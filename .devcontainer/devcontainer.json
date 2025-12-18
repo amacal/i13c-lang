@@ -1,0 +1,40 @@
+{
+    "name": "i13c-lang",
+    "remoteUser": "vscode",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "containerEnv": {
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.black-formatter",
+                "tamasfe.even-better-toml",
+                "redhat.vscode-yaml",
+                "ms-vscode.makefile-tools"
+            ],
+            "settings": {
+                "files.trimTrailingWhitespace": true,
+                "files.trimFinalNewlines": true,
+                "files.insertFinalNewline": true,
+                "python.testing.unittestEnabled": false,
+                "python.testing.pytestEnabled": true,
+                "python.testing.pytestArgs": [
+                    "tests"
+                ],
+                "python.languageServer": "Pylance",
+                "python.venvPath": "/home/vscode/.cache/pypoetry/virtualenvs",
+                "python.terminal.activateEnvironment": false,
+                "python.analysis.typeCheckingMode": "basic",
+                "[python]": {
+                    "black-formatter.importStrategy": "fromEnvironment",
+                    "editor.defaultFormatter": "ms-python.black-formatter"
+                }
+            }
+        }
+    }
+}
