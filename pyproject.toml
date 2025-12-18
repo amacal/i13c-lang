@@ -15,5 +15,10 @@ packages = [{ include = "i13c", from = "src" }]
 i13c = "i13c.main:i13c"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core==2.2.1"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.0.2,<10.0.0)"
+]
