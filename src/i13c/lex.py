@@ -83,6 +83,10 @@ class Token:
         return Token(code=TOKEN_COMMA, offset=offset, length=1)
 
     @staticmethod
+    def eof_token(offset: int) -> "Token":
+        return Token(code=TOKEN_EOF, offset=offset, length=0)
+
+    @staticmethod
     def hex_token(offset: int, length: int) -> "Token":
         return Token(code=TOKEN_HEX, offset=offset, length=length)
 
@@ -117,8 +121,12 @@ def tokenize(lexer: Lexer) -> List[Token]:
         elif lexer.is_in(CLASS_LETTER):
             read_ident(lexer, tokens)
 
+        # unrecognized token
         elif not lexer.is_eof():
             raise UnrecognizedToken(lexer.offset)
+
+    # always emit EOF token
+    tokens.append(Token.eof_token(offset=lexer.offset))
 
     return tokens
 

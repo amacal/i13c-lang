@@ -9,17 +9,19 @@ def can_tokenize_few_tokens():
 
     tokens = lex.tokenize(lexer)
     assert tokens is not None
-    assert len(tokens) == 4
+    assert len(tokens) == 5
 
     assert tokens[0] == lex.Token(code=lex.TOKEN_HEX, offset=0, length=6)
     assert tokens[1] == lex.Token(code=lex.TOKEN_COMMA, offset=6, length=1)
     assert tokens[2] == lex.Token(code=lex.TOKEN_IDENT, offset=7, length=5)
     assert tokens[3] == lex.Token(code=lex.TOKEN_NEWLINE, offset=12, length=1)
+    assert tokens[4] == lex.Token(code=lex.TOKEN_EOF, offset=13, length=0)
 
     assert lexer.extract(tokens[0]) == b"0x1a2f"
     assert lexer.extract(tokens[1]) == b","
     assert lexer.extract(tokens[2]) == b"hello"
     assert lexer.extract(tokens[3]) == b"\n"
+    assert lexer.extract(tokens[4]) == b""
 
 
 def can_tokenize_new_lines():
@@ -28,15 +30,17 @@ def can_tokenize_new_lines():
 
     tokens = lex.tokenize(lexer)
     assert tokens is not None
-    assert len(tokens) == 3
+    assert len(tokens) == 4
 
     assert tokens[0] == lex.Token(code=lex.TOKEN_NEWLINE, offset=0, length=1)
     assert tokens[1] == lex.Token(code=lex.TOKEN_NEWLINE, offset=3, length=1)
     assert tokens[2] == lex.Token(code=lex.TOKEN_NEWLINE, offset=4, length=1)
+    assert tokens[3] == lex.Token(code=lex.TOKEN_EOF, offset=7, length=0)
 
     assert lexer.extract(tokens[0]) == b"\n"
     assert lexer.extract(tokens[1]) == b"\n"
     assert lexer.extract(tokens[2]) == b"\n"
+    assert lexer.extract(tokens[3]) == b""
 
 
 def can_tokenize_last_hex():
@@ -45,10 +49,13 @@ def can_tokenize_last_hex():
 
     tokens = lex.tokenize(lexer)
     assert tokens is not None
+    assert len(tokens) == 2
 
-    assert len(tokens) == 1
     assert tokens[0] == lex.Token(code=lex.TOKEN_HEX, offset=0, length=8)
+    assert tokens[1] == lex.Token(code=lex.TOKEN_EOF, offset=8, length=0)
+
     assert lexer.extract(tokens[0]) == b"0xabcdef"
+    assert lexer.extract(tokens[1]) == b""
 
 
 def can_tokenize_last_ident():
@@ -57,10 +64,13 @@ def can_tokenize_last_ident():
 
     tokens = lex.tokenize(lexer)
     assert tokens is not None
+    assert len(tokens) == 2
 
-    assert len(tokens) == 1
     assert tokens[0] == lex.Token(code=lex.TOKEN_IDENT, offset=0, length=6)
+    assert tokens[1] == lex.Token(code=lex.TOKEN_EOF, offset=6, length=0)
+
     assert lexer.extract(tokens[0]) == b"abcdef"
+    assert lexer.extract(tokens[1]) == b""
 
 
 def can_tokenize_registers():
@@ -69,17 +79,19 @@ def can_tokenize_registers():
 
     tokens = lex.tokenize(lexer)
     assert tokens is not None
-    assert len(tokens) == 4
+    assert len(tokens) == 5
 
     assert tokens[0] == lex.Token(code=lex.TOKEN_IDENT, offset=0, length=3)
     assert tokens[1] == lex.Token(code=lex.TOKEN_REG, offset=4, length=3)
     assert tokens[2] == lex.Token(code=lex.TOKEN_COMMA, offset=7, length=1)
     assert tokens[3] == lex.Token(code=lex.TOKEN_HEX, offset=9, length=6)
+    assert tokens[4] == lex.Token(code=lex.TOKEN_EOF, offset=15, length=0)
 
     assert lexer.extract(tokens[0]) == b"mov"
     assert lexer.extract(tokens[1]) == b"rax"
     assert lexer.extract(tokens[2]) == b","
     assert lexer.extract(tokens[3]) == b"0x1234"
+    assert lexer.extract(tokens[4]) == b""
 
 
 def can_omit_whitespaces():
@@ -88,12 +100,15 @@ def can_omit_whitespaces():
 
     tokens = lex.tokenize(lexer)
     assert tokens is not None
-    assert len(tokens) == 2
+    assert len(tokens) == 3
 
     assert tokens[0] == lex.Token(code=lex.TOKEN_HEX, offset=2, length=4)
     assert tokens[1] == lex.Token(code=lex.TOKEN_IDENT, offset=8, length=4)
+    assert tokens[2] == lex.Token(code=lex.TOKEN_EOF, offset=14, length=0)
+
     assert lexer.extract(tokens[0]) == b"0xff"
     assert lexer.extract(tokens[1]) == b"test"
+    assert lexer.extract(tokens[2]) == b""
 
 
 def can_detect_hex_with_invalid_characters():
