@@ -6,6 +6,7 @@ CLASS_NEWLINE = b"\n"
 CLASS_WHITESPACE = b" "
 CLASS_ZERO = b"0"
 CLASS_LETTER = b"abcdefghijklmnopqrstuvwxyz"
+CLASS_ALPHANUM = b"abcdefghijklmnopqrstuvwxyz0123456789"
 CLASS_HEX = b"0123456789abcdef"
 
 TOKEN_NEWLINE = 1
@@ -163,9 +164,9 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     start_offset = lexer.offset
     lexer.advance(1)  # consume first letter
 
-    # accept subsequent letters
-    while not lexer.is_eof() and lexer.is_in(CLASS_LETTER):
-        lexer.advance(1)  # consume letters
+    # accept subsequent letters or digits
+    while not lexer.is_eof() and lexer.is_in(CLASS_ALPHANUM):
+        lexer.advance(1)  # consume letters and digits
 
     # expect either EOF or valid character after ident
     if not lexer.is_eof() and not lexer.is_in(AFTER_IDENT):

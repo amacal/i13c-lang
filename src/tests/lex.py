@@ -74,7 +74,7 @@ def can_tokenize_last_ident():
 
 
 def can_tokenize_registers():
-    text = "mov rax, 0x1234"
+    text = "mov r15, 0x1234"
     lexer = lex.open_text(text)
 
     tokens = lex.tokenize(lexer)
@@ -88,7 +88,7 @@ def can_tokenize_registers():
     assert tokens[4] == lex.Token(code=lex.TOKEN_EOF, offset=15, length=0)
 
     assert lexer.extract(tokens[0]) == b"mov"
-    assert lexer.extract(tokens[1]) == b"rax"
+    assert lexer.extract(tokens[1]) == b"r15"
     assert lexer.extract(tokens[2]) == b","
     assert lexer.extract(tokens[3]) == b"0x1234"
     assert lexer.extract(tokens[4]) == b""
@@ -136,7 +136,7 @@ def can_detect_incomplete_hex():
 
 
 def can_detect_ident_followed_by_invalid_character():
-    text = "hello0xab"
+    text = "hello-xab"
     lexer = lex.open_text(text)
 
     with pytest.raises(lex.UnexpectedValue):

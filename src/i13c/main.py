@@ -18,5 +18,7 @@ def tokenize(path: str) -> None:
     tokens = lex.tokenize(lexer)
 
     for token in tokens:
-        extracted = lexer.extract(token)
-        click.echo(f"{token.code:03}:{token.offset:04}:{token.length:02} -> {extracted!r}")
+        key = f"{token.code:03}:{token.offset:04}:{token.length:02}"
+        value = lexer.extract(token)
+
+        click.echo(f"{key} -> {value!r}")
