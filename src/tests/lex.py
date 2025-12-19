@@ -63,6 +63,25 @@ def can_tokenize_last_ident():
     assert lexer.extract(tokens[0]) == b"abcdef"
 
 
+def can_tokenize_registers():
+    text = "mov rax, 0x1234"
+    lexer = lex.open_text(text)
+
+    tokens = lex.tokenize(lexer)
+    assert tokens is not None
+    assert len(tokens) == 4
+
+    assert tokens[0] == lex.Token(code=lex.TOKEN_IDENT, offset=0, length=3)
+    assert tokens[1] == lex.Token(code=lex.TOKEN_REG, offset=4, length=3)
+    assert tokens[2] == lex.Token(code=lex.TOKEN_COMMA, offset=7, length=1)
+    assert tokens[3] == lex.Token(code=lex.TOKEN_HEX, offset=9, length=6)
+
+    assert lexer.extract(tokens[0]) == b"mov"
+    assert lexer.extract(tokens[1]) == b"rax"
+    assert lexer.extract(tokens[2]) == b","
+    assert lexer.extract(tokens[3]) == b"0x1234"
+
+
 def can_omit_whitespaces():
     text = "  0xff  test  "
     lexer = lex.open_text(text)

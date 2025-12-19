@@ -12,11 +12,17 @@ TOKEN_NEWLINE = 1
 TOKEN_COMMA = 2
 TOKEN_HEX = 3
 TOKEN_IDENT = 4
+TOKEN_REG = 5
 TOKEN_EOF = 255
 
 AFTER_HEX = CLASS_WHITESPACE + CLASS_COMMA + CLASS_NEWLINE
 AFTER_IDENT = CLASS_WHITESPACE + CLASS_COMMA + CLASS_NEWLINE
 
+# fmt: off
+SET_REGS = {
+    b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
+    b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
+}
 
 class UnexpectedValue(Exception):
     def __init__(self, offset: int, expected: bytes) -> None:
@@ -83,6 +89,10 @@ class Token:
     @staticmethod
     def ident_token(offset: int, length: int) -> "Token":
         return Token(code=TOKEN_IDENT, offset=offset, length=length)
+
+    @staticmethod
+    def reg_token(offset: int, length: int) -> "Token":
+        return Token(code=TOKEN_REG, offset=offset, length=length)
 
 
 def open_text(data: str) -> Lexer:
@@ -154,7 +164,13 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
         raise UnexpectedValue(lexer.offset, AFTER_IDENT)
 
     length = lexer.offset - start_offset
-    tokens.append(Token.ident_token(offset=start_offset, length=length))
+    token = Token.ident_token(offset=start_offset, length=length)
+
+    # perhaps it's a register
+    if lexer.extract(token) in SET_REGS:
+        token = Token.reg_token(offset=start_offset, length=length)
+
+    tokens.append(token)
 
 
 def emit_newline(lexer: Lexer, tokens: List[Token]) -> None:
