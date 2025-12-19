@@ -112,6 +112,14 @@ def can_detect_too_short_hex():
         lex.tokenize(lexer)
 
 
+def can_detect_incomplete_hex():
+    text = "0"
+    lexer = lex.open_text(text)
+
+    with pytest.raises(lex.UnexpectedEndOfFile):
+        lex.tokenize(lexer)
+
+
 def can_detect_ident_followed_by_invalid_character():
     text = "hello0xab"
     lexer = lex.open_text(text)
