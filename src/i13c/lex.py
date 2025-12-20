@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from i13c import source
+from i13c import src
 
 CLASS_COMMA = b","
 CLASS_SEMICOLON = b";"
@@ -47,7 +47,7 @@ class UnrecognizedToken(Exception):
 
 @dataclass(kw_only=True)
 class Lexer:
-    code: source.SourceCode
+    code: src.SourceCode
     offset: int
 
     def is_eof(self) -> bool:
@@ -101,7 +101,7 @@ class Token:
         return Token(code=TOKEN_REG, offset=offset, length=length)
 
 
-def tokenize(code: source.SourceCode) -> List[Token]:
+def tokenize(code: src.SourceCode) -> List[Token]:
     tokens: List[Token] = []
     lexer = Lexer(code=code, offset=0)
 

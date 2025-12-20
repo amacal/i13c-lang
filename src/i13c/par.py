@@ -1,6 +1,6 @@
 from typing import List, Union
 from dataclasses import dataclass
-from i13c import lex, ast, source
+from i13c import lex, ast, src
 
 
 class UnexpectedTokenCode(Exception):
@@ -17,7 +17,7 @@ class UnexpectedEndOfTokens(Exception):
 
 @dataclass(kw_only=True)
 class ParsingState:
-    code: source.SourceCode
+    code: src.SourceCode
     tokens: List[lex.Token]
     position: int
 
@@ -59,7 +59,7 @@ class ParsingState:
         return self.code.extract(token)
 
 
-def parse(code: source.SourceCode, tokens: List[lex.Token]) -> ast.Program:
+def parse(code: src.SourceCode, tokens: List[lex.Token]) -> ast.Program:
     state = ParsingState(code=code, tokens=tokens, position=0)
     instructions: List[ast.Instruction] = []
 
@@ -79,9 +79,12 @@ def parse_instruction(state: ParsingState) -> ast.Instruction:
 
     # expect a semicolon
     state.expect(lex.TOKEN_SEMICOLON)
-    mnemonic = ast.Mnemonic(name=state.extract(token))
 
-    return ast.Instruction(mnemonic=mnemonic, operands=operands)
+    # build instruction and token reference
+    mnemonic = ast.Mnemonic(name=state.extract(token))
+    ref = ast.Reference(offset=token.offset, length=token.length)
+
+    return ast.Instruction(ref=ref, mnemonic=mnemonic, operands=operands)
 
 
 def parse_operands(state: ParsingState) -> List[Union[ast.Register, ast.Immediate]]:

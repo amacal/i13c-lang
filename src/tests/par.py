@@ -1,13 +1,13 @@
 import pytest
 
-from i13c import source, lex, parse
+from i13c import lex, par, src
 
 
 def can_parse_instruction_without_operands():
-    code = source.open_text("syscall;")
+    code = src.open_text("syscall;")
     tokens = lex.tokenize(code)
 
-    program = parse.parse(code, tokens)
+    program = par.parse(code, tokens)
     assert program is not None
 
     assert len(program.instructions) == 1
@@ -18,10 +18,10 @@ def can_parse_instruction_without_operands():
 
 
 def can_parse_instruction_with_operands():
-    code = source.open_text("mov rax, rbx;")
+    code = src.open_text("mov rax, rbx;")
     tokens = lex.tokenize(code)
 
-    program = parse.parse(code, tokens)
+    program = par.parse(code, tokens)
     assert program is not None
 
     assert len(program.instructions) == 1
@@ -31,19 +31,19 @@ def can_parse_instruction_with_operands():
     assert len(instruction.operands) == 2
 
     operand1 = instruction.operands[0]
-    assert isinstance(operand1, parse.ast.Register)
+    assert isinstance(operand1, par.ast.Register)
     assert operand1.name == b"rax"
 
     operand2 = instruction.operands[1]
-    assert isinstance(operand2, parse.ast.Register)
+    assert isinstance(operand2, par.ast.Register)
     assert operand2.name == b"rbx"
 
 
 def can_parse_instruction_with_immediate():
-    code = source.open_text("mov rax, 0x1234;")
+    code = src.open_text("mov rax, 0x1234;")
     tokens = lex.tokenize(code)
 
-    program = parse.parse(code, tokens)
+    program = par.parse(code, tokens)
     assert program is not None
 
     assert len(program.instructions) == 1
@@ -53,19 +53,19 @@ def can_parse_instruction_with_immediate():
     assert len(instruction.operands) == 2
 
     operand1 = instruction.operands[0]
-    assert isinstance(operand1, parse.ast.Register)
+    assert isinstance(operand1, par.ast.Register)
     assert operand1.name == b"rax"
 
     operand2 = instruction.operands[1]
-    assert isinstance(operand2, parse.ast.Immediate)
+    assert isinstance(operand2, par.ast.Immediate)
     assert operand2.value == 0x1234
 
 
 def can_parse_multiple_instructions():
-    code = source.open_text("mov rax, rbx; syscall;")
+    code = src.open_text("mov rax, rbx; syscall;")
     tokens = lex.tokenize(code)
 
-    program = parse.parse(code, tokens)
+    program = par.parse(code, tokens)
     assert program is not None
 
     assert len(program.instructions) == 2
@@ -80,26 +80,26 @@ def can_parse_multiple_instructions():
 
 
 def can_handle_empty_program():
-    code = source.open_text("")
+    code = src.open_text("")
     tokens = lex.tokenize(code)
 
-    program = parse.parse(code, tokens)
+    program = par.parse(code, tokens)
     assert program is not None
 
     assert len(program.instructions) == 0
 
 
 def can_handle_end_of_tokens():
-    code = source.open_text("mov rax, rbx")
+    code = src.open_text("mov rax, rbx")
     tokens = lex.tokenize(code)
 
-    with pytest.raises(parse.UnexpectedEndOfTokens):
-        parse.parse(code, tokens)
+    with pytest.raises(par.UnexpectedEndOfTokens):
+        par.parse(code, tokens)
 
 
 def can_handle_unexpected_token():
-    code = source.open_text("mov rax rbx\nsyscall;")
+    code = src.open_text("mov rax rbx\nsyscall;")
     tokens = lex.tokenize(code)
 
-    with pytest.raises(parse.UnexpectedTokenCode):
-        parse.parse(code, tokens)
+    with pytest.raises(par.UnexpectedTokenCode):
+        par.parse(code, tokens)

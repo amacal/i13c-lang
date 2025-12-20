@@ -1,6 +1,6 @@
 import click
 
-from i13c import source, lex, parse
+from i13c import lex, par, src
 
 
 @click.group()
@@ -14,7 +14,7 @@ def tokenize_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    code = source.open_text(text)
+    code = src.open_text(text)
     tokens = lex.tokenize(code)
 
     for token in tokens:
@@ -30,9 +30,9 @@ def parse_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    code = source.open_text(text)
+    code = src.open_text(text)
     tokens = lex.tokenize(code)
-    program = parse.parse(code, tokens)
+    program = par.parse(code, tokens)
 
     for instruction in program.instructions:
         operands = ", ".join([str(op) for op in instruction.operands])

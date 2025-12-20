@@ -1,11 +1,11 @@
 import pytest
 
-from i13c import lex, source
+from i13c import lex, src
 
 
 def can_tokenize_few_tokens():
     text = "0x1a2f,hello;"
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
@@ -26,7 +26,7 @@ def can_tokenize_few_tokens():
 
 def can_tokenize_new_lines():
     text = ";  ;;  "
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
@@ -45,7 +45,7 @@ def can_tokenize_new_lines():
 
 def can_tokenize_last_hex():
     text = "0xabcdef"
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
@@ -60,7 +60,7 @@ def can_tokenize_last_hex():
 
 def can_tokenize_last_ident():
     text = "abcdef"
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
@@ -75,7 +75,7 @@ def can_tokenize_last_ident():
 
 def can_tokenize_registers():
     text = "mov r15, 0x1234"
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
@@ -96,7 +96,7 @@ def can_tokenize_registers():
 
 def can_omit_whitespaces():
     text = "  0xff  test  "
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
@@ -113,7 +113,7 @@ def can_omit_whitespaces():
 
 def can_detect_hex_with_invalid_characters():
     text = "0x1g"
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     with pytest.raises(lex.UnexpectedValue):
         lex.tokenize(code)
@@ -121,7 +121,7 @@ def can_detect_hex_with_invalid_characters():
 
 def can_detect_too_short_hex():
     text = "0x"
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     with pytest.raises(lex.UnexpectedValue):
         lex.tokenize(code)
@@ -129,7 +129,7 @@ def can_detect_too_short_hex():
 
 def can_detect_incomplete_hex():
     text = "0"
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     with pytest.raises(lex.UnexpectedEndOfFile):
         lex.tokenize(code)
@@ -137,7 +137,7 @@ def can_detect_incomplete_hex():
 
 def can_detect_ident_followed_by_invalid_character():
     text = "hello-xab"
-    code = source.open_text(text)
+    code = src.open_text(text)
 
     with pytest.raises(lex.UnexpectedValue):
         lex.tokenize(code)
