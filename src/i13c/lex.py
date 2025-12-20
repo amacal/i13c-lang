@@ -1,23 +1,24 @@
 from dataclasses import dataclass
 from typing import List
+from i13c import source
 
 CLASS_COMMA = b","
-CLASS_NEWLINE = b"\n"
-CLASS_WHITESPACE = b" "
+CLASS_SEMICOLON = b";"
+CLASS_WHITESPACE = b" \n"
 CLASS_ZERO = b"0"
 CLASS_LETTER = b"abcdefghijklmnopqrstuvwxyz"
 CLASS_ALPHANUM = b"abcdefghijklmnopqrstuvwxyz0123456789"
 CLASS_HEX = b"0123456789abcdef"
 
-TOKEN_NEWLINE = 1
+TOKEN_SEMICOLON = 1
 TOKEN_COMMA = 2
 TOKEN_HEX = 3
 TOKEN_IDENT = 4
 TOKEN_REG = 5
 TOKEN_EOF = 255
 
-AFTER_HEX = CLASS_WHITESPACE + CLASS_COMMA + CLASS_NEWLINE
-AFTER_IDENT = CLASS_WHITESPACE + CLASS_COMMA + CLASS_NEWLINE
+AFTER_HEX = CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON
+AFTER_IDENT = CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON
 
 # fmt: off
 SET_REGS = {
@@ -46,17 +47,17 @@ class UnrecognizedToken(Exception):
 
 @dataclass(kw_only=True)
 class Lexer:
-    data: bytes
+    code: source.SourceCode
     offset: int
 
     def is_eof(self) -> bool:
-        return self.offset >= len(self.data)
+        return self.code.is_eof(self.offset)
 
     def is_in(self, n: bytes) -> bool:
-        return not self.is_eof() and self.data[self.offset] in n
+        return not self.is_eof() and self.code.at(self.offset) in n
 
     def extract(self, token: Token) -> bytes:
-        return self.data[token.offset : token.offset + token.length]
+        return self.code.extract(token)
 
     def advance(self, n: int) -> None:
         self.offset += n
@@ -76,8 +77,8 @@ class Token:
     length: int
 
     @staticmethod
-    def newline_token(offset: int) -> "Token":
-        return Token(code=TOKEN_NEWLINE, offset=offset, length=1)
+    def semicolon_token(offset: int) -> "Token":
+        return Token(code=TOKEN_SEMICOLON, offset=offset, length=1)
 
     @staticmethod
     def comma_token(offset: int) -> "Token":
@@ -100,18 +101,15 @@ class Token:
         return Token(code=TOKEN_REG, offset=offset, length=length)
 
 
-def open_text(data: str) -> Lexer:
-    return Lexer(data=data.encode("utf-8"), offset=0)
-
-
-def tokenize(lexer: Lexer) -> List[Token]:
+def tokenize(code: source.SourceCode) -> List[Token]:
     tokens: List[Token] = []
+    lexer = Lexer(code=code, offset=0)
 
     while not lexer.is_eof():
         skip_whitespace(lexer)
 
-        if lexer.is_in(CLASS_NEWLINE):
-            emit_newline(lexer, tokens)
+        if lexer.is_in(CLASS_SEMICOLON):
+            emit_semicolon(lexer, tokens)
 
         elif lexer.is_in(CLASS_COMMA):
             emit_comma(lexer, tokens)
@@ -182,9 +180,9 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(token)
 
 
-def emit_newline(lexer: Lexer, tokens: List[Token]) -> None:
-    tokens.append(Token.newline_token(offset=lexer.offset))
-    lexer.advance(1)  # consume newline
+def emit_semicolon(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.semicolon_token(offset=lexer.offset))
+    lexer.advance(1)  # consume semicolon
 
 
 def emit_comma(lexer: Lexer, tokens: List[Token]) -> None:
