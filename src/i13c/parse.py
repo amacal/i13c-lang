@@ -79,8 +79,9 @@ def parse_instruction(state: ParsingState) -> ast.Instruction:
 
     # expect a semicolon
     state.expect(lex.TOKEN_SEMICOLON)
+    mnemonic = ast.Mnemonic(name=state.extract(token))
 
-    return ast.Instruction(mnemonic=state.extract(token), operands=operands)
+    return ast.Instruction(mnemonic=mnemonic, operands=operands)
 
 
 def parse_operands(state: ParsingState) -> List[Union[ast.Register, ast.Immediate]]:

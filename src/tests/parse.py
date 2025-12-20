@@ -11,7 +11,7 @@ def can_parse_instruction_without_operands():
     assert len(program.instructions) == 1
     instruction = program.instructions[0]
 
-    assert instruction.mnemonic == b"syscall"
+    assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
 
 
@@ -25,7 +25,7 @@ def can_parse_instruction_with_operands():
     assert len(program.instructions) == 1
     instruction = program.instructions[0]
 
-    assert instruction.mnemonic == b"mov"
+    assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
 
     operand1 = instruction.operands[0]
@@ -47,7 +47,7 @@ def can_parse_instruction_with_immediate():
     assert len(program.instructions) == 1
     instruction = program.instructions[0]
 
-    assert instruction.mnemonic == b"mov"
+    assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
 
     operand1 = instruction.operands[0]
@@ -69,9 +69,9 @@ def can_parse_multiple_instructions():
     assert len(program.instructions) == 2
 
     instruction1 = program.instructions[0]
-    assert instruction1.mnemonic == b"mov"
+    assert instruction1.mnemonic.name == b"mov"
     assert len(instruction1.operands) == 2
 
     instruction2 = program.instructions[1]
-    assert instruction2.mnemonic == b"syscall"
+    assert instruction2.mnemonic.name == b"syscall"
     assert len(instruction2.operands) == 0

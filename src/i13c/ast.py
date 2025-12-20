@@ -11,10 +11,13 @@ class Register:
 class Immediate:
     value: int
 
+@dataclass(kw_only=True)
+class Mnemonic:
+    name: bytes
 
 @dataclass(kw_only=True)
 class Instruction:
-    mnemonic: bytes
+    mnemonic: Mnemonic
     operands: List[Union[Register, Immediate]]
 
 
