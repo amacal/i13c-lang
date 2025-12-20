@@ -1,3 +1,5 @@
+import pytest
+
 from i13c import source, lex, parse
 
 
@@ -75,3 +77,29 @@ def can_parse_multiple_instructions():
     instruction2 = program.instructions[1]
     assert instruction2.mnemonic.name == b"syscall"
     assert len(instruction2.operands) == 0
+
+
+def can_handle_empty_program():
+    code = source.open_text("")
+    tokens = lex.tokenize(code)
+
+    program = parse.parse(code, tokens)
+    assert program is not None
+
+    assert len(program.instructions) == 0
+
+
+def can_handle_end_of_tokens():
+    code = source.open_text("mov rax, rbx")
+    tokens = lex.tokenize(code)
+
+    with pytest.raises(parse.UnexpectedEndOfTokens):
+        parse.parse(code, tokens)
+
+
+def can_handle_unexpected_token():
+    code = source.open_text("mov rax rbx\nsyscall;")
+    tokens = lex.tokenize(code)
+
+    with pytest.raises(parse.UnexpectedTokenCode):
+        parse.parse(code, tokens)
