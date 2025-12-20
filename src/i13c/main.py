@@ -1,6 +1,6 @@
 import click
 
-from i13c import lex, par, src
+from i13c import ir, lex, par, src, sem, low
 
 
 @click.group()
@@ -37,3 +37,19 @@ def parse_command(path: str) -> None:
     for instruction in program.instructions:
         operands = ", ".join([str(op) for op in instruction.operands])
         click.echo(f"{str(instruction.mnemonic)} {operands}")
+
+
+@i13c.command("lower")
+@click.argument("path", type=click.Path(exists=True))
+def lower_command(path: str) -> None:
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    code = src.open_text(text)
+    tokens = lex.tokenize(code)
+    program = par.parse(code, tokens)
+    sem.validate(program)
+    instructions = low.lower(program)
+
+    for instr in instructions:
+        click.echo(str(instr))
