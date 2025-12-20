@@ -1,6 +1,7 @@
+import sys
 import click
 
-from i13c import ir, lex, par, src, sem, low
+from i13c import ir, lex, par, src, sem, low, enc
 
 
 @click.group()
@@ -48,8 +49,26 @@ def lower_command(path: str) -> None:
     code = src.open_text(text)
     tokens = lex.tokenize(code)
     program = par.parse(code, tokens)
+
     sem.validate(program)
     instructions = low.lower(program)
 
     for instr in instructions:
         click.echo(str(instr))
+
+
+@i13c.command("encode")
+@click.argument("path", type=click.Path(exists=True))
+def encode_command(path: str) -> None:
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    code = src.open_text(text)
+    tokens = lex.tokenize(code)
+    program = par.parse(code, tokens)
+
+    sem.validate(program)
+    instructions = low.lower(program)
+    binary = enc.encode(instructions)
+
+    sys.stdout.buffer.write(binary)
