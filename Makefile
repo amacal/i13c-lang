@@ -17,3 +17,8 @@ run:
 .PHONY: test
 test:
 	@poetry run pytest -o python_files='*.py' -o python_functions="can_*" src/tests
+
+
+.PHONY: disasm
+disasm:
+	@ndisasm -b 64 -k0,120 a.out
