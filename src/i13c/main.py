@@ -47,21 +47,8 @@ def ast_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = lex.tokenize(code)
-
-    match tokens:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            tokens = tokens.value
-
-    program = par.parse(code, tokens)
-
-    match program:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            program = program.value
+    tokens = unwrap(lex.tokenize(code))
+    program = unwrap(par.parse(code, tokens))
 
     for instruction in program.instructions:
         operands = ", ".join([str(op) for op in instruction.operands])
