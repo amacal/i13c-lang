@@ -45,6 +45,33 @@ def can_tokenize_new_lines():
     assert code.extract(tokens.value[3]) == b""
 
 
+def can_tokenize_single_bytes():
+    text = ";,}{)("
+    code = src.open_text(text)
+
+    tokens = lex.tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, res.Ok)
+    assert len(tokens.value) == 7
+
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_SEMICOLON, offset=0, length=1)
+    assert tokens.value[1] == lex.Token(code=lex.TOKEN_COMMA, offset=1, length=1)
+    assert tokens.value[2] == lex.Token(code=lex.TOKEN_CURLY_CLOSE, offset=2, length=1)
+    assert tokens.value[3] == lex.Token(code=lex.TOKEN_CURLY_OPEN, offset=3, length=1)
+    assert tokens.value[4] == lex.Token(code=lex.TOKEN_ROUND_CLOSE, offset=4, length=1)
+    assert tokens.value[5] == lex.Token(code=lex.TOKEN_ROUND_OPEN, offset=5, length=1)
+    assert tokens.value[6] == lex.Token(code=lex.TOKEN_EOF, offset=6, length=0)
+
+    assert code.extract(tokens.value[0]) == b";"
+    assert code.extract(tokens.value[1]) == b","
+    assert code.extract(tokens.value[2]) == b"}"
+    assert code.extract(tokens.value[3]) == b"{"
+    assert code.extract(tokens.value[4]) == b")"
+    assert code.extract(tokens.value[5]) == b"("
+    assert code.extract(tokens.value[6]) == b""
+
+
 def can_tokenize_last_hex():
     text = "0xabcdef"
     code = src.open_text(text)
@@ -89,7 +116,7 @@ def can_tokenize_registers():
     assert isinstance(tokens, res.Ok)
     assert len(tokens.value) == 5
 
-    assert tokens.value[0] == lex.Token(code=lex.TOKEN_IDENT, offset=0, length=3)
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=0, length=3)
     assert tokens.value[1] == lex.Token(code=lex.TOKEN_REG, offset=4, length=3)
     assert tokens.value[2] == lex.Token(code=lex.TOKEN_COMMA, offset=7, length=1)
     assert tokens.value[3] == lex.Token(code=lex.TOKEN_HEX, offset=9, length=6)
@@ -100,6 +127,44 @@ def can_tokenize_registers():
     assert code.extract(tokens.value[2]) == b","
     assert code.extract(tokens.value[3]) == b"0x1234"
     assert code.extract(tokens.value[4]) == b""
+
+
+def can_tokenize_mnemonics():
+    text = "syscall mov"
+    code = src.open_text(text)
+
+    tokens = lex.tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, res.Ok)
+    assert len(tokens.value) == 3
+
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=0, length=7)
+    assert tokens.value[1] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=8, length=3)
+    assert tokens.value[2] == lex.Token(code=lex.TOKEN_EOF, offset=11, length=0)
+
+    assert code.extract(tokens.value[0]) == b"syscall"
+    assert code.extract(tokens.value[1]) == b"mov"
+    assert code.extract(tokens.value[2]) == b""
+
+
+def can_tokenize_keywords():
+    text = "asm mov"
+    code = src.open_text(text)
+
+    tokens = lex.tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, res.Ok)
+    assert len(tokens.value) == 3
+
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_KEYWORD, offset=0, length=3)
+    assert tokens.value[1] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=4, length=3)
+    assert tokens.value[2] == lex.Token(code=lex.TOKEN_EOF, offset=7, length=0)
+
+    assert code.extract(tokens.value[0]) == b"asm"
+    assert code.extract(tokens.value[1]) == b"mov"
+    assert code.extract(tokens.value[2]) == b""
 
 
 def can_omit_whitespaces():

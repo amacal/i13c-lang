@@ -1,3 +1,5 @@
-mov rax, 0xe7;
-mov rdi, 0x01;
-syscall;
+asm main() {
+    mov rax, 0xe7;
+    mov rdi, 0x01;
+    syscall;
+}

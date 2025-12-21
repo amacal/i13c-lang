@@ -6,6 +6,10 @@ CLASS_COMMA = b","
 CLASS_SEMICOLON = b";"
 CLASS_WHITESPACE = b" \n"
 CLASS_ZERO = b"0"
+CLASS_ROUND_OPEN = b"("
+CLASS_ROUND_CLOSE = b")"
+CLASS_CURLY_OPEN = b"{"
+CLASS_CURLY_CLOSE = b"}"
 CLASS_LETTER = b"abcdefghijklmnopqrstuvwxyz"
 CLASS_ALPHANUM = b"abcdefghijklmnopqrstuvwxyz0123456789"
 CLASS_HEX = b"0123456789abcdef"
@@ -15,6 +19,12 @@ TOKEN_COMMA = 2
 TOKEN_HEX = 3
 TOKEN_IDENT = 4
 TOKEN_REG = 5
+TOKEN_MNEMONIC = 6
+TOKEN_KEYWORD = 7
+TOKEN_ROUND_OPEN = 8
+TOKEN_ROUND_CLOSE = 9
+TOKEN_CURLY_OPEN = 10
+TOKEN_CURLY_CLOSE = 11
 TOKEN_EOF = 255
 
 AFTER_HEX = CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON
@@ -24,6 +34,14 @@ AFTER_IDENT = CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON
 SET_REGS = {
     b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
     b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
+}
+
+SET_MNEMONICS = {
+    b"mov", b"syscall",
+}
+
+SET_KEYWORDS = {
+    b"asm",
 }
 # fmt: on
 
@@ -100,6 +118,30 @@ class Token:
     def reg_token(offset: int, length: int) -> "Token":
         return Token(code=TOKEN_REG, offset=offset, length=length)
 
+    @staticmethod
+    def mnemonic_token(offset: int, length: int) -> "Token":
+        return Token(code=TOKEN_MNEMONIC, offset=offset, length=length)
+
+    @staticmethod
+    def keyword_token(offset: int, length: int) -> "Token":
+        return Token(code=TOKEN_KEYWORD, offset=offset, length=length)
+
+    @staticmethod
+    def round_open_token(offset: int) -> "Token":
+        return Token(code=TOKEN_ROUND_OPEN, offset=offset, length=1)
+
+    @staticmethod
+    def round_close_token(offset: int) -> "Token":
+        return Token(code=TOKEN_ROUND_CLOSE, offset=offset, length=1)
+
+    @staticmethod
+    def curly_open_token(offset: int) -> "Token":
+        return Token(code=TOKEN_CURLY_OPEN, offset=offset, length=1)
+
+    @staticmethod
+    def curly_close_token(offset: int) -> "Token":
+        return Token(code=TOKEN_CURLY_CLOSE, offset=offset, length=1)
+
 
 def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnostic]]:
     tokens: List[Token] = []
@@ -115,6 +157,18 @@ def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnost
 
             elif lexer.is_in(CLASS_COMMA):
                 emit_comma(lexer, tokens)
+
+            elif lexer.is_in(CLASS_ROUND_OPEN):
+                emit_round_open(lexer, tokens)
+
+            elif lexer.is_in(CLASS_ROUND_CLOSE):
+                emit_round_close(lexer, tokens)
+
+            elif lexer.is_in(CLASS_CURLY_OPEN):
+                emit_curly_open(lexer, tokens)
+
+            elif lexer.is_in(CLASS_CURLY_CLOSE):
+                emit_curly_close(lexer, tokens)
 
             elif lexer.is_in(CLASS_ZERO):
                 read_hex(lexer, tokens)
@@ -190,6 +244,14 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     if lexer.extract(token) in SET_REGS:
         token = Token.reg_token(offset=start_offset, length=length)
 
+    # perhaps it's a mnemonic
+    elif lexer.extract(token) in SET_MNEMONICS:
+        token = Token.mnemonic_token(offset=start_offset, length=length)
+
+    # perhaps it's a keyword
+    elif lexer.extract(token) in SET_KEYWORDS:
+        token = Token.keyword_token(offset=start_offset, length=length)
+
     tokens.append(token)
 
 
@@ -201,6 +263,26 @@ def emit_semicolon(lexer: Lexer, tokens: List[Token]) -> None:
 def emit_comma(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.comma_token(offset=lexer.offset))
     lexer.advance(1)  # consume comma
+
+
+def emit_round_open(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.round_open_token(offset=lexer.offset))
+    lexer.advance(1)  # consume '('
+
+
+def emit_round_close(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.round_close_token(offset=lexer.offset))
+    lexer.advance(1)  # consume ')'
+
+
+def emit_curly_open(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.curly_open_token(offset=lexer.offset))
+    lexer.advance(1)  # consume '{'
+
+
+def emit_curly_close(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.curly_close_token(offset=lexer.offset))
+    lexer.advance(1)  # consume '}'
 
 
 def report_unrecognized_token(offset: int) -> diag.Diagnostic:

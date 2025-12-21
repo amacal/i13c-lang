@@ -33,6 +33,9 @@ def can_detect_invalid_instruction():
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)
 
+    # force invalid mnemonic
+    tokens.value[0] = lex.Token(code=lex.TOKEN_MNEMONIC, offset=0, length=3)
+
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 

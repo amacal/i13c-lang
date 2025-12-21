@@ -12,7 +12,7 @@ def encode(instructions: List[ir.Instruction]) -> bytes:
 
 
 def encode_mov_reg_imm(instruction: ir.MovRegImm, bytecode: bytearray) -> None:
-    # REX.W + B8+ rd io
+    # REX.W + B8+rd io
     rex = 0x40   | 0x08 | (0x01 if instruction.dst >= 8 else 0x00)
     opcode = 0xB8 | (instruction.dst & 0x07)
     imm = instruction.imm.to_bytes(8, byteorder="little", signed=False)
