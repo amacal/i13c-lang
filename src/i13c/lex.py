@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from i13c import src
+from i13c import src, res, diag
 
 CLASS_COMMA = b","
 CLASS_SEMICOLON = b";"
@@ -25,6 +25,8 @@ SET_REGS = {
     b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
     b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
 }
+# fmt: on
+
 
 class UnexpectedValue(Exception):
     def __init__(self, offset: int, expected: bytes) -> None:
@@ -34,14 +36,6 @@ class UnexpectedValue(Exception):
 
 class UnexpectedEndOfFile(Exception):
     def __init__(self, offset: int) -> None:
-        self.offset = offset
-
-
-class UnrecognizedToken(Exception):
-    def __init__(
-        self,
-        offset: int,
-    ) -> None:
         self.offset = offset
 
 
@@ -68,6 +62,12 @@ class Lexer:
 
         if not self.is_in(n):
             raise UnexpectedValue(self.offset, n)
+
+
+@dataclass(kw_only=True)
+class Reference:
+    offset: int
+    length: int
 
 
 @dataclass(kw_only=True)
@@ -101,33 +101,46 @@ class Token:
         return Token(code=TOKEN_REG, offset=offset, length=length)
 
 
-def tokenize(code: src.SourceCode) -> List[Token]:
+def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnostic]]:
     tokens: List[Token] = []
+    diagnostics: List[diag.Diagnostic] = []
     lexer = Lexer(code=code, offset=0)
 
-    while not lexer.is_eof():
-        skip_whitespace(lexer)
+    try:
+        while not lexer.is_eof():
+            skip_whitespace(lexer)
 
-        if lexer.is_in(CLASS_SEMICOLON):
-            emit_semicolon(lexer, tokens)
+            if lexer.is_in(CLASS_SEMICOLON):
+                emit_semicolon(lexer, tokens)
 
-        elif lexer.is_in(CLASS_COMMA):
-            emit_comma(lexer, tokens)
+            elif lexer.is_in(CLASS_COMMA):
+                emit_comma(lexer, tokens)
 
-        elif lexer.is_in(CLASS_ZERO):
-            read_hex(lexer, tokens)
+            elif lexer.is_in(CLASS_ZERO):
+                read_hex(lexer, tokens)
 
-        elif lexer.is_in(CLASS_LETTER):
-            read_ident(lexer, tokens)
+            elif lexer.is_in(CLASS_LETTER):
+                read_ident(lexer, tokens)
 
-        # unrecognized token
-        elif not lexer.is_eof():
-            raise UnrecognizedToken(lexer.offset)
+            # unrecognized token
+            elif not lexer.is_eof():
+                diagnostics.append(report_unrecognized_token(lexer.offset))
+                break
+
+    except UnexpectedEndOfFile as e:
+        diagnostics.append(report_unexpected_end_of_file(e.offset))
+
+    except UnexpectedValue as e:
+        diagnostics.append(report_unexpected_value(e.offset, e.expected))
+
+    # any diagnostics stops further processing
+    if diagnostics:
+        return res.Err(diagnostics)
 
     # always emit EOF token
     tokens.append(Token.eof_token(offset=lexer.offset))
 
-    return tokens
+    return res.Ok(tokens)
 
 
 def skip_whitespace(lexer: Lexer) -> None:
@@ -188,3 +201,27 @@ def emit_semicolon(lexer: Lexer, tokens: List[Token]) -> None:
 def emit_comma(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.comma_token(offset=lexer.offset))
     lexer.advance(1)  # consume comma
+
+
+def report_unrecognized_token(offset: int) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        offset=offset,
+        code="L001",
+        message="Unrecognized token",
+    )
+
+
+def report_unexpected_end_of_file(offset: int) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        offset=offset,
+        code="L002",
+        message="Unexpected end of file",
+    )
+
+
+def report_unexpected_value(offset: int, expected: bytes) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        offset=offset,
+        code="L003",
+        message=f"Unexpected value at offset {offset}, expected one of: {list(expected)}",
+    )

@@ -1,13 +1,15 @@
 import pytest
 
-from i13c import lex, par, src
+from i13c import lex, par, src, diag, res
 
 
 def can_parse_instruction_without_operands():
     code = src.open_text("syscall;")
-    tokens = lex.tokenize(code)
 
-    program = par.parse(code, tokens)
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
     assert program is not None
 
     assert len(program.instructions) == 1
@@ -19,9 +21,11 @@ def can_parse_instruction_without_operands():
 
 def can_parse_instruction_with_operands():
     code = src.open_text("mov rax, rbx;")
-    tokens = lex.tokenize(code)
 
-    program = par.parse(code, tokens)
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
     assert program is not None
 
     assert len(program.instructions) == 1
@@ -41,9 +45,11 @@ def can_parse_instruction_with_operands():
 
 def can_parse_instruction_with_immediate():
     code = src.open_text("mov rax, 0x1234;")
-    tokens = lex.tokenize(code)
 
-    program = par.parse(code, tokens)
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
     assert program is not None
 
     assert len(program.instructions) == 1
@@ -63,9 +69,11 @@ def can_parse_instruction_with_immediate():
 
 def can_parse_multiple_instructions():
     code = src.open_text("mov rax, rbx; syscall;")
-    tokens = lex.tokenize(code)
 
-    program = par.parse(code, tokens)
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
     assert program is not None
 
     assert len(program.instructions) == 2
@@ -81,9 +89,11 @@ def can_parse_multiple_instructions():
 
 def can_handle_empty_program():
     code = src.open_text("")
-    tokens = lex.tokenize(code)
 
-    program = par.parse(code, tokens)
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
     assert program is not None
 
     assert len(program.instructions) == 0
@@ -91,15 +101,19 @@ def can_handle_empty_program():
 
 def can_handle_end_of_tokens():
     code = src.open_text("mov rax, rbx")
+
     tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
 
     with pytest.raises(par.UnexpectedEndOfTokens):
-        par.parse(code, tokens)
+        par.parse(code, tokens.value)
 
 
 def can_handle_unexpected_token():
     code = src.open_text("mov rax rbx\nsyscall;")
+
     tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
 
     with pytest.raises(par.UnexpectedTokenCode):
-        par.parse(code, tokens)
+        par.parse(code, tokens.value)

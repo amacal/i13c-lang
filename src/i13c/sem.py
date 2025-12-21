@@ -48,7 +48,7 @@ def validate_instruction(
 
     # missing instruction mnemonic
     if signature is None:
-        diagnostics.append(emit_unknown_instruction(instruction.ref))
+        diagnostics.append(report_unknown_instruction(instruction.ref))
         return
 
     # early acceptance for instructions without operands
@@ -71,7 +71,9 @@ def validate_instruction(
                 if isinstance(operand, ast.Immediate):
                     if not (0 <= operand.value <= 0xFFFFFFFFFFFFFFFF):
                         diagnostics.append(
-                            emit_immediate_out_of_range(instruction.ref, operand.value)
+                            report_immediate_out_of_range(
+                                instruction.ref, operand.value
+                            )
                         )
 
             matched = True
@@ -79,32 +81,34 @@ def validate_instruction(
 
     if not matched:
         diagnostics.append(
-            emit_invalid_operand_types(
+            report_invalid_operand_types(
                 instruction.ref,
                 [type(operand).__name__ for operand in instruction.operands],
             )
         )
 
 
-def emit_unknown_instruction(ref: ast.Reference) -> diag.Diagnostic:
+def report_unknown_instruction(ref: ast.Reference) -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=ref,
+        offset=ref.offset,
         code="V001",
         message=f"Unknown instruction mnemonic at offset {ref.offset}",
     )
 
 
-def emit_immediate_out_of_range(ref: ast.Reference, value: int) -> diag.Diagnostic:
+def report_immediate_out_of_range(ref: ast.Reference, value: int) -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=ref,
+        offset=ref.offset,
         code="V002",
         message=f"Immediate value {value} out of range at offset {ref.offset}",
     )
 
 
-def emit_invalid_operand_types(ref: ast.Reference, found: List[str]) -> diag.Diagnostic:
+def report_invalid_operand_types(
+    ref: ast.Reference, found: List[str]
+) -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=ref,
+        offset=ref.offset,
         code="V003",
         message=f"Invalid operand types ({', '.join(found)}) at offset {ref.offset}",
     )

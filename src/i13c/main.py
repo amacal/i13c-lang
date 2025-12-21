@@ -3,13 +3,13 @@ import sys
 import click
 
 from typing import List
-from i13c import ir, lex, par, src, sem, low, enc, elf, diag
+from i13c import ir, lex, par, src, sem, low, enc, elf, diag, res
 
 
 def emit_and_exit(diagnostics: List[diag.Diagnostic]) -> None:
     for diagnostic in diagnostics:
         click.echo(
-            f"Error {diagnostic.code} at offset {diagnostic.ref.offset}: {diagnostic.message}"
+            f"Error {diagnostic.code} at offset {diagnostic.offset}: {diagnostic.message}"
         )
 
     sys.exit(1)
@@ -29,7 +29,13 @@ def tokenize_command(path: str) -> None:
     code = src.open_text(text)
     tokens = lex.tokenize(code)
 
-    for token in tokens:
+    match tokens:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            pass
+
+    for token in tokens.value:
         key = f"{token.code:03}:{token.offset:04}:{token.length:02}"
         value = code.extract(token)
 
@@ -44,7 +50,14 @@ def parse_command(path: str) -> None:
 
     code = src.open_text(text)
     tokens = lex.tokenize(code)
-    program = par.parse(code, tokens)
+
+    match tokens:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            pass
+
+    program = par.parse(code, tokens.value)
 
     for instruction in program.instructions:
         operands = ", ".join([str(op) for op in instruction.operands])
@@ -59,7 +72,14 @@ def lower_command(path: str) -> None:
 
     code = src.open_text(text)
     tokens = lex.tokenize(code)
-    program = par.parse(code, tokens)
+
+    match tokens:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            pass
+
+    program = par.parse(code, tokens.value)
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
@@ -77,7 +97,14 @@ def encode_command(path: str) -> None:
 
     code = src.open_text(text)
     tokens = lex.tokenize(code)
-    program = par.parse(code, tokens)
+
+    match tokens:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            pass
+
+    program = par.parse(code, tokens.value)
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
@@ -96,7 +123,14 @@ def compile_command(path: str) -> None:
 
     code = src.open_text(text)
     tokens = lex.tokenize(code)
-    program = par.parse(code, tokens)
+
+    match tokens:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            pass
+
+    program = par.parse(code, tokens.value)
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
