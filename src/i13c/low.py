@@ -1,5 +1,5 @@
 from typing import List
-from i13c import ast, ir
+from i13c import ast, ir, diag, res
 
 # fmt: off
 IR_REGISTER_MAP = {
@@ -14,13 +14,24 @@ class UnknownMnemonic(Exception):
         self.name = name
 
 
-def lower(program: ast.Program) -> List[ir.Instruction]:
+def lower(
+    program: ast.Program,
+) -> res.Result[List[ir.Instruction], List[diag.Diagnostic]]:
     instructions: List[ir.Instruction] = []
+    diagnostics: List[diag.Diagnostic] = []
 
-    for entry in program.instructions:
-        instructions.append(lower_instruction(entry))
+    try:
+        for entry in program.instructions:
+            instructions.append(lower_instruction(entry))
 
-    return instructions
+    except UnknownMnemonic as ex:
+        diagnostics.append(report_unknown_instruction(entry.ref, ex.name))
+
+    # any diagnostic is an error
+    if diagnostics:
+        return res.Err(diagnostics)
+
+    return res.Ok(instructions)
 
 
 def lower_instruction(instruction: ast.Instruction) -> ir.Instruction:
@@ -48,3 +59,11 @@ def lower_instruction_mov(instruction: ast.Instruction) -> ir.Instruction:
 
 def lower_instruction_syscall(instruction: ast.Instruction) -> ir.Instruction:
     return ir.SysCall()
+
+
+def report_unknown_instruction(ref: ast.Reference, name: bytes) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        code="V001",
+        offset=ref.offset,
+        message=f"Unknown instruction mnemonic: {name.decode()}",
+    )

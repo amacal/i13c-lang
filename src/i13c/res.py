@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Callable
 
 A = TypeVar("A")
 B = TypeVar("B")
@@ -16,3 +16,9 @@ class Err(Generic[B]):
 
 
 Result = Ok[A] | Err[B]
+
+
+def unwrap(r: Result[A, B], callback: Callable[[B], A]) -> A:
+    match r:
+        case Ok(v): return v
+        case Err(e): return callback(e)

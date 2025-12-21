@@ -1,6 +1,6 @@
 import pytest
 
-from i13c import ast, ir, low
+from i13c import ast, ir, low, res
 
 
 def can_lower_syscall_program():
@@ -15,9 +15,10 @@ def can_lower_syscall_program():
     )
 
     instructions = low.lower(program)
-    assert len(instructions) == 1
+    assert isinstance(instructions, res.Ok)
+    assert len(instructions.value) == 1
 
-    instruction = instructions[0]
+    instruction = instructions.value[0]
     assert isinstance(instruction, ir.SysCall)
 
 
@@ -36,9 +37,10 @@ def can_lower_mov_program():
     )
 
     instructions = low.lower(program)
-    assert len(instructions) == 1
+    assert isinstance(instructions, res.Ok)
+    assert len(instructions.value) == 1
 
-    instruction = instructions[0]
+    instruction = instructions.value[0]
     assert isinstance(instruction, ir.MovRegImm)
 
     assert instruction.dst == 0
@@ -56,7 +58,10 @@ def can_detect_unknown_mnemonic():
         ]
     )
 
-    with pytest.raises(low.UnknownMnemonic) as ex:
-        low.lower(program)
+    instructions = low.lower(program)
+    assert isinstance(instructions, res.Err)
 
-    assert ex.value.name == b"abcd"
+    diagnostics = instructions.error
+    assert len(diagnostics) == 1
+
+    assert diagnostics[0].code == "V001"

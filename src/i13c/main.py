@@ -2,17 +2,21 @@ import os
 import sys
 import click
 
-from typing import List
-from i13c import ir, lex, par, src, sem, low, enc, elf, diag, res
+from typing import List, NoReturn
+from i13c import lex, par, src, sem, low, enc, elf, diag, res
 
 
-def emit_and_exit(diagnostics: List[diag.Diagnostic]) -> None:
+def emit_and_exit(diagnostics: List[diag.Diagnostic]) -> NoReturn:
     for diagnostic in diagnostics:
         click.echo(
             f"Error {diagnostic.code} at offset {diagnostic.offset}: {diagnostic.message}"
         )
 
     sys.exit(1)
+
+
+def unwrap(result: res.Result[res.A, List[diag.Diagnostic]]) -> res.A:
+    return res.unwrap(result, emit_and_exit)
 
 
 @click.group()
@@ -77,26 +81,13 @@ def lower_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = lex.tokenize(code)
-
-    match tokens:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            tokens = tokens.value
-
-    program = par.parse(code, tokens)
-
-    match program:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            program = program.value
+    tokens = unwrap(lex.tokenize(code))
+    program = unwrap(par.parse(code, tokens))
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
 
-    if instructions := low.lower(program):
+    if instructions := unwrap(low.lower(program)):
         for instr in instructions:
             click.echo(str(instr))
 
@@ -108,26 +99,13 @@ def encode_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = lex.tokenize(code)
-
-    match tokens:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            tokens = tokens.value
-
-    program = par.parse(code, tokens)
-
-    match program:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            program = program.value
+    tokens = unwrap(lex.tokenize(code))
+    program = unwrap(par.parse(code, tokens))
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
 
-    instructions = low.lower(program)
+    instructions = unwrap(low.lower(program))
     binary = enc.encode(instructions)
 
     sys.stdout.buffer.write(binary)
@@ -140,28 +118,14 @@ def compile_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = lex.tokenize(code)
-
-    match tokens:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            tokens = tokens.value
-
-    program = par.parse(code, tokens)
-
-    match program:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            program = program.value
+    tokens = unwrap(lex.tokenize(code))
+    program = unwrap(par.parse(code, tokens))
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
 
-    instructions = low.lower(program)
+    instructions = unwrap(low.lower(program))
     binary = enc.encode(instructions)
-
     executable = elf.emit(binary)
 
     with open("a.out", "wb") as f:
