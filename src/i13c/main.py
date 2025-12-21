@@ -24,31 +24,25 @@ def i13c():
     pass
 
 
-@i13c.command("tokenize")
+@i13c.command("lex")
 @click.argument("path", type=click.Path(exists=True))
-def tokenize_command(path: str) -> None:
+def lex_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = lex.tokenize(code)
+    tokens = unwrap(lex.tokenize(code))
 
-    match tokens:
-        case res.Err(diagnostics):
-            return emit_and_exit(diagnostics)
-        case res.Ok():
-            pass
-
-    for token in tokens.value:
+    for token in tokens:
         key = f"{token.code:03}:{token.offset:04}:{token.length:02}"
         value = code.extract(token)
 
         click.echo(f"{key} -> {value!r}")
 
 
-@i13c.command("parse")
+@i13c.command("ast")
 @click.argument("path", type=click.Path(exists=True))
-def parse_command(path: str) -> None:
+def ast_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
@@ -74,9 +68,9 @@ def parse_command(path: str) -> None:
         click.echo(f"{str(instruction.mnemonic)} {operands}")
 
 
-@i13c.command("lower")
+@i13c.command("ir")
 @click.argument("path", type=click.Path(exists=True))
-def lower_command(path: str) -> None:
+def ir_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
@@ -92,9 +86,9 @@ def lower_command(path: str) -> None:
             click.echo(str(instr))
 
 
-@i13c.command("encode")
+@i13c.command("bin")
 @click.argument("path", type=click.Path(exists=True))
-def encode_command(path: str) -> None:
+def bin_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
@@ -111,9 +105,9 @@ def encode_command(path: str) -> None:
     sys.stdout.buffer.write(binary)
 
 
-@i13c.command("compile")
+@i13c.command("elf")
 @click.argument("path", type=click.Path(exists=True))
-def compile_command(path: str) -> None:
+def elf_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
