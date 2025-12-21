@@ -1,7 +1,8 @@
+import os
 import sys
 import click
 
-from i13c import ir, lex, par, src, sem, low, enc
+from i13c import ir, lex, par, src, sem, low, enc, elf
 
 
 @click.group()
@@ -72,3 +73,26 @@ def encode_command(path: str) -> None:
     binary = enc.encode(instructions)
 
     sys.stdout.buffer.write(binary)
+
+
+@i13c.command("compile")
+@click.argument("path", type=click.Path(exists=True))
+def compile_command(path: str) -> None:
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    code = src.open_text(text)
+    tokens = lex.tokenize(code)
+
+    program = par.parse(code, tokens)
+    sem.validate(program)
+
+    instructions = low.lower(program)
+    binary = enc.encode(instructions)
+
+    executable = elf.emit(binary)
+
+    with open("a.out", "wb") as f:
+        f.write(executable)
+
+    os.chmod("a.out", 0o755)

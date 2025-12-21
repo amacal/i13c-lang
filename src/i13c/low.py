@@ -3,13 +3,16 @@ from i13c import ast, ir
 
 # fmt: off
 IR_REGISTER_MAP = {
-    b"rax": 0, b"rbx": 1, b"rcx": 2, b"rdx": 3, b"rsi": 4, b"rdi": 5, b"rsp": 6, b"rbp": 7,
+    b"rax": 0, b"rcx": 1, b"rdx": 2, b"rbx": 3, b"rsp": 4, b"rbp": 5, b"rsi": 6, b"rdi": 7,
     b"r8": 8, b"r9": 9, b"r10": 10, b"r11": 11, b"r12": 12, b"r13": 13, b"r14": 14, b"r15": 15,
 }
+# fmt: on
+
 
 class UnknownMnemonic(Exception):
     def __init__(self, name: bytes) -> None:
         self.name = name
+
 
 def lower(program: ast.Program) -> List[ir.Instruction]:
     instructions: List[ir.Instruction] = []
