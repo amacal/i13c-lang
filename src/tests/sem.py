@@ -1,5 +1,3 @@
-import pytest
-
 from i13c import lex, par, sem, src
 
 
@@ -8,7 +6,9 @@ def can_accept_operands_arity_of_syscall():
     tokens = lex.tokenize(code)
 
     program = par.parse(code, tokens)
-    sem.validate(program)
+    diagnostics = sem.validate(program)
+
+    assert len(diagnostics) == 0
 
 
 def can_accept_operands_arity_of_mov():
@@ -16,32 +16,23 @@ def can_accept_operands_arity_of_mov():
     tokens = lex.tokenize(code)
 
     program = par.parse(code, tokens)
-    sem.validate(program)
+    diagnostics = sem.validate(program)
+
+    assert len(diagnostics) == 0
 
 
-def can_detect_invalid_arity_of_xyz():
+def can_detect_invalid_instruction():
     code = src.open_text("xyz rax;")
     tokens = lex.tokenize(code)
 
     program = par.parse(code, tokens)
+    diagnostics = sem.validate(program)
 
-    with pytest.raises(sem.UnknownInstruction) as ex:
-        sem.validate(program)
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
 
-    assert ex.value.ref.offset == 0
-
-
-def can_detect_invalid_operand_types_of_mov():
-    code = src.open_text("mov 0x1234, 0x5678;")
-    tokens = lex.tokenize(code)
-
-    program = par.parse(code, tokens)
-
-    with pytest.raises(sem.InvalidOperandTypes) as ex:
-        sem.validate(program)
-
-    assert ex.value.ref.offset == 0
-    assert ex.value.found == ["Immediate", "Immediate"]
+    assert diagnostic.ref.offset == 0
+    assert diagnostic.code == "V001"
 
 
 def can_detect_immediate_out_of_range():
@@ -49,9 +40,24 @@ def can_detect_immediate_out_of_range():
     tokens = lex.tokenize(code)
 
     program = par.parse(code, tokens)
+    diagnostics = sem.validate(program)
 
-    with pytest.raises(sem.ImmediateOutOfRange) as ex:
-        sem.validate(program)
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
 
-    assert ex.value.ref.offset == 0
-    assert ex.value.value == 0x1ffffffffffffffff
+    assert diagnostic.ref.offset == 0
+    assert diagnostic.code == "V002"
+
+
+def can_detect_invalid_operand_types_of_mov():
+    code = src.open_text("mov 0x1234, 0x5678;")
+    tokens = lex.tokenize(code)
+
+    program = par.parse(code, tokens)
+    diagnostics = sem.validate(program)
+
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
+
+    assert diagnostic.ref.offset == 0
+    assert diagnostic.code == "V003"

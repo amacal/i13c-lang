@@ -1,6 +1,6 @@
-from typing import List, Tuple, Type
+from typing import List, Tuple, Type, List
 from dataclasses import dataclass
-from i13c import ast, src
+from i13c import ast, diag
 
 
 class UnknownInstruction(Exception):
@@ -31,17 +31,25 @@ INSTRUCTIONS_TABLE = {
 }
 
 
-def validate(program: ast.Program) -> None:
+def validate(program: ast.Program) -> List[diag.Diagnostic]:
+    diagnostics: List[diag.Diagnostic] = []
+
     for instruction in program.instructions:
-        validate_instruction(instruction)
+        validate_instruction(diagnostics, instruction)
+
+    return diagnostics
 
 
-def validate_instruction(instruction: ast.Instruction) -> None:
+def validate_instruction(
+    diagnostics: List[diag.Diagnostic], instruction: ast.Instruction
+) -> None:
     matched = False
     signature = INSTRUCTIONS_TABLE.get(instruction.mnemonic.name)
 
+    # missing instruction mnemonic
     if signature is None:
-        raise UnknownInstruction(instruction.ref)
+        diagnostics.append(emit_unknown_instruction(instruction.ref))
+        return
 
     # early acceptance for instructions without operands
     if not instruction.operands and not signature.variants:
@@ -62,13 +70,41 @@ def validate_instruction(instruction: ast.Instruction) -> None:
             for operand in instruction.operands:
                 if isinstance(operand, ast.Immediate):
                     if not (0 <= operand.value <= 0xFFFFFFFFFFFFFFFF):
-                        raise ImmediateOutOfRange(instruction.ref, operand.value)
+                        diagnostics.append(
+                            emit_immediate_out_of_range(instruction.ref, operand.value)
+                        )
 
             matched = True
             break
 
     if not matched:
-        raise InvalidOperandTypes(
-            instruction.ref,
-            found=[type(op).__name__ for op in instruction.operands],
+        diagnostics.append(
+            emit_invalid_operand_types(
+                instruction.ref,
+                [type(operand).__name__ for operand in instruction.operands],
+            )
         )
+
+
+def emit_unknown_instruction(ref: ast.Reference) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code="V001",
+        message=f"Unknown instruction mnemonic at offset {ref.offset}",
+    )
+
+
+def emit_immediate_out_of_range(ref: ast.Reference, value: int) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code="V002",
+        message=f"Immediate value {value} out of range at offset {ref.offset}",
+    )
+
+
+def emit_invalid_operand_types(ref: ast.Reference, found: List[str]) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code="V003",
+        message=f"Invalid operand types ({', '.join(found)}) at offset {ref.offset}",
+    )

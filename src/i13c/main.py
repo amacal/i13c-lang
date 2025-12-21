@@ -2,7 +2,17 @@ import os
 import sys
 import click
 
-from i13c import ir, lex, par, src, sem, low, enc, elf
+from typing import List
+from i13c import ir, lex, par, src, sem, low, enc, elf, diag
+
+
+def emit_and_exit(diagnostics: List[diag.Diagnostic]) -> None:
+    for diagnostic in diagnostics:
+        click.echo(
+            f"Error {diagnostic.code} at offset {diagnostic.ref.offset}: {diagnostic.message}"
+        )
+
+    sys.exit(1)
 
 
 @click.group()
@@ -51,11 +61,12 @@ def lower_command(path: str) -> None:
     tokens = lex.tokenize(code)
     program = par.parse(code, tokens)
 
-    sem.validate(program)
-    instructions = low.lower(program)
+    if diagnostics := sem.validate(program):
+        emit_and_exit(diagnostics)
 
-    for instr in instructions:
-        click.echo(str(instr))
+    if instructions := low.lower(program):
+        for instr in instructions:
+            click.echo(str(instr))
 
 
 @i13c.command("encode")
@@ -68,7 +79,9 @@ def encode_command(path: str) -> None:
     tokens = lex.tokenize(code)
     program = par.parse(code, tokens)
 
-    sem.validate(program)
+    if diagnostics := sem.validate(program):
+        emit_and_exit(diagnostics)
+
     instructions = low.lower(program)
     binary = enc.encode(instructions)
 
@@ -83,9 +96,10 @@ def compile_command(path: str) -> None:
 
     code = src.open_text(text)
     tokens = lex.tokenize(code)
-
     program = par.parse(code, tokens)
-    sem.validate(program)
+
+    if diagnostics := sem.validate(program):
+        emit_and_exit(diagnostics)
 
     instructions = low.lower(program)
     binary = enc.encode(instructions)
