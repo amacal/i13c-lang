@@ -42,3 +42,16 @@ def can_detect_invalid_operand_types_of_mov():
 
     assert ex.value.ref.offset == 0
     assert ex.value.found == ["Immediate", "Immediate"]
+
+
+def can_detect_immediate_out_of_range():
+    code = src.open_text("mov rax, 0x1ffffffffffffffff;")
+    tokens = lex.tokenize(code)
+
+    program = par.parse(code, tokens)
+
+    with pytest.raises(sem.ImmediateOutOfRange) as ex:
+        sem.validate(program)
+
+    assert ex.value.ref.offset == 0
+    assert ex.value.value == 0x1ffffffffffffffff

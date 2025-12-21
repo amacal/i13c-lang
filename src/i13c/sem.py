@@ -14,6 +14,12 @@ class InvalidOperandTypes(Exception):
         self.found = found
 
 
+class ImmediateOutOfRange(Exception):
+    def __init__(self, ref: ast.Reference, value: int) -> None:
+        self.ref = ref
+        self.value = value
+
+
 @dataclass(kw_only=True)
 class InstructionSignature:
     variants: List[Tuple[Type, ...]]
@@ -53,6 +59,11 @@ def validate_instruction(instruction: ast.Instruction) -> None:
                 break
 
         else:
+            for operand in instruction.operands:
+                if isinstance(operand, ast.Immediate):
+                    if not (0 <= operand.value <= 0xFFFFFFFFFFFFFFFF):
+                        raise ImmediateOutOfRange(instruction.ref, operand.value)
+
             matched = True
             break
 
