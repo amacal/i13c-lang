@@ -55,9 +55,15 @@ def parse_command(path: str) -> None:
         case res.Err(diagnostics):
             return emit_and_exit(diagnostics)
         case res.Ok():
-            pass
+            tokens = tokens.value
 
-    program = par.parse(code, tokens.value)
+    program = par.parse(code, tokens)
+
+    match program:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            program = program.value
 
     for instruction in program.instructions:
         operands = ", ".join([str(op) for op in instruction.operands])
@@ -77,9 +83,15 @@ def lower_command(path: str) -> None:
         case res.Err(diagnostics):
             return emit_and_exit(diagnostics)
         case res.Ok():
-            pass
+            tokens = tokens.value
 
-    program = par.parse(code, tokens.value)
+    program = par.parse(code, tokens)
+
+    match program:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            program = program.value
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
@@ -102,9 +114,15 @@ def encode_command(path: str) -> None:
         case res.Err(diagnostics):
             return emit_and_exit(diagnostics)
         case res.Ok():
-            pass
+            tokens = tokens.value
 
-    program = par.parse(code, tokens.value)
+    program = par.parse(code, tokens)
+
+    match program:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            program = program.value
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
@@ -128,9 +146,15 @@ def compile_command(path: str) -> None:
         case res.Err(diagnostics):
             return emit_and_exit(diagnostics)
         case res.Ok():
-            pass
+            tokens = tokens.value
 
-    program = par.parse(code, tokens.value)
+    program = par.parse(code, tokens)
+
+    match program:
+        case res.Err(diagnostics):
+            return emit_and_exit(diagnostics)
+        case res.Ok():
+            program = program.value
 
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)

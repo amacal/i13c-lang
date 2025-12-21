@@ -137,7 +137,7 @@ def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnost
     if diagnostics:
         return res.Err(diagnostics)
 
-    # always emit EOF token
+    # append last EOF token
     tokens.append(Token.eof_token(offset=lexer.offset))
 
     return res.Ok(tokens)

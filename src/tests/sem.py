@@ -1,4 +1,4 @@
-from i13c import lex, par, sem, src, res, diag
+from i13c import lex, par, sem, src, res
 
 
 def can_accept_operands_arity_of_syscall():
@@ -8,8 +8,9 @@ def can_accept_operands_arity_of_syscall():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    diagnostics = sem.validate(program)
+    assert isinstance(program, res.Ok)
 
+    diagnostics = sem.validate(program.value)
     assert len(diagnostics) == 0
 
 
@@ -20,8 +21,9 @@ def can_accept_operands_arity_of_mov():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    diagnostics = sem.validate(program)
+    assert isinstance(program, res.Ok)
 
+    diagnostics = sem.validate(program.value)
     assert len(diagnostics) == 0
 
 
@@ -32,7 +34,9 @@ def can_detect_invalid_instruction():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    diagnostics = sem.validate(program)
+    assert isinstance(program, res.Ok)
+
+    diagnostics = sem.validate(program.value)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -48,7 +52,9 @@ def can_detect_immediate_out_of_range():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    diagnostics = sem.validate(program)
+    assert isinstance(program, res.Ok)
+
+    diagnostics = sem.validate(program.value)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -64,7 +70,9 @@ def can_detect_invalid_operand_types_of_mov():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    diagnostics = sem.validate(program)
+    assert isinstance(program, res.Ok)
+
+    diagnostics = sem.validate(program.value)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

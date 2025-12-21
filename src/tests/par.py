@@ -1,6 +1,4 @@
-import pytest
-
-from i13c import lex, par, src, diag, res
+from i13c import lex, par, src, res
 
 
 def can_parse_instruction_without_operands():
@@ -10,10 +8,10 @@ def can_parse_instruction_without_operands():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    assert program is not None
+    assert isinstance(program, res.Ok)
 
-    assert len(program.instructions) == 1
-    instruction = program.instructions[0]
+    assert len(program.value.instructions) == 1
+    instruction = program.value.instructions[0]
 
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
@@ -26,10 +24,10 @@ def can_parse_instruction_with_operands():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    assert program is not None
+    assert isinstance(program, res.Ok)
 
-    assert len(program.instructions) == 1
-    instruction = program.instructions[0]
+    assert len(program.value.instructions) == 1
+    instruction = program.value.instructions[0]
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -50,10 +48,10 @@ def can_parse_instruction_with_immediate():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    assert program is not None
+    assert isinstance(program, res.Ok)
 
-    assert len(program.instructions) == 1
-    instruction = program.instructions[0]
+    assert len(program.value.instructions) == 1
+    instruction = program.value.instructions[0]
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -74,15 +72,15 @@ def can_parse_multiple_instructions():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    assert program is not None
+    assert isinstance(program, res.Ok)
 
-    assert len(program.instructions) == 2
+    assert len(program.value.instructions) == 2
 
-    instruction1 = program.instructions[0]
+    instruction1 = program.value.instructions[0]
     assert instruction1.mnemonic.name == b"mov"
     assert len(instruction1.operands) == 2
 
-    instruction2 = program.instructions[1]
+    instruction2 = program.value.instructions[1]
     assert instruction2.mnemonic.name == b"syscall"
     assert len(instruction2.operands) == 0
 
@@ -94,9 +92,9 @@ def can_handle_empty_program():
     assert isinstance(tokens, res.Ok)
 
     program = par.parse(code, tokens.value)
-    assert program is not None
+    assert isinstance(program, res.Ok)
 
-    assert len(program.instructions) == 0
+    assert len(program.value.instructions) == 0
 
 
 def can_handle_end_of_tokens():
@@ -105,8 +103,14 @@ def can_handle_end_of_tokens():
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    with pytest.raises(par.UnexpectedEndOfTokens):
-        par.parse(code, tokens.value)
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == "P001"
 
 
 def can_handle_unexpected_token():
@@ -115,5 +119,11 @@ def can_handle_unexpected_token():
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    with pytest.raises(par.UnexpectedTokenCode):
-        par.parse(code, tokens.value)
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == "P002"

@@ -1,6 +1,6 @@
 from typing import List, Union
 from dataclasses import dataclass
-from i13c import lex, ast, src
+from i13c import lex, ast, src, res, diag
 
 
 class UnexpectedTokenCode(Exception):
@@ -59,14 +59,28 @@ class ParsingState:
         return self.code.extract(token)
 
 
-def parse(code: src.SourceCode, tokens: List[lex.Token]) -> ast.Program:
+def parse(
+    code: src.SourceCode, tokens: List[lex.Token]
+) -> res.Result[ast.Program, List[diag.Diagnostic]]:
     state = ParsingState(code=code, tokens=tokens, position=0)
     instructions: List[ast.Instruction] = []
+    diagnostics: List[diag.Diagnostic] = []
 
-    while not state.is_eof():
-        instructions.append(parse_instruction(state))
+    try:
+        while not state.is_eof():
+            instructions.append(parse_instruction(state))
 
-    return ast.Program(instructions=instructions)
+    except UnexpectedEndOfTokens as e:
+        diagnostics.append(report_unexpected_end_of_tokens(e.offset))
+
+    except UnexpectedTokenCode as e:
+        diagnostics.append(report_unexpected_token(e.offset, e.expected, e.found))
+
+    # any diagnostics stops further processing
+    if diagnostics:
+        return res.Err(diagnostics)
+
+    return res.Ok(ast.Program(instructions=instructions))
 
 
 def parse_instruction(state: ParsingState) -> ast.Instruction:
@@ -108,3 +122,21 @@ def parse_operand(state: ParsingState) -> Union[ast.Register, ast.Immediate]:
     # immediate has to provide its decimal value
     else:
         return ast.Immediate(value=int(state.extract(token), 16))
+
+
+def report_unexpected_end_of_tokens(offset: int) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        offset=offset,
+        code="P001",
+        message=f"Unexpected end of tokens at offset {offset}",
+    )
+
+
+def report_unexpected_token(
+    offset: int, expected: List[int], found: int
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        offset=offset,
+        code="P002",
+        message=f"Unexpected token code {found} at offset {offset}, expected one of: {list(expected)}",
+    )
