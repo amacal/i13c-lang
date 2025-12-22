@@ -11,7 +11,7 @@ IR_REGISTER_MAP = {
 
 
 class UnknownMnemonic(Exception):
-    def __init__(self, ref: ast.Reference, name: bytes) -> None:
+    def __init__(self, ref: ast.Span, name: bytes) -> None:
         self.ref = ref
         self.name = name
 
@@ -48,7 +48,11 @@ def lower_function(function: ast.Function) -> ir.CodeBlock:
     for instruction in function.instructions:
         instructions.append(lower_instruction(instruction))
 
-    return ir.CodeBlock(label=function.name, instructions=instructions)
+    return ir.CodeBlock(
+        label=function.name,
+        terminal=function.terminal,
+        instructions=instructions,
+    )
 
 
 def lower_instruction(instruction: ast.Instruction) -> ir.Instruction:
@@ -78,7 +82,7 @@ def lower_instruction_syscall(instruction: ast.Instruction) -> ir.Instruction:
     return ir.SysCall()
 
 
-def report_unknown_instruction(ref: ast.Reference, name: bytes) -> diag.Diagnostic:
+def report_unknown_instruction(ref: ast.Span, name: bytes) -> diag.Diagnostic:
     return diag.Diagnostic(
         code="V001",
         offset=ref.offset,
