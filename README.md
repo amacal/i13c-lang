@@ -10,8 +10,8 @@ You need to work only with the Makefile.
 - `make lint` will reformat the code
 - `make asm` will show the disassembled code
 
-If you installed deps you can use i13c script:
-- `i13c lex file.i13c` will tokenize the file
-- `i13c ast file.i13c` will produce AST of the file
-- `i13c low file.i13c` will produce IR of the file
-- `i13c elf file.i13c` will generate a.out
+If you installed deps you can use `i13c` script:
+- `i13c lex data/hello.i13c` will tokenize the file
+- `i13c ast data/hello.i13c` will produce AST of the file
+- `i13c ir  data/hello.i13c` will produce IR of the file
+- `i13c elf data/hello.i13c` will generate a.out
