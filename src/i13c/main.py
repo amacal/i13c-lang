@@ -53,9 +53,16 @@ def ast_command(path: str) -> None:
 
     for idx, function in enumerate(program.functions):
         click.echo(f"Function: {function.name.decode('utf-8')}")
-        for instruction in function.instructions:
-            operands = ", ".join([str(op) for op in instruction.operands])
-            click.echo(f"  {str(instruction.mnemonic)} {operands}")
+
+        if function.clobbers:
+            click.echo("  Parameters:")
+            for parameter in function.parameters:
+                click.echo(f"    {str(parameter)}")
+
+        if function.instructions:
+            click.echo("  Instructions:")
+            for instruction in function.instructions:
+                click.echo(f"    {str(instruction)}")
 
         if idx < len(program.functions) - 1:
             click.echo("")
