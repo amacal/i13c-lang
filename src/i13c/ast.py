@@ -46,6 +46,7 @@ class Parameter:
 class Function:
     ref: Span
     name: bytes
+    terminal: bool
     clobbers: List[Register]
     parameters: List[Parameter]
     instructions: List[Instruction]

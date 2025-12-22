@@ -1,9 +1,9 @@
-asm exit(code@rdi: u32) clobbers rax, rcx, r11 {
+asm exit(code@rdi: u32) noreturn clobbers rax, rcx, r11 {
     mov rax, 0x3c;
     syscall;
 }
 
-asm main() {
+asm main() noreturn {
     mov rax, 0xe7;
     mov rdi, 0x01;
     syscall;

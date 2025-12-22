@@ -14,6 +14,8 @@ def can_parse_instruction_without_operands():
     function = program.value.functions[0]
 
     assert function.name == b"main"
+    assert function.terminal is False
+
     assert len(function.instructions) == 1
     instruction = function.instructions[0]
 
@@ -34,6 +36,8 @@ def can_parse_instruction_with_operands():
     function = program.value.functions[0]
 
     assert function.name == b"main"
+    assert function.terminal is False
+
     assert len(function.instructions) == 1
     instruction = function.instructions[0]
 
@@ -62,6 +66,8 @@ def can_parse_instruction_with_immediate():
     function = program.value.functions[0]
 
     assert function.name == b"main"
+    assert function.terminal is False
+
     assert len(function.instructions) == 1
     instruction = function.instructions[0]
 
@@ -90,6 +96,7 @@ def can_parse_multiple_instructions():
     function = program.value.functions[0]
 
     assert function.name == b"main"
+    assert function.terminal is False
     assert len(function.instructions) == 2
 
     instruction1 = function.instructions[0]
@@ -114,6 +121,7 @@ def can_parse_functions_with_single_arg():
     function = program.value.functions[0]
 
     assert function.name == b"exit"
+    assert function.terminal is False
     assert len(function.instructions) == 1
 
     instruction = function.instructions[0]
@@ -142,6 +150,7 @@ def can_parse_functions_with_multiple_args():
     function = program.value.functions[0]
 
     assert function.name == b"exit"
+    assert function.terminal is False
     assert len(function.instructions) == 1
 
     instruction = function.instructions[0]
@@ -175,6 +184,7 @@ def can_parse_functions_with_clobbers():
     function = program.value.functions[0]
 
     assert function.name == b"aux"
+    assert function.terminal is False
     assert len(function.clobbers) == 2
 
     assert function.clobbers[0].name == b"rax"
@@ -185,6 +195,28 @@ def can_parse_functions_with_clobbers():
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
+
+
+def can_parse_functions_with_no_return():
+    code = src.open_text("asm halt() noreturn { syscall; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert function.name == b"halt"
+    assert function.terminal is True
+
+    assert len(function.instructions) == 1
+    instruction = function.instructions[0]
+
+    assert instruction.mnemonic.name == b"syscall"
+    assert len(instruction.operands) == 0
 
 
 def can_handle_empty_program():

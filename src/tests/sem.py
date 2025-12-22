@@ -8,6 +8,7 @@ def can_accept_operands_arity_of_syscall():
                 ast.Function(
                     ref=ast.Span(offset=0, length=4),
                     name=b"main",
+                    terminal=False,
                     parameters=[],
                     clobbers=[],
                     instructions=[
@@ -32,6 +33,7 @@ def can_accept_operands_arity_of_mov():
                 ast.Function(
                     ref=ast.Span(offset=0, length=4),
                     name=b"main",
+                    terminal=False,
                     parameters=[],
                     clobbers=[],
                     instructions=[
@@ -59,6 +61,7 @@ def can_detect_invalid_instruction():
                 ast.Function(
                     ref=ast.Span(offset=0, length=4),
                     name=b"main",
+                    terminal=False,
                     parameters=[],
                     clobbers=[],
                     instructions=[
@@ -87,6 +90,7 @@ def can_detect_immediate_out_of_range():
                 ast.Function(
                     ref=ast.Span(offset=0, length=4),
                     name=b"main",
+                    terminal=False,
                     parameters=[],
                     clobbers=[],
                     instructions=[
@@ -118,6 +122,7 @@ def can_detect_invalid_operand_types_of_mov():
                 ast.Function(
                     ref=ast.Span(offset=0, length=4),
                     name=b"main",
+                    terminal=False,
                     parameters=[],
                     clobbers=[],
                     instructions=[
@@ -149,6 +154,7 @@ def can_detect_duplicated_parameter_bindings():
                 ast.Function(
                     ref=ast.Span(offset=0, length=4),
                     name=b"main",
+                    terminal=False,
                     parameters=[
                         ast.Parameter(
                             name=b"code",
@@ -188,6 +194,7 @@ def can_detect_duplicated_parameter_names():
                 ast.Function(
                     ref=ast.Span(offset=0, length=4),
                     name=b"main",
+                    terminal=False,
                     parameters=[
                         ast.Parameter(
                             name=b"code",
@@ -227,6 +234,7 @@ def can_detect_duplicated_clobbers():
                 ast.Function(
                     ref=ast.Span(offset=0, length=4),
                     name=b"main",
+                    terminal=False,
                     parameters=[],
                     clobbers=[
                         ast.Register(name=b"rax"),

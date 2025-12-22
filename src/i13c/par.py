@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Set, Tuple, Union
 
 from i13c import ast, diag, lex, res, src
 
@@ -17,7 +17,9 @@ class UnexpectedEndOfTokens(Exception):
 
 
 class UnexpectedKeyword(Exception):
-    def __init__(self, offset: int, expected: List[bytes], found: bytes) -> None:
+    def __init__(
+        self, offset: int, expected: Union[List[bytes], Set[bytes]], found: bytes
+    ) -> None:
         self.offset = offset
         self.expected = expected
         self.found = found
@@ -104,6 +106,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     instructions: List[ast.Instruction] = []
     parameters: List[ast.Parameter] = []
     clobbers: List[ast.Register] = []
+    terminal: bool = False
 
     # currently only "asm" functions are supported
     keyword = state.expect(lex.TOKEN_KEYWORD)
@@ -129,7 +132,7 @@ def parse_function(state: ParsingState) -> ast.Function:
 
     # optional clobbers
     while not state.is_in(lex.TOKEN_CURLY_OPEN):
-        clobbers = parse_clobbers(state)
+        clobbers, terminal = parse_function_flags(state)
 
     # expect opening curly brace
     state.expect(lex.TOKEN_CURLY_OPEN)
@@ -144,6 +147,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     return ast.Function(
         ref=ref,
         name=state.extract(name),
+        terminal=terminal,
         clobbers=clobbers,
         parameters=parameters,
         instructions=instructions,
@@ -179,13 +183,30 @@ def parse_parameter(state: ParsingState) -> ast.Parameter:
     )
 
 
-def parse_clobbers(state: ParsingState) -> List[ast.Register]:
-    clobbers: List[ast.Register] = []
+def parse_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
+    expected = {b"clobbers", b"noreturn"}
     keyword = state.expect(lex.TOKEN_KEYWORD)
 
-    # fail if the keyword is not "clobbers"
-    if state.extract(keyword) != b"clobbers":
-        raise UnexpectedKeyword(keyword.offset, [b"clobbers"], state.extract(keyword))
+    terminal: bool = False
+    clobbers: List[ast.Register] = []
+
+    # fail if the keyword is not "clobbers" or "noreturn"
+    if state.extract(keyword) not in expected:
+        raise UnexpectedKeyword(keyword.offset, expected, state.extract(keyword))
+
+    # if "clobbers", parse the clobber list
+    if state.extract(keyword) == b"clobbers":
+        clobbers = parse_clobbers(state)
+
+    # if "noreturn", set terminal flag
+    elif state.extract(keyword) == b"noreturn":
+        terminal = True
+
+    return clobbers, terminal
+
+
+def parse_clobbers(state: ParsingState) -> List[ast.Register]:
+    clobbers: List[ast.Register] = []
 
     # at least one register is expected
     clobber = state.expect(lex.TOKEN_REG)
@@ -259,7 +280,7 @@ def report_unexpected_token(
 
 
 def report_unexpected_keyword(
-    offset: int, expected: List[bytes], found: bytes
+    offset: int, expected: Union[List[bytes], Set[bytes]], found: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         offset=offset,
