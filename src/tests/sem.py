@@ -135,3 +135,90 @@ def can_detect_invalid_operand_types_of_mov():
 
     assert diagnostic.offset == 0
     assert diagnostic.code == "V003"
+
+
+def can_detect_duplicated_parameter_bindings():
+    diagnostics = sem.validate(
+        ast.Program(
+            functions=[
+                ast.Function(
+                    name=b"main",
+                    parameters=[
+                        ast.Parameter(name=b"code", type=b"u32", bind=b"rdi"),
+                        ast.Parameter(name=b"id", type=b"u16", bind=b"rdi"),
+                    ],
+                    clobbers=[],
+                    instructions=[
+                        ast.Instruction(
+                            ref=ast.Reference(offset=0, length=3),
+                            mnemonic=ast.Mnemonic(name=b"syscall"),
+                            operands=[],
+                        )
+                    ],
+                )
+            ]
+        )
+    )
+
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
+
+    assert diagnostic.offset == 0
+    assert diagnostic.code == "V004"
+
+
+def can_detect_duplicated_parameter_names():
+    diagnostics = sem.validate(
+        ast.Program(
+            functions=[
+                ast.Function(
+                    name=b"main",
+                    parameters=[
+                        ast.Parameter(name=b"code", type=b"u32", bind=b"rdi"),
+                        ast.Parameter(name=b"code", type=b"u16", bind=b"rax"),
+                    ],
+                    clobbers=[],
+                    instructions=[
+                        ast.Instruction(
+                            ref=ast.Reference(offset=0, length=3),
+                            mnemonic=ast.Mnemonic(name=b"syscall"),
+                            operands=[],
+                        )
+                    ],
+                )
+            ]
+        )
+    )
+
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
+
+    assert diagnostic.offset == 0
+    assert diagnostic.code == "V005"
+
+
+def can_detect_duplicated_clobbers():
+    diagnostics = sem.validate(
+        ast.Program(
+            functions=[
+                ast.Function(
+                    name=b"main",
+                    parameters=[],
+                    clobbers=[b"rax", b"rbx", b"rax"],
+                    instructions=[
+                        ast.Instruction(
+                            ref=ast.Reference(offset=0, length=3),
+                            mnemonic=ast.Mnemonic(name=b"syscall"),
+                            operands=[],
+                        )
+                    ],
+                )
+            ]
+        )
+    )
+
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
+
+    assert diagnostic.offset == 0
+    assert diagnostic.code == "V006"
