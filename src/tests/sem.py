@@ -6,12 +6,13 @@ def can_accept_operands_arity_of_syscall():
         ast.Program(
             functions=[
                 ast.Function(
+                    ref=ast.Span(offset=0, length=4),
                     name=b"main",
                     parameters=[],
                     clobbers=[],
                     instructions=[
                         ast.Instruction(
-                            ref=ast.Reference(offset=0, length=7),
+                            ref=ast.Span(offset=0, length=7),
                             mnemonic=ast.Mnemonic(name=b"syscall"),
                             operands=[],
                         )
@@ -29,12 +30,13 @@ def can_accept_operands_arity_of_mov():
         ast.Program(
             functions=[
                 ast.Function(
+                    ref=ast.Span(offset=0, length=4),
                     name=b"main",
                     parameters=[],
                     clobbers=[],
                     instructions=[
                         ast.Instruction(
-                            ref=ast.Reference(offset=0, length=3),
+                            ref=ast.Span(offset=0, length=3),
                             mnemonic=ast.Mnemonic(name=b"mov"),
                             operands=[
                                 ast.Register(name=b"rax"),
@@ -55,12 +57,13 @@ def can_detect_invalid_instruction():
         ast.Program(
             functions=[
                 ast.Function(
+                    ref=ast.Span(offset=0, length=4),
                     name=b"main",
                     parameters=[],
                     clobbers=[],
                     instructions=[
                         ast.Instruction(
-                            ref=ast.Reference(offset=0, length=3),
+                            ref=ast.Span(offset=0, length=3),
                             mnemonic=ast.Mnemonic(name=b"xyz"),
                             operands=[],
                         )
@@ -82,12 +85,13 @@ def can_detect_immediate_out_of_range():
         ast.Program(
             functions=[
                 ast.Function(
+                    ref=ast.Span(offset=0, length=4),
                     name=b"main",
                     parameters=[],
                     clobbers=[],
                     instructions=[
                         ast.Instruction(
-                            ref=ast.Reference(offset=0, length=3),
+                            ref=ast.Span(offset=0, length=3),
                             mnemonic=ast.Mnemonic(name=b"mov"),
                             operands=[
                                 ast.Register(name=b"rax"),
@@ -112,12 +116,13 @@ def can_detect_invalid_operand_types_of_mov():
         ast.Program(
             functions=[
                 ast.Function(
+                    ref=ast.Span(offset=0, length=4),
                     name=b"main",
                     parameters=[],
                     clobbers=[],
                     instructions=[
                         ast.Instruction(
-                            ref=ast.Reference(offset=0, length=3),
+                            ref=ast.Span(offset=0, length=3),
                             mnemonic=ast.Mnemonic(name=b"mov"),
                             operands=[
                                 ast.Immediate(value=0x1234),
@@ -142,15 +147,24 @@ def can_detect_duplicated_parameter_bindings():
         ast.Program(
             functions=[
                 ast.Function(
+                    ref=ast.Span(offset=0, length=4),
                     name=b"main",
                     parameters=[
-                        ast.Parameter(name=b"code", type=b"u32", bind=b"rdi"),
-                        ast.Parameter(name=b"id", type=b"u16", bind=b"rdi"),
+                        ast.Parameter(
+                            name=b"code",
+                            type=ast.Type(name=b"u32"),
+                            bind=ast.Register(name=b"rdi"),
+                        ),
+                        ast.Parameter(
+                            name=b"id",
+                            type=ast.Type(name=b"u16"),
+                            bind=ast.Register(name=b"rdi"),
+                        ),
                     ],
                     clobbers=[],
                     instructions=[
                         ast.Instruction(
-                            ref=ast.Reference(offset=0, length=3),
+                            ref=ast.Span(offset=0, length=3),
                             mnemonic=ast.Mnemonic(name=b"syscall"),
                             operands=[],
                         )
@@ -172,15 +186,24 @@ def can_detect_duplicated_parameter_names():
         ast.Program(
             functions=[
                 ast.Function(
+                    ref=ast.Span(offset=0, length=4),
                     name=b"main",
                     parameters=[
-                        ast.Parameter(name=b"code", type=b"u32", bind=b"rdi"),
-                        ast.Parameter(name=b"code", type=b"u16", bind=b"rax"),
+                        ast.Parameter(
+                            name=b"code",
+                            type=ast.Type(name=b"u32"),
+                            bind=ast.Register(name=b"rdi"),
+                        ),
+                        ast.Parameter(
+                            name=b"code",
+                            type=ast.Type(name=b"u16"),
+                            bind=ast.Register(name=b"rax"),
+                        ),
                     ],
                     clobbers=[],
                     instructions=[
                         ast.Instruction(
-                            ref=ast.Reference(offset=0, length=3),
+                            ref=ast.Span(offset=0, length=3),
                             mnemonic=ast.Mnemonic(name=b"syscall"),
                             operands=[],
                         )
@@ -202,12 +225,17 @@ def can_detect_duplicated_clobbers():
         ast.Program(
             functions=[
                 ast.Function(
+                    ref=ast.Span(offset=0, length=4),
                     name=b"main",
                     parameters=[],
-                    clobbers=[b"rax", b"rbx", b"rax"],
+                    clobbers=[
+                        ast.Register(name=b"rax"),
+                        ast.Register(name=b"rbx"),
+                        ast.Register(name=b"rax"),
+                    ],
                     instructions=[
                         ast.Instruction(
-                            ref=ast.Reference(offset=0, length=3),
+                            ref=ast.Span(offset=0, length=3),
                             mnemonic=ast.Mnemonic(name=b"syscall"),
                             operands=[],
                         )

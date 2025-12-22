@@ -35,6 +35,12 @@ class ParsingState:
     def is_in(self, *codes: int) -> bool:
         return self.tokens[self.position].code in codes
 
+    def span(self, token: lex.Token) -> ast.Span:
+        return ast.Span(
+            offset=token.offset,
+            length=self.tokens[self.position].length - token.offset,
+        )
+
     def accept(self, *codes: int) -> bool:
         if self.is_in(*codes):
             self.advance()
@@ -97,7 +103,7 @@ def parse(
 def parse_function(state: ParsingState) -> ast.Function:
     instructions: List[ast.Instruction] = []
     parameters: List[ast.Parameter] = []
-    clobbers: List[bytes] = []
+    clobbers: List[ast.Register] = []
 
     # currently only "asm" functions are supported
     keyword = state.expect(lex.TOKEN_KEYWORD)
@@ -118,6 +124,9 @@ def parse_function(state: ParsingState) -> ast.Function:
     # expect closed round bracket
     state.expect(lex.TOKEN_ROUND_CLOSE)
 
+    # capture function signature
+    ref = state.span(name)
+
     # optional clobbers
     while not state.is_in(lex.TOKEN_CURLY_OPEN):
         clobbers = parse_clobbers(state)
@@ -133,6 +142,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     state.expect(lex.TOKEN_CURLY_CLOSE)
 
     return ast.Function(
+        ref=ref,
         name=state.extract(name),
         clobbers=clobbers,
         parameters=parameters,
@@ -164,13 +174,13 @@ def parse_parameter(state: ParsingState) -> ast.Parameter:
 
     return ast.Parameter(
         name=state.extract(ident),
-        type=state.extract(type),
-        bind=state.extract(bind),
+        type=ast.Type(name=state.extract(type)),
+        bind=ast.Register(name=state.extract(bind)),
     )
 
 
-def parse_clobbers(state: ParsingState) -> List[bytes]:
-    clobbers: List[bytes] = []
+def parse_clobbers(state: ParsingState) -> List[ast.Register]:
+    clobbers: List[ast.Register] = []
     keyword = state.expect(lex.TOKEN_KEYWORD)
 
     # fail if the keyword is not "clobbers"
@@ -179,12 +189,12 @@ def parse_clobbers(state: ParsingState) -> List[bytes]:
 
     # at least one register is expected
     clobber = state.expect(lex.TOKEN_REG)
-    clobbers.append(state.extract(clobber))
+    clobbers.append(ast.Register(name=state.extract(clobber)))
 
     # a comma suggests next clobber
     while state.accept(lex.TOKEN_COMMA):
         clobber = state.expect(lex.TOKEN_REG)
-        clobbers.append(state.extract(clobber))
+        clobbers.append(ast.Register(name=state.extract(clobber)))
 
     return clobbers
 
@@ -201,8 +211,8 @@ def parse_instruction(state: ParsingState) -> ast.Instruction:
     state.expect(lex.TOKEN_SEMICOLON)
 
     # build instruction and token reference
+    ref = state.span(token)
     mnemonic = ast.Mnemonic(name=state.extract(token))
-    ref = ast.Reference(offset=token.offset, length=token.length)
 
     return ast.Instruction(ref=ref, mnemonic=mnemonic, operands=operands)
 

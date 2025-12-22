@@ -125,8 +125,8 @@ def can_parse_functions_with_single_arg():
 
     parameter = parameters[0]
     assert parameter.name == b"code"
-    assert parameter.type == b"u32"
-    assert parameter.bind == b"rdi"
+    assert parameter.type.name == b"u32"
+    assert parameter.bind.name == b"rdi"
 
 
 def can_parse_functions_with_multiple_args():
@@ -153,13 +153,13 @@ def can_parse_functions_with_multiple_args():
 
     parameter1 = parameters[0]
     assert parameter1.name == b"code"
-    assert parameter1.type == b"u32"
-    assert parameter1.bind == b"rdi"
+    assert parameter1.type.name == b"u32"
+    assert parameter1.bind.name == b"rdi"
 
     parameter2 = parameters[1]
     assert parameter2.name == b"id"
-    assert parameter2.type == b"u16"
-    assert parameter2.bind == b"rax"
+    assert parameter2.type.name == b"u16"
+    assert parameter2.bind.name == b"rax"
 
 
 def can_parse_functions_with_clobbers():
@@ -177,8 +177,8 @@ def can_parse_functions_with_clobbers():
     assert function.name == b"aux"
     assert len(function.clobbers) == 2
 
-    assert function.clobbers[0] == b"rax"
-    assert function.clobbers[1] == b"rbx"
+    assert function.clobbers[0].name == b"rax"
+    assert function.clobbers[1].name == b"rbx"
 
     assert len(function.instructions) == 1
     instruction = function.instructions[0]

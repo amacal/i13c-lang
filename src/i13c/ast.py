@@ -3,9 +3,14 @@ from typing import List, Union
 
 
 @dataclass(kw_only=True)
-class Reference:
+class Span:
     offset: int
     length: int
+
+
+@dataclass
+class Type:
+    name: bytes
 
 
 @dataclass(kw_only=True)
@@ -25,7 +30,7 @@ class Mnemonic:
 
 @dataclass(kw_only=True)
 class Instruction:
-    ref: Reference
+    ref: Span
     mnemonic: Mnemonic
     operands: List[Union[Register, Immediate]]
 
@@ -33,14 +38,15 @@ class Instruction:
 @dataclass
 class Parameter:
     name: bytes
-    type: bytes
-    bind: bytes
+    type: Type
+    bind: Register
 
 
 @dataclass(kw_only=True)
 class Function:
+    ref: Span
     name: bytes
-    clobbers: List[bytes]
+    clobbers: List[Register]
     parameters: List[Parameter]
     instructions: List[Instruction]
 

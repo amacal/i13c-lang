@@ -1,22 +1,22 @@
 from dataclasses import dataclass
-from typing import List, Tuple, Type, Set
+from typing import List, Set, Tuple, Type
 
 from i13c import ast, diag
 
 
 class UnknownInstruction(Exception):
-    def __init__(self, ref: ast.Reference) -> None:
+    def __init__(self, ref: ast.Span) -> None:
         self.ref = ref
 
 
 class InvalidOperandTypes(Exception):
-    def __init__(self, ref: ast.Reference, found: List[str]) -> None:
+    def __init__(self, ref: ast.Span, found: List[str]) -> None:
         self.ref = ref
         self.found = found
 
 
 class ImmediateOutOfRange(Exception):
-    def __init__(self, ref: ast.Reference, value: int) -> None:
+    def __init__(self, ref: ast.Span, value: int) -> None:
         self.ref = ref
         self.value = value
 
@@ -68,12 +68,12 @@ def validate_parameters(
         else:
             names.add(parameter.name)
 
-        if parameter.bind in bindings:
+        if parameter.bind.name in bindings:
             diagnostics.append(
-                report_duplicated_bindings(function.instructions[0].ref, parameter.bind)
+                report_duplicated_bindings(function.ref, parameter.bind.name)
             )
         else:
-            bindings.add(parameter.bind)
+            bindings.add(parameter.bind.name)
 
 
 def validate_clobbers(
@@ -82,12 +82,10 @@ def validate_clobbers(
     seen: Set[bytes] = set()
 
     for clobber in function.clobbers:
-        if clobber in seen:
-            diagnostics.append(
-                report_duplicated_clobbers(function.instructions[0].ref, clobber)
-            )
+        if clobber.name in seen:
+            diagnostics.append(report_duplicated_clobbers(function.ref, clobber.name))
         else:
-            seen.add(clobber)
+            seen.add(clobber.name)
 
 
 def validate_instruction(
@@ -138,7 +136,7 @@ def validate_instruction(
         )
 
 
-def report_unknown_instruction(ref: ast.Reference) -> diag.Diagnostic:
+def report_unknown_instruction(ref: ast.Span) -> diag.Diagnostic:
     return diag.Diagnostic(
         offset=ref.offset,
         code="V001",
@@ -146,7 +144,7 @@ def report_unknown_instruction(ref: ast.Reference) -> diag.Diagnostic:
     )
 
 
-def report_immediate_out_of_range(ref: ast.Reference, value: int) -> diag.Diagnostic:
+def report_immediate_out_of_range(ref: ast.Span, value: int) -> diag.Diagnostic:
     return diag.Diagnostic(
         offset=ref.offset,
         code="V002",
@@ -154,9 +152,7 @@ def report_immediate_out_of_range(ref: ast.Reference, value: int) -> diag.Diagno
     )
 
 
-def report_invalid_operand_types(
-    ref: ast.Reference, found: List[str]
-) -> diag.Diagnostic:
+def report_invalid_operand_types(ref: ast.Span, found: List[str]) -> diag.Diagnostic:
     return diag.Diagnostic(
         offset=ref.offset,
         code="V003",
@@ -164,7 +160,7 @@ def report_invalid_operand_types(
     )
 
 
-def report_duplicated_bindings(ref: ast.Reference, found: bytes) -> diag.Diagnostic:
+def report_duplicated_bindings(ref: ast.Span, found: bytes) -> diag.Diagnostic:
     return diag.Diagnostic(
         offset=ref.offset,
         code="V004",
@@ -172,9 +168,7 @@ def report_duplicated_bindings(ref: ast.Reference, found: bytes) -> diag.Diagnos
     )
 
 
-def report_duplicated_parameter_names(
-    ref: ast.Reference, found: bytes
-) -> diag.Diagnostic:
+def report_duplicated_parameter_names(ref: ast.Span, found: bytes) -> diag.Diagnostic:
     return diag.Diagnostic(
         offset=ref.offset,
         code="V005",
@@ -182,7 +176,7 @@ def report_duplicated_parameter_names(
     )
 
 
-def report_duplicated_clobbers(ref: ast.Reference, found: bytes) -> diag.Diagnostic:
+def report_duplicated_clobbers(ref: ast.Span, found: bytes) -> diag.Diagnostic:
     return diag.Diagnostic(
         offset=ref.offset,
         code="V006",
