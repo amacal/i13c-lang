@@ -46,14 +46,14 @@ def can_tokenize_new_lines():
 
 
 def can_tokenize_single_bytes():
-    text = ";,}{)("
+    text = ";,}{)(:@"
     code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
 
     assert isinstance(tokens, res.Ok)
-    assert len(tokens.value) == 7
+    assert len(tokens.value) == 9
 
     assert tokens.value[0] == lex.Token(code=lex.TOKEN_SEMICOLON, offset=0, length=1)
     assert tokens.value[1] == lex.Token(code=lex.TOKEN_COMMA, offset=1, length=1)
@@ -61,7 +61,9 @@ def can_tokenize_single_bytes():
     assert tokens.value[3] == lex.Token(code=lex.TOKEN_CURLY_OPEN, offset=3, length=1)
     assert tokens.value[4] == lex.Token(code=lex.TOKEN_ROUND_CLOSE, offset=4, length=1)
     assert tokens.value[5] == lex.Token(code=lex.TOKEN_ROUND_OPEN, offset=5, length=1)
-    assert tokens.value[6] == lex.Token(code=lex.TOKEN_EOF, offset=6, length=0)
+    assert tokens.value[6] == lex.Token(code=lex.TOKEN_COLON, offset=6, length=1)
+    assert tokens.value[7] == lex.Token(code=lex.TOKEN_AT, offset=7, length=1)
+    assert tokens.value[8] == lex.Token(code=lex.TOKEN_EOF, offset=8, length=0)
 
     assert code.extract(tokens.value[0]) == b";"
     assert code.extract(tokens.value[1]) == b","
@@ -69,7 +71,9 @@ def can_tokenize_single_bytes():
     assert code.extract(tokens.value[3]) == b"{"
     assert code.extract(tokens.value[4]) == b")"
     assert code.extract(tokens.value[5]) == b"("
-    assert code.extract(tokens.value[6]) == b""
+    assert code.extract(tokens.value[6]) == b":"
+    assert code.extract(tokens.value[7]) == b"@"
+    assert code.extract(tokens.value[8]) == b""
 
 
 def can_tokenize_last_hex():
@@ -167,6 +171,29 @@ def can_tokenize_keywords():
     assert code.extract(tokens.value[2]) == b""
 
 
+def can_tokenize_types():
+    text = "u8 u16 u32 u64"
+    code = src.open_text(text)
+
+    tokens = lex.tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, res.Ok)
+    assert len(tokens.value) == 5
+
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_TYPE, offset=0, length=2)
+    assert tokens.value[1] == lex.Token(code=lex.TOKEN_TYPE, offset=3, length=3)
+    assert tokens.value[2] == lex.Token(code=lex.TOKEN_TYPE, offset=7, length=3)
+    assert tokens.value[3] == lex.Token(code=lex.TOKEN_TYPE, offset=11, length=3)
+    assert tokens.value[4] == lex.Token(code=lex.TOKEN_EOF, offset=14, length=0)
+
+    assert code.extract(tokens.value[0]) == b"u8"
+    assert code.extract(tokens.value[1]) == b"u16"
+    assert code.extract(tokens.value[2]) == b"u32"
+    assert code.extract(tokens.value[3]) == b"u64"
+    assert code.extract(tokens.value[4]) == b""
+
+
 def can_omit_whitespaces():
     text = "  0xff  test  "
     code = src.open_text(text)
@@ -187,7 +214,7 @@ def can_omit_whitespaces():
 
 
 def can_detect_unrecognized_token():
-    code = src.open_text("@")
+    code = src.open_text("\xff")
     tokens = lex.tokenize(code)
 
     assert isinstance(tokens, res.Err)

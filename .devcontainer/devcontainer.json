@@ -27,7 +27,7 @@
                 "python.languageServer": "Pylance",
                 "python.venvPath": "/home/vscode/.cache/pypoetry/virtualenvs",
                 "python.terminal.activateEnvironment": false,
-                "python.analysis.typeCheckingMode": "basic",
+                "python.analysis.typeCheckingMode": "standard",
                 "[python]": {
                     "black-formatter.importStrategy": "fromEnvironment",
                     "editor.defaultFormatter": "ms-python.black-formatter"

@@ -3,7 +3,9 @@ from typing import List
 
 from i13c import diag, res, src
 
+CLASS_AT = b"@"
 CLASS_COMMA = b","
+CLASS_COLON = b":"
 CLASS_SEMICOLON = b";"
 CLASS_WHITESPACE = b" \n"
 CLASS_ZERO = b"0"
@@ -26,18 +28,26 @@ TOKEN_ROUND_OPEN = 8
 TOKEN_ROUND_CLOSE = 9
 TOKEN_CURLY_OPEN = 10
 TOKEN_CURLY_CLOSE = 11
+TOKEN_AT = 12
+TOKEN_COLON = 13
+TOKEN_TYPE = 14
 TOKEN_EOF = 255
 
 # fmt: off
 SEPARATORS = (
     CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON +
     CLASS_ROUND_OPEN + CLASS_ROUND_CLOSE +
-    CLASS_CURLY_OPEN + CLASS_CURLY_CLOSE
+    CLASS_CURLY_OPEN + CLASS_CURLY_CLOSE +
+    CLASS_AT + CLASS_COLON
 )
 
 SET_REGS = {
     b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
     b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
+}
+
+SET_TYPES = {
+    b"u8", b"u16", b"u32", b"u64",
 }
 
 SET_MNEMONICS = {
@@ -131,6 +141,10 @@ class Token:
         return Token(code=TOKEN_KEYWORD, offset=offset, length=length)
 
     @staticmethod
+    def type_token(offset: int, length: int) -> "Token":
+        return Token(code=TOKEN_TYPE, offset=offset, length=length)
+
+    @staticmethod
     def round_open_token(offset: int) -> "Token":
         return Token(code=TOKEN_ROUND_OPEN, offset=offset, length=1)
 
@@ -145,6 +159,14 @@ class Token:
     @staticmethod
     def curly_close_token(offset: int) -> "Token":
         return Token(code=TOKEN_CURLY_CLOSE, offset=offset, length=1)
+
+    @staticmethod
+    def at_token(offset: int) -> "Token":
+        return Token(code=TOKEN_AT, offset=offset, length=1)
+
+    @staticmethod
+    def colon_token(offset: int) -> "Token":
+        return Token(code=TOKEN_COLON, offset=offset, length=1)
 
 
 def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnostic]]:
@@ -173,6 +195,12 @@ def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnost
 
             elif lexer.is_in(CLASS_CURLY_CLOSE):
                 emit_curly_close(lexer, tokens)
+
+            elif lexer.is_in(CLASS_AT):
+                emit_at(lexer, tokens)
+
+            elif lexer.is_in(CLASS_COLON):
+                emit_colon(lexer, tokens)
 
             elif lexer.is_in(CLASS_ZERO):
                 read_hex(lexer, tokens)
@@ -256,6 +284,10 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     elif lexer.extract(token) in SET_KEYWORDS:
         token = Token.keyword_token(offset=start_offset, length=length)
 
+    # perhaps it's a type
+    elif lexer.extract(token) in SET_TYPES:
+        token = Token.type_token(offset=start_offset, length=length)
+
     tokens.append(token)
 
 
@@ -287,6 +319,16 @@ def emit_curly_open(lexer: Lexer, tokens: List[Token]) -> None:
 def emit_curly_close(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.curly_close_token(offset=lexer.offset))
     lexer.advance(1)  # consume '}'
+
+
+def emit_colon(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.colon_token(offset=lexer.offset))
+    lexer.advance(1)  # consume ':'
+
+
+def emit_at(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.at_token(offset=lexer.offset))
+    lexer.advance(1)  # consume '@'
 
 
 def report_unrecognized_token(offset: int) -> diag.Diagnostic:
