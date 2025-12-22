@@ -5,8 +5,6 @@
         "dockerfile": "Dockerfile",
         "context": ".."
     },
-    "containerEnv": {
-    },
     "customizations": {
         "vscode": {
             "extensions": [

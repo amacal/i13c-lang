@@ -1,0 +1,5 @@
+#!/home/vscode/.cache/pypoetry/virtualenvs/i13c-lang-vkXUBngp-py3.14/bin/python
+
+from i13c.main import i13c
+
+i13c()
