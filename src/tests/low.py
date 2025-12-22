@@ -21,6 +21,7 @@ def can_lower_syscall_program():
 
     unit = low.lower(program)
     assert isinstance(unit, res.Ok)
+    assert unit.value.symbols == {b"main"}
 
     codeblocks = unit.value.codeblocks
     assert len(codeblocks) == 1
@@ -51,6 +52,7 @@ def can_lower_mov_program():
 
     unit = low.lower(program)
     assert isinstance(unit, res.Ok)
+    assert unit.value.symbols == {b"main"}
 
     codeblocks = unit.value.codeblocks
     assert len(codeblocks) == 1
@@ -88,3 +90,41 @@ def can_detect_unknown_mnemonic():
     assert len(diagnostics) == 1
 
     assert diagnostics[0].code == "V001"
+
+
+def can_detected_duplicated_symbols():
+    program = ast.Program(
+        functions=[
+            ast.Function(
+                name=b"main",
+                instructions=[
+                    ast.Instruction(
+                        ref=ast.Reference(offset=0, length=7),
+                        mnemonic=ast.Mnemonic(name=b"syscall"),
+                        operands=[],
+                    ),
+                ],
+            ),
+            ast.Function(
+                name=b"main",
+                instructions=[
+                    ast.Instruction(
+                        ref=ast.Reference(offset=8, length=3),
+                        mnemonic=ast.Mnemonic(name=b"mov"),
+                        operands=[
+                            ast.Register(name=b"rax"),
+                            ast.Immediate(value=0x1234),
+                        ],
+                    ),
+                ],
+            ),
+        ]
+    )
+
+    codeblocks = low.lower(program)
+    assert isinstance(codeblocks, res.Err)
+
+    diagnostics = codeblocks.error
+    assert len(diagnostics) == 1
+
+    assert diagnostics[0].code == "V002"

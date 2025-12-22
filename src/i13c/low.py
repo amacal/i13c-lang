@@ -28,6 +28,13 @@ def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     except UnknownMnemonic as ex:
         diagnostics.append(report_unknown_instruction(ex.ref, ex.name))
 
+    # check for duplicated symbols
+    for codeblock in codeblocks:
+        if codeblock.label not in symbols:
+            symbols.add(codeblock.label)
+        else:
+            diagnostics.append(report_duplicate_symbol(codeblock.label))
+
     # any diagnostic is an error
     if diagnostics:
         return res.Err(diagnostics)
@@ -76,4 +83,12 @@ def report_unknown_instruction(ref: ast.Reference, name: bytes) -> diag.Diagnost
         code="V001",
         offset=ref.offset,
         message=f"Unknown instruction mnemonic: {name.decode()}",
+    )
+
+
+def report_duplicate_symbol(name: bytes) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        code="V002",
+        offset=0,
+        message=f"Duplicate symbol definition: {name.decode()}",
     )
