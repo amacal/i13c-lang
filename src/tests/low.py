@@ -61,6 +61,51 @@ def can_lower_mov_program():
     assert instruction.imm == 0x1234
 
 
+def can_move_entry_function_to_front():
+    program = ast.Program(
+        functions=[
+            ast.Function(
+                name=b"aux",
+                instructions=[
+                    ast.Instruction(
+                        ref=ast.Reference(offset=0, length=3),
+                        mnemonic=ast.Mnemonic(name=b"mov"),
+                        operands=[
+                            ast.Register(name=b"rax"),
+                            ast.Immediate(value=0x1234),
+                        ],
+                    ),
+                ],
+            ),
+            ast.Function(
+                name=b"main",
+                instructions=[
+                    ast.Instruction(
+                        ref=ast.Reference(offset=4, length=7),
+                        mnemonic=ast.Mnemonic(name=b"syscall"),
+                        operands=[],
+                    ),
+                ],
+            ),
+        ]
+    )
+
+    codeblocks = low.lower(program)
+    assert isinstance(codeblocks, res.Ok)
+    assert len(codeblocks.value) == 2
+
+    # main should be first
+    main_codeblock = codeblocks.value[0]
+    assert len(main_codeblock.instructions) == 1
+    assert isinstance(main_codeblock.instructions[0], ir.SysCall)
+
+    # aux should be second
+    aux_codeblock = codeblocks.value[1]
+    assert len(aux_codeblock.instructions) == 1
+    instruction = aux_codeblock.instructions[0]
+    assert isinstance(instruction, ir.MovRegImm)
+
+
 def can_detect_unknown_mnemonic():
     program = ast.Program(
         functions=[

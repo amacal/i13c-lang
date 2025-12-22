@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from i13c import ast, ir, diag, res
 
 # fmt: off
@@ -18,19 +18,34 @@ class UnknownMnemonic(Exception):
 def lower(
     program: ast.Program,
 ) -> res.Result[List[ir.CodeBlock], List[diag.Diagnostic]]:
+    entry: Optional[int] = None
     codeblocks: List[ir.CodeBlock] = []
     diagnostics: List[diag.Diagnostic] = []
 
     try:
-        for entry in program.functions:
-            codeblocks.append(lower_function(entry))
+        for function in program.functions:
+            if function.name == b"main":
+                entry = len(codeblocks)
+
+            codeblocks.append(lower_function(function))
 
     except UnknownMnemonic as ex:
         diagnostics.append(report_unknown_instruction(ex.ref, ex.name))
 
+    if entry is None:
+        diagnostics.append(report_missing_main_function())
+
     # any diagnostic is an error
     if diagnostics:
         return res.Err(diagnostics)
+
+    # linting cannot infer it
+    assert entry is not None
+
+    # move entrypoint to the front
+    codeblocks = [codeblocks[entry]] + [
+        codeblock for idx, codeblock in enumerate(codeblocks) if idx != entry
+    ]
 
     return res.Ok(codeblocks)
 
@@ -76,4 +91,12 @@ def report_unknown_instruction(ref: ast.Reference, name: bytes) -> diag.Diagnost
         code="V001",
         offset=ref.offset,
         message=f"Unknown instruction mnemonic: {name.decode()}",
+    )
+
+
+def report_missing_main_function() -> diag.Diagnostic:
+    return diag.Diagnostic(
+        code="V002",
+        offset=0,
+        message="Missing 'main' entrypoint function",
     )
