@@ -19,11 +19,13 @@ def can_lower_syscall_program():
         ]
     )
 
-    codeblocks = low.lower(program)
-    assert isinstance(codeblocks, res.Ok)
-    assert len(codeblocks.value) == 1
+    unit = low.lower(program)
+    assert isinstance(unit, res.Ok)
 
-    instructions = codeblocks.value[0].instructions
+    codeblocks = unit.value.codeblocks
+    assert len(codeblocks) == 1
+
+    instructions = codeblocks[0].instructions
     assert len(instructions) == 1
     assert isinstance(instructions[0], ir.SysCall)
 
@@ -47,11 +49,13 @@ def can_lower_mov_program():
         ]
     )
 
-    codeblocks = low.lower(program)
-    assert isinstance(codeblocks, res.Ok)
-    assert len(codeblocks.value) == 1
+    unit = low.lower(program)
+    assert isinstance(unit, res.Ok)
 
-    instructions = codeblocks.value[0].instructions
+    codeblocks = unit.value.codeblocks
+    assert len(codeblocks) == 1
+
+    instructions = codeblocks[0].instructions
     assert len(instructions) == 1
 
     instruction = instructions[0]

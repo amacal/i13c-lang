@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Set
 
 from i13c import ast, diag, ir, res
 
@@ -16,11 +16,10 @@ class UnknownMnemonic(Exception):
         self.name = name
 
 
-def lower(
-    program: ast.Program,
-) -> res.Result[List[ir.CodeBlock], List[diag.Diagnostic]]:
+def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     codeblocks: List[ir.CodeBlock] = []
     diagnostics: List[diag.Diagnostic] = []
+    symbols: Set[bytes] = set()
 
     try:
         for function in program.functions:
@@ -33,7 +32,7 @@ def lower(
     if diagnostics:
         return res.Err(diagnostics)
 
-    return res.Ok(codeblocks)
+    return res.Ok(ir.Unit(symbols=symbols, codeblocks=codeblocks))
 
 
 def lower_function(function: ast.Function) -> ir.CodeBlock:

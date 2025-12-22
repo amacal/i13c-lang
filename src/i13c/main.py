@@ -4,7 +4,7 @@ from typing import List, NoReturn
 
 import click
 
-from i13c import diag, elf, enc, lex, low, par, res, sem, src
+from i13c import diag, elf, enc, ld, lex, low, par, res, sem, src
 
 
 def emit_and_exit(diagnostics: List[diag.Diagnostic]) -> NoReturn:
@@ -74,9 +74,15 @@ def ir_command(path: str) -> None:
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
 
-    if instructions := unwrap(low.lower(program)):
-        for instr in instructions:
-            click.echo(str(instr))
+    unit = unwrap(low.lower(program))
+
+    for idx, codeblock in enumerate(unit.codeblocks):
+        click.echo(f"Codeblock: {codeblock.label.decode('utf-8')}")
+        for instruction in codeblock.instructions:
+            click.echo(f"  {str(instruction)}")
+
+        if idx < len(unit.codeblocks) - 1:
+            click.echo("")
 
 
 @i13c.command("bin")
@@ -92,8 +98,9 @@ def bin_command(path: str) -> None:
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
 
-    codeblocks = unwrap(low.lower(program))
-    binary = enc.encode(codeblocks)
+    unit = unwrap(low.lower(program))
+    linked = unwrap(ld.link(unit))
+    binary = enc.encode(linked)
 
     sys.stdout.buffer.write(binary)
 

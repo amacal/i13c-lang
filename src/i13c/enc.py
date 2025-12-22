@@ -3,10 +3,10 @@ from typing import Callable, Dict, List, Type, TypeVar
 from i13c import ir
 
 
-def encode(codeblocks: List[ir.CodeBlock]) -> bytes:
+def encode(unit: ir.Unit) -> bytes:
     bytecode = bytearray()
 
-    for codeblock in codeblocks:
+    for codeblock in unit.codeblocks:
         for instruction in codeblock.instructions:
             DISPATCH_TABLE[type(instruction)](instruction, bytecode)
 

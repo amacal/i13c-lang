@@ -3,25 +3,23 @@ from typing import List
 from i13c import diag, ir, res
 
 
-def link(
-    blocks: List[ir.CodeBlock],
-) -> res.Result[List[ir.CodeBlock], List[diag.Diagnostic]]:
-    linked: List[ir.CodeBlock] = []
+def link(unit: ir.Unit) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
+    blocks: List[ir.CodeBlock] = []
     diagnostics: List[diag.Diagnostic] = []
 
-    for block in blocks:
+    for block in unit.codeblocks:
         if block.label == b"main":
-            linked.insert(0, block)
+            blocks.insert(0, block)
         else:
-            linked.append(block)
+            blocks.append(block)
 
-    if linked[0].label != b"main":
+    if blocks[0].label != b"main":
         diagnostics.append(report_missing_main_function())
 
     if diagnostics:
         return res.Err(diagnostics)
 
-    return res.Ok(linked)
+    return res.Ok(ir.Unit(symbols=set(), codeblocks=blocks))
 
 
 def report_missing_main_function() -> diag.Diagnostic:

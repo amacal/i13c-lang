@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Set, Union
 
 
 @dataclass
@@ -20,3 +20,9 @@ Instruction = Union[MovRegImm, SysCall]
 class CodeBlock:
     label: bytes
     instructions: List[Instruction]
+
+
+@dataclass
+class Unit:
+    symbols: Set[bytes]
+    codeblocks: List[CodeBlock]
