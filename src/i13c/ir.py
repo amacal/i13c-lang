@@ -18,4 +18,5 @@ Instruction = Union[MovRegImm, SysCall]
 
 @dataclass
 class CodeBlock:
+    label: bytes
     instructions: List[Instruction]

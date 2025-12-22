@@ -6,9 +6,10 @@ from i13c import enc, ir
 def can_encode_instructions_mov_rax_imm():
     codeblocks: List[ir.CodeBlock] = [
         ir.CodeBlock(
+            label=b"main",
             instructions=[
                 ir.MovRegImm(dst=0, imm=0x1234),
-            ]
+            ],
         )
     ]
 
@@ -21,9 +22,10 @@ def can_encode_instructions_mov_rax_imm():
 def can_encode_instructions_mov_r10_imm():
     codeblocks: List[ir.CodeBlock] = [
         ir.CodeBlock(
+            label=b"main",
             instructions=[
                 ir.MovRegImm(dst=10, imm=0x1234),
-            ]
+            ],
         )
     ]
 
@@ -36,9 +38,10 @@ def can_encode_instructions_mov_r10_imm():
 def can_encode_instructions_syscall():
     codeblocks: List[ir.CodeBlock] = [
         ir.CodeBlock(
+            label=b"main",
             instructions=[
                 ir.SysCall(),
-            ]
+            ],
         )
     ]
 
