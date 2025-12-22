@@ -1,3 +1,7 @@
+asm aux() {
+    mov rsp, 0x00;
+}
+
 asm main() {
     mov rax, 0xe7;
     mov rdi, 0x01;

@@ -118,8 +118,9 @@ def elf_command(path: str) -> None:
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
 
-    codeblocks = unwrap(low.lower(program))
-    binary = enc.encode(codeblocks)
+    unit = unwrap(low.lower(program))
+    linked = unwrap(ld.link(unit))
+    binary = enc.encode(linked)
     executable = elf.emit(binary)
 
     with open("a.out", "wb") as f:
