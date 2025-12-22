@@ -10,28 +10,38 @@ IR_REGISTER_MAP = {
 
 
 class UnknownMnemonic(Exception):
-    def __init__(self, name: bytes) -> None:
+    def __init__(self, ref: ast.Reference, name: bytes) -> None:
+        self.ref = ref
         self.name = name
 
 
 def lower(
     program: ast.Program,
-) -> res.Result[List[ir.Instruction], List[diag.Diagnostic]]:
-    instructions: List[ir.Instruction] = []
+) -> res.Result[List[ir.CodeBlock], List[diag.Diagnostic]]:
+    codeblocks: List[ir.CodeBlock] = []
     diagnostics: List[diag.Diagnostic] = []
 
     try:
-        for entry in program.instructions:
-            instructions.append(lower_instruction(entry))
+        for entry in program.functions:
+            codeblocks.append(lower_function(entry))
 
     except UnknownMnemonic as ex:
-        diagnostics.append(report_unknown_instruction(entry.ref, ex.name))
+        diagnostics.append(report_unknown_instruction(ex.ref, ex.name))
 
     # any diagnostic is an error
     if diagnostics:
         return res.Err(diagnostics)
 
-    return res.Ok(instructions)
+    return res.Ok(codeblocks)
+
+
+def lower_function(function: ast.Function) -> ir.CodeBlock:
+    instructions: List[ir.Instruction] = []
+
+    for instruction in function.instructions:
+        instructions.append(lower_instruction(instruction))
+
+    return ir.CodeBlock(instructions=instructions)
 
 
 def lower_instruction(instruction: ast.Instruction) -> ir.Instruction:
@@ -41,7 +51,7 @@ def lower_instruction(instruction: ast.Instruction) -> ir.Instruction:
     elif instruction.mnemonic.name == b"syscall":
         return lower_instruction_syscall(instruction)
 
-    raise UnknownMnemonic(instruction.mnemonic.name)
+    raise UnknownMnemonic(instruction.ref, instruction.mnemonic.name)
 
 
 def lower_instruction_mov(instruction: ast.Instruction) -> ir.Instruction:

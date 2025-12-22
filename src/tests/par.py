@@ -2,7 +2,7 @@ from i13c import lex, par, src, res
 
 
 def can_parse_instruction_without_operands():
-    code = src.open_text("syscall;")
+    code = src.open_text("asm main() { syscall; }")
 
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)
@@ -10,15 +10,19 @@ def can_parse_instruction_without_operands():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.instructions) == 1
-    instruction = program.value.instructions[0]
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert function.name == b"main"
+    assert len(function.instructions) == 1
+    instruction = function.instructions[0]
 
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
 
 
 def can_parse_instruction_with_operands():
-    code = src.open_text("mov rax, rbx;")
+    code = src.open_text("asm main() { mov rax, rbx; }")
 
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)
@@ -26,8 +30,12 @@ def can_parse_instruction_with_operands():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.instructions) == 1
-    instruction = program.value.instructions[0]
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert function.name == b"main"
+    assert len(function.instructions) == 1
+    instruction = function.instructions[0]
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -42,7 +50,7 @@ def can_parse_instruction_with_operands():
 
 
 def can_parse_instruction_with_immediate():
-    code = src.open_text("mov rax, 0x1234;")
+    code = src.open_text("asm main() { mov rax, 0x1234; }")
 
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)
@@ -50,8 +58,12 @@ def can_parse_instruction_with_immediate():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.instructions) == 1
-    instruction = program.value.instructions[0]
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert function.name == b"main"
+    assert len(function.instructions) == 1
+    instruction = function.instructions[0]
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -66,7 +78,7 @@ def can_parse_instruction_with_immediate():
 
 
 def can_parse_multiple_instructions():
-    code = src.open_text("mov rax, rbx; syscall;")
+    code = src.open_text("asm main() { mov rax, rbx; syscall; }")
 
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)
@@ -74,13 +86,17 @@ def can_parse_multiple_instructions():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.instructions) == 2
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
 
-    instruction1 = program.value.instructions[0]
+    assert function.name == b"main"
+    assert len(function.instructions) == 2
+
+    instruction1 = function.instructions[0]
     assert instruction1.mnemonic.name == b"mov"
     assert len(instruction1.operands) == 2
 
-    instruction2 = program.value.instructions[1]
+    instruction2 = function.instructions[1]
     assert instruction2.mnemonic.name == b"syscall"
     assert len(instruction2.operands) == 0
 
@@ -94,11 +110,11 @@ def can_handle_empty_program():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.instructions) == 0
+    assert len(program.value.functions) == 0
 
 
 def can_handle_end_of_tokens():
-    code = src.open_text("mov rax, rbx")
+    code = src.open_text("asm main() { mov rax, rbx")
 
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)
@@ -114,7 +130,7 @@ def can_handle_end_of_tokens():
 
 
 def can_handle_unexpected_token():
-    code = src.open_text("mov rax rbx\nsyscall;")
+    code = src.open_text("asm main() { mov rax rbx\nsyscall; }")
 
     tokens = lex.tokenize(code)
     assert isinstance(tokens, res.Ok)

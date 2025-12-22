@@ -50,9 +50,14 @@ def ast_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code))
     program = unwrap(par.parse(code, tokens))
 
-    for instruction in program.instructions:
-        operands = ", ".join([str(op) for op in instruction.operands])
-        click.echo(f"{str(instruction.mnemonic)} {operands}")
+    for idx, function in enumerate(program.functions):
+        click.echo(f"Function: {function.name.decode('utf-8')}")
+        for instruction in function.instructions:
+            operands = ", ".join([str(op) for op in instruction.operands])
+            click.echo(f"  {str(instruction.mnemonic)} {operands}")
+
+        if idx < len(program.functions) - 1:
+            click.echo("")
 
 
 @i13c.command("ir")
@@ -86,8 +91,8 @@ def bin_command(path: str) -> None:
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
 
-    instructions = unwrap(low.lower(program))
-    binary = enc.encode(instructions)
+    codeblocks = unwrap(low.lower(program))
+    binary = enc.encode(codeblocks)
 
     sys.stdout.buffer.write(binary)
 
@@ -105,8 +110,8 @@ def elf_command(path: str) -> None:
     if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics)
 
-    instructions = unwrap(low.lower(program))
-    binary = enc.encode(instructions)
+    codeblocks = unwrap(low.lower(program))
+    binary = enc.encode(codeblocks)
     executable = elf.emit(binary)
 
     with open("a.out", "wb") as f:

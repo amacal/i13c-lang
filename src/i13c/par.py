@@ -15,6 +15,13 @@ class UnexpectedEndOfTokens(Exception):
         self.offset = offset
 
 
+class UnexpectedKeyword(Exception):
+    def __init__(self, offset: int, expected: List[bytes], found: bytes) -> None:
+        self.offset = offset
+        self.expected = expected
+        self.found = found
+
+
 @dataclass(kw_only=True)
 class ParsingState:
     code: src.SourceCode
@@ -63,12 +70,12 @@ def parse(
     code: src.SourceCode, tokens: List[lex.Token]
 ) -> res.Result[ast.Program, List[diag.Diagnostic]]:
     state = ParsingState(code=code, tokens=tokens, position=0)
-    instructions: List[ast.Instruction] = []
     diagnostics: List[diag.Diagnostic] = []
+    functions: List[ast.Function] = []
 
     try:
         while not state.is_eof():
-            instructions.append(parse_instruction(state))
+            functions.append(parse_function(state))
 
     except UnexpectedEndOfTokens as e:
         diagnostics.append(report_unexpected_end_of_tokens(e.offset))
@@ -76,11 +83,41 @@ def parse(
     except UnexpectedTokenCode as e:
         diagnostics.append(report_unexpected_token(e.offset, e.expected, e.found))
 
+    except UnexpectedKeyword as e:
+        diagnostics.append(report_unexpected_keyword(e.offset, e.expected, e.found))
+
     # any diagnostics stops further processing
     if diagnostics:
         return res.Err(diagnostics)
 
-    return res.Ok(ast.Program(instructions=instructions))
+    return res.Ok(ast.Program(functions=functions))
+
+
+def parse_function(state: ParsingState) -> ast.Function:
+    instructions: List[ast.Instruction] = []
+    keyword = state.expect(lex.TOKEN_KEYWORD)  # "asm" keyword
+
+    if state.extract(keyword) != b"asm":
+        raise UnexpectedKeyword(keyword.offset, [b"asm"], state.extract(keyword))
+
+    # function name is an identifier
+    name = state.expect(lex.TOKEN_IDENT)
+
+    # ignored function parameters for now
+    state.expect(lex.TOKEN_ROUND_OPEN)
+    state.expect(lex.TOKEN_ROUND_CLOSE)
+
+    # expect opening curly brace
+    state.expect(lex.TOKEN_CURLY_OPEN)
+
+    # parse instructions until closing curly brace
+    while not state.is_in(lex.TOKEN_CURLY_CLOSE):
+        instructions.append(parse_instruction(state))
+
+    # expect closed curly brace
+    state.expect(lex.TOKEN_CURLY_CLOSE)
+
+    return ast.Function(name=state.extract(name), instructions=instructions)
 
 
 def parse_instruction(state: ParsingState) -> ast.Instruction:
@@ -139,4 +176,14 @@ def report_unexpected_token(
         offset=offset,
         code="P002",
         message=f"Unexpected token code {found} at offset {offset}, expected one of: {list(expected)}",
+    )
+
+
+def report_unexpected_keyword(
+    offset: int, expected: List[bytes], found: bytes
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        offset=offset,
+        code="P003",
+        message=f"Unexpected keyword '{found.decode()}' at offset {offset}, expected one of: {list(expected)}",
     )

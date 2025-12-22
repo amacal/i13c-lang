@@ -5,42 +5,56 @@ from i13c import ast, ir, low, res
 
 def can_lower_syscall_program():
     program = ast.Program(
-        instructions=[
-            ast.Instruction(
-                ref=ast.Reference(offset=0, length=7),
-                mnemonic=ast.Mnemonic(name=b"syscall"),
-                operands=[],
-            ),
+        functions=[
+            ast.Function(
+                name=b"main",
+                instructions=[
+                    ast.Instruction(
+                        ref=ast.Reference(offset=0, length=7),
+                        mnemonic=ast.Mnemonic(name=b"syscall"),
+                        operands=[],
+                    ),
+                ],
+            )
         ]
     )
 
-    instructions = low.lower(program)
-    assert isinstance(instructions, res.Ok)
-    assert len(instructions.value) == 1
+    codeblocks = low.lower(program)
+    assert isinstance(codeblocks, res.Ok)
+    assert len(codeblocks.value) == 1
 
-    instruction = instructions.value[0]
-    assert isinstance(instruction, ir.SysCall)
+    instructions = codeblocks.value[0].instructions
+    assert len(instructions) == 1
+    assert isinstance(instructions[0], ir.SysCall)
 
 
 def can_lower_mov_program():
     program = ast.Program(
-        instructions=[
-            ast.Instruction(
-                ref=ast.Reference(offset=0, length=3),
-                mnemonic=ast.Mnemonic(name=b"mov"),
-                operands=[
-                    ast.Register(name=b"rax"),
-                    ast.Immediate(value=0x1234),
+        functions=[
+            ast.Function(
+                name=b"main",
+                instructions=[
+                    ast.Instruction(
+                        ref=ast.Reference(offset=0, length=3),
+                        mnemonic=ast.Mnemonic(name=b"mov"),
+                        operands=[
+                            ast.Register(name=b"rax"),
+                            ast.Immediate(value=0x1234),
+                        ],
+                    ),
                 ],
-            ),
+            )
         ]
     )
 
-    instructions = low.lower(program)
-    assert isinstance(instructions, res.Ok)
-    assert len(instructions.value) == 1
+    codeblocks = low.lower(program)
+    assert isinstance(codeblocks, res.Ok)
+    assert len(codeblocks.value) == 1
 
-    instruction = instructions.value[0]
+    instructions = codeblocks.value[0].instructions
+    assert len(instructions) == 1
+
+    instruction = instructions[0]
     assert isinstance(instruction, ir.MovRegImm)
 
     assert instruction.dst == 0
@@ -49,19 +63,24 @@ def can_lower_mov_program():
 
 def can_detect_unknown_mnemonic():
     program = ast.Program(
-        instructions=[
-            ast.Instruction(
-                ref=ast.Reference(offset=0, length=4),
-                mnemonic=ast.Mnemonic(name=b"abcd"),
-                operands=[],
-            ),
+        functions=[
+            ast.Function(
+                name=b"main",
+                instructions=[
+                    ast.Instruction(
+                        ref=ast.Reference(offset=0, length=4),
+                        mnemonic=ast.Mnemonic(name=b"abcd"),
+                        operands=[],
+                    ),
+                ],
+            )
         ]
     )
 
-    instructions = low.lower(program)
-    assert isinstance(instructions, res.Err)
+    codeblocks = low.lower(program)
+    assert isinstance(codeblocks, res.Err)
 
-    diagnostics = instructions.error
+    diagnostics = codeblocks.error
     assert len(diagnostics) == 1
 
     assert diagnostics[0].code == "V001"

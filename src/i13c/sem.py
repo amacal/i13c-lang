@@ -34,10 +34,17 @@ INSTRUCTIONS_TABLE = {
 def validate(program: ast.Program) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for instruction in program.instructions:
-        validate_instruction(diagnostics, instruction)
+    for function in program.functions:
+        validate_function(diagnostics, function)
 
     return diagnostics
+
+
+def validate_function(
+    diagnostics: List[diag.Diagnostic], function: ast.Function
+) -> None:
+    for instruction in function.instructions:
+        validate_instruction(diagnostics, instruction)
 
 
 def validate_instruction(

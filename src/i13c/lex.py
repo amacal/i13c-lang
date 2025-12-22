@@ -27,8 +27,11 @@ TOKEN_CURLY_OPEN = 10
 TOKEN_CURLY_CLOSE = 11
 TOKEN_EOF = 255
 
-AFTER_HEX = CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON
-AFTER_IDENT = CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON
+SEPARATORS = (
+    CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON +
+    CLASS_ROUND_OPEN + CLASS_ROUND_CLOSE +
+    CLASS_CURLY_OPEN + CLASS_CURLY_CLOSE
+)
 
 # fmt: off
 SET_REGS = {
@@ -218,8 +221,8 @@ def read_hex(lexer: Lexer, tokens: List[Token]) -> None:
         raise UnexpectedValue(lexer.offset, CLASS_HEX)
 
     # expect either EOF or valid character after hex
-    if not lexer.is_eof() and not lexer.is_in(AFTER_HEX):
-        raise UnexpectedValue(lexer.offset, AFTER_HEX)
+    if not lexer.is_eof() and not lexer.is_in(SEPARATORS):
+        raise UnexpectedValue(lexer.offset, SEPARATORS)
 
     length = lexer.offset - start_offset
     tokens.append(Token.hex_token(offset=start_offset, length=length))
@@ -234,8 +237,8 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
         lexer.advance(1)  # consume letters and digits
 
     # expect either EOF or valid character after ident
-    if not lexer.is_eof() and not lexer.is_in(AFTER_IDENT):
-        raise UnexpectedValue(lexer.offset, AFTER_IDENT)
+    if not lexer.is_eof() and not lexer.is_in(SEPARATORS):
+        raise UnexpectedValue(lexer.offset, SEPARATORS)
 
     length = lexer.offset - start_offset
     token = Token.ident_token(offset=start_offset, length=length)

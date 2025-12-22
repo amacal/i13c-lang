@@ -2,11 +2,12 @@ from typing import List, Dict, Callable, Type, TypeVar
 from i13c import ir
 
 
-def encode(instructions: List[ir.Instruction]) -> bytes:
+def encode(codeblocks: List[ir.CodeBlock]) -> bytes:
     bytecode = bytearray()
 
-    for instruction in instructions:
-        DISPATCH_TABLE[type(instruction)](instruction, bytecode)
+    for codeblock in codeblocks:
+        for instruction in codeblock.instructions:
+            DISPATCH_TABLE[type(instruction)](instruction, bytecode)
 
     return bytes(bytecode)
 

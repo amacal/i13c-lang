@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 from dataclasses import dataclass
 
 
@@ -14,3 +14,8 @@ class SysCall:
 
 
 Instruction = Union[MovRegImm, SysCall]
+
+
+@dataclass
+class CodeBlock:
+    instructions: List[Instruction]

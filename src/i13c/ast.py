@@ -31,5 +31,11 @@ class Instruction:
 
 
 @dataclass(kw_only=True)
-class Program:
+class Function:
+    name: bytes
     instructions: List[Instruction]
+
+
+@dataclass(kw_only=True)
+class Program:
+    functions: List[Function]
