@@ -1,10 +1,11 @@
-from typing import Protocol
 from dataclasses import dataclass
+from typing import Protocol
 
 
 class SliceIndex(Protocol):
     offset: int
     length: int
+
 
 @dataclass(kw_only=True)
 class SourceCode:

@@ -1,6 +1,7 @@
-from typing import List, Union
 from dataclasses import dataclass
-from i13c import lex, ast, src, res, diag
+from typing import List, Union
+
+from i13c import ast, diag, lex, res, src
 
 
 class UnexpectedTokenCode(Exception):

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
-from i13c import src, res, diag
+
+from i13c import diag, res, src
 
 CLASS_COMMA = b","
 CLASS_SEMICOLON = b";"
@@ -27,13 +28,13 @@ TOKEN_CURLY_OPEN = 10
 TOKEN_CURLY_CLOSE = 11
 TOKEN_EOF = 255
 
+# fmt: off
 SEPARATORS = (
     CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON +
     CLASS_ROUND_OPEN + CLASS_ROUND_CLOSE +
     CLASS_CURLY_OPEN + CLASS_CURLY_CLOSE
 )
 
-# fmt: off
 SET_REGS = {
     b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
     b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",

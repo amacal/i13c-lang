@@ -1,5 +1,6 @@
 from typing import List, Optional
-from i13c import ast, ir, diag, res
+
+from i13c import ast, diag, ir, res
 
 # fmt: off
 IR_REGISTER_MAP = {

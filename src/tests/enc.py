@@ -1,5 +1,6 @@
 from typing import List
-from i13c import ir, enc
+
+from i13c import enc, ir
 
 
 def can_encode_instructions_mov_rax_imm():

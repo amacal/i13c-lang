@@ -10,6 +10,11 @@ update:
 install:
 	@poetry install --only-root
 
+.PHONY: lint
+lint:
+	@poetry run black src/i13c src/tests
+	@poetry run isort src/i13c src/tests
+
 .PHONY: run
 run:
 	@poetry run i13c

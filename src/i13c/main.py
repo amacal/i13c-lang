@@ -1,9 +1,10 @@
 import os
 import sys
+from typing import List, NoReturn
+
 import click
 
-from typing import List, NoReturn
-from i13c import lex, par, src, sem, low, enc, elf, diag, res
+from i13c import diag, elf, enc, lex, low, par, res, sem, src
 
 
 def emit_and_exit(diagnostics: List[diag.Diagnostic]) -> NoReturn:

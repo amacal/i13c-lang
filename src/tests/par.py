@@ -1,4 +1,4 @@
-from i13c import lex, par, src, res
+from i13c import lex, par, res, src
 
 
 def can_parse_instruction_without_operands():

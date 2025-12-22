@@ -1,4 +1,4 @@
-from i13c import lex, par, sem, src, res, ast
+from i13c import ast, lex, par, res, sem, src
 
 
 def can_accept_operands_arity_of_syscall():
@@ -83,7 +83,7 @@ def can_detect_immediate_out_of_range():
                             mnemonic=ast.Mnemonic(name=b"mov"),
                             operands=[
                                 ast.Register(name=b"rax"),
-                                ast.Immediate(value=0x1_ffffffff_ffffffff),
+                                ast.Immediate(value=0x1_FFFFFFFF_FFFFFFFF),
                             ],
                         )
                     ],

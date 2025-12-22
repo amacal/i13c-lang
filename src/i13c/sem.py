@@ -1,5 +1,6 @@
-from typing import List, Tuple, Type, List
 from dataclasses import dataclass
+from typing import List, Tuple, Type
+
 from i13c import ast, diag
 
 

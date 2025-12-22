@@ -1,4 +1,4 @@
-from i13c import lex, src, res
+from i13c import lex, res, src
 
 
 def can_tokenize_few_tokens():
