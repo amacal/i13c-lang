@@ -8,6 +8,8 @@ def can_lower_syscall_program():
         functions=[
             ast.Function(
                 name=b"main",
+                parameters=[],
+                clobbers=[],
                 instructions=[
                     ast.Instruction(
                         ref=ast.Reference(offset=0, length=7),
@@ -36,6 +38,8 @@ def can_lower_mov_program():
         functions=[
             ast.Function(
                 name=b"main",
+                parameters=[],
+                clobbers=[],
                 instructions=[
                     ast.Instruction(
                         ref=ast.Reference(offset=0, length=3),
@@ -72,6 +76,8 @@ def can_detect_unknown_mnemonic():
         functions=[
             ast.Function(
                 name=b"main",
+                parameters=[],
+                clobbers=[],
                 instructions=[
                     ast.Instruction(
                         ref=ast.Reference(offset=0, length=4),
@@ -97,6 +103,8 @@ def can_detected_duplicated_symbols():
         functions=[
             ast.Function(
                 name=b"main",
+                parameters=[],
+                clobbers=[],
                 instructions=[
                     ast.Instruction(
                         ref=ast.Reference(offset=0, length=7),
@@ -107,6 +115,8 @@ def can_detected_duplicated_symbols():
             ),
             ast.Function(
                 name=b"main",
+                parameters=[],
+                clobbers=[],
                 instructions=[
                     ast.Instruction(
                         ref=ast.Reference(offset=8, length=3),

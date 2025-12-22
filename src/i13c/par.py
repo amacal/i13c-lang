@@ -96,7 +96,11 @@ def parse(
 
 def parse_function(state: ParsingState) -> ast.Function:
     instructions: List[ast.Instruction] = []
-    keyword = state.expect(lex.TOKEN_KEYWORD)  # "asm" keyword
+    parameters: List[ast.Parameter] = []
+    clobbers: List[bytes] = []
+
+    # currently only "asm" functions are supported
+    keyword = state.expect(lex.TOKEN_KEYWORD)
 
     if state.extract(keyword) != b"asm":
         raise UnexpectedKeyword(keyword.offset, [b"asm"], state.extract(keyword))
@@ -104,9 +108,19 @@ def parse_function(state: ParsingState) -> ast.Function:
     # function name is an identifier
     name = state.expect(lex.TOKEN_IDENT)
 
-    # ignored function parameters for now
+    # expect opening round bracket
     state.expect(lex.TOKEN_ROUND_OPEN)
+
+    # optional function parameters
+    while not state.is_in(lex.TOKEN_ROUND_CLOSE):
+        parameters = parse_parameters(state)
+
+    # expect closed round bracket
     state.expect(lex.TOKEN_ROUND_CLOSE)
+
+    # optional clobbers
+    while not state.is_in(lex.TOKEN_CURLY_OPEN):
+        clobbers = parse_clobbers(state)
 
     # expect opening curly brace
     state.expect(lex.TOKEN_CURLY_OPEN)
@@ -118,7 +132,61 @@ def parse_function(state: ParsingState) -> ast.Function:
     # expect closed curly brace
     state.expect(lex.TOKEN_CURLY_CLOSE)
 
-    return ast.Function(name=state.extract(name), instructions=instructions)
+    return ast.Function(
+        name=state.extract(name),
+        clobbers=clobbers,
+        parameters=parameters,
+        instructions=instructions,
+    )
+
+
+def parse_parameters(state: ParsingState) -> List[ast.Parameter]:
+    parameters: List[ast.Parameter] = []
+    parameters.append(parse_parameter(state))
+
+    # a comma suggests next parameter
+    while state.accept(lex.TOKEN_COMMA):
+        parameters.append(parse_parameter(state))
+
+    return parameters
+
+
+def parse_parameter(state: ParsingState) -> ast.Parameter:
+    ident = state.expect(lex.TOKEN_IDENT)
+
+    # expect '@' followed by register
+    state.expect(lex.TOKEN_AT)
+    bind = state.expect(lex.TOKEN_REG)
+
+    # expect ':' followed by type
+    state.expect(lex.TOKEN_COLON)
+    type = state.expect(lex.TOKEN_TYPE)
+
+    return ast.Parameter(
+        name=state.extract(ident),
+        type=state.extract(type),
+        bind=state.extract(bind),
+    )
+
+
+def parse_clobbers(state: ParsingState) -> List[bytes]:
+    clobbers: List[bytes] = []
+    keyword = state.expect(lex.TOKEN_KEYWORD)
+
+    # fail if the keyword is not "clobbers"
+    if state.extract(keyword) != b"clobbers":
+        raise UnexpectedKeyword(keyword.offset, [b"clobbers"], state.extract(keyword))
+
+    # at least one register is expected
+    clobber = state.expect(lex.TOKEN_REG)
+    clobbers.append(state.extract(clobber))
+
+    # a comma suggests next clobber
+    while state.accept(lex.TOKEN_COMMA):
+        clobber = state.expect(lex.TOKEN_REG)
+        clobbers.append(state.extract(clobber))
+
+    return clobbers
 
 
 def parse_instruction(state: ParsingState) -> ast.Instruction:

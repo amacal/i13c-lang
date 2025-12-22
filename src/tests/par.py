@@ -101,6 +101,92 @@ def can_parse_multiple_instructions():
     assert len(instruction2.operands) == 0
 
 
+def can_parse_functions_with_single_arg():
+    code = src.open_text("asm exit(code@rdi: u32) { syscall; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert function.name == b"exit"
+    assert len(function.instructions) == 1
+
+    instruction = function.instructions[0]
+    assert instruction.mnemonic.name == b"syscall"
+    assert len(instruction.operands) == 0
+
+    parameters = function.parameters
+    assert len(parameters) == 1
+
+    parameter = parameters[0]
+    assert parameter.name == b"code"
+    assert parameter.type == b"u32"
+    assert parameter.bind == b"rdi"
+
+
+def can_parse_functions_with_multiple_args():
+    code = src.open_text("asm exit(code@rdi: u32, id@rax: u16) { syscall; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert function.name == b"exit"
+    assert len(function.instructions) == 1
+
+    instruction = function.instructions[0]
+    assert instruction.mnemonic.name == b"syscall"
+    assert len(instruction.operands) == 0
+
+    parameters = function.parameters
+    assert len(parameters) == 2
+
+    parameter1 = parameters[0]
+    assert parameter1.name == b"code"
+    assert parameter1.type == b"u32"
+    assert parameter1.bind == b"rdi"
+
+    parameter2 = parameters[1]
+    assert parameter2.name == b"id"
+    assert parameter2.type == b"u16"
+    assert parameter2.bind == b"rax"
+
+
+def can_parse_functions_with_clobbers():
+    code = src.open_text("asm aux() clobbers rax, rbx { mov rax, rbx; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert function.name == b"aux"
+    assert len(function.clobbers) == 2
+
+    assert function.clobbers[0] == b"rax"
+    assert function.clobbers[1] == b"rbx"
+
+    assert len(function.instructions) == 1
+    instruction = function.instructions[0]
+
+    assert instruction.mnemonic.name == b"mov"
+    assert len(instruction.operands) == 2
+
+
 def can_handle_empty_program():
     code = src.open_text("")
 

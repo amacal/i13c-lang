@@ -30,9 +30,18 @@ class Instruction:
     operands: List[Union[Register, Immediate]]
 
 
+@dataclass
+class Parameter:
+    name: bytes
+    type: bytes
+    bind: bytes
+
+
 @dataclass(kw_only=True)
 class Function:
     name: bytes
+    clobbers: List[bytes]
+    parameters: List[Parameter]
     instructions: List[Instruction]
 
 

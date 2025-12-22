@@ -7,6 +7,8 @@ def can_accept_operands_arity_of_syscall():
             functions=[
                 ast.Function(
                     name=b"main",
+                    parameters=[],
+                    clobbers=[],
                     instructions=[
                         ast.Instruction(
                             ref=ast.Reference(offset=0, length=7),
@@ -28,6 +30,8 @@ def can_accept_operands_arity_of_mov():
             functions=[
                 ast.Function(
                     name=b"main",
+                    parameters=[],
+                    clobbers=[],
                     instructions=[
                         ast.Instruction(
                             ref=ast.Reference(offset=0, length=3),
@@ -52,6 +56,8 @@ def can_detect_invalid_instruction():
             functions=[
                 ast.Function(
                     name=b"main",
+                    parameters=[],
+                    clobbers=[],
                     instructions=[
                         ast.Instruction(
                             ref=ast.Reference(offset=0, length=3),
@@ -77,6 +83,8 @@ def can_detect_immediate_out_of_range():
             functions=[
                 ast.Function(
                     name=b"main",
+                    parameters=[],
+                    clobbers=[],
                     instructions=[
                         ast.Instruction(
                             ref=ast.Reference(offset=0, length=3),
@@ -105,6 +113,8 @@ def can_detect_invalid_operand_types_of_mov():
             functions=[
                 ast.Function(
                     name=b"main",
+                    parameters=[],
+                    clobbers=[],
                     instructions=[
                         ast.Instruction(
                             ref=ast.Reference(offset=0, length=3),

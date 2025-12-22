@@ -153,22 +153,24 @@ def can_tokenize_mnemonics():
 
 
 def can_tokenize_keywords():
-    text = "asm mov"
+    text = "asm mov clobbers"
     code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
 
     assert isinstance(tokens, res.Ok)
-    assert len(tokens.value) == 3
+    assert len(tokens.value) == 4
 
     assert tokens.value[0] == lex.Token(code=lex.TOKEN_KEYWORD, offset=0, length=3)
     assert tokens.value[1] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=4, length=3)
-    assert tokens.value[2] == lex.Token(code=lex.TOKEN_EOF, offset=7, length=0)
+    assert tokens.value[2] == lex.Token(code=lex.TOKEN_KEYWORD, offset=8, length=8)
+    assert tokens.value[3] == lex.Token(code=lex.TOKEN_EOF, offset=16, length=0)
 
     assert code.extract(tokens.value[0]) == b"asm"
     assert code.extract(tokens.value[1]) == b"mov"
-    assert code.extract(tokens.value[2]) == b""
+    assert code.extract(tokens.value[2]) == b"clobbers"
+    assert code.extract(tokens.value[3]) == b""
 
 
 def can_tokenize_types():
