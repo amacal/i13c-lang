@@ -1,7 +1,19 @@
 from typing import Callable, Dict, List, Union
 
 from i13c import ast, diag, sym
-from i13c.sem.rules import e3000, e3001, e3002, e3003, e3004, e3005, e3006, e3007, e3008
+from i13c.sem.rules import (
+    e3000,
+    e3001,
+    e3002,
+    e3003,
+    e3004,
+    e3005,
+    e3006,
+    e3007,
+    e3008,
+    e3009,
+    e3010,
+)
 
 RULES_1ST_PASS: List[Callable[[ast.Program], List[diag.Diagnostic]]] = [
     e3000.validate_assembly_mnemonic,
@@ -18,6 +30,8 @@ RULES_2ND_PASS: List[
     Callable[[ast.Program, sym.SymbolTable], List[diag.Diagnostic]]
 ] = [
     e3008.validate_called_symbol_exists,
+    e3009.validate_called_symbol_is_asm,
+    e3010.validate_called_symbol_termination,
 ]
 
 
@@ -67,4 +81,14 @@ def into_symbol_target(
             )
         )
 
-    return sym.SymbolFunction(parameters=parameters)
+    kind = (
+        sym.FUNCTION_KIND_ASM
+        if isinstance(function, ast.AsmFunction)
+        else sym.FUNCTION_KIND_REG
+    )
+
+    return sym.SymbolFunction(
+        kind=kind,
+        terminal=function.terminal,
+        parameters=parameters,
+    )

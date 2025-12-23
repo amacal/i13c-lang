@@ -20,6 +20,8 @@ ERROR_3005 = "E3005"  # Duplicated clobber registers
 ERROR_3006 = "E3006"  # Duplicated function names
 ERROR_3007 = "E3007"  # Integer literal out of range
 ERROR_3008 = "E3008"  # Called symbol does not exist
+ERROR_3009 = "E3009"  # Called symbol is not an asm function
+ERROR_3010 = "E3010"  # Callee is non-terminal
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
 
@@ -200,4 +202,24 @@ def report_e3008_called_symbol_exists(
         ref=ref,
         code=ERROR_3008,
         message=f"Called symbol does not exist: {str(name)}",
+    )
+
+
+def report_e3009_called_symbol_is_asm(
+    ref: src.SpanLike, name: bytes
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_3009,
+        message=f"Called symbol is not an asm function: {str(name)}",
+    )
+
+
+def report_e3010_callee_is_non_terminal(
+    ref: src.SpanLike, name: bytes
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_3010,
+        message=f"Callee function '{str(name)}' is terminal but called from a non-terminal function",
     )

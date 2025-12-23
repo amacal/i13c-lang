@@ -3,6 +3,9 @@ from typing import Dict, List
 
 from i13c import src
 
+FUNCTION_KIND_ASM = 1
+FUNCTION_KIND_REG = 2
+
 
 @dataclass(kw_only=True)
 class SigType:
@@ -17,6 +20,8 @@ class SigParameter:
 
 @dataclass(kw_only=True)
 class SymbolFunction:
+    kind: int
+    terminal: bool
     parameters: List[SigParameter]
 
 
