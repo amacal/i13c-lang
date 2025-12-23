@@ -55,7 +55,7 @@ SET_MNEMONICS = {
 }
 
 SET_KEYWORDS = {
-    b"asm", b"clobbers", b"noreturn",
+    b"asm", b"clobbers", b"noreturn", b"fn",
 }
 # fmt: on
 
