@@ -1,4 +1,4 @@
-from i13c import lex, res, src
+from i13c import err, lex, res, src
 
 
 def can_tokenize_few_tokens():
@@ -227,8 +227,9 @@ def can_detect_unrecognized_token():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.offset == 0
-    assert diagnostic.code == "L001"
+    assert diagnostic.ref.offset == 0
+    assert diagnostic.ref.length == 1
+    assert diagnostic.code == err.ERROR_1000
 
 
 def can_detect_hex_with_invalid_characters():
@@ -241,8 +242,9 @@ def can_detect_hex_with_invalid_characters():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.offset == 3
-    assert diagnostic.code == "L003"
+    assert diagnostic.ref.offset == 3
+    assert diagnostic.ref.length == 1
+    assert diagnostic.code == err.ERROR_1002
 
 
 def can_detect_too_short_hex():
@@ -256,8 +258,9 @@ def can_detect_too_short_hex():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.offset == 2
-    assert diagnostic.code == "L003"
+    assert diagnostic.ref.offset == 2
+    assert diagnostic.ref.length == 1
+    assert diagnostic.code == err.ERROR_1002
 
 
 def can_detect_incomplete_hex():
@@ -270,8 +273,9 @@ def can_detect_incomplete_hex():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.offset == 1
-    assert diagnostic.code == "L002"
+    assert diagnostic.ref.offset == 1
+    assert diagnostic.ref.length == 1
+    assert diagnostic.code == err.ERROR_1001
 
 
 def can_detect_ident_followed_by_invalid_character():
@@ -284,5 +288,6 @@ def can_detect_ident_followed_by_invalid_character():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.offset == 5
-    assert diagnostic.code == "L003"
+    assert diagnostic.ref.offset == 5
+    assert diagnostic.ref.length == 1
+    assert diagnostic.code == err.ERROR_1002

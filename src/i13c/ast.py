@@ -1,11 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Union
 
-
-@dataclass(kw_only=True)
-class Span:
-    offset: int
-    length: int
+from i13c import src
 
 
 @dataclass
@@ -30,7 +26,7 @@ class Mnemonic:
 
 @dataclass(kw_only=True)
 class Instruction:
-    ref: Span
+    ref: src.Span
     mnemonic: Mnemonic
     operands: List[Union[Register, Immediate]]
 
@@ -44,7 +40,7 @@ class Parameter:
 
 @dataclass(kw_only=True)
 class Function:
-    ref: Span
+    ref: src.Span
     name: bytes
     terminal: bool
     clobbers: List[Register]

@@ -1,29 +1,32 @@
 from dataclasses import dataclass
-from typing import List, Set, Tuple, Type
+from typing import List, Set, Tuple, Type, Union
 
-from i13c import ast, diag
+from i13c import ast, diag, err, src
 
 
 class UnknownInstruction(Exception):
-    def __init__(self, ref: ast.Span) -> None:
+    def __init__(self, ref: src.Span) -> None:
         self.ref = ref
 
 
 class InvalidOperandTypes(Exception):
-    def __init__(self, ref: ast.Span, found: List[str]) -> None:
+    def __init__(self, ref: src.Span, found: List[str]) -> None:
         self.ref = ref
         self.found = found
 
 
 class ImmediateOutOfRange(Exception):
-    def __init__(self, ref: ast.Span, value: int) -> None:
+    def __init__(self, ref: src.Span, value: int) -> None:
         self.ref = ref
         self.value = value
 
 
+AllowedVariants = Union[Type[ast.Register], Type[ast.Immediate]]
+
+
 @dataclass(kw_only=True)
 class InstructionSignature:
-    variants: List[Tuple[Type, ...]]
+    variants: List[Tuple[AllowedVariants, ...]]
 
 
 INSTRUCTIONS_TABLE = {
@@ -34,9 +37,17 @@ INSTRUCTIONS_TABLE = {
 
 def validate(program: ast.Program) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
+    function_names: Set[bytes] = set()
 
     for function in program.functions:
-        validate_function(diagnostics, function)
+        if function.name not in function_names:
+            function_names.add(function.name)
+            validate_function(diagnostics, function)
+
+        else:
+            diagnostics.append(
+                err.report_e3006_duplicated_function_names(function.ref, function.name)
+            )
 
     return diagnostics
 
@@ -61,14 +72,16 @@ def validate_parameters(
     for parameter in function.parameters:
         if parameter.name in names:
             diagnostics.append(
-                report_duplicated_parameter_names(function.ref, parameter.name)
+                err.report_e3004_duplicated_parameter_names(
+                    function.ref, parameter.name
+                )
             )
         else:
             names.add(parameter.name)
 
         if parameter.bind.name in bindings:
             diagnostics.append(
-                report_duplicated_bindings(function.ref, parameter.bind.name)
+                err.report_e3003_duplicated_bindings(function.ref, parameter.bind.name)
             )
         else:
             bindings.add(parameter.bind.name)
@@ -81,7 +94,9 @@ def validate_clobbers(
 
     for clobber in function.clobbers:
         if clobber.name in seen:
-            diagnostics.append(report_duplicated_clobbers(function.ref, clobber.name))
+            diagnostics.append(
+                err.report_e3005_duplicated_clobbers(function.ref, clobber.name)
+            )
         else:
             seen.add(clobber.name)
 
@@ -94,7 +109,7 @@ def validate_instruction(
 
     # missing instruction mnemonic
     if signature is None:
-        diagnostics.append(report_unknown_instruction(instruction.ref))
+        diagnostics.append(err.report_e3000_unknown_instruction(instruction.ref))
         return
 
     # early acceptance for instructions without operands
@@ -117,7 +132,7 @@ def validate_instruction(
                 if isinstance(operand, ast.Immediate):
                     if not (0 <= operand.value <= 0xFFFFFFFFFFFFFFFF):
                         diagnostics.append(
-                            report_immediate_out_of_range(
+                            err.report_e3001_immediate_out_of_range(
                                 instruction.ref, operand.value
                             )
                         )
@@ -127,56 +142,8 @@ def validate_instruction(
 
     if not matched:
         diagnostics.append(
-            report_invalid_operand_types(
+            err.report_e3002_invalid_operand_types(
                 instruction.ref,
                 [type(operand).__name__ for operand in instruction.operands],
             )
         )
-
-
-def report_unknown_instruction(ref: ast.Span) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=ref.offset,
-        code="V001",
-        message=f"Unknown instruction mnemonic at offset {ref.offset}",
-    )
-
-
-def report_immediate_out_of_range(ref: ast.Span, value: int) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=ref.offset,
-        code="V002",
-        message=f"Immediate value {value} out of range at offset {ref.offset}",
-    )
-
-
-def report_invalid_operand_types(ref: ast.Span, found: List[str]) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=ref.offset,
-        code="V003",
-        message=f"Invalid operand types ({', '.join(found)}) at offset {ref.offset}",
-    )
-
-
-def report_duplicated_bindings(ref: ast.Span, found: bytes) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=ref.offset,
-        code="V004",
-        message=f"Duplicated parameter bindings for ({found.decode('utf-8')}) at offset {ref.offset}",
-    )
-
-
-def report_duplicated_parameter_names(ref: ast.Span, found: bytes) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=ref.offset,
-        code="V005",
-        message=f"Duplicated parameter names for ({found.decode('utf-8')}) at offset {ref.offset}",
-    )
-
-
-def report_duplicated_clobbers(ref: ast.Span, found: bytes) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=ref.offset,
-        code="V006",
-        message=f"Duplicated clobber registers for ({found.decode('utf-8')}) at offset {ref.offset}",
-    )

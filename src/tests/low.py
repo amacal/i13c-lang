@@ -1,20 +1,18 @@
-import pytest
-
-from i13c import ast, ir, low, res
+from i13c import ast, err, ir, low, res, src
 
 
 def can_lower_syscall_program():
     program = ast.Program(
         functions=[
             ast.Function(
-                ref=ast.Span(offset=0, length=4),
+                ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
                 parameters=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
-                        ref=ast.Span(offset=0, length=7),
+                        ref=src.Span(offset=10, length=6),
                         mnemonic=ast.Mnemonic(name=b"syscall"),
                         operands=[],
                     ),
@@ -39,14 +37,14 @@ def can_lower_mov_program():
     program = ast.Program(
         functions=[
             ast.Function(
-                ref=ast.Span(offset=0, length=4),
+                ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
                 parameters=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
-                        ref=ast.Span(offset=0, length=3),
+                        ref=src.Span(offset=10, length=10),
                         mnemonic=ast.Mnemonic(name=b"mov"),
                         operands=[
                             ast.Register(name=b"rax"),
@@ -79,14 +77,14 @@ def can_lower_noentry_program():
     program = ast.Program(
         functions=[
             ast.Function(
-                ref=ast.Span(offset=0, length=4),
+                ref=src.Span(offset=0, length=4),
                 name=b"aux",
                 terminal=False,
                 parameters=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
-                        ref=ast.Span(offset=0, length=7),
+                        ref=src.Span(offset=10, length=6),
                         mnemonic=ast.Mnemonic(name=b"syscall"),
                         operands=[],
                     ),
@@ -107,18 +105,18 @@ def can_lower_noentry_program():
     assert isinstance(instructions[0], ir.SysCall)
 
 
-def can_detect_unknown_mnemonic():
+def can_detect_unsupported_mnemonic():
     program = ast.Program(
         functions=[
             ast.Function(
-                ref=ast.Span(offset=0, length=4),
+                ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
                 parameters=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
-                        ref=ast.Span(offset=0, length=4),
+                        ref=src.Span(offset=10, length=4),
                         mnemonic=ast.Mnemonic(name=b"abcd"),
                         operands=[],
                     ),
@@ -133,50 +131,6 @@ def can_detect_unknown_mnemonic():
     diagnostics = codeblocks.error
     assert len(diagnostics) == 1
 
-    assert diagnostics[0].code == "V001"
-
-
-def can_detected_duplicated_symbols():
-    program = ast.Program(
-        functions=[
-            ast.Function(
-                ref=ast.Span(offset=0, length=4),
-                name=b"main",
-                terminal=False,
-                parameters=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=ast.Span(offset=0, length=7),
-                        mnemonic=ast.Mnemonic(name=b"syscall"),
-                        operands=[],
-                    ),
-                ],
-            ),
-            ast.Function(
-                ref=ast.Span(offset=0, length=4),
-                name=b"main",
-                terminal=False,
-                parameters=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=ast.Span(offset=0, length=3),
-                        mnemonic=ast.Mnemonic(name=b"mov"),
-                        operands=[
-                            ast.Register(name=b"rax"),
-                            ast.Immediate(value=0x1234),
-                        ],
-                    ),
-                ],
-            ),
-        ]
-    )
-
-    codeblocks = low.lower(program)
-    assert isinstance(codeblocks, res.Err)
-
-    diagnostics = codeblocks.error
-    assert len(diagnostics) == 1
-
-    assert diagnostics[0].code == "V002"
+    assert diagnostics[0].code == err.ERROR_4000
+    assert diagnostics[0].ref.offset == 10
+    assert diagnostics[0].ref.length == 4

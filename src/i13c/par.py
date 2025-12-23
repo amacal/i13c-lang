@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import List, Optional, Set, Tuple, Union
 
-from i13c import ast, diag, lex, res, src
+from i13c import ast, diag, err, lex, res, src
 
 
 class UnexpectedTokenCode(Exception):
-    def __init__(self, offset: int, expected: List[int], found: int) -> None:
-        self.offset = offset
+    def __init__(self, token: lex.Token, expected: List[int], found: int) -> None:
+        self.token = token
         self.expected = expected
         self.found = found
 
@@ -18,16 +18,16 @@ class UnexpectedEndOfTokens(Exception):
 
 class UnexpectedKeyword(Exception):
     def __init__(
-        self, offset: int, expected: Union[List[bytes], Set[bytes]], found: bytes
+        self, token: lex.Token, expected: Union[List[bytes], Set[bytes]], found: bytes
     ) -> None:
-        self.offset = offset
+        self.token = token
         self.expected = expected
         self.found = found
 
 
 class FlagAlreadySpecified(Exception):
-    def __init__(self, offset: int, flag: bytes) -> None:
-        self.offset = offset
+    def __init__(self, token: lex.Token, flag: bytes) -> None:
+        self.token = token
         self.flag = flag
 
 
@@ -43,10 +43,10 @@ class ParsingState:
     def is_in(self, *codes: int) -> bool:
         return self.tokens[self.position].code in codes
 
-    def span(self, token: lex.Token) -> ast.Span:
-        return ast.Span(
+    def span(self, token: lex.Token) -> src.Span:
+        return src.Span(
             offset=token.offset,
-            length=self.tokens[self.position].length - token.offset,
+            length=self.tokens[self.position].offset - token.offset,
         )
 
     def accept(self, *codes: int) -> bool:
@@ -63,7 +63,7 @@ class ParsingState:
 
         if self.tokens[self.position].code not in codes:
             raise UnexpectedTokenCode(
-                self.tokens[self.position].offset,
+                self.tokens[self.position],
                 list(codes),
                 self.tokens[self.position].code,
             )
@@ -93,16 +93,20 @@ def parse(
             functions.append(parse_function(state))
 
     except UnexpectedEndOfTokens as e:
-        diagnostics.append(report_unexpected_end_of_tokens(e.offset))
+        diagnostics.append(err.report_e2000_unexpected_end_of_tokens(e.offset))
 
     except UnexpectedTokenCode as e:
-        diagnostics.append(report_unexpected_token(e.offset, e.expected, e.found))
+        diagnostics.append(
+            err.report_e2001_unexpected_token(e.token, e.expected, e.found)
+        )
 
     except UnexpectedKeyword as e:
-        diagnostics.append(report_unexpected_keyword(e.offset, e.expected, e.found))
+        diagnostics.append(
+            err.report_e2002_unexpected_keyword(e.token, e.expected, e.found)
+        )
 
     except FlagAlreadySpecified as e:
-        diagnostics.append(report_flag_already_specified(e.offset, e.flag))
+        diagnostics.append(err.report_e2003_flag_already_specified(e.token, e.flag))
 
     # any diagnostics stops further processing
     if diagnostics:
@@ -121,7 +125,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     keyword = state.expect(lex.TOKEN_KEYWORD)
 
     if state.extract(keyword) != b"asm":
-        raise UnexpectedKeyword(keyword.offset, [b"asm"], state.extract(keyword))
+        raise UnexpectedKeyword(keyword, [b"asm"], state.extract(keyword))
 
     # function name is an identifier
     name = state.expect(lex.TOKEN_IDENT)
@@ -203,7 +207,7 @@ def parse_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]
 
         # fail if the keyword is not "clobbers" or "noreturn"
         if state.extract(keyword) not in expected:
-            raise UnexpectedKeyword(keyword.offset, expected, state.extract(keyword))
+            raise UnexpectedKeyword(keyword, expected, state.extract(keyword))
 
         # if "clobbers", parse the clobber list
         if state.extract(keyword) == b"clobbers":
@@ -214,10 +218,10 @@ def parse_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]
             terminal.append(True)
 
     if keyword and len(clobbers) > 1:
-        raise FlagAlreadySpecified(keyword.offset, b"clobbers")
+        raise FlagAlreadySpecified(keyword, b"clobbers")
 
     if keyword and len(terminal) > 1:
-        raise FlagAlreadySpecified(keyword.offset, b"noreturn")
+        raise FlagAlreadySpecified(keyword, b"noreturn")
 
     return clobbers[0] if clobbers else [], bool(terminal)
 
@@ -276,39 +280,3 @@ def parse_operand(state: ParsingState) -> Union[ast.Register, ast.Immediate]:
     # immediate has to provide its decimal value
     else:
         return ast.Immediate(value=int(state.extract(token), 16))
-
-
-def report_unexpected_end_of_tokens(offset: int) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=offset,
-        code="P001",
-        message=f"Unexpected end of tokens at offset {offset}",
-    )
-
-
-def report_unexpected_token(
-    offset: int, expected: List[int], found: int
-) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=offset,
-        code="P002",
-        message=f"Unexpected token code {found} at offset {offset}, expected one of: {list(expected)}",
-    )
-
-
-def report_unexpected_keyword(
-    offset: int, expected: Union[List[bytes], Set[bytes]], found: bytes
-) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=offset,
-        code="P003",
-        message=f"Unexpected keyword '{found.decode()}' at offset {offset}, expected one of: {list(expected)}",
-    )
-
-
-def report_flag_already_specified(offset: int, flag: bytes) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=offset,
-        code="P004",
-        message=f"Function flag '{flag.decode()}' already specified at offset {offset}",
-    )

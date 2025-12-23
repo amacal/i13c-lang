@@ -1,4 +1,4 @@
-from i13c import ir, ld, res
+from i13c import err, ir, ld, res
 
 
 def can_move_entry_function_to_front():
@@ -61,4 +61,6 @@ def can_detect_non_terminal_main():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == "X002"
+    assert diagnostic.code == err.ERROR_5001
+    assert diagnostic.ref.offset == 0
+    assert diagnostic.ref.length == 0

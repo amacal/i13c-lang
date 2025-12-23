@@ -10,7 +10,7 @@ from i13c import diag, elf, enc, ld, lex, low, par, res, sem, src
 def emit_and_exit(diagnostics: List[diag.Diagnostic]) -> NoReturn:
     for diagnostic in diagnostics:
         click.echo(
-            f"Error {diagnostic.code} at offset {diagnostic.offset}: {diagnostic.message}"
+            f"Error {diagnostic.code} at offset {diagnostic.ref.offset}: {diagnostic.message}"
         )
 
     sys.exit(1)
@@ -84,7 +84,9 @@ def ir_command(path: str) -> None:
     unit = unwrap(low.lower(program))
 
     for idx, codeblock in enumerate(unit.codeblocks):
-        click.echo(f"Codeblock: {codeblock.label.decode('utf-8')}")
+        click.echo(
+            f"Codeblock: {codeblock.label.decode('utf-8') if codeblock.label else '<anonymous>'}"
+        )
         for instruction in codeblock.instructions:
             click.echo(f"  {str(instruction)}")
 

@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Type, TypeVar
+from typing import Dict, Protocol, Type
 
 from i13c import ir
 
@@ -26,10 +26,11 @@ def encode_syscall(instruction: ir.SysCall, bytecode: bytearray) -> None:
     bytecode.extend([0x0F, 0x05])
 
 
-Encoded = TypeVar("Encoded", bound=ir.Instruction)
-Encoder = Callable[[Encoded, bytearray], None]
+class Encoder(Protocol):
+    def __call__(self, instruction: ir.Instruction, out: bytearray) -> None: ...
+
 
 DISPATCH_TABLE: Dict[Type[ir.Instruction], Encoder] = {
     ir.MovRegImm: encode_mov_reg_imm,
     ir.SysCall: encode_syscall,
-}
+}  # pyright: ignore[reportAssignmentType]

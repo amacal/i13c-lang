@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from i13c import diag, res, src
+from i13c import diag, err, res, src
 
 CLASS_AT = b"@"
 CLASS_COMMA = b","
@@ -210,14 +210,14 @@ def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnost
 
             # unrecognized token
             elif not lexer.is_eof():
-                diagnostics.append(report_unrecognized_token(lexer.offset))
+                diagnostics.append(err.report_e1000_unrecognized_token(lexer.offset))
                 break
 
     except UnexpectedEndOfFile as e:
-        diagnostics.append(report_unexpected_end_of_file(e.offset))
+        diagnostics.append(err.report_e1001_unexpected_end_of_file(e.offset))
 
     except UnexpectedValue as e:
-        diagnostics.append(report_unexpected_value(e.offset, e.expected))
+        diagnostics.append(err.report_e1002_unexpected_value(e.offset, e.expected))
 
     # any diagnostics stops further processing
     if diagnostics:
@@ -329,27 +329,3 @@ def emit_colon(lexer: Lexer, tokens: List[Token]) -> None:
 def emit_at(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.at_token(offset=lexer.offset))
     lexer.advance(1)  # consume '@'
-
-
-def report_unrecognized_token(offset: int) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=offset,
-        code="L001",
-        message="Unrecognized token",
-    )
-
-
-def report_unexpected_end_of_file(offset: int) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=offset,
-        code="L002",
-        message="Unexpected end of file",
-    )
-
-
-def report_unexpected_value(offset: int, expected: bytes) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        offset=offset,
-        code="L003",
-        message=f"Unexpected value at offset {offset}, expected one of: {list(expected)}",
-    )

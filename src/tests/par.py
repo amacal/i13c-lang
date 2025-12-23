@@ -1,4 +1,4 @@
-from i13c import lex, par, res, src
+from i13c import err, lex, par, res, src
 
 
 def can_parse_instruction_without_operands():
@@ -270,7 +270,9 @@ def can_handle_end_of_tokens():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == "P001"
+    assert diagnostic.code == err.ERROR_2000
+    assert diagnostic.ref.offset == len(code.data)
+    assert diagnostic.ref.length == 0
 
 
 def can_handle_unexpected_token():
@@ -286,7 +288,9 @@ def can_handle_unexpected_token():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == "P002"
+    assert diagnostic.code == err.ERROR_2001
+    assert diagnostic.ref.offset == 21  # offset of "rbx"
+    assert diagnostic.ref.length == 3  # length of "rbx"
 
 
 def can_detect_unknown_function_keyword():
@@ -302,7 +306,9 @@ def can_detect_unknown_function_keyword():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == "P003"
+    assert diagnostic.code == err.ERROR_2002
+    assert diagnostic.ref.offset == 0  # offset of "noreturn"
+    assert diagnostic.ref.length == 8  # length of "noreturn"
 
 
 def can_detect_duplicated_flags_noreturn():
@@ -318,7 +324,9 @@ def can_detect_duplicated_flags_noreturn():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == "P004"
+    assert diagnostic.code == err.ERROR_2003
+    assert diagnostic.ref.offset == 20  # offset of 2nd "noreturn"
+    assert diagnostic.ref.length == 8  # length of 2nd "noreturn
 
 
 def can_detect_duplicated_flags_clobbers():
@@ -334,4 +342,6 @@ def can_detect_duplicated_flags_clobbers():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == "P004"
+    assert diagnostic.code == err.ERROR_2003
+    assert diagnostic.ref.offset == 23  # offset of 2nd "clobbers"
+    assert diagnostic.ref.length == 8  # length of 2nd "clobbers"

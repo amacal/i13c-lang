@@ -2,7 +2,13 @@ from dataclasses import dataclass
 from typing import Protocol
 
 
-class SliceIndex(Protocol):
+@dataclass
+class Span:
+    offset: int
+    length: int
+
+
+class SpanLike(Protocol):
     offset: int
     length: int
 
@@ -17,8 +23,8 @@ class SourceCode:
     def at(self, offset: int) -> int:
         return self.data[offset]
 
-    def extract(self, slice: SliceIndex) -> bytes:
-        return self.data[slice.offset : slice.offset + slice.length]
+    def extract(self, span: SpanLike) -> bytes:
+        return self.data[span.offset : span.offset + span.length]
 
 
 def open_text(data: str) -> SourceCode:

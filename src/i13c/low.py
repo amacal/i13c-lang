@@ -1,6 +1,6 @@
-from typing import List, Optional, Set
+from typing import List, Optional
 
-from i13c import ast, diag, ir, res
+from i13c import ast, diag, err, ir, res, src
 
 # fmt: off
 IR_REGISTER_MAP = {
@@ -10,8 +10,8 @@ IR_REGISTER_MAP = {
 # fmt: on
 
 
-class UnknownMnemonic(Exception):
-    def __init__(self, ref: ast.Span, name: bytes) -> None:
+class UnsupportedMnemonic(Exception):
+    def __init__(self, ref: src.Span, name: bytes) -> None:
         self.ref = ref
         self.name = name
 
@@ -19,15 +19,14 @@ class UnknownMnemonic(Exception):
 def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     codeblocks: List[ir.CodeBlock] = []
     diagnostics: List[diag.Diagnostic] = []
-    symbols: Set[bytes] = set()
     entry: Optional[int] = None
 
     try:
         for function in program.functions:
             codeblocks.append(lower_function(function))
 
-    except UnknownMnemonic as ex:
-        diagnostics.append(report_unknown_instruction(ex.ref, ex.name))
+    except UnsupportedMnemonic as e:
+        diagnostics.append(err.report_e4000_unsupported_mnemonic(e.ref, e.name))
 
     # check for duplicated symbols
     for idx, codeblock in enumerate(codeblocks):
@@ -36,11 +35,6 @@ def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
             # find entry point
             if codeblock.label == b"main":
                 entry = idx
-
-            if codeblock.label not in symbols:
-                symbols.add(codeblock.label)
-            else:
-                diagnostics.append(report_duplicate_symbol(codeblock.label))
 
     # any diagnostic is an error
     if diagnostics:
@@ -69,7 +63,7 @@ def lower_instruction(instruction: ast.Instruction) -> ir.Instruction:
     elif instruction.mnemonic.name == b"syscall":
         return lower_instruction_syscall(instruction)
 
-    raise UnknownMnemonic(instruction.ref, instruction.mnemonic.name)
+    raise UnsupportedMnemonic(instruction.ref, instruction.mnemonic.name)
 
 
 def lower_instruction_mov(instruction: ast.Instruction) -> ir.Instruction:
@@ -87,19 +81,3 @@ def lower_instruction_mov(instruction: ast.Instruction) -> ir.Instruction:
 
 def lower_instruction_syscall(instruction: ast.Instruction) -> ir.Instruction:
     return ir.SysCall()
-
-
-def report_unknown_instruction(ref: ast.Span, name: bytes) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        code="V001",
-        offset=ref.offset,
-        message=f"Unknown instruction mnemonic: {name.decode()}",
-    )
-
-
-def report_duplicate_symbol(name: bytes) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        code="V002",
-        offset=0,
-        message=f"Duplicate symbol definition: {name.decode()}",
-    )
