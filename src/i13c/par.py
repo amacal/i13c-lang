@@ -198,8 +198,8 @@ def parse_parameter(state: ParsingState) -> ast.Parameter:
 
 def parse_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
     keyword: Optional[lex.Token] = None
-    terminal: List[bool] = []
-    clobbers: List[List[ast.Register]] = []
+    clobbers: Optional[List[ast.Register]] = None
+    terminal = False
 
     while not state.is_in(lex.TOKEN_CURLY_OPEN):
         expected = {b"clobbers", b"noreturn"}
@@ -211,19 +211,19 @@ def parse_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]
 
         # if "clobbers", parse the clobber list
         if state.extract(keyword) == b"clobbers":
-            clobbers.append(parse_clobbers(state))
+            if clobbers is not None:
+                raise FlagAlreadySpecified(keyword, b"clobbers")
+            else:
+                clobbers = parse_clobbers(state)
 
         # if "noreturn", set terminal flag
         elif state.extract(keyword) == b"noreturn":
-            terminal.append(True)
+            if terminal:
+                raise FlagAlreadySpecified(keyword, b"noreturn")
+            else:
+                terminal = True
 
-    if keyword and len(clobbers) > 1:
-        raise FlagAlreadySpecified(keyword, b"clobbers")
-
-    if keyword and len(terminal) > 1:
-        raise FlagAlreadySpecified(keyword, b"noreturn")
-
-    return clobbers[0] if clobbers else [], bool(terminal)
+    return clobbers or [], terminal
 
 
 def parse_clobbers(state: ParsingState) -> List[ast.Register]:

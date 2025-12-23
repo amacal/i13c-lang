@@ -345,3 +345,41 @@ def can_detect_duplicated_flags_clobbers():
     assert diagnostic.code == err.ERROR_2003
     assert diagnostic.ref.offset == 23  # offset of 2nd "clobbers"
     assert diagnostic.ref.length == 8  # length of 2nd "clobbers"
+
+
+def can_detect_duplicated_flags_clobbers_with_noreturn_after():
+    code = src.open_text(
+        "asm aux() clobbers rax clobbers rbx noreturn { mov rax, rbx; }"
+    )
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == err.ERROR_2003
+    assert diagnostic.ref.offset == 23  # offset of 2nd "clobbers"
+    assert diagnostic.ref.length == 8  # length of 2nd "clobbers"
+
+
+def can_detect_duplicated_flags_noreturn_with_clobbers_after():
+    code = src.open_text("asm halt() noreturn noreturn clobbers rax { syscall; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == err.ERROR_2003
+    assert diagnostic.ref.offset == 20  # offset of 2nd "noreturn"
+    assert diagnostic.ref.length == 8  # length of 2nd "noreturn"
