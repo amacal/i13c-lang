@@ -1,26 +1,7 @@
 from typing import Callable, List, Union
 
-from i13c import ast, diag, src, sym
-from i13c.sem.rules import (e3000, e3001, e3002, e3003, e3004, e3005, e3006,
-                            e3007)
-
-
-class UnknownInstruction(Exception):
-    def __init__(self, ref: src.Span) -> None:
-        self.ref = ref
-
-
-class InvalidOperandTypes(Exception):
-    def __init__(self, ref: src.Span, found: List[str]) -> None:
-        self.ref = ref
-        self.found = found
-
-
-class ImmediateOutOfRange(Exception):
-    def __init__(self, ref: src.Span, value: int) -> None:
-        self.ref = ref
-        self.value = value
-
+from i13c import ast, diag, sym
+from i13c.sem.rules import e3000, e3001, e3002, e3003, e3004, e3005, e3006, e3007
 
 RULES: List[Callable[[ast.Program], List[diag.Diagnostic]]] = [
     e3000.validate_assembly_mnemonic,
