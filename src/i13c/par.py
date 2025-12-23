@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Set, Tuple, Union
+from typing import List, Optional, Set, Tuple, Union
 
 from i13c import ast, diag, lex, res, src
 
@@ -23,6 +23,12 @@ class UnexpectedKeyword(Exception):
         self.offset = offset
         self.expected = expected
         self.found = found
+
+
+class FlagAlreadySpecified(Exception):
+    def __init__(self, offset: int, flag: bytes) -> None:
+        self.offset = offset
+        self.flag = flag
 
 
 @dataclass(kw_only=True)
@@ -95,6 +101,9 @@ def parse(
     except UnexpectedKeyword as e:
         diagnostics.append(report_unexpected_keyword(e.offset, e.expected, e.found))
 
+    except FlagAlreadySpecified as e:
+        diagnostics.append(report_flag_already_specified(e.offset, e.flag))
+
     # any diagnostics stops further processing
     if diagnostics:
         return res.Err(diagnostics)
@@ -131,7 +140,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     ref = state.span(name)
 
     # optional clobbers
-    while not state.is_in(lex.TOKEN_CURLY_OPEN):
+    if not state.is_in(lex.TOKEN_CURLY_OPEN):
         clobbers, terminal = parse_function_flags(state)
 
     # expect opening curly brace
@@ -184,25 +193,33 @@ def parse_parameter(state: ParsingState) -> ast.Parameter:
 
 
 def parse_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
-    expected = {b"clobbers", b"noreturn"}
-    keyword = state.expect(lex.TOKEN_KEYWORD)
+    keyword: Optional[lex.Token] = None
+    terminal: List[bool] = []
+    clobbers: List[List[ast.Register]] = []
 
-    terminal: bool = False
-    clobbers: List[ast.Register] = []
+    while not state.is_in(lex.TOKEN_CURLY_OPEN):
+        expected = {b"clobbers", b"noreturn"}
+        keyword = state.expect(lex.TOKEN_KEYWORD)
 
-    # fail if the keyword is not "clobbers" or "noreturn"
-    if state.extract(keyword) not in expected:
-        raise UnexpectedKeyword(keyword.offset, expected, state.extract(keyword))
+        # fail if the keyword is not "clobbers" or "noreturn"
+        if state.extract(keyword) not in expected:
+            raise UnexpectedKeyword(keyword.offset, expected, state.extract(keyword))
 
-    # if "clobbers", parse the clobber list
-    if state.extract(keyword) == b"clobbers":
-        clobbers = parse_clobbers(state)
+        # if "clobbers", parse the clobber list
+        if state.extract(keyword) == b"clobbers":
+            clobbers.append(parse_clobbers(state))
 
-    # if "noreturn", set terminal flag
-    elif state.extract(keyword) == b"noreturn":
-        terminal = True
+        # if "noreturn", set terminal flag
+        elif state.extract(keyword) == b"noreturn":
+            terminal.append(True)
 
-    return clobbers, terminal
+    if keyword and len(clobbers) > 1:
+        raise FlagAlreadySpecified(keyword.offset, b"clobbers")
+
+    if keyword and len(terminal) > 1:
+        raise FlagAlreadySpecified(keyword.offset, b"noreturn")
+
+    return clobbers[0] if clobbers else [], bool(terminal)
 
 
 def parse_clobbers(state: ParsingState) -> List[ast.Register]:
@@ -286,4 +303,12 @@ def report_unexpected_keyword(
         offset=offset,
         code="P003",
         message=f"Unexpected keyword '{found.decode()}' at offset {offset}, expected one of: {list(expected)}",
+    )
+
+
+def report_flag_already_specified(offset: int, flag: bytes) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        offset=offset,
+        code="P004",
+        message=f"Function flag '{flag.decode()}' already specified at offset {offset}",
     )

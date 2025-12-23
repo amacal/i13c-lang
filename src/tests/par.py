@@ -219,6 +219,32 @@ def can_parse_functions_with_no_return():
     assert len(instruction.operands) == 0
 
 
+def can_parse_functions_with_no_return_with_clobbers():
+    code = src.open_text("asm halt() noreturn clobbers rax { syscall; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert function.name == b"halt"
+    assert function.terminal is True
+
+    clobbers = function.clobbers
+    assert len(clobbers) == 1
+    assert clobbers[0].name == b"rax"
+
+    assert len(function.instructions) == 1
+    instruction = function.instructions[0]
+
+    assert instruction.mnemonic.name == b"syscall"
+    assert len(instruction.operands) == 0
+
+
 def can_handle_empty_program():
     code = src.open_text("")
 
@@ -261,3 +287,51 @@ def can_handle_unexpected_token():
 
     diagnostic = diagnostics[0]
     assert diagnostic.code == "P002"
+
+
+def can_detect_unknown_function_keyword():
+    code = src.open_text("noreturn main { syscall; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == "P003"
+
+
+def can_detect_duplicated_flags_noreturn():
+    code = src.open_text("asm halt() noreturn noreturn { syscall; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == "P004"
+
+
+def can_detect_duplicated_flags_clobbers():
+    code = src.open_text("asm aux() clobbers rax clobbers rcx { mov rax, rbx; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == "P004"
