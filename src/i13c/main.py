@@ -54,7 +54,7 @@ def ast_command(path: str) -> None:
     for idx, function in enumerate(program.functions):
         click.echo(f"Function: {function.name.decode('utf-8')}")
 
-        if function.clobbers:
+        if function.parameters:
             click.echo("  Parameters:")
             for parameter in function.parameters:
                 click.echo(f"    {str(parameter)}")
