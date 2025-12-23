@@ -61,9 +61,7 @@ def validate_parameters(
     for parameter in function.parameters:
         if parameter.name in names:
             diagnostics.append(
-                report_duplicated_parameter_names(
-                    function.instructions[0].ref, parameter.name
-                )
+                report_duplicated_parameter_names(function.ref, parameter.name)
             )
         else:
             names.add(parameter.name)
