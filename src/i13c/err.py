@@ -116,7 +116,7 @@ def report_e3002_invalid_operand_types(
     )
 
 
-def report_e3003_duplicated_bindings(
+def report_e3003_duplicated_parameter_bindings(
     ref: src.SpanLike, found: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
@@ -136,7 +136,7 @@ def report_e3004_duplicated_parameter_names(
     )
 
 
-def report_e3005_duplicated_clobbers(
+def report_e3005_duplicated_function_clobbers(
     ref: src.SpanLike, found: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
