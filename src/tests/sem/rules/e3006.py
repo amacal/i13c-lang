@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 
 
 def can_detect_duplicated_asm_function_names():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3006.validate_duplicated_function_names(
         ast.Program(
             functions=[
                 ast.AsmFunction(
@@ -46,7 +46,7 @@ def can_detect_duplicated_asm_function_names():
 
 
 def can_detect_duplicated_reg_function_names():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3006.validate_duplicated_function_names(
         ast.Program(
             functions=[
                 ast.RegFunction(
@@ -88,7 +88,7 @@ def can_detect_duplicated_reg_function_names():
 
 
 def can_detect_duplicated_mixed_function_names():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3006.validate_duplicated_function_names(
         ast.Program(
             functions=[
                 ast.AsmFunction(

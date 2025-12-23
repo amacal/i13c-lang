@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 
 
 def can_detect_duplicated_asm_parameter_names():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3004.validate_duplicated_parameter_names(
         ast.Program(
             functions=[
                 ast.AsmFunction(
@@ -43,7 +43,7 @@ def can_detect_duplicated_asm_parameter_names():
 
 
 def can_detect_duplicated_reg_parameter_names():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3004.validate_duplicated_parameter_names(
         ast.Program(
             functions=[
                 ast.RegFunction(

@@ -1,9 +1,9 @@
-from typing import Callable, List, Union
+from typing import Callable, Dict, List, Union
 
 from i13c import ast, diag, sym
-from i13c.sem.rules import e3000, e3001, e3002, e3003, e3004, e3005, e3006, e3007
+from i13c.sem.rules import e3000, e3001, e3002, e3003, e3004, e3005, e3006, e3007, e3008
 
-RULES: List[Callable[[ast.Program], List[diag.Diagnostic]]] = [
+RULES_1ST_PASS: List[Callable[[ast.Program], List[diag.Diagnostic]]] = [
     e3000.validate_assembly_mnemonic,
     e3001.validate_immediate_out_of_range,
     e3002.validate_assembly_operand_types,
@@ -14,26 +14,41 @@ RULES: List[Callable[[ast.Program], List[diag.Diagnostic]]] = [
     e3007.validate_integer_literal_out_of_range,
 ]
 
+RULES_2ND_PASS: List[
+    Callable[[ast.Program, sym.SymbolTable], List[diag.Diagnostic]]
+] = [
+    e3008.validate_called_symbol_exists,
+]
 
-def validate(program: ast.Program) -> List[diag.Diagnostic]:
+
+def validate_1st_pass(program: ast.Program) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for rule in RULES:
+    for rule in RULES_1ST_PASS:
         diagnostics.extend(rule(program))
 
     return diagnostics
 
 
+def validate_2nd_pass(
+    program: ast.Program, symbol_table: sym.SymbolTable
+) -> List[diag.Diagnostic]:
+    diagnostics: List[diag.Diagnostic] = []
+
+    for rule in RULES_2ND_PASS:
+        diagnostics.extend(rule(program, symbol_table))
+
+    return diagnostics
+
+
 def aggregate(program: ast.Program) -> sym.SymbolTable:
-    entries: List[sym.SymbolTableEntry] = []
+    entries: Dict[bytes, sym.SymbolTableEntry] = {}
 
     for function in program.functions:
-        entries.append(
-            sym.SymbolTableEntry(
-                ref=function.ref,
-                name=function.name,
-                target=into_symbol_target(function),
-            )
+        entries[function.name] = sym.SymbolTableEntry(
+            ref=function.ref,
+            name=function.name,
+            target=into_symbol_target(function),
         )
 
     return sym.SymbolTable(entries=entries)

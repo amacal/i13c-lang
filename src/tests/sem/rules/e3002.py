@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 
 
 def can_detect_invalid_asm_operand_types_of_mov():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3002.validate_assembly_operand_types(
         ast.Program(
             functions=[
                 ast.AsmFunction(

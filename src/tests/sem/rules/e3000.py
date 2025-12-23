@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 
 
 def can_accept_asm_operands_arity_of_syscall():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3000.validate_assembly_mnemonic(
         ast.Program(
             functions=[
                 ast.AsmFunction(
@@ -27,7 +27,7 @@ def can_accept_asm_operands_arity_of_syscall():
 
 
 def can_accept_asm_operands_arity_of_mov():
-    diagnostics = sem.validate(
+    diagnostics = sem.validate_1st_pass(
         ast.Program(
             functions=[
                 ast.AsmFunction(
@@ -55,7 +55,7 @@ def can_accept_asm_operands_arity_of_mov():
 
 
 def can_detect_invalid_asm_instruction():
-    diagnostics = sem.validate(
+    diagnostics = sem.validate_1st_pass(
         ast.Program(
             functions=[
                 ast.AsmFunction(

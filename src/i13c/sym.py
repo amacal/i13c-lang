@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, List
 
 from i13c import src
 
@@ -29,4 +29,4 @@ class SymbolTableEntry:
 
 @dataclass(kw_only=True)
 class SymbolTable:
-    entries: List[SymbolTableEntry]
+    entries: Dict[bytes, SymbolTableEntry]

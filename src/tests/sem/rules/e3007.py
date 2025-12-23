@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 
 
 def can_detect_reg_integer_literal_out_of_range():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3007.validate_integer_literal_out_of_range(
         ast.Program(
             functions=[
                 ast.RegFunction(

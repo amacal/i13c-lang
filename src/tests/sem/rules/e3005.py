@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 
 
 def can_detect_duplicated_asm_clobbers():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3005.validate_duplicated_function_clobbers(
         ast.Program(
             functions=[
                 ast.AsmFunction(

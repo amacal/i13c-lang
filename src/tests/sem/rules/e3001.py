@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 
 
 def can_detect_asm_immediate_out_of_range():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3001.validate_immediate_out_of_range(
         ast.Program(
             functions=[
                 ast.AsmFunction(

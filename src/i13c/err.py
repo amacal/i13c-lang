@@ -19,6 +19,7 @@ ERROR_3004 = "E3004"  # Duplicated parameter names
 ERROR_3005 = "E3005"  # Duplicated clobber registers
 ERROR_3006 = "E3006"  # Duplicated function names
 ERROR_3007 = "E3007"  # Integer literal out of range
+ERROR_3008 = "E3008"  # Called symbol does not exist
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
 
@@ -189,4 +190,14 @@ def report_e5001_non_terminal_entrypoint_function() -> diag.Diagnostic:
         ref=src.Span(offset=0, length=0),
         code=ERROR_5001,
         message="The entrypoint codeblock must be terminal",
+    )
+
+
+def report_e3008_called_symbol_exists(
+    ref: src.SpanLike, name: bytes
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_3008,
+        message=f"Called symbol does not exist: {str(name)}",
     )

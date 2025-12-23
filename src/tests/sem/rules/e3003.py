@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 
 
 def can_detect_duplicated_asm_parameter_bindings():
-    diagnostics = sem.validate(
+    diagnostics = sem.e3003.validate_duplicated_parameter_bindings(
         ast.Program(
             functions=[
                 ast.AsmFunction(
