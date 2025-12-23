@@ -22,7 +22,6 @@ class Immediate:
 @dataclass(kw_only=True)
 class IntegerLiteral:
     value: int
-    type: Type
 
 
 @dataclass(kw_only=True)

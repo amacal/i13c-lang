@@ -116,7 +116,61 @@ def parse(
 
 
 def parse_function(state: ParsingState) -> Union[ast.AsmFunction, ast.RegFunction]:
-    return parse_asm_function(state)
+    expected = {b"asm", b"fn"}
+    keyword = state.expect(lex.TOKEN_KEYWORD)
+
+    if state.extract(keyword) not in expected:
+        raise UnexpectedKeyword(keyword, list(expected), state.extract(keyword))
+
+    if state.extract(keyword) == b"asm":
+        return parse_asm_function(state)
+
+    else:
+        return parse_reg_function(state)
+
+
+def parse_reg_function(state: ParsingState) -> ast.RegFunction:
+    statements: List[ast.CallStatement] = []
+    parameters: List[ast.RegParameter] = []
+    terminal: bool = False
+
+    # function name is an identifier
+    name = state.expect(lex.TOKEN_IDENT)
+
+    # expect opening round bracket
+    state.expect(lex.TOKEN_ROUND_OPEN)
+
+    # optional function parameters
+    while not state.is_in(lex.TOKEN_ROUND_CLOSE):
+        parameters = parse_reg_parameters(state)
+
+    # expect closed round bracket
+    state.expect(lex.TOKEN_ROUND_CLOSE)
+
+    # capture function signature
+    ref = state.span(name)
+
+    # optional flags
+    if not state.is_in(lex.TOKEN_CURLY_OPEN):
+        terminal = parse_reg_function_flags(state)
+
+    # expect opening curly brace
+    state.expect(lex.TOKEN_CURLY_OPEN)
+
+    # parse statements until closing curly brace
+    while not state.is_in(lex.TOKEN_CURLY_CLOSE):
+        statements.append(parse_statement(state))
+
+    # expect closed curly brace
+    state.expect(lex.TOKEN_CURLY_CLOSE)
+
+    return ast.RegFunction(
+        ref=ref,
+        name=state.extract(name),
+        terminal=terminal,
+        parameters=parameters,
+        statements=statements,
+    )
 
 
 def parse_asm_function(state: ParsingState) -> ast.AsmFunction:
@@ -124,12 +178,6 @@ def parse_asm_function(state: ParsingState) -> ast.AsmFunction:
     parameters: List[ast.AsmParameter] = []
     clobbers: List[ast.Register] = []
     terminal: bool = False
-
-    # currently only "asm" functions are supported
-    keyword = state.expect(lex.TOKEN_KEYWORD)
-
-    if state.extract(keyword) != b"asm":
-        raise UnexpectedKeyword(keyword, [b"asm"], state.extract(keyword))
 
     # function name is an identifier
     name = state.expect(lex.TOKEN_IDENT)
@@ -147,9 +195,9 @@ def parse_asm_function(state: ParsingState) -> ast.AsmFunction:
     # capture function signature
     ref = state.span(name)
 
-    # optional clobbers
+    # optional flags
     if not state.is_in(lex.TOKEN_CURLY_OPEN):
-        clobbers, terminal = parse_function_flags(state)
+        clobbers, terminal = parse_asm_function_flags(state)
 
     # expect opening curly brace
     state.expect(lex.TOKEN_CURLY_OPEN)
@@ -171,6 +219,17 @@ def parse_asm_function(state: ParsingState) -> ast.AsmFunction:
     )
 
 
+def parse_reg_parameters(state: ParsingState) -> List[ast.RegParameter]:
+    parameters: List[ast.RegParameter] = []
+    parameters.append(parse_reg_parameter(state))
+
+    # a comma suggests next parameter
+    while state.accept(lex.TOKEN_COMMA):
+        parameters.append(parse_reg_parameter(state))
+
+    return parameters
+
+
 def parse_asm_parameters(state: ParsingState) -> List[ast.AsmParameter]:
     parameters: List[ast.AsmParameter] = []
     parameters.append(parse_asm_parameter(state))
@@ -178,7 +237,21 @@ def parse_asm_parameters(state: ParsingState) -> List[ast.AsmParameter]:
     # a comma suggests next parameter
     while state.accept(lex.TOKEN_COMMA):
         parameters.append(parse_asm_parameter(state))
+
     return parameters
+
+
+def parse_reg_parameter(state: ParsingState) -> ast.RegParameter:
+    ident = state.expect(lex.TOKEN_IDENT)
+
+    # expect ':' followed by type
+    state.expect(lex.TOKEN_COLON)
+    type = state.expect(lex.TOKEN_TYPE)
+
+    return ast.RegParameter(
+        name=state.extract(ident),
+        type=ast.Type(name=state.extract(type)),
+    )
 
 
 def parse_asm_parameter(state: ParsingState) -> ast.AsmParameter:
@@ -199,7 +272,29 @@ def parse_asm_parameter(state: ParsingState) -> ast.AsmParameter:
     )
 
 
-def parse_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
+def parse_reg_function_flags(state: ParsingState) -> bool:
+    keyword: Optional[lex.Token] = None
+    terminal = False
+
+    while not state.is_in(lex.TOKEN_CURLY_OPEN):
+        expected = {b"noreturn"}
+        keyword = state.expect(lex.TOKEN_KEYWORD)
+
+        # fail if the keyword is not "clobbers" or "noreturn"
+        if state.extract(keyword) not in expected:
+            raise UnexpectedKeyword(keyword, expected, state.extract(keyword))
+
+        # if "noreturn", set terminal flag
+        elif state.extract(keyword) == b"noreturn":
+            if terminal:
+                raise FlagAlreadySpecified(keyword, b"noreturn")
+            else:
+                terminal = True
+
+    return terminal
+
+
+def parse_asm_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
     keyword: Optional[lex.Token] = None
     clobbers: Optional[List[ast.Register]] = None
     terminal = False
@@ -244,6 +339,29 @@ def parse_clobbers(state: ParsingState) -> List[ast.Register]:
     return clobbers
 
 
+def parse_statement(state: ParsingState) -> ast.CallStatement:
+    arguments = []
+    token = state.expect(lex.TOKEN_IDENT)
+
+    # expect opening round bracket
+    state.expect(lex.TOKEN_ROUND_OPEN)
+
+    # optional arguments
+    if state.is_in(lex.TOKEN_HEX):
+        arguments = parse_arguments(state)
+
+    # expect closed round bracket
+    state.expect(lex.TOKEN_ROUND_CLOSE)
+
+    # expect a semicolon
+    state.expect(lex.TOKEN_SEMICOLON)
+
+    return ast.CallStatement(
+        name=state.extract(token),
+        arguments=arguments,
+    )
+
+
 def parse_instruction(state: ParsingState) -> ast.Instruction:
     operands = []
     token = state.expect(lex.TOKEN_MNEMONIC)
@@ -262,6 +380,17 @@ def parse_instruction(state: ParsingState) -> ast.Instruction:
     return ast.Instruction(ref=ref, mnemonic=mnemonic, operands=operands)
 
 
+def parse_arguments(state: ParsingState) -> List[ast.IntegerLiteral]:
+    arguments: List[ast.IntegerLiteral] = []
+    arguments.append(parse_argument(state))
+
+    # a comma suggests next argument
+    while state.accept(lex.TOKEN_COMMA):
+        arguments.append(parse_argument(state))
+
+    return arguments
+
+
 def parse_operands(state: ParsingState) -> List[Union[ast.Register, ast.Immediate]]:
     operands: List[Union[ast.Register, ast.Immediate]] = []
     operands.append(parse_operand(state))
@@ -271,6 +400,14 @@ def parse_operands(state: ParsingState) -> List[Union[ast.Register, ast.Immediat
         operands.append(parse_operand(state))
 
     return operands
+
+
+def parse_argument(state: ParsingState) -> ast.IntegerLiteral:
+    token = state.expect(lex.TOKEN_HEX)
+
+    return ast.IntegerLiteral(
+        value=int(state.extract(token), 16),
+    )
 
 
 def parse_operand(state: ParsingState) -> Union[ast.Register, ast.Immediate]:

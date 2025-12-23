@@ -73,6 +73,11 @@ def ast_command(path: str) -> None:
             for instruction in function.instructions:
                 click.echo(f"    {str(instruction)}")
 
+        if isinstance(function, ast.RegFunction) and function.statements:
+            click.echo("  Statements:")
+            for statement in function.statements:
+                click.echo(f"    {str(statement)}")
+
         if idx < len(program.functions) - 1:
             click.echo("")
 
