@@ -1,11 +1,9 @@
-from typing import List
-
 from i13c import enc, ir
 
 
 def can_encode_instructions_mov_rax_imm():
     unit = ir.Unit(
-        symbols=set(),
+        entry=0,
         codeblocks=[
             ir.CodeBlock(
                 label=b"main",
@@ -25,7 +23,7 @@ def can_encode_instructions_mov_rax_imm():
 
 def can_encode_instructions_mov_r10_imm():
     unit = ir.Unit(
-        symbols=set(),
+        entry=0,
         codeblocks=[
             ir.CodeBlock(
                 label=b"main",
@@ -45,7 +43,7 @@ def can_encode_instructions_mov_r10_imm():
 
 def can_encode_instructions_syscall():
     unit = ir.Unit(
-        symbols=set(),
+        entry=0,
         codeblocks=[
             ir.CodeBlock(
                 label=b"main",

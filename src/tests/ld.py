@@ -3,7 +3,7 @@ from i13c import ir, ld, res
 
 def can_move_entry_function_to_front():
     unit = ir.Unit(
-        symbols=set(),
+        entry=1,
         codeblocks=[
             ir.CodeBlock(
                 label=b"aux",
@@ -42,7 +42,7 @@ def can_move_entry_function_to_front():
 
 def can_detect_non_terminal_main():
     unit = ir.Unit(
-        symbols=set(),
+        entry=0,
         codeblocks=[
             ir.CodeBlock(
                 label=b"main",

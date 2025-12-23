@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import List, Optional, Set
 
 from i13c import ast, diag, ir, res
 
@@ -20,6 +20,7 @@ def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     codeblocks: List[ir.CodeBlock] = []
     diagnostics: List[diag.Diagnostic] = []
     symbols: Set[bytes] = set()
+    entry: Optional[int] = None
 
     try:
         for function in program.functions:
@@ -29,17 +30,23 @@ def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
         diagnostics.append(report_unknown_instruction(ex.ref, ex.name))
 
     # check for duplicated symbols
-    for codeblock in codeblocks:
-        if codeblock.label not in symbols:
-            symbols.add(codeblock.label)
-        else:
-            diagnostics.append(report_duplicate_symbol(codeblock.label))
+    for idx, codeblock in enumerate(codeblocks):
+        if codeblock.label:
+
+            # find entry point
+            if codeblock.label == b"main":
+                entry = idx
+
+            if codeblock.label not in symbols:
+                symbols.add(codeblock.label)
+            else:
+                diagnostics.append(report_duplicate_symbol(codeblock.label))
 
     # any diagnostic is an error
     if diagnostics:
         return res.Err(diagnostics)
 
-    return res.Ok(ir.Unit(symbols=symbols, codeblocks=codeblocks))
+    return res.Ok(ir.Unit(entry=entry, codeblocks=codeblocks))
 
 
 def lower_function(function: ast.Function) -> ir.CodeBlock:

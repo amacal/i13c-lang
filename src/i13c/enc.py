@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Type, TypeVar
+from typing import Callable, Dict, Type, TypeVar
 
 from i13c import ir
 

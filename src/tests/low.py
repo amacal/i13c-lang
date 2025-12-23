@@ -25,7 +25,7 @@ def can_lower_syscall_program():
 
     unit = low.lower(program)
     assert isinstance(unit, res.Ok)
-    assert unit.value.symbols == {b"main"}
+    assert unit.value.entry == 0
 
     codeblocks = unit.value.codeblocks
     assert len(codeblocks) == 1
@@ -60,7 +60,7 @@ def can_lower_mov_program():
 
     unit = low.lower(program)
     assert isinstance(unit, res.Ok)
-    assert unit.value.symbols == {b"main"}
+    assert unit.value.entry == 0
 
     codeblocks = unit.value.codeblocks
     assert len(codeblocks) == 1
@@ -73,6 +73,38 @@ def can_lower_mov_program():
 
     assert instruction.dst == 0
     assert instruction.imm == 0x1234
+
+
+def can_lower_noentry_program():
+    program = ast.Program(
+        functions=[
+            ast.Function(
+                ref=ast.Span(offset=0, length=4),
+                name=b"aux",
+                terminal=False,
+                parameters=[],
+                clobbers=[],
+                instructions=[
+                    ast.Instruction(
+                        ref=ast.Span(offset=0, length=7),
+                        mnemonic=ast.Mnemonic(name=b"syscall"),
+                        operands=[],
+                    ),
+                ],
+            )
+        ]
+    )
+
+    unit = low.lower(program)
+    assert isinstance(unit, res.Ok)
+    assert unit.value.entry is None
+
+    codeblocks = unit.value.codeblocks
+    assert len(codeblocks) == 1
+
+    instructions = codeblocks[0].instructions
+    assert len(instructions) == 1
+    assert isinstance(instructions[0], ir.SysCall)
 
 
 def can_detect_unknown_mnemonic():
