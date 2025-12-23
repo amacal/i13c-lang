@@ -1,7 +1,7 @@
 from i13c import ast, err, sem, src
 
 
-def can_accept_operands_arity_of_syscall():
+def can_accept_asm_operands_arity_of_syscall():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
@@ -26,7 +26,7 @@ def can_accept_operands_arity_of_syscall():
     assert len(diagnostics) == 0
 
 
-def can_accept_operands_arity_of_mov():
+def can_accept_asm_operands_arity_of_mov():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
@@ -54,7 +54,7 @@ def can_accept_operands_arity_of_mov():
     assert len(diagnostics) == 0
 
 
-def can_detect_invalid_instruction():
+def can_detect_invalid_asm_instruction():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
@@ -84,7 +84,7 @@ def can_detect_invalid_instruction():
     assert diagnostic.ref.length == 3
 
 
-def can_detect_immediate_out_of_range():
+def can_detect_asm_immediate_out_of_range():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
@@ -117,7 +117,7 @@ def can_detect_immediate_out_of_range():
     assert diagnostic.ref.length == 20
 
 
-def can_detect_invalid_operand_types_of_mov():
+def can_detect_invalid_asm_operand_types_of_mov():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
@@ -150,7 +150,7 @@ def can_detect_invalid_operand_types_of_mov():
     assert diagnostic.ref.length == 15
 
 
-def can_detect_duplicated_parameter_bindings():
+def can_detect_duplicated_asm_parameter_bindings():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
@@ -191,7 +191,7 @@ def can_detect_duplicated_parameter_bindings():
     assert diagnostic.ref.length == 20
 
 
-def can_detect_duplicated_parameter_names():
+def can_detect_duplicated_asm_parameter_names():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
@@ -232,7 +232,7 @@ def can_detect_duplicated_parameter_names():
     assert diagnostic.ref.length == 20
 
 
-def can_detect_duplicated_clobbers():
+def can_detect_duplicated_asm_clobbers():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
@@ -266,7 +266,7 @@ def can_detect_duplicated_clobbers():
     assert diagnostic.ref.length == 20
 
 
-def can_detect_duplicated_function_names():
+def can_detect_duplicated_asm_function_names():
     diagnostics = sem.validate(
         ast.Program(
             functions=[

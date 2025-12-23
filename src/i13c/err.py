@@ -18,6 +18,7 @@ ERROR_3003 = "E3003"  # Duplicated parameter bindings
 ERROR_3004 = "E3004"  # Duplicated parameter names
 ERROR_3005 = "E3005"  # Duplicated clobber registers
 ERROR_3006 = "E3006"  # Duplicated function names
+ERROR_3007 = "E3007"  # Integer literal out of range
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
 
@@ -152,6 +153,16 @@ def report_e3006_duplicated_function_names(
         ref=ref,
         code=ERROR_3006,
         message=f"Duplicated function names for ({str(found)}) at offset {ref.offset}",
+    )
+
+
+def report_e3007_integer_literal_out_of_range(
+    ref: src.SpanLike, value: int
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_3007,
+        message=f"Immediate value {value} out of range at offset {ref.offset}",
     )
 
 

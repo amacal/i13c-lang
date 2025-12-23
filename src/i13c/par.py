@@ -357,6 +357,7 @@ def parse_statement(state: ParsingState) -> ast.CallStatement:
     state.expect(lex.TOKEN_SEMICOLON)
 
     return ast.CallStatement(
+        ref=state.span(token),
         name=state.extract(token),
         arguments=arguments,
     )

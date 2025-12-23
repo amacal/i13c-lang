@@ -56,8 +56,21 @@ def validate_function(
     diagnostics: List[diag.Diagnostic],
     function: Union[ast.AsmFunction, ast.RegFunction],
 ) -> None:
-    assert isinstance(function, ast.AsmFunction)
-    validate_asm_function(diagnostics, function)
+    if isinstance(function, ast.AsmFunction):
+        validate_asm_function(diagnostics, function)
+
+    else:
+        validate_reg_function(diagnostics, function)
+
+
+def validate_reg_function(
+    diagnostics: List[diag.Diagnostic], function: ast.RegFunction
+) -> None:
+
+    validate_reg_parameters(diagnostics, function)
+
+    for statement in function.statements:
+        validate_statement(diagnostics, statement)
 
 
 def validate_asm_function(
@@ -68,7 +81,23 @@ def validate_asm_function(
     validate_asm_clobbers(diagnostics, function)
 
     for instruction in function.instructions:
-        validate_asm_instruction(diagnostics, instruction)
+        validate_instruction(diagnostics, instruction)
+
+
+def validate_reg_parameters(
+    diagnostics: List[diag.Diagnostic], function: ast.RegFunction
+) -> None:
+    names: Set[bytes] = set()
+
+    for parameter in function.parameters:
+        if parameter.name in names:
+            diagnostics.append(
+                err.report_e3004_duplicated_parameter_names(
+                    function.ref, parameter.name
+                )
+            )
+        else:
+            names.add(parameter.name)
 
 
 def validate_asm_parameters(
@@ -109,7 +138,20 @@ def validate_asm_clobbers(
             seen.add(clobber.name)
 
 
-def validate_asm_instruction(
+def validate_statement(
+    diagnostics: List[diag.Diagnostic], statement: ast.CallStatement
+) -> None:
+
+    for argument in statement.arguments:
+        if not (0 <= argument.value <= 0xFFFFFFFFFFFFFFFF):
+            diagnostics.append(
+                err.report_e3007_integer_literal_out_of_range(
+                    statement.ref, argument.value
+                )
+            )
+
+
+def validate_instruction(
     diagnostics: List[diag.Diagnostic], instruction: ast.Instruction
 ) -> None:
     matched = False

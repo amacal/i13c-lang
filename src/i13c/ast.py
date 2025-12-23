@@ -38,6 +38,7 @@ class Instruction:
 
 @dataclass(kw_only=True)
 class CallStatement:
+    ref: src.Span
     name: bytes
     arguments: List[IntegerLiteral]
 
