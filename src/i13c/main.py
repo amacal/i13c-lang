@@ -1,5 +1,6 @@
 import os
 import sys
+from functools import partial
 from typing import List, NoReturn
 
 import click
@@ -7,17 +8,25 @@ import click
 from i13c import diag, elf, enc, ld, lex, low, par, res, sem, src
 
 
-def emit_and_exit(diagnostics: List[diag.Diagnostic]) -> NoReturn:
+def emit_and_exit(
+    diagnostics: List[diag.Diagnostic], /, source: src.SourceCode
+) -> NoReturn:
     for diagnostic in diagnostics:
         click.echo(
             f"Error {diagnostic.code} at offset {diagnostic.ref.offset}: {diagnostic.message}"
         )
 
+    if diagnostics[0].ref.length > 0:
+        click.echo("\n")
+        click.echo(diag.show(source, diagnostics[0]))
+
     sys.exit(1)
 
 
-def unwrap(result: res.Result[res.A, List[diag.Diagnostic]]) -> res.A:
-    return res.unwrap(result, emit_and_exit)
+def unwrap(
+    result: res.Result[res.A, List[diag.Diagnostic]], /, source: src.SourceCode
+) -> res.A:
+    return res.unwrap(result, partial(emit_and_exit, source=source))
 
 
 @click.group()
@@ -32,7 +41,7 @@ def lex_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code))
+    tokens = unwrap(lex.tokenize(code), source=code)
 
     for token in tokens:
         key = f"{token.code:03}:{token.offset:04}:{token.length:02}"
@@ -48,8 +57,8 @@ def ast_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code))
-    program = unwrap(par.parse(code, tokens))
+    tokens = unwrap(lex.tokenize(code), source=code)
+    program = unwrap(par.parse(code, tokens), source=code)
 
     for idx, function in enumerate(program.functions):
         click.echo(f"Function: {function.name.decode('utf-8')}")
@@ -75,13 +84,13 @@ def ir_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code))
-    program = unwrap(par.parse(code, tokens))
+    tokens = unwrap(lex.tokenize(code), source=code)
+    program = unwrap(par.parse(code, tokens), source=code)
 
     if diagnostics := sem.validate(program):
-        emit_and_exit(diagnostics)
+        emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(program))
+    unit = unwrap(low.lower(program), source=code)
 
     for idx, codeblock in enumerate(unit.codeblocks):
         click.echo(
@@ -101,14 +110,14 @@ def bin_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code))
-    program = unwrap(par.parse(code, tokens))
+    tokens = unwrap(lex.tokenize(code), source=code)
+    program = unwrap(par.parse(code, tokens), source=code)
 
     if diagnostics := sem.validate(program):
-        emit_and_exit(diagnostics)
+        emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(program))
-    linked = unwrap(ld.link(unit))
+    unit = unwrap(low.lower(program), source=code)
+    linked = unwrap(ld.link(unit), source=code)
     binary = enc.encode(linked)
 
     sys.stdout.buffer.write(binary)
@@ -121,14 +130,14 @@ def elf_command(path: str) -> None:
         text = f.read()
 
     code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code))
-    program = unwrap(par.parse(code, tokens))
+    tokens = unwrap(lex.tokenize(code), source=code)
+    program = unwrap(par.parse(code, tokens), source=code)
 
     if diagnostics := sem.validate(program):
-        emit_and_exit(diagnostics)
+        emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(program))
-    linked = unwrap(ld.link(unit))
+    unit = unwrap(low.lower(program), source=code)
+    linked = unwrap(ld.link(unit), source=code)
     binary = enc.encode(linked)
     executable = elf.emit(binary)
 
