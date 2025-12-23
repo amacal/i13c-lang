@@ -53,18 +53,26 @@ def validate(program: ast.Program) -> List[diag.Diagnostic]:
 
 
 def validate_function(
-    diagnostics: List[diag.Diagnostic], function: ast.Function
+    diagnostics: List[diag.Diagnostic],
+    function: Union[ast.AsmFunction, ast.RegFunction],
+) -> None:
+    assert isinstance(function, ast.AsmFunction)
+    validate_asm_function(diagnostics, function)
+
+
+def validate_asm_function(
+    diagnostics: List[diag.Diagnostic], function: ast.AsmFunction
 ) -> None:
 
-    validate_parameters(diagnostics, function)
-    validate_clobbers(diagnostics, function)
+    validate_asm_parameters(diagnostics, function)
+    validate_asm_clobbers(diagnostics, function)
 
     for instruction in function.instructions:
-        validate_instruction(diagnostics, instruction)
+        validate_asm_instruction(diagnostics, instruction)
 
 
-def validate_parameters(
-    diagnostics: List[diag.Diagnostic], function: ast.Function
+def validate_asm_parameters(
+    diagnostics: List[diag.Diagnostic], function: ast.AsmFunction
 ) -> None:
     names: Set[bytes] = set()
     bindings: Set[bytes] = set()
@@ -87,8 +95,8 @@ def validate_parameters(
             bindings.add(parameter.bind.name)
 
 
-def validate_clobbers(
-    diagnostics: List[diag.Diagnostic], function: ast.Function
+def validate_asm_clobbers(
+    diagnostics: List[diag.Diagnostic], function: ast.AsmFunction
 ) -> None:
     seen: Set[bytes] = set()
 
@@ -101,7 +109,7 @@ def validate_clobbers(
             seen.add(clobber.name)
 
 
-def validate_instruction(
+def validate_asm_instruction(
     diagnostics: List[diag.Diagnostic], instruction: ast.Instruction
 ) -> None:
     matched = False

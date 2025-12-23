@@ -1,4 +1,4 @@
-from i13c import err, lex, par, res, src
+from i13c import ast, err, lex, par, res, src
 
 
 def can_parse_instruction_without_operands():
@@ -13,6 +13,7 @@ def can_parse_instruction_without_operands():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"main"
     assert function.terminal is False
 
@@ -35,6 +36,7 @@ def can_parse_instruction_with_operands():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"main"
     assert function.terminal is False
 
@@ -65,6 +67,7 @@ def can_parse_instruction_with_immediate():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"main"
     assert function.terminal is False
 
@@ -95,6 +98,7 @@ def can_parse_multiple_instructions():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"main"
     assert function.terminal is False
     assert len(function.instructions) == 2
@@ -120,6 +124,7 @@ def can_parse_functions_with_single_arg():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"exit"
     assert function.terminal is False
     assert len(function.instructions) == 1
@@ -149,6 +154,7 @@ def can_parse_functions_with_multiple_args():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"exit"
     assert function.terminal is False
     assert len(function.instructions) == 1
@@ -183,6 +189,7 @@ def can_parse_functions_with_clobbers():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"aux"
     assert function.terminal is False
     assert len(function.clobbers) == 2
@@ -209,6 +216,7 @@ def can_parse_functions_with_no_return():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"halt"
     assert function.terminal is True
 
@@ -231,6 +239,7 @@ def can_parse_functions_with_no_return_with_clobbers():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
+    assert isinstance(function, ast.AsmFunction)
     assert function.name == b"halt"
     assert function.terminal is True
 

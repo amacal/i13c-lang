@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from i13c import ast, diag, err, ir, res, src
 
@@ -43,7 +43,12 @@ def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     return res.Ok(ir.Unit(entry=entry, codeblocks=codeblocks))
 
 
-def lower_function(function: ast.Function) -> ir.CodeBlock:
+def lower_function(function: Union[ast.AsmFunction, ast.RegFunction]) -> ir.CodeBlock:
+    assert isinstance(function, ast.AsmFunction)
+    return lower_asm_function(function)
+
+
+def lower_asm_function(function: ast.AsmFunction) -> ir.CodeBlock:
     instructions: List[ir.Instruction] = []
 
     for instruction in function.instructions:

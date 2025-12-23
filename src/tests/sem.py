@@ -5,7 +5,7 @@ def can_accept_operands_arity_of_syscall():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=0, length=4),
                     name=b"main",
                     terminal=False,
@@ -30,7 +30,7 @@ def can_accept_operands_arity_of_mov():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=0, length=4),
                     name=b"main",
                     terminal=False,
@@ -58,7 +58,7 @@ def can_detect_invalid_instruction():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=1, length=10),
                     name=b"main",
                     terminal=False,
@@ -88,7 +88,7 @@ def can_detect_immediate_out_of_range():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=1, length=10),
                     name=b"main",
                     terminal=False,
@@ -121,7 +121,7 @@ def can_detect_invalid_operand_types_of_mov():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=1, length=10),
                     name=b"main",
                     terminal=False,
@@ -154,17 +154,17 @@ def can_detect_duplicated_parameter_bindings():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=1, length=20),
                     name=b"main",
                     terminal=False,
                     parameters=[
-                        ast.Parameter(
+                        ast.AsmParameter(
                             name=b"code",
                             type=ast.Type(name=b"u32"),
                             bind=ast.Register(name=b"rdi"),
                         ),
-                        ast.Parameter(
+                        ast.AsmParameter(
                             name=b"id",
                             type=ast.Type(name=b"u16"),
                             bind=ast.Register(name=b"rdi"),
@@ -195,17 +195,17 @@ def can_detect_duplicated_parameter_names():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=1, length=20),
                     name=b"main",
                     terminal=False,
                     parameters=[
-                        ast.Parameter(
+                        ast.AsmParameter(
                             name=b"code",
                             type=ast.Type(name=b"u32"),
                             bind=ast.Register(name=b"rdi"),
                         ),
-                        ast.Parameter(
+                        ast.AsmParameter(
                             name=b"code",
                             type=ast.Type(name=b"u16"),
                             bind=ast.Register(name=b"rax"),
@@ -236,7 +236,7 @@ def can_detect_duplicated_clobbers():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=1, length=20),
                     name=b"main",
                     terminal=False,
@@ -270,7 +270,7 @@ def can_detect_duplicated_function_names():
     diagnostics = sem.validate(
         ast.Program(
             functions=[
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=1, length=10),
                     name=b"main",
                     terminal=False,
@@ -284,7 +284,7 @@ def can_detect_duplicated_function_names():
                         )
                     ],
                 ),
-                ast.Function(
+                ast.AsmFunction(
                     ref=src.Span(offset=20, length=10),
                     name=b"main",
                     terminal=False,

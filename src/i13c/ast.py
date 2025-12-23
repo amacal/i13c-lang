@@ -4,7 +4,7 @@ from typing import List, Union
 from i13c import src
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Type:
     name: bytes
 
@@ -20,6 +20,12 @@ class Immediate:
 
 
 @dataclass(kw_only=True)
+class IntegerLiteral:
+    value: int
+    type: Type
+
+
+@dataclass(kw_only=True)
 class Mnemonic:
     name: bytes
 
@@ -31,23 +37,44 @@ class Instruction:
     operands: List[Union[Register, Immediate]]
 
 
-@dataclass
-class Parameter:
+@dataclass(kw_only=True)
+class CallStatement:
+    name: bytes
+    arguments: List[IntegerLiteral]
+
+
+@dataclass(kw_only=True)
+class AsmParameter:
     name: bytes
     type: Type
     bind: Register
 
 
 @dataclass(kw_only=True)
-class Function:
+class RegParameter:
+    name: bytes
+    type: Type
+
+
+@dataclass(kw_only=True)
+class AsmFunction:
     ref: src.Span
     name: bytes
     terminal: bool
     clobbers: List[Register]
-    parameters: List[Parameter]
+    parameters: List[AsmParameter]
     instructions: List[Instruction]
 
 
 @dataclass(kw_only=True)
+class RegFunction:
+    ref: src.Span
+    name: bytes
+    terminal: bool
+    parameters: List[RegParameter]
+    statements: List[CallStatement]
+
+
+@dataclass(kw_only=True)
 class Program:
-    functions: List[Function]
+    functions: List[Union[AsmFunction, RegFunction]]

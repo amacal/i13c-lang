@@ -4,5 +4,5 @@ asm exit(code@rdi: u32) noreturn clobbers rax, rcx, r11 {
 }
 
 fn main() noreturn {
-    exit(1);
+    exit(0x01);
 }

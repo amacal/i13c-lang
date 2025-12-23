@@ -4,7 +4,7 @@ from i13c import ast, err, ir, low, res, src
 def can_lower_syscall_program():
     program = ast.Program(
         functions=[
-            ast.Function(
+            ast.AsmFunction(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
@@ -36,7 +36,7 @@ def can_lower_syscall_program():
 def can_lower_mov_program():
     program = ast.Program(
         functions=[
-            ast.Function(
+            ast.AsmFunction(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
@@ -76,7 +76,7 @@ def can_lower_mov_program():
 def can_lower_noentry_program():
     program = ast.Program(
         functions=[
-            ast.Function(
+            ast.AsmFunction(
                 ref=src.Span(offset=0, length=4),
                 name=b"aux",
                 terminal=False,
@@ -108,7 +108,7 @@ def can_lower_noentry_program():
 def can_detect_unsupported_mnemonic():
     program = ast.Program(
         functions=[
-            ast.Function(
+            ast.AsmFunction(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,

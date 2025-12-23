@@ -5,7 +5,7 @@ from typing import List, NoReturn
 
 import click
 
-from i13c import diag, elf, enc, ld, lex, low, par, res, sem, src
+from i13c import ast, diag, elf, enc, ld, lex, low, par, res, sem, src
 
 
 def emit_and_exit(
@@ -68,7 +68,7 @@ def ast_command(path: str) -> None:
             for parameter in function.parameters:
                 click.echo(f"    {str(parameter)}")
 
-        if function.instructions:
+        if isinstance(function, ast.AsmFunction) and function.instructions:
             click.echo("  Instructions:")
             for instruction in function.instructions:
                 click.echo(f"    {str(instruction)}")
