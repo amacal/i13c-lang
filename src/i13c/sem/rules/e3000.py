@@ -1,23 +1,22 @@
 from typing import List
 
-from i13c import ast, diag, err
-from i13c.sem.asm import INSTRUCTIONS_TABLE
+from i13c import diag, err
+from i13c.sem import asm, rel
 
 
 def validate_assembly_mnemonic(
-    program: ast.Program,
+    relationships: rel.Relationships,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for function in program.functions:
-        if isinstance(function, ast.AsmFunction):
-            for instruction in function.instructions:
+    for instruction in relationships.nodes.instructions.values():
 
-                if instruction.mnemonic.name not in INSTRUCTIONS_TABLE:
-                    diagnostics.append(
-                        err.report_e3000_unknown_instruction(
-                            instruction.ref,
-                        )
-                    )
+        # absence means unknown instruction
+        if instruction.mnemonic.name not in asm.INSTRUCTIONS_TABLE:
+            diagnostics.append(
+                err.report_e3000_unknown_instruction(
+                    instruction.ref,
+                )
+            )
 
     return diagnostics

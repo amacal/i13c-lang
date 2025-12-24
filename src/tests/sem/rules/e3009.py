@@ -1,4 +1,5 @@
 from i13c import ast, err, sem, src
+from i13c.sem import build
 
 
 def can_detect_non_asm_called_symbol():
@@ -27,10 +28,8 @@ def can_detect_non_asm_called_symbol():
         ]
     )
 
-    diagnostics = sem.e3009.validate_called_symbol_is_asm(
-        program,
-        sem.aggregate(program),
-    )
+    relationships = build.build_semantic(program)
+    diagnostics = sem.e3009.validate_called_symbol_is_asm(relationships)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

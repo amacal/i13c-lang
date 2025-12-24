@@ -1,23 +1,21 @@
 from typing import List
 
-from i13c import ast, diag, err, sym
+from i13c import diag, err
+from i13c.sem import rel
 
 
 def validate_called_symbol_exists(
-    program: ast.Program,
-    symbols: sym.SymbolTable,
+    relationships: rel.Relationships,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for function in program.functions:
-        if isinstance(function, ast.RegFunction):
-            for statement in function.statements:
-                if statement.name not in symbols.entries:
-                    diagnostics.append(
-                        err.report_e3008_called_symbol_exists(
-                            statement.ref,
-                            statement.name,
-                        )
-                    )
+    for cid, call in relationships.nodes.calls.id_to_node.items():
+        if cid not in relationships.edges.call_targets.keys():
+            diagnostics.append(
+                err.report_e3008_called_symbol_exists(
+                    call.ref,
+                    call.name,
+                )
+            )
 
     return diagnostics

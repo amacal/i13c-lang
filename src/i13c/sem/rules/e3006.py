@@ -1,24 +1,25 @@
 from typing import List, Set
 
-from i13c import ast, diag, err
+from i13c import diag, err
+from i13c.sem import rel
 
 
 def validate_duplicated_function_names(
-    program: ast.Program,
+    relationships: rel.Relationships,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
-    function_names: Set[bytes] = set()
+    seen: Set[bytes] = set()
 
-    for function in program.functions:
-        if function.name not in function_names:
-            function_names.add(function.name)
-
-        else:
-            diagnostics.append(
-                err.report_e3006_duplicated_function_names(
-                    function.ref,
-                    function.name,
+    for fid in relationships.nodes.functions.id_to_node:
+        if function := relationships.nodes.functions.find_by_id(fid):
+            if function.name in seen:
+                diagnostics.append(
+                    err.report_e3006_duplicated_function_names(
+                        function.ref,
+                        function.name,
+                    )
                 )
-            )
+            else:
+                seen.add(function.name)
 
     return diagnostics

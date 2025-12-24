@@ -1,30 +1,32 @@
 from i13c import ast, err, sem, src
+from i13c.sem import build
 
 
 def can_detect_invalid_asm_operand_types_of_mov():
-    diagnostics = sem.e3002.validate_assembly_operand_types(
-        ast.Program(
-            functions=[
-                ast.AsmFunction(
-                    ref=src.Span(offset=1, length=10),
-                    name=b"main",
-                    terminal=False,
-                    parameters=[],
-                    clobbers=[],
-                    instructions=[
-                        ast.Instruction(
-                            ref=src.Span(offset=12, length=15),
-                            mnemonic=ast.Mnemonic(name=b"mov"),
-                            operands=[
-                                ast.Immediate(value=0x1234),
-                                ast.Immediate(value=0x5678),
-                            ],
-                        )
-                    ],
-                )
-            ]
-        )
+    program = ast.Program(
+        functions=[
+            ast.AsmFunction(
+                ref=src.Span(offset=1, length=10),
+                name=b"main",
+                terminal=False,
+                parameters=[],
+                clobbers=[],
+                instructions=[
+                    ast.Instruction(
+                        ref=src.Span(offset=12, length=15),
+                        mnemonic=ast.Mnemonic(name=b"mov"),
+                        operands=[
+                            ast.Immediate(value=0x1234),
+                            ast.Immediate(value=0x5678),
+                        ],
+                    )
+                ],
+            )
+        ]
     )
+
+    relationships = build.build_semantic(program)
+    diagnostics = sem.e3002.validate_assembly_operand_types(relationships)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

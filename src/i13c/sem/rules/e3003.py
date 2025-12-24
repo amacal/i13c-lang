@@ -1,31 +1,28 @@
 from typing import List, Set
 
-from i13c import ast, diag, err
+from i13c import diag, err
+from i13c.sem import rel
 
 
 def validate_duplicated_parameter_bindings(
-    program: ast.Program,
+    relationships: rel.Relationships,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for function in program.functions:
-        # each function's bindings
-        bindings: Set[bytes] = set()
-        parameters: List[ast.AsmParameter] = []
+    for fid, parameters in relationships.edges.function_parameters.items():
+        seen: Set[bytes] = set()
 
-        if isinstance(function, ast.AsmFunction):
-            parameters = function.parameters
-
-        # asm functions will be the only ones with parameter bindings
-        for parameter in parameters:
-            if parameter.bind.name in bindings:
-                diagnostics.append(
-                    err.report_e3003_duplicated_parameter_bindings(
-                        function.ref,
-                        parameter.bind.name,
-                    )
-                )
-            else:
-                bindings.add(parameter.bind.name)
+        for pid in parameters:
+            if register := relationships.edges.parameter_bindings.find_by_id(pid):
+                if register.name in seen:
+                    if function := relationships.nodes.functions.find_by_id(fid):
+                        diagnostics.append(
+                            err.report_e3003_duplicated_parameter_bindings(
+                                function.ref,
+                                register.name,
+                            )
+                        )
+                else:
+                    seen.add(register.name)
 
     return diagnostics

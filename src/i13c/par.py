@@ -407,6 +407,7 @@ def parse_argument(state: ParsingState) -> ast.IntegerLiteral:
     token = state.expect(lex.TOKEN_HEX)
 
     return ast.IntegerLiteral(
+        ref=state.span(token),
         value=int(state.extract(token), 16),
     )
 

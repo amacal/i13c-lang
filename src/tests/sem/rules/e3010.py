@@ -1,4 +1,5 @@
 from i13c import ast, err, sem, src
+from i13c.sem import build
 
 
 def can_survive_non_terminal_callee_symbol():
@@ -27,10 +28,8 @@ def can_survive_non_terminal_callee_symbol():
         ]
     )
 
-    diagnostics = sem.e3010.validate_called_symbol_termination(
-        program,
-        sem.aggregate(program),
-    )
+    relationships = build.build_semantic(program)
+    diagnostics = sem.e3010.validate_called_symbol_termination(relationships)
 
     assert len(diagnostics) == 0
 
@@ -61,10 +60,8 @@ def can_detect_non_terminal_caller_symbol():
         ]
     )
 
-    diagnostics = sem.e3010.validate_called_symbol_termination(
-        program,
-        sem.aggregate(program),
-    )
+    relationships = build.build_semantic(program)
+    diagnostics = sem.e3010.validate_called_symbol_termination(relationships)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -112,9 +109,7 @@ def can_service_non_terminal_caller_symbol_not_last_call():
         ]
     )
 
-    diagnostics = sem.e3010.validate_called_symbol_termination(
-        program,
-        sem.aggregate(program),
-    )
+    relationships = build.build_semantic(program)
+    diagnostics = sem.e3010.validate_called_symbol_termination(relationships)
 
     assert len(diagnostics) == 0

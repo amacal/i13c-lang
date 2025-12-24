@@ -1,30 +1,26 @@
 from typing import List, Set
 
-from i13c import ast, diag, err
+from i13c import diag, err
+from i13c.sem import rel
 
 
 def validate_duplicated_function_clobbers(
-    program: ast.Program,
+    relationships: rel.Relationships,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for function in program.functions:
-        # each function's clobbers
+    for fid, registers in relationships.edges.function_clobbers.items():
         seen: Set[bytes] = set()
-        clobbers: List[ast.Register] = []
 
-        if isinstance(function, ast.AsmFunction):
-            clobbers = function.clobbers
-
-        # asm functions will be the only ones with clobbers
-        for clobber in clobbers:
+        for clobber in registers:
             if clobber.name in seen:
-                diagnostics.append(
-                    err.report_e3005_duplicated_function_clobbers(
-                        function.ref,
-                        clobber.name,
+                if function := relationships.nodes.functions.find_by_id(fid):
+                    diagnostics.append(
+                        err.report_e3005_duplicated_function_clobbers(
+                            function.ref,
+                            clobber.name,
+                        )
                     )
-                )
             else:
                 seen.add(clobber.name)
 

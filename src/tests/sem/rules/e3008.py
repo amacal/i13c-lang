@@ -1,4 +1,5 @@
 from i13c import ast, err, sem, src
+from i13c.sem import build
 
 
 def can_detect_missing_called_symbol():
@@ -20,10 +21,8 @@ def can_detect_missing_called_symbol():
         ]
     )
 
-    diagnostics = sem.e3008.validate_called_symbol_exists(
-        program,
-        sem.aggregate(program),
-    )
+    relationships = build.build_semantic(program)
+    diagnostics = sem.e3008.validate_called_symbol_exists(relationships)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

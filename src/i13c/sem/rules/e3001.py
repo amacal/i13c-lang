@@ -1,24 +1,23 @@
 from typing import List
 
 from i13c import ast, diag, err
+from i13c.sem import rel
 
 
 def validate_immediate_out_of_range(
-    program: ast.Program,
+    relationships: rel.Relationships,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for function in program.functions:
-        if isinstance(function, ast.AsmFunction):
-            for instruction in function.instructions:
-                for operand in instruction.operands:
-                    if isinstance(operand, ast.Immediate):
-                        if not (0 <= operand.value <= 0xFFFFFFFFFFFFFFFF):
-                            diagnostics.append(
-                                err.report_e3001_immediate_out_of_range(
-                                    instruction.ref,
-                                    operand.value,
-                                )
-                            )
+    for instruction in relationships.nodes.instructions.values():
+        for operand in instruction.operands:
+            if isinstance(operand, ast.Immediate):
+                if not (0 <= operand.value <= 0xFFFFFFFFFFFFFFFF):
+                    diagnostics.append(
+                        err.report_e3001_immediate_out_of_range(
+                            instruction.ref,
+                            operand.value,
+                        )
+                    )
 
     return diagnostics

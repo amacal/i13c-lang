@@ -92,7 +92,7 @@ def ir_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
 
-    if diagnostics := sem.validate_1st_pass(program):
+    if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics, source=code)
 
     unit = unwrap(low.lower(program), source=code)
@@ -118,7 +118,7 @@ def bin_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
 
-    if diagnostics := sem.validate_1st_pass(program):
+    if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics, source=code)
 
     unit = unwrap(low.lower(program), source=code)
@@ -138,7 +138,7 @@ def elf_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
 
-    if diagnostics := sem.validate_1st_pass(program):
+    if diagnostics := sem.validate(program):
         emit_and_exit(diagnostics, source=code)
 
     unit = unwrap(low.lower(program), source=code)

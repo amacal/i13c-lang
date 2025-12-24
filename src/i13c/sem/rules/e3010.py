@@ -1,31 +1,28 @@
-from typing import List, Optional
+from typing import List
 
-from i13c import ast, diag, err, sym
+from i13c import diag, err
+from i13c.sem import rel
 
 
 def validate_called_symbol_termination(
-    program: ast.Program,
-    symbols: sym.SymbolTable,
+    relationships: rel.Relationships,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for function in program.functions:
-        if function.terminal:
-            if isinstance(function, ast.RegFunction):
-                terminal = False
-                matched: Optional[ast.CallStatement] = None
+    for fid, terminal in relationships.analysis.is_terminal.items():
+        if not terminal:
+            continue
 
-                # find for last called symbol
-                for statement in function.statements:
-                    if symbol := symbols.entries.get(statement.name):
-                        (matched, terminal) = statement, symbol.target.terminal
-
-                if matched and not terminal:
-                    diagnostics.append(
-                        err.report_e3010_callee_is_non_terminal(
-                            matched.ref,
-                            matched.name,
-                        )
-                    )
+        for sid in relationships.analysis.function_exits.get(fid):
+            if cid := relationships.edges.statement_calls.find_by_id(sid):
+                if callee := relationships.edges.call_targets.find_by_id(cid):
+                    if not relationships.analysis.is_terminal.find_by_id(callee):
+                        if call := relationships.nodes.calls.find_by_id(cid):
+                            diagnostics.append(
+                                err.report_e3010_callee_is_non_terminal(
+                                    call.ref,
+                                    call.name,
+                                )
+                            )
 
     return diagnostics
