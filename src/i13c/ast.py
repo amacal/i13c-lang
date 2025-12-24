@@ -26,6 +26,7 @@ class IntegerLiteral:
 
 
 Literal = Union[IntegerLiteral]
+Argument = Union[Literal]
 
 
 @dataclass(kw_only=True, eq=False)

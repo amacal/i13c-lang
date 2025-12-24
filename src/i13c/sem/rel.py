@@ -22,8 +22,17 @@ class Bidirectional[AstNode, NodeId]:
     def items(self) -> Iterable[Tuple[NodeId, AstNode]]:
         return self.id_to_node.items()
 
+    def get_by_id(self, node_id: NodeId) -> AstNode:
+        return self.id_to_node[node_id]
+
+    def get_by_ids(self, node_ids: List[NodeId]) -> List[AstNode]:
+        return [self.id_to_node[nid] for nid in node_ids]
+
     def find_by_id(self, node_id: NodeId) -> Optional[AstNode]:
         return self.id_to_node.get(node_id)
+
+    def find_by_ids(self, node_ids: List[NodeId]) -> List[AstNode]:
+        return [self.id_to_node[nid] for nid in node_ids if nid in self.id_to_node]
 
     def find_by_node(self, node: AstNode) -> Optional[NodeId]:
         return self.node_to_id.get(node)
@@ -94,12 +103,18 @@ class StatementId:
     value: int
 
 
+@dataclass(kw_only=True, frozen=True)
+class ArgumentId:
+    value: int
+
+
 @dataclass(kw_only=True)
 class Nodes:
     functions: Bidirectional[ast.Function, FunctionId]
     instructions: Bidirectional[ast.Instruction, InstructionId]
     statements: Bidirectional[ast.Statement, StatementId]
     parameters: Bidirectional[ast.Parameter, ParameterId]
+    arguments: Bidirectional[ast.Argument, ArgumentId]
     literals: Bidirectional[ast.Literal, LiteralId]
     calls: Bidirectional[ast.CallStatement, CallId]
 
@@ -110,13 +125,21 @@ class Edges:
     function_clobbers: OneToMany[FunctionId, ast.Register]
     parameter_bindings: OneToOne[ParameterId, ast.Register]
     call_targets: OneToOne[CallId, FunctionId]
+    call_arguments: OneToMany[CallId, ArgumentId]
     statement_calls: OneToOne[StatementId, CallId]
+
+
+@dataclass(kw_only=True)
+class Type:
+    name: bytes
 
 
 @dataclass(kw_only=True)
 class Analysis:
     is_terminal: OneToOne[FunctionId, bool]
     function_exits: OneToMany[FunctionId, StatementId]
+    argument_types: OneToOne[ArgumentId, Type]
+    parameter_types: OneToOne[ParameterId, Type]
 
 
 @dataclass(kw_only=True)

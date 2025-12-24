@@ -14,6 +14,8 @@ from i13c.sem.rules import (
     e3008,
     e3009,
     e3010,
+    e3011,
+    e3012,
 )
 
 RULES_1ST_PASS: List[Callable[[rel.Relationships], List[diag.Diagnostic]]] = [
@@ -31,6 +33,8 @@ RULES_2ND_PASS: List[Callable[[rel.Relationships], List[diag.Diagnostic]]] = [
     e3008.validate_called_symbol_exists,
     e3009.validate_called_symbol_is_asm,
     e3010.validate_called_symbol_termination,
+    e3011.validate_called_arguments_count,
+    e3012.validate_called_arguments_types,
 ]
 
 

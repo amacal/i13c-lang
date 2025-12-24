@@ -15,7 +15,10 @@ lint:
 test:
 	@poetry run pytest -o python_files='*.py' -o python_functions="can_*" src/tests
 
-
 .PHONY: asm
 asm:
 	@ndisasm -b 64 -k0,120 a.out
+
+.PHONY: dump
+dump:
+	@find ./src/i13c/ -type f -name '*.py' -print0 | xargs -0 cat > dump

@@ -22,6 +22,8 @@ ERROR_3007 = "E3007"  # Integer literal out of range
 ERROR_3008 = "E3008"  # Called symbol does not exist
 ERROR_3009 = "E3009"  # Called symbol is not an asm function
 ERROR_3010 = "E3010"  # Callee is non-terminal
+ERROR_3011 = "E3011"  # Called argument count mismatch
+ERROR_3012 = "E3012"  # Called argument type mismatch
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
 
@@ -222,4 +224,29 @@ def report_e3010_callee_is_non_terminal(
         ref=ref,
         code=ERROR_3010,
         message=f"Callee function '{str(name)}' is terminal but called from a non-terminal function",
+    )
+
+
+def report_e3011_called_argument_count_mismatch(
+    ref: src.SpanLike,
+    expected: int,
+    found: int,
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_3011,
+        message=f"Called function argument mismatch: expected {str(expected)}, found {str(found)}",
+    )
+
+
+def report_e3012_called_argument_type_mismatch(
+    ref: src.SpanLike,
+    position: int,
+    expected: bytes,
+    found: bytes,
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_3012,
+        message=f"Called function argument {position} mismatch: expected {str(expected)}, found {str(found)}",
     )

@@ -8,14 +8,16 @@ def build_semantic(program: ast.Program) -> rel.Relationships:
     functions = collect_functions(program)
     instructions = collect_instructions(functions)
     statements = collect_statements(functions)
+    calls = collect_calls(functions)
 
     nodes = rel.Nodes(
         functions=functions,
         instructions=instructions,
         statements=statements,
+        calls=calls,
         parameters=collect_parameters(functions),
+        arguments=collect_arguments(calls),
         literals=collect_literals(functions),
-        calls=collect_calls(functions),
     )
 
     edges = rel.Edges(
@@ -23,12 +25,17 @@ def build_semantic(program: ast.Program) -> rel.Relationships:
         parameter_bindings=collect_parameter_bindings(nodes),
         function_clobbers=collect_function_clobbers(nodes),
         call_targets=collect_call_targets(nodes),
+        call_arguments=collect_call_arguments(nodes),
         statement_calls=collect_statement_calls(nodes),
     )
+
+    parameter_types = collect_parameter_types(nodes, edges)
 
     analysis = rel.Analysis(
         is_terminal=collect_is_terminal(nodes, edges),
         function_exits=collect_function_exits(nodes, edges),
+        parameter_types=parameter_types,
+        argument_types=collect_argument_types(nodes, edges, parameter_types),
     )
 
     return rel.Relationships(nodes=nodes, edges=edges, analysis=analysis)
@@ -122,6 +129,30 @@ def collect_parameters(
         for parameter in function.parameters:
             node_to_id[parameter] = rel.ParameterId(value=next)
             id_to_node[rel.ParameterId(value=next)] = parameter
+
+            # increment
+            next += 1
+
+    return rel.Bidirectional(
+        node_to_id=node_to_id,
+        id_to_node=id_to_node,
+        attr_to_id={},
+    )
+
+
+def collect_arguments(
+    calls: rel.Bidirectional[ast.CallStatement, rel.CallId],
+) -> rel.Bidirectional[ast.Argument, rel.ArgumentId]:
+    id_to_node: Dict[rel.ArgumentId, ast.Argument] = {}
+    node_to_id: Dict[ast.Argument, rel.ArgumentId] = {}
+
+    # counter
+    next = 1
+
+    for call in calls.values():
+        for argument in call.arguments:
+            node_to_id[argument] = rel.ArgumentId(value=next)
+            id_to_node[rel.ArgumentId(value=next)] = argument
 
             # increment
             next += 1
@@ -236,6 +267,23 @@ def collect_call_targets(
     return rel.OneToOne(map=call_targets)
 
 
+def collect_call_arguments(
+    nodes: rel.Nodes,
+) -> rel.OneToMany[rel.CallId, rel.ArgumentId]:
+    call_arguments: Dict[rel.CallId, List[rel.ArgumentId]] = {}
+
+    for cid, call in nodes.calls.items():
+        arguments: List[rel.ArgumentId] = []
+
+        for argument in call.arguments:
+            if arg_id := nodes.arguments.find_by_node(argument):
+                arguments.append(arg_id)
+
+        call_arguments[cid] = arguments
+
+    return rel.OneToMany(map=call_arguments)
+
+
 def collect_statement_calls(
     nodes: rel.Nodes,
 ) -> rel.OneToOne[rel.StatementId, rel.CallId]:
@@ -276,3 +324,51 @@ def collect_function_exits(
         function_exits[fid] = exits
 
     return rel.OneToMany(map=function_exits)
+
+
+def collect_argument_types(
+    nodes: rel.Nodes,
+    edges: rel.Edges,
+    parameter_types: rel.OneToOne[rel.ParameterId, rel.Type],
+) -> rel.OneToOne[rel.ArgumentId, rel.Type]:
+    argument_types: Dict[rel.ArgumentId, rel.Type] = {}
+
+    def fits(value: int, typ: rel.Type) -> bool:
+        match typ.name:
+            case b"u8":
+                return 0 <= value <= 0xFF
+            case b"u16":
+                return 0 <= value <= 0xFFFF
+            case b"u32":
+                return 0 <= value <= 0xFFFFFFFF
+            case b"u64":
+                return 0 <= value <= 0xFFFFFFFFFFFFFFFF
+            case _:
+                return False
+
+    for cid, fid in edges.call_targets.items():
+        aids = edges.call_arguments.get(cid)
+        pids = edges.function_parameters.get(fid)
+
+        if len(aids) != len(pids):
+            continue
+
+        for aid, pid in zip(aids, pids):
+            if ptype := parameter_types.find_by_id(pid):
+                if argument := nodes.arguments.find_by_id(aid):
+                    if fits(argument.value, ptype):
+                        argument_types[aid] = ptype
+
+    return rel.OneToOne(map=argument_types)
+
+
+def collect_parameter_types(
+    nodes: rel.Nodes,
+    edges: rel.Edges,
+) -> rel.OneToOne[rel.ParameterId, rel.Type]:
+    parameter_types: Dict[rel.ParameterId, rel.Type] = {}
+
+    for pid, parameter in nodes.parameters.items():
+        parameter_types[pid] = rel.Type(name=parameter.type.name)
+
+    return rel.OneToOne(map=parameter_types)
