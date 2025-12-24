@@ -1,20 +1,20 @@
 from typing import List, Set
 
 from i13c import diag, err
-from i13c.sem import rel
+from i13c.sem.graph import Graph
 
 
 def validate_duplicated_function_clobbers(
-    relationships: rel.Relationships,
+    graph: Graph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fid, registers in relationships.edges.function_clobbers.items():
+    for fid, rids in graph.edges.function_clobbers.items():
         seen: Set[bytes] = set()
 
-        for clobber in registers:
+        for clobber in graph.nodes.registers.find_by_ids(rids):
             if clobber.name in seen:
-                if function := relationships.nodes.functions.find_by_id(fid):
+                if function := graph.nodes.functions.find_by_id(fid):
                     diagnostics.append(
                         err.report_e3005_duplicated_function_clobbers(
                             function.ref,

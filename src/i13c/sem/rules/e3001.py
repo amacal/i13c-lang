@@ -1,15 +1,15 @@
 from typing import List
 
 from i13c import ast, diag, err
-from i13c.sem import rel
+from i13c.sem.graph import Graph
 
 
 def validate_immediate_out_of_range(
-    relationships: rel.Relationships,
+    graph: Graph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for instruction in relationships.nodes.instructions.values():
+    for instruction in graph.nodes.instructions.values():
         for operand in instruction.operands:
             if isinstance(operand, ast.Immediate):
                 if not (0 <= operand.value <= 0xFFFFFFFFFFFFFFFF):

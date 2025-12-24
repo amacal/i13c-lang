@@ -1,5 +1,5 @@
 from i13c import ast, err, sem, src
-from i13c.sem import build
+from i13c.sem.graph import build_graph
 
 
 def can_detect_reg_integer_literal_out_of_range():
@@ -26,8 +26,8 @@ def can_detect_reg_integer_literal_out_of_range():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3007.validate_integer_literal_out_of_range(relationships)
+    graph = build_graph(program)
+    diagnostics = sem.e3007.validate_integer_literal_out_of_range(graph)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

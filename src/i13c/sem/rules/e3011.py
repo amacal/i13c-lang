@@ -1,19 +1,21 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem import rel
+from i13c.sem.analysis import Analysis
+from i13c.sem.graph import Graph
 
 
 def validate_called_arguments_count(
-    relationships: rel.Relationships,
+    graph: Graph,
+    analysis: Analysis,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for cid, fid in relationships.edges.call_targets.items():
-        call = relationships.nodes.calls.get_by_id(cid)
+    for cid, fids in graph.edges.call_targets.items():
+        call = graph.nodes.calls.get_by_id(cid)
 
-        aids = relationships.edges.call_arguments.get(cid)
-        pids = relationships.edges.function_parameters.get(fid)
+        aids = graph.edges.call_arguments.get(cid)
+        pids = graph.edges.function_parameters.get(fids[0])
 
         if len(aids) != len(pids):
             diagnostics.append(

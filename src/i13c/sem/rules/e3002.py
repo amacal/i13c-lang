@@ -1,15 +1,16 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem import asm, rel
+from i13c.sem import asm
+from i13c.sem.graph import Graph
 
 
 def validate_assembly_operand_types(
-    relationships: rel.Relationships,
+    graph: Graph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for instruction in relationships.nodes.instructions.values():
+    for instruction in graph.nodes.instructions.values():
 
         matched = False
         signature = asm.INSTRUCTIONS_TABLE.get(instruction.mnemonic.name)

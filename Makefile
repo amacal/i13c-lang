@@ -21,4 +21,5 @@ asm:
 
 .PHONY: dump
 dump:
-	@find ./src/i13c/ -type f -name '*.py' -print0 | xargs -0 cat > dump
+	@find ./src/i13c -type f -name '*.py' -print0 \
+	| xargs -0 -I{} sh -c 'echo "---- {}"; cat "{}"; echo' > dump

@@ -1,5 +1,5 @@
 from i13c import ast, err, sem, src
-from i13c.sem import build
+from i13c.sem.graph import build_graph
 
 
 def can_detect_duplicated_asm_parameter_names():
@@ -33,8 +33,8 @@ def can_detect_duplicated_asm_parameter_names():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3004.validate_duplicated_parameter_names(relationships)
+    graph = build_graph(program)
+    diagnostics = sem.e3004.validate_duplicated_parameter_names(graph)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -72,8 +72,8 @@ def can_detect_duplicated_reg_parameter_names():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3004.validate_duplicated_parameter_names(relationships)
+    graph = build_graph(program)
+    diagnostics = sem.e3004.validate_duplicated_parameter_names(graph)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

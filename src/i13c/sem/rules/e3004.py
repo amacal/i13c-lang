@@ -1,21 +1,21 @@
 from typing import List, Set
 
 from i13c import diag, err
-from i13c.sem import rel
+from i13c.sem.graph import Graph
 
 
 def validate_duplicated_parameter_names(
-    relationships: rel.Relationships,
+    graph: Graph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fid, parameters in relationships.edges.function_parameters.items():
+    for fid, parameters in graph.edges.function_parameters.items():
         seen: Set[bytes] = set()
 
         for pid in parameters:
-            if parameter := relationships.nodes.parameters.find_by_id(pid):
+            if parameter := graph.nodes.parameters.find_by_id(pid):
                 if parameter.name in seen:
-                    if function := relationships.nodes.functions.find_by_id(fid):
+                    if function := graph.nodes.functions.find_by_id(fid):
                         diagnostics.append(
                             err.report_e3004_duplicated_parameter_names(
                                 function.ref,

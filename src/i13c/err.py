@@ -223,7 +223,7 @@ def report_e3010_callee_is_non_terminal(
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_3010,
-        message=f"Callee function '{str(name)}' is terminal but called from a non-terminal function",
+        message=f"Callee function '{str(name)}' is non-terminal but called from a terminal function",
     )
 
 

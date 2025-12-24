@@ -1,5 +1,6 @@
 from i13c import ast, err, sem, src
-from i13c.sem import build
+from i13c.sem.analysis import build_analysis
+from i13c.sem.graph import build_graph
 
 
 def can_detect_incorrect_argument_count_for_a_call_less():
@@ -33,8 +34,9 @@ def can_detect_incorrect_argument_count_for_a_call_less():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3011.validate_called_arguments_count(relationships)
+    graph = build_graph(program)
+    analysis = build_analysis(graph)
+    diagnostics = sem.e3011.validate_called_arguments_count(graph, analysis)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

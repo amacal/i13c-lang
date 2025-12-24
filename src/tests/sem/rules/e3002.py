@@ -1,5 +1,5 @@
 from i13c import ast, err, sem, src
-from i13c.sem import build
+from i13c.sem.graph import build_graph
 
 
 def can_detect_invalid_asm_operand_types_of_mov():
@@ -25,8 +25,8 @@ def can_detect_invalid_asm_operand_types_of_mov():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3002.validate_assembly_operand_types(relationships)
+    graph = build_graph(program)
+    diagnostics = sem.e3002.validate_assembly_operand_types(graph)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

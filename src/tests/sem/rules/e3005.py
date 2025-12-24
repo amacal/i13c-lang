@@ -1,5 +1,5 @@
 from i13c import ast, err, sem, src
-from i13c.sem import build
+from i13c.sem.graph import build_graph
 
 
 def can_detect_duplicated_asm_clobbers():
@@ -26,8 +26,8 @@ def can_detect_duplicated_asm_clobbers():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3005.validate_duplicated_function_clobbers(relationships)
+    graph = build_graph(program)
+    diagnostics = sem.e3005.validate_duplicated_function_clobbers(graph)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

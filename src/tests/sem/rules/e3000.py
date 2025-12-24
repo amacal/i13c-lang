@@ -1,5 +1,5 @@
 from i13c import ast, err, sem, src
-from i13c.sem import build
+from i13c.sem.graph import build_graph
 
 
 def can_accept_asm_operands_arity_of_syscall():
@@ -22,8 +22,8 @@ def can_accept_asm_operands_arity_of_syscall():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3000.validate_assembly_mnemonic(relationships)
+    graph = build_graph(program)
+    diagnostics = sem.e3000.validate_assembly_mnemonic(graph)
 
     assert len(diagnostics) == 0
 
@@ -51,8 +51,8 @@ def can_accept_asm_operands_arity_of_mov():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3000.validate_assembly_mnemonic(relationships)
+    graph = build_graph(program)
+    diagnostics = sem.e3000.validate_assembly_mnemonic(graph)
 
     assert len(diagnostics) == 0
 
@@ -77,8 +77,8 @@ def can_detect_invalid_asm_instruction():
         ]
     )
 
-    relationships = build.build_semantic(program)
-    diagnostics = sem.e3000.validate_assembly_mnemonic(relationships)
+    graph = build_graph(program)
+    diagnostics = sem.e3000.validate_assembly_mnemonic(graph)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
