@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from i13c.sem.graph import ArgumentId, CallId, FunctionId, ParameterId
+from i13c.sem import ids
 
 
 @dataclass(kw_only=True)
@@ -15,11 +15,11 @@ class Register:
 
 @dataclass(kw_only=True, frozen=True)
 class CallSite:
-    call: CallId
-    function: FunctionId
+    call: ids.CallId
+    function: ids.FunctionId
 
 
 @dataclass(kw_only=True, frozen=True)
 class SlotBinding:
-    argument: ArgumentId
-    parameter: ParameterId
+    argument: ids.ArgumentId
+    parameter: ids.ParameterId

@@ -2,31 +2,25 @@ from dataclasses import dataclass
 from typing import Dict, List
 
 from i13c import ast
+from i13c.sem import ids
 from i13c.sem.core import Bidirectional, OneToMany, OneToOne
-from i13c.sem.graph import (
-    ArgumentId,
-    CallId,
-    FunctionId,
-    Graph,
-    ParameterId,
-    StatementId,
-)
+from i13c.sem.graph import Graph
 from i13c.sem.types import CallSite, SlotBinding, Type
 
 
 @dataclass
 class Resolver:
-    by_name: OneToMany[CallId, FunctionId]
-    by_arity: OneToMany[CallId, FunctionId]
+    by_name: OneToMany[ids.CallId, ids.FunctionId]
+    by_arity: OneToMany[ids.CallId, ids.FunctionId]
     by_slot: OneToMany[CallSite, SlotBinding]
-    by_type: OneToMany[CallId, FunctionId]
+    by_type: OneToMany[ids.CallId, ids.FunctionId]
 
 
 @dataclass(kw_only=True)
 class Analysis:
-    is_terminal: OneToOne[FunctionId, bool]
-    function_exits: OneToMany[FunctionId, StatementId]
-    parameter_types: OneToOne[ParameterId, Type]
+    is_terminal: OneToOne[ids.FunctionId, bool]
+    function_exits: OneToMany[ids.FunctionId, ids.StatementId]
+    parameter_types: OneToOne[ids.ParameterId, Type]
     argument_types: OneToMany[SlotBinding, Type]
 
 
@@ -86,10 +80,10 @@ def build_semantic_model(graph: Graph) -> SemanticModel:
 
 
 def resolve_by_name(
-    calls: Bidirectional[ast.CallStatement, CallId],
-    functions_by_name: OneToMany[bytes, FunctionId],
-) -> OneToMany[CallId, FunctionId]:
-    out: Dict[CallId, List[FunctionId]] = {}
+    calls: Bidirectional[ast.CallStatement, ids.CallId],
+    functions_by_name: OneToMany[bytes, ids.FunctionId],
+) -> OneToMany[ids.CallId, ids.FunctionId]:
+    out: Dict[ids.CallId, List[ids.FunctionId]] = {}
 
     for cid, call in calls.items():
         if targets := functions_by_name.get(call.name):
@@ -99,15 +93,15 @@ def resolve_by_name(
 
 
 def resolve_by_arity(
-    call_targets: OneToMany[CallId, FunctionId],
-    calls: Bidirectional[ast.CallStatement, CallId],
-    functions: Bidirectional[ast.Function, FunctionId],
-) -> OneToMany[CallId, FunctionId]:
+    call_targets: OneToMany[ids.CallId, ids.FunctionId],
+    calls: Bidirectional[ast.CallStatement, ids.CallId],
+    functions: Bidirectional[ast.Function, ids.FunctionId],
+) -> OneToMany[ids.CallId, ids.FunctionId]:
 
-    out: Dict[CallId, List[FunctionId]] = {}
+    out: Dict[ids.CallId, List[ids.FunctionId]] = {}
 
     for cid, fids in call_targets.items():
-        keep: List[FunctionId] = []
+        keep: List[ids.FunctionId] = []
 
         call = calls.get_by_id(cid)
         argc = len(call.arguments)
@@ -124,11 +118,11 @@ def resolve_by_arity(
 
 
 def resolve_by_slot(
-    call_targets: OneToMany[CallId, FunctionId],
-    calls: Bidirectional[ast.CallStatement, CallId],
-    functions: Bidirectional[ast.Function, FunctionId],
-    arguments: Bidirectional[ast.Argument, ArgumentId],
-    parameters: Bidirectional[ast.Parameter, ParameterId],
+    call_targets: OneToMany[ids.CallId, ids.FunctionId],
+    calls: Bidirectional[ast.CallStatement, ids.CallId],
+    functions: Bidirectional[ast.Function, ids.FunctionId],
+    arguments: Bidirectional[ast.Argument, ids.ArgumentId],
+    parameters: Bidirectional[ast.Parameter, ids.ParameterId],
 ) -> OneToMany[CallSite, SlotBinding]:
 
     out: Dict[CallSite, List[SlotBinding]] = {}
@@ -156,9 +150,9 @@ def resolve_by_slot(
 def resolve_by_type(
     bindings: OneToMany[CallSite, SlotBinding],
     types: OneToMany[SlotBinding, Type],
-) -> OneToMany[CallId, FunctionId]:
+) -> OneToMany[ids.CallId, ids.FunctionId]:
 
-    out: Dict[CallId, List[FunctionId]] = {}
+    out: Dict[ids.CallId, List[ids.FunctionId]] = {}
 
     for call_site, slots in bindings.items():
         ok = True
@@ -178,9 +172,9 @@ def resolve_by_type(
 
 
 def collect_parameter_types(
-    parameters: Bidirectional[ast.Parameter, ParameterId],
-) -> OneToOne[ParameterId, Type]:
-    out: Dict[ParameterId, Type] = {}
+    parameters: Bidirectional[ast.Parameter, ids.ParameterId],
+) -> OneToOne[ids.ParameterId, Type]:
+    out: Dict[ids.ParameterId, Type] = {}
 
     for pid, parameter in parameters.items():
         out[pid] = Type(name=parameter.type.name)
@@ -189,9 +183,9 @@ def collect_parameter_types(
 
 
 def collect_argument_types(
-    arguments: Bidirectional[ast.Argument, ArgumentId],
+    arguments: Bidirectional[ast.Argument, ids.ArgumentId],
     bindings: OneToMany[CallSite, SlotBinding],
-    parameter_types: OneToOne[ParameterId, Type],
+    parameter_types: OneToOne[ids.ParameterId, Type],
 ) -> OneToMany[SlotBinding, Type]:
     out: Dict[SlotBinding, List[Type]] = {}
 
@@ -219,9 +213,9 @@ def collect_argument_types(
 
 
 def collect_is_terminal(
-    functions: Bidirectional[ast.Function, FunctionId],
-) -> OneToOne[FunctionId, bool]:
-    out: Dict[FunctionId, bool] = {}
+    functions: Bidirectional[ast.Function, ids.FunctionId],
+) -> OneToOne[ids.FunctionId, bool]:
+    out: Dict[ids.FunctionId, bool] = {}
 
     for fid, function in functions.items():
         out[fid] = function.terminal
@@ -230,10 +224,10 @@ def collect_is_terminal(
 
 
 def collect_function_exits(
-    functions: Bidirectional[ast.Function, FunctionId],
-    statements: Bidirectional[ast.Statement, StatementId],
-) -> OneToMany[FunctionId, StatementId]:
-    out: Dict[FunctionId, List[StatementId]] = {}
+    functions: Bidirectional[ast.Function, ids.FunctionId],
+    statements: Bidirectional[ast.Statement, ids.StatementId],
+) -> OneToMany[ids.FunctionId, ids.StatementId]:
+    out: Dict[ids.FunctionId, List[ids.StatementId]] = {}
 
     for fid, function in functions.items():
         if len(function.statements) > 0:
