@@ -72,5 +72,8 @@ class OneToOne[LeftId, RightId]:
     def items(self) -> Iterable[Tuple[LeftId, RightId]]:
         return self.map.items()
 
+    def get_by_id(self, left_id: LeftId) -> RightId:
+        return self.map[left_id]
+
     def find_by_id(self, left_id: LeftId) -> Optional[RightId]:
         return self.map.get(left_id)

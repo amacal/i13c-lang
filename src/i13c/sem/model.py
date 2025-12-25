@@ -1,16 +1,16 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Callable, Dict, List, Union
 
 from i13c import ast
-from i13c.sem import ids
+from i13c.sem import ids, nodes
 from i13c.sem.core import Bidirectional, OneToMany, OneToOne
 from i13c.sem.graph import Graph
-from i13c.sem.types import CallSite, SlotBinding, Type
+from i13c.sem.types import CallSite, Register, SlotBinding, Type
 
 
 @dataclass
 class Resolver:
-    by_name: OneToMany[ids.CallId, ids.FunctionId]
+    by_name: OneToMany[ids.CallId, Union[ids.FunctionId, ids.SnippetId]]
     by_arity: OneToMany[ids.CallId, ids.FunctionId]
     by_slot: OneToMany[CallSite, SlotBinding]
     by_type: OneToMany[ids.CallId, ids.FunctionId]
@@ -28,12 +28,14 @@ class Analysis:
 class SemanticModel:
     resolver: Resolver
     analysis: Analysis
+    functions: List[nodes.Function]
 
 
 def build_semantic_model(graph: Graph) -> SemanticModel:
     by_name = resolve_by_name(
         graph.nodes.calls,
         graph.indices.functions_by_name,
+        graph.indices.snippets_by_name,
     )
 
     by_arity = resolve_by_arity(
@@ -76,24 +78,186 @@ def build_semantic_model(graph: Graph) -> SemanticModel:
             is_terminal=is_terminal,
             function_exits=function_exits,
         ),
+        functions=[],
     )
+
+
+def build_snippets(
+    graph: Graph,
+    next: Callable[[], int],
+) -> Dict[ids.SnippetId, nodes.Function]:
+    out: Dict[ids.SnippetId, nodes.Function] = {}
+
+    for snid, snippet in graph.nodes.snippets.items():
+        parameters: List[nodes.Parameter] = []
+
+        for sid in graph.edges.snippet_slots.get(snid):
+            slot = graph.nodes.slots.get_by_id(sid)
+
+            parameters.append(
+                nodes.Parameter(
+                    id=nodes.ParameterId(id=next()),
+                    name=slot.name,
+                    type=Type(name=slot.type.name),
+                    bind=Register(name=slot.bind.name),
+                )
+            )
+
+        def into_instructions(node: ast.Instruction) -> nodes.Instruction:
+            operands: List[Union[nodes.Register, nodes.Immediate]] = []
+
+            for operand in node.operands:
+                match operand:
+                    case ast.Register() as reg:
+                        operands.append(nodes.Register(name=reg.name))
+                    case ast.Immediate() as imm:
+                        operands.append(nodes.Immediate(value=imm.value))
+
+            return nodes.Instruction(
+                id=nodes.InstructionId(id=next()),
+                mnemonic=node.mnemonic.name,
+                operands=operands,
+            )
+
+        clobbers = [nodes.Register(name=clobber.name) for clobber in snippet.clobbers]
+        instructions = (into_instructions(instr) for instr in snippet.instructions)
+
+        out[snid] = nodes.Function(
+            id=nodes.FunctionId(id=next()),
+            name=snippet.name,
+            terminal=snippet.terminal,
+            parameters=parameters,
+            clobbers=clobbers,
+            body=list(instructions),
+        )
+
+    return out
+
+
+def build_functions(
+    graph: Graph,
+    analysis: Analysis,
+    next: Callable[[], int],
+) -> Dict[ids.FunctionId, nodes.Function]:
+    out: Dict[ids.FunctionId, nodes.Function] = {}
+
+    for fid, function in graph.nodes.functions.items():
+        parameters: List[nodes.Parameter] = []
+
+        for pid in graph.edges.function_parameters.get(fid):
+            param = graph.nodes.parameters.get_by_id(pid)
+
+            parameters.append(
+                nodes.Parameter(
+                    id=nodes.ParameterId(id=next()),
+                    name=param.name,
+                    type=analysis.parameter_types.get_by_id(pid),
+                    bind=None,
+                )
+            )
+
+        out[fid] = nodes.Function(
+            id=nodes.FunctionId(id=next()),
+            name=function.name,
+            terminal=analysis.is_terminal.get_by_id(fid),
+            parameters=parameters,
+            clobbers=[],
+            body=[],
+        )
+
+    return out
+
+
+def build_calls(
+    graph: Graph,
+    resolver: Resolver,
+    functions: Dict[ids.FunctionId, nodes.Function],
+    snippets: Dict[ids.SnippetId, nodes.Function],
+    next: Callable[[], int],
+) -> Dict[ids.CallId, nodes.Call]:
+    out: Dict[ids.CallId, nodes.Call] = {}
+
+    for cid, call in graph.nodes.calls.items():
+        arguments: List[nodes.Argument] = []
+        candidates: List[nodes.Function] = []
+
+        for aid in graph.edges.call_arguments.get(cid):
+            argument = graph.nodes.arguments.get_by_id(aid)
+            value = nodes.Literal(value=argument.value)
+
+            # append argument node
+            arguments.append(
+                nodes.Argument(id=nodes.ArgumentId(id=next()), value=value)
+            )
+
+        for fid in resolver.by_name.get(cid):
+            if isinstance(fid, ids.SnippetId):
+                candidates.append(snippets[fid])
+            else:
+                candidates.append(functions[fid])
+
+        out[cid] = nodes.Call(
+            id=nodes.CallId(id=next()),
+            name=call.name,
+            arguments=arguments,
+            candidates=candidates,
+        )
+
+    return out
+
+
+def attach_bodies(
+    graph: Graph,
+    functions: Dict[ids.FunctionId, nodes.Function],
+    calls: Dict[ids.CallId, nodes.Call],
+) -> None:
+    for fid, function in functions.items():
+        body: List[Union[nodes.Instruction, nodes.Call]] = []
+
+        for sid in graph.edges.function_statements.get(fid):
+            call = graph.edges.statement_calls.find_by_id(sid)
+
+            if call is not None:
+                body.append(calls[call])
+
+        function.body = body
+
+
+def merge_functions(
+    snippets: Dict[nodes.FunctionId, nodes.Function],
+    functions: Dict[ids.FunctionId, nodes.Function],
+) -> List[nodes.Function]:
+    out: List[nodes.Function] = []
+
+    out.extend(snippets.values())
+    out.extend(functions.values())
+
+    return out
 
 
 def resolve_by_name(
     calls: Bidirectional[ast.CallStatement, ids.CallId],
     functions_by_name: OneToMany[bytes, ids.FunctionId],
-) -> OneToMany[ids.CallId, ids.FunctionId]:
-    out: Dict[ids.CallId, List[ids.FunctionId]] = {}
+    snippets_by_name: OneToMany[bytes, ids.SnippetId],
+) -> OneToMany[ids.CallId, Union[ids.FunctionId, ids.SnippetId]]:
+    out: Dict[ids.CallId, List[Union[ids.FunctionId, ids.SnippetId]]] = {}
 
     for cid, call in calls.items():
+        candidates: List[Union[ids.FunctionId, ids.SnippetId]] = []
+
         if targets := functions_by_name.get(call.name):
-            out[cid] = targets
+            candidates.extend(targets)
+
+        if targets := snippets_by_name.get(call.name):
+            candidates.extend(targets)
+
+        out[cid] = candidates
 
     return OneToMany(map=out)
 
 
 def resolve_by_arity(
-    call_targets: OneToMany[ids.CallId, ids.FunctionId],
+    call_targets: OneToMany[ids.CallId, Union[ids.FunctionId, ids.SnippetId]],
     calls: Bidirectional[ast.CallStatement, ids.CallId],
     functions: Bidirectional[ast.Function, ids.FunctionId],
 ) -> OneToMany[ids.CallId, ids.FunctionId]:
@@ -107,9 +271,10 @@ def resolve_by_arity(
         argc = len(call.arguments)
 
         for fid in fids:
-            fn = functions.get_by_id(fid)
-            if len(fn.parameters) == argc:
-                keep.append(fid)
+            if isinstance(fid, ids.FunctionId):
+                fn = functions.get_by_id(fid)
+                if len(fn.parameters) == argc:
+                    keep.append(fid)
 
         if keep:
             out[cid] = keep

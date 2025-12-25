@@ -23,11 +23,13 @@ class Nodes:
 @dataclass(kw_only=True)
 class Indices:
     functions_by_name: OneToMany[bytes, ids.FunctionId]
+    snippets_by_name: OneToMany[bytes, ids.SnippetId]
 
 
 @dataclass(kw_only=True)
 class Edges:
     function_parameters: OneToMany[ids.FunctionId, ids.ParameterId]
+    function_statements: OneToMany[ids.FunctionId, ids.StatementId]
     snippet_clobbers: OneToMany[ids.SnippetId, ids.RegisterId]
     snippet_slots: OneToMany[ids.SnippetId, ids.SlotId]
     slot_bindings: OneToOne[ids.SlotId, ids.RegisterId]
@@ -60,9 +62,11 @@ def build_graph(program: ast.Program) -> Graph:
 
     # indices
     functions_by_name = index_collect_functions_by_name(functions)
+    snippets_by_name = index_collect_snippets_by_name(snippets)
 
     # edges
     function_parameters = edges_collect_function_parameters(functions, parameters)
+    function_statements = edges_collect_function_statements(functions, statements)
     snippet_clobbers = edge_collect_snippet_clobbers(snippets, registers)
     snippet_slots = edge_collect_snippet_slots(snippets, slots)
     slot_bindings = edge_collect_slot_bindings(slots, registers)
@@ -84,6 +88,7 @@ def build_graph(program: ast.Program) -> Graph:
         ),
         edges=Edges(
             function_parameters=function_parameters,
+            function_statements=function_statements,
             snippet_clobbers=snippet_clobbers,
             snippet_slots=snippet_slots,
             slot_bindings=slot_bindings,
@@ -92,6 +97,7 @@ def build_graph(program: ast.Program) -> Graph:
         ),
         indices=Indices(
             functions_by_name=functions_by_name,
+            snippets_by_name=snippets_by_name,
         ),
     )
 
@@ -335,12 +341,23 @@ def node_collect_registers(
 def index_collect_functions_by_name(
     functions: Bidirectional[ast.Function, ids.FunctionId],
 ) -> OneToMany[bytes, ids.FunctionId]:
-    functions_by_name: Dict[bytes, List[ids.FunctionId]] = {}
+    out: Dict[bytes, List[ids.FunctionId]] = {}
 
     for fid, function in functions.items():
-        functions_by_name.setdefault(function.name, []).append(fid)
+        out.setdefault(function.name, []).append(fid)
 
-    return OneToMany(map=functions_by_name)
+    return OneToMany(map=out)
+
+
+def index_collect_snippets_by_name(
+    snippets: Bidirectional[ast.Snippet, ids.SnippetId],
+) -> OneToMany[bytes, ids.SnippetId]:
+    out: Dict[bytes, List[ids.SnippetId]] = {}
+
+    for sid, snippet in snippets.items():
+        out.setdefault(snippet.name, []).append(sid)
+
+    return OneToMany(map=out)
 
 
 def edges_collect_function_parameters(
@@ -353,6 +370,18 @@ def edges_collect_function_parameters(
         function_parameters[fid] = parameters.get_by_nodes(function.parameters)
 
     return OneToMany(map=function_parameters)
+
+
+def edges_collect_function_statements(
+    functions: Bidirectional[ast.Function, ids.FunctionId],
+    statements: Bidirectional[ast.Statement, ids.StatementId],
+) -> OneToMany[ids.FunctionId, ids.StatementId]:
+    out: Dict[ids.FunctionId, List[ids.StatementId]] = {}
+
+    for fid, function in functions.items():
+        out[fid] = statements.get_by_nodes(function.statements)
+
+    return OneToMany(map=out)
 
 
 def edge_collect_slot_bindings(

@@ -13,6 +13,16 @@ class Register:
     name: bytes
 
 
+@dataclass(kw_only=True)
+class Immediate:
+    value: int
+
+
+@dataclass(kw_only=True)
+class Literal:
+    value: int
+
+
 @dataclass(kw_only=True, frozen=True)
 class CallSite:
     call: ids.CallId
