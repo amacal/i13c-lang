@@ -4,12 +4,13 @@ from i13c.sem.graph import build_graph
 
 def can_detect_duplicated_asm_function_names():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=1, length=10),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -19,11 +20,11 @@ def can_detect_duplicated_asm_function_names():
                     )
                 ],
             ),
-            ast.AsmFunction(
+            ast.Snippet(
                 ref=src.Span(offset=20, length=10),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -33,7 +34,7 @@ def can_detect_duplicated_asm_function_names():
                     )
                 ],
             ),
-        ]
+        ],
     )
 
     graph = build_graph(program)
@@ -49,8 +50,9 @@ def can_detect_duplicated_asm_function_names():
 
 def can_detect_duplicated_reg_function_names():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=10),
                 name=b"main",
                 terminal=False,
@@ -63,7 +65,7 @@ def can_detect_duplicated_reg_function_names():
                     )
                 ],
             ),
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=20, length=10),
                 name=b"main",
                 terminal=False,
@@ -76,7 +78,7 @@ def can_detect_duplicated_reg_function_names():
                     )
                 ],
             ),
-        ]
+        ],
     )
 
     graph = build_graph(program)
@@ -92,12 +94,12 @@ def can_detect_duplicated_reg_function_names():
 
 def can_detect_duplicated_mixed_function_names():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=1, length=10),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -107,7 +109,9 @@ def can_detect_duplicated_mixed_function_names():
                     )
                 ],
             ),
-            ast.RegFunction(
+        ],
+        functions=[
+            ast.Function(
                 ref=src.Span(offset=20, length=10),
                 name=b"main",
                 terminal=False,
@@ -120,7 +124,7 @@ def can_detect_duplicated_mixed_function_names():
                     )
                 ],
             ),
-        ]
+        ],
     )
 
     graph = build_graph(program)
@@ -130,5 +134,5 @@ def can_detect_duplicated_mixed_function_names():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3006
-    assert diagnostic.ref.offset == 20
+    assert diagnostic.ref.offset == 1
     assert diagnostic.ref.length == 10

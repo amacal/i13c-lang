@@ -3,12 +3,13 @@ from i13c import ast, err, ir, low, res, src
 
 def can_lower_syscall_program():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -18,7 +19,7 @@ def can_lower_syscall_program():
                     ),
                 ],
             )
-        ]
+        ],
     )
 
     unit = low.lower(program)
@@ -35,12 +36,13 @@ def can_lower_syscall_program():
 
 def can_lower_mov_program():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -53,7 +55,7 @@ def can_lower_mov_program():
                     ),
                 ],
             )
-        ]
+        ],
     )
 
     unit = low.lower(program)
@@ -75,12 +77,13 @@ def can_lower_mov_program():
 
 def can_lower_noentry_program():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"aux",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -90,7 +93,7 @@ def can_lower_noentry_program():
                     ),
                 ],
             )
-        ]
+        ],
     )
 
     unit = low.lower(program)
@@ -107,12 +110,13 @@ def can_lower_noentry_program():
 
 def can_detect_unsupported_mnemonic():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -122,7 +126,7 @@ def can_detect_unsupported_mnemonic():
                     ),
                 ],
             )
-        ]
+        ],
     )
 
     codeblocks = low.lower(program)

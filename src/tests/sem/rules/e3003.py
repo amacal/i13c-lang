@@ -2,20 +2,21 @@ from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
 
 
-def can_detect_duplicated_asm_parameter_bindings():
+def can_detect_duplicated_asm_slot_bindings():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=False,
-                parameters=[
-                    ast.AsmParameter(
+                slots=[
+                    ast.Slot(
                         name=b"code",
                         type=ast.Type(name=b"u32"),
                         bind=ast.Register(name=b"rdi"),
                     ),
-                    ast.AsmParameter(
+                    ast.Slot(
                         name=b"id",
                         type=ast.Type(name=b"u16"),
                         bind=ast.Register(name=b"rdi"),
@@ -30,11 +31,11 @@ def can_detect_duplicated_asm_parameter_bindings():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)
-    diagnostics = sem.e3003.validate_duplicated_parameter_bindings(graph)
+    diagnostics = sem.e3003.validate_duplicated_slot_bindings(graph)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

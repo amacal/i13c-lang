@@ -10,15 +10,14 @@ def can_parse_asm_instruction_without_operands():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"main"
-    assert function.terminal is False
+    assert snippet.name == b"main"
+    assert snippet.terminal is False
 
-    assert len(function.instructions) == 1
-    instruction = function.instructions[0]
+    assert len(snippet.instructions) == 1
+    instruction = snippet.instructions[0]
 
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
@@ -33,15 +32,14 @@ def can_parse_asm_instruction_with_operands():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"main"
-    assert function.terminal is False
+    assert snippet.name == b"main"
+    assert snippet.terminal is False
 
-    assert len(function.instructions) == 1
-    instruction = function.instructions[0]
+    assert len(snippet.instructions) == 1
+    instruction = snippet.instructions[0]
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -64,15 +62,14 @@ def can_parse_asm_instruction_with_immediate():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"main"
-    assert function.terminal is False
+    assert snippet.name == b"main"
+    assert snippet.terminal is False
 
-    assert len(function.instructions) == 1
-    instruction = function.instructions[0]
+    assert len(snippet.instructions) == 1
+    instruction = snippet.instructions[0]
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -95,19 +92,18 @@ def can_parse_multiple_asm_instructions():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"main"
-    assert function.terminal is False
-    assert len(function.instructions) == 2
+    assert snippet.name == b"main"
+    assert snippet.terminal is False
+    assert len(snippet.instructions) == 2
 
-    instruction1 = function.instructions[0]
+    instruction1 = snippet.instructions[0]
     assert instruction1.mnemonic.name == b"mov"
     assert len(instruction1.operands) == 2
 
-    instruction2 = function.instructions[1]
+    instruction2 = snippet.instructions[1]
     assert instruction2.mnemonic.name == b"syscall"
     assert len(instruction2.operands) == 0
 
@@ -121,25 +117,24 @@ def can_parse_asm_functions_with_single_arg():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"exit"
-    assert function.terminal is False
-    assert len(function.instructions) == 1
+    assert snippet.name == b"exit"
+    assert snippet.terminal is False
+    assert len(snippet.instructions) == 1
 
-    instruction = function.instructions[0]
+    instruction = snippet.instructions[0]
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
 
-    parameters = function.parameters
-    assert len(parameters) == 1
+    slots = snippet.slots
+    assert len(slots) == 1
 
-    parameter = parameters[0]
-    assert parameter.name == b"code"
-    assert parameter.type.name == b"u32"
-    assert parameter.bind.name == b"rdi"
+    slot = slots[0]
+    assert slot.name == b"code"
+    assert slot.type.name == b"u32"
+    assert slot.bind.name == b"rdi"
 
 
 def can_parse_asm_functions_with_multiple_args():
@@ -151,30 +146,29 @@ def can_parse_asm_functions_with_multiple_args():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"exit"
-    assert function.terminal is False
-    assert len(function.instructions) == 1
+    assert snippet.name == b"exit"
+    assert snippet.terminal is False
+    assert len(snippet.instructions) == 1
 
-    instruction = function.instructions[0]
+    instruction = snippet.instructions[0]
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
 
-    parameters = function.parameters
-    assert len(parameters) == 2
+    slots = snippet.slots
+    assert len(slots) == 2
 
-    parameter1 = parameters[0]
-    assert parameter1.name == b"code"
-    assert parameter1.type.name == b"u32"
-    assert parameter1.bind.name == b"rdi"
+    slot1 = slots[0]
+    assert slot1.name == b"code"
+    assert slot1.type.name == b"u32"
+    assert slot1.bind.name == b"rdi"
 
-    parameter2 = parameters[1]
-    assert parameter2.name == b"id"
-    assert parameter2.type.name == b"u16"
-    assert parameter2.bind.name == b"rax"
+    slot2 = slots[1]
+    assert slot2.name == b"id"
+    assert slot2.type.name == b"u16"
+    assert slot2.bind.name == b"rax"
 
 
 def can_parse_asm_functions_with_clobbers():
@@ -186,19 +180,18 @@ def can_parse_asm_functions_with_clobbers():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"aux"
-    assert function.terminal is False
-    assert len(function.clobbers) == 2
+    assert snippet.name == b"aux"
+    assert snippet.terminal is False
+    assert len(snippet.clobbers) == 2
 
-    assert function.clobbers[0].name == b"rax"
-    assert function.clobbers[1].name == b"rbx"
+    assert snippet.clobbers[0].name == b"rax"
+    assert snippet.clobbers[1].name == b"rbx"
 
-    assert len(function.instructions) == 1
-    instruction = function.instructions[0]
+    assert len(snippet.instructions) == 1
+    instruction = snippet.instructions[0]
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -213,15 +206,14 @@ def can_parse_asm_functions_with_no_return():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"halt"
-    assert function.terminal is True
+    assert snippet.name == b"halt"
+    assert snippet.terminal is True
 
-    assert len(function.instructions) == 1
-    instruction = function.instructions[0]
+    assert len(snippet.instructions) == 1
+    instruction = snippet.instructions[0]
 
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
@@ -236,19 +228,18 @@ def can_parse_asm_functions_with_no_return_with_clobbers():
     program = par.parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
-    assert len(program.value.functions) == 1
-    function = program.value.functions[0]
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
 
-    assert isinstance(function, ast.AsmFunction)
-    assert function.name == b"halt"
-    assert function.terminal is True
+    assert snippet.name == b"halt"
+    assert snippet.terminal is True
 
-    clobbers = function.clobbers
+    clobbers = snippet.clobbers
     assert len(clobbers) == 1
     assert clobbers[0].name == b"rax"
 
-    assert len(function.instructions) == 1
-    instruction = function.instructions[0]
+    assert len(snippet.instructions) == 1
+    instruction = snippet.instructions[0]
 
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
@@ -278,7 +269,7 @@ def can_parse_reg_function_without_statements():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.RegFunction)
+    assert isinstance(function, ast.Function)
     assert function.name == b"main"
     assert function.terminal is False
     assert len(function.statements) == 0
@@ -296,7 +287,7 @@ def can_parse_reg_function_with_statements():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.RegFunction)
+    assert isinstance(function, ast.Function)
     assert function.name == b"main"
     assert function.terminal is False
     assert len(function.statements) == 1
@@ -323,7 +314,7 @@ def can_parse_reg_function_with_single_parameter():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.RegFunction)
+    assert isinstance(function, ast.Function)
     assert function.name == b"main"
     assert function.terminal is False
     assert len(function.parameters) == 1
@@ -345,7 +336,7 @@ def can_parse_reg_function_with_multiple_parameters():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.RegFunction)
+    assert isinstance(function, ast.Function)
     assert function.name == b"main"
     assert function.terminal is False
     assert len(function.parameters) == 2
@@ -371,7 +362,7 @@ def can_parse_reg_function_with_flags_noreturn():
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.RegFunction)
+    assert isinstance(function, ast.Function)
     assert function.name == b"main"
     assert function.terminal is True
     assert len(function.statements) == 1

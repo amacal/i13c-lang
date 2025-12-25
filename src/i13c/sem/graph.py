@@ -11,7 +11,17 @@ class FunctionId:
 
 
 @dataclass(kw_only=True, frozen=True)
+class SnippetId:
+    value: int
+
+
+@dataclass(kw_only=True, frozen=True)
 class InstructionId:
+    value: int
+
+
+@dataclass(kw_only=True, frozen=True)
+class SlotId:
     value: int
 
 
@@ -48,9 +58,11 @@ class ArgumentId:
 @dataclass(kw_only=True)
 class Nodes:
     functions: Bidirectional[ast.Function, FunctionId]
+    snippets: Bidirectional[ast.Snippet, SnippetId]
     instructions: Bidirectional[ast.Instruction, InstructionId]
     statements: Bidirectional[ast.Statement, StatementId]
     parameters: Bidirectional[ast.Parameter, ParameterId]
+    slots: Bidirectional[ast.Slot, SlotId]
     arguments: Bidirectional[ast.Argument, ArgumentId]
     literals: Bidirectional[ast.Literal, LiteralId]
     registers: Bidirectional[ast.Register, RegisterId]
@@ -65,8 +77,9 @@ class Indices:
 @dataclass(kw_only=True)
 class Edges:
     function_parameters: OneToMany[FunctionId, ParameterId]
-    function_clobbers: OneToMany[FunctionId, RegisterId]
-    parameter_bindings: OneToOne[ParameterId, RegisterId]
+    snippet_clobbers: OneToMany[SnippetId, RegisterId]
+    snippet_slots: OneToMany[SnippetId, SlotId]
+    slot_bindings: OneToOne[SlotId, RegisterId]
     call_targets: OneToMany[CallId, FunctionId]
     call_arguments: OneToMany[CallId, ArgumentId]
     statement_calls: OneToOne[StatementId, CallId]
@@ -82,21 +95,27 @@ class Graph:
 def build_graph(program: ast.Program) -> Graph:
     # nodes
     functions = node_collect_functions(program)
-    instructions = node_collect_instructions(functions)
+    snippets = node_collect_snippets(program)
+
+    instructions = node_collect_instructions(snippets)
     statements = node_collect_statements(functions)
+
     parameters = node_collect_parameters(functions)
+    slots = node_collect_slots(snippets)
+
     calls = node_collect_calls(statements)
     arguments = node_collect_arguments(calls)
     literals = node_collect_literals(arguments)
-    registers = node_collect_registers(functions, parameters)
+    registers = node_collect_registers(snippets, slots)
 
     # indices
     functions_by_name = index_collect_functions_by_name(functions)
 
     # edges
     function_parameters = edges_collect_function_parameters(functions, parameters)
-    function_clobbers = edge_collect_function_clobbers(functions, registers)
-    parameter_bindings = edge_collect_parameter_bindings(parameters, registers)
+    snippet_clobbers = edge_collect_snippet_clobbers(snippets, registers)
+    snippet_slots = edge_collect_snippet_slots(snippets, slots)
+    slot_bindings = edge_collect_slot_bindings(slots, registers)
     call_targets = edge_collect_call_targets(calls, functions_by_name)
     call_arguments = edge_collect_call_arguments(calls, arguments)
     statement_calls = edge_collect_statement_calls(statements, calls)
@@ -104,9 +123,11 @@ def build_graph(program: ast.Program) -> Graph:
     return Graph(
         nodes=Nodes(
             functions=functions,
+            snippets=snippets,
             instructions=instructions,
             statements=statements,
             parameters=parameters,
+            slots=slots,
             calls=calls,
             arguments=arguments,
             literals=literals,
@@ -114,8 +135,9 @@ def build_graph(program: ast.Program) -> Graph:
         ),
         edges=Edges(
             function_parameters=function_parameters,
-            function_clobbers=function_clobbers,
-            parameter_bindings=parameter_bindings,
+            snippet_clobbers=snippet_clobbers,
+            snippet_slots=snippet_slots,
+            slot_bindings=slot_bindings,
             call_targets=call_targets,
             call_arguments=call_arguments,
             statement_calls=statement_calls,
@@ -150,8 +172,30 @@ def node_collect_functions(
     )
 
 
+def node_collect_snippets(
+    program: ast.Program,
+) -> Bidirectional[ast.Snippet, SnippetId]:
+    id_to_node: Dict[SnippetId, ast.Snippet] = {}
+    node_to_id: Dict[ast.Snippet, SnippetId] = {}
+
+    # counter
+    next = 1
+
+    for snippet in program.snippets:
+        node_to_id[snippet] = SnippetId(value=next)
+        id_to_node[SnippetId(value=next)] = snippet
+
+        # increment
+        next += 1
+
+    return Bidirectional(
+        node_to_id=node_to_id,
+        id_to_node=id_to_node,
+    )
+
+
 def node_collect_instructions(
-    functions: Bidirectional[ast.Function, FunctionId],
+    snippets: Bidirectional[ast.Snippet, SnippetId],
 ) -> Bidirectional[ast.Instruction, InstructionId]:
     id_to_node: Dict[InstructionId, ast.Instruction] = {}
     node_to_id: Dict[ast.Instruction, InstructionId] = {}
@@ -159,14 +203,13 @@ def node_collect_instructions(
     # counter
     next = 1
 
-    for function in functions.values():
-        if isinstance(function, ast.AsmFunction):
-            for instruction in function.instructions:
-                node_to_id[instruction] = InstructionId(value=next)
-                id_to_node[InstructionId(value=next)] = instruction
+    for snippet in snippets.values():
+        for instruction in snippet.instructions:
+            node_to_id[instruction] = InstructionId(value=next)
+            id_to_node[InstructionId(value=next)] = instruction
 
-                # increment
-                next += 1
+            # increment
+            next += 1
 
     return Bidirectional(
         node_to_id=node_to_id,
@@ -184,13 +227,12 @@ def node_collect_statements(
     next = 1
 
     for function in functions.values():
-        if isinstance(function, ast.RegFunction):
-            for statement in function.statements:
-                node_to_id[statement] = StatementId(value=next)
-                id_to_node[StatementId(value=next)] = statement
+        for statement in function.statements:
+            node_to_id[statement] = StatementId(value=next)
+            id_to_node[StatementId(value=next)] = statement
 
-                # increment
-                next += 1
+            # increment
+            next += 1
 
     return Bidirectional(
         node_to_id=node_to_id,
@@ -211,6 +253,29 @@ def node_collect_parameters(
         for parameter in function.parameters:
             node_to_id[parameter] = ParameterId(value=next)
             id_to_node[ParameterId(value=next)] = parameter
+
+            # increment
+            next += 1
+
+    return Bidirectional(
+        node_to_id=node_to_id,
+        id_to_node=id_to_node,
+    )
+
+
+def node_collect_slots(
+    snippets: Bidirectional[ast.Snippet, SnippetId],
+) -> Bidirectional[ast.Slot, SlotId]:
+    id_to_node: Dict[SlotId, ast.Slot] = {}
+    node_to_id: Dict[ast.Slot, SlotId] = {}
+
+    # counter
+    next = 1
+
+    for snippet in snippets.values():
+        for slot in snippet.slots:
+            node_to_id[slot] = SlotId(value=next)
+            id_to_node[SlotId(value=next)] = slot
 
             # increment
             next += 1
@@ -289,8 +354,8 @@ def node_collect_literals(
 
 
 def node_collect_registers(
-    functions: Bidirectional[ast.Function, FunctionId],
-    parameters: Bidirectional[ast.Parameter, ParameterId],
+    snippets: Bidirectional[ast.Snippet, SnippetId],
+    slots: Bidirectional[ast.Slot, SlotId],
 ) -> Bidirectional[ast.Register, RegisterId]:
     id_to_node: Dict[RegisterId, ast.Register] = {}
     node_to_id: Dict[ast.Register, RegisterId] = {}
@@ -298,22 +363,20 @@ def node_collect_registers(
     # counter
     next = 1
 
-    for function in functions.values():
-        if isinstance(function, ast.AsmFunction):
-            for register in function.clobbers:
-                node_to_id[register] = RegisterId(value=next)
-                id_to_node[RegisterId(value=next)] = register
-
-                # increment
-                next += 1
-
-    for parameter in parameters.values():
-        if isinstance(parameter, ast.AsmParameter):
-            node_to_id[parameter.bind] = RegisterId(value=next)
-            id_to_node[RegisterId(value=next)] = parameter.bind
+    for snippet in snippets.values():
+        for register in snippet.clobbers:
+            node_to_id[register] = RegisterId(value=next)
+            id_to_node[RegisterId(value=next)] = register
 
             # increment
             next += 1
+
+    for slot in slots.values():
+        node_to_id[slot.bind] = RegisterId(value=next)
+        id_to_node[RegisterId(value=next)] = slot.bind
+
+        # increment
+        next += 1
 
     return Bidirectional(
         node_to_id=node_to_id,
@@ -327,9 +390,7 @@ def index_collect_functions_by_name(
     functions_by_name: Dict[bytes, List[FunctionId]] = {}
 
     for fid, function in functions.items():
-        if function.name not in functions_by_name:
-            functions_by_name[function.name] = []
-        functions_by_name[function.name].append(fid)
+        functions_by_name.setdefault(function.name, []).append(fid)
 
     return OneToMany(map=functions_by_name)
 
@@ -346,30 +407,40 @@ def edges_collect_function_parameters(
     return OneToMany(map=function_parameters)
 
 
-def edge_collect_parameter_bindings(
-    parameters: Bidirectional[ast.Parameter, ParameterId],
+def edge_collect_slot_bindings(
+    slots: Bidirectional[ast.Slot, SlotId],
     registers: Bidirectional[ast.Register, RegisterId],
-) -> OneToOne[ParameterId, RegisterId]:
-    parameter_bindings: Dict[ParameterId, RegisterId] = {}
+) -> OneToOne[SlotId, RegisterId]:
+    out: Dict[SlotId, RegisterId] = {}
 
-    for pid, parameter in parameters.items():
-        if isinstance(parameter, ast.AsmParameter):
-            parameter_bindings[pid] = registers.get_by_node(parameter.bind)
+    for sid, slot in slots.items():
+        out[sid] = registers.get_by_node(slot.bind)
 
-    return OneToOne(map=parameter_bindings)
+    return OneToOne(map=out)
 
 
-def edge_collect_function_clobbers(
-    functions: Bidirectional[ast.Function, FunctionId],
+def edge_collect_snippet_clobbers(
+    snippets: Bidirectional[ast.Snippet, SnippetId],
     registers: Bidirectional[ast.Register, RegisterId],
-) -> OneToMany[FunctionId, RegisterId]:
-    function_clobbers: Dict[FunctionId, List[RegisterId]] = {}
+) -> OneToMany[SnippetId, RegisterId]:
+    out: Dict[SnippetId, List[RegisterId]] = {}
 
-    for fid, function in functions.items():
-        if isinstance(function, ast.AsmFunction):
-            function_clobbers[fid] = registers.get_by_nodes(function.clobbers)
+    for sid, snippet in snippets.items():
+        out[sid] = registers.get_by_nodes(snippet.clobbers)
 
-    return OneToMany(map=function_clobbers)
+    return OneToMany(map=out)
+
+
+def edge_collect_snippet_slots(
+    snippets: Bidirectional[ast.Snippet, SnippetId],
+    slots: Bidirectional[ast.Slot, SlotId],
+) -> OneToMany[SnippetId, SlotId]:
+    out: Dict[SnippetId, List[SlotId]] = {}
+
+    for sid, snippet in snippets.items():
+        out[sid] = slots.get_by_nodes(snippet.slots)
+
+    return OneToMany(map=out)
 
 
 def edge_collect_call_targets(

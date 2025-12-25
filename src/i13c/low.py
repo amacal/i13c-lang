@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from i13c import ast, diag, err, ir, res, src
 
@@ -22,8 +22,8 @@ def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     entry: Optional[int] = None
 
     try:
-        for function in program.functions:
-            codeblocks.append(lower_function(function))
+        for snippet in program.snippets:
+            codeblocks.append(lower_snippet(snippet))
 
     except UnsupportedMnemonic as e:
         diagnostics.append(err.report_e4000_unsupported_mnemonic(e.ref, e.name))
@@ -43,20 +43,15 @@ def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     return res.Ok(ir.Unit(entry=entry, codeblocks=codeblocks))
 
 
-def lower_function(function: Union[ast.AsmFunction, ast.RegFunction]) -> ir.CodeBlock:
-    assert isinstance(function, ast.AsmFunction)
-    return lower_asm_function(function)
-
-
-def lower_asm_function(function: ast.AsmFunction) -> ir.CodeBlock:
+def lower_snippet(snippet: ast.Snippet) -> ir.CodeBlock:
     instructions: List[ir.Instruction] = []
 
-    for instruction in function.instructions:
+    for instruction in snippet.instructions:
         instructions.append(lower_instruction(instruction))
 
     return ir.CodeBlock(
-        label=function.name,
-        terminal=function.terminal,
+        label=snippet.name,
+        terminal=snippet.terminal,
         instructions=instructions,
     )
 

@@ -4,8 +4,9 @@ from i13c.sem.graph import build_graph
 
 def can_detect_reg_integer_literal_out_of_range():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=False,
@@ -23,7 +24,7 @@ def can_detect_reg_integer_literal_out_of_range():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)

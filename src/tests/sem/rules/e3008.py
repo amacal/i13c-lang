@@ -5,8 +5,9 @@ from i13c.sem.model import build_semantic_model
 
 def can_detect_missing_called_symbol():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=False,
@@ -19,7 +20,7 @@ def can_detect_missing_called_symbol():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)

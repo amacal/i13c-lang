@@ -10,7 +10,7 @@ def validate_duplicated_function_names(
     diagnostics: List[diag.Diagnostic] = []
     seen: Set[bytes] = set()
 
-    for fid in graph.nodes.functions.id_to_node:
+    for fid in graph.nodes.functions.ids():
         if function := graph.nodes.functions.find_by_id(fid):
             if function.name in seen:
                 diagnostics.append(
@@ -21,5 +21,17 @@ def validate_duplicated_function_names(
                 )
             else:
                 seen.add(function.name)
+
+    for snid in graph.nodes.snippets.ids():
+        if snippet := graph.nodes.snippets.find_by_id(snid):
+            if snippet.name in seen:
+                diagnostics.append(
+                    err.report_e3006_duplicated_function_names(
+                        snippet.ref,
+                        snippet.name,
+                    )
+                )
+            else:
+                seen.add(snippet.name)
 
     return diagnostics

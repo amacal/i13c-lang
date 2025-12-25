@@ -86,11 +86,17 @@ def parse(
 ) -> res.Result[ast.Program, List[diag.Diagnostic]]:
     state = ParsingState(code=code, tokens=tokens, position=0)
     diagnostics: List[diag.Diagnostic] = []
-    functions: List[Union[ast.AsmFunction, ast.RegFunction]] = []
+
+    snippets: List[ast.Snippet] = []
+    functions: List[ast.Function] = []
 
     try:
         while not state.is_eof():
-            functions.append(parse_function(state))
+            match parse_entity(state):
+                case ast.Snippet() as snippet:
+                    snippets.append(snippet)
+                case ast.Function() as function:
+                    functions.append(function)
 
     except UnexpectedEndOfTokens as e:
         diagnostics.append(err.report_e2000_unexpected_end_of_tokens(e.offset))
@@ -112,10 +118,15 @@ def parse(
     if diagnostics:
         return res.Err(diagnostics)
 
-    return res.Ok(ast.Program(functions=functions))
+    return res.Ok(
+        ast.Program(
+            functions=functions,
+            snippets=snippets,
+        )
+    )
 
 
-def parse_function(state: ParsingState) -> Union[ast.AsmFunction, ast.RegFunction]:
+def parse_entity(state: ParsingState) -> Union[ast.Snippet, ast.Function]:
     expected = {b"asm", b"fn"}
     keyword = state.expect(lex.TOKEN_KEYWORD)
 
@@ -129,9 +140,9 @@ def parse_function(state: ParsingState) -> Union[ast.AsmFunction, ast.RegFunctio
         return parse_reg_function(state)
 
 
-def parse_reg_function(state: ParsingState) -> ast.RegFunction:
+def parse_reg_function(state: ParsingState) -> ast.Function:
     statements: List[ast.CallStatement] = []
-    parameters: List[ast.RegParameter] = []
+    parameters: List[ast.Parameter] = []
     terminal: bool = False
 
     # function name is an identifier
@@ -164,7 +175,7 @@ def parse_reg_function(state: ParsingState) -> ast.RegFunction:
     # expect closed curly brace
     state.expect(lex.TOKEN_CURLY_CLOSE)
 
-    return ast.RegFunction(
+    return ast.Function(
         ref=ref,
         name=state.extract(name),
         terminal=terminal,
@@ -173,9 +184,9 @@ def parse_reg_function(state: ParsingState) -> ast.RegFunction:
     )
 
 
-def parse_asm_function(state: ParsingState) -> ast.AsmFunction:
+def parse_asm_function(state: ParsingState) -> ast.Snippet:
     instructions: List[ast.Instruction] = []
-    parameters: List[ast.AsmParameter] = []
+    slots: List[ast.Slot] = []
     clobbers: List[ast.Register] = []
     terminal: bool = False
 
@@ -187,7 +198,7 @@ def parse_asm_function(state: ParsingState) -> ast.AsmFunction:
 
     # optional function parameters
     while not state.is_in(lex.TOKEN_ROUND_CLOSE):
-        parameters = parse_asm_parameters(state)
+        slots = parse_slots(state)
 
     # expect closed round bracket
     state.expect(lex.TOKEN_ROUND_CLOSE)
@@ -209,18 +220,18 @@ def parse_asm_function(state: ParsingState) -> ast.AsmFunction:
     # expect closed curly brace
     state.expect(lex.TOKEN_CURLY_CLOSE)
 
-    return ast.AsmFunction(
+    return ast.Snippet(
         ref=ref,
         name=state.extract(name),
         terminal=terminal,
         clobbers=clobbers,
-        parameters=parameters,
+        slots=slots,
         instructions=instructions,
     )
 
 
-def parse_reg_parameters(state: ParsingState) -> List[ast.RegParameter]:
-    parameters: List[ast.RegParameter] = []
+def parse_reg_parameters(state: ParsingState) -> List[ast.Parameter]:
+    parameters: List[ast.Parameter] = []
     parameters.append(parse_reg_parameter(state))
 
     # a comma suggests next parameter
@@ -230,8 +241,8 @@ def parse_reg_parameters(state: ParsingState) -> List[ast.RegParameter]:
     return parameters
 
 
-def parse_asm_parameters(state: ParsingState) -> List[ast.AsmParameter]:
-    parameters: List[ast.AsmParameter] = []
+def parse_slots(state: ParsingState) -> List[ast.Slot]:
+    parameters: List[ast.Slot] = []
     parameters.append(parse_asm_parameter(state))
 
     # a comma suggests next parameter
@@ -241,20 +252,20 @@ def parse_asm_parameters(state: ParsingState) -> List[ast.AsmParameter]:
     return parameters
 
 
-def parse_reg_parameter(state: ParsingState) -> ast.RegParameter:
+def parse_reg_parameter(state: ParsingState) -> ast.Parameter:
     ident = state.expect(lex.TOKEN_IDENT)
 
     # expect ':' followed by type
     state.expect(lex.TOKEN_COLON)
     type = state.expect(lex.TOKEN_TYPE)
 
-    return ast.RegParameter(
+    return ast.Parameter(
         name=state.extract(ident),
         type=ast.Type(name=state.extract(type)),
     )
 
 
-def parse_asm_parameter(state: ParsingState) -> ast.AsmParameter:
+def parse_asm_parameter(state: ParsingState) -> ast.Slot:
     ident = state.expect(lex.TOKEN_IDENT)
 
     # expect '@' followed by register
@@ -265,7 +276,7 @@ def parse_asm_parameter(state: ParsingState) -> ast.AsmParameter:
     state.expect(lex.TOKEN_COLON)
     type = state.expect(lex.TOKEN_TYPE)
 
-    return ast.AsmParameter(
+    return ast.Slot(
         name=state.extract(ident),
         type=ast.Type(name=state.extract(type)),
         bind=ast.Register(name=state.extract(bind)),

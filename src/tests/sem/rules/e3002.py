@@ -4,12 +4,13 @@ from i13c.sem.graph import build_graph
 
 def can_detect_invalid_asm_operand_types_of_mov():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=1, length=10),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -22,7 +23,7 @@ def can_detect_invalid_asm_operand_types_of_mov():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)

@@ -25,4 +25,20 @@ def validate_duplicated_parameter_names(
                 else:
                     seen.add(parameter.name)
 
+    for snid, slots in graph.edges.snippet_slots.items():
+        seen: Set[bytes] = set()
+
+        for slid in slots:
+            if slot := graph.nodes.slots.find_by_id(slid):
+                if slot.name in seen:
+                    if snippet := graph.nodes.snippets.find_by_id(snid):
+                        diagnostics.append(
+                            err.report_e3004_duplicated_parameter_names(
+                                snippet.ref,
+                                slot.name,
+                            )
+                        )
+                else:
+                    seen.add(slot.name)
+
     return diagnostics

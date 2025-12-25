@@ -4,20 +4,20 @@ from i13c import diag, err
 from i13c.sem.graph import Graph
 
 
-def validate_duplicated_function_clobbers(
+def validate_duplicated_snippet_clobbers(
     graph: Graph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fid, rids in graph.edges.function_clobbers.items():
+    for snid, rids in graph.edges.snippet_clobbers.items():
         seen: Set[bytes] = set()
 
         for clobber in graph.nodes.registers.find_by_ids(rids):
             if clobber.name in seen:
-                if function := graph.nodes.functions.find_by_id(fid):
+                if snippet := graph.nodes.snippets.find_by_id(snid):
                     diagnostics.append(
-                        err.report_e3005_duplicated_function_clobbers(
-                            function.ref,
+                        err.report_e3005_duplicated_snippet_clobbers(
+                            snippet.ref,
                             clobber.name,
                         )
                     )

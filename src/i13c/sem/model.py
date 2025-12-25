@@ -236,8 +236,7 @@ def collect_function_exits(
     out: Dict[FunctionId, List[StatementId]] = {}
 
     for fid, function in functions.items():
-        if isinstance(function, ast.RegFunction):
-            if len(function.statements) > 0:
-                out[fid] = [statements.get_by_node(function.statements[-1])]
+        if len(function.statements) > 0:
+            out[fid] = [statements.get_by_node(function.statements[-1])]
 
     return OneToMany(map=out)

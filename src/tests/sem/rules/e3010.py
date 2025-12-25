@@ -5,8 +5,9 @@ from i13c.sem.model import build_semantic_model
 
 def can_survive_non_terminal_callee_symbol():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"bar",
                 terminal=False,
@@ -19,14 +20,14 @@ def can_survive_non_terminal_callee_symbol():
                     )
                 ],
             ),
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=30, length=10),
                 name=b"foo",
                 terminal=True,
                 parameters=[],
                 statements=[],
             ),
-        ]
+        ],
     )
 
     graph = build_graph(program)
@@ -38,8 +39,9 @@ def can_survive_non_terminal_callee_symbol():
 
 def can_detect_non_terminal_caller_symbol():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=True,
@@ -52,14 +54,14 @@ def can_detect_non_terminal_caller_symbol():
                     )
                 ],
             ),
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=30, length=10),
                 name=b"foo",
                 terminal=False,
                 parameters=[],
                 statements=[],
             ),
-        ]
+        ],
     )
 
     graph = build_graph(program)
@@ -76,8 +78,9 @@ def can_detect_non_terminal_caller_symbol():
 
 def can_service_non_terminal_caller_symbol_not_last_call():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"bar",
                 terminal=True,
@@ -95,21 +98,21 @@ def can_service_non_terminal_caller_symbol_not_last_call():
                     ),
                 ],
             ),
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=30, length=10),
                 name=b"foo1",
                 terminal=True,
                 parameters=[],
                 statements=[],
             ),
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=30, length=10),
                 name=b"foo2",
                 terminal=False,
                 parameters=[],
                 statements=[],
             ),
-        ]
+        ],
     )
 
     graph = build_graph(program)

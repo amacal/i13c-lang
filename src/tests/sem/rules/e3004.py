@@ -4,18 +4,19 @@ from i13c.sem.graph import build_graph
 
 def can_detect_duplicated_asm_parameter_names():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=False,
-                parameters=[
-                    ast.AsmParameter(
+                slots=[
+                    ast.Slot(
                         name=b"code",
                         type=ast.Type(name=b"u32"),
                         bind=ast.Register(name=b"rdi"),
                     ),
-                    ast.AsmParameter(
+                    ast.Slot(
                         name=b"code",
                         type=ast.Type(name=b"u16"),
                         bind=ast.Register(name=b"rax"),
@@ -30,7 +31,7 @@ def can_detect_duplicated_asm_parameter_names():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)
@@ -46,17 +47,18 @@ def can_detect_duplicated_asm_parameter_names():
 
 def can_detect_duplicated_reg_parameter_names():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=False,
                 parameters=[
-                    ast.RegParameter(
+                    ast.Parameter(
                         name=b"code",
                         type=ast.Type(name=b"u32"),
                     ),
-                    ast.RegParameter(
+                    ast.Parameter(
                         name=b"code",
                         type=ast.Type(name=b"u16"),
                     ),
@@ -69,7 +71,7 @@ def can_detect_duplicated_reg_parameter_names():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)

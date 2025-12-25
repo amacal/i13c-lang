@@ -5,7 +5,7 @@ from typing import List, NoReturn
 
 import click
 
-from i13c import ast, diag, elf, enc, ld, lex, low, par, res, sem, src
+from i13c import diag, elf, enc, ld, lex, low, par, res, sem, src
 
 
 def emit_and_exit(
@@ -68,17 +68,28 @@ def ast_command(path: str) -> None:
             for parameter in function.parameters:
                 click.echo(f"    {str(parameter)}")
 
-        if isinstance(function, ast.AsmFunction) and function.instructions:
-            click.echo("  Instructions:")
-            for instruction in function.instructions:
-                click.echo(f"    {str(instruction)}")
-
-        if isinstance(function, ast.RegFunction) and function.statements:
+        if function.statements:
             click.echo("  Statements:")
             for statement in function.statements:
                 click.echo(f"    {str(statement)}")
 
-        if idx < len(program.functions) - 1:
+        if idx < len(program.functions) - 1 or len(program.snippets) > 0:
+            click.echo("")
+
+    for idx, snippet in enumerate(program.snippets):
+        click.echo(f"Snippet: {snippet.name.decode('utf-8')}")
+
+        if snippet.slots:
+            click.echo("  Slots:")
+            for slot in snippet.slots:
+                click.echo(f"    {str(slot)}")
+
+        if snippet.instructions:
+            click.echo("  Instructions:")
+            for instruction in snippet.instructions:
+                click.echo(f"    {str(instruction)}")
+
+        if idx < len(program.snippets) - 1:
             click.echo("")
 
 

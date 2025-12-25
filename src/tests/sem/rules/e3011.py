@@ -5,8 +5,9 @@ from i13c.sem.model import build_semantic_model
 
 def can_detect_incorrect_argument_count_for_a_call_less():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=True,
@@ -19,19 +20,19 @@ def can_detect_incorrect_argument_count_for_a_call_less():
                     )
                 ],
             ),
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=30, length=10),
                 name=b"foo",
                 terminal=True,
                 parameters=[
-                    ast.RegParameter(
+                    ast.Parameter(
                         name=b"x",
                         type=ast.Type(name=b"u8"),
                     )
                 ],
                 statements=[],
             ),
-        ]
+        ],
     )
 
     graph = build_graph(program)

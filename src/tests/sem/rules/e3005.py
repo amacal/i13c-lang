@@ -4,12 +4,13 @@ from i13c.sem.graph import build_graph
 
 def can_detect_duplicated_asm_clobbers():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[
                     ast.Register(name=b"rax"),
                     ast.Register(name=b"rbx"),
@@ -23,11 +24,11 @@ def can_detect_duplicated_asm_clobbers():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)
-    diagnostics = sem.e3005.validate_duplicated_function_clobbers(graph)
+    diagnostics = sem.e3005.validate_duplicated_snippet_clobbers(graph)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

@@ -52,43 +52,38 @@ Statement = Union[CallStatement]
 
 
 @dataclass(kw_only=True, eq=False)
-class AsmParameter:
+class Slot:
     name: bytes
     type: Type
     bind: Register
 
 
 @dataclass(kw_only=True, eq=False)
-class RegParameter:
+class Parameter:
     name: bytes
     type: Type
 
 
-Parameter = Union[AsmParameter, RegParameter]
-
-
 @dataclass(kw_only=True, eq=False)
-class AsmFunction:
+class Snippet:
     ref: src.Span
     name: bytes
     terminal: bool
+    slots: List[Slot]
     clobbers: List[Register]
-    parameters: List[AsmParameter]
     instructions: List[Instruction]
 
 
 @dataclass(kw_only=True, eq=False)
-class RegFunction:
+class Function:
     ref: src.Span
     name: bytes
     terminal: bool
-    parameters: List[RegParameter]
+    parameters: List[Parameter]
     statements: List[CallStatement]
-
-
-Function = Union[AsmFunction, RegFunction]
 
 
 @dataclass(kw_only=True, eq=False)
 class Program:
     functions: List[Function]
+    snippets: List[Snippet]

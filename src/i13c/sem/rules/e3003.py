@@ -4,22 +4,22 @@ from i13c import diag, err
 from i13c.sem.graph import Graph
 
 
-def validate_duplicated_parameter_bindings(
+def validate_duplicated_slot_bindings(
     graph: Graph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fid, parameters in graph.edges.function_parameters.items():
+    for snid, slots in graph.edges.snippet_slots.items():
         seen: Set[bytes] = set()
 
-        for pid in parameters:
-            if rid := graph.edges.parameter_bindings.find_by_id(pid):
+        for slid in slots:
+            if rid := graph.edges.slot_bindings.find_by_id(slid):
                 if register := graph.nodes.registers.find_by_id(rid):
                     if register.name in seen:
-                        if function := graph.nodes.functions.find_by_id(fid):
+                        if snippet := graph.nodes.snippets.find_by_id(snid):
                             diagnostics.append(
-                                err.report_e3003_duplicated_parameter_bindings(
-                                    function.ref,
+                                err.report_e3003_duplicated_slot_bindings(
+                                    snippet.ref,
                                     register.name,
                                 )
                             )

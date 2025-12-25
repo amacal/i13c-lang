@@ -5,8 +5,9 @@ from i13c.sem.model import build_semantic_model
 
 def can_detect_non_asm_called_symbol():
     program = ast.Program(
+        snippets=[],
         functions=[
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
                 terminal=False,
@@ -19,14 +20,14 @@ def can_detect_non_asm_called_symbol():
                     )
                 ],
             ),
-            ast.RegFunction(
+            ast.Function(
                 ref=src.Span(offset=30, length=10),
                 name=b"foo",
                 terminal=True,
                 parameters=[],
                 statements=[],
             ),
-        ]
+        ],
     )
 
     graph = build_graph(program)

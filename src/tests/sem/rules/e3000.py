@@ -4,12 +4,13 @@ from i13c.sem.graph import build_graph
 
 def can_accept_asm_operands_arity_of_syscall():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -19,7 +20,7 @@ def can_accept_asm_operands_arity_of_syscall():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)
@@ -30,12 +31,13 @@ def can_accept_asm_operands_arity_of_syscall():
 
 def can_accept_asm_operands_arity_of_mov():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -48,7 +50,7 @@ def can_accept_asm_operands_arity_of_mov():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)
@@ -59,12 +61,13 @@ def can_accept_asm_operands_arity_of_mov():
 
 def can_detect_invalid_asm_instruction():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=1, length=10),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -74,7 +77,7 @@ def can_detect_invalid_asm_instruction():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)

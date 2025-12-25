@@ -4,12 +4,13 @@ from i13c.sem.graph import build_graph
 
 def can_detect_asm_immediate_out_of_range():
     program = ast.Program(
-        functions=[
-            ast.AsmFunction(
+        functions=[],
+        snippets=[
+            ast.Snippet(
                 ref=src.Span(offset=1, length=10),
                 name=b"main",
                 terminal=False,
-                parameters=[],
+                slots=[],
                 clobbers=[],
                 instructions=[
                     ast.Instruction(
@@ -22,7 +23,7 @@ def can_detect_asm_immediate_out_of_range():
                     )
                 ],
             )
-        ]
+        ],
     )
 
     graph = build_graph(program)

@@ -20,7 +20,7 @@ def validate_called_symbol_is_asm(
 
         for fid in fids:
             function = graph.nodes.functions.get_by_id(fid)
-            if not isinstance(function, ast.AsmFunction):
+            if not isinstance(function, ast.Snippet):
                 diagnostics.append(
                     err.report_e3009_called_symbol_is_asm(call.ref, call.name)
                 )
