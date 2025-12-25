@@ -32,7 +32,7 @@ RULES_1ST_PASS: List[Callable[[Graph], List[diag.Diagnostic]]] = [
 
 RULES_2ND_PASS: List[Callable[[Graph, SemanticModel], List[diag.Diagnostic]]] = [
     e3008.validate_called_symbol_exists,
-    e3009.validate_called_symbol_is_asm,
+    e3009.validate_called_symbol_is_snippet,
     e3010.validate_called_symbol_termination,
     e3011.validate_called_arguments_count,
     e3012.validate_called_arguments_types,

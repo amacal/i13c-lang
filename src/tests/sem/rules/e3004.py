@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
 
 
-def can_detect_duplicated_asm_parameter_names():
+def can_detect_duplicated_slot_names():
     program = ast.Program(
         functions=[],
         snippets=[
@@ -45,7 +45,7 @@ def can_detect_duplicated_asm_parameter_names():
     assert diagnostic.ref.length == 20
 
 
-def can_detect_duplicated_reg_parameter_names():
+def can_detect_duplicated_parameter_names():
     program = ast.Program(
         snippets=[],
         functions=[

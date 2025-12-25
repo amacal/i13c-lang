@@ -134,13 +134,13 @@ def parse_entity(state: ParsingState) -> Union[ast.Snippet, ast.Function]:
         raise UnexpectedKeyword(keyword, list(expected), state.extract(keyword))
 
     if state.extract(keyword) == b"asm":
-        return parse_asm_function(state)
+        return parse_snippet(state)
 
     else:
-        return parse_reg_function(state)
+        return parse_function(state)
 
 
-def parse_reg_function(state: ParsingState) -> ast.Function:
+def parse_function(state: ParsingState) -> ast.Function:
     statements: List[ast.CallStatement] = []
     parameters: List[ast.Parameter] = []
     terminal: bool = False
@@ -153,7 +153,7 @@ def parse_reg_function(state: ParsingState) -> ast.Function:
 
     # optional function parameters
     while not state.is_in(lex.TOKEN_ROUND_CLOSE):
-        parameters = parse_reg_parameters(state)
+        parameters = parse_parameters(state)
 
     # expect closed round bracket
     state.expect(lex.TOKEN_ROUND_CLOSE)
@@ -163,7 +163,7 @@ def parse_reg_function(state: ParsingState) -> ast.Function:
 
     # optional flags
     if not state.is_in(lex.TOKEN_CURLY_OPEN):
-        terminal = parse_reg_function_flags(state)
+        terminal = parse_function_flags(state)
 
     # expect opening curly brace
     state.expect(lex.TOKEN_CURLY_OPEN)
@@ -184,7 +184,7 @@ def parse_reg_function(state: ParsingState) -> ast.Function:
     )
 
 
-def parse_asm_function(state: ParsingState) -> ast.Snippet:
+def parse_snippet(state: ParsingState) -> ast.Snippet:
     instructions: List[ast.Instruction] = []
     slots: List[ast.Slot] = []
     clobbers: List[ast.Register] = []
@@ -208,7 +208,7 @@ def parse_asm_function(state: ParsingState) -> ast.Snippet:
 
     # optional flags
     if not state.is_in(lex.TOKEN_CURLY_OPEN):
-        clobbers, terminal = parse_asm_function_flags(state)
+        clobbers, terminal = parse_snippet_flags(state)
 
     # expect opening curly brace
     state.expect(lex.TOKEN_CURLY_OPEN)
@@ -230,29 +230,29 @@ def parse_asm_function(state: ParsingState) -> ast.Snippet:
     )
 
 
-def parse_reg_parameters(state: ParsingState) -> List[ast.Parameter]:
+def parse_parameters(state: ParsingState) -> List[ast.Parameter]:
     parameters: List[ast.Parameter] = []
-    parameters.append(parse_reg_parameter(state))
+    parameters.append(parse_parameter(state))
 
     # a comma suggests next parameter
     while state.accept(lex.TOKEN_COMMA):
-        parameters.append(parse_reg_parameter(state))
+        parameters.append(parse_parameter(state))
 
     return parameters
 
 
 def parse_slots(state: ParsingState) -> List[ast.Slot]:
     parameters: List[ast.Slot] = []
-    parameters.append(parse_asm_parameter(state))
+    parameters.append(parse_slot(state))
 
     # a comma suggests next parameter
     while state.accept(lex.TOKEN_COMMA):
-        parameters.append(parse_asm_parameter(state))
+        parameters.append(parse_slot(state))
 
     return parameters
 
 
-def parse_reg_parameter(state: ParsingState) -> ast.Parameter:
+def parse_parameter(state: ParsingState) -> ast.Parameter:
     ident = state.expect(lex.TOKEN_IDENT)
 
     # expect ':' followed by type
@@ -265,7 +265,7 @@ def parse_reg_parameter(state: ParsingState) -> ast.Parameter:
     )
 
 
-def parse_asm_parameter(state: ParsingState) -> ast.Slot:
+def parse_slot(state: ParsingState) -> ast.Slot:
     ident = state.expect(lex.TOKEN_IDENT)
 
     # expect '@' followed by register
@@ -283,7 +283,7 @@ def parse_asm_parameter(state: ParsingState) -> ast.Slot:
     )
 
 
-def parse_reg_function_flags(state: ParsingState) -> bool:
+def parse_function_flags(state: ParsingState) -> bool:
     keyword: Optional[lex.Token] = None
     terminal = False
 
@@ -305,7 +305,7 @@ def parse_reg_function_flags(state: ParsingState) -> bool:
     return terminal
 
 
-def parse_asm_function_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
+def parse_snippet_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
     keyword: Optional[lex.Token] = None
     clobbers: Optional[List[ast.Register]] = None
     terminal = False

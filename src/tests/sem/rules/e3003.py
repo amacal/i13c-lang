@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
 
 
-def can_detect_duplicated_asm_slot_bindings():
+def can_detect_duplicated_slot_bindings():
     program = ast.Program(
         functions=[],
         snippets=[

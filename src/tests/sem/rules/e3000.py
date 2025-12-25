@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
 
 
-def can_accept_asm_operands_arity_of_syscall():
+def can_accept_operands_arity_of_syscall():
     program = ast.Program(
         functions=[],
         snippets=[
@@ -29,7 +29,7 @@ def can_accept_asm_operands_arity_of_syscall():
     assert len(diagnostics) == 0
 
 
-def can_accept_asm_operands_arity_of_mov():
+def can_accept_operands_arity_of_mov():
     program = ast.Program(
         functions=[],
         snippets=[
@@ -59,7 +59,7 @@ def can_accept_asm_operands_arity_of_mov():
     assert len(diagnostics) == 0
 
 
-def can_detect_invalid_asm_instruction():
+def can_detect_invalid_instruction():
     program = ast.Program(
         functions=[],
         snippets=[

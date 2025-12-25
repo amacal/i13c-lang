@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
 
 
-def can_detect_duplicated_asm_clobbers():
+def can_detect_duplicated_slot_clobbers():
     program = ast.Program(
         functions=[],
         snippets=[

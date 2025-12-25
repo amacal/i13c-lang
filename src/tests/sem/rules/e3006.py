@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
 
 
-def can_detect_duplicated_asm_function_names():
+def can_detect_duplicated_snippet_names():
     program = ast.Program(
         functions=[],
         snippets=[
@@ -48,7 +48,7 @@ def can_detect_duplicated_asm_function_names():
     assert diagnostic.ref.length == 10
 
 
-def can_detect_duplicated_reg_function_names():
+def can_detect_duplicated_function_names():
     program = ast.Program(
         snippets=[],
         functions=[

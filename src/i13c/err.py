@@ -20,7 +20,7 @@ ERROR_3005 = "E3005"  # Duplicated clobber registers
 ERROR_3006 = "E3006"  # Duplicated function names
 ERROR_3007 = "E3007"  # Integer literal out of range
 ERROR_3008 = "E3008"  # Called symbol does not exist
-ERROR_3009 = "E3009"  # Called symbol is not an asm function
+ERROR_3009 = "E3009"  # Called symbol is not a snippet
 ERROR_3010 = "E3010"  # Callee is non-terminal
 ERROR_3011 = "E3011"  # Called argument count mismatch
 ERROR_3012 = "E3012"  # Called argument type mismatch
@@ -207,13 +207,13 @@ def report_e3008_called_symbol_exists(
     )
 
 
-def report_e3009_called_symbol_is_asm(
+def report_e3009_called_symbol_is_not_a_snippet(
     ref: src.SpanLike, name: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_3009,
-        message=f"Called symbol is not an asm function: {str(name)}",
+        message=f"Called symbol is not an snippet: {str(name)}",
     )
 
 

@@ -2,7 +2,7 @@ from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
 
 
-def can_detect_reg_integer_literal_out_of_range():
+def can_detect_integer_literal_out_of_range():
     program = ast.Program(
         snippets=[],
         functions=[

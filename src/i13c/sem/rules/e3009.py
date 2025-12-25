@@ -5,7 +5,7 @@ from i13c.sem.graph import Graph
 from i13c.sem.model import SemanticModel
 
 
-def validate_called_symbol_is_asm(
+def validate_called_symbol_is_snippet(
     graph: Graph,
     model: SemanticModel,
 ) -> List[diag.Diagnostic]:
@@ -22,7 +22,7 @@ def validate_called_symbol_is_asm(
             function = graph.nodes.functions.get_by_id(fid)
             if not isinstance(function, ast.Snippet):
                 diagnostics.append(
-                    err.report_e3009_called_symbol_is_asm(call.ref, call.name)
+                    err.report_e3009_called_symbol_is_not_a_snippet(call.ref, call.name)
                 )
 
                 break
