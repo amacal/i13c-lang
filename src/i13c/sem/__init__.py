@@ -4,6 +4,10 @@ from i13c import ast, diag
 from i13c.sem.graph import build_graph
 from i13c.sem.model import build_model
 from i13c.sem.nodes import Function
+from i13c.sem.resolve import (
+    resolve_call_candidates_by_arity,
+    resolve_call_candidates_by_type,
+)
 from i13c.sem.rules import (
     e3000,
     e3001,
@@ -20,6 +24,11 @@ from i13c.sem.rules import (
     e3012,
 )
 
+RESOLVERS: List[Callable[[List[Function]], None]] = [
+    resolve_call_candidates_by_arity,
+    resolve_call_candidates_by_type,
+]
+
 RULES: List[Callable[[List[Function]], List[diag.Diagnostic]]] = [
     e3000.validate_assembly_mnemonic,
     e3001.validate_immediate_out_of_range,
@@ -32,8 +41,8 @@ RULES: List[Callable[[List[Function]], List[diag.Diagnostic]]] = [
     e3008.validate_called_symbol_exists,
     e3009.validate_called_symbol_is_snippet,
     e3010.validate_called_symbol_termination,
-    e3011.validate_called_arguments_count,
-    e3012.validate_called_arguments_types,
+    e3011.validate_entrypoint_exists,
+    e3012.validate_entrypoint_never_returns,
 ]
 
 
@@ -42,6 +51,9 @@ def validate(program: ast.Program) -> List[diag.Diagnostic]:
 
     graph = build_graph(program)
     functions = build_model(graph)
+
+    for resolver in RESOLVERS:
+        resolver(functions)
 
     for rule in RULES:
         diagnostics.extend(rule(functions))

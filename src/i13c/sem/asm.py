@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import List, Tuple, Type, Union
 
-from i13c import ast
+from i13c.sem.nodes import Immediate, Register
 
-AllowedVariants = Union[Type[ast.Register], Type[ast.Immediate]]
+AllowedVariants = Union[Type[Register], Type[Immediate]]
 
 
 @dataclass(kw_only=True)
@@ -13,5 +13,5 @@ class InstructionSignature:
 
 INSTRUCTIONS_TABLE = {
     b"syscall": InstructionSignature(variants=[()]),
-    b"mov": InstructionSignature(variants=[(ast.Register, ast.Immediate)]),
+    b"mov": InstructionSignature(variants=[(Register, Immediate)]),
 }

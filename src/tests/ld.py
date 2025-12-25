@@ -1,4 +1,4 @@
-from i13c import err, ir, ld, res
+from i13c import ir, ld, res
 
 
 def can_move_entry_function_to_front():
@@ -38,29 +38,3 @@ def can_move_entry_function_to_front():
     assert len(aux_codeblock.instructions) == 1
     instruction = aux_codeblock.instructions[0]
     assert isinstance(instruction, ir.MovRegImm)
-
-
-def can_detect_non_terminal_main():
-    unit = ir.Unit(
-        entry=0,
-        codeblocks=[
-            ir.CodeBlock(
-                label=b"main",
-                noreturn=False,
-                instructions=[
-                    ir.SysCall(),
-                ],
-            ),
-        ],
-    )
-
-    linked = ld.link(unit)
-    assert isinstance(linked, res.Err)
-
-    diagnostics = linked.error
-    assert len(diagnostics) == 1
-
-    diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_5001
-    assert diagnostic.ref.offset == 0
-    assert diagnostic.ref.length == 0

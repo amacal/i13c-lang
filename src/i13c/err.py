@@ -22,13 +22,10 @@ ERROR_3007 = "E3007"  # Integer literal out of range
 ERROR_3008 = "E3008"  # Called symbol does not exist
 ERROR_3009 = "E3009"  # Called symbol is not a snippet
 ERROR_3010 = "E3010"  # Callee is non-terminal
-ERROR_3011 = "E3011"  # Called argument count mismatch
-ERROR_3012 = "E3012"  # Called argument type mismatch
+ERROR_3011 = "E3011"  # Missing entrypoint function
+ERROR_3012 = "E3012"  # Non-terminal entrypoint function
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
-
-ERROR_5000 = "E5000"  # Missing entrypoint function
-ERROR_5001 = "E5001"  # Non-terminal entrypoint function
 
 
 def report_e1000_unrecognized_token(offset: int) -> diag.Diagnostic:
@@ -171,32 +168,6 @@ def report_e3007_integer_literal_out_of_range(
     )
 
 
-def report_e4000_unsupported_mnemonic(
-    ref: src.SpanLike, name: bytes
-) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        ref=ref,
-        code=ERROR_4000,
-        message=f"Unsupported mnemonic: {name.decode()}",
-    )
-
-
-def report_e5000_missing_entrypoint_function() -> diag.Diagnostic:
-    return diag.Diagnostic(
-        ref=src.Span(offset=0, length=0),
-        code=ERROR_5000,
-        message="Missing entrypoint codeblock",
-    )
-
-
-def report_e5001_non_terminal_entrypoint_function() -> diag.Diagnostic:
-    return diag.Diagnostic(
-        ref=src.Span(offset=0, length=0),
-        code=ERROR_5001,
-        message="The entrypoint codeblock must be terminal",
-    )
-
-
 def report_e3008_called_symbol_exists(
     ref: src.SpanLike, name: bytes
 ) -> diag.Diagnostic:
@@ -227,26 +198,27 @@ def report_e3010_callee_is_non_terminal(
     )
 
 
-def report_e3011_called_argument_count_mismatch(
-    ref: src.SpanLike,
-    expected: int,
-    found: int,
-) -> diag.Diagnostic:
+def report_e3011_missing_entrypoint_function() -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=ref,
+        ref=src.Span(offset=0, length=0),
         code=ERROR_3011,
-        message=f"Called function argument mismatch: expected {str(expected)}, found {str(found)}",
+        message="Missing entrypoint codeblock",
     )
 
 
-def report_e3012_called_argument_type_mismatch(
-    ref: src.SpanLike,
-    position: int,
-    expected: bytes,
-    found: bytes,
-) -> diag.Diagnostic:
+def report_e3012_non_terminal_entrypoint_function(ref: src.SpanLike) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_3012,
-        message=f"Called function argument {position} mismatch: expected {str(expected)}, found {str(found)}",
+        message="The entrypoint codeblock must be terminal",
+    )
+
+
+def report_e4000_unsupported_mnemonic(
+    ref: src.SpanLike, name: bytes
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_4000,
+        message=f"Unsupported mnemonic: {name.decode()}",
     )
