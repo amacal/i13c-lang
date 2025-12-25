@@ -1,6 +1,6 @@
 from i13c import ast, err, sem, src
-from i13c.sem.analysis import build_analysis
 from i13c.sem.graph import build_graph
+from i13c.sem.model import build_semantic_model
 
 
 def can_detect_incorrect_argument_type_for_parameter():
@@ -40,8 +40,8 @@ def can_detect_incorrect_argument_type_for_parameter():
     )
 
     graph = build_graph(program)
-    analysis = build_analysis(graph)
-    diagnostics = sem.e3012.validate_called_arguments_types(graph, analysis)
+    model = build_semantic_model(graph)
+    diagnostics = sem.e3012.validate_called_arguments_types(graph, model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

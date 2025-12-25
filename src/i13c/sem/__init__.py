@@ -1,8 +1,8 @@
 from typing import Callable, List
 
 from i13c import ast, diag
-from i13c.sem.analysis import Analysis, build_analysis
 from i13c.sem.graph import Graph, build_graph
+from i13c.sem.model import SemanticModel, build_semantic_model
 from i13c.sem.rules import (
     e3000,
     e3001,
@@ -30,7 +30,7 @@ RULES_1ST_PASS: List[Callable[[Graph], List[diag.Diagnostic]]] = [
     e3007.validate_integer_literal_out_of_range,
 ]
 
-RULES_2ND_PASS: List[Callable[[Graph, Analysis], List[diag.Diagnostic]]] = [
+RULES_2ND_PASS: List[Callable[[Graph, SemanticModel], List[diag.Diagnostic]]] = [
     e3008.validate_called_symbol_exists,
     e3009.validate_called_symbol_is_asm,
     e3010.validate_called_symbol_termination,
@@ -42,10 +42,10 @@ RULES_2ND_PASS: List[Callable[[Graph, Analysis], List[diag.Diagnostic]]] = [
 def validate(program: ast.Program) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
     graph = build_graph(program)
-    analysis = build_analysis(graph)
+    model = build_semantic_model(graph)
 
     diagnostics.extend(validate_1st_pass(graph))
-    diagnostics.extend(validate_2nd_pass(graph, analysis))
+    diagnostics.extend(validate_2nd_pass(graph, model))
 
     return diagnostics
 
@@ -59,10 +59,10 @@ def validate_1st_pass(graph: Graph) -> List[diag.Diagnostic]:
     return diagnostics
 
 
-def validate_2nd_pass(graph: Graph, analysis: Analysis) -> List[diag.Diagnostic]:
+def validate_2nd_pass(graph: Graph, model: SemanticModel) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
     for rule in RULES_2ND_PASS:
-        diagnostics.extend(rule(graph, analysis))
+        diagnostics.extend(rule(graph, model))
 
     return diagnostics

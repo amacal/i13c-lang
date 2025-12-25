@@ -52,6 +52,9 @@ class OneToMany[LeftId, RightId]:
     def keys(self) -> Iterable[LeftId]:
         return self.map.keys()
 
+    def values(self) -> Iterable[List[RightId]]:
+        return self.map.values()
+
     def items(self) -> Iterable[Tuple[LeftId, List[RightId]]]:
         return self.map.items()
 
