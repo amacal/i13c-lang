@@ -31,7 +31,6 @@ class Edges:
     snippet_clobbers: OneToMany[ids.SnippetId, ids.RegisterId]
     snippet_slots: OneToMany[ids.SnippetId, ids.SlotId]
     slot_bindings: OneToOne[ids.SlotId, ids.RegisterId]
-    call_targets: OneToMany[ids.CallId, ids.FunctionId]
     call_arguments: OneToMany[ids.CallId, ids.ArgumentId]
     statement_calls: OneToOne[ids.StatementId, ids.CallId]
 
@@ -67,7 +66,6 @@ def build_graph(program: ast.Program) -> Graph:
     snippet_clobbers = edge_collect_snippet_clobbers(snippets, registers)
     snippet_slots = edge_collect_snippet_slots(snippets, slots)
     slot_bindings = edge_collect_slot_bindings(slots, registers)
-    call_targets = edge_collect_call_targets(calls, functions_by_name)
     call_arguments = edge_collect_call_arguments(calls, arguments)
     statement_calls = edge_collect_statement_calls(statements, calls)
 
@@ -89,7 +87,6 @@ def build_graph(program: ast.Program) -> Graph:
             snippet_clobbers=snippet_clobbers,
             snippet_slots=snippet_slots,
             slot_bindings=slot_bindings,
-            call_targets=call_targets,
             call_arguments=call_arguments,
             statement_calls=statement_calls,
         ),
@@ -392,19 +389,6 @@ def edge_collect_snippet_slots(
         out[sid] = slots.get_by_nodes(snippet.slots)
 
     return OneToMany(map=out)
-
-
-def edge_collect_call_targets(
-    calls: Bidirectional[ast.CallStatement, ids.CallId],
-    functions_by_name: OneToMany[bytes, ids.FunctionId],
-) -> OneToMany[ids.CallId, ids.FunctionId]:
-    call_targets: Dict[ids.CallId, List[ids.FunctionId]] = {}
-
-    for cid, call in calls.items():
-        if targets := functions_by_name.get(call.name):
-            call_targets[cid] = targets
-
-    return OneToMany(map=call_targets)
 
 
 def edge_collect_call_arguments(
