@@ -1,5 +1,6 @@
 from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
+from i13c.sem.model import build_model
 
 
 def can_accept_operands_arity_of_syscall():
@@ -9,7 +10,7 @@ def can_accept_operands_arity_of_syscall():
             ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 slots=[],
                 clobbers=[],
                 instructions=[
@@ -23,8 +24,8 @@ def can_accept_operands_arity_of_syscall():
         ],
     )
 
-    graph = build_graph(program)
-    diagnostics = sem.e3000.validate_assembly_mnemonic(graph)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
 
     assert len(diagnostics) == 0
 
@@ -36,7 +37,7 @@ def can_accept_operands_arity_of_mov():
             ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 slots=[],
                 clobbers=[],
                 instructions=[
@@ -53,8 +54,8 @@ def can_accept_operands_arity_of_mov():
         ],
     )
 
-    graph = build_graph(program)
-    diagnostics = sem.e3000.validate_assembly_mnemonic(graph)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
 
     assert len(diagnostics) == 0
 
@@ -66,7 +67,7 @@ def can_detect_invalid_instruction():
             ast.Snippet(
                 ref=src.Span(offset=1, length=10),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 slots=[],
                 clobbers=[],
                 instructions=[
@@ -80,8 +81,8 @@ def can_detect_invalid_instruction():
         ],
     )
 
-    graph = build_graph(program)
-    diagnostics = sem.e3000.validate_assembly_mnemonic(graph)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

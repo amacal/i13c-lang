@@ -1,37 +1,40 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem.graph import Graph
-from i13c.sem.model import SemanticModel
+from i13c.sem.nodes import Call, Function
 
 
 def validate_called_symbol_termination(
-    graph: Graph,
-    model: SemanticModel,
+    functions: List[Function],
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fid, terminal in model.analysis.is_terminal.items():
-        if not terminal:
+    for fn in functions:
+        if not fn.noreturn or fn.kind in ["snippet"]:
             continue
 
-        for sid in model.analysis.function_exits.get(fid):
-            if cid := graph.edges.statement_calls.find_by_id(sid):
-                callees = model.resolver.by_type.get(cid)
+        for exit_point in fn.exit_points:
+            # implicitly non-terminal
+            if not exit_point.statement or not isinstance(exit_point.statement, Call):
+                diagnostics.append(
+                    err.report_e3010_callee_is_non_terminal(
+                        fn.ref,
+                        fn.name,
+                    )
+                )
 
-                # unresolved calls handled elsewhere
-                if not callees:
-                    continue
+                break
 
-                for callee in callees:
-                    if not model.analysis.is_terminal.find_by_id(callee):
-                        # find the call node
-                        call = graph.nodes.calls.get_by_id(cid)
-
-                        diagnostics.append(
-                            err.report_e3010_callee_is_non_terminal(call.ref, call.name)
+            # complain on any non-terminal callee
+            for callee in exit_point.statement.candidates:
+                if not callee.noreturn:
+                    diagnostics.append(
+                        err.report_e3010_callee_is_non_terminal(
+                            exit_point.statement.ref,
+                            exit_point.statement.name,
                         )
+                    )
 
-                        break
+                    break
 
     return diagnostics

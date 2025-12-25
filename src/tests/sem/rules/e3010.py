@@ -1,16 +1,25 @@
 from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
-from i13c.sem.model import build_semantic_model
+from i13c.sem.model import build_model
 
 
 def can_survive_non_terminal_callee_symbol():
     program = ast.Program(
-        snippets=[],
+        snippets=[
+            ast.Snippet(
+                ref=src.Span(offset=0, length=10),
+                name=b"foo",
+                noreturn=False,
+                slots=[],
+                clobbers=[],
+                instructions=[],
+            ),
+        ],
         functions=[
             ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"bar",
-                terminal=False,
+                noreturn=False,
                 parameters=[],
                 statements=[
                     ast.CallStatement(
@@ -20,31 +29,32 @@ def can_survive_non_terminal_callee_symbol():
                     )
                 ],
             ),
-            ast.Function(
-                ref=src.Span(offset=30, length=10),
-                name=b"foo",
-                terminal=True,
-                parameters=[],
-                statements=[],
-            ),
         ],
     )
 
-    graph = build_graph(program)
-    model = build_semantic_model(graph)
-    diagnostics = sem.e3010.validate_called_symbol_termination(graph, model)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3010.validate_called_symbol_termination(model)
 
     assert len(diagnostics) == 0
 
 
 def can_detect_non_terminal_caller_symbol():
     program = ast.Program(
-        snippets=[],
+        snippets=[
+            ast.Snippet(
+                ref=src.Span(offset=0, length=10),
+                name=b"foo",
+                noreturn=False,
+                slots=[],
+                clobbers=[],
+                instructions=[],
+            ),
+        ],
         functions=[
             ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
-                terminal=True,
+                noreturn=True,
                 parameters=[],
                 statements=[
                     ast.CallStatement(
@@ -54,19 +64,11 @@ def can_detect_non_terminal_caller_symbol():
                     )
                 ],
             ),
-            ast.Function(
-                ref=src.Span(offset=30, length=10),
-                name=b"foo",
-                terminal=False,
-                parameters=[],
-                statements=[],
-            ),
         ],
     )
 
-    graph = build_graph(program)
-    model = build_semantic_model(graph)
-    diagnostics = sem.e3010.validate_called_symbol_termination(graph, model)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3010.validate_called_symbol_termination(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -76,14 +78,31 @@ def can_detect_non_terminal_caller_symbol():
     assert diagnostic.ref.length == 20
 
 
-def can_service_non_terminal_caller_symbol_not_last_call():
+def can_survive_non_terminal_caller_symbol_not_last_call():
     program = ast.Program(
-        snippets=[],
+        snippets=[
+            ast.Snippet(
+                ref=src.Span(offset=0, length=10),
+                name=b"foo1",
+                noreturn=True,
+                slots=[],
+                clobbers=[],
+                instructions=[],
+            ),
+            ast.Snippet(
+                ref=src.Span(offset=10, length=10),
+                name=b"foo2",
+                noreturn=False,
+                slots=[],
+                clobbers=[],
+                instructions=[],
+            ),
+        ],
         functions=[
             ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"bar",
-                terminal=True,
+                noreturn=True,
                 parameters=[],
                 statements=[
                     ast.CallStatement(
@@ -98,25 +117,10 @@ def can_service_non_terminal_caller_symbol_not_last_call():
                     ),
                 ],
             ),
-            ast.Function(
-                ref=src.Span(offset=30, length=10),
-                name=b"foo1",
-                terminal=True,
-                parameters=[],
-                statements=[],
-            ),
-            ast.Function(
-                ref=src.Span(offset=30, length=10),
-                name=b"foo2",
-                terminal=False,
-                parameters=[],
-                statements=[],
-            ),
         ],
     )
 
-    graph = build_graph(program)
-    model = build_semantic_model(graph)
-    diagnostics = sem.e3010.validate_called_symbol_termination(graph, model)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3010.validate_called_symbol_termination(model)
 
     assert len(diagnostics) == 0

@@ -16,7 +16,7 @@ def link(unit: ir.Unit) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     if unit.entry is None:
         diagnostics.append(err.report_e5000_missing_entrypoint_function())
 
-    elif blocks[0].terminal is False:
+    elif blocks[0].noreturn is False:
         diagnostics.append(err.report_e5001_non_terminal_entrypoint_function())
 
     if diagnostics:

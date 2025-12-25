@@ -1,6 +1,6 @@
 from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
-from i13c.sem.model import build_semantic_model
+from i13c.sem.model import build_model
 
 
 def can_detect_incorrect_argument_count_for_a_call_less():
@@ -10,7 +10,7 @@ def can_detect_incorrect_argument_count_for_a_call_less():
             ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
-                terminal=True,
+                noreturn=True,
                 parameters=[],
                 statements=[
                     ast.CallStatement(
@@ -23,7 +23,7 @@ def can_detect_incorrect_argument_count_for_a_call_less():
             ast.Function(
                 ref=src.Span(offset=30, length=10),
                 name=b"foo",
-                terminal=True,
+                noreturn=True,
                 parameters=[
                     ast.Parameter(
                         name=b"x",
@@ -35,9 +35,8 @@ def can_detect_incorrect_argument_count_for_a_call_less():
         ],
     )
 
-    graph = build_graph(program)
-    model = build_semantic_model(graph)
-    diagnostics = sem.e3011.validate_called_arguments_count(graph, model)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3011.validate_called_arguments_count(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

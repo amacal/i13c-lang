@@ -7,14 +7,14 @@ def can_move_entry_function_to_front():
         codeblocks=[
             ir.CodeBlock(
                 label=b"aux",
-                terminal=False,
+                noreturn=False,
                 instructions=[
                     ir.MovRegImm(dst=1, imm=0x0),
                 ],
             ),
             ir.CodeBlock(
                 label=b"main",
-                terminal=True,
+                noreturn=True,
                 instructions=[
                     ir.SysCall(),
                 ],
@@ -46,7 +46,7 @@ def can_detect_non_terminal_main():
         codeblocks=[
             ir.CodeBlock(
                 label=b"main",
-                terminal=False,
+                noreturn=False,
                 instructions=[
                     ir.SysCall(),
                 ],

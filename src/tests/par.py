@@ -14,7 +14,7 @@ def can_parse_instruction_without_operands():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"main"
-    assert snippet.terminal is False
+    assert snippet.noreturn is False
 
     assert len(snippet.instructions) == 1
     instruction = snippet.instructions[0]
@@ -36,7 +36,7 @@ def can_parse_instruction_with_operands():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"main"
-    assert snippet.terminal is False
+    assert snippet.noreturn is False
 
     assert len(snippet.instructions) == 1
     instruction = snippet.instructions[0]
@@ -66,7 +66,7 @@ def can_parse_instruction_with_immediate():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"main"
-    assert snippet.terminal is False
+    assert snippet.noreturn is False
 
     assert len(snippet.instructions) == 1
     instruction = snippet.instructions[0]
@@ -96,7 +96,7 @@ def can_parse_multiple_instructions():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"main"
-    assert snippet.terminal is False
+    assert snippet.noreturn is False
     assert len(snippet.instructions) == 2
 
     instruction1 = snippet.instructions[0]
@@ -121,7 +121,7 @@ def can_parse_snippets_with_single_arg():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"exit"
-    assert snippet.terminal is False
+    assert snippet.noreturn is False
     assert len(snippet.instructions) == 1
 
     instruction = snippet.instructions[0]
@@ -150,7 +150,7 @@ def can_parse_snippets_with_multiple_args():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"exit"
-    assert snippet.terminal is False
+    assert snippet.noreturn is False
     assert len(snippet.instructions) == 1
 
     instruction = snippet.instructions[0]
@@ -184,7 +184,7 @@ def can_parse_snippets_with_clobbers():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"aux"
-    assert snippet.terminal is False
+    assert snippet.noreturn is False
     assert len(snippet.clobbers) == 2
 
     assert snippet.clobbers[0].name == b"rax"
@@ -210,7 +210,7 @@ def can_parse_snippets_with_no_return():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"halt"
-    assert snippet.terminal is True
+    assert snippet.noreturn is True
 
     assert len(snippet.instructions) == 1
     instruction = snippet.instructions[0]
@@ -232,7 +232,7 @@ def can_parse_snippets_with_no_return_with_clobbers():
     snippet = program.value.snippets[0]
 
     assert snippet.name == b"halt"
-    assert snippet.terminal is True
+    assert snippet.noreturn is True
 
     clobbers = snippet.clobbers
     assert len(clobbers) == 1
@@ -271,7 +271,7 @@ def can_parse_function_without_statements():
 
     assert isinstance(function, ast.Function)
     assert function.name == b"main"
-    assert function.terminal is False
+    assert function.noreturn is False
     assert len(function.statements) == 0
 
 
@@ -289,7 +289,7 @@ def can_parse_function_with_statements():
 
     assert isinstance(function, ast.Function)
     assert function.name == b"main"
-    assert function.terminal is False
+    assert function.noreturn is False
     assert len(function.statements) == 1
 
     statement = function.statements[0]
@@ -316,7 +316,7 @@ def can_parse_function_with_single_parameter():
 
     assert isinstance(function, ast.Function)
     assert function.name == b"main"
-    assert function.terminal is False
+    assert function.noreturn is False
     assert len(function.parameters) == 1
 
     parameter = function.parameters[0]
@@ -338,7 +338,7 @@ def can_parse_function_with_multiple_parameters():
 
     assert isinstance(function, ast.Function)
     assert function.name == b"main"
-    assert function.terminal is False
+    assert function.noreturn is False
     assert len(function.parameters) == 2
 
     parameter1 = function.parameters[0]
@@ -364,7 +364,7 @@ def can_parse_function_with_flags_noreturn():
 
     assert isinstance(function, ast.Function)
     assert function.name == b"main"
-    assert function.terminal is True
+    assert function.noreturn is True
     assert len(function.statements) == 1
 
     statement = function.statements[0]

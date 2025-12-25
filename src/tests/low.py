@@ -8,7 +8,7 @@ def can_lower_syscall_program():
             ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 slots=[],
                 clobbers=[],
                 instructions=[
@@ -41,7 +41,7 @@ def can_lower_mov_program():
             ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 slots=[],
                 clobbers=[],
                 instructions=[
@@ -82,7 +82,7 @@ def can_lower_noentry_program():
             ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"aux",
-                terminal=False,
+                noreturn=False,
                 slots=[],
                 clobbers=[],
                 instructions=[
@@ -115,7 +115,7 @@ def can_detect_unsupported_mnemonic():
             ast.Snippet(
                 ref=src.Span(offset=0, length=4),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 slots=[],
                 clobbers=[],
                 instructions=[

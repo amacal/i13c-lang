@@ -51,7 +51,7 @@ def lower_snippet(snippet: ast.Snippet) -> ir.CodeBlock:
 
     return ir.CodeBlock(
         label=snippet.name,
-        terminal=snippet.terminal,
+        noreturn=snippet.noreturn,
         instructions=instructions,
     )
 

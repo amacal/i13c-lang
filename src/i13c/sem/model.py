@@ -115,20 +115,29 @@ def build_snippets(
 
             return nodes.Instruction(
                 id=nodes.InstructionId(id=next()),
+                ref=node.ref,
                 mnemonic=node.mnemonic.name,
                 operands=operands,
             )
 
         clobbers = [nodes.Register(name=clobber.name) for clobber in snippet.clobbers]
-        instructions = (into_instructions(instr) for instr in snippet.instructions)
+        instructions = [into_instructions(instr) for instr in snippet.instructions]
+
+        exit_point = nodes.ExitPoint(
+            ref=instructions[-1].ref if snippet.instructions else snippet.ref,
+            statement=instructions[-1] if snippet.instructions else None,
+        )
 
         out[snid] = nodes.Function(
             id=nodes.FunctionId(id=next()),
+            kind="snippet",
+            ref=snippet.ref,
             name=snippet.name,
-            terminal=snippet.terminal,
+            noreturn=snippet.noreturn,
             parameters=parameters,
             clobbers=clobbers,
             body=list(instructions),
+            exit_points=[exit_point],
         )
 
     return out
@@ -158,11 +167,14 @@ def build_functions(
 
         out[fid] = nodes.Function(
             id=nodes.FunctionId(id=next()),
+            kind="function",
+            ref=function.ref,
             name=function.name,
-            terminal=analysis.is_terminal.get_by_id(fid),
+            noreturn=function.noreturn,
             parameters=parameters,
             clobbers=[],
             body=[],
+            exit_points=[],
         )
 
     return out
@@ -187,7 +199,11 @@ def build_calls(
 
             # append argument node
             arguments.append(
-                nodes.Argument(id=nodes.ArgumentId(id=next()), value=value)
+                nodes.Argument(
+                    id=nodes.ArgumentId(id=next()),
+                    ref=argument.ref,
+                    value=value,
+                )
             )
 
         for fid in resolver.by_name.get(cid):
@@ -198,6 +214,7 @@ def build_calls(
 
         out[cid] = nodes.Call(
             id=nodes.CallId(id=next()),
+            ref=call.ref,
             name=call.name,
             arguments=arguments,
             candidates=candidates,
@@ -220,11 +237,17 @@ def attach_bodies(
             if call is not None:
                 body.append(calls[call])
 
+        exit_point = nodes.ExitPoint(
+            ref=body[-1].ref if body else function.ref,
+            statement=body[-1] if body else None,
+        )
+
         function.body = body
+        function.exit_points = [exit_point]
 
 
 def merge_functions(
-    snippets: Dict[nodes.FunctionId, nodes.Function],
+    snippets: Dict[ids.SnippetId, nodes.Function],
     functions: Dict[ids.FunctionId, nodes.Function],
 ) -> List[nodes.Function]:
     out: List[nodes.Function] = []
@@ -233,6 +256,32 @@ def merge_functions(
     out.extend(functions.values())
 
     return out
+
+
+def build_model(graph: Graph) -> List[nodes.Function]:
+    semantic_model = build_semantic_model(graph)
+
+    next_id = 0
+
+    def next() -> int:
+        nonlocal next_id
+        nid = next_id
+        next_id += 1
+        return nid
+
+    snippets = build_snippets(graph, next)
+    functions = build_functions(graph, semantic_model.analysis, next)
+
+    calls = build_calls(
+        graph,
+        semantic_model.resolver,
+        functions,
+        snippets,
+        next,
+    )
+
+    attach_bodies(graph, functions, calls)
+    return merge_functions(snippets, functions)
 
 
 def resolve_by_name(
@@ -383,7 +432,7 @@ def collect_is_terminal(
     out: Dict[ids.FunctionId, bool] = {}
 
     for fid, function in functions.items():
-        out[fid] = function.terminal
+        out[fid] = function.noreturn
 
     return OneToOne(map=out)
 

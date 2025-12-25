@@ -1,6 +1,6 @@
 from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
-from i13c.sem.model import build_semantic_model
+from i13c.sem.model import build_model
 
 
 def can_detect_missing_called_symbol():
@@ -10,7 +10,7 @@ def can_detect_missing_called_symbol():
             ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 parameters=[],
                 statements=[
                     ast.CallStatement(
@@ -23,9 +23,8 @@ def can_detect_missing_called_symbol():
         ],
     )
 
-    graph = build_graph(program)
-    model = build_semantic_model(graph)
-    diagnostics = sem.e3008.validate_called_symbol_exists(graph, model)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3008.validate_called_symbol_exists(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

@@ -68,7 +68,7 @@ class Parameter:
 class Snippet:
     ref: src.Span
     name: bytes
-    terminal: bool
+    noreturn: bool
     slots: List[Slot]
     clobbers: List[Register]
     instructions: List[Instruction]
@@ -78,7 +78,7 @@ class Snippet:
 class Function:
     ref: src.Span
     name: bytes
-    terminal: bool
+    noreturn: bool
     parameters: List[Parameter]
     statements: List[CallStatement]
 

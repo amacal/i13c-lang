@@ -1,20 +1,23 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem.graph import Graph
-from i13c.sem.model import SemanticModel
+from i13c.sem.nodes import Call, Function
 
 
 def validate_called_symbol_exists(
-    graph: Graph,
-    model: SemanticModel,
+    functions: List[Function],
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for cid, call in graph.nodes.calls.items():
-        if not model.resolver.by_name.get(cid):
-            diagnostics.append(
-                err.report_e3008_called_symbol_exists(call.ref, call.name)
-            )
+    for fn in functions:
+        for stmt in fn.body:
+            if isinstance(stmt, Call):
+                if not stmt.candidates:
+                    diagnostics.append(
+                        err.report_e3008_called_symbol_exists(
+                            stmt.ref,
+                            stmt.name,
+                        )
+                    )
 
     return diagnostics

@@ -1,51 +1,51 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem import asm
-from i13c.sem.graph import Graph
+from i13c.sem.asm import INSTRUCTIONS_TABLE
+from i13c.sem.nodes import Function, Instruction
 
 
-def validate_assembly_operand_types(
-    graph: Graph,
-) -> List[diag.Diagnostic]:
+def validate_assembly_operand_types(functions: List[Function]) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for instruction in graph.nodes.instructions.values():
-
-        matched = False
-        signature = asm.INSTRUCTIONS_TABLE.get(instruction.mnemonic.name)
-
-        # unknown instruction mnemonic
-        if signature is None:
-            continue
-
-        # early acceptance for instructions without operands
-        if not instruction.operands and not signature.variants:
-            continue
-
-        # each possible variant has to be checked
-        for variant in signature.variants:
-
-            # check operand count
-            if len(variant) != len(instruction.operands):
+    for fn in functions:
+        for stmt in fn.body:
+            if not isinstance(stmt, Instruction):
                 continue
 
-            # check each operand type
-            for expected, operand in zip(variant, instruction.operands):
-                if not isinstance(operand, expected):
+            # unknown mnemonic handled elsewhere
+            sig = INSTRUCTIONS_TABLE.get(stmt.mnemonic)
+            if sig is None:
+                continue
+
+            # no operands expected
+            if not stmt.operands and not sig.variants:
+                continue
+
+            # final outcome
+            matched = False
+
+            for variant in sig.variants:
+                if len(variant) != len(stmt.operands):
+                    continue
+
+                # check each operand type
+                for expected, operand in zip(variant, stmt.operands):
+                    if not isinstance(operand, expected):
+                        break
+
+                # report success
+                else:
+                    matched = True
                     break
 
-            else:
-                matched = True
-                break
-
-        # any match indicates success
-        if not matched:
-            diagnostics.append(
-                err.report_e3002_invalid_operand_types(
-                    instruction.ref,
-                    [type(operand).__name__ for operand in instruction.operands],
+            # report failure
+            if not matched:
+                diagnostics.append(
+                    err.report_e3002_invalid_operand_types(
+                        stmt.ref,
+                        [type(op).__name__ for op in stmt.operands],
+                    )
                 )
-            )
 
     return diagnostics

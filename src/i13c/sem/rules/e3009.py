@@ -1,30 +1,29 @@
 from typing import List
 
-from i13c import ast, diag, err
-from i13c.sem.graph import Graph
-from i13c.sem.model import SemanticModel
+from i13c import diag, err
+from i13c.sem.nodes import Call, Function, Instruction
 
 
 def validate_called_symbol_is_snippet(
-    graph: Graph,
-    model: SemanticModel,
+    functions: List[Function],
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for cid, call in graph.nodes.calls.items():
-        fids = model.resolver.by_type.get(cid)
+    for fn in functions:
+        for stmt in fn.body:
+            if not isinstance(stmt, Call):
+                continue
 
-        # if nothing is callable, another rule will complain
-        if not fids:
-            continue
+            for callee in stmt.candidates:
+                # a snippet is a function whose body contains Instructions
+                is_snippet = any(isinstance(x, Instruction) for x in callee.body)
 
-        for fid in fids:
-            function = graph.nodes.functions.get_by_id(fid)
-            if not isinstance(function, ast.Snippet):
-                diagnostics.append(
-                    err.report_e3009_called_symbol_is_not_a_snippet(call.ref, call.name)
-                )
-
-                break
+                if not is_snippet:
+                    diagnostics.append(
+                        err.report_e3009_called_symbol_is_not_a_snippet(
+                            stmt.ref,
+                            stmt.name,
+                        )
+                    )
 
     return diagnostics

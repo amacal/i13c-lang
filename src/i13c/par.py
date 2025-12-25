@@ -143,7 +143,7 @@ def parse_entity(state: ParsingState) -> Union[ast.Snippet, ast.Function]:
 def parse_function(state: ParsingState) -> ast.Function:
     statements: List[ast.CallStatement] = []
     parameters: List[ast.Parameter] = []
-    terminal: bool = False
+    noreturn: bool = False
 
     # function name is an identifier
     name = state.expect(lex.TOKEN_IDENT)
@@ -163,7 +163,7 @@ def parse_function(state: ParsingState) -> ast.Function:
 
     # optional flags
     if not state.is_in(lex.TOKEN_CURLY_OPEN):
-        terminal = parse_function_flags(state)
+        noreturn = parse_function_flags(state)
 
     # expect opening curly brace
     state.expect(lex.TOKEN_CURLY_OPEN)
@@ -178,7 +178,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     return ast.Function(
         ref=ref,
         name=state.extract(name),
-        terminal=terminal,
+        noreturn=noreturn,
         parameters=parameters,
         statements=statements,
     )
@@ -188,7 +188,7 @@ def parse_snippet(state: ParsingState) -> ast.Snippet:
     instructions: List[ast.Instruction] = []
     slots: List[ast.Slot] = []
     clobbers: List[ast.Register] = []
-    terminal: bool = False
+    noreturn: bool = False
 
     # function name is an identifier
     name = state.expect(lex.TOKEN_IDENT)
@@ -208,7 +208,7 @@ def parse_snippet(state: ParsingState) -> ast.Snippet:
 
     # optional flags
     if not state.is_in(lex.TOKEN_CURLY_OPEN):
-        clobbers, terminal = parse_snippet_flags(state)
+        clobbers, noreturn = parse_snippet_flags(state)
 
     # expect opening curly brace
     state.expect(lex.TOKEN_CURLY_OPEN)
@@ -223,7 +223,7 @@ def parse_snippet(state: ParsingState) -> ast.Snippet:
     return ast.Snippet(
         ref=ref,
         name=state.extract(name),
-        terminal=terminal,
+        noreturn=noreturn,
         clobbers=clobbers,
         slots=slots,
         instructions=instructions,

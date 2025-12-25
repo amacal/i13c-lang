@@ -1,5 +1,6 @@
 from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
+from i13c.sem.model import build_model
 
 
 def can_detect_integer_literal_out_of_range():
@@ -9,7 +10,7 @@ def can_detect_integer_literal_out_of_range():
             ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 parameters=[],
                 statements=[
                     ast.CallStatement(
@@ -27,8 +28,8 @@ def can_detect_integer_literal_out_of_range():
         ],
     )
 
-    graph = build_graph(program)
-    diagnostics = sem.e3007.validate_integer_literal_out_of_range(graph)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3007.validate_integer_literal_out_of_range(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

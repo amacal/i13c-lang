@@ -7,7 +7,7 @@ def can_encode_instructions_mov_rax_imm():
         codeblocks=[
             ir.CodeBlock(
                 label=b"main",
-                terminal=True,
+                noreturn=True,
                 instructions=[
                     ir.MovRegImm(dst=0, imm=0x1234),
                 ],
@@ -27,7 +27,7 @@ def can_encode_instructions_mov_r10_imm():
         codeblocks=[
             ir.CodeBlock(
                 label=b"main",
-                terminal=True,
+                noreturn=True,
                 instructions=[
                     ir.MovRegImm(dst=10, imm=0x1234),
                 ],
@@ -47,7 +47,7 @@ def can_encode_instructions_syscall():
         codeblocks=[
             ir.CodeBlock(
                 label=b"main",
-                terminal=True,
+                noreturn=True,
                 instructions=[
                     ir.SysCall(),
                 ],

@@ -1,5 +1,6 @@
 from i13c import ast, err, sem, src
 from i13c.sem.graph import build_graph
+from i13c.sem.model import build_model
 
 
 def can_detect_duplicated_slot_names():
@@ -9,7 +10,7 @@ def can_detect_duplicated_slot_names():
             ast.Snippet(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 slots=[
                     ast.Slot(
                         name=b"code",
@@ -34,8 +35,8 @@ def can_detect_duplicated_slot_names():
         ],
     )
 
-    graph = build_graph(program)
-    diagnostics = sem.e3004.validate_duplicated_parameter_names(graph)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3004.validate_duplicated_parameter_names(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -52,7 +53,7 @@ def can_detect_duplicated_parameter_names():
             ast.Function(
                 ref=src.Span(offset=1, length=20),
                 name=b"main",
-                terminal=False,
+                noreturn=False,
                 parameters=[
                     ast.Parameter(
                         name=b"code",
@@ -74,8 +75,8 @@ def can_detect_duplicated_parameter_names():
         ],
     )
 
-    graph = build_graph(program)
-    diagnostics = sem.e3004.validate_duplicated_parameter_names(graph)
+    model = build_model(build_graph(program))
+    diagnostics = sem.e3004.validate_duplicated_parameter_names(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
