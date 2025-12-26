@@ -1,7 +1,16 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Protocol, Union
 
 from i13c import src
+
+
+class Visitor(Protocol):
+    def on_program(self, program: Program) -> None: ...
+    def on_snippet(self, snippet: Snippet) -> None: ...
+    def on_instruction(self, instruction: Instruction) -> None: ...
+    def on_function(self, function: Function) -> None: ...
+    def on_statement(self, statement: Statement) -> None: ...
+    def on_literal(self, literal: Literal) -> None: ...
 
 
 @dataclass(kw_only=True, eq=False)
@@ -40,12 +49,21 @@ class Instruction:
     mnemonic: Mnemonic
     operands: List[Union[Register, Immediate]]
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_instruction(self)
+
 
 @dataclass(kw_only=True, eq=False)
 class CallStatement:
     ref: src.Span
     name: bytes
     arguments: List[IntegerLiteral]
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_statement(self)
+
+        for argument in self.arguments:
+            visitor.on_literal(argument)
 
 
 Statement = Union[CallStatement]
@@ -73,6 +91,12 @@ class Snippet:
     clobbers: List[Register]
     instructions: List[Instruction]
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_snippet(self)
+
+        for instruction in self.instructions:
+            instruction.accept(visitor)
+
 
 @dataclass(kw_only=True, eq=False)
 class Function:
@@ -82,8 +106,23 @@ class Function:
     parameters: List[Parameter]
     statements: List[CallStatement]
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_function(self)
+
+        for statement in self.statements:
+            statement.accept(visitor)
+
 
 @dataclass(kw_only=True, eq=False)
 class Program:
     functions: List[Function]
     snippets: List[Snippet]
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_program(self)
+
+        for snippet in self.snippets:
+            snippet.accept(visitor)
+
+        for function in self.functions:
+            function.accept(visitor)

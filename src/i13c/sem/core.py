@@ -10,6 +10,14 @@ class Bidirectional[AstNode, NodeId]:
     node_to_id: Dict[AstNode, NodeId]
     id_to_node: Dict[NodeId, AstNode]
 
+    @staticmethod
+    def empty() -> Bidirectional[AstNode, NodeId]:
+        return Bidirectional(node_to_id={}, id_to_node={})
+
+    def append(self, id: NodeId, node: AstNode) -> None:
+        self.node_to_id[node] = id
+        self.id_to_node[id] = node
+
     def ids(self) -> Iterable[NodeId]:
         return self.id_to_node.keys()
 
