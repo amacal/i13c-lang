@@ -102,7 +102,12 @@ MnemonicVariant = Tuple[OperandSpec, ...]
 
 INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
     b"syscall": [()],
-    b"mov": [(OperandSpec.register(), OperandSpec.immediate(64))],
+    b"mov": [
+        (OperandSpec.register(), OperandSpec.immediate(64)),
+        (OperandSpec.register(), OperandSpec.immediate(32)),
+        (OperandSpec.register(), OperandSpec.immediate(16)),
+        (OperandSpec.register(), OperandSpec.immediate(8)),
+    ],
 }
 
 

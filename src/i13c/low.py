@@ -1,9 +1,13 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from i13c import diag, err, ir, res, src
 from i13c.sem.asm import Immediate, Instruction, Register
+from i13c.sem.callsite import CallSiteId
+from i13c.sem.entrypoint import EntryPoint
+from i13c.sem.function import FunctionId
+from i13c.sem.literal import Hex
 from i13c.sem.model import SemanticGraph
-from i13c.sem.snippet import Snippet
+from i13c.sem.snippet import Slot, Snippet, SnippetId
 
 # fmt: off
 IR_REGISTER_MAP = {
@@ -19,31 +23,105 @@ class UnsupportedMnemonic(Exception):
         self.name = name
 
 
+def match_entrypoint(
+    entrypoint: EntryPoint, target: Union[SnippetId, FunctionId]
+) -> bool:
+    if entrypoint.kind == b"function":
+        return entrypoint.target == target
+
+    if entrypoint.kind == b"snippet":
+        return entrypoint.target == target
+
+    return False
+
+
 def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     codeblocks: List[ir.CodeBlock] = []
     diagnostics: List[diag.Diagnostic] = []
     entry: Optional[int] = None
 
     try:
-        for snippet in graph.snippets.values():
+        # entrypoint always exists here
+        assert len(graph.entrypoints) == 1
+        entrypoint = graph.entrypoints[0]
+
+        for snid, snippet in graph.snippets.items():
             codeblocks.append(lower_snippet(graph, snippet))
+
+            if match_entrypoint(entrypoint, snid):
+                entry = len(codeblocks) - 1
+
+        for fid, function in graph.functions.items():
+            out: List[ir.Instruction] = []
+
+            for stmt in function.statements:
+                # currently only callsites are supported
+                assert isinstance(stmt, CallSiteId)
+
+                # just append callsite instructions
+                out.extend(lower_callsite(graph, stmt))
+
+            # and create codeblock out of them
+            codeblocks.append(ir.CodeBlock(instructions=out))
+
+            if match_entrypoint(entrypoint, fid):
+                entry = len(codeblocks) - 1
 
     except UnsupportedMnemonic as e:
         diagnostics.append(err.report_e4000_unsupported_mnemonic(e.ref, e.name))
-
-    # check for duplicated symbols
-    for idx, codeblock in enumerate(codeblocks):
-        if codeblock.label:
-
-            # find entry point
-            if codeblock.label == b"main":
-                entry = idx
 
     # any diagnostic is an error
     if diagnostics:
         return res.Err(diagnostics)
 
+    # entrypoint must be found
+    assert entry is not None
+
     return res.Ok(ir.Unit(entry=entry, codeblocks=codeblocks))
+
+
+def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction]:
+
+    out: List[ir.Instruction] = []
+
+    # find callsite and its resolution
+    callsite = graph.callsites[cid]
+    resolution = graph.callsite_resolutions[cid]
+
+    # we know there is exactly one accepted resolution
+    assert len(resolution.accepted) == 1
+    acceptance = resolution.accepted[0]
+
+    # we know we supported only snippet callsites
+    assert acceptance.callable.kind == b"snippet"
+    assert isinstance(acceptance.callable.target, SnippetId)
+    snippet = graph.snippets[acceptance.callable.target]
+
+    for binding in acceptance.bindings:
+        # because this is a snippet callsite
+        assert isinstance(binding.target, Slot)
+
+        # we know all slots are literals for now
+        assert binding.argument.kind == b"literal"
+        literal = graph.literals[binding.argument.target]
+
+        # we know all literals are hex for now
+        assert literal.kind == b"hex"
+        assert isinstance(literal.target, Hex)
+
+        # extract register and immediate
+        bind: Register = binding.target.bind
+        imm: int = literal.target.value
+
+        # emit move instruction for binding
+        out.append(ir.MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm))
+
+    # finally, emit snippet instructions
+    for iid in snippet.instructions:
+        instruction = graph.instructions[iid]
+        out.append(lower_instruction(instruction))
+
+    return out
 
 
 def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
@@ -53,11 +131,7 @@ def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
         instruction = graph.instructions[iid]
         out.append(lower_instruction(instruction))
 
-    return ir.CodeBlock(
-        label=snippet.identifier.name,
-        noreturn=snippet.noreturn,
-        instructions=out,
-    )
+    return ir.CodeBlock(instructions=out)
 
 
 def lower_instruction(instruction: Instruction) -> ir.Instruction:

@@ -114,9 +114,8 @@ def ir_command(path: str) -> None:
     unit = unwrap(low.lower(model), source=code)
 
     for idx, codeblock in enumerate(unit.codeblocks):
-        click.echo(
-            f"Codeblock: {codeblock.label.decode('utf-8') if codeblock.label else '<anonymous>'}"
-        )
+        click.echo(f"Codeblock: {idx}")
+
         for instruction in codeblock.instructions:
             click.echo(f"  {str(instruction)}")
 
