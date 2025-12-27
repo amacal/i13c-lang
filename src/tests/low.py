@@ -1,4 +1,6 @@
 from i13c import ast, err, ir, low, res, src
+from i13c.sem.model import build_semantic_graph
+from i13c.sem.syntax import build_syntax_graph
 
 
 def can_lower_syscall_program():
@@ -22,7 +24,10 @@ def can_lower_syscall_program():
         ],
     )
 
-    unit = low.lower(program)
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    unit = low.lower(model)
     assert isinstance(unit, res.Ok)
     assert unit.value.entry == 0
 
@@ -58,7 +63,10 @@ def can_lower_mov_program():
         ],
     )
 
-    unit = low.lower(program)
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    unit = low.lower(model)
     assert isinstance(unit, res.Ok)
     assert unit.value.entry == 0
 
@@ -96,7 +104,10 @@ def can_lower_noentry_program():
         ],
     )
 
-    unit = low.lower(program)
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    unit = low.lower(model)
     assert isinstance(unit, res.Ok)
     assert unit.value.entry is None
 
@@ -129,10 +140,13 @@ def can_detect_unsupported_mnemonic():
         ],
     )
 
-    codeblocks = low.lower(program)
-    assert isinstance(codeblocks, res.Err)
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
 
-    diagnostics = codeblocks.error
+    unit = low.lower(model)
+    assert isinstance(unit, res.Err)
+
+    diagnostics = unit.error
     assert len(diagnostics) == 1
 
     assert diagnostics[0].code == err.ERROR_4000

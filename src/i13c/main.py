@@ -6,6 +6,8 @@ from typing import List, NoReturn
 import click
 
 from i13c import diag, elf, enc, ld, lex, low, par, res, sem, src
+from i13c.sem.model import build_semantic_graph
+from i13c.sem.syntax import build_syntax_graph
 
 
 def emit_and_exit(
@@ -103,10 +105,13 @@ def ir_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
 
-    if diagnostics := sem.validate(program):
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    if diagnostics := sem.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(program), source=code)
+    unit = unwrap(low.lower(model), source=code)
 
     for idx, codeblock in enumerate(unit.codeblocks):
         click.echo(
@@ -129,10 +134,13 @@ def bin_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
 
-    if diagnostics := sem.validate(program):
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    if diagnostics := sem.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(program), source=code)
+    unit = unwrap(low.lower(model), source=code)
     linked = unwrap(ld.link(unit), source=code)
     binary = enc.encode(linked)
 
@@ -149,10 +157,13 @@ def elf_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
 
-    if diagnostics := sem.validate(program):
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    if diagnostics := sem.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(program), source=code)
+    unit = unwrap(low.lower(model), source=code)
     linked = unwrap(ld.link(unit), source=code)
     binary = enc.encode(linked)
     executable = elf.emit(binary)

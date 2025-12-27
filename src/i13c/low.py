@@ -1,6 +1,9 @@
 from typing import List, Optional
 
-from i13c import ast, diag, err, ir, res, src
+from i13c import diag, err, ir, res, src
+from i13c.sem.asm import Immediate, Instruction, Register
+from i13c.sem.model import SemanticGraph
+from i13c.sem.snippet import Snippet
 
 # fmt: off
 IR_REGISTER_MAP = {
@@ -16,14 +19,14 @@ class UnsupportedMnemonic(Exception):
         self.name = name
 
 
-def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
+def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     codeblocks: List[ir.CodeBlock] = []
     diagnostics: List[diag.Diagnostic] = []
     entry: Optional[int] = None
 
     try:
-        for snippet in program.snippets:
-            codeblocks.append(lower_snippet(snippet))
+        for snippet in graph.snippets.values():
+            codeblocks.append(lower_snippet(graph, snippet))
 
     except UnsupportedMnemonic as e:
         diagnostics.append(err.report_e4000_unsupported_mnemonic(e.ref, e.name))
@@ -43,41 +46,42 @@ def lower(program: ast.Program) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     return res.Ok(ir.Unit(entry=entry, codeblocks=codeblocks))
 
 
-def lower_snippet(snippet: ast.Snippet) -> ir.CodeBlock:
-    instructions: List[ir.Instruction] = []
+def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
+    out: List[ir.Instruction] = []
 
-    for instruction in snippet.instructions:
-        instructions.append(lower_instruction(instruction))
+    for iid in snippet.instructions:
+        instruction = graph.instructions[iid]
+        out.append(lower_instruction(instruction))
 
     return ir.CodeBlock(
-        label=snippet.name,
+        label=snippet.identifier.name,
         noreturn=snippet.noreturn,
-        instructions=instructions,
+        instructions=out,
     )
 
 
-def lower_instruction(instruction: ast.Instruction) -> ir.Instruction:
+def lower_instruction(instruction: Instruction) -> ir.Instruction:
     if instruction.mnemonic.name == b"mov":
         return lower_instruction_mov(instruction)
 
     elif instruction.mnemonic.name == b"syscall":
-        return lower_instruction_syscall(instruction)
+        return lower_instruction_syscall()
 
     raise UnsupportedMnemonic(instruction.ref, instruction.mnemonic.name)
 
 
-def lower_instruction_mov(instruction: ast.Instruction) -> ir.Instruction:
+def lower_instruction_mov(instruction: Instruction) -> ir.Instruction:
     dst = instruction.operands[0]
     src = instruction.operands[1]
 
-    assert isinstance(dst, ast.Register)
-    assert isinstance(src, ast.Immediate)
+    assert isinstance(dst.target, Register)
+    assert isinstance(src.target, Immediate)
 
-    dst_reg = IR_REGISTER_MAP[dst.name]
-    src_imm = src.value
+    dst_reg = IR_REGISTER_MAP[dst.target.name]
+    src_imm = src.target.value
 
     return ir.MovRegImm(dst=dst_reg, imm=src_imm)
 
 
-def lower_instruction_syscall(instruction: ast.Instruction) -> ir.Instruction:
+def lower_instruction_syscall() -> ir.Instruction:
     return ir.SysCall()

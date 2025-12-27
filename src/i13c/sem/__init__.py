@@ -1,7 +1,7 @@
 from typing import Callable, List
 
 from i13c import ast, diag
-from i13c.sem.model import SemanticGraph, build_semantic_graph
+from i13c.sem.model import SemanticGraph
 from i13c.sem.rules import (
     e3000,
     e3001,
@@ -17,7 +17,6 @@ from i13c.sem.rules import (
     e3011,
     e3012,
 )
-from i13c.sem.syntax import build_syntax_graph
 
 RULES: List[Callable[[SemanticGraph], List[diag.Diagnostic]]] = [
     e3000.validate_assembly_mnemonic,
@@ -36,13 +35,10 @@ RULES: List[Callable[[SemanticGraph], List[diag.Diagnostic]]] = [
 ]
 
 
-def validate(program: ast.Program) -> List[diag.Diagnostic]:
+def validate(model: SemanticGraph, program: ast.Program) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    graph = build_syntax_graph(program)
-    semantics = build_semantic_graph(graph)
-
     for rule in RULES:
-        diagnostics.extend(rule(semantics))
+        diagnostics.extend(rule(model))
 
     return diagnostics
