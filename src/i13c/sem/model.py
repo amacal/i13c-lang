@@ -41,6 +41,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
     callsites = build_callsites(graph)
     instructions = build_instructions(graph)
 
+    entrypoints = build_entrypoints(functions, snippets)
     function_flowgraphs = build_flowgraphs(functions)
     callsite_resolutions = build_callsite_resolutions(
         functions,
@@ -56,12 +57,6 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         functions,
         function_flowgraphs,
         callsite_resolutions,
-    )
-
-    entrypoints = build_entrypoints(
-        functions,
-        snippets,
-        function_terminalities,
     )
 
     return SemanticGraph(
