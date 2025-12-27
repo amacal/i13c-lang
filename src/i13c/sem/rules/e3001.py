@@ -1,8 +1,8 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem.model import SemanticGraph
 from i13c.sem.asm import Immediate
+from i13c.sem.model import SemanticGraph
 
 
 def validate_immediate_out_of_range(graph: SemanticGraph) -> List[diag.Diagnostic]:

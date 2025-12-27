@@ -1,19 +1,42 @@
 from dataclasses import dataclass
 from typing import Dict, Iterable, List
 from typing import Literal as Kind
-from typing import Optional, Tuple
+from typing import Protocol, Tuple, Union
 
+from i13c.res import Err, Ok, Result
 from i13c.sem.callable import Callable
 from i13c.sem.callsite import Argument, CallSite, CallSiteId
 from i13c.sem.core import Type
-from i13c.sem.function import Function, FunctionId
+from i13c.sem.function import Function, FunctionId, Parameter
 from i13c.sem.literal import Hex, Literal, LiteralId
-from i13c.sem.snippet import Snippet, SnippetId
+from i13c.sem.snippet import Slot, Snippet, SnippetId
 
 RejectionReason = Kind[
     b"wrong-arity",
     b"type-mismatch",
+    b"unknown-target",
 ]
+
+BindingKind = Kind[
+    b"argument",
+    b"slot",
+]
+
+
+@dataclass(kw_only=True)
+class Binding:
+    kind: BindingKind
+    type: Type
+    argument: Argument
+    target: Union[Parameter, Slot]
+
+    @staticmethod
+    def slot(type: Type, argument: Argument, target: Slot) -> "Binding":
+        return Binding(kind=b"slot", type=type, argument=argument, target=target)
+
+    @staticmethod
+    def parameter(type: Type, argument: Argument, target: Parameter) -> "Binding":
+        return Binding(kind=b"argument", type=type, argument=argument, target=target)
 
 
 @dataclass(kw_only=True)
@@ -25,12 +48,40 @@ class Rejection:
 @dataclass(kw_only=True)
 class Acceptance:
     callable: Callable
+    bindings: List[Binding]
 
 
 @dataclass(kw_only=True)
 class Resolution:
     accepted: List[Acceptance]
     rejected: List[Rejection]
+
+
+class BindingLike(Protocol):
+    type: Type
+    argument: Argument
+
+
+def match_literal(literal: Literal, type: Type) -> bool:
+    match (type.name, literal.kind):
+        case (b"u8", b"hex"):
+            assert isinstance(literal.target, Hex)
+            return literal.target.width is not None and literal.target.width <= 8
+
+        case (b"u16", b"hex"):
+            assert isinstance(literal.target, Hex)
+            return literal.target.width is not None and literal.target.width <= 16
+
+        case (b"u32", b"hex"):
+            assert isinstance(literal.target, Hex)
+            return literal.target.width is not None and literal.target.width <= 32
+
+        case (b"u64", b"hex"):
+            assert isinstance(literal.target, Hex)
+            return literal.target.width is not None and literal.target.width <= 64
+
+        case _:
+            return False
 
 
 def build_resolutions(
@@ -41,67 +92,51 @@ def build_resolutions(
 ) -> Dict[CallSiteId, Resolution]:
     resolutions: Dict[CallSiteId, Resolution] = {}
 
-    def match_literal(literal: Literal, type: Type) -> bool:
-        match (type.name, literal.kind):
-            case (b"u8", b"hex"):
-                assert isinstance(literal.target, Hex)
-                return literal.target.width is not None and literal.target.width <= 8
-
-            case (b"u16", b"hex"):
-                assert isinstance(literal.target, Hex)
-                return literal.target.width is not None and literal.target.width <= 16
-
-            case (b"u32", b"hex"):
-                assert isinstance(literal.target, Hex)
-                return literal.target.width is not None and literal.target.width <= 32
-
-            case (b"u64", b"hex"):
-                assert isinstance(literal.target, Hex)
-                return literal.target.width is not None and literal.target.width <= 64
-
-            case _:
-                return False
-
     def match_bindings(
-        bindings: Iterable[Tuple[Argument, Type]],
-    ) -> Optional[RejectionReason]:
-        for argument, parameter in bindings:
-            match argument:
+        bindings: Iterable[Binding],
+    ) -> Result[List[Binding], RejectionReason]:
+        for binding in bindings:
+            match binding.argument:
                 case Argument(kind=b"literal", target=lit):
+                    # satisfy type checker
                     assert isinstance(lit, LiteralId)
-                    if not match_literal(literals[lit], type=parameter):
-                        return b"type-mismatch"
-                case _:
-                    return b"type-mismatch"
 
-        return None
+                    if not match_literal(literals[lit], type=binding.type):
+                        return Err(b"type-mismatch")
+                case _:
+                    return Err(b"type-mismatch")
+
+        return Ok(list(bindings))
 
     def match_function(
         callsite: CallSite, function: Function
-    ) -> Optional[RejectionReason]:
+    ) -> Result[List[Binding], RejectionReason]:
         if len(function.parameters) != len(callsite.arguments):
-            return b"wrong-arity"
+            return Err(b"wrong-arity")
 
-        return match_bindings(
-            zip(
-                callsite.arguments,
-                [parameter.type for parameter in function.parameters],
-            )
-        )
+        bindings = [
+            Binding.parameter(parameter.type, argument, parameter)
+            for argument, parameter in zip(callsite.arguments, function.parameters)
+        ]
+
+        return match_bindings(bindings)
 
     def match_snippet(
         callsite: CallSite, snippet: Snippet
-    ) -> Optional[RejectionReason]:
+    ) -> Result[List[Binding], RejectionReason]:
         if len(snippet.slots) != len(callsite.arguments):
-            return b"wrong-arity"
+            return Err(b"wrong-arity")
 
-        return match_bindings(
-            zip(callsite.arguments, [slot.type for slot in snippet.slots])
-        )
+        bindings = [
+            Binding.slot(slot.type, argument, slot)
+            for argument, slot in zip(callsite.arguments, snippet.slots)
+        ]
+
+        return match_bindings(bindings)
 
     def match_callable(
         callsite: CallSite, callable: Callable
-    ) -> Optional[RejectionReason]:
+    ) -> Result[List[Binding], RejectionReason]:
         match callable:
             case Callable(kind=b"function", target=target):
                 assert isinstance(target, FunctionId)
@@ -110,7 +145,7 @@ def build_resolutions(
                 assert isinstance(target, SnippetId)
                 return match_snippet(callsite, snippets[target])
             case _:
-                return None
+                return Err(b"unknown-target")
 
     for cid, callsite in callsites.items():
         candidates: List[Callable] = []
@@ -133,21 +168,21 @@ def build_resolutions(
                     )
                 )
 
-        reasoned: List[Tuple[Callable, Optional[RejectionReason]]] = [
+        reasoned: List[Tuple[Callable, Result[List[Binding], RejectionReason]]] = [
             (candidate, match_callable(callsites[cid], candidate))
             for candidate in candidates
         ]
 
         resolutions[cid] = Resolution(
             accepted=[
-                Acceptance(callable=candidate)
-                for candidate, reason in reasoned
-                if reason is None
+                Acceptance(callable=candidate, bindings=result.value)
+                for candidate, result in reasoned
+                if isinstance(result, Ok)
             ],
             rejected=[
-                Rejection(callable=candidate, reason=reason)
-                for candidate, reason in reasoned
-                if reason is not None
+                Rejection(callable=candidate, reason=result.error)
+                for candidate, result in reasoned
+                if isinstance(result, Err)
             ],
         )
 
