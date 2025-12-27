@@ -1,13 +1,7 @@
 from typing import Callable, List
 
 from i13c import ast, diag
-from i13c.sem.graph import build_graph
-from i13c.sem.model import build_model
-from i13c.sem.nodes import Function
-from i13c.sem.resolve import (
-    resolve_call_candidates_by_arity,
-    resolve_call_candidates_by_type,
-)
+from i13c.sem.model import SemanticGraph, build_semantic_graph
 from i13c.sem.rules import (
     e3000,
     e3001,
@@ -23,13 +17,9 @@ from i13c.sem.rules import (
     e3011,
     e3012,
 )
+from i13c.sem.syntax import build_syntax_graph
 
-RESOLVERS: List[Callable[[List[Function]], None]] = [
-    resolve_call_candidates_by_arity,
-    resolve_call_candidates_by_type,
-]
-
-RULES: List[Callable[[List[Function]], List[diag.Diagnostic]]] = [
+RULES: List[Callable[[SemanticGraph], List[diag.Diagnostic]]] = [
     e3000.validate_assembly_mnemonic,
     e3001.validate_immediate_out_of_range,
     e3002.validate_assembly_operand_types,
@@ -49,13 +39,10 @@ RULES: List[Callable[[List[Function]], List[diag.Diagnostic]]] = [
 def validate(program: ast.Program) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    graph = build_graph(program)
-    functions = build_model(graph)
-
-    for resolver in RESOLVERS:
-        resolver(functions)
+    graph = build_syntax_graph(program)
+    semantics = build_semantic_graph(graph)
 
     for rule in RULES:
-        diagnostics.extend(rule(functions))
+        diagnostics.extend(rule(semantics))
 
     return diagnostics
