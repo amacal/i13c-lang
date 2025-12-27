@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List
 
 from i13c.sem.asm import Instruction, InstructionId
 from i13c.sem.asm import Resolution as InstructionResolution
 from i13c.sem.asm import build_instructions
 from i13c.sem.asm import build_resolutions as build_instruction_resolutions
 from i13c.sem.callsite import CallSite, CallSiteId, build_callsites
+from i13c.sem.entrypoint import EntryPoint, build_entrypoints
 from i13c.sem.flows import FlowGraph, build_flowgraphs
 from i13c.sem.function import Function, FunctionId, build_functions
 from i13c.sem.literal import Literal, LiteralId, build_literals
@@ -18,6 +19,8 @@ from i13c.sem.terminal import Terminality, build_terminalities
 
 @dataclass(kw_only=True)
 class SemanticGraph:
+    entrypoints: List[EntryPoint]
+
     literals: Dict[LiteralId, Literal]
     snippets: Dict[SnippetId, Snippet]
     functions: Dict[FunctionId, Function]
@@ -55,7 +58,14 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         callsite_resolutions,
     )
 
+    entrypoints = build_entrypoints(
+        functions,
+        snippets,
+        function_terminalities,
+    )
+
     return SemanticGraph(
+        entrypoints=entrypoints,
         literals=literals,
         snippets=snippets,
         functions=functions,

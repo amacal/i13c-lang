@@ -8,9 +8,7 @@ def validate_entrypoint_exists(
     graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
 
-    # check for a function named "main"
-    for function in graph.functions.values():
-        if function.identifier.name == b"main":
-            return []
+    if len(graph.entrypoints) > 0:
+        return []
 
     return [err.report_e3011_missing_entrypoint_function()]

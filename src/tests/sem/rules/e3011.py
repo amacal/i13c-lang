@@ -5,14 +5,29 @@ from i13c.sem.syntax import build_syntax_graph
 
 def can_survive_existing_entrypoint():
     program = ast.Program(
-        snippets=[],
+        snippets=[
+            ast.Snippet(
+                ref=src.Span(offset=0, length=4),
+                name=b"exit",
+                noreturn=True,
+                slots=[],
+                clobbers=[],
+                instructions=[],
+            )
+        ],
         functions=[
             ast.Function(
                 ref=src.Span(offset=0, length=10),
                 name=b"main",
                 noreturn=True,
                 parameters=[],
-                statements=[],
+                statements=[
+                    ast.CallStatement(
+                        ref=src.Span(offset=11, length=20),
+                        name=b"exit",
+                        arguments=[],
+                    )
+                ],
             )
         ],
     )
@@ -23,13 +38,13 @@ def can_survive_existing_entrypoint():
     assert len(diagnostics) == 0
 
 
-def can_detect_unexisting_entrypoint():
+def can_detect_unexisting_entrypoint_even_if_function_is_called_main():
     program = ast.Program(
         snippets=[],
         functions=[
             ast.Function(
                 ref=src.Span(offset=12, length=10),
-                name=b"main2",
+                name=b"main",
                 noreturn=False,
                 parameters=[],
                 statements=[],

@@ -4,21 +4,11 @@ from i13c import diag, err
 from i13c.sem.model import SemanticGraph
 
 
-def validate_entrypoint_never_returns(
+def validate_entrypoint_is_single(
     graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
 
-    for fid, function in graph.functions.items():
-        if function.identifier.name == b"main":
-            # get the terminality info for this function
-            terminality = graph.function_terminalities[fid]
+    if len(graph.entrypoints) <= 1:
+        return []
 
-            # complain if it is not noreturn
-            if not terminality.noreturn:
-                return [
-                    err.report_e3012_non_terminal_entrypoint_function(
-                        function.ref,
-                    )
-                ]
-
-    return []
+    return [err.report_e3012_multiple_entrypoint_functions()]

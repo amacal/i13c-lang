@@ -23,7 +23,7 @@ ERROR_3008 = "E3008"  # Called symbol does not exist
 ERROR_3009 = "E3009"  # Called symbol is not a snippet
 ERROR_3010 = "E3010"  # Callee is non-terminal
 ERROR_3011 = "E3011"  # Missing entrypoint function
-ERROR_3012 = "E3012"  # Non-terminal entrypoint function
+ERROR_3012 = "E3012"  # Multiple entrypoint functions
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
 
@@ -206,11 +206,11 @@ def report_e3011_missing_entrypoint_function() -> diag.Diagnostic:
     )
 
 
-def report_e3012_non_terminal_entrypoint_function(ref: src.SpanLike) -> diag.Diagnostic:
+def report_e3012_multiple_entrypoint_functions() -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=ref,
+        ref=src.Span(offset=0, length=0),
         code=ERROR_3012,
-        message="The entrypoint codeblock must be terminal",
+        message="Multiple entrypoint codeblocks found",
     )
 
 

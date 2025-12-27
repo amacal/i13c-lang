@@ -31,7 +31,7 @@ RULES: List[Callable[[SemanticGraph], List[diag.Diagnostic]]] = [
     e3009.validate_called_symbol_is_snippet,
     e3010.validate_called_symbol_termination,
     e3011.validate_entrypoint_exists,
-    e3012.validate_entrypoint_never_returns,
+    e3012.validate_entrypoint_is_single,
 ]
 
 
