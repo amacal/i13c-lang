@@ -1,40 +1,25 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem.nodes import Call, Function
+from i13c.sem.model import SemanticGraph
 
 
 def validate_called_symbol_termination(
-    functions: List[Function],
+    graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fn in functions:
-        if not fn.noreturn or fn.kind in ["snippet"]:
-            continue
+    for fid, terminality in graph.function_terminalities.items():
+        # we need to compare against the function definition
+        function = graph.functions[fid]
 
-        for exit_point in fn.exit_points:
-            # implicitly non-terminal
-            if not exit_point.statement or not isinstance(exit_point.statement, Call):
+        # if the terminality expectations do not match, report an error
+        if function.noreturn != terminality.noreturn:
                 diagnostics.append(
                     err.report_e3010_callee_is_non_terminal(
-                        fn.ref,
-                        fn.name,
+                        function.ref,
+                        function.identifier.name,
                     )
                 )
-
-                break
-
-            # complain on any non-terminal callee
-            for callee in exit_point.statement.candidates:
-                if not callee.noreturn:
-                    diagnostics.append(
-                        err.report_e3010_callee_is_non_terminal(
-                            exit_point.statement.ref,
-                            exit_point.statement.name,
-                        )
-                    )
-
-                    break
 
     return diagnostics

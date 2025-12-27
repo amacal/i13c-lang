@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
-from i13c import ast
-from i13c.sem.asm import Instruction, InstructionId, Mnemonic, Operand, Register
+from i13c.sem.asm import InstructionId, Register
 from i13c.sem.core import Identifier, Type
 from i13c.sem.syntax import SyntaxGraph
+from i13c.src import Span
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -21,10 +21,12 @@ class Slot:
 
 @dataclass(kw_only=True)
 class Snippet:
+    ref: Span
     identifier: Identifier
     noreturn: bool
     slots: List[Slot]
-    instructions: List[Instruction]
+    clobbers: List[Register]
+    instructions: List[InstructionId]
 
 
 def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
@@ -32,11 +34,17 @@ def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
 
     for nid, snippet in graph.nodes.snippets.items():
         slots: List[Slot] = []
-        instructions: List[Instruction] = []
+        clobbers: List[Register] = []
+        instructions: List[InstructionId] = []
 
         # derive snippet ID from globally unique node ID
         id = SnippetId(value=nid.value)
 
+        # collect clobbers
+        for reg in snippet.clobbers:
+            clobbers.append(Register(name=reg.name))
+
+        # collect slots
         for slot in snippet.slots:
             slots.append(
                 Slot(
@@ -47,32 +55,16 @@ def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
             )
 
         for instruction in snippet.instructions:
-            operands: List[Operand] = []
-
-            for operand in instruction.operands:
-                match operand:
-                    case ast.Register() as reg:
-                        operands.append(Operand.register(name=reg.name))
-                    case ast.Immediate() as imm:
-                        operands.append(Operand.immediate(value=imm.value))
-
             # derive instruction ID from globally unique node ID
             node = graph.nodes.instructions.get_by_node(instruction)
-            iid = InstructionId(value=node.value)
-
-            instructions.append(
-                Instruction(
-                    id=iid,
-                    ref=instruction.ref,
-                    mnemonic=Mnemonic(name=instruction.mnemonic.name),
-                    operands=operands,
-                )
-            )
+            instructions.append(InstructionId(value=node.value))
 
         snippets[id] = Snippet(
+            ref=snippet.ref,
             identifier=Identifier(name=snippet.name),
             noreturn=snippet.noreturn,
             slots=slots,
+            clobbers=clobbers,
             instructions=instructions,
         )
 

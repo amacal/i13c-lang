@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
+from i13c.src import Span
 from i13c.sem.callsite import CallSiteId
 from i13c.sem.core import Identifier, Type
 from i13c.sem.syntax import SyntaxGraph
@@ -21,6 +22,7 @@ class Parameter:
 
 @dataclass(kw_only=True)
 class Function:
+    ref: Span
     identifier: Identifier
     noreturn: bool
     parameters: List[Parameter]
@@ -52,6 +54,7 @@ def build_functions(
             statements.append(CallSiteId(value=sid.value))
 
         functions[id] = Function(
+            ref=function.ref,
             identifier=Identifier(name=function.name),
             noreturn=function.noreturn,
             parameters=parameters,

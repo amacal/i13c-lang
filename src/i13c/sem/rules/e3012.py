@@ -1,19 +1,23 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem.nodes import Function
+from i13c.sem.model import SemanticGraph
 
 
 def validate_entrypoint_never_returns(
-    functions: List[Function],
+    graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
 
-    for fn in functions:
-        if fn.name == b"main":
-            if not fn.noreturn:
+    for fid, function in graph.functions.items():
+        if function.identifier.name == b"main":
+            # get the terminality info for this function
+            terminality = graph.function_terminalities[fid]
+
+            # complain if it is not noreturn
+            if not terminality.noreturn:
                 return [
                     err.report_e3012_non_terminal_entrypoint_function(
-                        fn.ref,
+                        function.ref,
                     )
                 ]
 

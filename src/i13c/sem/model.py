@@ -1,12 +1,16 @@
 from dataclasses import dataclass
 from typing import Dict
 
-from i13c.sem.asm import InstructionId, InstructionResolution
+from i13c.sem.asm import Instruction, InstructionId
+from i13c.sem.asm import Resolution as InstructionResolution
+from i13c.sem.asm import build_instructions
+from i13c.sem.asm import build_resolutions as build_instruction_resolutions
 from i13c.sem.callsite import CallSite, CallSiteId, build_callsites
 from i13c.sem.flows import FlowGraph, build_flowgraphs
 from i13c.sem.function import Function, FunctionId, build_functions
 from i13c.sem.literal import Literal, LiteralId, build_literals
-from i13c.sem.resolve import Resolution, build_resolutions
+from i13c.sem.resolve import Resolution as CallSiteResolution
+from i13c.sem.resolve import build_resolutions as build_callsite_resolutions
 from i13c.sem.snippet import Snippet, SnippetId, build_snippets
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.terminal import Terminality, build_terminalities
@@ -18,11 +22,12 @@ class SemanticGraph:
     snippets: Dict[SnippetId, Snippet]
     functions: Dict[FunctionId, Function]
     callsites: Dict[CallSiteId, CallSite]
+    instructions: Dict[InstructionId, Instruction]
 
     function_flowgraphs: Dict[FunctionId, FlowGraph]
     function_terminalities: Dict[FunctionId, Terminality]
 
-    callsite_resolutions: Dict[CallSiteId, Resolution]
+    callsite_resolutions: Dict[CallSiteId, CallSiteResolution]
     instruction_resolutions: Dict[InstructionId, InstructionResolution]
 
 
@@ -31,13 +36,17 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
     snippets = build_snippets(graph)
     functions = build_functions(graph)
     callsites = build_callsites(graph)
+    instructions = build_instructions(graph)
+
     function_flowgraphs = build_flowgraphs(functions)
-    callsite_resolutions = build_resolutions(
+    callsite_resolutions = build_callsite_resolutions(
         functions,
         snippets,
         callsites,
         literals,
     )
+
+    instruction_resolutions = build_instruction_resolutions(instructions)
 
     function_terminalities = build_terminalities(
         snippets,
@@ -51,8 +60,9 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         snippets=snippets,
         functions=functions,
         callsites=callsites,
+        instructions=instructions,
         function_flowgraphs=function_flowgraphs,
         callsite_resolutions=callsite_resolutions,
         function_terminalities=function_terminalities,
-        instruction_resolutions={},
+        instruction_resolutions=instruction_resolutions,
     )

@@ -1,22 +1,22 @@
 from typing import List, Set
 
 from i13c import diag, err
-from i13c.sem.nodes import Function
+from i13c.sem.model import SemanticGraph
 
 
 def validate_duplicated_snippet_clobbers(
-    functions: List[Function],
+    graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fn in functions:
+    for snippet in graph.snippets.values():
         seen: Set[bytes] = set()
 
-        for reg in fn.clobbers:
+        for reg in snippet.clobbers:
             if reg.name in seen:
                 diagnostics.append(
                     err.report_e3005_duplicated_snippet_clobbers(
-                        fn.ref,
+                        snippet.ref,
                         reg.name,
                     )
                 )

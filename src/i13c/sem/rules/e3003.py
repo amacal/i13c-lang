@@ -1,29 +1,26 @@
 from typing import List, Set
 
 from i13c import diag, err
-from i13c.sem.nodes import Function
+from i13c.sem.model import SemanticGraph
 
 
 def validate_duplicated_slot_bindings(
-    functions: List[Function],
+    graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fn in functions:
+    for snippet in graph.snippets.values():
         seen: Set[bytes] = set()
 
-        for param in fn.parameters:
-            if param.bind is None:
-                continue
-
-            if param.bind.name in seen:
+        for slot in snippet.slots:
+            if slot.bind.name in seen:
                 diagnostics.append(
                     err.report_e3003_duplicated_slot_bindings(
-                        fn.ref,
-                        param.bind.name,
+                        snippet.ref,
+                        slot.bind.name,
                     )
                 )
             else:
-                seen.add(param.bind.name)
+                seen.add(slot.bind.name)
 
     return diagnostics

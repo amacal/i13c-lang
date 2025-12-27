@@ -1,24 +1,27 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem.nodes import Call, Function
+from i13c.sem.model import SemanticGraph
+from i13c.sem.literal import Hex
 
 
 def validate_integer_literal_out_of_range(
-    functions: List[Function],
+    graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fn in functions:
-        for stmt in fn.body:
-            if isinstance(stmt, Call):
-                for arg in stmt.arguments:
-                    if not (0 <= arg.value.value <= 0xFFFFFFFFFFFFFFFF):
-                        diagnostics.append(
-                            err.report_e3007_integer_literal_out_of_range(
-                                arg.ref,
-                                arg.value.value,
-                            )
-                        )
+    for literal in graph.literals.values():
+        if literal.kind == b"hex":
+
+            # satisfy type checker
+            assert isinstance(literal.target, Hex)
+
+            if literal.target.width is None:
+                diagnostics.append(
+                    err.report_e3007_integer_literal_out_of_range(
+                        literal.ref,
+                        literal.target.value,
+                    )
+                )
 
     return diagnostics

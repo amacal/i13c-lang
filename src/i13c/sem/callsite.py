@@ -3,6 +3,7 @@ from typing import Dict, List
 from typing import Literal as Kind
 
 from i13c import ast
+from i13c.src import Span
 from i13c.sem.core import Identifier
 from i13c.sem.literal import LiteralId
 from i13c.sem.syntax import SyntaxGraph
@@ -23,6 +24,7 @@ class Argument:
 
 @dataclass(kw_only=True)
 class CallSite:
+    ref: Span
     callee: Identifier
     arguments: List[Argument]
 
@@ -56,6 +58,7 @@ def build_callsites(
                     )
 
         callsites[id] = CallSite(
+            ref=statement.ref,
             callee=Identifier(name=statement.name),
             arguments=arguments,
         )
