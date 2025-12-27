@@ -55,7 +55,7 @@ class Instruction:
     operands: List[Operand]
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True)
 class OperandSpec:
     kind: OperandKind
     width: Optional[Width]
@@ -148,6 +148,8 @@ def match_instruction(
         # finally, classify as accepted or rejected
         if reason is None:
             accepted.append(variant)
+        else:
+            rejected[variant] = reason
 
     return accepted, rejected
 
@@ -185,15 +187,11 @@ def build_resolutions(
     resolutions: Dict[InstructionId, Resolution] = {}
 
     for iid, instruction in instructions.items():
-        accepted: List[MnemonicVariant]
-        rejected: Dict[MnemonicVariant, RejectionReason]
+        accepted: List[MnemonicVariant] = []
+        rejected: Dict[MnemonicVariant, RejectionReason] = {}
 
-        match INSTRUCTIONS_TABLE.get(instruction.mnemonic.name):
-            case None:
-                continue
-
-            case list() as variants:
-                accepted, rejected = match_instruction(instruction, variants)
+        if variants := INSTRUCTIONS_TABLE.get(instruction.mnemonic.name):
+            accepted, rejected = match_instruction(instruction, variants)
 
         acceptance = [
             Acceptance(mnemonic=instruction.mnemonic, variant=variant)

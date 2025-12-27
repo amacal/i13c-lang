@@ -1,8 +1,8 @@
 from typing import List
 
 from i13c import diag, err
-from i13c.sem.model import SemanticGraph
 from i13c.sem.literal import Hex
+from i13c.sem.model import SemanticGraph
 
 
 def validate_integer_literal_out_of_range(

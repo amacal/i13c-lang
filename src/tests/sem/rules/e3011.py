@@ -1,6 +1,6 @@
 from i13c import ast, err, sem, src
-from i13c.sem.graph import build_graph
-from i13c.sem.model import build_model
+from i13c.sem.model import build_semantic_graph
+from i13c.sem.syntax import build_syntax_graph
 
 
 def can_survive_existing_entrypoint():
@@ -17,7 +17,7 @@ def can_survive_existing_entrypoint():
         ],
     )
 
-    model = build_model(build_graph(program))
+    model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3011.validate_entrypoint_exists(model)
 
     assert len(diagnostics) == 0
@@ -37,7 +37,7 @@ def can_detect_unexisting_entrypoint():
         ],
     )
 
-    model = build_model(build_graph(program))
+    model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3011.validate_entrypoint_exists(model)
 
     assert len(diagnostics) == 1

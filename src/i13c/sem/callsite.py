@@ -3,10 +3,10 @@ from typing import Dict, List
 from typing import Literal as Kind
 
 from i13c import ast
-from i13c.src import Span
 from i13c.sem.core import Identifier
 from i13c.sem.literal import LiteralId
 from i13c.sem.syntax import SyntaxGraph
+from i13c.src import Span
 
 ArgumentKind = Kind[b"literal"]
 

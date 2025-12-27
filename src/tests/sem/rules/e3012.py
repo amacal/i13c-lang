@@ -1,23 +1,38 @@
 from i13c import ast, err, sem, src
-from i13c.sem.graph import build_graph
-from i13c.sem.model import build_model
+from i13c.sem.model import build_semantic_graph
+from i13c.sem.syntax import build_syntax_graph
 
 
 def can_survive_terminal_entrypoint():
     program = ast.Program(
-        snippets=[],
+        snippets=[
+            ast.Snippet(
+                ref=src.Span(offset=0, length=10),
+                name=b"exit",
+                noreturn=True,
+                slots=[],
+                clobbers=[],
+                instructions=[],
+            )
+        ],
         functions=[
             ast.Function(
-                ref=src.Span(offset=0, length=10),
+                ref=src.Span(offset=10, length=10),
                 name=b"main",
                 noreturn=True,
                 parameters=[],
-                statements=[],
+                statements=[
+                    ast.CallStatement(
+                        ref=src.Span(offset=20, length=10),
+                        name=b"exit",
+                        arguments=[],
+                    )
+                ],
             )
         ],
     )
 
-    model = build_model(build_graph(program))
+    model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3012.validate_entrypoint_never_returns(model)
 
     assert len(diagnostics) == 0
@@ -37,7 +52,7 @@ def can_detect_non_terminal_entrypoint():
         ],
     )
 
-    model = build_model(build_graph(program))
+    model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3012.validate_entrypoint_never_returns(model)
 
     assert len(diagnostics) == 1

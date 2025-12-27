@@ -1,7 +1,22 @@
-from typing import List, Set
+from typing import Iterable, List, Protocol, Set
 
 from i13c import diag, err
+from i13c.sem.core import Identifier
 from i13c.sem.model import SemanticGraph
+from i13c.src import Span
+
+
+class Callable(Protocol):
+    ref: Span
+    identifier: Identifier
+
+
+def yield_callables(graph: SemanticGraph) -> Iterable[Callable]:
+    for function in graph.functions.values():
+        yield function
+
+    for snippet in graph.snippets.values():
+        yield snippet
 
 
 def validate_duplicated_function_names(
@@ -10,15 +25,15 @@ def validate_duplicated_function_names(
     diagnostics: List[diag.Diagnostic] = []
     seen: Set[bytes] = set()
 
-    for function in graph.functions.values():
-        if function.identifier.name in seen:
+    for callable in yield_callables(graph):
+        if callable.identifier.name in seen:
             diagnostics.append(
                 err.report_e3006_duplicated_function_names(
-                    function.ref,
-                    function.identifier.name,
+                    callable.ref,
+                    callable.identifier.name,
                 )
             )
         else:
-            seen.add(function.identifier.name)
+            seen.add(callable.identifier.name)
 
     return diagnostics

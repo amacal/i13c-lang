@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
-from i13c.src import Span
 from i13c.sem.callsite import CallSiteId
 from i13c.sem.core import Identifier, Type
 from i13c.sem.syntax import SyntaxGraph
+from i13c.src import Span
 
 Statement = Union[CallSiteId]
 

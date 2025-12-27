@@ -1,6 +1,6 @@
 from i13c import ast, err, sem, src
-from i13c.sem.graph import build_graph
-from i13c.sem.model import build_model
+from i13c.sem.model import build_semantic_graph
+from i13c.sem.syntax import build_syntax_graph
 
 
 def can_detect_integer_literal_out_of_range():
@@ -28,7 +28,7 @@ def can_detect_integer_literal_out_of_range():
         ],
     )
 
-    model = build_model(build_graph(program))
+    model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3007.validate_integer_literal_out_of_range(model)
 
     assert len(diagnostics) == 1
