@@ -1,23 +1,17 @@
 from dataclasses import dataclass
 from typing import Dict, List
-from typing import Literal as Kind
-from typing import Union
 
+from i13c.sem.callable import CallableKind, CallableTarget
 from i13c.sem.function import Function, FunctionId
 from i13c.sem.snippet import Snippet, SnippetId
 
 EntryPointName: bytes = b"main"
 
-EntryPointKind = Kind[
-    b"function",
-    b"snippet",
-]
-
 
 @dataclass
 class EntryPoint:
-    kind: EntryPointKind
-    target: Union[FunctionId, SnippetId]
+    kind: CallableKind
+    target: CallableTarget
 
 
 def build_entrypoints(

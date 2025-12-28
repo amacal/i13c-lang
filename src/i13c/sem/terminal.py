@@ -3,7 +3,7 @@ from typing import Dict, List, Set
 
 from i13c.sem.callable import Callable
 from i13c.sem.callsite import CallSiteId
-from i13c.sem.flows import FlowGraph, FlowNode
+from i13c.sem.flowgraphs import FlowGraph, FlowNode
 from i13c.sem.function import Function, FunctionId
 from i13c.sem.resolve import Resolution
 from i13c.sem.snippet import Snippet, SnippetId

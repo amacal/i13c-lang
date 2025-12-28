@@ -36,7 +36,7 @@ def can_build_semantic_model_terminalities_calls_terminal():
         snippets=[
             ast.Snippet(
                 ref=src.Span(offset=31, length=10),
-                name=b"exit_snippet",
+                name=b"exit",
                 noreturn=True,
                 slots=[],
                 clobbers=[],
@@ -52,7 +52,7 @@ def can_build_semantic_model_terminalities_calls_terminal():
                 statements=[
                     ast.CallStatement(
                         ref=src.Span(offset=11, length=20),
-                        name=b"exit_snippet",
+                        name=b"exit",
                         arguments=[],
                     )
                 ],

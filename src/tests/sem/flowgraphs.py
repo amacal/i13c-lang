@@ -1,5 +1,5 @@
 from i13c import ast, src
-from i13c.sem import flows, function, model, syntax
+from i13c.sem import flowgraphs, function, model, syntax
 
 
 def can_build_semantic_model_flowgraphs_no_statements():
@@ -20,16 +20,16 @@ def can_build_semantic_model_flowgraphs_no_statements():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    flowgraphs = semantic.function_flowgraphs
+    values = semantic.function_flowgraphs
 
-    assert len(flowgraphs) == 1
-    id, flow = flowgraphs.popitem()
+    assert len(values) == 1
+    id, flow = values.popitem()
 
     assert isinstance(id, function.FunctionId)
-    assert isinstance(flow, flows.FlowGraph)
+    assert isinstance(flow, flowgraphs.FlowGraph)
 
-    assert isinstance(flow.entry, flows.FlowEntry)
-    assert isinstance(flow.exit, flows.FlowExit)
+    assert isinstance(flow.entry, flowgraphs.FlowEntry)
+    assert isinstance(flow.exit, flowgraphs.FlowExit)
 
     assert len(flow.edges) == 1
     input, outputs = flow.edges.popitem()
@@ -64,16 +64,16 @@ def can_build_semantic_model_flowgraphs_single_statement():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    flowgraphs = semantic.function_flowgraphs
+    values = semantic.function_flowgraphs
 
-    assert len(flowgraphs) == 1
-    id, flow = flowgraphs.popitem()
+    assert len(values) == 1
+    id, flow = values.popitem()
 
     assert isinstance(id, function.FunctionId)
-    assert isinstance(flow, flows.FlowGraph)
+    assert isinstance(flow, flowgraphs.FlowGraph)
 
-    assert isinstance(flow.entry, flows.FlowEntry)
-    assert isinstance(flow.exit, flows.FlowExit)
+    assert isinstance(flow.entry, flowgraphs.FlowEntry)
+    assert isinstance(flow.exit, flowgraphs.FlowExit)
 
     assert len(flow.edges) == 2
     n1s = flow.edges.get(flow.entry)

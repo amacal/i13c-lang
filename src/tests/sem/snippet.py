@@ -42,9 +42,11 @@ def can_build_semantic_model_snippets():
     assert value.noreturn is False
 
     assert len(value.instructions) == 1
-    instruction = value.instructions[0]
+    iid = value.instructions[0]
 
-    assert isinstance(instruction, asm.Instruction)
+    assert isinstance(iid, asm.InstructionId)
+    instruction = semantic.instructions[iid]
+
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
 

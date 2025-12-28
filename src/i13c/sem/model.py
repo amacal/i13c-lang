@@ -5,9 +5,11 @@ from i13c.sem.asm import Instruction, InstructionId
 from i13c.sem.asm import Resolution as InstructionResolution
 from i13c.sem.asm import build_instructions
 from i13c.sem.asm import build_resolutions as build_instruction_resolutions
+from i13c.sem.callable import CallableTarget
+from i13c.sem.callgraphs import build_callgraph
 from i13c.sem.callsite import CallSite, CallSiteId, build_callsites
 from i13c.sem.entrypoint import EntryPoint, build_entrypoints
-from i13c.sem.flows import FlowGraph, build_flowgraphs
+from i13c.sem.flowgraphs import FlowGraph, build_flowgraphs
 from i13c.sem.function import Function, FunctionId, build_functions
 from i13c.sem.literal import Literal, LiteralId, build_literals
 from i13c.sem.resolve import Resolution as CallSiteResolution
@@ -26,6 +28,7 @@ class SemanticGraph:
     functions: Dict[FunctionId, Function]
     callsites: Dict[CallSiteId, CallSite]
     instructions: Dict[InstructionId, Instruction]
+    callgraph: Dict[CallableTarget, List[CallableTarget]]
 
     function_flowgraphs: Dict[FunctionId, FlowGraph]
     function_terminalities: Dict[FunctionId, Terminality]
@@ -43,6 +46,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
 
     entrypoints = build_entrypoints(functions, snippets)
     function_flowgraphs = build_flowgraphs(functions)
+
     callsite_resolutions = build_callsite_resolutions(
         functions,
         snippets,
@@ -50,6 +54,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         literals,
     )
 
+    callgraph = build_callgraph(snippets, functions, callsite_resolutions)
     instruction_resolutions = build_instruction_resolutions(instructions)
 
     function_terminalities = build_terminalities(
@@ -65,6 +70,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         snippets=snippets,
         functions=functions,
         callsites=callsites,
+        callgraph=callgraph,
         instructions=instructions,
         function_flowgraphs=function_flowgraphs,
         callsite_resolutions=callsite_resolutions,
