@@ -6,11 +6,13 @@ def can_move_entry_function_to_front():
         entry=1,
         codeblocks=[
             ir.CodeBlock(
+                terminator=ir.Stop(),
                 instructions=[
                     ir.MovRegImm(dst=1, imm=0x0),
                 ],
             ),
             ir.CodeBlock(
+                terminator=ir.FallThrough(target=0),
                 instructions=[
                     ir.SysCall(),
                 ],

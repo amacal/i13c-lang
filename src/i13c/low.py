@@ -4,6 +4,7 @@ from i13c import diag, err, ir, res, src
 from i13c.sem.asm import Immediate, Instruction, Register
 from i13c.sem.callsite import CallSiteId
 from i13c.sem.entrypoint import EntryPoint
+from i13c.sem.flowgraphs import FlowEntry, FlowGraph
 from i13c.sem.function import FunctionId
 from i13c.sem.literal import Hex
 from i13c.sem.model import SemanticGraph
@@ -54,21 +55,13 @@ def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
             if match_entrypoint(entrypoint, snid):
                 entry = len(codeblocks) - 1
 
-        for fid, function in graph.functions.items():
-            out: List[ir.Instruction] = []
-
+        for fid in graph.functions.keys():
             if fid not in graph.callable_live:
                 continue
 
-            for stmt in function.statements:
-                # currently only callsites are supported
-                assert isinstance(stmt, CallSiteId)
-
-                # just append callsite instructions
-                out.extend(lower_callsite(graph, stmt))
-
-            # and create codeblock out of them
-            codeblocks.append(ir.CodeBlock(instructions=out))
+            next = len(codeblocks)
+            flowgraph = graph.function_flowgraphs_live[fid]
+            codeblocks.extend(lower_function(graph, flowgraph, next))
 
             if match_entrypoint(entrypoint, fid):
                 entry = len(codeblocks) - 1
@@ -84,6 +77,42 @@ def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     assert entry is not None
 
     return res.Ok(ir.Unit(entry=entry, codeblocks=codeblocks))
+
+
+def lower_function(
+    graph: SemanticGraph,
+    flow: FlowGraph,
+    next: int,
+) -> List[ir.CodeBlock]:
+    out: List[ir.CodeBlock] = []
+    ids = {node: next + idx for idx, node in enumerate(flow.edges.keys())}
+
+    for node, successors in flow.edges.items():
+        instructions: List[ir.Instruction] = []
+        terminator: ir.Terminator
+
+        if isinstance(node, FlowEntry):
+            continue
+
+        # node is a callsite
+        if isinstance(node, CallSiteId):
+            instructions.extend(lower_callsite(graph, node))
+
+        if not successors:
+            terminator = ir.Stop()
+        else:
+            # we don't handle multiple successors
+            assert len(successors) == 1
+            terminator = ir.FallThrough(target=ids[successors[0]])
+
+        out.append(
+            ir.CodeBlock(
+                instructions=instructions,
+                terminator=terminator,
+            )
+        )
+
+    return out
 
 
 def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction]:
@@ -137,7 +166,10 @@ def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
         instruction = graph.instructions[iid]
         out.append(lower_instruction(instruction))
 
-    return ir.CodeBlock(instructions=out)
+    return ir.CodeBlock(
+        instructions=out,
+        terminator=ir.Stop(),
+    )
 
 
 def lower_instruction(instruction: Instruction) -> ir.Instruction:

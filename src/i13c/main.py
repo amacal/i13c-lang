@@ -18,9 +18,10 @@ def emit_and_exit(
             f"Error {diagnostic.code} at offset {diagnostic.ref.offset}: {diagnostic.message}"
         )
 
-    if diagnostics[0].ref.length > 0:
-        click.echo("\n")
-        click.echo(diag.show(source, diagnostics[0]))
+        if diagnostic.ref.length > 0:
+            click.echo("\n")
+            click.echo(diag.show(source, diagnostic))
+            click.echo("\n")
 
     sys.exit(1)
 

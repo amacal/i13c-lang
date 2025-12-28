@@ -12,7 +12,11 @@ from i13c.sem.entrypoint import EntryPoint, build_entrypoints
 from i13c.sem.flowgraphs import FlowGraph, build_flowgraphs
 from i13c.sem.function import Function, FunctionId, build_functions
 from i13c.sem.literal import Literal, LiteralId, build_literals
-from i13c.sem.live import build_callable_live, build_callgraph_live
+from i13c.sem.live import (
+    build_callable_live,
+    build_callgraph_live,
+    build_flowgraphs_live,
+)
 from i13c.sem.resolve import Resolution as CallSiteResolution
 from i13c.sem.resolve import build_resolutions as build_callsite_resolutions
 from i13c.sem.snippet import Snippet, SnippetId, build_snippets
@@ -35,6 +39,7 @@ class SemanticGraph:
     callable_live: Set[CallableTarget]
 
     function_flowgraphs: Dict[FunctionId, FlowGraph]
+    function_flowgraphs_live: Dict[FunctionId, FlowGraph]
     function_terminalities: Dict[FunctionId, Terminality]
 
     callsite_resolutions: Dict[CallSiteId, CallSiteResolution]
@@ -82,6 +87,13 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         callgraph_live,
     )
 
+    function_flowgraphs_live = build_flowgraphs_live(
+        function_flowgraphs,
+        callsite_resolutions,
+        snippets,
+        function_terminalities,
+    )
+
     return SemanticGraph(
         entrypoints=entrypoints,
         literals=literals,
@@ -93,7 +105,8 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         callable_live=callable_live,
         instructions=instructions,
         function_flowgraphs=function_flowgraphs,
-        callsite_resolutions=callsite_resolutions,
+        function_flowgraphs_live=function_flowgraphs_live,
         function_terminalities=function_terminalities,
+        callsite_resolutions=callsite_resolutions,
         instruction_resolutions=instruction_resolutions,
     )

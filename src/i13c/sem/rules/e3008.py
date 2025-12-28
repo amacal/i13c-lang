@@ -10,7 +10,7 @@ def validate_called_symbol_exists(
     diagnostics: List[diag.Diagnostic] = []
 
     for cid, resolution in graph.callsite_resolutions.items():
-        if not resolution.accepted and not resolution.rejected:
+        if not resolution.accepted:
             diagnostics.append(
                 err.report_e3008_called_symbol_exists(
                     graph.callsites[cid].ref,

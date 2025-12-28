@@ -21,6 +21,7 @@ def show(source: src.SourceCode, diagnostic: Diagnostic) -> str:
     caret_length = diagnostic.ref.length
 
     line = source.data[start:end]
+
     caret = b" " * caret_start + b"^" * caret_length
     error = b" " * caret_start + b"|-> " + diagnostic.message.encode("utf-8")
 

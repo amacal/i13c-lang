@@ -21,7 +21,7 @@ ERROR_3006 = "E3006"  # Duplicated function names
 ERROR_3007 = "E3007"  # Integer literal out of range
 ERROR_3008 = "E3008"  # Called symbol does not exist
 ERROR_3009 = "E3009"  # Called symbol is not a snippet
-ERROR_3010 = "E3010"  # Callee is non-terminal
+ERROR_3010 = "E3010"  # Function has wrong terminality
 ERROR_3011 = "E3011"  # Missing entrypoint function
 ERROR_3012 = "E3012"  # Multiple entrypoint functions
 
@@ -188,13 +188,13 @@ def report_e3009_called_symbol_is_not_a_snippet(
     )
 
 
-def report_e3010_callee_is_non_terminal(
+def report_e3010_function_has_wrong_terminality(
     ref: src.SpanLike, name: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_3010,
-        message=f"Callee function '{str(name)}' is non-terminal but called from a terminal function",
+        message=f"Function '{str(name)}' has wrong terminality: does not match declaration",
     )
 
 

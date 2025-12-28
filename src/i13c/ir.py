@@ -3,6 +3,19 @@ from typing import List, Optional, Union
 
 
 @dataclass
+class FallThrough:
+    target: int
+
+
+@dataclass
+class Stop:
+    pass
+
+
+Terminator = Union[FallThrough, Stop]
+
+
+@dataclass
 class MovRegImm:
     dst: int
     imm: int
@@ -19,9 +32,10 @@ Instruction = Union[MovRegImm, SysCall]
 @dataclass
 class CodeBlock:
     instructions: List[Instruction]
+    terminator: Terminator
 
 
 @dataclass
 class Unit:
-    entry: Optional[int]
+    entry: int
     codeblocks: List[CodeBlock]

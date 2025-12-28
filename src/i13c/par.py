@@ -49,6 +49,12 @@ class ParsingState:
             length=self.tokens[self.position].offset - token.offset,
         )
 
+    def between(self, left: lex.Token, right: lex.Token) -> src.Span:
+        return src.Span(
+            offset=left.offset,
+            length=right.offset + right.length - left.offset,
+        )
+
     def accept(self, *codes: int) -> bool:
         if self.is_in(*codes):
             self.advance()
@@ -158,9 +164,6 @@ def parse_function(state: ParsingState) -> ast.Function:
     # expect closed round bracket
     state.expect(lex.TOKEN_ROUND_CLOSE)
 
-    # capture function signature
-    ref = state.span(name)
-
     # optional flags
     if not state.is_in(lex.TOKEN_CURLY_OPEN):
         noreturn = parse_function_flags(state)
@@ -176,7 +179,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     state.expect(lex.TOKEN_CURLY_CLOSE)
 
     return ast.Function(
-        ref=ref,
+        ref=state.between(name, name),
         name=state.extract(name),
         noreturn=noreturn,
         parameters=parameters,
@@ -352,7 +355,7 @@ def parse_clobbers(state: ParsingState) -> List[ast.Register]:
 
 def parse_statement(state: ParsingState) -> ast.CallStatement:
     arguments = []
-    token = state.expect(lex.TOKEN_IDENT)
+    ident = state.expect(lex.TOKEN_IDENT)
 
     # expect opening round bracket
     state.expect(lex.TOKEN_ROUND_OPEN)
@@ -362,14 +365,14 @@ def parse_statement(state: ParsingState) -> ast.CallStatement:
         arguments = parse_arguments(state)
 
     # expect closed round bracket
-    state.expect(lex.TOKEN_ROUND_CLOSE)
+    end = state.expect(lex.TOKEN_ROUND_CLOSE)
 
     # expect a semicolon
     state.expect(lex.TOKEN_SEMICOLON)
 
     return ast.CallStatement(
-        ref=state.span(token),
-        name=state.extract(token),
+        ref=state.between(ident, end),
+        name=state.extract(ident),
         arguments=arguments,
     )
 

@@ -16,7 +16,7 @@ def validate_called_symbol_termination(
         # if the terminality expectations do not match, report an error
         if function.noreturn != terminality.noreturn:
             diagnostics.append(
-                err.report_e3010_callee_is_non_terminal(
+                err.report_e3010_function_has_wrong_terminality(
                     function.ref,
                     function.identifier.name,
                 )

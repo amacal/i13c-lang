@@ -127,3 +127,86 @@ def build_callable_live(
                 out.add(target)
 
     return out
+
+
+def prune_flowgraph(
+    flowgraph: FlowGraph,
+    resolutions: Dict[CallSiteId, Resolution],
+    nonreturn: Set[CallableTarget],
+) -> FlowGraph:
+    edges: Dict[FlowNode, List[FlowNode]] = {}
+
+    for node, successors in flowgraph.edges.items():
+        if isinstance(node, CallSiteId):
+            # node is a callsite
+            resolution = resolutions[node]
+            acceptable = False
+
+            # no accepted callables, all successors are pruned
+            if not resolution.accepted:
+                successors = []
+
+            # check if any accepted callable is not nonreturn
+            for accepted in resolution.accepted:
+                if accepted.callable.target not in nonreturn:
+                    acceptable = True
+                    break
+
+            # all accepted callables are nonreturn, prune successors
+            if not acceptable:
+                successors = []
+
+        edges[node] = list(successors)
+
+    queue: List[FlowNode] = [flowgraph.entry]
+    visited: Set[FlowNode] = set()
+
+    while queue:
+        node = queue.pop()
+        if node in visited:
+            continue
+
+        visited.add(node)
+
+        for successor in edges.get(node, []):
+            if successor not in visited:
+                queue.append(successor)
+
+    # prune edges to visited nodes only
+    edges = {
+        node: [s for s in successors if s in visited]
+        for node, successors in edges.items()
+        if node in visited
+    }
+
+    # let's be sure entry is still there
+    assert flowgraph.entry in edges
+
+    return FlowGraph(
+        entry=flowgraph.entry,
+        exit=flowgraph.exit,
+        edges=edges,
+    )
+
+
+def build_flowgraphs_live(
+    function_flowgraphs: Dict[FunctionId, FlowGraph],
+    resolutions: Dict[CallSiteId, Resolution],
+    snippets: Dict[SnippetId, Snippet],
+    terminalities: Dict[FunctionId, Terminality],
+) -> Dict[FunctionId, FlowGraph]:
+    out: Dict[FunctionId, FlowGraph] = {}
+    noreturn: Set[CallableTarget] = set()
+
+    for fid, terminality in terminalities.items():
+        if terminality.noreturn:
+            noreturn.add(fid)
+
+    for snid, snippet in snippets.items():
+        if snippet.noreturn:
+            noreturn.add(snid)
+
+    for fid, flowgraph in function_flowgraphs.items():
+        out[fid] = prune_flowgraph(flowgraph, resolutions, noreturn)
+
+    return out

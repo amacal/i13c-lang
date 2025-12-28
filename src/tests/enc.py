@@ -6,6 +6,7 @@ def can_encode_instructions_mov_rax_imm():
         entry=0,
         codeblocks=[
             ir.CodeBlock(
+                terminator=ir.Stop(),
                 instructions=[
                     ir.MovRegImm(dst=0, imm=0x1234),
                 ],
@@ -24,6 +25,7 @@ def can_encode_instructions_mov_r10_imm():
         entry=0,
         codeblocks=[
             ir.CodeBlock(
+                terminator=ir.Stop(),
                 instructions=[
                     ir.MovRegImm(dst=10, imm=0x1234),
                 ],
@@ -42,6 +44,7 @@ def can_encode_instructions_syscall():
         entry=0,
         codeblocks=[
             ir.CodeBlock(
+                terminator=ir.Stop(),
                 instructions=[
                     ir.SysCall(),
                 ],
