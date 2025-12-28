@@ -46,6 +46,9 @@ def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
         entrypoint = graph.entrypoints[0]
 
         for snid, snippet in graph.snippets.items():
+            if snid not in graph.callable_live:
+                continue
+
             codeblocks.append(lower_snippet(graph, snippet))
 
             if match_entrypoint(entrypoint, snid):
@@ -53,6 +56,9 @@ def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
 
         for fid, function in graph.functions.items():
             out: List[ir.Instruction] = []
+
+            if fid not in graph.callable_live:
+                continue
 
             for stmt in function.statements:
                 # currently only callsites are supported

@@ -110,3 +110,20 @@ def build_callgraph_live(
         out[target] = reached
 
     return out
+
+
+def build_callable_live(
+    entrypoints: List[EntryPoint],
+    callgraph_live: Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]],
+) -> Set[CallableTarget]:
+    out: Set[CallableTarget] = set()
+
+    for entrypoint in entrypoints:
+        out.add(entrypoint.target)
+
+    for edges in callgraph_live.values():
+        for _, target in edges:
+            if isinstance(target, FunctionId):
+                out.add(target)
+
+    return out

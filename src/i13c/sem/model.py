@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List, Set, Tuple
 
 from i13c.sem.asm import Instruction, InstructionId
 from i13c.sem.asm import Resolution as InstructionResolution
@@ -12,7 +12,7 @@ from i13c.sem.entrypoint import EntryPoint, build_entrypoints
 from i13c.sem.flowgraphs import FlowGraph, build_flowgraphs
 from i13c.sem.function import Function, FunctionId, build_functions
 from i13c.sem.literal import Literal, LiteralId, build_literals
-from i13c.sem.live import build_callgraph_live
+from i13c.sem.live import build_callable_live, build_callgraph_live
 from i13c.sem.resolve import Resolution as CallSiteResolution
 from i13c.sem.resolve import build_resolutions as build_callsite_resolutions
 from i13c.sem.snippet import Snippet, SnippetId, build_snippets
@@ -32,6 +32,7 @@ class SemanticGraph:
 
     callgraph: Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]]
     callgraph_live: Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]]
+    callable_live: Set[CallableTarget]
 
     function_flowgraphs: Dict[FunctionId, FlowGraph]
     function_terminalities: Dict[FunctionId, Terminality]
@@ -68,12 +69,17 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
     )
 
     callgraph_live = build_callgraph_live(
-        entrypoints=entrypoints,
-        snippets=snippets,
-        flowgraphs=function_flowgraphs,
-        callgraph=callgraph,
-        terminalities=function_terminalities,
-        resolutions=callsite_resolutions,
+        entrypoints,
+        snippets,
+        function_flowgraphs,
+        callgraph,
+        function_terminalities,
+        callsite_resolutions,
+    )
+
+    callable_live = build_callable_live(
+        entrypoints,
+        callgraph_live,
     )
 
     return SemanticGraph(
@@ -84,6 +90,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         callsites=callsites,
         callgraph=callgraph,
         callgraph_live=callgraph_live,
+        callable_live=callable_live,
         instructions=instructions,
         function_flowgraphs=function_flowgraphs,
         callsite_resolutions=callsite_resolutions,
