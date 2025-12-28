@@ -1,5 +1,5 @@
 asm exit(code@rdi: u32) noreturn clobbers rax, rcx, r11 {
-    mov rax, 0x3c;
+    mov rax, 0x30;
     syscall;
 }
 

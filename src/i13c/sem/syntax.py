@@ -1,15 +1,14 @@
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional, Tuple, TypeVar
+from typing import Dict, Iterable, Tuple, TypeVar
 
 from i13c import ast
+
+AstNode = TypeVar("AstNode")
 
 
 @dataclass(kw_only=True, frozen=True)
 class NodeId:
     value: int
-
-
-AstNode = TypeVar("AstNode")
 
 
 @dataclass(kw_only=True)
@@ -25,35 +24,14 @@ class Bidirectional[AstNode]:
         self.node_to_id[node] = id
         self.id_to_node[id] = node
 
-    def ids(self) -> Iterable[NodeId]:
-        return self.id_to_node.keys()
-
-    def values(self) -> Iterable[AstNode]:
-        return self.node_to_id.keys()
-
     def items(self) -> Iterable[Tuple[NodeId, AstNode]]:
         return self.id_to_node.items()
 
     def get_by_id(self, node_id: NodeId) -> AstNode:
         return self.id_to_node[node_id]
 
-    def get_by_ids(self, node_ids: List[NodeId]) -> List[AstNode]:
-        return [self.id_to_node[nid] for nid in node_ids]
-
-    def find_by_id(self, node_id: NodeId) -> Optional[AstNode]:
-        return self.id_to_node.get(node_id)
-
-    def find_by_ids(self, node_ids: List[NodeId]) -> List[AstNode]:
-        return [self.id_to_node[nid] for nid in node_ids if nid in self.id_to_node]
-
-    def find_by_node(self, node: AstNode) -> Optional[NodeId]:
-        return self.node_to_id.get(node)
-
     def get_by_node(self, node: AstNode) -> NodeId:
         return self.node_to_id[node]
-
-    def get_by_nodes(self, nodes: Iterable[AstNode]) -> List[NodeId]:
-        return [self.node_to_id[node] for node in nodes]
 
 
 @dataclass(kw_only=True)
@@ -75,19 +53,15 @@ class Nodes:
         )
 
 
-@dataclass(kw_only=True)
-class Edges:
-    pass
-
-
 class NodesVisitor:
     def __init__(self) -> None:
         self.counter = 0
         self.nodes = Nodes.empty()
 
     def next(self) -> NodeId:
-        nid = NodeId(value=self.counter)
         self.counter += 1
+        nid = NodeId(value=self.counter)
+
         return nid
 
     def on_program(self, program: ast.Program) -> None:

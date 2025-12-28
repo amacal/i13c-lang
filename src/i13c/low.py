@@ -41,33 +41,28 @@ def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     diagnostics: List[diag.Diagnostic] = []
     entry: Optional[int] = None
 
-    try:
-        # entrypoint always exists here
-        assert len(graph.entrypoints) == 1
-        entrypoint = graph.entrypoints[0]
+    # entrypoint always exists here
+    assert len(graph.entrypoints) == 1
+    entrypoint = graph.entrypoints[0]
 
-        for snid, snippet in graph.snippets.items():
-            if snid not in graph.callable_live:
-                continue
+    for snid, snippet in graph.snippets.items():
+        if not match_entrypoint(entrypoint, snid):
+            continue
 
-            codeblocks.append(lower_snippet(graph, snippet))
+        # snippet may be live only if called directly
+        codeblocks.append(lower_snippet(graph, snippet))
+        entry = len(codeblocks) - 1
 
-            if match_entrypoint(entrypoint, snid):
-                entry = len(codeblocks) - 1
+    for fid in graph.functions.keys():
+        if fid not in graph.callable_live:
+            continue
 
-        for fid in graph.functions.keys():
-            if fid not in graph.callable_live:
-                continue
+        next = len(codeblocks)
+        flowgraph = graph.function_flowgraphs_live[fid]
+        codeblocks.extend(lower_function(graph, flowgraph, next))
 
-            next = len(codeblocks)
-            flowgraph = graph.function_flowgraphs_live[fid]
-            codeblocks.extend(lower_function(graph, flowgraph, next))
-
-            if match_entrypoint(entrypoint, fid):
-                entry = len(codeblocks) - 1
-
-    except UnsupportedMnemonic as e:
-        diagnostics.append(err.report_e4000_unsupported_mnemonic(e.ref, e.name))
+        if match_entrypoint(entrypoint, fid):
+            entry = len(codeblocks) - 1
 
     # any diagnostic is an error
     if diagnostics:

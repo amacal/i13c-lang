@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Set
 
 from i13c.sem.asm import Instruction, InstructionId
 from i13c.sem.asm import Resolution as InstructionResolution
 from i13c.sem.asm import build_instructions
 from i13c.sem.asm import build_resolutions as build_instruction_resolutions
 from i13c.sem.callable import CallableTarget
-from i13c.sem.callgraphs import build_callgraph
+from i13c.sem.callgraphs import CallGraphs, build_callgraph
 from i13c.sem.callsite import CallSite, CallSiteId, build_callsites
 from i13c.sem.entrypoint import EntryPoint, build_entrypoints
 from i13c.sem.flowgraphs import FlowGraph, build_flowgraphs
@@ -34,8 +34,8 @@ class SemanticGraph:
     callsites: Dict[CallSiteId, CallSite]
     instructions: Dict[InstructionId, Instruction]
 
-    callgraph: Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]]
-    callgraph_live: Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]]
+    callgraph: CallGraphs
+    callgraph_live: CallGraphs
     callable_live: Set[CallableTarget]
 
     function_flowgraphs: Dict[FunctionId, FlowGraph]
@@ -78,25 +78,18 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         function_terminalities,
     )
 
-    callgraph_live = build_callgraph_live(
-        entrypoints,
-        snippets,
-        function_flowgraphs,
-        callgraph,
-        function_terminalities,
-        callsite_resolutions,
-    )
-
-    callable_live = build_callable_live(
-        entrypoints,
-        callgraph_live,
-    )
-
     function_flowgraphs_live = build_flowgraphs_live(
         function_flowgraphs,
         callsite_resolutions,
         snippets,
         function_terminalities,
+    )
+
+    callgraph_live = build_callgraph_live(function_flowgraphs_live, callgraph)
+
+    callable_live = build_callable_live(
+        entrypoints,
+        callgraph_live,
     )
 
     return SemanticGraph(

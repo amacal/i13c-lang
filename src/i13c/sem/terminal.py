@@ -23,12 +23,9 @@ def build_terminalities(
 
     def is_callable_terminal(callable: Callable) -> bool:
         match callable:
-            case Callable(kind=b"snippet", target=target):
-                assert isinstance(target, SnippetId)
+            case Callable(kind=b"snippet", target=SnippetId() as target):
                 return snippets[target].noreturn
-
-            case Callable(kind=b"function", target=target):
-                assert isinstance(target, FunctionId)
+            case Callable(kind=b"function", target=FunctionId() as target):
                 return terminalities[target].noreturn
             case _:
                 return False

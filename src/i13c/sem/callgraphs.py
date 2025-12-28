@@ -6,13 +6,16 @@ from i13c.sem.function import Function, FunctionId
 from i13c.sem.resolve import Resolution
 from i13c.sem.snippet import Snippet, SnippetId
 
+CallPair = Tuple[CallSiteId, CallableTarget]
+CallGraphs = Dict[CallableTarget, List[CallPair]]
+
 
 def build_callgraph(
     snippets: Dict[SnippetId, Snippet],
     functions: Dict[FunctionId, Function],
     resolutions: Dict[CallSiteId, Resolution],
-) -> Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]]:
-    out: Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]] = {}
+) -> CallGraphs:
+    out: CallGraphs = {}
 
     for snid in snippets.keys():
         out[snid] = []

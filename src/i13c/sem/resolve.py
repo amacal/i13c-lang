@@ -63,22 +63,18 @@ class BindingLike(Protocol):
 
 
 def match_literal(literal: Literal, type: Type) -> bool:
-    match (type.name, literal.kind):
-        case (b"u8", b"hex"):
-            assert isinstance(literal.target, Hex)
-            return literal.target.width is not None and literal.target.width <= 8
+    match (type.name, literal):
+        case (b"u8", Literal(kind=b"hex", target=Hex() as target)):
+            return target.width is not None and target.width <= 8
 
-        case (b"u16", b"hex"):
-            assert isinstance(literal.target, Hex)
-            return literal.target.width is not None and literal.target.width <= 16
+        case (b"u16", Literal(kind=b"hex", target=Hex() as target)):
+            return target.width is not None and target.width <= 16
 
-        case (b"u32", b"hex"):
-            assert isinstance(literal.target, Hex)
-            return literal.target.width is not None and literal.target.width <= 32
+        case (b"u32", Literal(kind=b"hex", target=Hex() as target)):
+            return target.width is not None and target.width <= 32
 
-        case (b"u64", b"hex"):
-            assert isinstance(literal.target, Hex)
-            return literal.target.width is not None and literal.target.width <= 64
+        case (b"u64", Literal(kind=b"hex", target=Hex() as target)):
+            return target.width is not None and target.width <= 64
 
         case _:
             return False
@@ -97,10 +93,7 @@ def build_resolutions(
     ) -> Result[List[Binding], RejectionReason]:
         for binding in bindings:
             match binding.argument:
-                case Argument(kind=b"literal", target=lit):
-                    # satisfy type checker
-                    assert isinstance(lit, LiteralId)
-
+                case Argument(kind=b"literal", target=LiteralId() as lit):
                     if not match_literal(literals[lit], type=binding.type):
                         return Err(b"type-mismatch")
                 case _:
@@ -138,11 +131,9 @@ def build_resolutions(
         callsite: CallSite, callable: Callable
     ) -> Result[List[Binding], RejectionReason]:
         match callable:
-            case Callable(kind=b"function", target=target):
-                assert isinstance(target, FunctionId)
+            case Callable(kind=b"function", target=FunctionId() as target):
                 return match_function(callsite, functions[target])
-            case Callable(kind=b"snippet", target=target):
-                assert isinstance(target, SnippetId)
+            case Callable(kind=b"snippet", target=SnippetId() as target):
                 return match_snippet(callsite, snippets[target])
             case _:
                 return Err(b"unknown-target")
