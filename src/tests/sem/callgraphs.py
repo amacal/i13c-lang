@@ -38,7 +38,7 @@ def can_build_callgraphs_from_main_calling_snippet():
             ast.Snippet(
                 ref=src.Span(offset=31, length=10),
                 name=b"foo",
-                noreturn=False,
+                noreturn=True,
                 slots=[],
                 clobbers=[],
                 instructions=[],
@@ -48,7 +48,7 @@ def can_build_callgraphs_from_main_calling_snippet():
             ast.Function(
                 ref=src.Span(offset=0, length=10),
                 name=b"main",
-                noreturn=False,
+                noreturn=True,
                 parameters=[],
                 statements=[
                     ast.CallStatement(

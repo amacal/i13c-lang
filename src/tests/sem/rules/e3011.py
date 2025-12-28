@@ -63,7 +63,7 @@ def can_detect_unexisting_entrypoint_even_if_function_is_called_main2():
     assert diagnostic.ref.length == 0
 
 
-def can_consider_main_as_entrypoint_when_noreturn_is_false():
+def can_reject_main_as_entrypoint_when_noreturn_is_false():
     program = ast.Program(
         snippets=[],
         functions=[
@@ -80,4 +80,9 @@ def can_consider_main_as_entrypoint_when_noreturn_is_false():
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3011.validate_entrypoint_exists(model)
 
-    assert len(diagnostics) == 0
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
+
+    assert diagnostic.code == err.ERROR_3011
+    assert diagnostic.ref.offset == 0
+    assert diagnostic.ref.length == 0
