@@ -1,5 +1,5 @@
 from i13c import ast, src
-from i13c.sem import model, syntax, asm, snippet
+from i13c.sem import asm, model, snippet, syntax
 
 
 def can_build_semantic_model_snippets():

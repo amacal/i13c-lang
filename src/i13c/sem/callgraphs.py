@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from i13c.sem.callable import CallableTarget
 from i13c.sem.callsite import CallSiteId
@@ -11,8 +11,8 @@ def build_callgraph(
     snippets: Dict[SnippetId, Snippet],
     functions: Dict[FunctionId, Function],
     resolutions: Dict[CallSiteId, Resolution],
-) -> Dict[CallableTarget, List[CallableTarget]]:
-    out: Dict[CallableTarget, List[CallableTarget]] = {}
+) -> Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]]:
+    out: Dict[CallableTarget, List[Tuple[CallSiteId, CallableTarget]]] = {}
 
     for snid in snippets.keys():
         out[snid] = []
@@ -23,6 +23,6 @@ def build_callgraph(
     for fid, function in functions.items():
         for statement in function.statements:
             for accepted in resolutions[statement].accepted:
-                out[fid].append(accepted.callable.target)
+                out[fid].append((statement, accepted.callable.target))
 
     return out

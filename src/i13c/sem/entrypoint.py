@@ -23,11 +23,12 @@ def build_entrypoints(
 
     for fid, function in functions.items():
         if function.identifier.name == EntryPointName:
-            out.append(EntryPoint(kind=b"function", target=fid))
+            if not function.parameters:
+                out.append(EntryPoint(kind=b"function", target=fid))
 
     for sid, snippet in snippets.items():
         if snippet.identifier.name == EntryPointName:
-            if snippet.noreturn:
+            if snippet.noreturn and not snippet.slots:
                 out.append(EntryPoint(kind=b"snippet", target=sid))
 
     return out

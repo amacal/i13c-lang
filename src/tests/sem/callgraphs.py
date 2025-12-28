@@ -1,6 +1,5 @@
-from i13c.sem import syntax
-from i13c.sem import model, function, snippet
 from i13c import ast, src
+from i13c.sem import function, model, snippet, syntax
 
 
 def can_build_callgraphs_from_single_main():
@@ -78,7 +77,7 @@ def can_build_callgraphs_from_main_calling_snippet():
     assert caller.identifier.name == b"main"
     assert len(callees) == 1
 
-    assert isinstance(callees[0], snippet.SnippetId)
-    callee = semantic.snippets[callees[0]]
+    assert isinstance(callees[0][1], snippet.SnippetId)
+    callee = semantic.snippets[callees[0][1]]
 
     assert callee.identifier.name == b"foo"
