@@ -1,41 +1,20 @@
-from i13c import ast, err, sem, src
+from i13c import err, sem
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+from tests.sem import prepare_program
 
 
 def can_detect_duplicated_snippet_names():
-    program = ast.Program(
-        functions=[],
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=12, length=6),
-                        mnemonic=ast.Mnemonic(name=b"syscall"),
-                        operands=[],
-                    )
-                ],
-            ),
-            ast.Snippet(
-                ref=src.Span(offset=20, length=10),
-                name=b"main",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=32, length=6),
-                        mnemonic=ast.Mnemonic(name=b"syscall"),
-                        operands=[],
-                    )
-                ],
-            ),
-        ],
+    source, program = prepare_program(
+        """
+            asm main() noreturn {
+                syscall;
+            }
+
+            asm main() {
+                syscall;
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -45,41 +24,18 @@ def can_detect_duplicated_snippet_names():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3006
-    assert diagnostic.ref.offset == 20
-    assert diagnostic.ref.length == 10
+    assert source.extract(diagnostic.ref) == b"main()"
 
 
 def can_detect_duplicated_function_names():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=12, length=6),
-                        name=b"foo",
-                        arguments=[],
-                    )
-                ],
-            ),
-            ast.Function(
-                ref=src.Span(offset=20, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=32, length=6),
-                        name=b"bar",
-                        arguments=[],
-                    )
-                ],
-            ),
-        ],
+    source, program = prepare_program(
+        """
+            fn main() noreturn {
+            }
+
+            fn main() {
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -89,43 +45,19 @@ def can_detect_duplicated_function_names():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3006
-    assert diagnostic.ref.offset == 20
-    assert diagnostic.ref.length == 10
+    assert source.extract(diagnostic.ref) == b"main()"
 
 
 def can_detect_duplicated_mixed_function_names():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=12, length=6),
-                        mnemonic=ast.Mnemonic(name=b"syscall"),
-                        operands=[],
-                    )
-                ],
-            ),
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=20, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=32, length=6),
-                        name=b"bar",
-                        arguments=[],
-                    )
-                ],
-            ),
-        ],
+    source, program = prepare_program(
+        """
+            asm main() {
+                syscall;
+            }
+
+            fn main() {
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -135,5 +67,4 @@ def can_detect_duplicated_mixed_function_names():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3006
-    assert diagnostic.ref.offset == 1
-    assert diagnostic.ref.length == 10
+    assert source.extract(diagnostic.ref) == b"main()"

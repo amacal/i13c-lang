@@ -1,35 +1,15 @@
-from i13c import ast, err, sem, src
+from i13c import err, sem
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+from tests.sem import prepare_program
 
 
 def can_survive_existing_entrypoint():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=0, length=4),
-                name=b"exit",
-                noreturn=True,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=True,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"exit",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm exit() noreturn { }
+            fn main() noreturn { exit(); }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -39,17 +19,10 @@ def can_survive_existing_entrypoint():
 
 
 def can_detect_unexisting_entrypoint_even_if_function_is_called_main2():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=12, length=10),
-                name=b"main2",
-                noreturn=False,
-                parameters=[],
-                statements=[],
-            )
-        ],
+    source, program = prepare_program(
+        """
+            fn main2() noreturn { }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -59,22 +32,14 @@ def can_detect_unexisting_entrypoint_even_if_function_is_called_main2():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3011
-    assert diagnostic.ref.offset == 0
-    assert diagnostic.ref.length == 0
+    assert source.extract(diagnostic.ref) == b""
 
 
 def can_reject_main_as_entrypoint_when_noreturn_is_false():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=12, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[],
-            )
-        ],
+    source, program = prepare_program(
+        """
+            fn main() { }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -84,5 +49,4 @@ def can_reject_main_as_entrypoint_when_noreturn_is_false():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3011
-    assert diagnostic.ref.offset == 0
-    assert diagnostic.ref.length == 0
+    assert source.extract(diagnostic.ref) == b""

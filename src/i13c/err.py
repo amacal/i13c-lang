@@ -168,7 +168,7 @@ def report_e3007_integer_literal_out_of_range(
     )
 
 
-def report_e3008_called_symbol_exists(
+def report_e3008_called_symbol_missing(
     ref: src.SpanLike, name: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(

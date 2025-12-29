@@ -251,7 +251,21 @@ def can_detect_hex_with_invalid_characters():
 
 def can_detect_too_short_hex():
     code = src.open_text("0x")
+    tokens = lex.tokenize(code)
 
+    assert isinstance(tokens, res.Err)
+    diagnostics = tokens.error
+
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
+
+    assert diagnostic.ref.offset == 2
+    assert diagnostic.ref.length == 1
+    assert diagnostic.code == err.ERROR_1002
+
+
+def can_reject_hex_without_digits():
+    code = src.open_text("0x;")
     tokens = lex.tokenize(code)
 
     assert isinstance(tokens, res.Err)

@@ -162,7 +162,7 @@ def parse_function(state: ParsingState) -> ast.Function:
         parameters = parse_parameters(state)
 
     # expect closed round bracket
-    state.expect(lex.TOKEN_ROUND_CLOSE)
+    end = state.expect(lex.TOKEN_ROUND_CLOSE)
 
     # optional flags
     if not state.is_in(lex.TOKEN_CURLY_OPEN):
@@ -179,7 +179,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     state.expect(lex.TOKEN_CURLY_CLOSE)
 
     return ast.Function(
-        ref=state.between(name, name),
+        ref=state.between(name, end),
         name=state.extract(name),
         noreturn=noreturn,
         parameters=parameters,
@@ -291,7 +291,7 @@ def parse_function_flags(state: ParsingState) -> bool:
         expected = {b"noreturn"}
         keyword = state.expect(lex.TOKEN_KEYWORD)
 
-        # fail if the keyword is not "clobbers" or "noreturn"
+        # fail if the keyword is not "noreturn"
         if state.extract(keyword) not in expected:
             raise UnexpectedKeyword(keyword, expected, state.extract(keyword))
 
@@ -314,7 +314,7 @@ def parse_snippet_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
         expected = {b"clobbers", b"noreturn"}
         keyword = state.expect(lex.TOKEN_KEYWORD)
 
-        # fail if the keyword is not "clobbers" or "noreturn"
+        # fail if the keyword is not "noreturn"
         if state.extract(keyword) not in expected:
             raise UnexpectedKeyword(keyword, expected, state.extract(keyword))
 

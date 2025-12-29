@@ -1,35 +1,15 @@
-from i13c import ast, err, sem, src
+from i13c import err, sem
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+from tests.sem import prepare_program
 
 
 def can_survive_non_terminal_callee_symbol():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=0, length=10),
-                name=b"foo",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            ),
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=20),
-                name=b"bar",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=12, length=20),
-                        name=b"foo",
-                        arguments=[],
-                    )
-                ],
-            ),
-        ],
+    _, program = prepare_program(
+        """
+            asm foo() { }
+            fn bar() { foo(); }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -39,32 +19,11 @@ def can_survive_non_terminal_callee_symbol():
 
 
 def can_detect_non_terminal_caller_symbol():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=0, length=10),
-                name=b"foo",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            ),
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=20),
-                name=b"main",
-                noreturn=True,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=12, length=20),
-                        name=b"foo",
-                        arguments=[],
-                    )
-                ],
-            ),
-        ],
+    source, program = prepare_program(
+        """
+            asm foo() { }
+            fn bar() noreturn { foo(); }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -74,50 +33,16 @@ def can_detect_non_terminal_caller_symbol():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3010
-    assert diagnostic.ref.offset == 1
-    assert diagnostic.ref.length == 20
+    assert source.extract(diagnostic.ref) == b"bar()"
 
 
 def can_survive_non_terminal_caller_symbol_not_last_call():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=0, length=10),
-                name=b"foo1",
-                noreturn=True,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            ),
-            ast.Snippet(
-                ref=src.Span(offset=10, length=10),
-                name=b"foo2",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            ),
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=20),
-                name=b"bar",
-                noreturn=True,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=12, length=20),
-                        name=b"foo2",
-                        arguments=[],
-                    ),
-                    ast.CallStatement(
-                        ref=src.Span(offset=22, length=25),
-                        name=b"foo1",
-                        arguments=[],
-                    ),
-                ],
-            ),
-        ],
+    _, program = prepare_program(
+        """
+            asm foo1() noreturn { }
+            asm foo2() { }
+            fn bar() noreturn { foo1(); foo2(); }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))

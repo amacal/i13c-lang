@@ -38,4 +38,4 @@ def can_detect_duplicated_parameter_names():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3004
-    assert source.extract(diagnostic.ref) == b"aux"
+    assert source.extract(diagnostic.ref) == b"aux(code: u32, code: u16)"
