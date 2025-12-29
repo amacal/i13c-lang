@@ -80,7 +80,12 @@ def lower_function(
     next: int,
 ) -> List[ir.CodeBlock]:
     out: List[ir.CodeBlock] = []
-    ids = {node: next + idx for idx, node in enumerate(flow.edges.keys())}
+
+    # remove entry and exit from nodes
+    nodes = [node for node in flow.edges.keys() if node not in (flow.entry, flow.exit)]
+
+    # assign ids to nodes, entry/exit won't get ids
+    ids = {node: next + idx for idx, node in enumerate(nodes)}
 
     for node, successors in flow.edges.items():
         instructions: List[ir.Instruction] = []

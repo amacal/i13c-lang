@@ -1,4 +1,4 @@
-from i13c import ast, err, sem, src
+from i13c import err, sem
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
 from tests.sem import prepare_program

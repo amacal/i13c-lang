@@ -55,3 +55,26 @@ def can_lower_mov_program():
 
     assert instruction.dst == 0
     assert instruction.imm == 0x1234
+
+
+def can_lower_function_statements_to_codeblocks():
+    _, program = prepare_program(
+        """
+            fn main() noreturn { foo(); bar(); }
+            asm foo() { mov rax, 0x01; }
+            asm bar() noreturn { syscall; }
+        """
+    )
+
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    unit = low.lower(model)
+    assert isinstance(unit, res.Ok)
+
+    codeblocks = unit.value.codeblocks
+    assert len(codeblocks) == 2
+
+    assert isinstance(codeblocks[0].terminator, ir.FallThrough)
+    assert codeblocks[0].terminator.target == 1
+    assert isinstance(codeblocks[-1].terminator, ir.Stop)
