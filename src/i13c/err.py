@@ -184,7 +184,7 @@ def report_e3009_called_symbol_is_not_a_snippet(
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_3009,
-        message=f"Called symbol is not an snippet: {str(name)}",
+        message=f"Called symbol is not a snippet: {str(name)}",
     )
 
 

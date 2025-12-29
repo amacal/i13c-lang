@@ -413,6 +413,42 @@ def can_handle_unexpected_token():
     assert diagnostic.ref.length == 3  # length of "rbx"
 
 
+def can_handle_missing_parameter_comma():
+    code = src.open_text("fn main(a: u8 b: u8) { exit(0x1); }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == err.ERROR_2001
+    assert diagnostic.ref.offset == 14  # offset of "b"
+    assert diagnostic.ref.length == 1  # length of "b"
+
+
+def can_handle_missing_slot_comma():
+    code = src.open_text("asm exit(code@rdi: u32 id@rax: u16) { syscall; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Err)
+
+    diagnostics = program.error
+    assert len(diagnostics) == 1
+
+    diagnostic = diagnostics[0]
+    assert diagnostic.code == err.ERROR_2001
+    assert diagnostic.ref.offset == 23  # offset of "id"
+    assert diagnostic.ref.length == 2  # length of "id"
+
+
 def can_detect_unknown_function_keyword():
     code = src.open_text("noreturn main { syscall; }")
 

@@ -158,7 +158,7 @@ def parse_function(state: ParsingState) -> ast.Function:
     state.expect(lex.TOKEN_ROUND_OPEN)
 
     # optional function parameters
-    while not state.is_in(lex.TOKEN_ROUND_CLOSE):
+    if not state.is_in(lex.TOKEN_ROUND_CLOSE):
         parameters = parse_parameters(state)
 
     # expect closed round bracket
@@ -193,14 +193,14 @@ def parse_snippet(state: ParsingState) -> ast.Snippet:
     clobbers: List[ast.Register] = []
     noreturn: bool = False
 
-    # function name is an identifier
+    # snippet name is an identifier
     name = state.expect(lex.TOKEN_IDENT)
 
     # expect opening round bracket
     state.expect(lex.TOKEN_ROUND_OPEN)
 
-    # optional function parameters
-    while not state.is_in(lex.TOKEN_ROUND_CLOSE):
+    # optional snippet parameters
+    if not state.is_in(lex.TOKEN_ROUND_CLOSE):
         slots = parse_slots(state)
 
     # expect closed round bracket
