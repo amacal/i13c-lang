@@ -62,7 +62,7 @@ def build_callable_live(
 def prune_flowgraph(
     flowgraph: FlowGraph,
     resolutions: Dict[CallSiteId, Resolution],
-    nonreturn: Set[CallableTarget],
+    noreturn: Set[CallableTarget],
 ) -> FlowGraph:
     edges: Dict[FlowNode, List[FlowNode]] = {}
 
@@ -76,13 +76,13 @@ def prune_flowgraph(
             if not resolution.accepted:
                 successors = []
 
-            # check if any accepted callable is not nonreturn
+            # check if any accepted callable is not noreturn
             for accepted in resolution.accepted:
-                if accepted.callable.target not in nonreturn:
+                if accepted.callable.target not in noreturn:
                     acceptable = True
                     break
 
-            # all accepted callables are nonreturn, prune successors
+            # all accepted callables are noreturn, prune successors
             if not acceptable:
                 successors = []
 

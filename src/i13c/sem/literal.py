@@ -38,9 +38,9 @@ def build_literals(
         assert isinstance(literal, ast.IntegerLiteral)
 
         # derive literal ID from globally unique node ID
-        id = LiteralId(value=nid.value)
+        literal_id = LiteralId(value=nid.value)
 
-        literals[id] = Literal(
+        literals[literal_id] = Literal(
             ref=literal.ref,
             kind=b"hex",
             target=Hex(

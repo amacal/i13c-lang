@@ -29,7 +29,7 @@ RULES: List[Callable[[SemanticGraph], List[diag.Diagnostic]]] = [
     e3007.validate_integer_literal_out_of_range,
     e3008.validate_called_symbol_exists,
     e3009.validate_called_symbol_is_snippet,
-    e3010.validate_called_symbol_termination,
+    e3010.validate_called_symbol_terminality,
     e3011.validate_entrypoint_exists,
     e3012.validate_entrypoint_is_single,
 ]

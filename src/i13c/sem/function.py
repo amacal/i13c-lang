@@ -38,9 +38,6 @@ def build_functions(
         parameters: List[Parameter] = []
         statements: List[Statement] = []
 
-        # derive function id from globally unique node id
-        id = FunctionId(value=nid.value)
-
         for parameter in function.parameters:
             parameters.append(
                 Parameter(
@@ -53,7 +50,10 @@ def build_functions(
             sid = graph.nodes.statements.get_by_node(statement)
             statements.append(CallSiteId(value=sid.value))
 
-        functions[id] = Function(
+        # derive function ID from globally unique node ID
+        function_id = FunctionId(value=nid.value)
+
+        functions[function_id] = Function(
             ref=function.ref,
             identifier=Identifier(name=function.name),
             noreturn=function.noreturn,

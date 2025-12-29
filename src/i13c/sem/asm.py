@@ -175,9 +175,9 @@ def build_instructions(
                     operands.append(Operand.immediate(value=imm.value))
 
         # derive instruction ID from globally unique node ID
-        id = InstructionId(value=nid.value)
+        instruction_id = InstructionId(value=nid.value)
 
-        instructions[id] = Instruction(
+        instructions[instruction_id] = Instruction(
             ref=instruction.ref,
             mnemonic=Mnemonic(name=instruction.mnemonic.name),
             operands=operands,

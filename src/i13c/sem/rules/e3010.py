@@ -4,7 +4,7 @@ from i13c import diag, err
 from i13c.sem.model import SemanticGraph
 
 
-def validate_called_symbol_termination(
+def validate_called_symbol_terminality(
     graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []

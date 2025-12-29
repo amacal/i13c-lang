@@ -37,9 +37,6 @@ def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
         clobbers: List[Register] = []
         instructions: List[InstructionId] = []
 
-        # derive snippet ID from globally unique node ID
-        id = SnippetId(value=nid.value)
-
         # collect clobbers
         for reg in snippet.clobbers:
             clobbers.append(Register(name=reg.name))
@@ -55,11 +52,14 @@ def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
             )
 
         for instruction in snippet.instructions:
-            # derive instruction ID from globally unique node ID
-            node = graph.nodes.instructions.get_by_node(instruction)
-            instructions.append(InstructionId(value=node.value))
+            # identify instruction ID from globally unique node ID
+            instruction_node = graph.nodes.instructions.get_by_node(instruction)
+            instructions.append(InstructionId(value=instruction_node.value))
 
-        snippets[id] = Snippet(
+        # derive snippet ID from globally unique node ID
+        snippet_id = SnippetId(value=nid.value)
+
+        snippets[snippet_id] = Snippet(
             ref=snippet.ref,
             identifier=Identifier(name=snippet.name),
             noreturn=snippet.noreturn,

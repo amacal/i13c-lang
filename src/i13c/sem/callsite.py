@@ -41,9 +41,6 @@ def build_callsites(
         # if not isinstance(statement, ast.CallStatement):
         #    continue
 
-        # derive callsite id from globally unique node id
-        id = CallSiteId(value=nid.value)
-
         for argument in statement.arguments:
             match argument:
                 case ast.IntegerLiteral() as lit:
@@ -57,7 +54,10 @@ def build_callsites(
                         )
                     )
 
-        callsites[id] = CallSite(
+        # derive callsite ID from globally unique node ID
+        callsite_id = CallSiteId(value=nid.value)
+
+        callsites[callsite_id] = CallSite(
             ref=statement.ref,
             callee=Identifier(name=statement.name),
             arguments=arguments,
