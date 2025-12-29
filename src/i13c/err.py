@@ -22,7 +22,7 @@ ERROR_3007 = "E3007"  # Integer literal out of range
 ERROR_3008 = "E3008"  # Called symbol does not exist
 ERROR_3009 = "E3009"  # Called symbol is not a snippet
 ERROR_3010 = "E3010"  # Function has wrong terminality
-ERROR_3011 = "E3011"  # Missing entrypoint function
+ERROR_3011 = "E3011"  # Missing entrypoint function or snippet
 ERROR_3012 = "E3012"  # Multiple entrypoint functions
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic

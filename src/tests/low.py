@@ -75,6 +75,30 @@ def can_lower_function_statements_to_codeblocks():
     codeblocks = unit.value.codeblocks
     assert len(codeblocks) == 2
 
+    # first block ends with fallthrough
     assert isinstance(codeblocks[0].terminator, ir.FallThrough)
     assert codeblocks[0].terminator.target == 1
+
+    # last block ends with stop
     assert isinstance(codeblocks[-1].terminator, ir.Stop)
+
+
+def can_lower_function_final_statement_to_stop():
+    _, program = prepare_program(
+        """
+            fn main() noreturn { foo(); }
+            asm foo() noreturn { syscall; }
+        """
+    )
+
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    unit = low.lower(model)
+    assert isinstance(unit, res.Ok)
+
+    codeblocks = unit.value.codeblocks
+    assert len(codeblocks) == 1
+
+    # single block ends with stop
+    assert isinstance(codeblocks[0].terminator, ir.Stop)

@@ -18,7 +18,7 @@ def can_survive_existing_entrypoint():
     assert len(diagnostics) == 0
 
 
-def can_detect_unexisting_entrypoint_even_if_function_is_called_main2():
+def can_detect_nonexistent_entrypoint_even_if_function_is_called_main2():
     source, program = prepare_program(
         """
             fn main2() noreturn { }
