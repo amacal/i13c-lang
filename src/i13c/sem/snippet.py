@@ -32,7 +32,7 @@ class Snippet:
 def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
     snippets: Dict[SnippetId, Snippet] = {}
 
-    for nid, snippet in graph.nodes.snippets.items():
+    for nid, snippet in graph.snippets.items():
         slots: List[Slot] = []
         clobbers: List[Register] = []
         instructions: List[InstructionId] = []
@@ -53,7 +53,7 @@ def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
 
         for instruction in snippet.instructions:
             # identify instruction ID from globally unique node ID
-            instruction_node = graph.nodes.instructions.get_by_node(instruction)
+            instruction_node = graph.instructions.get_by_node(instruction)
             instructions.append(InstructionId(value=instruction_node.value))
 
         # derive snippet ID from globally unique node ID

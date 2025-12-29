@@ -28,7 +28,7 @@ def can_build_semantic_model_functions():
     assert len(value.statements) == 1
     sid = syntax.NodeId(value=value.statements[0].value)
 
-    statement = graph.nodes.statements.get_by_id(sid)
+    statement = graph.statements.get_by_id(sid)
     assert isinstance(statement, ast.CallStatement)
 
     assert statement.name == b"foo"

@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Dict, Iterable, Tuple, TypeVar
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, Iterable, Optional, Protocol, Tuple, TypeVar
 
 from i13c import ast
 
@@ -9,6 +9,10 @@ AstNode = TypeVar("AstNode")
 @dataclass(kw_only=True, frozen=True)
 class NodeId:
     value: int
+
+
+class BidirectionalLike(Protocol):
+    def as_dict(self) -> Dict[int, Dict[str, Any]]: ...
 
 
 @dataclass(kw_only=True)
@@ -33,30 +37,17 @@ class Bidirectional[AstNode]:
     def get_by_node(self, node: AstNode) -> NodeId:
         return self.node_to_id[node]
 
-
-@dataclass(kw_only=True)
-class Nodes:
-    snippets: Bidirectional[ast.Snippet]
-    instructions: Bidirectional[ast.Instruction]
-    functions: Bidirectional[ast.Function]
-    statements: Bidirectional[ast.Statement]
-    literals: Bidirectional[ast.Literal]
-
-    @staticmethod
-    def empty() -> "Nodes":
-        return Nodes(
-            snippets=Bidirectional[ast.Snippet].empty(),
-            instructions=Bidirectional[ast.Instruction].empty(),
-            functions=Bidirectional[ast.Function].empty(),
-            statements=Bidirectional[ast.Statement].empty(),
-            literals=Bidirectional[ast.Literal].empty(),
-        )
+    def as_dict(self) -> Dict[int, Dict[str, Any]]:
+        return {
+            k.value: asdict(v)  # type: ignore[reportUnknownMemberType]
+            for k, v in self.id_to_node.items()
+        }
 
 
 class NodesVisitor:
     def __init__(self) -> None:
         self.counter = 0
-        self.nodes = Nodes.empty()
+        self.graph = SyntaxGraph.empty()
 
     def next(self) -> NodeId:
         self.counter += 1
@@ -68,28 +59,48 @@ class NodesVisitor:
         pass
 
     def on_snippet(self, snippet: ast.Snippet) -> None:
-        self.nodes.snippets.append(self.next(), snippet)
+        self.graph.snippets.append(self.next(), snippet)
 
     def on_instruction(self, instruction: ast.Instruction) -> None:
-        self.nodes.instructions.append(self.next(), instruction)
+        self.graph.instructions.append(self.next(), instruction)
 
     def on_function(self, function: ast.Function) -> None:
-        self.nodes.functions.append(self.next(), function)
+        self.graph.functions.append(self.next(), function)
 
     def on_statement(self, statement: ast.Statement) -> None:
-        self.nodes.statements.append(self.next(), statement)
+        self.graph.statements.append(self.next(), statement)
 
     def on_literal(self, literal: ast.Literal) -> None:
-        self.nodes.literals.append(self.next(), literal)
+        self.graph.literals.append(self.next(), literal)
 
 
 @dataclass(kw_only=True)
 class SyntaxGraph:
-    nodes: Nodes
+    snippets: Bidirectional[ast.Snippet]
+    instructions: Bidirectional[ast.Instruction]
+    functions: Bidirectional[ast.Function]
+    statements: Bidirectional[ast.Statement]
+    literals: Bidirectional[ast.Literal]
+
+    @staticmethod
+    def empty() -> "SyntaxGraph":
+        return SyntaxGraph(
+            snippets=Bidirectional[ast.Snippet].empty(),
+            instructions=Bidirectional[ast.Instruction].empty(),
+            functions=Bidirectional[ast.Function].empty(),
+            statements=Bidirectional[ast.Statement].empty(),
+            literals=Bidirectional[ast.Literal].empty(),
+        )
+
+    def as_dict(self, key: str) -> Dict[int, Dict[str, Any]]:
+        field: Optional[BidirectionalLike] = getattr(self, key, None)
+
+        # guard the missing field case
+        return field.as_dict() if field else {}
 
 
 def build_syntax_graph(program: ast.Program) -> SyntaxGraph:
     visitor = NodesVisitor()
     program.accept(visitor)
 
-    return SyntaxGraph(nodes=visitor.nodes)
+    return visitor.graph

@@ -34,7 +34,7 @@ def build_callsites(
 ) -> Dict[CallSiteId, CallSite]:
     callsites: Dict[CallSiteId, CallSite] = {}
 
-    for nid, statement in graph.nodes.statements.items():
+    for nid, statement in graph.statements.items():
         arguments: List[Argument] = []
 
         # ignore non-call instructions
@@ -45,7 +45,7 @@ def build_callsites(
             match argument:
                 case ast.IntegerLiteral() as lit:
                     # find literal by AST node
-                    lid = graph.nodes.literals.get_by_node(lit)
+                    lid = graph.literals.get_by_node(lit)
 
                     arguments.append(
                         Argument(

@@ -34,7 +34,7 @@ def build_literals(
 ) -> Dict[LiteralId, Literal]:
     literals: Dict[LiteralId, Literal] = {}
 
-    for nid, literal in graph.nodes.literals.items():
+    for nid, literal in graph.literals.items():
         assert isinstance(literal, ast.IntegerLiteral)
 
         # derive literal ID from globally unique node ID

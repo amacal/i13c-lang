@@ -34,7 +34,7 @@ def build_functions(
 ) -> Dict[FunctionId, Function]:
     functions: Dict[FunctionId, Function] = {}
 
-    for nid, function in graph.nodes.functions.items():
+    for nid, function in graph.functions.items():
         parameters: List[Parameter] = []
         statements: List[Statement] = []
 
@@ -47,7 +47,7 @@ def build_functions(
             )
 
         for statement in function.statements:
-            sid = graph.nodes.statements.get_by_node(statement)
+            sid = graph.statements.get_by_node(statement)
             statements.append(CallSiteId(value=sid.value))
 
         # derive function ID from globally unique node ID

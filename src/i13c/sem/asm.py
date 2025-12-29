@@ -164,7 +164,7 @@ def build_instructions(
 ) -> Dict[InstructionId, Instruction]:
     instructions: Dict[InstructionId, Instruction] = {}
 
-    for nid, instruction in graph.nodes.instructions.items():
+    for nid, instruction in graph.instructions.items():
         operands: List[Operand] = []
 
         for operand in instruction.operands:

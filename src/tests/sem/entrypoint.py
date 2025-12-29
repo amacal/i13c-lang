@@ -25,7 +25,7 @@ def can_build_entrypoints_for_valid_main_function():
     assert isinstance(value.target, function.FunctionId)
     fid = syntax.NodeId(value=value.target.value)
 
-    target = graph.nodes.functions.get_by_id(fid)
+    target = graph.functions.get_by_id(fid)
     assert target.name == b"main"
 
 
@@ -67,5 +67,5 @@ def can_accept_snippet_as_entrypoint():
     assert isinstance(value.target, snippet.SnippetId)
     sid = syntax.NodeId(value=value.target.value)
 
-    target = graph.nodes.snippets.get_by_id(sid)
+    target = graph.snippets.get_by_id(sid)
     assert target.name == b"main"

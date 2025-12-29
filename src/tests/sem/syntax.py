@@ -12,12 +12,12 @@ def can_visit_all_nodes_in_a_snippet() -> None:
     visitor = NodesVisitor()
     program.accept(visitor)
 
-    assert len(list(visitor.nodes.snippets.items())) == 1
-    assert len(list(visitor.nodes.instructions.items())) == 1
+    assert len(list(visitor.graph.snippets.items())) == 1
+    assert len(list(visitor.graph.instructions.items())) == 1
 
-    assert len(list(visitor.nodes.functions.items())) == 0
-    assert len(list(visitor.nodes.statements.items())) == 0
-    assert len(list(visitor.nodes.literals.items())) == 0
+    assert len(list(visitor.graph.functions.items())) == 0
+    assert len(list(visitor.graph.statements.items())) == 0
+    assert len(list(visitor.graph.literals.items())) == 0
 
 
 def can_visit_all_nodes_in_a_function() -> None:
@@ -30,9 +30,9 @@ def can_visit_all_nodes_in_a_function() -> None:
     visitor = NodesVisitor()
     program.accept(visitor)
 
-    assert len(list(visitor.nodes.functions.items())) == 1
-    assert len(list(visitor.nodes.statements.items())) == 1
-    assert len(list(visitor.nodes.literals.items())) == 1
+    assert len(list(visitor.graph.functions.items())) == 1
+    assert len(list(visitor.graph.statements.items())) == 1
+    assert len(list(visitor.graph.literals.items())) == 1
 
-    assert len(list(visitor.nodes.snippets.items())) == 0
-    assert len(list(visitor.nodes.instructions.items())) == 0
+    assert len(list(visitor.graph.snippets.items())) == 0
+    assert len(list(visitor.graph.instructions.items())) == 0
