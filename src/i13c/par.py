@@ -204,10 +204,7 @@ def parse_snippet(state: ParsingState) -> ast.Snippet:
         slots = parse_slots(state)
 
     # expect closed round bracket
-    state.expect(lex.TOKEN_ROUND_CLOSE)
-
-    # capture function signature
-    ref = state.span(name)
+    end = state.expect(lex.TOKEN_ROUND_CLOSE)
 
     # optional flags
     if not state.is_in(lex.TOKEN_CURLY_OPEN):
@@ -224,7 +221,7 @@ def parse_snippet(state: ParsingState) -> ast.Snippet:
     state.expect(lex.TOKEN_CURLY_CLOSE)
 
     return ast.Snippet(
-        ref=ref,
+        ref=state.between(name, end),
         name=state.extract(name),
         noreturn=noreturn,
         clobbers=clobbers,
@@ -386,13 +383,16 @@ def parse_instruction(state: ParsingState) -> ast.Instruction:
         operands = parse_operands(state)
 
     # expect a semicolon
-    state.expect(lex.TOKEN_SEMICOLON)
+    end = state.expect(lex.TOKEN_SEMICOLON)
 
     # build instruction and token reference
-    ref = state.span(token)
     mnemonic = ast.Mnemonic(name=state.extract(token))
 
-    return ast.Instruction(ref=ref, mnemonic=mnemonic, operands=operands)
+    return ast.Instruction(
+        ref=state.between(token, end),
+        mnemonic=mnemonic,
+        operands=operands,
+    )
 
 
 def parse_arguments(state: ParsingState) -> List[ast.IntegerLiteral]:

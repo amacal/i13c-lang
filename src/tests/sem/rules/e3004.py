@@ -1,38 +1,16 @@
-from i13c import ast, err, sem, src
+from i13c import err, sem
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+from tests.sem import prepare_program
 
 
 def can_detect_duplicated_slot_names():
-    program = ast.Program(
-        functions=[],
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=1, length=20),
-                name=b"main",
-                noreturn=False,
-                slots=[
-                    ast.Slot(
-                        name=b"code",
-                        type=ast.Type(name=b"u32"),
-                        bind=ast.Register(name=b"rdi"),
-                    ),
-                    ast.Slot(
-                        name=b"code",
-                        type=ast.Type(name=b"u16"),
-                        bind=ast.Register(name=b"rax"),
-                    ),
-                ],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=22, length=6),
-                        mnemonic=ast.Mnemonic(name=b"syscall"),
-                        operands=[],
-                    )
-                ],
-            )
-        ],
+    source, program = prepare_program(
+        """
+            asm main(code@rdi: u32, code@rax: u16) noreturn {
+                syscall;
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -42,37 +20,15 @@ def can_detect_duplicated_slot_names():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3004
-    assert diagnostic.ref.offset == 1
-    assert diagnostic.ref.length == 20
+    assert source.extract(diagnostic.ref) == b"main(code@rdi: u32, code@rax: u16)"
 
 
 def can_detect_duplicated_parameter_names():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=20),
-                name=b"main",
-                noreturn=False,
-                parameters=[
-                    ast.Parameter(
-                        name=b"code",
-                        type=ast.Type(name=b"u32"),
-                    ),
-                    ast.Parameter(
-                        name=b"code",
-                        type=ast.Type(name=b"u16"),
-                    ),
-                ],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=22, length=6),
-                        name=b"foo",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    source, program = prepare_program(
+        """
+            fn aux(code: u32, code: u16) {
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -82,5 +38,4 @@ def can_detect_duplicated_parameter_names():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3004
-    assert diagnostic.ref.offset == 1
-    assert diagnostic.ref.length == 20
+    assert source.extract(diagnostic.ref) == b"aux"

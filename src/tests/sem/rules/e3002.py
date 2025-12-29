@@ -1,30 +1,16 @@
-from i13c import ast, err, sem, src
+from i13c import err, sem
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+from tests.sem import prepare_program
 
 
 def can_detect_invalid_operand_types_of_mov():
-    program = ast.Program(
-        functions=[],
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=12, length=15),
-                        mnemonic=ast.Mnemonic(name=b"mov"),
-                        operands=[
-                            ast.Immediate(value=0x1234),
-                            ast.Immediate(value=0x5678),
-                        ],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm main() noreturn {
+                mov 0x1234, 0x5678;
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -35,5 +21,5 @@ def can_detect_invalid_operand_types_of_mov():
     # all of them are related to E3002
     for diagnostic in diagnostics:
         assert diagnostic.code == err.ERROR_3002
-        assert diagnostic.ref.offset == 12
-        assert diagnostic.ref.length == 15
+        assert diagnostic.ref.offset == 51
+        assert diagnostic.ref.length == 19

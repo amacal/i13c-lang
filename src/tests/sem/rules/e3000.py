@@ -1,27 +1,16 @@
-from i13c import ast, err, sem, src
+from i13c import err, sem
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+from tests.sem import prepare_program
 
 
 def can_accept_operands_arity_of_syscall():
-    program = ast.Program(
-        functions=[],
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=0, length=4),
-                name=b"main",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=0, length=7),
-                        mnemonic=ast.Mnemonic(name=b"syscall"),
-                        operands=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm main() noreturn {
+                syscall;
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -31,27 +20,12 @@ def can_accept_operands_arity_of_syscall():
 
 
 def can_accept_operands_arity_of_mov():
-    program = ast.Program(
-        functions=[],
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=0, length=4),
-                name=b"main",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=0, length=3),
-                        mnemonic=ast.Mnemonic(name=b"mov"),
-                        operands=[
-                            ast.Register(name=b"rax"),
-                            ast.Immediate(value=0x1234),
-                        ],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm main() noreturn {
+                mov rax, 0x1234;
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -61,24 +35,12 @@ def can_accept_operands_arity_of_mov():
 
 
 def can_detect_invalid_instruction():
-    program = ast.Program(
-        functions=[],
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=12, length=3),
-                        mnemonic=ast.Mnemonic(name=b"xyz"),
-                        operands=[],
-                    )
-                ],
-            )
-        ],
+    source, program = prepare_program(
+        """
+            asm main() noreturn {
+                xyz;
+            }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
@@ -88,5 +50,4 @@ def can_detect_invalid_instruction():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3000
-    assert diagnostic.ref.offset == 12
-    assert diagnostic.ref.length == 3
+    assert source.extract(diagnostic.ref) == "xyz"
