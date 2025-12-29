@@ -1,13 +1,23 @@
+import json
 import os
 import sys
+from dataclasses import asdict
 from functools import partial
-from typing import List, NoReturn
+from typing import Any, List, NoReturn
 
 import click
 
 from i13c import diag, elf, enc, ld, lex, low, par, res, sem, src
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+
+
+class BytesAsTextEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if isinstance(o, bytes):
+            return o.decode("utf-8", errors="surrogateescape")
+
+        return super().default(o)
 
 
 def emit_and_exit(
@@ -64,37 +74,7 @@ def ast_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
 
-    for idx, function in enumerate(program.functions):
-        click.echo(f"Function: {function.name.decode('utf-8')}")
-
-        if function.parameters:
-            click.echo("  Parameters:")
-            for parameter in function.parameters:
-                click.echo(f"    {str(parameter)}")
-
-        if function.statements:
-            click.echo("  Statements:")
-            for statement in function.statements:
-                click.echo(f"    {str(statement)}")
-
-        if idx < len(program.functions) - 1 or len(program.snippets) > 0:
-            click.echo("")
-
-    for idx, snippet in enumerate(program.snippets):
-        click.echo(f"Snippet: {snippet.name.decode('utf-8')}")
-
-        if snippet.slots:
-            click.echo("  Slots:")
-            for slot in snippet.slots:
-                click.echo(f"    {str(slot)}")
-
-        if snippet.instructions:
-            click.echo("  Instructions:")
-            for instruction in snippet.instructions:
-                click.echo(f"    {str(instruction)}")
-
-        if idx < len(program.snippets) - 1:
-            click.echo("")
+    click.echo(json.dumps(asdict(program), cls=BytesAsTextEncoder))
 
 
 @i13c.command("ir")
