@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, List
 
 from i13c import diag, err, res, src
 
@@ -52,6 +52,24 @@ SET_TYPES = {
 
 SET_KEYWORDS = {
     b"asm", b"clobbers", b"noreturn", b"fn",
+}
+
+TOKEN_NAMES: Dict[int, str] = {
+    TOKEN_SEMICOLON: "semicolon",
+    TOKEN_COMMA: "comma",
+    TOKEN_HEX: "hex",
+    TOKEN_IDENT: "identifier",
+    TOKEN_REG: "register",
+    TOKEN_MNEMONIC: "mnemonic",
+    TOKEN_KEYWORD: "keyword",
+    TOKEN_ROUND_OPEN: "round-open",
+    TOKEN_ROUND_CLOSE: "round-close",
+    TOKEN_CURLY_OPEN: "curly-open",
+    TOKEN_CURLY_CLOSE: "curly-close",
+    TOKEN_AT: "at",
+    TOKEN_COLON: "colon",
+    TOKEN_TYPE: "type",
+    TOKEN_EOF: "end-of-file",
 }
 # fmt: on
 

@@ -48,9 +48,10 @@ def lex_command(path: str) -> None:
 
     for token in tokens:
         key = f"{token.code:03}:{token.offset:04}:{token.length:02}"
+        name = f"{lex.TOKEN_NAMES[token.code]:<15}"
         value = code.extract(token)
 
-        click.echo(f"{key} -> {value!r}")
+        click.echo(f"{key}:{name} -> {value!r}")
 
 
 @i13c.command("ast")

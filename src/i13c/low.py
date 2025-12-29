@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from i13c import diag, err, ir, res, src
+from i13c import diag, ir, res, src
 from i13c.sem.asm import Immediate, Instruction, Register
 from i13c.sem.callsite import CallSiteId
 from i13c.sem.entrypoint import EntryPoint

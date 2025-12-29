@@ -48,7 +48,7 @@ def report_e1002_unexpected_value(offset: int, expected: bytes) -> diag.Diagnost
     return diag.Diagnostic(
         ref=src.Span(offset=offset, length=1),
         code=ERROR_1002,
-        message=f"Unexpected value at offset {offset}, expected one of: {list(expected)}",
+        message=f"Unexpected value at offset {offset}, expected one of: {list(sorted(expected))}",
     )
 
 
