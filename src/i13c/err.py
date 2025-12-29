@@ -202,7 +202,7 @@ def report_e3011_missing_entrypoint_function() -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=src.Span(offset=0, length=0),
         code=ERROR_3011,
-        message="Missing entrypoint codeblock",
+        message="Missing entrypoint function or snippet named 'main'",
     )
 
 

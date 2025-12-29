@@ -1,45 +1,13 @@
-from i13c import ast, src
 from i13c.sem import callsite, model, resolve, snippet, syntax
+from tests.sem import prepare_program
 
 
 def can_build_semantic_model_accepted_resolutions_for_snippet():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=31, length=10),
-                name=b"foo",
-                noreturn=False,
-                slots=[
-                    ast.Slot(
-                        name=b"arg1",
-                        type=ast.Type(name=b"u32"),
-                        bind=ast.Register(name=b"rax"),
-                    )
-                ],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"foo",
-                        arguments=[
-                            ast.IntegerLiteral(
-                                ref=src.Span(offset=21, length=30),
-                                value=42,
-                            ),
-                        ],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm foo(arg1@rax: u32) { }
+            fn main() { foo(0x42); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
@@ -66,37 +34,11 @@ def can_build_semantic_model_accepted_resolutions_for_snippet():
 
 
 def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity_much():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=31, length=10),
-                name=b"foo",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"foo",
-                        arguments=[
-                            ast.IntegerLiteral(
-                                ref=src.Span(offset=21, length=30),
-                                value=42,
-                            ),
-                        ],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm foo() { }
+            fn main() { foo(0x42); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
@@ -125,38 +67,11 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
 
 
 def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity_less():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=31, length=10),
-                name=b"foo",
-                noreturn=False,
-                slots=[
-                    ast.Slot(
-                        name=b"arg1",
-                        type=ast.Type(name=b"u32"),
-                        bind=ast.Register(name=b"rax"),
-                    )
-                ],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"foo",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm foo(arg1@rax: u32) { }
+            fn main() { foo(); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
@@ -185,43 +100,11 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
 
 
 def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_hex_width():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=31, length=10),
-                name=b"foo",
-                noreturn=False,
-                slots=[
-                    ast.Slot(
-                        name=b"arg1",
-                        type=ast.Type(name=b"u8"),
-                        bind=ast.Register(name=b"rax"),
-                    )
-                ],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=1, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"foo",
-                        arguments=[
-                            ast.IntegerLiteral(
-                                ref=src.Span(offset=21, length=30),
-                                value=0x1234,
-                            ),
-                        ],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm foo(arg1@rax: u8) { }
+            fn main() { foo(0x842); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)

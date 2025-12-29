@@ -1,34 +1,13 @@
-from i13c import ast, src
 from i13c.sem import entrypoint, function, model, syntax
+from tests.sem import prepare_program
 
 
 def can_build_entrypoints_for_valid_main_function():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=31, length=10),
-                name=b"exit",
-                noreturn=True,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=True,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"exit",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm exit() noreturn { }
+            fn main() noreturn { exit(); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)

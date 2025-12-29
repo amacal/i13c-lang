@@ -1,29 +1,12 @@
-from i13c import ast, src
 from i13c.sem import asm, model, snippet, syntax
+from tests.sem import prepare_program
 
 
 def can_build_semantic_model_snippets():
-    program = ast.Program(
-        functions=[],
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[
-                    ast.Instruction(
-                        ref=src.Span(offset=11, length=15),
-                        mnemonic=ast.Mnemonic(name=b"mov"),
-                        operands=[
-                            ast.Register(name=b"rax"),
-                            ast.Immediate(value=0x1234),
-                        ],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm main() { mov rax, 0x1234; }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)

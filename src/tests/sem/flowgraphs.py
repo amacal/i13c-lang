@@ -1,19 +1,12 @@
-from i13c import ast, src
 from i13c.sem import flowgraphs, function, model, syntax
+from tests.sem import prepare_program
 
 
 def can_build_semantic_model_flowgraphs_no_statements():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            fn main() { }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
@@ -41,23 +34,10 @@ def can_build_semantic_model_flowgraphs_no_statements():
 
 
 def can_build_semantic_model_flowgraphs_single_statement():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"foo",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            fn main() noreturn { foo(); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)

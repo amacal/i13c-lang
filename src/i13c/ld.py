@@ -13,7 +13,7 @@ def layout(unit: ir.Unit) -> List[int]:
         visited.add(node)
         out.append(node)
 
-        # fine the terminator
+        # find the terminator
         terminator = unit.codeblocks[node].terminator
 
         # follow fallthroughs only

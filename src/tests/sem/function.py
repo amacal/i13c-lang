@@ -1,30 +1,12 @@
-from i13c import ast, src
+from i13c import ast
 from i13c.sem import function, model, syntax
-
+from tests.sem import prepare_program
 
 def can_build_semantic_model_functions():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"foo",
-                        arguments=[
-                            ast.IntegerLiteral(
-                                ref=src.Span(offset=21, length=30),
-                                value=42,
-                            ),
-                        ],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            fn main() { foo(0x42); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)

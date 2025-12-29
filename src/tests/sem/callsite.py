@@ -1,30 +1,12 @@
-from i13c import ast, src
 from i13c.sem import callsite, model, syntax
+from tests.sem import prepare_program
 
 
 def can_build_semantic_model_callsites():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"foo",
-                        arguments=[
-                            ast.IntegerLiteral(
-                                ref=src.Span(offset=21, length=30),
-                                value=42,
-                            ),
-                        ],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            fn main() noreturn { foo(0x42); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
@@ -49,4 +31,4 @@ def can_build_semantic_model_callsites():
     lid = syntax.NodeId(value=argument.target.value)
 
     literal = graph.nodes.literals.get_by_id(lid)
-    assert literal.value == 42
+    assert literal.value == 0x42

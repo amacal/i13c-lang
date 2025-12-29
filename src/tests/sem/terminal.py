@@ -1,19 +1,12 @@
-from i13c import ast, src
 from i13c.sem import function, model, syntax, terminal
+from tests.sem import prepare_program
 
 
 def can_build_semantic_model_terminalities_empty():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            fn main() { }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
@@ -32,32 +25,11 @@ def can_build_semantic_model_terminalities_empty():
 
 
 def can_build_semantic_model_terminalities_calls_terminal():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=31, length=10),
-                name=b"exit",
-                noreturn=True,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"exit",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm exit() noreturn { }
+            fn main() { exit(); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
@@ -76,32 +48,11 @@ def can_build_semantic_model_terminalities_calls_terminal():
 
 
 def can_build_semantic_model_terminalities_calls_non_terminal():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=31, length=10),
-                name=b"exit",
-                noreturn=False,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"exit",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm exit() { }
+            fn main() { exit(); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)

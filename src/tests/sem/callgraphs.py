@@ -1,19 +1,12 @@
-from i13c import ast, src
 from i13c.sem import function, model, snippet, syntax
+from tests.sem import prepare_program
 
 
 def can_build_callgraphs_from_single_main():
-    program = ast.Program(
-        snippets=[],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=False,
-                parameters=[],
-                statements=[],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            fn main() { }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
@@ -33,32 +26,11 @@ def can_build_callgraphs_from_single_main():
 
 
 def can_build_callgraphs_from_main_calling_snippet():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=31, length=10),
-                name=b"foo",
-                noreturn=True,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            )
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=True,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"foo",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm foo() noreturn { }
+            fn main() noreturn { foo(); }
+        """
     )
 
     graph = syntax.build_syntax_graph(program)
