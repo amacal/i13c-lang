@@ -2,6 +2,7 @@ from i13c import ast
 from i13c.sem import function, model, syntax
 from tests.sem import prepare_program
 
+
 def can_build_semantic_model_functions():
     _, program = prepare_program(
         """

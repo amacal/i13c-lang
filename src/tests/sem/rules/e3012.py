@@ -1,43 +1,16 @@
 from i13c import ast, err, sem, src
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+from tests.sem import prepare_program
 
 
 def can_detect_multiple_entrypoints():
-    program = ast.Program(
-        snippets=[
-            ast.Snippet(
-                ref=src.Span(offset=0, length=4),
-                name=b"exit",
-                noreturn=True,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            ),
-            ast.Snippet(
-                ref=src.Span(offset=0, length=4),
-                name=b"main",
-                noreturn=True,
-                slots=[],
-                clobbers=[],
-                instructions=[],
-            ),
-        ],
-        functions=[
-            ast.Function(
-                ref=src.Span(offset=0, length=10),
-                name=b"main",
-                noreturn=True,
-                parameters=[],
-                statements=[
-                    ast.CallStatement(
-                        ref=src.Span(offset=11, length=20),
-                        name=b"exit",
-                        arguments=[],
-                    )
-                ],
-            )
-        ],
+    _, program = prepare_program(
+        """
+            asm exit() noreturn { }
+            asm main() noreturn { }
+            fn main() noreturn { exit(); }
+        """
     )
 
     model = build_semantic_graph(build_syntax_graph(program))
