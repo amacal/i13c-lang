@@ -1,4 +1,4 @@
-from i13c.sem import callsite, model, syntax
+from i13c.sem import callsite, literal, model, syntax
 from tests.sem import prepare_program
 
 
@@ -27,8 +27,43 @@ def can_build_semantic_model_callsites():
     argument = value.arguments[0]
     assert argument.kind == b"literal"
 
-    assert isinstance(argument.target, callsite.LiteralId)
-    lid = syntax.NodeId(value=argument.target.value)
+    assert isinstance(argument.target, literal.LiteralId)
+    value = semantic.literals[argument.target]
 
-    literal = graph.nodes.literals.get_by_id(lid)
-    assert literal.value == 0x42
+    assert value.kind == b"hex"
+    assert isinstance(value.target, literal.Hex)
+
+    assert value.target.value == 0x42
+    assert value.target.width == 8
+
+
+def can_build_callsite_with_multiple_arguments():
+    _, program = prepare_program(
+        """
+            fn main() { foo(0x1, 0x2, 0x3); }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    callsites = semantic.callsites
+
+    assert len(callsites) == 1
+    _, callsite_value = callsites.popitem()
+
+    assert len(callsite_value.arguments) == 3
+    values = [0x1, 0x2, 0x3]
+
+    for argument, expected in zip(callsite_value.arguments, values):
+        assert argument.kind == b"literal"
+        assert isinstance(argument.target, callsite.LiteralId)
+
+        value = semantic.literals[argument.target]
+
+        assert value.kind == b"hex"
+        assert isinstance(value.target, literal.Hex)
+
+        assert value.target.value == expected
+        assert value.target.width == 8

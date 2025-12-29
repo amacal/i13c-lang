@@ -1,4 +1,4 @@
-from i13c.sem import entrypoint, function, model, syntax
+from i13c.sem import entrypoint, function, model, snippet, syntax
 from tests.sem import prepare_program
 
 
@@ -26,4 +26,46 @@ def can_build_entrypoints_for_valid_main_function():
     fid = syntax.NodeId(value=value.target.value)
 
     target = graph.nodes.functions.get_by_id(fid)
+    assert target.name == b"main"
+
+
+def can_reject_snippet_with_arguments():
+    _, program = prepare_program(
+        """
+            asm main(arg1@rax: u32) noreturn { }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    entrypoints = semantic.entrypoints
+
+    assert len(entrypoints) == 0
+
+
+def can_accept_snippet_as_entrypoint():
+    _, program = prepare_program(
+        """
+            asm main() noreturn { }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    entrypoints = semantic.entrypoints
+
+    assert len(entrypoints) == 1
+    value = entrypoints[0]
+
+    assert isinstance(value, entrypoint.EntryPoint)
+    assert value.kind == b"snippet"
+
+    assert isinstance(value.target, snippet.SnippetId)
+    sid = syntax.NodeId(value=value.target.value)
+
+    target = graph.nodes.snippets.get_by_id(sid)
     assert target.name == b"main"
