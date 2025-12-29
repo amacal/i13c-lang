@@ -50,4 +50,4 @@ def can_detect_invalid_instruction():
     diagnostic = diagnostics[0]
 
     assert diagnostic.code == err.ERROR_3000
-    assert source.extract(diagnostic.ref) == "xyz"
+    assert source.extract(diagnostic.ref) == b"xyz;"

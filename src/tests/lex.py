@@ -120,7 +120,7 @@ def can_tokenize_registers():
     assert isinstance(tokens, res.Ok)
     assert len(tokens.value) == 5
 
-    assert tokens.value[0] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=0, length=3)
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_IDENT, offset=0, length=3)
     assert tokens.value[1] == lex.Token(code=lex.TOKEN_REG, offset=4, length=3)
     assert tokens.value[2] == lex.Token(code=lex.TOKEN_COMMA, offset=7, length=1)
     assert tokens.value[3] == lex.Token(code=lex.TOKEN_HEX, offset=9, length=6)
@@ -143,8 +143,8 @@ def can_tokenize_mnemonics():
     assert isinstance(tokens, res.Ok)
     assert len(tokens.value) == 3
 
-    assert tokens.value[0] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=0, length=7)
-    assert tokens.value[1] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=8, length=3)
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_IDENT, offset=0, length=7)
+    assert tokens.value[1] == lex.Token(code=lex.TOKEN_IDENT, offset=8, length=3)
     assert tokens.value[2] == lex.Token(code=lex.TOKEN_EOF, offset=11, length=0)
 
     assert code.extract(tokens.value[0]) == b"syscall"
@@ -163,7 +163,7 @@ def can_tokenize_keywords():
     assert len(tokens.value) == 6
 
     assert tokens.value[0] == lex.Token(code=lex.TOKEN_KEYWORD, offset=0, length=3)
-    assert tokens.value[1] == lex.Token(code=lex.TOKEN_MNEMONIC, offset=4, length=3)
+    assert tokens.value[1] == lex.Token(code=lex.TOKEN_IDENT, offset=4, length=3)
     assert tokens.value[2] == lex.Token(code=lex.TOKEN_KEYWORD, offset=8, length=8)
     assert tokens.value[3] == lex.Token(code=lex.TOKEN_KEYWORD, offset=17, length=8)
     assert tokens.value[4] == lex.Token(code=lex.TOKEN_KEYWORD, offset=26, length=2)

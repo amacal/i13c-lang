@@ -376,7 +376,7 @@ def parse_statement(state: ParsingState) -> ast.CallStatement:
 
 def parse_instruction(state: ParsingState) -> ast.Instruction:
     operands = []
-    token = state.expect(lex.TOKEN_MNEMONIC)
+    token = state.expect(lex.TOKEN_IDENT)
 
     # optional operands
     if state.is_in(lex.TOKEN_REG, lex.TOKEN_HEX):

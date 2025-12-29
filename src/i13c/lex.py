@@ -50,10 +50,6 @@ SET_TYPES = {
     b"u8", b"u16", b"u32", b"u64",
 }
 
-SET_MNEMONICS = {
-    b"mov", b"syscall",
-}
-
 SET_KEYWORDS = {
     b"asm", b"clobbers", b"noreturn", b"fn",
 }
@@ -275,10 +271,6 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     # perhaps it's a register
     if lexer.extract(token) in SET_REGS:
         token = Token.reg_token(offset=start_offset, length=length)
-
-    # perhaps it's a mnemonic
-    elif lexer.extract(token) in SET_MNEMONICS:
-        token = Token.mnemonic_token(offset=start_offset, length=length)
 
     # perhaps it's a keyword
     elif lexer.extract(token) in SET_KEYWORDS:
