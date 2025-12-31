@@ -46,14 +46,14 @@ def can_tokenize_new_lines():
 
 
 def can_tokenize_single_bytes():
-    text = ";,}{)(:@"
+    text = ";,}{)(:@]["
     code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
 
     assert isinstance(tokens, res.Ok)
-    assert len(tokens.value) == 9
+    assert len(tokens.value) == 11
 
     assert tokens.value[0] == lex.Token(code=lex.TOKEN_SEMICOLON, offset=0, length=1)
     assert tokens.value[1] == lex.Token(code=lex.TOKEN_COMMA, offset=1, length=1)
@@ -63,7 +63,9 @@ def can_tokenize_single_bytes():
     assert tokens.value[5] == lex.Token(code=lex.TOKEN_ROUND_OPEN, offset=5, length=1)
     assert tokens.value[6] == lex.Token(code=lex.TOKEN_COLON, offset=6, length=1)
     assert tokens.value[7] == lex.Token(code=lex.TOKEN_AT, offset=7, length=1)
-    assert tokens.value[8] == lex.Token(code=lex.TOKEN_EOF, offset=8, length=0)
+    assert tokens.value[8] == lex.Token(code=lex.TOKEN_SQUARE_CLOSE, offset=8, length=1)
+    assert tokens.value[9] == lex.Token(code=lex.TOKEN_SQUARE_OPEN, offset=9, length=1)
+    assert tokens.value[10] == lex.Token(code=lex.TOKEN_EOF, offset=10, length=0)
 
     assert code.extract(tokens.value[0]) == b";"
     assert code.extract(tokens.value[1]) == b","
@@ -73,7 +75,30 @@ def can_tokenize_single_bytes():
     assert code.extract(tokens.value[5]) == b"("
     assert code.extract(tokens.value[6]) == b":"
     assert code.extract(tokens.value[7]) == b"@"
-    assert code.extract(tokens.value[8]) == b""
+    assert code.extract(tokens.value[8]) == b"]"
+    assert code.extract(tokens.value[9]) == b"["
+    assert code.extract(tokens.value[10]) == b""
+
+
+def can_tokenize_range_operator():
+    text = "0x12..0x20"
+    code = src.open_text(text)
+
+    tokens = lex.tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, res.Ok)
+    assert len(tokens.value) == 4
+
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_HEX, offset=0, length=4)
+    assert tokens.value[1] == lex.Token(code=lex.TOKEN_RANGE, offset=4, length=2)
+    assert tokens.value[2] == lex.Token(code=lex.TOKEN_HEX, offset=6, length=4)
+    assert tokens.value[3] == lex.Token(code=lex.TOKEN_EOF, offset=10, length=0)
+
+    assert code.extract(tokens.value[0]) == b"0x12"
+    assert code.extract(tokens.value[1]) == b".."
+    assert code.extract(tokens.value[2]) == b"0x20"
+    assert code.extract(tokens.value[3]) == b""
 
 
 def can_tokenize_last_hex():

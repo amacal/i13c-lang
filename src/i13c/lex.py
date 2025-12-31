@@ -4,6 +4,7 @@ from typing import Dict, List
 from i13c import diag, err, res, src
 
 CLASS_AT = b"@"
+CLASS_DOT = b"."
 CLASS_COMMA = b","
 CLASS_COLON = b":"
 CLASS_SEMICOLON = b";"
@@ -13,6 +14,8 @@ CLASS_ROUND_OPEN = b"("
 CLASS_ROUND_CLOSE = b")"
 CLASS_CURLY_OPEN = b"{"
 CLASS_CURLY_CLOSE = b"}"
+CLASS_SQUARE_OPEN = b"["
+CLASS_SQUARE_CLOSE = b"]"
 CLASS_LETTER = b"abcdefghijklmnopqrstuvwxyz"
 CLASS_ALPHANUM = b"abcdefghijklmnopqrstuvwxyz0123456789"
 CLASS_HEX = b"0123456789abcdef"
@@ -22,7 +25,7 @@ TOKEN_COMMA = 2
 TOKEN_HEX = 3
 TOKEN_IDENT = 4
 TOKEN_REG = 5
-TOKEN_MNEMONIC = 6
+TOKEN_RANGE = 6
 TOKEN_KEYWORD = 7
 TOKEN_ROUND_OPEN = 8
 TOKEN_ROUND_CLOSE = 9
@@ -31,6 +34,8 @@ TOKEN_CURLY_CLOSE = 11
 TOKEN_AT = 12
 TOKEN_COLON = 13
 TOKEN_TYPE = 14
+TOKEN_SQUARE_OPEN = 15
+TOKEN_SQUARE_CLOSE = 16
 TOKEN_EOF = 255
 
 # fmt: off
@@ -38,7 +43,8 @@ SEPARATORS = (
     CLASS_WHITESPACE + CLASS_COMMA + CLASS_SEMICOLON +
     CLASS_ROUND_OPEN + CLASS_ROUND_CLOSE +
     CLASS_CURLY_OPEN + CLASS_CURLY_CLOSE +
-    CLASS_AT + CLASS_COLON
+    CLASS_SQUARE_OPEN + CLASS_SQUARE_CLOSE +
+    CLASS_AT + CLASS_COLON + CLASS_DOT
 )
 
 SET_REGS = {
@@ -60,7 +66,7 @@ TOKEN_NAMES: Dict[int, str] = {
     TOKEN_HEX: "hex",
     TOKEN_IDENT: "identifier",
     TOKEN_REG: "register",
-    TOKEN_MNEMONIC: "mnemonic",
+    TOKEN_RANGE: "range",
     TOKEN_KEYWORD: "keyword",
     TOKEN_ROUND_OPEN: "round-open",
     TOKEN_ROUND_CLOSE: "round-close",
@@ -69,6 +75,8 @@ TOKEN_NAMES: Dict[int, str] = {
     TOKEN_AT: "at",
     TOKEN_COLON: "colon",
     TOKEN_TYPE: "type",
+    TOKEN_SQUARE_OPEN: "square-open",
+    TOKEN_SQUARE_CLOSE: "square-close",
     TOKEN_EOF: "end-of-file",
 }
 # fmt: on
@@ -153,8 +161,8 @@ class Token:
         return Token(code=TOKEN_REG, offset=offset, length=length)
 
     @staticmethod
-    def mnemonic_token(offset: int, length: int) -> "Token":
-        return Token(code=TOKEN_MNEMONIC, offset=offset, length=length)
+    def range_token(offset: int, length: int) -> "Token":
+        return Token(code=TOKEN_RANGE, offset=offset, length=length)
 
     @staticmethod
     def keyword_token(offset: int, length: int) -> "Token":
@@ -179,6 +187,14 @@ class Token:
     @staticmethod
     def curly_close_token(offset: int) -> "Token":
         return Token(code=TOKEN_CURLY_CLOSE, offset=offset, length=1)
+
+    @staticmethod
+    def square_open_token(offset: int) -> "Token":
+        return Token(code=TOKEN_SQUARE_OPEN, offset=offset, length=1)
+
+    @staticmethod
+    def square_close_token(offset: int) -> "Token":
+        return Token(code=TOKEN_SQUARE_CLOSE, offset=offset, length=1)
 
     @staticmethod
     def at_token(offset: int) -> "Token":
@@ -216,11 +232,20 @@ def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnost
             elif lexer.is_in(CLASS_CURLY_CLOSE):
                 emit_curly_close(lexer, tokens)
 
+            elif lexer.is_in(CLASS_SQUARE_OPEN):
+                emit_square_open(lexer, tokens)
+
+            elif lexer.is_in(CLASS_SQUARE_CLOSE):
+                emit_square_close(lexer, tokens)
+
             elif lexer.is_in(CLASS_AT):
                 emit_at(lexer, tokens)
 
             elif lexer.is_in(CLASS_COLON):
                 emit_colon(lexer, tokens)
+
+            elif lexer.is_in(CLASS_DOT):
+                read_dot(lexer, tokens)
 
             elif lexer.is_in(CLASS_ZERO):
                 read_hex(lexer, tokens)
@@ -255,6 +280,19 @@ def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnost
 def skip_whitespace(lexer: Lexer) -> None:
     while not lexer.is_eof() and lexer.is_in(CLASS_WHITESPACE):
         lexer.advance(1)
+
+
+def read_dot(lexer: Lexer, tokens: List[Token]) -> None:
+    start_offset = lexer.offset
+    lexer.advance(1)  # consume the '.'
+
+    # expect another dot for range
+    lexer.expect(CLASS_DOT)
+    lexer.advance(1)  # consume the second '.'
+
+    # success
+    length = lexer.offset - start_offset
+    tokens.append(Token.range_token(offset=start_offset, length=length))
 
 
 def read_hex(lexer: Lexer, tokens: List[Token]) -> None:
@@ -342,6 +380,16 @@ def emit_curly_open(lexer: Lexer, tokens: List[Token]) -> None:
 def emit_curly_close(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.curly_close_token(offset=lexer.offset))
     lexer.advance(1)  # consume '}'
+
+
+def emit_square_open(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.square_open_token(offset=lexer.offset))
+    lexer.advance(1)  # consume '['
+
+
+def emit_square_close(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.square_close_token(offset=lexer.offset))
+    lexer.advance(1)  # consume ']'
 
 
 def emit_colon(lexer: Lexer, tokens: List[Token]) -> None:
