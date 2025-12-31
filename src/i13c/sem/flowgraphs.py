@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Union, Iterable
+from typing import Dict, Iterable, List, Union
 
 from i13c.sem.function import Function, FunctionId, Statement
 

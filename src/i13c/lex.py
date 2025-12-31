@@ -74,6 +74,12 @@ TOKEN_NAMES: Dict[int, str] = {
 # fmt: on
 
 
+class TooLargeHex(Exception):
+    def __init__(self, offset: int, length: int) -> None:
+        self.offset = offset
+        self.length = length
+
+
 class UnexpectedValue(Exception):
     def __init__(self, offset: int, expected: bytes) -> None:
         self.offset = offset
@@ -227,6 +233,9 @@ def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnost
                 diagnostics.append(err.report_e1000_unrecognized_token(lexer.offset))
                 break
 
+    except TooLargeHex as e:
+        diagnostics.append(err.report_e1003_too_large_hex(e.offset, e.length))
+
     except UnexpectedEndOfFile as e:
         diagnostics.append(err.report_e1001_unexpected_end_of_file(e.offset))
 
@@ -258,6 +267,10 @@ def read_hex(lexer: Lexer, tokens: List[Token]) -> None:
     # accept subsequent hex digits
     while not lexer.is_eof() and lexer.is_in(CLASS_HEX):
         lexer.advance(1)  # consume hex digits
+
+        # arbitrary limit to prevent overflow
+        if lexer.offset - start_offset > 18:
+            raise TooLargeHex(start_offset, lexer.offset - start_offset)
 
     # 0x alone is not valid hex
     if lexer.offset - start_offset <= 2:

@@ -204,36 +204,3 @@ def can_resolve_by_type_u64_max():
 
     value = semantic.basic.snippets.get(callables.target)
     assert value.identifier.name == b"foo"
-
-
-def can_reject_by_type_u64_overflow():
-    _, program = prepare_program(
-        """
-            asm foo(arg1@rax: u64) { }
-            fn main() { foo(0x10000000000000000); }
-        """
-    )
-
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
-
-    assert semantic is not None
-    resolutions = semantic.indices.resolution_by_callsite
-
-    assert resolutions.size() == 1
-    id, value = resolutions.pop()
-
-    assert isinstance(id, callsite.CallSiteId)
-    assert isinstance(value, resolve.Resolution)
-
-    assert len(value.rejected) == 1
-    assert len(value.accepted) == 0
-
-    assert value.rejected[0].reason == b"type-mismatch"
-    callables = value.rejected[0].callable
-
-    assert callables.kind == b"snippet"
-    assert isinstance(callables.target, snippet.SnippetId)
-
-    value = semantic.basic.snippets.get(callables.target)
-    assert value.identifier.name == b"foo"

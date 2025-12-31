@@ -5,6 +5,7 @@ from i13c import diag, src
 ERROR_1000 = "E1000"  # Unrecognized token
 ERROR_1001 = "E1001"  # Unexpected end of file
 ERROR_1002 = "E1002"  # Unexpected value
+ERROR_1003 = "E1003"  # Hexadecimal literal too large
 
 ERROR_2000 = "E2000"  # Unexpected end of tokens
 ERROR_2001 = "E2001"  # Unexpected token
@@ -12,13 +13,11 @@ ERROR_2002 = "E2002"  # Unexpected keyword
 ERROR_2003 = "E2003"  # Function flag already specified
 
 ERROR_3000 = "E3000"  # Unknown mnemonic
-ERROR_3001 = "E3001"  # Immediate out of range
 ERROR_3002 = "E3002"  # Invalid operand types
 ERROR_3003 = "E3003"  # Duplicated parameter bindings
 ERROR_3004 = "E3004"  # Duplicated parameter names
 ERROR_3005 = "E3005"  # Duplicated clobber registers
 ERROR_3006 = "E3006"  # Duplicated function names
-ERROR_3007 = "E3007"  # Integer literal out of range
 ERROR_3008 = "E3008"  # Called symbol does not exist
 ERROR_3009 = "E3009"  # Called symbol is not a snippet
 ERROR_3010 = "E3010"  # Function has wrong terminality
@@ -49,6 +48,14 @@ def report_e1002_unexpected_value(offset: int, expected: bytes) -> diag.Diagnost
         ref=src.Span(offset=offset, length=1),
         code=ERROR_1002,
         message=f"Unexpected value at offset {offset}, expected one of: {list(sorted(expected))}",
+    )
+
+
+def report_e1003_too_large_hex(offset: int, length: int) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=src.Span(offset=offset, length=length),
+        code=ERROR_1003,
+        message=f"Hexadecimal literal too large at offset {offset}",
     )
 
 
@@ -95,16 +102,6 @@ def report_e3000_unknown_instruction(ref: src.SpanLike) -> diag.Diagnostic:
         ref=ref,
         code=ERROR_3000,
         message=f"Unknown instruction mnemonic at offset {ref.offset}",
-    )
-
-
-def report_e3001_immediate_out_of_range(
-    ref: src.SpanLike, value: int
-) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        ref=ref,
-        code=ERROR_3001,
-        message=f"Immediate value {value} out of range at offset {ref.offset}",
     )
 
 
@@ -155,16 +152,6 @@ def report_e3006_duplicated_function_names(
         ref=ref,
         code=ERROR_3006,
         message=f"Duplicated function names for ({str(found)}) at offset {ref.offset}",
-    )
-
-
-def report_e3007_integer_literal_out_of_range(
-    ref: src.SpanLike, value: int
-) -> diag.Diagnostic:
-    return diag.Diagnostic(
-        ref=ref,
-        code=ERROR_3007,
-        message=f"Immediate value {value} out of range at offset {ref.offset}",
     )
 
 

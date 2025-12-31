@@ -15,7 +15,7 @@ class Type:
     name: bytes
 
 
-def derive_width(value: int) -> Optional[Width]:
+def derive_width(value: int) -> Width:
     if value.bit_length() <= 8:
         return 8
 
@@ -25,7 +25,5 @@ def derive_width(value: int) -> Optional[Width]:
     if value.bit_length() <= 32:
         return 32
 
-    if value.bit_length() <= 64:
-        return 64
-
-    return None
+    # we don't support widths larger than 64 bits
+    return 64

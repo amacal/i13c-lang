@@ -14,12 +14,9 @@ LiteralKind = Kind[b"hex"]
 @dataclass(kw_only=True)
 class Hex:
     value: int
-    width: Optional[Width]
+    width: Width
 
     def describe(self) -> str:
-        if self.width is None:
-            return f"value=0x{self.value:02x}"
-
         bytes_ = self.width // 8
         hex_digits = max(2, bytes_ * 2)
 

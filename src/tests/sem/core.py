@@ -25,6 +25,3 @@ def can_derive_width_respects_boundaries():
 
     # 0xffff_ffff_ffff_ffff is the max 64-bit value.
     assert core.derive_width(0xFFFF_FFFF_FFFF_FFFF) == 64
-
-    # 0x1_0000_0000_0000_0000 needs 65 bits, so overflow.
-    assert core.derive_width(0x1_0000_0000_0000_0000) is None
