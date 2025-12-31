@@ -12,7 +12,7 @@ dependencies = ["click (>=8.3.1,<9.0.0)"]
 packages = [{ include = "i13c", from = "src" }]
 
 [project.scripts]
-i13c = "i13c.main:i13c"
+i13c = "i13c.cli:i13c"
 
 [build-system]
 requires = ["poetry-core==2.2.1"]
