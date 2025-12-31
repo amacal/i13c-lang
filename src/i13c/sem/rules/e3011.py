@@ -8,7 +8,7 @@ def validate_entrypoint_exists(
     graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
 
-    if graph.entrypoints.size() > 0:
+    if graph.live.entrypoints.size() > 0:
         return []
 
     return [err.report_e3011_missing_entrypoint_function()]

@@ -12,10 +12,10 @@ class Callable(Protocol):
 
 
 def yield_callables(graph: SemanticGraph) -> Iterable[Callable]:
-    for function in graph.functions.values():
+    for function in graph.basic.functions.values():
         yield function
 
-    for snippet in graph.snippets.values():
+    for snippet in graph.basic.snippets.values():
         yield snippet
 
 

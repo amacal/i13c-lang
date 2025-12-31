@@ -13,7 +13,7 @@ def can_build_semantic_model_literals():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    literals = semantic.literals
+    literals = semantic.basic.literals
 
     assert literals.size() == 1
     id, value = literals.pop()

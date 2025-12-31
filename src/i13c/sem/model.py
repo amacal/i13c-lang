@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Set
+from typing import Set
 
 from i13c.sem.asm import Instruction, InstructionId
 from i13c.sem.asm import Resolution as InstructionResolution
@@ -25,28 +25,38 @@ from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.terminal import Terminality, build_terminalities
 
 
-@dataclass(kw_only=True)
-class SemanticGraph:
-    entrypoints: OneToOne[CallableTarget, EntryPoint]
-
-    # very basic entities derived from the syntax graph
+@dataclass
+class BasicNodes:
     literals: OneToOne[LiteralId, Literal]
     instructions: OneToOne[InstructionId, Instruction]
     snippets: OneToOne[SnippetId, Snippet]
     functions: OneToOne[FunctionId, Function]
     callsites: OneToOne[CallSiteId, CallSite]
 
+
+@dataclass
+class IndicesEdges:
+    terminality_by_function: OneToOne[FunctionId, Terminality]
+    resolution_by_callsite: OneToOne[CallSiteId, CallSiteResolution]
+    resolution_by_instruction: OneToOne[InstructionId, InstructionResolution]
+    flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
+
+
+@dataclass
+class LiveComponents:
+    entrypoints: OneToOne[CallableTarget, EntryPoint]
+    flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
+
+
+@dataclass(kw_only=True)
+class SemanticGraph:
     callgraph: CallGraphs
     callgraph_live: CallGraphs
     callable_live: Set[CallableTarget]
 
-    flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
-    flowgraph_by_function_live: Dict[FunctionId, FlowGraph]
-
-    # derived indexed by some entity
-    terminality_by_function: OneToOne[FunctionId, Terminality]
-    resolution_by_callsite: OneToOne[CallSiteId, CallSiteResolution]
-    resolution_by_instruction: OneToOne[InstructionId, InstructionResolution]
+    basic: BasicNodes
+    indices: IndicesEdges
+    live: LiveComponents
 
 
 def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
@@ -96,18 +106,34 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
     )
 
     return SemanticGraph(
-        entrypoints=OneToOne[CallableTarget, EntryPoint].instance(entrypoints),
-        literals=OneToOne[LiteralId, Literal].instance(literals),
-        instructions=OneToOne[InstructionId, Instruction].instance(instructions),
-        snippets=OneToOne[SnippetId, Snippet].instance(snippets),
-        functions=OneToOne[FunctionId, Function].instance(functions),
-        callsites=OneToOne[CallSiteId, CallSite].instance(callsites),
+        basic=BasicNodes(
+            literals=OneToOne[LiteralId, Literal].instance(literals),
+            instructions=OneToOne[InstructionId, Instruction].instance(instructions),
+            snippets=OneToOne[SnippetId, Snippet].instance(snippets),
+            functions=OneToOne[FunctionId, Function].instance(functions),
+            callsites=OneToOne[CallSiteId, CallSite].instance(callsites),
+        ),
+        indices=IndicesEdges(
+            terminality_by_function=OneToOne[FunctionId, Terminality].instance(
+                terminality_by_function
+            ),
+            resolution_by_callsite=OneToOne[CallSiteId, CallSiteResolution].instance(
+                resolution_by_callsite
+            ),
+            resolution_by_instruction=OneToOne[
+                InstructionId, InstructionResolution
+            ].instance(resolution_by_instruction),
+            flowgraph_by_function=OneToOne[FunctionId, FlowGraph].instance(
+                flowgraph_by_function
+            ),
+        ),
+        live=LiveComponents(
+            entrypoints=OneToOne[CallableTarget, EntryPoint].instance(entrypoints),
+            flowgraph_by_function=OneToOne[FunctionId, FlowGraph].instance(
+                flowgraph_by_function_live
+            ),
+        ),
         callgraph=callgraph,
         callgraph_live=callgraph_live,
         callable_live=callable_live,
-        flowgraph_by_function=OneToOne[FunctionId, FlowGraph].instance(flowgraph_by_function),
-        flowgraph_by_function_live=flowgraph_by_function_live,
-        terminality_by_function=OneToOne[FunctionId, Terminality].instance(terminality_by_function),
-        resolution_by_callsite=OneToOne[CallSiteId, CallSiteResolution].instance(resolution_by_callsite),
-        resolution_by_instruction=OneToOne[InstructionId, InstructionResolution].instance(resolution_by_instruction),
     )

@@ -9,13 +9,13 @@ def validate_called_symbol_is_snippet(
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for cid, resolution in graph.resolution_by_callsite.items():
+    for cid, resolution in graph.indices.resolution_by_callsite.items():
         for acceptance in resolution.accepted:
             if acceptance.callable.kind != b"snippet":
                 diagnostics.append(
                     err.report_e3009_called_symbol_is_not_a_snippet(
-                        graph.callsites.get(cid).ref,
-                        graph.callsites.get(cid).callee.name,
+                        graph.basic.callsites.get(cid).ref,
+                        graph.basic.callsites.get(cid).callee.name,
                     )
                 )
 

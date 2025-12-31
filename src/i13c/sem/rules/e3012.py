@@ -8,7 +8,7 @@ def validate_entrypoint_is_single(
     graph: SemanticGraph,
 ) -> List[diag.Diagnostic]:
 
-    if graph.entrypoints.size() <= 1:
+    if graph.live.entrypoints.size() <= 1:
         return []
 
     return [err.report_e3012_multiple_entrypoint_functions()]

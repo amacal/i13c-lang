@@ -13,7 +13,7 @@ def can_build_semantic_model_callsites():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    callsites = semantic.callsites
+    callsites = semantic.basic.callsites
 
     assert callsites.size() == 1
     id, value = callsites.pop()
@@ -28,7 +28,7 @@ def can_build_semantic_model_callsites():
     assert argument.kind == b"literal"
 
     assert isinstance(argument.target, literal.LiteralId)
-    value = semantic.literals.get(argument.target)
+    value = semantic.basic.literals.get(argument.target)
 
     assert value.kind == b"hex"
     assert isinstance(value.target, literal.Hex)
@@ -48,7 +48,7 @@ def can_build_callsite_with_multiple_arguments():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    callsites = semantic.callsites
+    callsites = semantic.basic.callsites
 
     assert callsites.size() == 1
     _, value = callsites.pop()
@@ -60,7 +60,7 @@ def can_build_callsite_with_multiple_arguments():
         assert argument.kind == b"literal"
         assert isinstance(argument.target, callsite.LiteralId)
 
-        value = semantic.literals.get(argument.target)
+        value = semantic.basic.literals.get(argument.target)
 
         assert value.kind == b"hex"
         assert isinstance(value.target, literal.Hex)

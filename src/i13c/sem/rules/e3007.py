@@ -10,7 +10,7 @@ def validate_integer_literal_out_of_range(
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for literal in graph.literals.values():
+    for literal in graph.basic.literals.values():
         if literal.kind == b"hex":
 
             # satisfy type checker

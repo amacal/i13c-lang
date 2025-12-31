@@ -120,7 +120,9 @@ class Resolution:
         if len(self.accepted) > 0:
             candidate = self.accepted[0].describe()
 
-        return f"accepted={len(self.accepted)} rejected={len(self.rejected)} {candidate}"
+        return (
+            f"accepted={len(self.accepted)} rejected={len(self.rejected)} {candidate}"
+        )
 
 
 MnemonicVariant = Tuple[OperandSpec, ...]

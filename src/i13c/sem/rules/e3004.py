@@ -9,7 +9,7 @@ def validate_duplicated_parameter_names(
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for snippet in graph.snippets.values():
+    for snippet in graph.basic.snippets.values():
         seen: Set[bytes] = set()
 
         for slot in snippet.slots:
@@ -22,7 +22,7 @@ def validate_duplicated_parameter_names(
             else:
                 seen.add(slot.name.name)
 
-    for function in graph.functions.values():
+    for function in graph.basic.functions.values():
         seen: Set[bytes] = set()
 
         for parameter in function.parameters:

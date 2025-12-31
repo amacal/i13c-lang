@@ -7,10 +7,12 @@ from i13c.sem.model import SemanticGraph
 def validate_assembly_mnemonic(graph: SemanticGraph) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for iid, resolution in graph.resolution_by_instruction.items():
+    for iid, resolution in graph.indices.resolution_by_instruction.items():
         if not resolution.accepted and not resolution.rejected:
             diagnostics.append(
-                err.report_e3000_unknown_instruction(graph.instructions.get(iid).ref)
+                err.report_e3000_unknown_instruction(
+                    graph.basic.instructions.get(iid).ref
+                )
             )
 
     return diagnostics

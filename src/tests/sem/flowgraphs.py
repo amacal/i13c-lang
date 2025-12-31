@@ -13,7 +13,7 @@ def can_build_semantic_model_flowgraphs_no_statements():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    values = semantic.flowgraph_by_function
+    values = semantic.indices.flowgraph_by_function
 
     assert values.size() == 1
     id, flow = values.pop()
@@ -44,7 +44,7 @@ def can_build_semantic_model_flowgraphs_single_statement():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    values = semantic.flowgraph_by_function
+    values = semantic.indices.flowgraph_by_function
 
     assert values.size() == 1
     id, flow = values.pop()
@@ -61,7 +61,7 @@ def can_build_semantic_model_flowgraphs_single_statement():
     assert n1s is not None and len(n1s) == 1
     assert isinstance(n1s[0], model.CallSiteId)
 
-    assert semantic.callsites.get(n1s[0]).callee.name == b"foo"
+    assert semantic.basic.callsites.get(n1s[0]).callee.name == b"foo"
 
     n2s = flow.edges.get(n1s[0])
     assert n2s is not None and len(n2s) == 1
@@ -79,7 +79,7 @@ def can_build_flow_with_multiple_statements_ordered():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    values = semantic.flowgraph_by_function
+    values = semantic.indices.flowgraph_by_function
 
     assert values.size() == 1
     _, flow = values.pop()
@@ -109,6 +109,6 @@ def can_build_flow_with_multiple_statements_ordered():
     assert last is not None and len(last) == 1
     assert last[0] == flow.exit
 
-    assert semantic.callsites.get(foo).callee.name == b"foo"
-    assert semantic.callsites.get(bar).callee.name == b"bar"
-    assert semantic.callsites.get(baz).callee.name == b"baz"
+    assert semantic.basic.callsites.get(foo).callee.name == b"foo"
+    assert semantic.basic.callsites.get(bar).callee.name == b"bar"
+    assert semantic.basic.callsites.get(baz).callee.name == b"baz"

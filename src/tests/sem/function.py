@@ -14,7 +14,7 @@ def can_build_semantic_model_functions():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    functions = semantic.functions
+    functions = semantic.basic.functions
 
     assert functions.size() == 1
     id, value = functions.pop()

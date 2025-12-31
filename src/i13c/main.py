@@ -140,25 +140,25 @@ def list_command(ctx: click.Context, path: str) -> None:
 
     match node:
         case "literals":
-            target = model.literals
+            target = model.basic.literals
         case "instructions":
-            target = model.instructions
+            target = model.basic.instructions
         case "snippets":
-            target = model.snippets
+            target = model.basic.snippets
         case "functions":
-            target = model.functions
+            target = model.basic.functions
         case "callsites":
-            target = model.callsites
+            target = model.basic.callsites
         case "entrypoints":
-            target = model.entrypoints
+            target = model.live.entrypoints
         case "resolution-by-callsite":
-            target = model.resolution_by_callsite
+            target = model.indices.resolution_by_callsite
         case "resolution-by-instruction":
-            target = model.resolution_by_instruction
+            target = model.indices.resolution_by_instruction
         case "terminality-by-function":
-            target = model.terminality_by_function
+            target = model.indices.terminality_by_function
         case "flowgraph-by-function":
-            target = model.flowgraph_by_function
+            target = model.indices.flowgraph_by_function
         case _:
             raise ValueError(f"unknown semantic node type: {node!r}")
 

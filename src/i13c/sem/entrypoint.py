@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict
 
 from i13c.sem.callable import CallableKind, CallableTarget
 from i13c.sem.function import Function, FunctionId

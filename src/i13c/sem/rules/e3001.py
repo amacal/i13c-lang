@@ -8,7 +8,7 @@ from i13c.sem.model import SemanticGraph
 def validate_immediate_out_of_range(graph: SemanticGraph) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for instruction in graph.instructions.values():
+    for instruction in graph.basic.instructions.values():
         for operand in instruction.operands:
             if operand.kind == b"immediate":
 

@@ -9,7 +9,7 @@ def validate_duplicated_slot_bindings(
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for snippet in graph.snippets.values():
+    for snippet in graph.basic.snippets.values():
         seen: Set[bytes] = set()
 
         for slot in snippet.slots:

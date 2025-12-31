@@ -13,7 +13,7 @@ def can_build_semantic_model_snippets():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    snippets = semantic.snippets
+    snippets = semantic.basic.snippets
 
     assert snippets.size() == 1
     id, value = snippets.pop()
@@ -28,7 +28,7 @@ def can_build_semantic_model_snippets():
     iid = value.instructions[0]
 
     assert isinstance(iid, asm.InstructionId)
-    instruction = semantic.instructions.get(iid)
+    instruction = semantic.basic.instructions.get(iid)
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2

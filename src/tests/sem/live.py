@@ -13,10 +13,10 @@ def can_build_live_flowgraph_without_need_of_pruning():
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
 
-    assert len(semantic.flowgraph_by_function_live) == 1
-    fid, flowgraph_live = semantic.flowgraph_by_function_live.popitem()
+    assert semantic.live.flowgraph_by_function.size() == 1
+    fid, flowgraph_live = semantic.live.flowgraph_by_function.pop()
 
-    main = semantic.functions.get(fid)
+    main = semantic.basic.functions.get(fid)
     assert len(main.statements) == 1
 
     callsite_id = main.statements[0]

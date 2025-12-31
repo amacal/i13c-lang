@@ -14,7 +14,7 @@ def can_build_entrypoints_for_valid_main_function():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    entrypoints = semantic.entrypoints
+    entrypoints = semantic.live.entrypoints
 
     assert entrypoints.size() == 1
     _, value = entrypoints.pop()
@@ -40,7 +40,7 @@ def can_reject_snippet_with_arguments():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    entrypoints = semantic.entrypoints
+    entrypoints = semantic.live.entrypoints
 
     assert entrypoints.size() == 0
 
@@ -56,7 +56,7 @@ def can_accept_snippet_as_entrypoint():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    entrypoints = semantic.entrypoints
+    entrypoints = semantic.live.entrypoints
 
     assert entrypoints.size() == 1
     _, value = entrypoints.pop()

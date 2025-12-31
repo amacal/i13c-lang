@@ -13,7 +13,7 @@ def can_build_semantic_model_terminalities_empty():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    terminalities = semantic.terminality_by_function
+    terminalities = semantic.indices.terminality_by_function
 
     assert terminalities.size() == 1
     id, terminality = terminalities.pop()
@@ -36,7 +36,7 @@ def can_build_semantic_model_terminalities_calls_terminal():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    terminalities = semantic.terminality_by_function
+    terminalities = semantic.indices.terminality_by_function
 
     assert terminalities.size() == 1
     id, terminality = terminalities.pop()
@@ -59,7 +59,7 @@ def can_build_semantic_model_terminalities_calls_non_terminal():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    terminalities = semantic.terminality_by_function
+    terminalities = semantic.indices.terminality_by_function
 
     assert terminalities.size() == 1
     id, terminality = terminalities.pop()
@@ -81,7 +81,7 @@ def can_build_semantic_model_terminalities_calls_without_accepted_resolutions():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    terminalities = semantic.terminality_by_function
+    terminalities = semantic.indices.terminality_by_function
 
     assert terminalities.size() == 1
     id, terminality = terminalities.pop()
