@@ -14,8 +14,8 @@ def validate_called_symbol_is_snippet(
             if acceptance.callable.kind != b"snippet":
                 diagnostics.append(
                     err.report_e3009_called_symbol_is_not_a_snippet(
-                        graph.callsites[cid].ref,
-                        graph.callsites[cid].callee.name,
+                        graph.callsites.get(cid).ref,
+                        graph.callsites.get(cid).callee.name,
                     )
                 )
 

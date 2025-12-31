@@ -120,7 +120,7 @@ def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction
     out: List[ir.Instruction] = []
 
     # find callsite and its resolution
-    callsite = graph.callsites[cid]
+    callsite = graph.callsites.get(cid)
     resolution = graph.callsite_resolutions[cid]
 
     # we know there is exactly one accepted resolution
@@ -130,7 +130,7 @@ def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction
     # we know we supported only snippet callsites
     assert acceptance.callable.kind == b"snippet"
     assert isinstance(acceptance.callable.target, SnippetId)
-    snippet = graph.snippets[acceptance.callable.target]
+    snippet = graph.snippets.get(acceptance.callable.target)
 
     for binding in acceptance.bindings:
         # because this is a snippet callsite
@@ -138,7 +138,7 @@ def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction
 
         # we know all slots are literals for now
         assert binding.argument.kind == b"literal"
-        literal = graph.literals[binding.argument.target]
+        literal = graph.literals.get(binding.argument.target)
 
         # we know all literals are hex for now
         assert literal.kind == b"hex"
@@ -153,7 +153,7 @@ def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction
 
     # finally, emit snippet instructions
     for iid in snippet.instructions:
-        instruction = graph.instructions[iid]
+        instruction = graph.instructions.get(iid)
         out.append(lower_instruction(instruction))
 
     return out
@@ -163,7 +163,7 @@ def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
     out: List[ir.Instruction] = []
 
     for iid in snippet.instructions:
-        instruction = graph.instructions[iid]
+        instruction = graph.instructions.get(iid)
         out.append(lower_instruction(instruction))
 
     return ir.CodeBlock(

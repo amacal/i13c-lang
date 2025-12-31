@@ -15,6 +15,9 @@ ArgumentKind = Kind[b"literal"]
 class CallSiteId:
     value: int
 
+    def identify(self, length: int) -> str:
+        return "#".join(("callsite", f"{self.value:<{length}}"))
+
 
 @dataclass(kw_only=True)
 class Argument:
@@ -27,6 +30,9 @@ class CallSite:
     ref: Span
     callee: Identifier
     arguments: List[Argument]
+
+    def describe(self) -> str:
+        return f"name={self.callee.name.decode()}/{len(self.arguments)}"
 
 
 def build_callsites(

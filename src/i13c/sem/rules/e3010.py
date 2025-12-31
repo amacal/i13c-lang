@@ -11,7 +11,7 @@ def validate_called_symbol_terminality(
 
     for fid, terminality in graph.function_terminalities.items():
         # we need to compare against the function definition
-        function = graph.functions[fid]
+        function = graph.functions.get(fid)
 
         # if the terminality expectations do not match, report an error
         if function.noreturn != terminality.noreturn:

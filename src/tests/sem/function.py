@@ -16,8 +16,8 @@ def can_build_semantic_model_functions():
     assert semantic is not None
     functions = semantic.functions
 
-    assert len(functions) == 1
-    id, value = functions.popitem()
+    assert functions.size() == 1
+    id, value = functions.pop()
 
     assert isinstance(id, function.FunctionId)
     assert isinstance(value, function.Function)

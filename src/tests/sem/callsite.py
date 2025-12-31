@@ -15,8 +15,8 @@ def can_build_semantic_model_callsites():
     assert semantic is not None
     callsites = semantic.callsites
 
-    assert len(callsites) == 1
-    id, value = callsites.popitem()
+    assert callsites.size() == 1
+    id, value = callsites.pop()
 
     assert isinstance(id, callsite.CallSiteId)
     assert isinstance(value, callsite.CallSite)
@@ -28,7 +28,7 @@ def can_build_semantic_model_callsites():
     assert argument.kind == b"literal"
 
     assert isinstance(argument.target, literal.LiteralId)
-    value = semantic.literals[argument.target]
+    value = semantic.literals.get(argument.target)
 
     assert value.kind == b"hex"
     assert isinstance(value.target, literal.Hex)
@@ -50,17 +50,17 @@ def can_build_callsite_with_multiple_arguments():
     assert semantic is not None
     callsites = semantic.callsites
 
-    assert len(callsites) == 1
-    _, callsite_value = callsites.popitem()
+    assert callsites.size() == 1
+    _, value = callsites.pop()
 
-    assert len(callsite_value.arguments) == 3
+    assert len(value.arguments) == 3
     values = [0x1, 0x2, 0x3]
 
-    for argument, expected in zip(callsite_value.arguments, values):
+    for argument, expected in zip(value.arguments, values):
         assert argument.kind == b"literal"
         assert isinstance(argument.target, callsite.LiteralId)
 
-        value = semantic.literals[argument.target]
+        value = semantic.literals.get(argument.target)
 
         assert value.kind == b"hex"
         assert isinstance(value.target, literal.Hex)

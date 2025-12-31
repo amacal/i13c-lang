@@ -29,7 +29,7 @@ def can_build_semantic_model_accepted_resolutions_for_snippet():
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, snippet.SnippetId)
 
-    value = semantic.snippets[callables.target]
+    value = semantic.snippets.get(callables.target)
     assert value.identifier.name == b"foo"
 
 
@@ -62,7 +62,7 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, snippet.SnippetId)
 
-    value = semantic.snippets[callables.target]
+    value = semantic.snippets.get(callables.target)
     assert value.identifier.name == b"foo"
 
 
@@ -95,7 +95,7 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, snippet.SnippetId)
 
-    value = semantic.snippets[callables.target]
+    value = semantic.snippets.get(callables.target)
     assert value.identifier.name == b"foo"
 
 
@@ -128,7 +128,7 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_hex_w
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, snippet.SnippetId)
 
-    value = semantic.snippets[callables.target]
+    value = semantic.snippets.get(callables.target)
     assert value.identifier.name == b"foo"
 
 
@@ -162,7 +162,7 @@ def can_resolve_function_and_snippet_with_same_name():
     assert accepted.kind == b"snippet"
     assert isinstance(accepted.target, snippet.SnippetId)
 
-    snippet_value = semantic.snippets[accepted.target]
+    snippet_value = semantic.snippets.get(accepted.target)
     assert snippet_value.identifier.name == b"foo"
 
     # function was rejected, due to wrong arity
@@ -171,7 +171,7 @@ def can_resolve_function_and_snippet_with_same_name():
     assert rejected.kind == b"function"
     assert isinstance(rejected.target, function.FunctionId)
 
-    function_value = semantic.functions[rejected.target]
+    function_value = semantic.functions.get(rejected.target)
     assert function_value.identifier.name == b"foo"
 
 
@@ -202,7 +202,7 @@ def can_resolve_by_type_u64_max():
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, snippet.SnippetId)
 
-    value = semantic.snippets[callables.target]
+    value = semantic.snippets.get(callables.target)
     assert value.identifier.name == b"foo"
 
 
@@ -235,5 +235,5 @@ def can_reject_by_type_u64_overflow():
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, snippet.SnippetId)
 
-    value = semantic.snippets[callables.target]
+    value = semantic.snippets.get(callables.target)
     assert value.identifier.name == b"foo"

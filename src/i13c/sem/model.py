@@ -11,6 +11,7 @@ from i13c.sem.callsite import CallSite, CallSiteId, build_callsites
 from i13c.sem.entrypoint import EntryPoint, build_entrypoints
 from i13c.sem.flowgraphs import FlowGraph, build_flowgraphs
 from i13c.sem.function import Function, FunctionId, build_functions
+from i13c.sem.infra import OneToOne
 from i13c.sem.literal import Literal, LiteralId, build_literals
 from i13c.sem.live import (
     build_callable_live,
@@ -28,11 +29,11 @@ from i13c.sem.terminal import Terminality, build_terminalities
 class SemanticGraph:
     entrypoints: List[EntryPoint]
 
-    literals: Dict[LiteralId, Literal]
-    snippets: Dict[SnippetId, Snippet]
-    functions: Dict[FunctionId, Function]
-    callsites: Dict[CallSiteId, CallSite]
-    instructions: Dict[InstructionId, Instruction]
+    literals: OneToOne[LiteralId, Literal]
+    instructions: OneToOne[InstructionId, Instruction]
+    snippets: OneToOne[SnippetId, Snippet]
+    functions: OneToOne[FunctionId, Function]
+    callsites: OneToOne[CallSiteId, CallSite]
 
     callgraph: CallGraphs
     callgraph_live: CallGraphs
@@ -94,14 +95,14 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
 
     return SemanticGraph(
         entrypoints=entrypoints,
-        literals=literals,
-        snippets=snippets,
-        functions=functions,
-        callsites=callsites,
+        literals=OneToOne[LiteralId, Literal].instance(literals),
+        instructions=OneToOne[InstructionId, Instruction].instance(instructions),
+        snippets=OneToOne[SnippetId, Snippet].instance(snippets),
+        functions=OneToOne[FunctionId, Function].instance(functions),
+        callsites=OneToOne[CallSiteId, CallSite].instance(callsites),
         callgraph=callgraph,
         callgraph_live=callgraph_live,
         callable_live=callable_live,
-        instructions=instructions,
         function_flowgraphs=function_flowgraphs,
         function_flowgraphs_live=function_flowgraphs_live,
         function_terminalities=function_terminalities,

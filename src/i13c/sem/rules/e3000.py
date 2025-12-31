@@ -10,7 +10,7 @@ def validate_assembly_mnemonic(graph: SemanticGraph) -> List[diag.Diagnostic]:
     for iid, resolution in graph.instruction_resolutions.items():
         if not resolution.accepted and not resolution.rejected:
             diagnostics.append(
-                err.report_e3000_unknown_instruction(graph.instructions[iid].ref)
+                err.report_e3000_unknown_instruction(graph.instructions.get(iid).ref)
             )
 
     return diagnostics

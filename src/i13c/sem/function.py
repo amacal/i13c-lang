@@ -13,6 +13,9 @@ Statement = Union[CallSiteId]
 class FunctionId:
     value: int
 
+    def identify(self, length: int) -> str:
+        return "#".join(("function", f"{self.value:<{length}}"))
+
 
 @dataclass(kw_only=True)
 class Parameter:
@@ -27,6 +30,9 @@ class Function:
     noreturn: bool
     parameters: List[Parameter]
     statements: List[Statement]
+
+    def describe(self) -> str:
+        return f"name={self.identifier.name.decode()}/{len(self.parameters)}"
 
 
 def build_functions(

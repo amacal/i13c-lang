@@ -13,8 +13,8 @@ def validate_called_symbol_exists(
         if not resolution.accepted:
             diagnostics.append(
                 err.report_e3008_called_symbol_missing(
-                    graph.callsites[cid].ref,
-                    graph.callsites[cid].callee.name,
+                    graph.callsites.get(cid).ref,
+                    graph.callsites.get(cid).callee.name,
                 )
             )
 

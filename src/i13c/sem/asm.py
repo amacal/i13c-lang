@@ -42,10 +42,16 @@ class Operand:
             kind=b"immediate", target=Immediate(value=value, width=derive_width(value))
         )
 
+    def describe(self) -> str:
+        return self.kind[0:3].decode()
+
 
 @dataclass(kw_only=True, frozen=True)
 class InstructionId:
     value: int
+
+    def identify(self, length: int) -> str:
+        return "#".join(("instruction", f"{self.value:<{length}}"))
 
 
 @dataclass(kw_only=True)
@@ -53,6 +59,10 @@ class Instruction:
     ref: Span
     mnemonic: Mnemonic
     operands: List[Operand]
+
+    def describe(self) -> str:
+        operands = ":".join(op.describe() for op in self.operands)
+        return f"mnemonic={self.mnemonic.name.decode():<8} operands={operands}"
 
 
 @dataclass(kw_only=True, frozen=True)

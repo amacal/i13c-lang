@@ -61,7 +61,7 @@ def can_build_semantic_model_flowgraphs_single_statement():
     assert n1s is not None and len(n1s) == 1
     assert isinstance(n1s[0], model.CallSiteId)
 
-    assert semantic.callsites[n1s[0]].callee.name == b"foo"
+    assert semantic.callsites.get(n1s[0]).callee.name == b"foo"
 
     n2s = flow.edges.get(n1s[0])
     assert n2s is not None and len(n2s) == 1
@@ -109,6 +109,6 @@ def can_build_flow_with_multiple_statements_ordered():
     assert last is not None and len(last) == 1
     assert last[0] == flow.exit
 
-    assert semantic.callsites[foo].callee.name == b"foo"
-    assert semantic.callsites[bar].callee.name == b"bar"
-    assert semantic.callsites[baz].callee.name == b"baz"
+    assert semantic.callsites.get(foo).callee.name == b"foo"
+    assert semantic.callsites.get(bar).callee.name == b"bar"
+    assert semantic.callsites.get(baz).callee.name == b"baz"

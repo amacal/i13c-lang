@@ -3,13 +3,30 @@ import os
 import sys
 from dataclasses import asdict
 from functools import partial
-from typing import Any, List, NoReturn
+from typing import Any, Iterable, List, NoReturn, Protocol, Tuple, TypeVar
 
 import click
 
 from i13c import diag, elf, enc, ld, lex, low, par, res, sem, src
+from i13c.sem.infra import Descriptive, Identified
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
+
+SemanticId = TypeVar("SemanticId", bound=Identified, covariant=True)
+SemanticNode = TypeVar("SemanticNode", bound=Descriptive, covariant=True)
+
+
+class OneToOneLike(Protocol[SemanticId, SemanticNode]):
+    def items(self) -> Iterable[Tuple[SemanticId, SemanticNode]]: ...
+
+
+class ListOne2OneLike(Protocol):
+    def __call__(self, nodes: OneToOneLike[Identified, Descriptive]) -> None: ...
+
+
+def list_one2one_semantic(nodes: OneToOneLike[Identified, Descriptive]) -> None:
+    for id, node in nodes.items():
+        click.echo(f"{id.identify(2)} {node.describe()}")
 
 
 class BytesAsTextEncoder(json.JSONEncoder):
@@ -92,6 +109,50 @@ def syntax_command(node: str, path: str) -> None:
     data = graph.as_dict(node)
 
     click.echo(json.dumps(data, cls=BytesAsTextEncoder))
+
+
+@i13c.group("model")
+@click.argument("node", type=str)
+@click.pass_context
+def model_group(ctx: click.Context, node: str) -> None:
+    ctx.obj = {
+        "node": node,
+        "list": list_one2one_semantic,
+    }
+
+
+@model_group.command("list")
+@click.argument("path", type=click.Path(exists=True))
+@click.pass_context
+def list_command(ctx: click.Context, path: str) -> None:
+    node: str = ctx.obj["node"]
+    list: ListOne2OneLike = ctx.obj["list"]
+    target: OneToOneLike[Identified, Descriptive]
+
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    code = src.open_text(text)
+    tokens = unwrap(lex.tokenize(code), source=code)
+    program = unwrap(par.parse(code, tokens), source=code)
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    match node:
+        case "literals":
+            target = model.literals
+        case "instructions":
+            target = model.instructions
+        case "snippets":
+            target = model.snippets
+        case "functions":
+            target = model.functions
+        case "callsites":
+            target = model.callsites
+        case _:
+            raise ValueError(f"unknown semantic node type: {node!r}")
+
+    list(target)
 
 
 @i13c.command("ir")

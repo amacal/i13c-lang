@@ -19,7 +19,7 @@ def can_build_callgraphs_from_single_main():
     target, callees = callgraph.popitem()
 
     assert isinstance(target, function.FunctionId)
-    caller = semantic.functions[target]
+    caller = semantic.functions.get(target)
 
     assert caller.identifier.name == b"main"
     assert len(callees) == 0
@@ -44,12 +44,12 @@ def can_build_callgraphs_from_main_calling_snippet():
     assert isinstance(entrypoint.target, function.FunctionId)
 
     callees = callgraph[entrypoint.target]
-    caller = semantic.functions[entrypoint.target]
+    caller = semantic.functions.get(entrypoint.target)
 
     assert caller.identifier.name == b"main"
     assert len(callees) == 1
 
     assert isinstance(callees[0][1], snippet.SnippetId)
-    callee = semantic.snippets[callees[0][1]]
+    callee = semantic.snippets.get(callees[0][1])
 
     assert callee.identifier.name == b"foo"

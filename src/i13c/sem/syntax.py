@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, Iterable, Optional, Protocol, Tuple, TypeVar
+from typing import Any, Dict, Iterable, Optional, Protocol, Tuple, TypeVar, Union
 
 from i13c import ast
 
@@ -92,11 +92,20 @@ class SyntaxGraph:
             literals=Bidirectional[ast.Literal].empty(),
         )
 
-    def as_dict(self, key: str) -> Dict[int, Dict[str, Any]]:
+    def as_dict(
+        self, key: str
+    ) -> Optional[Union[Dict[int, Dict[str, Any]], Dict[str, Any]]]:
+        # split the key and id if present
+        key, id = key.split("#", maxsplit=1) if "#" in key else (key, None)
+
+        # get the appropriate relation
         field: Optional[BidirectionalLike] = getattr(self, key, None)
 
         # guard the missing field case
-        return field.as_dict() if field else {}
+        data = field.as_dict() if field else {}
+
+        # return either the full data or the specific node
+        return data if not id else data.get(int(id))
 
 
 def build_syntax_graph(program: ast.Program) -> SyntaxGraph:

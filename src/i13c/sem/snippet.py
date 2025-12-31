@@ -11,6 +11,9 @@ from i13c.src import Span
 class SnippetId:
     value: int
 
+    def identify(self, length: int) -> str:
+        return "#".join(("snippet", f"{self.value:<{length}}"))
+
 
 @dataclass(kw_only=True)
 class Slot:
@@ -27,6 +30,9 @@ class Snippet:
     slots: List[Slot]
     clobbers: List[Register]
     instructions: List[InstructionId]
+
+    def describe(self) -> str:
+        return f"name={self.identifier.name.decode()}/{len(self.slots)}"
 
 
 def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:

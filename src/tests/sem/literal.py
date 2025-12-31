@@ -15,8 +15,8 @@ def can_build_semantic_model_literals():
     assert semantic is not None
     literals = semantic.literals
 
-    assert len(literals) == 1
-    id, value = literals.popitem()
+    assert literals.size() == 1
+    id, value = literals.pop()
 
     assert isinstance(id, literal.LiteralId)
     assert isinstance(value, literal.Literal)

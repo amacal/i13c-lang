@@ -15,8 +15,8 @@ def can_build_semantic_model_snippets():
     assert semantic is not None
     snippets = semantic.snippets
 
-    assert len(snippets) == 1
-    id, value = snippets.popitem()
+    assert snippets.size() == 1
+    id, value = snippets.pop()
 
     assert isinstance(id, snippet.SnippetId)
     assert isinstance(value, snippet.Snippet)
@@ -28,7 +28,7 @@ def can_build_semantic_model_snippets():
     iid = value.instructions[0]
 
     assert isinstance(iid, asm.InstructionId)
-    instruction = semantic.instructions[iid]
+    instruction = semantic.instructions.get(iid)
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2

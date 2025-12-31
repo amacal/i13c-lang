@@ -12,7 +12,7 @@ def validate_assembly_operand_types(graph: SemanticGraph) -> List[diag.Diagnosti
             for rejection in resolution.rejected:
                 diagnostics.append(
                     err.report_e3002_invalid_operand_types(
-                        graph.instructions[iid].ref,
+                        graph.instructions.get(iid).ref,
                         [str(spec) for spec in rejection.variant],
                     )
                 )

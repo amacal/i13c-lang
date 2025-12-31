@@ -16,7 +16,7 @@ def can_build_live_flowgraph_without_need_of_pruning():
     assert len(semantic.function_flowgraphs_live) == 1
     fid, flowgraph_live = semantic.function_flowgraphs_live.popitem()
 
-    main = semantic.functions[fid]
+    main = semantic.functions.get(fid)
     assert len(main.statements) == 1
 
     callsite_id = main.statements[0]
