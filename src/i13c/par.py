@@ -261,7 +261,7 @@ def parse_parameter(state: ParsingState) -> ast.Parameter:
 
     return ast.Parameter(
         name=state.extract(ident),
-        type=ast.Type(name=state.extract(type)),
+        type=ast.Type(name=state.extract(type), range=None),
     )
 
 
@@ -278,8 +278,8 @@ def parse_slot(state: ParsingState) -> ast.Slot:
 
     return ast.Slot(
         name=state.extract(ident),
-        type=ast.Type(name=state.extract(type)),
         bind=ast.Register(name=state.extract(bind)),
+        type=ast.Type(name=state.extract(type), range=None),
     )
 
 

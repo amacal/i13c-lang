@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Union
 
 from i13c.sem.callsite import CallSiteId
-from i13c.sem.core import Identifier, Type
+from i13c.sem.core import Identifier, Type, default_ranges, default_width
 from i13c.sem.syntax import SyntaxGraph
 from i13c.src import Span
 
@@ -45,10 +45,22 @@ def build_functions(
         statements: List[Statement] = []
 
         for parameter in function.parameters:
+            # default width for declared type
+            width = default_width(parameter.type.name)
+            ranges = default_ranges(parameter.type.name)
+
+            # construct slot type with range or default width
+            type = Type(
+                name=parameter.type.name,
+                width=width,
+                lower=parameter.type.range.lower if parameter.type.range else ranges[0],
+                upper=parameter.type.range.upper if parameter.type.range else ranges[1],
+            )
+
             parameters.append(
                 Parameter(
                     name=Identifier(name=parameter.name),
-                    type=Type(name=parameter.type.name),
+                    type=type,
                 )
             )
 

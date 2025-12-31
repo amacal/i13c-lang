@@ -76,18 +76,18 @@ class BindingLike(Protocol):
 
 
 def match_literal(literal: Literal, type: Type) -> bool:
-    match (type.name, literal):
-        case (b"u8", Literal(kind=b"hex", target=Hex() as target)):
-            return target.width <= 8
+    match literal:
+        case Literal(kind=b"hex", target=Hex() as target):
+            # width constraint
+            if target.width > type.width:
+                return False
 
-        case (b"u16", Literal(kind=b"hex", target=Hex() as target)):
-            return target.width <= 16
+            # range constraint
+            if not (type.lower <= target.value <= type.upper):
+                return False
 
-        case (b"u32", Literal(kind=b"hex", target=Hex() as target)):
-            return target.width <= 32
-
-        case (b"u64", Literal(kind=b"hex", target=Hex() as target)):
-            return target.width <= 64
+            # success
+            return True
 
         case _:
             return False

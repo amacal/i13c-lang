@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List
 
 from i13c.sem.asm import InstructionId, Register
-from i13c.sem.core import Identifier, Type
+from i13c.sem.core import Identifier, Type, default_ranges, default_width
 from i13c.sem.syntax import SyntaxGraph
 from i13c.src import Span
 
@@ -49,11 +49,23 @@ def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
 
         # collect slots
         for slot in snippet.slots:
+            # default width and ranges for declared type
+            width = default_width(slot.type.name)
+            ranges = default_ranges(slot.type.name)
+
+            # construct slot type with range or default width
+            type = Type(
+                name=slot.type.name,
+                width=width,
+                lower=slot.type.range.lower if slot.type.range else ranges[0],
+                upper=slot.type.range.upper if slot.type.range else ranges[1],
+            )
+
             slots.append(
                 Slot(
                     name=Identifier(name=slot.name),
-                    type=Type(name=slot.type.name),
                     bind=Register(name=slot.bind.name),
+                    type=type,
                 )
             )
 

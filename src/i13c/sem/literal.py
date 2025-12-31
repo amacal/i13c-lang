@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict
 from typing import Literal as Kind
-from typing import Optional
 
 from i13c import ast
 from i13c.sem.core import Width, derive_width

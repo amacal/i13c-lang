@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Protocol, Union
+from typing import List, Optional, Protocol, Union
 
 from i13c import src
 
@@ -16,6 +16,13 @@ class Visitor(Protocol):
 @dataclass(kw_only=True, eq=False)
 class Type:
     name: bytes
+    range: Optional[Range]
+
+
+@dataclass(kw_only=True, eq=False)
+class Range:
+    lower: int
+    upper: int
 
 
 @dataclass(kw_only=True, eq=False)
