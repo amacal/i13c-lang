@@ -34,7 +34,7 @@ def build_callgraph_live(
 
     for fid, flowgraph in flowgraphs_live.items():
         live = reachable_nodes(flowgraph)
-        out[fid] = [(cid, callee) for (cid, callee) in callgraph[fid] if cid in live]
+        out[fid] = [pair for pair in callgraph[fid] if pair.callsite in live]
 
     return out
 
@@ -51,12 +51,11 @@ def build_callable_live(
         stack.append(entrypoint.target)
 
     while stack:
-        for _, target in callgraph_live.get(stack.pop(), []):
-            if isinstance(target, FunctionId):
-                if target not in out:
-                    stack.append(target)
-                    out.add(target)
-
+        for pair in callgraph_live.get(stack.pop(), []):
+            if isinstance(pair.target, FunctionId):
+                if pair.target not in out:
+                    stack.append(pair.target)
+                    out.add(pair.target)
     return out
 
 

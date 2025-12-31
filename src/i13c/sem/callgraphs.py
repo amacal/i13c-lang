@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 from i13c.sem.callable import CallableTarget
@@ -6,7 +7,18 @@ from i13c.sem.function import Function, FunctionId
 from i13c.sem.resolve import Resolution
 from i13c.sem.snippet import Snippet, SnippetId
 
-CallPair = Tuple[CallSiteId, CallableTarget]
+
+@dataclass(kw_only=True)
+class CallPair:
+    callsite: CallSiteId
+    target: CallableTarget
+
+    @staticmethod
+    def instance(callsite: CallSiteId, target: CallableTarget) -> CallPair:
+        return CallPair(callsite=callsite, target=target)
+
+    def describe(self) -> str:
+        return f"callsite={self.callsite.identify(2)} target={self.target.identify(2)}"
 
 
 def build_callgraph(
@@ -29,7 +41,7 @@ def build_callgraph(
         for statement in function.statements:
             for accepted in resolutions[statement].accepted:
                 callee = accepted.callable.target
-                by_caller[fid].append((statement, callee))
-                by_callee[callee].append((statement, fid))
+                by_caller[fid].append(CallPair.instance(statement, callee))
+                by_callee[callee].append(CallPair.instance(statement, fid))
 
     return by_caller, by_callee
