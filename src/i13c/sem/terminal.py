@@ -51,12 +51,10 @@ def build_terminalities(
 
         while stack:
             node = stack.pop()
-
             if node in visited:
                 continue
 
             visited.add(node)
-
             if node == flowgraph.exit:
                 return True
 
