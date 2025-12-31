@@ -253,19 +253,24 @@ def parse_slots(state: ParsingState) -> List[ast.Slot]:
 
 
 def parse_parameter(state: ParsingState) -> ast.Parameter:
+    range: Optional[ast.Range] = None
     ident = state.expect(lex.TOKEN_IDENT)
 
     # expect ':' followed by type
     state.expect(lex.TOKEN_COLON)
     type = state.expect(lex.TOKEN_TYPE)
 
+    if state.is_in(lex.TOKEN_SQUARE_OPEN):
+        range = parse_range(state)
+
     return ast.Parameter(
         name=state.extract(ident),
-        type=ast.Type(name=state.extract(type), range=None),
+        type=ast.Type(name=state.extract(type), range=range),
     )
 
 
 def parse_slot(state: ParsingState) -> ast.Slot:
+    range: Optional[ast.Range] = None
     ident = state.expect(lex.TOKEN_IDENT)
 
     # expect '@' followed by register
@@ -276,10 +281,31 @@ def parse_slot(state: ParsingState) -> ast.Slot:
     state.expect(lex.TOKEN_COLON)
     type = state.expect(lex.TOKEN_TYPE)
 
+    if state.is_in(lex.TOKEN_SQUARE_OPEN):
+        range = parse_range(state)
+
     return ast.Slot(
         name=state.extract(ident),
         bind=ast.Register(name=state.extract(bind)),
-        type=ast.Type(name=state.extract(type), range=None),
+        type=ast.Type(name=state.extract(type), range=range),
+    )
+
+
+def parse_range(state: ParsingState) -> ast.Range:
+    # expect opening square bracket
+    state.expect(lex.TOKEN_SQUARE_OPEN)
+    lower = state.expect(lex.TOKEN_HEX)
+
+    # expect range operator
+    state.expect(lex.TOKEN_RANGE)
+    upper = state.expect(lex.TOKEN_HEX)
+
+    # expect closing square bracket
+    state.expect(lex.TOKEN_SQUARE_CLOSE)
+
+    return ast.Range(
+        lower=int(state.extract(lower), 16),
+        upper=int(state.extract(upper), 16),
     )
 
 

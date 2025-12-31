@@ -245,6 +245,29 @@ def can_parse_snippets_with_no_return_with_clobbers():
     assert len(instruction.operands) == 0
 
 
+def can_parse_snipper_with_ranged_parameter():
+    code = src.open_text("asm main(value@rdi: u8[0x10..0x20]) { }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
+
+    assert isinstance(snippet, ast.Snippet)
+    assert len(snippet.slots) == 1
+
+    slot = snippet.slots[0]
+    assert slot.name == b"value"
+    assert slot.type.name == b"u8"
+    assert slot.type.range is not None
+    assert slot.type.range.lower == 0x10
+    assert slot.type.range.upper == 0x20
+
+
 def can_handle_empty_program():
     code = src.open_text("")
 
@@ -375,6 +398,29 @@ def can_parse_function_with_flags_noreturn():
     argument = statement.arguments[0]
     assert isinstance(argument, ast.IntegerLiteral)
     assert argument.value == 0x1
+
+
+def can_parse_function_with_ranged_parameter():
+    code = src.open_text("fn main(value: u8[0x10..0x20]) { }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.functions) == 1
+    function = program.value.functions[0]
+
+    assert isinstance(function, ast.Function)
+    assert len(function.parameters) == 1
+
+    parameter = function.parameters[0]
+    assert parameter.name == b"value"
+    assert parameter.type.name == b"u8"
+    assert parameter.type.range is not None
+    assert parameter.type.range.lower == 0x10
+    assert parameter.type.range.upper == 0x20
 
 
 def can_handle_end_of_tokens():
