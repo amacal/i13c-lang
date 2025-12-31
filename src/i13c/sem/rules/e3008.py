@@ -11,11 +11,14 @@ def validate_called_symbol_exists(
 
     for cid, resolution in graph.indices.resolution_by_callsite.items():
         if not resolution.accepted:
-            diagnostics.append(
-                err.report_e3008_called_symbol_missing(
-                    graph.basic.callsites.get(cid).ref,
-                    graph.basic.callsites.get(cid).callee.name,
+
+            # truly missing if there are no rejected resolutions either
+            if not resolution.rejected:
+                diagnostics.append(
+                    err.report_e3008_called_symbol_missing(
+                        graph.basic.callsites.get(cid).ref,
+                        graph.basic.callsites.get(cid).callee.name,
+                    )
                 )
-            )
 
     return diagnostics

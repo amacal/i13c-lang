@@ -15,6 +15,9 @@ OperandKind = Kind[b"register", b"immediate"]
 class Register:
     name: bytes
 
+    def __str__(self) -> str:
+        return self.name.decode()
+
 
 @dataclass(kw_only=True)
 class Immediate:

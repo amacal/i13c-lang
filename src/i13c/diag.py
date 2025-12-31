@@ -23,7 +23,11 @@ def show(source: src.SourceCode, diagnostic: Diagnostic) -> str:
     line = source.data[start:end]
 
     caret = b" " * caret_start + b"^" * caret_length
-    error = b" " * caret_start + b"|-> " + diagnostic.message.encode("utf-8")
+    error = (
+        b" " * caret_start
+        + b"|-> "
+        + diagnostic.message.encode("utf-8").splitlines()[0]
+    )
 
     return (
         line.decode("utf-8")

@@ -9,6 +9,9 @@ Width = Kind[8, 16, 32, 64]
 class Identifier:
     name: bytes
 
+    def __str__(self) -> str:
+        return self.name.decode()
+
 
 @dataclass(kw_only=True)
 class Type:
@@ -16,6 +19,9 @@ class Type:
     width: Width
     lower: int
     upper: int
+
+    def __str__(self) -> str:
+        return f"{self.name.decode()}[{self.lower}..{self.upper}]"
 
 
 def derive_width(value: int) -> Width:

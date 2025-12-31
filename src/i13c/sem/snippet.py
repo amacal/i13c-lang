@@ -21,6 +21,9 @@ class Slot:
     type: Type
     bind: Register
 
+    def signature(self) -> str:
+        return f"{self.name}@{self.bind}:{self.type}"
+
 
 @dataclass(kw_only=True)
 class Snippet:
@@ -30,6 +33,10 @@ class Snippet:
     slots: List[Slot]
     clobbers: List[Register]
     instructions: List[InstructionId]
+
+    def signature(self) -> str:
+        slots = ", ".join([slot.signature() for slot in self.slots])
+        return f"{self.identifier.name.decode()}/{len(self.slots)} ({slots})"
 
     def describe(self) -> str:
         return f"name={self.identifier.name.decode()}/{len(self.slots)}"

@@ -18,6 +18,7 @@ ERROR_3003 = "E3003"  # Duplicated parameter bindings
 ERROR_3004 = "E3004"  # Duplicated parameter names
 ERROR_3005 = "E3005"  # Duplicated clobber registers
 ERROR_3006 = "E3006"  # Duplicated function names
+ERROR_3007 = "E3007"  # Called symbol has no matching overload
 ERROR_3008 = "E3008"  # Called symbol does not exist
 ERROR_3009 = "E3009"  # Called symbol is not a snippet
 ERROR_3010 = "E3010"  # Function has wrong terminality
@@ -152,6 +153,18 @@ def report_e3006_duplicated_function_names(
         ref=ref,
         code=ERROR_3006,
         message=f"Duplicated function names for ({str(found)}) at offset {ref.offset}",
+    )
+
+
+def report_e3007_no_matching_overload(
+    ref: src.SpanLike, name: bytes, candidates: List[str]
+) -> diag.Diagnostic:
+    candidates = [f"  - {c}" for c in candidates]
+
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_3007,
+        message=f"Called symbol '{str(name)}' has no matching overload.\nTried candidates:\n{'\n'.join(candidates)}",
     )
 
 

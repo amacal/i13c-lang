@@ -22,6 +22,9 @@ class Parameter:
     name: Identifier
     type: Type
 
+    def signature(self) -> str:
+        return f"{self.name}:{self.type}"
+
 
 @dataclass(kw_only=True)
 class Function:
@@ -30,6 +33,10 @@ class Function:
     noreturn: bool
     parameters: List[Parameter]
     statements: List[Statement]
+
+    def signature(self) -> str:
+        parameters = ", ".join([parameter.signature() for parameter in self.parameters])
+        return f"{self.identifier.name.decode()}/{len(self.parameters)} ({parameters})"
 
     def describe(self) -> str:
         return f"name={self.identifier.name.decode()}/{len(self.parameters)}"
