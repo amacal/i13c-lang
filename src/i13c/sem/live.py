@@ -1,7 +1,7 @@
 from typing import Dict, List, Set
 
 from i13c.sem.callable import CallableTarget
-from i13c.sem.callgraphs import CallGraphs
+from i13c.sem.callgraphs import CallPair
 from i13c.sem.callsite import CallSiteId
 from i13c.sem.entrypoint import EntryPoint
 from i13c.sem.flowgraphs import FlowGraph, FlowNode
@@ -12,9 +12,10 @@ from i13c.sem.terminal import Terminality
 
 
 def build_callgraph_live(
-    flowgraphs_live: Dict[FunctionId, FlowGraph], callgraph: CallGraphs
-) -> CallGraphs:
-    out: CallGraphs = {}
+    flowgraphs_live: Dict[FunctionId, FlowGraph],
+    callgraph: Dict[CallableTarget, List[CallPair]],
+) -> Dict[CallableTarget, List[CallPair]]:
+    out: Dict[CallableTarget, List[CallPair]] = {}
 
     def reachable_nodes(flowgraph: FlowGraph) -> Set[FlowNode]:
         visited: Set[FlowNode] = set()
@@ -40,7 +41,7 @@ def build_callgraph_live(
 
 def build_callable_live(
     entrypoints: Dict[CallableTarget, EntryPoint],
-    callgraph_live: CallGraphs,
+    callgraph_live: Dict[CallableTarget, List[CallPair]],
 ) -> Set[CallableTarget]:
     out: Set[CallableTarget] = set()
     stack: List[CallableTarget] = []

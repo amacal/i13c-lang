@@ -13,10 +13,10 @@ def can_build_callgraphs_from_single_main():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    callgraph = semantic.callgraph
+    callgraph = semantic.callgraph.calls_by_caller
 
-    assert len(callgraph) == 1
-    target, callees = callgraph.popitem()
+    assert callgraph.size() == 1
+    target, callees = callgraph.pop()
 
     assert isinstance(target, function.FunctionId)
     caller = semantic.basic.functions.get(target)
@@ -37,13 +37,13 @@ def can_build_callgraphs_from_main_calling_snippet():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    callgraph = semantic.callgraph
+    callgraph = semantic.callgraph.calls_by_caller
     _, entrypoint = semantic.live.entrypoints.pop()
 
-    assert len(callgraph) == 2
+    assert callgraph.size() == 2
     assert isinstance(entrypoint.target, function.FunctionId)
 
-    callees = callgraph[entrypoint.target]
+    callees = callgraph.get(entrypoint.target)
     caller = semantic.basic.functions.get(entrypoint.target)
 
     assert caller.identifier.name == b"main"

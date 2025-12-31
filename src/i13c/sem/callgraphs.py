@@ -7,25 +7,29 @@ from i13c.sem.resolve import Resolution
 from i13c.sem.snippet import Snippet, SnippetId
 
 CallPair = Tuple[CallSiteId, CallableTarget]
-CallGraphs = Dict[CallableTarget, List[CallPair]]
 
 
 def build_callgraph(
     snippets: Dict[SnippetId, Snippet],
     functions: Dict[FunctionId, Function],
     resolutions: Dict[CallSiteId, Resolution],
-) -> CallGraphs:
-    out: CallGraphs = {}
+) -> Tuple[Dict[CallableTarget, List[CallPair]], Dict[CallableTarget, List[CallPair]]]:
+    by_caller: Dict[CallableTarget, List[CallPair]] = {}
+    by_callee: Dict[CallableTarget, List[CallPair]] = {}
 
     for snid in snippets.keys():
-        out[snid] = []
+        by_caller[snid] = []
+        by_callee[snid] = []
 
     for fid in functions.keys():
-        out[fid] = []
+        by_caller[fid] = []
+        by_callee[fid] = []
 
     for fid, function in functions.items():
         for statement in function.statements:
             for accepted in resolutions[statement].accepted:
-                out[fid].append((statement, accepted.callable.target))
+                callee = accepted.callable.target
+                by_caller[fid].append((statement, callee))
+                by_callee[callee].append((statement, fid))
 
-    return out
+    return by_caller, by_callee
