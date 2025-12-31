@@ -50,11 +50,22 @@ class Acceptance:
     callable: Callable
     bindings: List[Binding]
 
+    def describe(self) -> str:
+        return self.callable.describe()
+
 
 @dataclass(kw_only=True)
 class Resolution:
     accepted: List[Acceptance]
     rejected: List[Rejection]
+
+    def describe(self) -> str:
+        candidate = ""
+
+        if len(self.accepted) > 0:
+            candidate = self.accepted[0].describe()
+
+        return f"accepted={len(self.accepted)} rejected={len(self.rejected)} {candidate}"
 
 
 class BindingLike(Protocol):

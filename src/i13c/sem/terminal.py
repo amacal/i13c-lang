@@ -13,6 +13,9 @@ from i13c.sem.snippet import Snippet, SnippetId
 class Terminality:
     noreturn: bool
 
+    def describe(self) -> str:
+        return f"noreturn={self.noreturn}"
+
 
 def build_terminalities(
     snippets: Dict[SnippetId, Snippet],

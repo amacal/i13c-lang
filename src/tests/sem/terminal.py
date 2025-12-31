@@ -13,10 +13,10 @@ def can_build_semantic_model_terminalities_empty():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    terminalities = semantic.function_terminalities
+    terminalities = semantic.terminality_by_function
 
-    assert len(terminalities) == 1
-    id, terminality = terminalities.popitem()
+    assert terminalities.size() == 1
+    id, terminality = terminalities.pop()
 
     assert isinstance(id, function.FunctionId)
     assert isinstance(terminality, terminal.Terminality)
@@ -36,10 +36,10 @@ def can_build_semantic_model_terminalities_calls_terminal():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    terminalities = semantic.function_terminalities
+    terminalities = semantic.terminality_by_function
 
-    assert len(terminalities) == 1
-    id, terminality = terminalities.popitem()
+    assert terminalities.size() == 1
+    id, terminality = terminalities.pop()
 
     assert isinstance(id, function.FunctionId)
     assert isinstance(terminality, terminal.Terminality)
@@ -59,10 +59,10 @@ def can_build_semantic_model_terminalities_calls_non_terminal():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    terminalities = semantic.function_terminalities
+    terminalities = semantic.terminality_by_function
 
-    assert len(terminalities) == 1
-    id, terminality = terminalities.popitem()
+    assert terminalities.size() == 1
+    id, terminality = terminalities.pop()
 
     assert isinstance(id, function.FunctionId)
     assert isinstance(terminality, terminal.Terminality)
@@ -81,10 +81,10 @@ def can_build_semantic_model_terminalities_calls_without_accepted_resolutions():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    terminalities = semantic.function_terminalities
+    terminalities = semantic.terminality_by_function
 
-    assert len(terminalities) == 1
-    id, terminality = terminalities.popitem()
+    assert terminalities.size() == 1
+    id, terminality = terminalities.pop()
 
     assert isinstance(id, function.FunctionId)
     assert isinstance(terminality, terminal.Terminality)

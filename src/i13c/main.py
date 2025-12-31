@@ -149,6 +149,16 @@ def list_command(ctx: click.Context, path: str) -> None:
             target = model.functions
         case "callsites":
             target = model.callsites
+        case "entrypoints":
+            target = model.entrypoints
+        case "resolution-by-callsite":
+            target = model.resolution_by_callsite
+        case "resolution-by-instruction":
+            target = model.resolution_by_instruction
+        case "terminality-by-function":
+            target = model.terminality_by_function
+        case "flowgraph-by-function":
+            target = model.flowgraph_by_function
         case _:
             raise ValueError(f"unknown semantic node type: {node!r}")
 

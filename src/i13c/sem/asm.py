@@ -81,11 +81,18 @@ class OperandSpec:
     def immediate(width: Width) -> "OperandSpec":
         return OperandSpec(kind=b"immediate", width=width)
 
+    def describe(self) -> str:
+        return self.kind[0:3].decode()
+
 
 @dataclass(kw_only=True)
 class Acceptance:
     mnemonic: Mnemonic
     variant: MnemonicVariant
+
+    def describe(self) -> str:
+        variants = ":".join(var.describe() for var in self.variant)
+        return f"mnemonic={self.mnemonic.name.decode():<8} variants={variants}"
 
 
 RejectionReason = Kind[
@@ -106,6 +113,14 @@ class Rejection:
 class Resolution:
     accepted: List[Acceptance]
     rejected: List[Rejection]
+
+    def describe(self) -> str:
+        candidate = ""
+
+        if len(self.accepted) > 0:
+            candidate = self.accepted[0].describe()
+
+        return f"accepted={len(self.accepted)} rejected={len(self.rejected)} {candidate}"
 
 
 MnemonicVariant = Tuple[OperandSpec, ...]

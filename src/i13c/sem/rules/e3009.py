@@ -9,7 +9,7 @@ def validate_called_symbol_is_snippet(
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for cid, resolution in graph.callsite_resolutions.items():
+    for cid, resolution in graph.resolution_by_callsite.items():
         for acceptance in resolution.accepted:
             if acceptance.callable.kind != b"snippet":
                 diagnostics.append(

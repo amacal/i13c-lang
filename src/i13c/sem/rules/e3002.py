@@ -7,7 +7,7 @@ from i13c.sem.model import SemanticGraph
 def validate_assembly_operand_types(graph: SemanticGraph) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for iid, resolution in graph.instruction_resolutions.items():
+    for iid, resolution in graph.resolution_by_instruction.items():
         if not resolution.accepted and resolution.rejected:
             for rejection in resolution.rejected:
                 diagnostics.append(

@@ -13,10 +13,10 @@ def can_build_semantic_model_flowgraphs_no_statements():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    values = semantic.function_flowgraphs
+    values = semantic.flowgraph_by_function
 
-    assert len(values) == 1
-    id, flow = values.popitem()
+    assert values.size() == 1
+    id, flow = values.pop()
 
     assert isinstance(id, function.FunctionId)
     assert isinstance(flow, flowgraphs.FlowGraph)
@@ -44,10 +44,10 @@ def can_build_semantic_model_flowgraphs_single_statement():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    values = semantic.function_flowgraphs
+    values = semantic.flowgraph_by_function
 
-    assert len(values) == 1
-    id, flow = values.popitem()
+    assert values.size() == 1
+    id, flow = values.pop()
 
     assert isinstance(id, function.FunctionId)
     assert isinstance(flow, flowgraphs.FlowGraph)
@@ -79,10 +79,10 @@ def can_build_flow_with_multiple_statements_ordered():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    values = semantic.function_flowgraphs
+    values = semantic.flowgraph_by_function
 
-    assert len(values) == 1
-    _, flow = values.popitem()
+    assert values.size() == 1
+    _, flow = values.pop()
 
     assert isinstance(flow.entry, flowgraphs.FlowEntry)
     assert isinstance(flow.exit, flowgraphs.FlowExit)

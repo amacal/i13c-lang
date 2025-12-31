@@ -38,7 +38,7 @@ def can_build_callgraphs_from_main_calling_snippet():
 
     assert semantic is not None
     callgraph = semantic.callgraph
-    entrypoint = semantic.entrypoints[0]
+    _, entrypoint = semantic.entrypoints.pop()
 
     assert len(callgraph) == 2
     assert isinstance(entrypoint.target, function.FunctionId)

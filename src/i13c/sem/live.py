@@ -39,13 +39,13 @@ def build_callgraph_live(
 
 
 def build_callable_live(
-    entrypoints: List[EntryPoint],
+    entrypoints: Dict[CallableTarget, EntryPoint],
     callgraph_live: CallGraphs,
 ) -> Set[CallableTarget]:
     out: Set[CallableTarget] = set()
     stack: List[CallableTarget] = []
 
-    for entrypoint in entrypoints:
+    for entrypoint in entrypoints.values():
         out.add(entrypoint.target)
         stack.append(entrypoint.target)
 
@@ -120,7 +120,7 @@ def prune_flowgraph(
 
 
 def build_flowgraphs_live(
-    function_flowgraphs: Dict[FunctionId, FlowGraph],
+    flowgraph_by_function: Dict[FunctionId, FlowGraph],
     resolutions: Dict[CallSiteId, Resolution],
     snippets: Dict[SnippetId, Snippet],
     terminalities: Dict[FunctionId, Terminality],
@@ -136,7 +136,7 @@ def build_flowgraphs_live(
         if snippet.noreturn:
             noreturn.add(snid)
 
-    for fid, flowgraph in function_flowgraphs.items():
+    for fid, flowgraph in flowgraph_by_function.items():
         out[fid] = prune_flowgraph(flowgraph, resolutions, noreturn)
 
     return out

@@ -23,6 +23,15 @@ class FlowGraph:
     exit: FlowExit
     edges: Dict[FlowNode, List[FlowNode]]
 
+    def describe(self) -> str:
+        nodes = set(self.edges.keys()) | set(
+            next for edge in self.edges.values() for next in edge
+        )
+
+        edges = sum(len(v) for v in self.edges.values())
+
+        return f"nodes={len(nodes)}, edges={edges}"
+
 
 def build_flowgraphs(
     functions: Dict[FunctionId, Function],

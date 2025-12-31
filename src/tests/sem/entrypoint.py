@@ -16,8 +16,8 @@ def can_build_entrypoints_for_valid_main_function():
     assert semantic is not None
     entrypoints = semantic.entrypoints
 
-    assert len(entrypoints) == 1
-    value = entrypoints[0]
+    assert entrypoints.size() == 1
+    _, value = entrypoints.pop()
 
     assert isinstance(value, entrypoint.EntryPoint)
     assert value.kind == b"function"
@@ -42,7 +42,7 @@ def can_reject_snippet_with_arguments():
     assert semantic is not None
     entrypoints = semantic.entrypoints
 
-    assert len(entrypoints) == 0
+    assert entrypoints.size() == 0
 
 
 def can_accept_snippet_as_entrypoint():
@@ -58,8 +58,8 @@ def can_accept_snippet_as_entrypoint():
     assert semantic is not None
     entrypoints = semantic.entrypoints
 
-    assert len(entrypoints) == 1
-    value = entrypoints[0]
+    assert entrypoints.size() == 1
+    _, value = entrypoints.pop()
 
     assert isinstance(value, entrypoint.EntryPoint)
     assert value.kind == b"snippet"

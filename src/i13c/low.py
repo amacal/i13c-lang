@@ -42,8 +42,8 @@ def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
     entry: Optional[int] = None
 
     # entrypoint always exists here
-    assert len(graph.entrypoints) == 1
-    entrypoint = graph.entrypoints[0]
+    assert graph.entrypoints.size() == 1
+    _, entrypoint = graph.entrypoints.pop()
 
     for snid, snippet in graph.snippets.items():
         if not match_entrypoint(entrypoint, snid):
@@ -58,7 +58,7 @@ def lower(graph: SemanticGraph) -> res.Result[ir.Unit, List[diag.Diagnostic]]:
             continue
 
         next = len(codeblocks)
-        flowgraph = graph.function_flowgraphs_live[fid]
+        flowgraph = graph.flowgraph_by_function_live[fid]
         codeblocks.extend(lower_function(graph, flowgraph, next))
 
         if match_entrypoint(entrypoint, fid):
@@ -121,7 +121,7 @@ def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction
 
     # find callsite and its resolution
     callsite = graph.callsites.get(cid)
-    resolution = graph.callsite_resolutions[cid]
+    resolution = graph.resolution_by_callsite.get(cid)
 
     # we know there is exactly one accepted resolution
     assert len(resolution.accepted) == 1

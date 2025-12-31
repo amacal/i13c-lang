@@ -9,7 +9,7 @@ def validate_called_symbol_terminality(
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fid, terminality in graph.function_terminalities.items():
+    for fid, terminality in graph.terminality_by_function.items():
         # we need to compare against the function definition
         function = graph.functions.get(fid)
 

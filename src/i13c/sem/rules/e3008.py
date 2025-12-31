@@ -9,7 +9,7 @@ def validate_called_symbol_exists(
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for cid, resolution in graph.callsite_resolutions.items():
+    for cid, resolution in graph.resolution_by_callsite.items():
         if not resolution.accepted:
             diagnostics.append(
                 err.report_e3008_called_symbol_missing(

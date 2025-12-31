@@ -14,10 +14,10 @@ def can_build_semantic_model_accepted_resolutions_for_snippet():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    resolutions = semantic.callsite_resolutions
+    resolutions = semantic.resolution_by_callsite
 
-    assert len(resolutions) == 1
-    id, value = resolutions.popitem()
+    assert resolutions.size() == 1
+    id, value = resolutions.pop()
 
     assert isinstance(id, callsite.CallSiteId)
     assert isinstance(value, resolve.Resolution)
@@ -45,10 +45,10 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    resolutions = semantic.callsite_resolutions
+    resolutions = semantic.resolution_by_callsite
 
-    assert len(resolutions) == 1
-    id, value = resolutions.popitem()
+    assert resolutions.size() == 1
+    id, value = resolutions.pop()
 
     assert isinstance(id, callsite.CallSiteId)
     assert isinstance(value, resolve.Resolution)
@@ -78,10 +78,10 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    resolutions = semantic.callsite_resolutions
+    resolutions = semantic.resolution_by_callsite
 
-    assert len(resolutions) == 1
-    id, value = resolutions.popitem()
+    assert resolutions.size() == 1
+    id, value = resolutions.pop()
 
     assert isinstance(id, callsite.CallSiteId)
     assert isinstance(value, resolve.Resolution)
@@ -111,10 +111,10 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_hex_w
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    resolutions = semantic.callsite_resolutions
+    resolutions = semantic.resolution_by_callsite
 
-    assert len(resolutions) == 1
-    id, value = resolutions.popitem()
+    assert resolutions.size() == 1
+    id, value = resolutions.pop()
 
     assert isinstance(id, callsite.CallSiteId)
     assert isinstance(value, resolve.Resolution)
@@ -145,10 +145,10 @@ def can_resolve_function_and_snippet_with_same_name():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    resolutions = semantic.callsite_resolutions
+    resolutions = semantic.resolution_by_callsite
 
-    assert len(resolutions) == 1
-    id, value = resolutions.popitem()
+    assert resolutions.size() == 1
+    id, value = resolutions.pop()
 
     assert isinstance(id, callsite.CallSiteId)
     assert isinstance(value, resolve.Resolution)
@@ -187,10 +187,10 @@ def can_resolve_by_type_u64_max():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    resolutions = semantic.callsite_resolutions
+    resolutions = semantic.resolution_by_callsite
 
-    assert len(resolutions) == 1
-    id, value = resolutions.popitem()
+    assert resolutions.size() == 1
+    id, value = resolutions.pop()
 
     assert isinstance(id, callsite.CallSiteId)
     assert isinstance(value, resolve.Resolution)
@@ -218,10 +218,10 @@ def can_reject_by_type_u64_overflow():
     semantic = model.build_semantic_graph(graph)
 
     assert semantic is not None
-    resolutions = semantic.callsite_resolutions
+    resolutions = semantic.resolution_by_callsite
 
-    assert len(resolutions) == 1
-    id, value = resolutions.popitem()
+    assert resolutions.size() == 1
+    id, value = resolutions.pop()
 
     assert isinstance(id, callsite.CallSiteId)
     assert isinstance(value, resolve.Resolution)

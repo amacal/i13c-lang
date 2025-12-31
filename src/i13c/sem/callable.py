@@ -13,3 +13,6 @@ CallableTarget = Union[SnippetId, FunctionId]
 class Callable:
     kind: CallableKind
     target: CallableTarget
+
+    def describe(self) -> str:
+        return f"kind={self.kind.decode()} target={self.target.identify(2)}"

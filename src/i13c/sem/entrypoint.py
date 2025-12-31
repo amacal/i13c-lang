@@ -14,24 +14,27 @@ class EntryPoint:
     kind: CallableKind
     target: CallableTarget
 
+    def describe(self) -> str:
+        return f"kind={self.kind.decode()}"
+
 
 def build_entrypoints(
     functions: Dict[FunctionId, Function],
     snippets: Dict[SnippetId, Snippet],
     terminalities: Dict[FunctionId, Terminality],
-) -> List[EntryPoint]:
+) -> Dict[CallableTarget, EntryPoint]:
 
-    out: List[EntryPoint] = []
+    out: Dict[CallableTarget, EntryPoint] = {}
 
     for fid, function in functions.items():
         if function.identifier.name == EntryPointName:
             if not function.parameters:
                 if terminalities[fid].noreturn:
-                    out.append(EntryPoint(kind=b"function", target=fid))
+                    out[fid] = EntryPoint(kind=b"function", target=fid)
 
     for sid, snippet in snippets.items():
         if snippet.identifier.name == EntryPointName:
             if snippet.noreturn and not snippet.slots:
-                out.append(EntryPoint(kind=b"snippet", target=sid))
+                out[sid] = EntryPoint(kind=b"snippet", target=sid)
 
     return out
