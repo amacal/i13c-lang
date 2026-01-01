@@ -176,6 +176,9 @@ def lower_instruction(instruction: Instruction) -> ir.Instruction:
     if instruction.mnemonic.name == b"mov":
         return lower_instruction_mov(instruction)
 
+    elif instruction.mnemonic.name == b"shl":
+        return lower_instruction_shl(instruction)
+
     elif instruction.mnemonic.name == b"syscall":
         return lower_instruction_syscall()
 
@@ -193,6 +196,19 @@ def lower_instruction_mov(instruction: Instruction) -> ir.Instruction:
     src_imm = src.target.value
 
     return ir.MovRegImm(dst=dst_reg, imm=src_imm)
+
+
+def lower_instruction_shl(instruction: Instruction) -> ir.Instruction:
+    dst = instruction.operands[0]
+    src = instruction.operands[1]
+
+    assert isinstance(dst.target, Register)
+    assert isinstance(src.target, Immediate)
+
+    dst_reg = IR_REGISTER_MAP[dst.target.name]
+    src_imm = src.target.value
+
+    return ir.ShlRegImm(dst=dst_reg, imm=src_imm)
 
 
 def lower_instruction_syscall() -> ir.Instruction:

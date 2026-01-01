@@ -22,11 +22,17 @@ class MovRegImm:
 
 
 @dataclass
+class ShlRegImm:
+    dst: int
+    imm: int
+
+
+@dataclass
 class SysCall:
     pass
 
 
-Instruction = Union[MovRegImm, SysCall]
+Instruction = Union[MovRegImm, ShlRegImm, SysCall]
 
 
 @dataclass

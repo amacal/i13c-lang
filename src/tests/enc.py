@@ -39,6 +39,25 @@ def can_encode_instructions_mov_r10_imm():
     assert bytecode == expected
 
 
+def can_encode_instructions_shl_rbx_imm():
+    unit = ir.Unit(
+        entry=0,
+        codeblocks=[
+            ir.CodeBlock(
+                terminator=ir.Stop(),
+                instructions=[
+                    ir.ShlRegImm(dst=3, imm=1),
+                ],
+            )
+        ],
+    )
+
+    bytecode = enc.encode(unit)
+    expected = bytes([0x48, 0xC1, 0xE3, 0x01])
+
+    assert bytecode == expected
+
+
 def can_encode_instructions_syscall():
     unit = ir.Unit(
         entry=0,

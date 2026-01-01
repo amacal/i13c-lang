@@ -34,6 +34,36 @@ def can_accept_operands_arity_of_mov():
     assert len(diagnostics) == 0
 
 
+def can_accept_shl_reg64_imm8_with_0x01():
+    _, program = prepare_program(
+        """
+            asm main() noreturn {
+                shl rax, 0x01;
+            }
+        """
+    )
+
+    model = build_semantic_graph(build_syntax_graph(program))
+    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
+
+    assert len(diagnostics) == 0
+
+
+def can_accept_shl_reg64_imm8_with_0x41():
+    _, program = prepare_program(
+        """
+            asm main() noreturn {
+                shl rax, 0x41;
+            }
+        """
+    )
+
+    model = build_semantic_graph(build_syntax_graph(program))
+    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
+
+    assert len(diagnostics) == 0
+
+
 def can_detect_invalid_instruction():
     source, program = prepare_program(
         """

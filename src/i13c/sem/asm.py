@@ -138,6 +138,9 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
         (OperandSpec.register(), OperandSpec.immediate(16)),
         (OperandSpec.register(), OperandSpec.immediate(8)),
     ],
+    b"shl": [
+        (OperandSpec.register(), OperandSpec.immediate(8)),
+    ],
 }
 
 

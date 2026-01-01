@@ -57,6 +57,35 @@ def can_lower_mov_program():
     assert instruction.imm == 0x1234
 
 
+def can_lower_shl_program():
+    _, program = prepare_program(
+        """
+            asm main() noreturn {
+                shl rax, 0x41;
+            }
+        """
+    )
+
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    unit = low.lower(model)
+    assert isinstance(unit, res.Ok)
+    assert unit.value.entry == 0
+
+    codeblocks = unit.value.codeblocks
+    assert len(codeblocks) == 1
+
+    instructions = codeblocks[0].instructions
+    assert len(instructions) == 1
+
+    instruction = instructions[0]
+    assert isinstance(instruction, ir.ShlRegImm)
+
+    assert instruction.dst == 0
+    assert instruction.imm == 0x41
+
+
 def can_lower_function_statements_to_codeblocks():
     _, program = prepare_program(
         """
