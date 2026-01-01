@@ -73,10 +73,14 @@ class NodesVisitor:
     def on_literal(self, literal: ast.Literal) -> None:
         self.graph.literals.append(self.next(), literal)
 
+    def on_operand(self, operand: ast.Operand) -> None:
+        self.graph.operands.append(self.next(), operand)
+
 
 @dataclass(kw_only=True)
 class SyntaxGraph:
     snippets: Bidirectional[ast.Snippet]
+    operands: Bidirectional[ast.Operand]
     instructions: Bidirectional[ast.Instruction]
     functions: Bidirectional[ast.Function]
     statements: Bidirectional[ast.Statement]
@@ -86,6 +90,7 @@ class SyntaxGraph:
     def empty() -> "SyntaxGraph":
         return SyntaxGraph(
             snippets=Bidirectional[ast.Snippet].empty(),
+            operands=Bidirectional[ast.Operand].empty(),
             instructions=Bidirectional[ast.Instruction].empty(),
             functions=Bidirectional[ast.Function].empty(),
             statements=Bidirectional[ast.Statement].empty(),

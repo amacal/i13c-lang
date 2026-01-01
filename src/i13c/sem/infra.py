@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Generic, Iterable, List, Protocol, Tuple, TypeVar
+from typing import Dict, Generic, Iterable, List, Optional, Protocol, Tuple, TypeVar
 
 
 class Identified(Protocol):
@@ -35,6 +35,9 @@ class OneToOne(Generic[SemanticId, SemanticNode]):
 
     def get(self, key: SemanticId) -> SemanticNode:
         return self.data[key]
+
+    def find(self, key: SemanticId) -> Optional[SemanticNode]:
+        return self.data.get(key)
 
     def keys(self) -> Iterable[SemanticId]:
         return self.data.keys()

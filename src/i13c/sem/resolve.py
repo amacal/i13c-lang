@@ -4,6 +4,16 @@ from typing import Literal as Kind
 from typing import Protocol, Tuple, Union
 
 from i13c.res import Err, Ok, Result
+from i13c.sem.asm import (
+    Immediate,
+    Instruction,
+    InstructionId,
+    Operand,
+    OperandAcceptance,
+    OperandId,
+    OperandResolution,
+    Reference,
+)
 from i13c.sem.callable import Callable
 from i13c.sem.callsite import Argument, CallSite, CallSiteId
 from i13c.sem.core import Type
@@ -191,3 +201,93 @@ def build_resolutions(
         )
 
     return resolutions
+
+
+def resolve_operand_bindings(
+    snippets: Dict[SnippetId, Snippet],
+    instructions: Dict[InstructionId, Instruction],
+    operands: Dict[OperandId, Operand],
+    literals: Dict[LiteralId, Literal],
+    resolution_by_callsite: Dict[CallSiteId, Resolution],
+) -> Dict[OperandId, OperandResolution]:
+    resolutions: Dict[OperandId, OperandResolution] = {}
+    resolvables: List[Tuple[CallSiteId, Acceptance]] = []
+
+    # find all snippet callsites
+    for cid, resolution in resolution_by_callsite.items():
+        for acceptance in resolution.accepted:
+            if acceptance.callable.kind == b"snippet":
+                resolvables.append((cid, acceptance))
+
+    for cid, acceptance in resolvables:
+        queue: List[OperandId] = []
+
+        # we follow only snippet callables here
+        assert isinstance(acceptance.callable.target, SnippetId)
+        snippet = snippets[acceptance.callable.target]
+
+        # collect all operand references
+        for iid in snippet.instructions:
+            for oid in instructions[iid].operands:
+                if operands[oid].kind == b"reference":
+                    queue.append(oid)
+
+        for oid in queue:
+            operand: Operand = operands[oid]
+
+            # find the resolution for this operand
+            assert isinstance(operand.target, Reference)
+            resolutions[oid] = resolve_operand_as_reference(
+                literals,
+                acceptance.bindings,
+                operand.target,
+            )
+
+    return resolutions
+
+
+def resolve_operand_as_reference(
+    literals: Dict[LiteralId, Literal], bindings: List[Binding], target: Reference
+) -> OperandResolution:
+
+    acceptances: List[OperandAcceptance] = []
+
+    for binding in bindings:
+        # we already prefiltered only slot bindings
+        assert isinstance(binding.target, Slot)
+
+        # match slot name with reference name
+        if target.name != binding.target.name.name:
+            continue
+
+        # only literal can be changed to immediate
+        if binding.argument.kind != b"literal":
+            continue
+
+        # satisfy type constraint
+        assert isinstance(binding.argument.target, LiteralId)
+
+        # fetch referenced literal
+        literal = literals[binding.argument.target]
+
+        # only hex literals
+        if literal.kind != b"hex":
+            continue
+
+        # satisfy type constraint
+        assert isinstance(literal.target, Hex)
+
+        acceptances.append(
+            OperandAcceptance(
+                kind=b"immediate",
+                target=Immediate(
+                    value=literal.target.value,
+                    width=binding.type.width,
+                ),
+            ),
+        )
+
+    return OperandResolution(
+        accepted=acceptances,
+        rejected=[],
+    )

@@ -57,7 +57,7 @@ SET_TYPES = {
 }
 
 SET_KEYWORDS = {
-    b"asm", b"clobbers", b"noreturn", b"fn",
+    b"asm", b"clobbers", b"noreturn", b"fn", b"imm",
 }
 
 TOKEN_NAMES: Dict[int, str] = {

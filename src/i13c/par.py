@@ -273,9 +273,14 @@ def parse_slot(state: ParsingState) -> ast.Slot:
     range: Optional[ast.Range] = None
     ident = state.expect(lex.TOKEN_IDENT)
 
-    # expect '@' followed by register
+    # expect '@' followed by register or immediate
     state.expect(lex.TOKEN_AT)
-    bind = state.expect(lex.TOKEN_REG)
+    bind = state.expect(lex.TOKEN_REG, lex.TOKEN_KEYWORD)
+
+    # if it's a keyword, it has to be "imm"
+    if bind.code == lex.TOKEN_KEYWORD:
+        if state.extract(bind) != b"imm":
+            raise UnexpectedKeyword(bind, [b"imm"], state.extract(bind))
 
     # expect ':' followed by type
     state.expect(lex.TOKEN_COLON)
@@ -286,7 +291,7 @@ def parse_slot(state: ParsingState) -> ast.Slot:
 
     return ast.Slot(
         name=state.extract(ident),
-        bind=ast.Register(name=state.extract(bind)),
+        bind=ast.Binding(name=state.extract(bind)),
         type=ast.Type(name=state.extract(type), range=range),
     )
 
@@ -401,11 +406,11 @@ def parse_statement(state: ParsingState) -> ast.CallStatement:
 
 
 def parse_instruction(state: ParsingState) -> ast.Instruction:
-    operands = []
+    operands: List[ast.Operand] = []
     token = state.expect(lex.TOKEN_IDENT)
 
     # optional operands
-    if state.is_in(lex.TOKEN_REG, lex.TOKEN_HEX):
+    if state.is_in(lex.TOKEN_REG, lex.TOKEN_HEX, lex.TOKEN_IDENT):
         operands = parse_operands(state)
 
     # expect a semicolon
@@ -432,8 +437,8 @@ def parse_arguments(state: ParsingState) -> List[ast.IntegerLiteral]:
     return arguments
 
 
-def parse_operands(state: ParsingState) -> List[Union[ast.Register, ast.Immediate]]:
-    operands: List[Union[ast.Register, ast.Immediate]] = []
+def parse_operands(state: ParsingState) -> List[ast.Operand]:
+    operands: List[ast.Operand] = []
     operands.append(parse_operand(state))
 
     # a comma suggests next operand
@@ -452,13 +457,17 @@ def parse_argument(state: ParsingState) -> ast.IntegerLiteral:
     )
 
 
-def parse_operand(state: ParsingState) -> Union[ast.Register, ast.Immediate]:
-    token = state.expect(lex.TOKEN_REG, lex.TOKEN_HEX)
+def parse_operand(state: ParsingState) -> ast.Operand:
+    token = state.expect(lex.TOKEN_REG, lex.TOKEN_HEX, lex.TOKEN_IDENT)
 
     # register has to provide its name
     if token.code == lex.TOKEN_REG:
         return ast.Register(name=state.extract(token))
 
     # immediate has to provide its decimal value
-    else:
+    elif token.code == lex.TOKEN_HEX:
         return ast.Immediate(value=int(state.extract(token), 16))
+
+    # reference has to provide its identifier
+    else:
+        return ast.Reference(name=state.extract(token))

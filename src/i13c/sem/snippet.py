@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
-from i13c.sem.asm import InstructionId, Register
+from i13c.sem.asm import Binding, InstructionId, Register
 from i13c.sem.core import Identifier, Type, default_ranges, default_width
 from i13c.sem.syntax import SyntaxGraph
 from i13c.src import Span
@@ -19,7 +19,7 @@ class SnippetId:
 class Slot:
     name: Identifier
     type: Type
-    bind: Register
+    bind: Binding
 
     def signature(self) -> str:
         return f"{self.name}@{self.bind}:{self.type}"
@@ -68,10 +68,15 @@ def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
                 upper=slot.type.range.upper if slot.type.range else ranges[1],
             )
 
+            if slot.bind.name == b"imm":
+                binding = Binding.immediate()
+            else:
+                binding = Binding.register(name=slot.bind.name)
+
             slots.append(
                 Slot(
                     name=Identifier(name=slot.name),
-                    bind=Register(name=slot.bind.name),
+                    bind=binding,
                     type=type,
                 )
             )

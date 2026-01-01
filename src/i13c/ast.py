@@ -11,6 +11,7 @@ class Visitor(Protocol):
     def on_function(self, function: Function) -> None: ...
     def on_statement(self, statement: Statement) -> None: ...
     def on_literal(self, literal: Literal) -> None: ...
+    def on_operand(self, operand: Operand) -> None: ...
 
 
 @dataclass(kw_only=True, eq=False)
@@ -36,6 +37,14 @@ class Immediate:
 
 
 @dataclass(kw_only=True, eq=False)
+class Reference:
+    name: bytes
+
+
+Operand = Union[Register, Immediate, Reference]
+
+
+@dataclass(kw_only=True, eq=False)
 class IntegerLiteral:
     ref: src.Span
     value: int
@@ -54,10 +63,14 @@ class Mnemonic:
 class Instruction:
     ref: src.Span
     mnemonic: Mnemonic
-    operands: List[Union[Register, Immediate]]
+    operands: List[Operand]
 
     def accept(self, visitor: Visitor) -> None:
         visitor.on_instruction(self)
+
+        # avoid entering operands
+        for operand in self.operands:
+            visitor.on_operand(operand)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -73,14 +86,24 @@ class CallStatement:
             visitor.on_literal(argument)
 
 
+@dataclass(kw_only=True)
+class ImmediateBinding:
+    pass
+
+
 Statement = Union[CallStatement]
+
+
+@dataclass(kw_only=True)
+class Binding:
+    name: bytes
 
 
 @dataclass(kw_only=True, eq=False)
 class Slot:
     name: bytes
     type: Type
-    bind: Register
+    bind: Binding
 
 
 @dataclass(kw_only=True, eq=False)

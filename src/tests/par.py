@@ -45,12 +45,42 @@ def can_parse_instruction_with_operands():
     assert len(instruction.operands) == 2
 
     operand1 = instruction.operands[0]
+    assert isinstance(operand1, ast.Register)
+    assert operand1.name == b"rax"
+
+    operand2 = instruction.operands[1]
+    assert isinstance(operand2, ast.Register)
+    assert operand2.name == b"rbx"
+
+
+def can_parse_instruction_with_operands_reference():
+    code = src.open_text("asm main() { mov rax, left; }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
+
+    assert snippet.name == b"main"
+    assert snippet.noreturn is False
+
+    assert len(snippet.instructions) == 1
+    instruction = snippet.instructions[0]
+
+    assert instruction.mnemonic.name == b"mov"
+    assert len(instruction.operands) == 2
+
+    operand1 = instruction.operands[0]
     assert isinstance(operand1, par.ast.Register)
     assert operand1.name == b"rax"
 
     operand2 = instruction.operands[1]
-    assert isinstance(operand2, par.ast.Register)
-    assert operand2.name == b"rbx"
+    assert isinstance(operand2, par.ast.Reference)
+    assert operand2.name == b"left"
 
 
 def can_parse_instruction_with_immediate():
@@ -134,6 +164,8 @@ def can_parse_snippets_with_single_arg():
     slot = slots[0]
     assert slot.name == b"code"
     assert slot.type.name == b"u32"
+
+    assert isinstance(slot.bind, ast.Binding)
     assert slot.bind.name == b"rdi"
 
 
@@ -163,12 +195,43 @@ def can_parse_snippets_with_multiple_args():
     slot1 = slots[0]
     assert slot1.name == b"code"
     assert slot1.type.name == b"u32"
+
+    assert isinstance(slot1.bind, ast.Binding)
     assert slot1.bind.name == b"rdi"
 
     slot2 = slots[1]
     assert slot2.name == b"id"
     assert slot2.type.name == b"u16"
+
+    assert isinstance(slot2.bind, ast.Binding)
     assert slot2.bind.name == b"rax"
+
+
+def can_parse_snippets_with_bind_to_immediate():
+    code = src.open_text("asm exit(code@imm: u32) { }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    assert len(program.value.snippets) == 1
+    snippet = program.value.snippets[0]
+
+    assert snippet.name == b"exit"
+    assert snippet.noreturn is False
+    assert len(snippet.instructions) == 0
+
+    slots = snippet.slots
+    assert len(slots) == 1
+
+    slot = slots[0]
+    assert slot.name == b"code"
+    assert slot.type.name == b"u32"
+
+    assert isinstance(slot.bind, ast.Binding)
+    assert slot.bind.name == b"imm"
 
 
 def can_parse_snippets_with_clobbers():

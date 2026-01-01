@@ -144,17 +144,18 @@ def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction
         assert literal.kind == b"hex"
         assert isinstance(literal.target, Hex)
 
-        # extract register and immediate
-        bind: Register = binding.target.bind
+        # extract slot binding
+        bind = binding.target.bind
         imm: int = literal.target.value
 
         # emit move instruction for binding
-        out.append(ir.MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm))
+        if bind.kind == b"register":
+            out.append(ir.MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm))
 
     # finally, emit snippet instructions
     for iid in snippet.instructions:
         instruction = graph.basic.instructions.get(iid)
-        out.append(lower_instruction(instruction))
+        out.append(lower_instruction(graph, instruction))
 
     return out
 
@@ -164,7 +165,7 @@ def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
 
     for iid in snippet.instructions:
         instruction = graph.basic.instructions.get(iid)
-        out.append(lower_instruction(instruction))
+        out.append(lower_instruction(graph, instruction))
 
     return ir.CodeBlock(
         instructions=out,
@@ -172,12 +173,12 @@ def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
     )
 
 
-def lower_instruction(instruction: Instruction) -> ir.Instruction:
+def lower_instruction(graph: SemanticGraph, instruction: Instruction) -> ir.Instruction:
     if instruction.mnemonic.name == b"mov":
-        return lower_instruction_mov(instruction)
+        return lower_instruction_mov(graph, instruction)
 
     elif instruction.mnemonic.name == b"shl":
-        return lower_instruction_shl(instruction)
+        return lower_instruction_shl(graph, instruction)
 
     elif instruction.mnemonic.name == b"syscall":
         return lower_instruction_syscall()
@@ -185,9 +186,11 @@ def lower_instruction(instruction: Instruction) -> ir.Instruction:
     raise UnsupportedMnemonic(instruction.ref, instruction.mnemonic.name)
 
 
-def lower_instruction_mov(instruction: Instruction) -> ir.Instruction:
-    dst = instruction.operands[0]
-    src = instruction.operands[1]
+def lower_instruction_mov(
+    graph: SemanticGraph, instruction: Instruction
+) -> ir.Instruction:
+    dst = graph.basic.operands.get(instruction.operands[0])
+    src = graph.basic.operands.get(instruction.operands[1])
 
     assert isinstance(dst.target, Register)
     assert isinstance(src.target, Immediate)
@@ -198,15 +201,27 @@ def lower_instruction_mov(instruction: Instruction) -> ir.Instruction:
     return ir.MovRegImm(dst=dst_reg, imm=src_imm)
 
 
-def lower_instruction_shl(instruction: Instruction) -> ir.Instruction:
-    dst = instruction.operands[0]
-    src = instruction.operands[1]
+def lower_instruction_shl(
+    graph: SemanticGraph, instruction: Instruction
+) -> ir.Instruction:
 
-    assert isinstance(dst.target, Register)
-    assert isinstance(src.target, Immediate)
+    dst_id = instruction.operands[0]
+    src_id = instruction.operands[1]
 
-    dst_reg = IR_REGISTER_MAP[dst.target.name]
-    src_imm = src.target.value
+    dst = graph.basic.operands.get(dst_id).target
+    src = graph.basic.operands.get(src_id).target
+
+    if resolution := graph.indices.resolution_by_operand.find(dst_id):
+        dst = resolution.accepted[0].target
+
+    if resolution := graph.indices.resolution_by_operand.find(src_id):
+        src = resolution.accepted[0].target
+
+    assert isinstance(dst, Register)
+    assert isinstance(src, Immediate)
+
+    dst_reg = IR_REGISTER_MAP[dst.name]
+    src_imm = src.value
 
     return ir.ShlRegImm(dst=dst_reg, imm=src_imm)
 

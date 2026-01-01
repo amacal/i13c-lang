@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict, List, Set
 
-from i13c.sem.asm import Instruction, InstructionId
+from i13c.sem.asm import Instruction, InstructionId, Operand, OperandId
 from i13c.sem.asm import Resolution as InstructionResolution
-from i13c.sem.asm import build_instructions
+from i13c.sem.asm import build_instructions, build_operands
 from i13c.sem.asm import build_resolutions as build_resolution_by_instruction
 from i13c.sem.callable import CallableTarget
 from i13c.sem.callgraphs import CallPair, build_callgraph
@@ -18,8 +18,10 @@ from i13c.sem.live import (
     build_callgraph_live,
     build_flowgraphs_live,
 )
+from i13c.sem.resolve import OperandResolution
 from i13c.sem.resolve import Resolution as CallSiteResolution
 from i13c.sem.resolve import build_resolutions as build_resolution_by_callsite
+from i13c.sem.resolve import resolve_operand_bindings
 from i13c.sem.snippet import Snippet, SnippetId, build_snippets
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.terminal import Terminality, build_terminalities
@@ -28,6 +30,7 @@ from i13c.sem.terminal import Terminality, build_terminalities
 @dataclass
 class BasicNodes:
     literals: OneToOne[LiteralId, Literal]
+    operands: OneToOne[OperandId, Operand]
     instructions: OneToOne[InstructionId, Instruction]
     snippets: OneToOne[SnippetId, Snippet]
     functions: OneToOne[FunctionId, Function]
@@ -39,6 +42,7 @@ class IndexEdges:
     terminality_by_function: OneToOne[FunctionId, Terminality]
     resolution_by_callsite: OneToOne[CallSiteId, CallSiteResolution]
     resolution_by_instruction: OneToOne[InstructionId, InstructionResolution]
+    resolution_by_operand: OneToOne[OperandId, OperandResolution]
     flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
 
 
@@ -67,6 +71,7 @@ class SemanticGraph:
 
 def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
     literals = build_literals(graph)
+    operands = build_operands(graph)
     snippets = build_snippets(graph)
     functions = build_functions(graph)
     callsites = build_callsites(graph)
@@ -81,8 +86,18 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
         literals,
     )
 
+    resolution_by_operand = resolve_operand_bindings(
+        snippets,
+        instructions,
+        operands,
+        literals,
+        resolution_by_callsite,
+    )
+
     callgraph, by_callee = build_callgraph(snippets, functions, resolution_by_callsite)
-    resolution_by_instruction = build_resolution_by_instruction(instructions)
+    resolution_by_instruction = build_resolution_by_instruction(
+        operands, instructions, resolution_by_operand
+    )
 
     terminality_by_function = build_terminalities(
         snippets,
@@ -114,6 +129,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
     return SemanticGraph(
         basic=BasicNodes(
             literals=OneToOne[LiteralId, Literal].instance(literals),
+            operands=OneToOne[OperandId, Operand].instance(operands),
             instructions=OneToOne[InstructionId, Instruction].instance(instructions),
             snippets=OneToOne[SnippetId, Snippet].instance(snippets),
             functions=OneToOne[FunctionId, Function].instance(functions),
@@ -129,6 +145,9 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
             resolution_by_instruction=OneToOne[
                 InstructionId, InstructionResolution
             ].instance(resolution_by_instruction),
+            resolution_by_operand=OneToOne[OperandId, OperandResolution].instance(
+                resolution_by_operand
+            ),
             flowgraph_by_function=OneToOne[FunctionId, FlowGraph].instance(
                 flowgraph_by_function
             ),
