@@ -1,43 +1,24 @@
-from dataclasses import dataclass
 from typing import Dict, List
-from typing import Literal as Kind
 
 from i13c import ast
 from i13c.sem.core import Identifier
-from i13c.sem.literal import LiteralId
+from i13c.sem.infra import Configuration, OneToOne
 from i13c.sem.syntax import SyntaxGraph
-from i13c.src import Span
-
-ArgumentKind = Kind[b"literal"]
-
-
-@dataclass(kw_only=True, frozen=True)
-class CallSiteId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("callsite", f"{self.value:<{length}}"))
+from i13c.sem.typing.entities.callsites import Argument, CallSite, CallSiteId
+from i13c.sem.typing.entities.literals import LiteralId
 
 
-@dataclass(kw_only=True)
-class Argument:
-    kind: ArgumentKind
-    target: LiteralId
-
-
-@dataclass(kw_only=True)
-class CallSite:
-    ref: Span
-    callee: Identifier
-    arguments: List[Argument]
-
-    def describe(self) -> str:
-        return f"name={self.callee.name.decode()}/{len(self.arguments)}"
+def configure_callsites() -> Configuration:
+    return Configuration(
+        builder=build_callsites,
+        produces=("entities/callsites",),
+        requires=frozenset({("graph", "syntax/graph")}),
+    )
 
 
 def build_callsites(
     graph: SyntaxGraph,
-) -> Dict[CallSiteId, CallSite]:
+) -> OneToOne[CallSiteId, CallSite]:
     callsites: Dict[CallSiteId, CallSite] = {}
 
     for nid, statement in graph.statements.items():
@@ -69,4 +50,4 @@ def build_callsites(
             arguments=arguments,
         )
 
-    return callsites
+    return OneToOne[CallSiteId, CallSite].instance(callsites)

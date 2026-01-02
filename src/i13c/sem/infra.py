@@ -1,5 +1,26 @@
 from dataclasses import dataclass
-from typing import Dict, Generic, Iterable, List, Optional, Protocol, Tuple, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    FrozenSet,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    TypeVar,
+)
+
+CallgraphBuilder = Callable[..., Any]
+
+
+@dataclass(kw_only=True, frozen=True)
+class Configuration:
+    builder: CallgraphBuilder
+    produces: Tuple[str, ...]
+    requires: FrozenSet[Tuple[str, str]]
 
 
 class Identified(Protocol):
@@ -67,6 +88,9 @@ class OneToMany[SemanticId, SemanticNode]:
 
     def get(self, key: SemanticId) -> List[SemanticNode]:
         return self.data[key]
+
+    def find(self, key: SemanticId) -> List[SemanticNode]:
+        return self.data.get(key, [])
 
     def values(self) -> Iterable[List[SemanticNode]]:
         return self.data.values()

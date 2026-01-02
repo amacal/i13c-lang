@@ -1,4 +1,5 @@
-from i13c.sem import literal, model, syntax
+from i13c.sem import model, syntax
+from i13c.sem.typing.entities.literals import Hex, Literal, LiteralId
 from tests.sem import prepare_program
 
 
@@ -18,11 +19,11 @@ def can_build_semantic_model_literals():
     assert literals.size() == 1
     id, value = literals.pop()
 
-    assert isinstance(id, literal.LiteralId)
-    assert isinstance(value, literal.Literal)
+    assert isinstance(id, LiteralId)
+    assert isinstance(value, Literal)
 
     assert value.kind == b"hex"
-    assert isinstance(value.target, literal.Hex)
+    assert isinstance(value.target, Hex)
 
     assert value.target.value == 0x476
     assert value.target.width == 16

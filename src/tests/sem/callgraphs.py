@@ -1,4 +1,6 @@
-from i13c.sem import function, model, snippet, syntax
+from i13c.sem import model, syntax
+from i13c.sem.typing.entities.functions import FunctionId
+from i13c.sem.typing.entities.snippets import SnippetId
 from tests.sem import prepare_program
 
 
@@ -18,7 +20,7 @@ def can_build_callgraphs_from_single_main():
     assert callgraph.size() == 1
     target, callees = callgraph.pop()
 
-    assert isinstance(target, function.FunctionId)
+    assert isinstance(target, FunctionId)
     caller = semantic.basic.functions.get(target)
 
     assert caller.identifier.name == b"main"
@@ -41,7 +43,7 @@ def can_build_callgraphs_from_main_calling_snippet():
     _, entrypoint = semantic.live.entrypoints.pop()
 
     assert callgraph.size() == 2
-    assert isinstance(entrypoint.target, function.FunctionId)
+    assert isinstance(entrypoint.target, FunctionId)
 
     callees = callgraph.get(entrypoint.target)
     caller = semantic.basic.functions.get(entrypoint.target)
@@ -49,7 +51,7 @@ def can_build_callgraphs_from_main_calling_snippet():
     assert caller.identifier.name == b"main"
     assert len(callees) == 1
 
-    assert isinstance(callees[0].target, snippet.SnippetId)
+    assert isinstance(callees[0].target, SnippetId)
     callee = semantic.basic.snippets.get(callees[0].target)
 
     assert callee.identifier.name == b"foo"

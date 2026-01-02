@@ -1,4 +1,6 @@
-from i13c.sem import function, model, syntax, terminal
+from i13c.sem import model, syntax
+from i13c.sem.typing.entities.functions import FunctionId
+from i13c.sem.typing.indices.terminalities import Terminality
 from tests.sem import prepare_program
 
 
@@ -18,8 +20,8 @@ def can_build_semantic_model_terminalities_empty():
     assert terminalities.size() == 1
     id, terminality = terminalities.pop()
 
-    assert isinstance(id, function.FunctionId)
-    assert isinstance(terminality, terminal.Terminality)
+    assert isinstance(id, FunctionId)
+    assert isinstance(terminality, Terminality)
 
     assert terminality.noreturn is False
 
@@ -41,8 +43,8 @@ def can_build_semantic_model_terminalities_calls_terminal():
     assert terminalities.size() == 1
     id, terminality = terminalities.pop()
 
-    assert isinstance(id, function.FunctionId)
-    assert isinstance(terminality, terminal.Terminality)
+    assert isinstance(id, FunctionId)
+    assert isinstance(terminality, Terminality)
 
     assert terminality.noreturn is True
 
@@ -64,8 +66,8 @@ def can_build_semantic_model_terminalities_calls_non_terminal():
     assert terminalities.size() == 1
     id, terminality = terminalities.pop()
 
-    assert isinstance(id, function.FunctionId)
-    assert isinstance(terminality, terminal.Terminality)
+    assert isinstance(id, FunctionId)
+    assert isinstance(terminality, Terminality)
 
     assert terminality.noreturn is False
 
@@ -86,7 +88,7 @@ def can_build_semantic_model_terminalities_calls_without_accepted_resolutions():
     assert terminalities.size() == 1
     id, terminality = terminalities.pop()
 
-    assert isinstance(id, function.FunctionId)
-    assert isinstance(terminality, terminal.Terminality)
+    assert isinstance(id, FunctionId)
+    assert isinstance(terminality, Terminality)
 
     assert terminality.noreturn is False

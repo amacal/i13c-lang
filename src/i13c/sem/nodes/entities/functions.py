@@ -1,50 +1,28 @@
-from dataclasses import dataclass
-from typing import Dict, List, Union
+from typing import Dict, List
 
-from i13c.sem.callsite import CallSiteId
 from i13c.sem.core import Identifier, Type, default_ranges, default_width
+from i13c.sem.infra import Configuration, OneToOne
 from i13c.sem.syntax import SyntaxGraph
-from i13c.src import Span
-
-Statement = Union[CallSiteId]
-
-
-@dataclass(kw_only=True, frozen=True)
-class FunctionId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("function", f"{self.value:<{length}}"))
+from i13c.sem.typing.entities.callsites import CallSiteId
+from i13c.sem.typing.entities.functions import (
+    Function,
+    FunctionId,
+    Parameter,
+    Statement,
+)
 
 
-@dataclass(kw_only=True)
-class Parameter:
-    name: Identifier
-    type: Type
-
-    def signature(self) -> str:
-        return f"{self.name}:{self.type}"
-
-
-@dataclass(kw_only=True)
-class Function:
-    ref: Span
-    identifier: Identifier
-    noreturn: bool
-    parameters: List[Parameter]
-    statements: List[Statement]
-
-    def signature(self) -> str:
-        parameters = ", ".join([parameter.signature() for parameter in self.parameters])
-        return f"{self.identifier.name.decode()}/{len(self.parameters)} ({parameters})"
-
-    def describe(self) -> str:
-        return f"name={self.identifier.name.decode()}/{len(self.parameters)}"
+def configure_functions() -> Configuration:
+    return Configuration(
+        builder=build_functions,
+        produces=("entities/functions",),
+        requires=frozenset({("graph", "syntax/graph")}),
+    )
 
 
 def build_functions(
     graph: SyntaxGraph,
-) -> Dict[FunctionId, Function]:
+) -> OneToOne[FunctionId, Function]:
     functions: Dict[FunctionId, Function] = {}
 
     for nid, function in graph.functions.items():
@@ -86,4 +64,4 @@ def build_functions(
             statements=statements,
         )
 
-    return functions
+    return OneToOne[FunctionId, Function].instance(functions)

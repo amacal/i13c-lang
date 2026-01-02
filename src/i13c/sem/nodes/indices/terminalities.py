@@ -1,40 +1,47 @@
-from dataclasses import dataclass
 from typing import Dict, List, Set
 
-from i13c.sem.callable import Callable
-from i13c.sem.callsite import CallSiteId
-from i13c.sem.flowgraphs import FlowGraph, FlowNode
-from i13c.sem.function import Function, FunctionId
-from i13c.sem.resolve import Resolution
-from i13c.sem.snippet import Snippet, SnippetId
+from i13c.sem.infra import Configuration, OneToOne
+from i13c.sem.typing.entities.callables import Callable
+from i13c.sem.typing.entities.callsites import CallSiteId
+from i13c.sem.typing.entities.functions import Function, FunctionId
+from i13c.sem.typing.entities.snippets import Snippet, SnippetId
+from i13c.sem.typing.indices.flowgraphs import FlowGraph, FlowNode
+from i13c.sem.typing.indices.terminalities import Terminality
+from i13c.sem.typing.resolutions.callsites import CallSiteResolution
 
 
-@dataclass(kw_only=True)
-class Terminality:
-    noreturn: bool
-
-    def describe(self) -> str:
-        return f"noreturn={self.noreturn}"
+def configure_terminality_by_function() -> Configuration:
+    return Configuration(
+        builder=build_terminalities,
+        produces=("indices/terminality-by-function",),
+        requires=frozenset(
+            {
+                ("snippets", "entities/snippets"),
+                ("functions", "entities/functions"),
+                ("flowgraphs", "indices/flowgraph-by-function"),
+                ("resolutions", "resolutions/callsites"),
+            }
+        ),
+    )
 
 
 def build_terminalities(
-    snippets: Dict[SnippetId, Snippet],
-    functions: Dict[FunctionId, Function],
-    flowgraphs: Dict[FunctionId, FlowGraph],
-    resolutions: Dict[CallSiteId, Resolution],
-) -> Dict[FunctionId, Terminality]:
-
+    snippets: OneToOne[SnippetId, Snippet],
+    functions: OneToOne[FunctionId, Function],
+    flowgraphs: OneToOne[FunctionId, FlowGraph],
+    resolutions: OneToOne[CallSiteId, CallSiteResolution],
+) -> OneToOne[FunctionId, Terminality]:
     def is_callable_terminal(callable: Callable) -> bool:
         match callable:
             case Callable(kind=b"snippet", target=SnippetId() as target):
-                return snippets[target].noreturn
+                return snippets.get(target).noreturn
             case Callable(kind=b"function", target=FunctionId() as target):
                 return terminalities[target].noreturn
             case _:
                 return False
 
     def is_callsite_terminal(cid: CallSiteId) -> bool:
-        resolution = resolutions[cid]
+        resolution = resolutions.get(cid)
 
         if not resolution.accepted:
             return False
@@ -82,8 +89,8 @@ def build_terminalities(
             if terminalities[fid].noreturn:
                 continue
 
-            if not has_path_to_exit(flowgraphs[fid]):
+            if not has_path_to_exit(flowgraphs.get(fid)):
                 terminalities[fid] = Terminality(noreturn=True)
                 changed = True
 
-    return terminalities
+    return OneToOne[FunctionId, Terminality].instance(terminalities)

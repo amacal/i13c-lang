@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 from typing import Union
 
-from i13c.sem.function import FunctionId
-from i13c.sem.snippet import SnippetId
+from i13c.sem.typing.entities.functions import FunctionId
+from i13c.sem.typing.entities.snippets import SnippetId
 
 CallableKind = Kind[b"snippet", b"function"]
 CallableTarget = Union[SnippetId, FunctionId]

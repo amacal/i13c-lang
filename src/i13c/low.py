@@ -1,14 +1,15 @@
 from typing import List, Optional, Union
 
 from i13c import diag, ir, res, src
-from i13c.sem.asm import Immediate, Instruction, Register
-from i13c.sem.callsite import CallSiteId
-from i13c.sem.entrypoint import EntryPoint
-from i13c.sem.flowgraphs import FlowEntry, FlowGraph
-from i13c.sem.function import FunctionId
-from i13c.sem.literal import Hex
 from i13c.sem.model import SemanticGraph
-from i13c.sem.snippet import Slot, Snippet, SnippetId
+from i13c.sem.typing.entities.callsites import CallSiteId
+from i13c.sem.typing.entities.functions import FunctionId
+from i13c.sem.typing.entities.instructions import Instruction
+from i13c.sem.typing.entities.literals import Hex
+from i13c.sem.typing.entities.operands import Immediate, Register
+from i13c.sem.typing.entities.snippets import Slot, Snippet, SnippetId
+from i13c.sem.typing.indices.entrypoints import EntryPoint
+from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowGraph
 
 # fmt: off
 IR_REGISTER_MAP = {

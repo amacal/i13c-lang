@@ -1,4 +1,6 @@
-from i13c.sem import callsite, literal, model, syntax
+from i13c.sem import model, syntax
+from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
+from i13c.sem.typing.entities.literals import Hex, LiteralId
 from tests.sem import prepare_program
 
 
@@ -18,8 +20,8 @@ def can_build_semantic_model_callsites():
     assert callsites.size() == 1
     id, value = callsites.pop()
 
-    assert isinstance(id, callsite.CallSiteId)
-    assert isinstance(value, callsite.CallSite)
+    assert isinstance(id, CallSiteId)
+    assert isinstance(value, CallSite)
 
     assert value.callee.name == b"foo"
     assert len(value.arguments) == 1
@@ -27,12 +29,11 @@ def can_build_semantic_model_callsites():
     argument = value.arguments[0]
     assert argument.kind == b"literal"
 
-    assert isinstance(argument.target, literal.LiteralId)
+    assert isinstance(argument.target, LiteralId)
     value = semantic.basic.literals.get(argument.target)
 
     assert value.kind == b"hex"
-    assert isinstance(value.target, literal.Hex)
-
+    assert isinstance(value.target, Hex)
     assert value.target.value == 0x42
     assert value.target.width == 8
 
@@ -58,12 +59,12 @@ def can_build_callsite_with_multiple_arguments():
 
     for argument, expected in zip(value.arguments, values):
         assert argument.kind == b"literal"
-        assert isinstance(argument.target, callsite.LiteralId)
+        assert isinstance(argument.target, LiteralId)
 
         value = semantic.basic.literals.get(argument.target)
 
         assert value.kind == b"hex"
-        assert isinstance(value.target, literal.Hex)
+        assert isinstance(value.target, Hex)
 
         assert value.target.value == expected
         assert value.target.width == 8

@@ -1,5 +1,6 @@
 from i13c import ast
-from i13c.sem import function, model, syntax
+from i13c.sem import model, syntax
+from i13c.sem.typing.entities.functions import Function, FunctionId
 from tests.sem import prepare_program
 
 
@@ -19,8 +20,8 @@ def can_build_semantic_model_functions():
     assert functions.size() == 1
     id, value = functions.pop()
 
-    assert isinstance(id, function.FunctionId)
-    assert isinstance(value, function.Function)
+    assert isinstance(id, FunctionId)
+    assert isinstance(value, Function)
 
     assert value.identifier.name == b"main"
     assert value.noreturn is False

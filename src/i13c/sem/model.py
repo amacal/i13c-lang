@@ -1,30 +1,23 @@
 from dataclasses import dataclass
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
-from i13c.sem.asm import Instruction, InstructionId, Operand, OperandId
-from i13c.sem.asm import Resolution as InstructionResolution
-from i13c.sem.asm import build_instructions, build_operands
-from i13c.sem.asm import build_resolutions as build_resolution_by_instruction
-from i13c.sem.callable import CallableTarget
-from i13c.sem.callgraphs import CallPair, build_callgraph
-from i13c.sem.callsite import CallSite, CallSiteId, build_callsites
-from i13c.sem.entrypoint import EntryPoint, build_entrypoints
-from i13c.sem.flowgraphs import FlowGraph, build_flowgraphs
-from i13c.sem.function import Function, FunctionId, build_functions
+from i13c.sem.dag import configure_semantic_model
 from i13c.sem.infra import OneToMany, OneToOne
-from i13c.sem.literal import Literal, LiteralId, build_literals
-from i13c.sem.live import (
-    build_callable_live,
-    build_callgraph_live,
-    build_flowgraphs_live,
-)
-from i13c.sem.resolve import OperandResolution
-from i13c.sem.resolve import Resolution as CallSiteResolution
-from i13c.sem.resolve import build_resolutions as build_resolution_by_callsite
-from i13c.sem.resolve import resolve_operand_bindings
-from i13c.sem.snippet import Snippet, SnippetId, build_snippets
 from i13c.sem.syntax import SyntaxGraph
-from i13c.sem.terminal import Terminality, build_terminalities
+from i13c.sem.typing.entities.callables import CallableTarget
+from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
+from i13c.sem.typing.entities.functions import Function, FunctionId
+from i13c.sem.typing.entities.instructions import Instruction, InstructionId
+from i13c.sem.typing.entities.literals import Literal, LiteralId
+from i13c.sem.typing.entities.operands import Operand, OperandId
+from i13c.sem.typing.entities.snippets import Snippet, SnippetId
+from i13c.sem.typing.indices.callgraphs import CallPair
+from i13c.sem.typing.indices.entrypoints import EntryPoint
+from i13c.sem.typing.indices.flowgraphs import FlowGraph
+from i13c.sem.typing.indices.terminalities import Terminality
+from i13c.sem.typing.resolutions.callsites import CallSiteResolution
+from i13c.sem.typing.resolutions.instructions import InstructionResolution
+from i13c.sem.typing.resolutions.operands import OperandResolution
 
 
 @dataclass
@@ -70,98 +63,32 @@ class SemanticGraph:
 
 
 def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
-    literals = build_literals(graph)
-    operands = build_operands(graph)
-    snippets = build_snippets(graph)
-    functions = build_functions(graph)
-    callsites = build_callsites(graph)
-    instructions = build_instructions(graph)
-
-    flowgraph_by_function = build_flowgraphs(functions)
-
-    resolution_by_callsite = build_resolution_by_callsite(
-        functions,
-        snippets,
-        callsites,
-        literals,
-    )
-
-    resolution_by_operand = resolve_operand_bindings(
-        snippets,
-        instructions,
-        operands,
-        literals,
-        resolution_by_callsite,
-    )
-
-    callgraph, by_callee = build_callgraph(snippets, functions, resolution_by_callsite)
-    resolution_by_instruction = build_resolution_by_instruction(
-        operands, instructions, resolution_by_operand
-    )
-
-    terminality_by_function = build_terminalities(
-        snippets,
-        functions,
-        flowgraph_by_function,
-        resolution_by_callsite,
-    )
-
-    entrypoints = build_entrypoints(
-        functions,
-        snippets,
-        terminality_by_function,
-    )
-
-    flowgraph_by_function_live = build_flowgraphs_live(
-        flowgraph_by_function,
-        resolution_by_callsite,
-        snippets,
-        terminality_by_function,
-    )
-
-    callgraph_live = build_callgraph_live(flowgraph_by_function_live, callgraph)
-
-    callable_live = build_callable_live(
-        entrypoints,
-        callgraph_live,
-    )
+    artifacts: Dict[str, Any] = configure_semantic_model(graph)
 
     return SemanticGraph(
         basic=BasicNodes(
-            literals=OneToOne[LiteralId, Literal].instance(literals),
-            operands=OneToOne[OperandId, Operand].instance(operands),
-            instructions=OneToOne[InstructionId, Instruction].instance(instructions),
-            snippets=OneToOne[SnippetId, Snippet].instance(snippets),
-            functions=OneToOne[FunctionId, Function].instance(functions),
-            callsites=OneToOne[CallSiteId, CallSite].instance(callsites),
+            literals=artifacts["entities/literals"],
+            operands=artifacts["entities/operands"],
+            instructions=artifacts["entities/instructions"],
+            snippets=artifacts["entities/snippets"],
+            functions=artifacts["entities/functions"],
+            callsites=artifacts["entities/callsites"],
         ),
         indices=IndexEdges(
-            terminality_by_function=OneToOne[FunctionId, Terminality].instance(
-                terminality_by_function
-            ),
-            resolution_by_callsite=OneToOne[CallSiteId, CallSiteResolution].instance(
-                resolution_by_callsite
-            ),
-            resolution_by_instruction=OneToOne[
-                InstructionId, InstructionResolution
-            ].instance(resolution_by_instruction),
-            resolution_by_operand=OneToOne[OperandId, OperandResolution].instance(
-                resolution_by_operand
-            ),
-            flowgraph_by_function=OneToOne[FunctionId, FlowGraph].instance(
-                flowgraph_by_function
-            ),
+            terminality_by_function=artifacts["indices/terminality-by-function"],
+            resolution_by_callsite=artifacts["resolutions/callsites"],
+            resolution_by_instruction=artifacts["resolutions/instructions"],
+            resolution_by_operand=artifacts["resolutions/operands"],
+            flowgraph_by_function=artifacts["indices/flowgraph-by-function"],
         ),
         callgraph=CallGraph(
-            calls_by_caller=OneToMany[CallableTarget, CallPair].instance(callgraph),
-            calls_by_callee=OneToMany[CallableTarget, CallPair].instance(by_callee),
+            calls_by_caller=artifacts["indices/calls-by-caller"],
+            calls_by_callee=artifacts["indices/calls-by-callee"],
         ),
         live=LiveComponents(
-            entrypoints=OneToOne[CallableTarget, EntryPoint].instance(entrypoints),
-            flowgraph_by_function=OneToOne[FunctionId, FlowGraph].instance(
-                flowgraph_by_function_live
-            ),
+            entrypoints=artifacts["indices/entrypoints-by-callable"],
+            flowgraph_by_function=artifacts["analyses/flowgraph-by-function/live"],
         ),
-        callgraph_live=callgraph_live,
-        callable_live=callable_live,
+        callable_live=artifacts["analyses/callables/live"],
+        callgraph_live=artifacts["analyses/calls-by-caller/live"],
     )

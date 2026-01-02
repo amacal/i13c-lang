@@ -1,0 +1,33 @@
+from dataclasses import dataclass
+from typing import List
+from typing import Literal as Kind
+
+from i13c.sem.core import Identifier
+from i13c.sem.typing.entities.literals import LiteralId
+from i13c.src import Span
+
+ArgumentKind = Kind[b"literal"]
+
+
+@dataclass(kw_only=True, frozen=True)
+class CallSiteId:
+    value: int
+
+    def identify(self, length: int) -> str:
+        return "#".join(("callsite", f"{self.value:<{length}}"))
+
+
+@dataclass(kw_only=True)
+class Argument:
+    kind: ArgumentKind
+    target: LiteralId
+
+
+@dataclass(kw_only=True)
+class CallSite:
+    ref: Span
+    callee: Identifier
+    arguments: List[Argument]
+
+    def describe(self) -> str:
+        return f"name={self.callee.name.decode()}/{len(self.arguments)}"

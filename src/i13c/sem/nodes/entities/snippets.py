@@ -1,48 +1,24 @@
-from dataclasses import dataclass
 from typing import Dict, List
 
-from i13c.sem.asm import Binding, InstructionId, Register
 from i13c.sem.core import Identifier, Type, default_ranges, default_width
+from i13c.sem.infra import Configuration, OneToOne
 from i13c.sem.syntax import SyntaxGraph
-from i13c.src import Span
+from i13c.sem.typing.entities.instructions import Binding, InstructionId
+from i13c.sem.typing.entities.operands import Register
+from i13c.sem.typing.entities.snippets import Slot, Snippet, SnippetId
 
 
-@dataclass(kw_only=True, frozen=True)
-class SnippetId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("snippet", f"{self.value:<{length}}"))
-
-
-@dataclass(kw_only=True)
-class Slot:
-    name: Identifier
-    type: Type
-    bind: Binding
-
-    def signature(self) -> str:
-        return f"{self.name}@{self.bind}:{self.type}"
+def configure_snippets() -> Configuration:
+    return Configuration(
+        builder=build_snippets,
+        produces=("entities/snippets",),
+        requires=frozenset({("graph", "syntax/graph")}),
+    )
 
 
-@dataclass(kw_only=True)
-class Snippet:
-    ref: Span
-    identifier: Identifier
-    noreturn: bool
-    slots: List[Slot]
-    clobbers: List[Register]
-    instructions: List[InstructionId]
-
-    def signature(self) -> str:
-        slots = ", ".join([slot.signature() for slot in self.slots])
-        return f"{self.identifier.name.decode()}/{len(self.slots)} ({slots})"
-
-    def describe(self) -> str:
-        return f"name={self.identifier.name.decode()}/{len(self.slots)}"
-
-
-def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
+def build_snippets(
+    graph: SyntaxGraph,
+) -> OneToOne[SnippetId, Snippet]:
     snippets: Dict[SnippetId, Snippet] = {}
 
     for nid, snippet in graph.snippets.items():
@@ -98,4 +74,4 @@ def build_snippets(graph: SyntaxGraph) -> Dict[SnippetId, Snippet]:
             instructions=instructions,
         )
 
-    return snippets
+    return OneToOne[SnippetId, Snippet].instance(snippets)

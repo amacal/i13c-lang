@@ -1,9 +1,9 @@
 from typing import List, Optional, Union
 
 from i13c import diag, err
-from i13c.sem.function import Function, FunctionId
 from i13c.sem.model import SemanticGraph
-from i13c.sem.snippet import Snippet, SnippetId
+from i13c.sem.typing.entities.functions import Function, FunctionId
+from i13c.sem.typing.entities.snippets import Snippet, SnippetId
 
 
 def validate_called_symbol_resolved(

@@ -1,4 +1,7 @@
-from i13c.sem import callsite, flowgraphs, function, model, syntax
+from i13c.sem import model, syntax
+from i13c.sem.typing.entities.callsites import CallSiteId
+from i13c.sem.typing.entities.functions import FunctionId
+from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowExit, FlowGraph
 from tests.sem import prepare_program
 
 
@@ -18,11 +21,11 @@ def can_build_semantic_model_flowgraphs_no_statements():
     assert values.size() == 1
     id, flow = values.pop()
 
-    assert isinstance(id, function.FunctionId)
-    assert isinstance(flow, flowgraphs.FlowGraph)
+    assert isinstance(id, FunctionId)
+    assert isinstance(flow, FlowGraph)
 
-    assert isinstance(flow.entry, flowgraphs.FlowEntry)
-    assert isinstance(flow.exit, flowgraphs.FlowExit)
+    assert isinstance(flow.entry, FlowEntry)
+    assert isinstance(flow.exit, FlowExit)
 
     assert len(flow.edges) == 1
     input, outputs = flow.edges.popitem()
@@ -49,11 +52,11 @@ def can_build_semantic_model_flowgraphs_single_statement():
     assert values.size() == 1
     id, flow = values.pop()
 
-    assert isinstance(id, function.FunctionId)
-    assert isinstance(flow, flowgraphs.FlowGraph)
+    assert isinstance(id, FunctionId)
+    assert isinstance(flow, FlowGraph)
 
-    assert isinstance(flow.entry, flowgraphs.FlowEntry)
-    assert isinstance(flow.exit, flowgraphs.FlowExit)
+    assert isinstance(flow.entry, FlowEntry)
+    assert isinstance(flow.exit, FlowExit)
 
     assert len(flow.edges) == 2
     n1s = flow.edges.get(flow.entry)
@@ -84,26 +87,26 @@ def can_build_flow_with_multiple_statements_ordered():
     assert values.size() == 1
     _, flow = values.pop()
 
-    assert isinstance(flow.entry, flowgraphs.FlowEntry)
-    assert isinstance(flow.exit, flowgraphs.FlowExit)
+    assert isinstance(flow.entry, FlowEntry)
+    assert isinstance(flow.exit, FlowExit)
 
     first = flow.edges.get(flow.entry)
     assert first is not None and len(first) == 1
 
     foo = first[0]
-    assert isinstance(foo, callsite.CallSiteId)
+    assert isinstance(foo, CallSiteId)
 
     second = flow.edges.get(foo)
     assert second is not None and len(second) == 1
 
     bar = second[0]
-    assert isinstance(bar, callsite.CallSiteId)
+    assert isinstance(bar, CallSiteId)
 
     third = flow.edges.get(bar)
     assert third is not None and len(third) == 1
 
     baz = third[0]
-    assert isinstance(baz, callsite.CallSiteId)
+    assert isinstance(baz, CallSiteId)
 
     last = flow.edges.get(baz)
     assert last is not None and len(last) == 1

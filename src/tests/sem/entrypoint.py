@@ -1,4 +1,7 @@
-from i13c.sem import entrypoint, function, model, snippet, syntax
+from i13c.sem import model, syntax
+from i13c.sem.typing.entities.functions import FunctionId
+from i13c.sem.typing.entities.snippets import SnippetId
+from i13c.sem.typing.indices.entrypoints import EntryPoint
 from tests.sem import prepare_program
 
 
@@ -19,10 +22,10 @@ def can_build_entrypoints_for_valid_main_function():
     assert entrypoints.size() == 1
     _, value = entrypoints.pop()
 
-    assert isinstance(value, entrypoint.EntryPoint)
+    assert isinstance(value, EntryPoint)
     assert value.kind == b"function"
 
-    assert isinstance(value.target, function.FunctionId)
+    assert isinstance(value.target, FunctionId)
     fid = syntax.NodeId(value=value.target.value)
 
     target = graph.functions.get_by_id(fid)
@@ -61,10 +64,10 @@ def can_accept_snippet_as_entrypoint():
     assert entrypoints.size() == 1
     _, value = entrypoints.pop()
 
-    assert isinstance(value, entrypoint.EntryPoint)
+    assert isinstance(value, EntryPoint)
     assert value.kind == b"snippet"
 
-    assert isinstance(value.target, snippet.SnippetId)
+    assert isinstance(value.target, SnippetId)
     sid = syntax.NodeId(value=value.target.value)
 
     target = graph.snippets.get_by_id(sid)
