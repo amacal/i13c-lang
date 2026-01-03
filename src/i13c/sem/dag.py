@@ -85,8 +85,7 @@ def configure_semantic_model(graph: SyntaxGraph) -> Dict[str, Any]:
         configure_callgraphs_live(),
     ]
 
-    artifacts: Dict[str, Any] = {
-    }
+    artifacts: Dict[str, Any] = {}
 
     for cfg in reorder_configurations(configs):
         # prepare arguments

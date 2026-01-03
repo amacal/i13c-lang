@@ -137,71 +137,71 @@ class Token:
     length: int
 
     @staticmethod
-    def semicolon_token(offset: int) -> "Token":
+    def semicolon_token(offset: int) -> Token:
         return Token(code=TOKEN_SEMICOLON, offset=offset, length=1)
 
     @staticmethod
-    def comma_token(offset: int) -> "Token":
+    def comma_token(offset: int) -> Token:
         return Token(code=TOKEN_COMMA, offset=offset, length=1)
 
     @staticmethod
-    def eof_token(offset: int) -> "Token":
+    def eof_token(offset: int) -> Token:
         return Token(code=TOKEN_EOF, offset=offset, length=0)
 
     @staticmethod
-    def hex_token(offset: int, length: int) -> "Token":
+    def hex_token(offset: int, length: int) -> Token:
         return Token(code=TOKEN_HEX, offset=offset, length=length)
 
     @staticmethod
-    def ident_token(offset: int, length: int) -> "Token":
+    def ident_token(offset: int, length: int) -> Token:
         return Token(code=TOKEN_IDENT, offset=offset, length=length)
 
     @staticmethod
-    def reg_token(offset: int, length: int) -> "Token":
+    def reg_token(offset: int, length: int) -> Token:
         return Token(code=TOKEN_REG, offset=offset, length=length)
 
     @staticmethod
-    def range_token(offset: int, length: int) -> "Token":
+    def range_token(offset: int, length: int) -> Token:
         return Token(code=TOKEN_RANGE, offset=offset, length=length)
 
     @staticmethod
-    def keyword_token(offset: int, length: int) -> "Token":
+    def keyword_token(offset: int, length: int) -> Token:
         return Token(code=TOKEN_KEYWORD, offset=offset, length=length)
 
     @staticmethod
-    def type_token(offset: int, length: int) -> "Token":
+    def type_token(offset: int, length: int) -> Token:
         return Token(code=TOKEN_TYPE, offset=offset, length=length)
 
     @staticmethod
-    def round_open_token(offset: int) -> "Token":
+    def round_open_token(offset: int) -> Token:
         return Token(code=TOKEN_ROUND_OPEN, offset=offset, length=1)
 
     @staticmethod
-    def round_close_token(offset: int) -> "Token":
+    def round_close_token(offset: int) -> Token:
         return Token(code=TOKEN_ROUND_CLOSE, offset=offset, length=1)
 
     @staticmethod
-    def curly_open_token(offset: int) -> "Token":
+    def curly_open_token(offset: int) -> Token:
         return Token(code=TOKEN_CURLY_OPEN, offset=offset, length=1)
 
     @staticmethod
-    def curly_close_token(offset: int) -> "Token":
+    def curly_close_token(offset: int) -> Token:
         return Token(code=TOKEN_CURLY_CLOSE, offset=offset, length=1)
 
     @staticmethod
-    def square_open_token(offset: int) -> "Token":
+    def square_open_token(offset: int) -> Token:
         return Token(code=TOKEN_SQUARE_OPEN, offset=offset, length=1)
 
     @staticmethod
-    def square_close_token(offset: int) -> "Token":
+    def square_close_token(offset: int) -> Token:
         return Token(code=TOKEN_SQUARE_CLOSE, offset=offset, length=1)
 
     @staticmethod
-    def at_token(offset: int) -> "Token":
+    def at_token(offset: int) -> Token:
         return Token(code=TOKEN_AT, offset=offset, length=1)
 
     @staticmethod
-    def colon_token(offset: int) -> "Token":
+    def colon_token(offset: int) -> Token:
         return Token(code=TOKEN_COLON, offset=offset, length=1)
 
 

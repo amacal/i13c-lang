@@ -14,11 +14,11 @@ class Binding:
     name: bytes
 
     @staticmethod
-    def register(name: bytes) -> "Binding":
+    def register(name: bytes) -> Binding:
         return Binding(kind=b"register", name=name)
 
     @staticmethod
-    def immediate() -> "Binding":
+    def immediate() -> Binding:
         return Binding(kind=b"immediate", name=b"imm")
 
     def __str__(self) -> str:

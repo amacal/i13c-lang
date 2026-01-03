@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, Optional, Protocol, Tuple, TypeVar, Union
 
 from i13c import ast
+from i13c.sem.generator import Generator
 
 AstNode = TypeVar("AstNode")
 
@@ -46,14 +47,11 @@ class Bidirectional[AstNode]:
 
 class NodesVisitor:
     def __init__(self) -> None:
-        self.counter = 0
-        self.graph = SyntaxGraph.empty()
+        self.generator = Generator()
+        self.graph = SyntaxGraph.empty(self.generator)
 
     def next(self) -> NodeId:
-        self.counter += 1
-        nid = NodeId(value=self.counter)
-
-        return nid
+        return NodeId(value=self.generator.next())
 
     def on_program(self, program: ast.Program) -> None:
         pass
@@ -79,6 +77,7 @@ class NodesVisitor:
 
 @dataclass(kw_only=True)
 class SyntaxGraph:
+    generator: Generator
     snippets: Bidirectional[ast.Snippet]
     operands: Bidirectional[ast.Operand]
     instructions: Bidirectional[ast.Instruction]
@@ -87,8 +86,9 @@ class SyntaxGraph:
     literals: Bidirectional[ast.Literal]
 
     @staticmethod
-    def empty() -> "SyntaxGraph":
+    def empty(generator: Generator) -> SyntaxGraph:
         return SyntaxGraph(
+            generator=generator,
             snippets=Bidirectional[ast.Snippet].empty(),
             operands=Bidirectional[ast.Operand].empty(),
             instructions=Bidirectional[ast.Instruction].empty(),
