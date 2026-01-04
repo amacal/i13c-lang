@@ -3,6 +3,12 @@ from typing import Dict, List
 
 from i13c import diag, err, res, src
 
+# - tabulators and other whitespace characters are
+#   on purpose excluded to enforce only spaces and newlines
+# - hex digits are lowercase only to simplify the lexer
+#
+# it is a language design decision not a limitation of the lexer
+
 CLASS_AT = b"@"
 CLASS_DOT = b"."
 CLASS_COMMA = b","

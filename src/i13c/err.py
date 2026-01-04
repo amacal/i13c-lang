@@ -13,6 +13,7 @@ ERROR_2002 = "E2002"  # Unexpected keyword
 ERROR_2003 = "E2003"  # Function flag already specified
 
 ERROR_3000 = "E3000"  # Unknown mnemonic
+ERROR_3001 = "E3001"  # Invalid type ranges
 ERROR_3002 = "E3002"  # Invalid operand types
 ERROR_3003 = "E3003"  # Duplicated parameter bindings
 ERROR_3004 = "E3004"  # Duplicated parameter names
@@ -106,6 +107,16 @@ def report_e3000_unknown_instruction(ref: src.SpanLike) -> diag.Diagnostic:
     )
 
 
+def report_e3001_invalid_type_ranges(
+    ref: src.SpanLike, lower: int, upper: int
+) -> diag.Diagnostic:
+    return diag.Diagnostic(
+        ref=ref,
+        code=ERROR_3001,
+        message=f"Invalid type ranges [{lower}..{upper}] at offset {ref.offset}",
+    )
+
+
 def report_e3002_invalid_operand_types(
     ref: src.SpanLike, found: List[str]
 ) -> diag.Diagnostic:
@@ -159,12 +170,15 @@ def report_e3006_duplicated_function_names(
 def report_e3007_no_matching_overload(
     ref: src.SpanLike, name: bytes, candidates: List[str]
 ) -> diag.Diagnostic:
-    candidates = [f"  - {c}" for c in candidates]
+    lines = "\n".join([f"  - {c}" for c in candidates])
 
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_3007,
-        message=f"Called symbol '{str(name)}' has no matching overload.\nTried candidates:\n{'\n'.join(candidates)}",
+        message=(
+            "Called symbol '{name}' has no matching overload.\n"
+            "Tried candidates:\n{canidates}"
+        ).format(name=str(name), canidates=lines),
     )
 
 

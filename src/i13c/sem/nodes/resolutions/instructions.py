@@ -74,6 +74,7 @@ def match_operand(
 def match_instruction(
     operands: OneToOne[OperandId, Operand],
     immediates: Dict[bytes, Type],
+    registers: Dict[bytes, Register],
     instruction: Instruction,
     variants: List[MnemonicVariant],
 ) -> Tuple[
@@ -98,7 +99,7 @@ def match_instruction(
 
             # take provided operand
             operand = operands.get(oid)
-            substitute: OperandSubstitute
+            substitute: Optional[OperandSubstitute] = None
 
             # if operand is a reference, try to resolve
             # from provided immediate type mapping
@@ -107,15 +108,24 @@ def match_instruction(
                 # satisfy type constraints
                 assert isinstance(operand.target, Reference)
 
-                # we expect it has to be inside the mapping
-                if operand.target.name not in immediates:
+                # try to resolve from immediates mapping
+                if operand.target.name in immediates:
+                    substitute = OperandSubstitute(
+                        kind=b"immediate",
+                        width=immediates[operand.target.name].width,
+                    )
+
+                # else try to resolve as register
+                if operand.target.name in registers:
+                    substitute = OperandSubstitute(
+                        kind=b"register",
+                        width=registers[operand.target.name].width,
+                    )
+
+                # if we could not resolve, mark as such
+                if substitute is None:
                     reason = b"unresolved"
                     break
-
-                substitute = OperandSubstitute(
-                    kind=b"immediate",
-                    width=immediates[operand.target.name].width,
-                )
 
             # try to extract immediate directly
             elif operand.kind == b"immediate":
@@ -162,11 +172,17 @@ def build_resolution_by_instruction(
 
     for snippet in snippets.values():
         immediates: Dict[bytes, Type] = {}
+        registers: Dict[bytes, Register] = {}
 
         # collect immediate slots
         for slot in snippet.slots:
             if slot.bind.via_immediate():
                 immediates[slot.name.name] = slot.type
+            else:
+                registers[slot.name.name] = Register(
+                    name=slot.bind.name,
+                    width=slot.type.width,
+                )
 
         for iid in snippet.instructions:
             accepted: Dict[MnemonicVariant, MnemonicBindings] = {}
@@ -175,10 +191,10 @@ def build_resolution_by_instruction(
             # retrieve instruction
             instruction = instructions.get(iid)
 
+            # if instruction mnemonic is known, try to match
             if variants := INSTRUCTIONS_TABLE.get(instruction.mnemonic.name):
-                accepted, rejected = match_instruction(
-                    operands, immediates, instruction, variants
-                )
+                args = (operands, immediates, registers, instruction, variants)
+                accepted, rejected = match_instruction(*args)
 
             acceptance = [
                 InstructionAcceptance(

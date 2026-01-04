@@ -1,4 +1,4 @@
-from typing import Dict, List, Set, Optional
+from typing import Dict, List, Optional, Set
 
 from i13c.sem.infra import Configuration, OneToOne
 from i13c.sem.typing.entities.callables import Callable

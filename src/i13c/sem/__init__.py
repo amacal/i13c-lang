@@ -4,6 +4,7 @@ from i13c import ast, diag
 from i13c.sem.model import SemanticGraph
 from i13c.sem.rules import (
     e3000,
+    e3001,
     e3002,
     e3003,
     e3004,
@@ -19,6 +20,7 @@ from i13c.sem.rules import (
 
 RULES: List[Callable[[SemanticGraph], List[diag.Diagnostic]]] = [
     e3000.validate_assembly_mnemonic,
+    e3001.validate_type_ranges,
     e3002.validate_assembly_operand_types,
     e3003.validate_duplicated_slot_bindings,
     e3004.validate_duplicated_parameter_names,

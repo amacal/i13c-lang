@@ -19,6 +19,7 @@ def can_do_nothing_without_any_function():
 
     assert terminalities.size() == 0
 
+
 def can_build_terminalities_for_single_function_without_any_statement():
     _, program = prepare_program(
         """

@@ -1,10 +1,10 @@
 from i13c.sem import model, syntax
 from i13c.sem.typing.entities.operands import (
-    OperandId,
-    Operand,
-    Register,
     Immediate,
+    Operand,
+    OperandId,
     Reference,
+    Register,
 )
 from tests.sem import prepare_program
 
