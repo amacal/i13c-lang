@@ -65,6 +65,10 @@ def match_operand(
     if operand.kind != spec.kind:
         return b"type-mismatch"
 
+    # on purpose we match exactly the width even for immediates
+    # because instruction variants are defined that way; we can
+    # have full control over which immediate widths are allowed
+
     if operand.width != spec.width:
         return b"width-mismatch"
 

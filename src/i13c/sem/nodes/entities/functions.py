@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from i13c.sem.core import Identifier, Type, default_ranges, default_width
+from i13c.sem.core import Identifier, Type, default_ranges, width_from_ranges
 from i13c.sem.infra import Configuration, OneToOne
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.callsites import CallSiteId
@@ -30,9 +30,15 @@ def build_functions(
         statements: List[Statement] = []
 
         for parameter in function.parameters:
-            # default width for declared type
-            width = default_width(parameter.type.name)
+            # default width and ranges for declared type
             ranges = default_ranges(parameter.type.name)
+
+            # override ranges if specified
+            if parameter.type.range is not None:
+                ranges = (parameter.type.range.lower, parameter.type.range.upper)
+
+            # derive width from ranges
+            width = width_from_ranges(*ranges)
 
             # construct slot type with range or default width
             type = Type(

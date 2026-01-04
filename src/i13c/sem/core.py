@@ -62,3 +62,7 @@ def default_ranges(name: bytes) -> Tuple[int, int]:
         return (0, 0xFFFFFFFFFFFFFFFF)
 
     assert False, f"Unknown type name: {name.decode()}"
+
+
+def width_from_ranges(lower: int, upper: int) -> Width:
+    return derive_width(upper)

@@ -98,3 +98,40 @@ def can_build_a_function_with_call_statement():
 
     assert statement.name == b"foo"
     assert len(statement.arguments) == 1
+
+
+def can_build_function_with_properly_derived_types():
+    _, program = prepare_program(
+        """
+            fn main(
+                r1: u64[0x0000..0xffff],
+                r2: u8[0x00..0x10]
+            ) {}
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    functions = semantic.basic.functions
+
+    assert functions.size() == 1
+    _, value = functions.peak()
+
+    assert value.identifier.name == b"main"
+    assert len(value.parameters) == 2
+
+    param1 = value.parameters[0]
+    assert param1.name.name == b"r1"
+    assert param1.type.name == b"u64"
+    assert param1.type.width == 16
+    assert param1.type.lower == 0x0000
+    assert param1.type.upper == 0xFFFF
+
+    param2 = value.parameters[1]
+    assert param2.name.name == b"r2"
+    assert param2.type.name == b"u8"
+    assert param2.type.width == 8
+    assert param2.type.lower == 0x00
+    assert param2.type.upper == 0x10
