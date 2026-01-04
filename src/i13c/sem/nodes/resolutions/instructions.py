@@ -84,7 +84,9 @@ def match_instruction(
     accepted: Dict[MnemonicVariant, MnemonicBindings] = {}
     rejected: Dict[MnemonicVariant, InstructionRejectionReason] = {}
     for variant in variants:
+
         reason: Optional[InstructionRejectionReason] = None
+        bindings: MnemonicBindings = []
 
         # first check arity
         if len(instruction.operands) != len(variant):
@@ -137,9 +139,12 @@ def match_instruction(
             if reason := match_operand(substitute, spec):
                 break
 
-        # finally, classify as accepted or rejected
+            bindings.append(operand.target)
+
+        # finally, classify as accepted with bindings
+        # or rejected with determined reason
         if reason is None:
-            accepted[variant] = []
+            accepted[variant] = bindings
         else:
             rejected[variant] = reason
 

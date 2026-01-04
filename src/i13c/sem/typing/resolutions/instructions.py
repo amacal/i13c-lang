@@ -5,7 +5,7 @@ from typing import Optional, Tuple, Union
 
 from i13c.sem.core import Width
 from i13c.sem.typing.entities.instructions import Mnemonic
-from i13c.sem.typing.entities.operands import Immediate, OperandKind, Register
+from i13c.sem.typing.entities.operands import Immediate, OperandKind, Register, Reference
 
 InstructionRejectionReason = Kind[
     b"wrong-arity",
@@ -42,7 +42,7 @@ class OperandSpec:
         return self.kind[0:3].decode()
 
 
-MnemonicBindings = List[Union[Register, Immediate]]
+MnemonicBindings = List[Union[Register, Immediate, Reference]]
 
 
 @dataclass(kw_only=True)
