@@ -4,7 +4,46 @@ from i13c.sem.typing.entities.literals import Hex, LiteralId
 from tests.sem import prepare_program
 
 
-def can_build_semantic_model_callsites():
+def can_do_nothing_without_any_callsite():
+    _, program = prepare_program(
+        """
+            fn main() noreturn { }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    callsites = semantic.basic.callsites
+
+    assert callsites.size() == 0
+
+
+def can_build_callsite_with_no_arguments():
+    _, program = prepare_program(
+        """
+            fn main() noreturn { foo(); }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    callsites = semantic.basic.callsites
+
+    assert callsites.size() == 1
+    id, value = callsites.pop()
+
+    assert isinstance(id, CallSiteId)
+    assert isinstance(value, CallSite)
+
+    assert value.callee.name == b"foo"
+    assert len(value.arguments) == 0
+
+
+def can_build_callsite_with_single_argument():
     _, program = prepare_program(
         """
             fn main() noreturn { foo(0x42); }
@@ -55,7 +94,7 @@ def can_build_callsite_with_multiple_arguments():
     _, value = callsites.pop()
 
     assert len(value.arguments) == 3
-    values = [0x1, 0x2, 0x3]
+    values = [0x01, 0x02, 0x03]
 
     for argument, expected in zip(value.arguments, values):
         assert argument.kind == b"literal"
