@@ -97,6 +97,9 @@ class SyntaxGraph:
             literals=Bidirectional[ast.Literal].empty(),
         )
 
+    def next(self) -> int:
+        return self.generator.next()
+
     def as_dict(
         self, key: str
     ) -> Optional[Union[Dict[int, Dict[str, Any]], Dict[str, Any]]]:

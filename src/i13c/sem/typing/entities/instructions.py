@@ -21,6 +21,9 @@ class Binding:
     def immediate() -> Binding:
         return Binding(kind=b"immediate", name=b"imm")
 
+    def via_immediate(self) -> bool:
+        return self.kind == b"immediate"
+
     def __str__(self) -> str:
         return self.name.decode()
 

@@ -14,10 +14,10 @@ from i13c.sem.nodes.entities.snippets import configure_snippets
 from i13c.sem.nodes.indices.callgraphs import configure_callgraphs
 from i13c.sem.nodes.indices.entrypoints import configure_entrypoint_by_callable
 from i13c.sem.nodes.indices.flowgraphs import configure_flowgraph_by_function
+from i13c.sem.nodes.indices.instances import configure_instance_by_callsite
 from i13c.sem.nodes.indices.terminalities import configure_terminality_by_function
 from i13c.sem.nodes.resolutions.callsites import configure_resolution_by_callsite
 from i13c.sem.nodes.resolutions.instructions import configure_resolution_by_instruction
-from i13c.sem.nodes.resolutions.operands import configure_resolution_by_operand
 from i13c.sem.syntax import SyntaxGraph
 
 
@@ -77,9 +77,9 @@ def configure_semantic_model(graph: SyntaxGraph) -> Dict[str, Any]:
         configure_flowgraph_by_function(),
         configure_terminality_by_function(),
         configure_entrypoint_by_callable(),
+        configure_instance_by_callsite(),
         configure_resolution_by_callsite(),
         configure_resolution_by_instruction(),
-        configure_resolution_by_operand(),
         configure_flowgraphs_live(),
         configure_callables_live(),
         configure_callgraphs_live(),

@@ -1,8 +1,18 @@
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from i13c.sem.core import Type, Width
 from i13c.sem.infra import Configuration, OneToOne
 from i13c.sem.typing.entities.instructions import Instruction, InstructionId
-from i13c.sem.typing.entities.operands import Immediate, Operand, OperandId, Register
+from i13c.sem.typing.entities.operands import (
+    Immediate,
+    Operand,
+    OperandId,
+    OperandKind,
+    Reference,
+    Register,
+)
+from i13c.sem.typing.entities.snippets import Snippet, SnippetId
 from i13c.sem.typing.resolutions.instructions import (
     InstructionAcceptance,
     InstructionRejection,
@@ -12,7 +22,6 @@ from i13c.sem.typing.resolutions.instructions import (
     MnemonicVariant,
     OperandSpec,
 )
-from i13c.sem.typing.resolutions.operands import OperandResolution
 
 
 def configure_resolution_by_instruction() -> Configuration:
@@ -23,7 +32,7 @@ def configure_resolution_by_instruction() -> Configuration:
             {
                 ("instructions", "entities/instructions"),
                 ("operands", "entities/operands"),
-                ("resolution_by_operand", "resolutions/operands"),
+                ("snippets", "entities/snippets"),
             }
         ),
     )
@@ -43,31 +52,28 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
 }
 
 
+@dataclass(kw_only=True)
+class OperandSubstitute:
+    kind: OperandKind
+    width: Width
+
+
 def match_operand(
-    operand: Operand, spec: OperandSpec
+    operand: OperandSubstitute, spec: OperandSpec
 ) -> Optional[InstructionRejectionReason]:
 
     if operand.kind != spec.kind:
         return b"type-mismatch"
 
-    if operand.kind == b"register":
-        assert isinstance(operand.target, Register)
-
-        if spec.width != 64:
-            return b"width-mismatch"
-
-    if operand.kind == b"immediate":
-        assert isinstance(operand.target, Immediate)
-
-        if operand.target.width != spec.width:
-            return b"width-mismatch"
+    if operand.width != spec.width:
+        return b"width-mismatch"
 
     return None
 
 
 def match_instruction(
     operands: OneToOne[OperandId, Operand],
-    resolutions: OneToOne[OperandId, OperandResolution],
+    immediates: Dict[bytes, Type],
     instruction: Instruction,
     variants: List[MnemonicVariant],
 ) -> Tuple[
@@ -89,21 +95,46 @@ def match_instruction(
         for oid, spec in zip(instruction.operands, variant):
 
             # take provided operand
-            operand: Operand = operands.get(oid)
+            operand = operands.get(oid)
+            substitute: OperandSubstitute
 
             # if operand is a reference, try to resolve
-            # but take only first acceptance, because
-            # ambiguity will be reported elsewhere
+            # from provided immediate type mapping
             if operand.kind == b"reference":
-                if resolution := resolutions.find(oid):
-                    if resolved := resolution.accepted:
-                        operand = Operand(
-                            kind=resolved[0].kind,
-                            target=resolved[0].target,
-                        )
+
+                # satisfy type constraints
+                assert isinstance(operand.target, Reference)
+
+                # we know it has be inside mapping
+                assert operand.target.name in immediates
+
+                substitute = OperandSubstitute(
+                    kind=b"immediate",
+                    width=immediates[operand.target.name].width,
+                )
+
+            # try to extract immediate directly
+            elif operand.kind == b"immediate":
+                # satisfy type constraints
+                assert isinstance(operand.target, Immediate)
+
+                substitute = OperandSubstitute(
+                    kind=operand.kind,
+                    width=operand.target.width,
+                )
+
+            # otherwise it has to be a register
+            else:
+                # satisfy type constraints
+                assert isinstance(operand.target, Register)
+
+                substitute = OperandSubstitute(
+                    kind=operand.kind,
+                    width=operand.target.width,
+                )
 
             # any reason requires immediate stop
-            if reason := match_operand(operand, spec):
+            if reason := match_operand(substitute, spec):
                 break
 
         # finally, classify as accepted or rejected
@@ -117,37 +148,48 @@ def match_instruction(
 
 def build_resolution_by_instruction(
     operands: OneToOne[OperandId, Operand],
+    snippets: OneToOne[SnippetId, Snippet],
     instructions: OneToOne[InstructionId, Instruction],
-    resolution_by_operand: OneToOne[OperandId, OperandResolution],
 ) -> OneToOne[InstructionId, InstructionResolution]:
     resolutions: Dict[InstructionId, InstructionResolution] = {}
 
-    for iid, instruction in instructions.items():
-        accepted: Dict[MnemonicVariant, MnemonicBindings] = {}
-        rejected: Dict[MnemonicVariant, InstructionRejectionReason] = {}
+    for snippet in snippets.values():
+        immediates: Dict[bytes, Type] = {}
 
-        if variants := INSTRUCTIONS_TABLE.get(instruction.mnemonic.name):
-            accepted, rejected = match_instruction(
-                operands, resolution_by_operand, instruction, variants
+        # collect immediate slots
+        for slot in snippet.slots:
+            if slot.bind.via_immediate():
+                immediates[slot.name.name] = slot.type
+
+        for iid in snippet.instructions:
+            accepted: Dict[MnemonicVariant, MnemonicBindings] = {}
+            rejected: Dict[MnemonicVariant, InstructionRejectionReason] = {}
+
+            # retrieve instruction
+            instruction = instructions.get(iid)
+
+            if variants := INSTRUCTIONS_TABLE.get(instruction.mnemonic.name):
+                accepted, rejected = match_instruction(
+                    operands, immediates, instruction, variants
+                )
+
+            acceptance = [
+                InstructionAcceptance(
+                    mnemonic=instruction.mnemonic, variant=variant, bindings=bindings
+                )
+                for variant, bindings in accepted.items()
+            ]
+
+            rejection = [
+                InstructionRejection(
+                    mnemonic=instruction.mnemonic, variant=variant, reason=reason
+                )
+                for variant, reason in rejected.items()
+            ]
+
+            resolutions[iid] = InstructionResolution(
+                accepted=acceptance,
+                rejected=rejection,
             )
-
-        acceptance = [
-            InstructionAcceptance(
-                mnemonic=instruction.mnemonic, variant=variant, bindings=bindings
-            )
-            for variant, bindings in accepted.items()
-        ]
-
-        rejection = [
-            InstructionRejection(
-                mnemonic=instruction.mnemonic, variant=variant, reason=reason
-            )
-            for variant, reason in rejected.items()
-        ]
-
-        resolutions[iid] = InstructionResolution(
-            accepted=acceptance,
-            rejected=rejection,
-        )
 
     return OneToOne[InstructionId, InstructionResolution].instance(resolutions)

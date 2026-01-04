@@ -28,7 +28,7 @@ def build_snippets(
 
         # collect clobbers
         for reg in snippet.clobbers:
-            clobbers.append(Register(name=reg.name))
+            clobbers.append(Register(name=reg.name, width=64))
 
         # collect slots
         for slot in snippet.slots:

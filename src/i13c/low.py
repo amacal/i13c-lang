@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from i13c import diag, ir, res, src
 from i13c.sem.model import SemanticGraph
@@ -6,7 +6,7 @@ from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.functions import FunctionId
 from i13c.sem.typing.entities.instructions import Instruction
 from i13c.sem.typing.entities.literals import Hex
-from i13c.sem.typing.entities.operands import Immediate, Register
+from i13c.sem.typing.entities.operands import Immediate, Operand, OperandId, Register
 from i13c.sem.typing.entities.snippets import Slot, Snippet, SnippetId
 from i13c.sem.typing.indices.entrypoints import EntryPoint
 from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowGraph
@@ -122,18 +122,25 @@ def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction
 
     # find callsite and its resolution
     callsite = graph.basic.callsites.get(cid)
-    resolution = graph.indices.resolution_by_callsite.get(cid)
+    callsite_resolution = graph.indices.resolution_by_callsite.get(cid)
 
     # we know there is exactly one accepted resolution
-    assert len(resolution.accepted) == 1
-    acceptance = resolution.accepted[0]
+    assert len(callsite_resolution.accepted) == 1
+    acceptance = callsite_resolution.accepted[0]
 
     # we know we supported only snippet callsites
     assert acceptance.callable.kind == b"snippet"
     assert isinstance(acceptance.callable.target, SnippetId)
-    snippet = graph.basic.snippets.get(acceptance.callable.target)
 
-    for binding in acceptance.bindings:
+    # find snippet and optionally its instance
+    snippet = graph.basic.snippets.get(acceptance.callable.target)
+    instance = graph.indices.instance_by_callsite.find(cid)
+
+    # find rewritten bindings and operands
+    bindings = instance.bindings if instance else acceptance.bindings
+    operands = instance.operands if instance else {}
+
+    for binding in bindings:
         # because this is a snippet callsite
         assert isinstance(binding.target, Slot)
 
@@ -150,13 +157,12 @@ def lower_callsite(graph: SemanticGraph, cid: CallSiteId) -> List[ir.Instruction
         imm: int = literal.target.value
 
         # emit move instruction for binding
-        if bind.kind == b"register":
-            out.append(ir.MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm))
+        out.append(ir.MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm))
 
-    # finally, emit snippet instructions
+    # finally, emit snippet instructions with rewritten operands
     for iid in snippet.instructions:
         instruction = graph.basic.instructions.get(iid)
-        out.append(lower_instruction(graph, instruction))
+        out.append(lower_instruction(graph, instruction, operands))
 
     return out
 
@@ -166,7 +172,7 @@ def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
 
     for iid in snippet.instructions:
         instruction = graph.basic.instructions.get(iid)
-        out.append(lower_instruction(graph, instruction))
+        out.append(lower_instruction(graph, instruction, {}))
 
     return ir.CodeBlock(
         instructions=out,
@@ -174,12 +180,16 @@ def lower_snippet(graph: SemanticGraph, snippet: Snippet) -> ir.CodeBlock:
     )
 
 
-def lower_instruction(graph: SemanticGraph, instruction: Instruction) -> ir.Instruction:
+def lower_instruction(
+    graph: SemanticGraph,
+    instruction: Instruction,
+    operands: Dict[OperandId, Operand],
+) -> ir.Instruction:
     if instruction.mnemonic.name == b"mov":
-        return lower_instruction_mov(graph, instruction)
+        return lower_instruction_mov(graph, instruction, operands)
 
     elif instruction.mnemonic.name == b"shl":
-        return lower_instruction_shl(graph, instruction)
+        return lower_instruction_shl(graph, instruction, operands)
 
     elif instruction.mnemonic.name == b"syscall":
         return lower_instruction_syscall()
@@ -188,10 +198,18 @@ def lower_instruction(graph: SemanticGraph, instruction: Instruction) -> ir.Inst
 
 
 def lower_instruction_mov(
-    graph: SemanticGraph, instruction: Instruction
+    graph: SemanticGraph,
+    instruction: Instruction,
+    operands: Dict[OperandId, Operand],
 ) -> ir.Instruction:
-    dst = graph.basic.operands.get(instruction.operands[0])
-    src = graph.basic.operands.get(instruction.operands[1])
+
+    # first try out rewritten operands
+    dst = operands.get(instruction.operands[0])
+    src = operands.get(instruction.operands[1])
+
+    # fallback to original operands if not rewritten
+    dst = dst or graph.basic.operands.get(instruction.operands[0])
+    src = src or graph.basic.operands.get(instruction.operands[1])
 
     assert isinstance(dst.target, Register)
     assert isinstance(src.target, Immediate)
@@ -203,26 +221,24 @@ def lower_instruction_mov(
 
 
 def lower_instruction_shl(
-    graph: SemanticGraph, instruction: Instruction
+    graph: SemanticGraph,
+    instruction: Instruction,
+    operands: Dict[OperandId, Operand],
 ) -> ir.Instruction:
 
-    dst_id = instruction.operands[0]
-    src_id = instruction.operands[1]
+    # first try out rewritten operands
+    dst = operands.get(instruction.operands[0])
+    src = operands.get(instruction.operands[1])
 
-    dst = graph.basic.operands.get(dst_id).target
-    src = graph.basic.operands.get(src_id).target
+    # fallback to original operands if not rewritten
+    dst = dst or graph.basic.operands.get(instruction.operands[0])
+    src = src or graph.basic.operands.get(instruction.operands[1])
 
-    if resolution := graph.indices.resolution_by_operand.find(dst_id):
-        dst = resolution.accepted[0].target
+    assert isinstance(dst.target, Register)
+    assert isinstance(src.target, Immediate)
 
-    if resolution := graph.indices.resolution_by_operand.find(src_id):
-        src = resolution.accepted[0].target
-
-    assert isinstance(dst, Register)
-    assert isinstance(src, Immediate)
-
-    dst_reg = IR_REGISTER_MAP[dst.name]
-    src_imm = src.value
+    dst_reg = IR_REGISTER_MAP[dst.target.name]
+    src_imm = src.target.value
 
     return ir.ShlRegImm(dst=dst_reg, imm=src_imm)
 

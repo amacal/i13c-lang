@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
-from typing import Optional, Union
+from typing import Union
 
 from i13c.sem.core import Width, derive_width
 
@@ -8,6 +8,7 @@ from i13c.sem.core import Width, derive_width
 @dataclass(kw_only=True)
 class Register:
     name: bytes
+    width: Width
 
     def __str__(self) -> str:
         return self.name.decode()
@@ -16,7 +17,7 @@ class Register:
 @dataclass(kw_only=True)
 class Immediate:
     value: int
-    width: Optional[Width]
+    width: Width
 
 
 @dataclass(kw_only=True)
@@ -43,7 +44,7 @@ class Operand:
 
     @staticmethod
     def register(name: bytes) -> Operand:
-        return Operand(kind=b"register", target=Register(name=name))
+        return Operand(kind=b"register", target=Register(name=name, width=64))
 
     @staticmethod
     def immediate(value: int) -> Operand:

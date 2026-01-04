@@ -5,7 +5,7 @@ from typing import Tuple
 Width = Kind[8, 16, 32, 64]
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True)
 class Identifier:
     name: bytes
 
@@ -13,7 +13,7 @@ class Identifier:
         return self.name.decode()
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True)
 class Type:
     name: bytes
     width: Width

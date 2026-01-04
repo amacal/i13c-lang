@@ -14,10 +14,10 @@ from i13c.sem.typing.entities.snippets import Snippet, SnippetId
 from i13c.sem.typing.indices.callgraphs import CallPair
 from i13c.sem.typing.indices.entrypoints import EntryPoint
 from i13c.sem.typing.indices.flowgraphs import FlowGraph
+from i13c.sem.typing.indices.instances import Instance
 from i13c.sem.typing.indices.terminalities import Terminality
 from i13c.sem.typing.resolutions.callsites import CallSiteResolution
 from i13c.sem.typing.resolutions.instructions import InstructionResolution
-from i13c.sem.typing.resolutions.operands import OperandResolution
 
 
 @dataclass
@@ -35,8 +35,8 @@ class IndexEdges:
     terminality_by_function: OneToOne[FunctionId, Terminality]
     resolution_by_callsite: OneToOne[CallSiteId, CallSiteResolution]
     resolution_by_instruction: OneToOne[InstructionId, InstructionResolution]
-    resolution_by_operand: OneToOne[OperandId, OperandResolution]
     flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
+    instance_by_callsite: OneToOne[CallSiteId, Instance]
 
 
 @dataclass
@@ -78,8 +78,8 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
             terminality_by_function=artifacts["indices/terminality-by-function"],
             resolution_by_callsite=artifacts["resolutions/callsites"],
             resolution_by_instruction=artifacts["resolutions/instructions"],
-            resolution_by_operand=artifacts["resolutions/operands"],
             flowgraph_by_function=artifacts["indices/flowgraph-by-function"],
+            instance_by_callsite=artifacts["indices/instance-by-callsite"],
         ),
         callgraph=CallGraph(
             calls_by_caller=artifacts["indices/calls-by-caller"],

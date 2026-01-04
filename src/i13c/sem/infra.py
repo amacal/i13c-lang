@@ -54,6 +54,9 @@ class OneToOne(Generic[SemanticId, SemanticNode]):
     def pop(self) -> Tuple[SemanticId, SemanticNode]:
         return self.data.popitem()
 
+    def peak(self) -> Tuple[SemanticId, SemanticNode]:
+        return next(iter(self.data.items()))
+
     def get(self, key: SemanticId) -> SemanticNode:
         return self.data[key]
 
