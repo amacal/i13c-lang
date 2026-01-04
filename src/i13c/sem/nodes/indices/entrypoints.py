@@ -33,8 +33,9 @@ def build_entrypoints(
     for fid, function in functions.items():
         if function.identifier.name == EntryPointName:
             if not function.parameters:
-                if terminalities.get(fid).noreturn:
-                    out[fid] = EntryPoint(kind=b"function", target=fid)
+                if terminality := terminalities.find(fid):
+                    if terminality.noreturn:
+                        out[fid] = EntryPoint(kind=b"function", target=fid)
 
     for sid, snippet in snippets.items():
         if snippet.identifier.name == EntryPointName:

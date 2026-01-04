@@ -89,6 +89,9 @@ class OneToMany[SemanticId, SemanticNode]:
     def pop(self) -> Tuple[SemanticId, List[SemanticNode]]:
         return self.data.popitem()
 
+    def peak(self) -> Tuple[SemanticId, List[SemanticNode]]:
+        return next(iter(self.data.items()))
+
     def get(self, key: SemanticId) -> List[SemanticNode]:
         return self.data[key]
 

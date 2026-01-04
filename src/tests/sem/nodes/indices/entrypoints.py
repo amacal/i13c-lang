@@ -5,7 +5,23 @@ from i13c.sem.typing.indices.entrypoints import EntryPoint
 from tests.sem import prepare_program
 
 
-def can_build_entrypoints_for_valid_main_function():
+def can_reject_function_with_arguments():
+    _, program = prepare_program(
+        """
+            fn main(arg1: u32) noreturn { }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    entrypoints = semantic.live.entrypoints
+
+    assert entrypoints.size() == 0
+
+
+def can_accept_terminal_function():
     _, program = prepare_program(
         """
             asm exit() noreturn { }
@@ -48,7 +64,7 @@ def can_reject_snippet_with_arguments():
     assert entrypoints.size() == 0
 
 
-def can_accept_snippet_as_entrypoint():
+def can_accept_terminal_snippet():
     _, program = prepare_program(
         """
             asm main() noreturn { }

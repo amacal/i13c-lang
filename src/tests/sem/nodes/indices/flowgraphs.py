@@ -5,7 +5,23 @@ from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowExit, FlowGraph
 from tests.sem import prepare_program
 
 
-def can_build_semantic_model_flowgraphs_no_statements():
+def can_do_nothing_without_any_function():
+    _, program = prepare_program(
+        """
+            asm main() noreturn { }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    values = semantic.indices.flowgraph_by_function
+
+    assert values.size() == 0
+
+
+def can_build_flowgraph_for_a_function_without_any_statement():
     _, program = prepare_program(
         """
             fn main() { }
@@ -36,7 +52,7 @@ def can_build_semantic_model_flowgraphs_no_statements():
     assert outputs[0] == flow.exit
 
 
-def can_build_semantic_model_flowgraphs_single_statement():
+def can_build_flowgraph_for_a_function_with_a_single_statement():
     _, program = prepare_program(
         """
             fn main() noreturn { foo(); }
@@ -71,7 +87,7 @@ def can_build_semantic_model_flowgraphs_single_statement():
     assert n2s[0] == flow.exit
 
 
-def can_build_flow_with_multiple_statements_ordered():
+def can_build_flowgraph_for_a_function_with_multiple_statements_ordered():
     _, program = prepare_program(
         """
             fn main() { foo(); bar(); baz(); }

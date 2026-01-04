@@ -6,7 +6,7 @@ from i13c.sem.typing.resolutions.callsites import CallSiteResolution
 from tests.sem import prepare_program
 
 
-def can_build_semantic_model_accepted_resolutions_for_snippet():
+def can_resolve_callsite_calling_snippet():
     _, program = prepare_program(
         """
             asm foo(arg1@rax: u32) { }
@@ -21,7 +21,7 @@ def can_build_semantic_model_accepted_resolutions_for_snippet():
     resolutions = semantic.indices.resolution_by_callsite
 
     assert resolutions.size() == 1
-    id, value = resolutions.pop()
+    id, value = resolutions.peak()
 
     assert isinstance(id, CallSiteId)
     assert isinstance(value, CallSiteResolution)
@@ -37,7 +37,7 @@ def can_build_semantic_model_accepted_resolutions_for_snippet():
     assert value.identifier.name == b"foo"
 
 
-def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity_much():
+def can_reject_callsite_due_to_wrong_arity_more_than_expected():
     _, program = prepare_program(
         """
             asm foo() { }
@@ -52,7 +52,7 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
     resolutions = semantic.indices.resolution_by_callsite
 
     assert resolutions.size() == 1
-    id, value = resolutions.pop()
+    id, value = resolutions.peak()
 
     assert isinstance(id, CallSiteId)
     assert isinstance(value, CallSiteResolution)
@@ -70,7 +70,7 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
     assert value.identifier.name == b"foo"
 
 
-def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity_less():
+def can_reject_callsite_due_to_wrong_arity_less_than_expected():
     _, program = prepare_program(
         """
             asm foo(arg1@rax: u32) { }
@@ -103,7 +103,7 @@ def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_arity
     assert value.identifier.name == b"foo"
 
 
-def can_build_semantic_model_rejected_resolutions_for_snippet_due_to_wrong_hex_width():
+def can_reject_callsite_due_to_wrong_hex_width():
     _, program = prepare_program(
         """
             asm foo(arg1@rax: u8) { }
@@ -152,7 +152,7 @@ def can_resolve_function_and_snippet_with_same_name():
     resolutions = semantic.indices.resolution_by_callsite
 
     assert resolutions.size() == 1
-    id, value = resolutions.pop()
+    id, value = resolutions.peak()
 
     assert isinstance(id, CallSiteId)
     assert isinstance(value, CallSiteResolution)
@@ -194,7 +194,7 @@ def can_resolve_by_type_u64_max():
     resolutions = semantic.indices.resolution_by_callsite
 
     assert resolutions.size() == 1
-    id, value = resolutions.pop()
+    id, value = resolutions.peak()
 
     assert isinstance(id, CallSiteId)
     assert isinstance(value, CallSiteResolution)

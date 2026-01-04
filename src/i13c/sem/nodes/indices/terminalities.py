@@ -1,4 +1,4 @@
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional
 
 from i13c.sem.infra import Configuration, OneToOne
 from i13c.sem.typing.entities.callables import Callable
@@ -40,19 +40,21 @@ def build_terminalities(
             case _:
                 return False
 
-    def is_callsite_terminal(cid: CallSiteId) -> bool:
+    def is_callsite_terminal(cid: CallSiteId) -> Optional[bool]:
         resolution = resolutions.get(cid)
 
-        if not resolution.accepted:
-            return False
+        # ignore not resolved or ambiguously resolved callsites
+        if len(resolution.accepted) != 1:
+            return None
 
+        # only one acceptance is expected here
         for accepted in resolution.accepted:
             if not is_callable_terminal(accepted.callable):
                 return False
 
         return True
 
-    def has_path_to_exit(flowgraph: FlowGraph) -> bool:
+    def has_path_to_exit(flowgraph: FlowGraph) -> Optional[bool]:
         visited: Set[FlowNode] = set()
         stack: List[FlowNode] = [flowgraph.entry]
 
@@ -67,7 +69,13 @@ def build_terminalities(
 
             # if callsite is terminal, ignore its successors
             if isinstance(node, CallSiteId):
-                if is_callsite_terminal(node):
+                is_terminal = is_callsite_terminal(node)
+
+                # break the search if we cannot determine terminality
+                if is_terminal is None:
+                    return None
+
+                if is_terminal:
                     continue
 
             # pick up successors
@@ -77,6 +85,7 @@ def build_terminalities(
         return False
 
     terminalities: Dict[FunctionId, Terminality] = {}
+    ignored: Set[FunctionId] = set()
 
     for fid in functions.keys():
         terminalities[fid] = Terminality(noreturn=False)
@@ -86,11 +95,26 @@ def build_terminalities(
         changed = False
 
         for fid in functions.keys():
+            # don't process already terminal functions
             if terminalities[fid].noreturn:
                 continue
 
-            if not has_path_to_exit(flowgraphs.get(fid)):
+            # don't process already ignored functions
+            if fid in ignored:
+                continue
+
+            flowgraph = flowgraphs.get(fid)
+            detected = has_path_to_exit(flowgraph)
+
+            if detected is None:
+                ignored.add(fid)
+
+            if detected == False:
                 terminalities[fid] = Terminality(noreturn=True)
                 changed = True
+
+    # don't expose ignored functions
+    for fid in ignored:
+        del terminalities[fid]
 
     return OneToOne[FunctionId, Terminality].instance(terminalities)
