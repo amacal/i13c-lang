@@ -5,7 +5,12 @@ from typing import Optional, Tuple, Union
 
 from i13c.sem.core import Width
 from i13c.sem.typing.entities.instructions import Mnemonic
-from i13c.sem.typing.entities.operands import Immediate, OperandKind, Register, Reference
+from i13c.sem.typing.entities.operands import (
+    Immediate,
+    OperandKind,
+    Reference,
+    Register,
+)
 
 InstructionRejectionReason = Kind[
     b"wrong-arity",

@@ -107,8 +107,10 @@ def match_instruction(
                 # satisfy type constraints
                 assert isinstance(operand.target, Reference)
 
-                # we know it has be inside mapping
-                assert operand.target.name in immediates
+                # we expect it has to be inside the mapping
+                if operand.target.name not in immediates:
+                    reason = b"unresolved"
+                    break
 
                 substitute = OperandSubstitute(
                     kind=b"immediate",
