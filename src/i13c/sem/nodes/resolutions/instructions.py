@@ -187,6 +187,9 @@ def build_resolution_by_instruction(
                     name=slot.bind.name,
                     width=slot.type.width,
                 )
+        # don't attempt to match instructions if names are not unique
+        if len(immediates.keys() | registers.keys()) < len(snippet.slots):
+            continue
 
         for iid in snippet.instructions:
             accepted: Dict[MnemonicVariant, MnemonicBindings] = {}

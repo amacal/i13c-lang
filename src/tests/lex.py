@@ -101,6 +101,27 @@ def can_tokenize_range_operator():
     assert code.extract(tokens.value[3]) == b""
 
 
+def can_tokenize_range_operator_with_spaces():
+    text = "0x12  ..   0x20"
+    code = src.open_text(text)
+
+    tokens = lex.tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, res.Ok)
+    assert len(tokens.value) == 4
+
+    assert tokens.value[0] == lex.Token(code=lex.TOKEN_HEX, offset=0, length=4)
+    assert tokens.value[1] == lex.Token(code=lex.TOKEN_RANGE, offset=6, length=2)
+    assert tokens.value[2] == lex.Token(code=lex.TOKEN_HEX, offset=11, length=4)
+    assert tokens.value[3] == lex.Token(code=lex.TOKEN_EOF, offset=15, length=0)
+
+    assert code.extract(tokens.value[0]) == b"0x12"
+    assert code.extract(tokens.value[1]) == b".."
+    assert code.extract(tokens.value[2]) == b"0x20"
+    assert code.extract(tokens.value[3]) == b""
+
+
 def can_tokenize_last_hex():
     text = "0xabcdef"
     code = src.open_text(text)

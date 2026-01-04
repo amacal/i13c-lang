@@ -32,3 +32,19 @@ def can_do_nothing_without_any_instruction():
     instructions = semantic.indices.resolution_by_instruction
 
     assert instructions.size() == 0
+
+
+def can_do_nothing_with_ambiguous_reference():
+    _, program = prepare_program(
+        """
+            asm main(val@imm: u8, val@rax: u16) noreturn { nop val; }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    instructions = semantic.indices.resolution_by_instruction
+
+    assert instructions.size() == 0
