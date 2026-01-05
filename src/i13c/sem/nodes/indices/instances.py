@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 
-from i13c.sem.infra import Configuration, OneToOne
+from i13c.core.mapping import OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.instructions import Instruction, InstructionId
 from i13c.sem.typing.entities.literals import Hex, Literal, LiteralId

@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from i13c.core.mapping import OneToOne
 from i13c.sem.core import Type, Width
-from i13c.sem.infra import Configuration, OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.instructions import Instruction, InstructionId
 from i13c.sem.typing.entities.operands import (
     Immediate,
@@ -187,6 +188,7 @@ def build_resolution_by_instruction(
                     name=slot.bind.name,
                     width=slot.type.width,
                 )
+
         # don't attempt to match instructions if names are not unique
         if len(immediates.keys() | registers.keys()) < len(snippet.slots):
             continue

@@ -1,77 +1,51 @@
+from typing import List
+
 from i13c import enc, ir
 
 
 def can_encode_instructions_mov_rax_imm():
-    unit = ir.Unit(
-        entry=0,
-        codeblocks=[
-            ir.CodeBlock(
-                terminator=ir.Stop(),
-                instructions=[
-                    ir.MovRegImm(dst=0, imm=0x1234),
-                ],
-            )
-        ],
-    )
+    flow: List[ir.InstructionFlow] = [
+        ir.Label(id=0),
+        ir.MovRegImm(dst=0, imm=0x1234),
+    ]
 
-    bytecode = enc.encode(unit)
+    bytecode = enc.encode(flow)
     expected = bytes([0x48, 0xB8, 0x34, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
 
     assert bytecode == expected
 
 
 def can_encode_instructions_mov_r10_imm():
-    unit = ir.Unit(
-        entry=0,
-        codeblocks=[
-            ir.CodeBlock(
-                terminator=ir.Stop(),
-                instructions=[
-                    ir.MovRegImm(dst=10, imm=0x1234),
-                ],
-            )
-        ],
-    )
+    flow: List[ir.InstructionFlow] = [
+        ir.Label(id=0),
+        ir.MovRegImm(dst=10, imm=0x1234),
+    ]
 
-    bytecode = enc.encode(unit)
+    bytecode = enc.encode(flow)
     expected = bytes([0x49, 0xBA, 0x34, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
 
     assert bytecode == expected
 
 
 def can_encode_instructions_shl_rbx_imm():
-    unit = ir.Unit(
-        entry=0,
-        codeblocks=[
-            ir.CodeBlock(
-                terminator=ir.Stop(),
-                instructions=[
-                    ir.ShlRegImm(dst=3, imm=1),
-                ],
-            )
-        ],
-    )
+    flow: List[ir.InstructionFlow] = [
+        ir.Label(id=0),
+        ir.ShlRegImm(dst=3, imm=0x01),
+    ]
 
-    bytecode = enc.encode(unit)
+    bytecode = enc.encode(flow)
     expected = bytes([0x48, 0xC1, 0xE3, 0x01])
 
     assert bytecode == expected
 
 
 def can_encode_instructions_syscall():
-    unit = ir.Unit(
-        entry=0,
-        codeblocks=[
-            ir.CodeBlock(
-                terminator=ir.Stop(),
-                instructions=[
-                    ir.SysCall(),
-                ],
-            )
-        ],
-    )
+    flow: List[ir.InstructionFlow] = [
+        ir.Label(id=0),
+        ir.SysCall(),
+    ]
 
-    bytecode = enc.encode(unit)
+    bytecode = enc.encode(flow)
     expected = bytes([0x0F, 0x05])
 
     assert bytecode == expected

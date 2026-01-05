@@ -1,6 +1,7 @@
 from typing import Dict, List
 
-from i13c.sem.infra import Configuration, OneToOne
+from i13c.core.mapping import OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.instructions import Instruction, InstructionId, Mnemonic
 from i13c.sem.typing.entities.operands import OperandId

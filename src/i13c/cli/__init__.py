@@ -5,9 +5,11 @@ from dataclasses import asdict
 
 import click
 
-from i13c import elf, enc, ld, lex, low, par, sem, src
+from i13c import elf, enc, lex, par, sem, src
 from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap
 from i13c.cli.semantic import attach
+from i13c.lowering.build import build_low_level_graph
+from i13c.lowering.linear import build_instruction_flow
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
 
@@ -47,9 +49,9 @@ def ast_command(path: str) -> None:
     click.echo(json.dumps(asdict(program), cls=BytesAsTextEncoder))
 
 
-@i13c.command("ir")
+@i13c.command("llg")
 @click.argument("path", type=click.Path(exists=True))
-def ir_command(path: str) -> None:
+def llg_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
@@ -63,16 +65,41 @@ def ir_command(path: str) -> None:
     if diagnostics := sem.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(model), source=code)
+    llg = build_low_level_graph(model)
 
-    for idx, codeblock in enumerate(unit.codeblocks):
-        click.echo(f"Codeblock: {idx}")
+    for idx, (bid, block) in enumerate(llg.nodes.items()):
+        click.echo(f"Block: {bid.value}")
+        click.echo(f"  Terminator: {block.terminator}")
 
-        for instruction in codeblock.instructions:
-            click.echo(f"  {str(instruction)}")
+        click.echo("  Instructions:")
+        for instruction in block.instructions:
+            click.echo(f"    {str(instruction)}")
 
-        if idx < len(unit.codeblocks) - 1:
+        if idx < llg.nodes.size() - 1:
             click.echo("")
+
+
+@i13c.command("linear")
+@click.argument("path", type=click.Path(exists=True))
+def linear_command(path: str) -> None:
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    code = src.open_text(text)
+    tokens = unwrap(lex.tokenize(code), source=code)
+    program = unwrap(par.parse(code, tokens), source=code)
+
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    if diagnostics := sem.validate(model, program):
+        emit_and_exit(diagnostics, source=code)
+
+    llg = build_low_level_graph(model)
+    flow = build_instruction_flow(llg)
+
+    for idx, instruction in enumerate(flow):
+        click.echo(f"{idx:04}: {str(instruction)}")
 
 
 @i13c.command("bin")
@@ -91,10 +118,10 @@ def bin_command(path: str) -> None:
     if diagnostics := sem.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(model), source=code)
-    linked = unwrap(ld.link(unit), source=code)
-    binary = enc.encode(linked)
+    llg = build_low_level_graph(model)
+    flow = build_instruction_flow(llg)
 
+    binary = enc.encode(flow)
     sys.stdout.buffer.write(binary)
 
 
@@ -114,9 +141,10 @@ def elf_command(path: str) -> None:
     if diagnostics := sem.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
-    unit = unwrap(low.lower(model), source=code)
-    linked = unwrap(ld.link(unit), source=code)
-    binary = enc.encode(linked)
+    llg = build_low_level_graph(model)
+    flow = build_instruction_flow(llg)
+
+    binary = enc.encode(flow)
     executable = elf.emit(binary)
 
     with open("a.out", "wb") as f:

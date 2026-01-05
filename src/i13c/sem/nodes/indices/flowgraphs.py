@@ -1,6 +1,7 @@
 from typing import Dict, List
 
-from i13c.sem.infra import Configuration, OneToOne
+from i13c.core.mapping import OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.functions import Function, FunctionId
 from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowExit, FlowGraph, FlowNode
 

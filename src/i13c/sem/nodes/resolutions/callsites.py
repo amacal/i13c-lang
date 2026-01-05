@@ -1,8 +1,9 @@
 from typing import Dict, Iterable, List, Protocol, Tuple
 
+from i13c.core.mapping import OneToOne
 from i13c.res import Err, Ok, Result
 from i13c.sem.core import Type
-from i13c.sem.infra import Configuration, OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.callables import Callable
 from i13c.sem.typing.entities.callsites import Argument, CallSite, CallSiteId
 from i13c.sem.typing.entities.functions import Function, FunctionId

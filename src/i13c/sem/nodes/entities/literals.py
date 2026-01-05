@@ -1,8 +1,9 @@
 from typing import Dict
 
 from i13c import ast
+from i13c.core.mapping import OneToOne
 from i13c.sem.core import derive_width
-from i13c.sem.infra import Configuration, OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.literals import Hex, Literal, LiteralId
 

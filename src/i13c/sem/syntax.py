@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, Optional, Protocol, Tuple, TypeVar, Union
 
 from i13c import ast
-from i13c.sem.generator import Generator
+from i13c.core.generator import Generator
 
 AstNode = TypeVar("AstNode")
 

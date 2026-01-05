@@ -1,14 +1,13 @@
-from typing import Dict, Protocol, Type
+from typing import Dict, List, Protocol, Type
 
 from i13c import ir
 
 
-def encode(unit: ir.Unit) -> bytes:
+def encode(instructions: List[ir.InstructionFlow]) -> bytes:
     bytecode = bytearray()
 
-    for codeblock in unit.codeblocks:
-        for instruction in codeblock.instructions:
-            DISPATCH_TABLE[type(instruction)](instruction, bytecode)
+    for instruction in instructions:
+        DISPATCH_TABLE[type(instruction)](instruction, bytecode)
 
     return bytes(bytecode)
 
@@ -36,12 +35,17 @@ def encode_syscall(instruction: ir.SysCall, bytecode: bytearray) -> None:
     bytecode.extend([0x0F, 0x05])
 
 
+def encode_label(instruction: ir.Label, bytecode: bytearray) -> None:
+    pass
+
+
 class Encoder(Protocol):
-    def __call__(self, instruction: ir.Instruction, out: bytearray) -> None: ...
+    def __call__(self, instruction: ir.InstructionFlow, out: bytearray) -> None: ...
 
 
-DISPATCH_TABLE: Dict[Type[ir.Instruction], Encoder] = {
+DISPATCH_TABLE: Dict[Type[ir.InstructionFlow], Encoder] = {
     ir.MovRegImm: encode_mov_reg_imm,
     ir.ShlRegImm: encode_shl_reg_imm,
     ir.SysCall: encode_syscall,
+    ir.Label: encode_label,
 }  # pyright: ignore[reportAssignmentType]

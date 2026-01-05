@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import Union
 
 
 @dataclass
 class FallThrough:
-    target: int
+    pass
 
 
 @dataclass
@@ -36,12 +36,13 @@ Instruction = Union[MovRegImm, ShlRegImm, SysCall]
 
 
 @dataclass
-class CodeBlock:
-    instructions: List[Instruction]
-    terminator: Terminator
+class Label:
+    id: int
 
 
 @dataclass
-class Unit:
-    entry: int
-    codeblocks: List[CodeBlock]
+class Jump:
+    label: int
+
+
+InstructionFlow = Union[Instruction, Label, Jump]

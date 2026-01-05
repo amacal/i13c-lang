@@ -1,7 +1,8 @@
 from typing import Dict, List
 
+from i13c.core.mapping import OneToOne
 from i13c.sem.core import Identifier, Type, default_ranges, width_from_ranges
-from i13c.sem.infra import Configuration, OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.instructions import Binding, InstructionId
 from i13c.sem.typing.entities.operands import Register

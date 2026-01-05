@@ -5,7 +5,7 @@ import click
 
 from i13c import lex, par, src
 from i13c.cli import unwrap
-from i13c.sem.infra import Descriptive, Identified
+from i13c.core.mapping import Descriptive, Identified
 from i13c.sem.model import SemanticGraph, build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
 

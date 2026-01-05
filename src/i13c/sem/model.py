@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Set
 
+from i13c.core.generator import Generator
+from i13c.core.mapping import OneToMany, OneToOne
 from i13c.sem.dag import configure_semantic_model
-from i13c.sem.infra import OneToMany, OneToOne
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.callables import CallableTarget
 from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
@@ -53,6 +54,8 @@ class CallGraph:
 
 @dataclass(kw_only=True)
 class SemanticGraph:
+    generator: Generator
+
     callgraph_live: Dict[CallableTarget, List[CallPair]]
     callable_live: Set[CallableTarget]
 
@@ -66,6 +69,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
     artifacts: Dict[str, Any] = configure_semantic_model(graph)
 
     return SemanticGraph(
+        generator=graph.generator,
         basic=BasicNodes(
             literals=artifacts["entities/literals"],
             operands=artifacts["entities/operands"],

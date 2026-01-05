@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Union
+from typing import Dict, Iterable, List, Set, Union
 
 from i13c.sem.typing.entities.functions import Statement
 
@@ -25,10 +25,15 @@ class FlowGraph:
     exit: FlowExit
     edges: Dict[FlowNode, List[FlowNode]]
 
-    def describe(self) -> str:
-        # compute unique nodes
+    def nodes(self) -> Set[FlowNode]:
         values = (next for edge in self.edges.values() for next in edge)
         nodes = set(self.edges.keys()) | set(values)
+
+        return nodes
+
+    def describe(self) -> str:
+        # compute unique nodes
+        nodes = self.nodes()
 
         # count number of edges
         edges = sum(len(v) for v in self.edges.values())

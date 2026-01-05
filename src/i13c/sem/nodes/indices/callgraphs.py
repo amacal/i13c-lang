@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple
 
-from i13c.sem.infra import Configuration, OneToMany, OneToOne
+from i13c.core.mapping import OneToMany, OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.callables import CallableTarget
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.functions import Function, FunctionId

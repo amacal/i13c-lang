@@ -1,8 +1,9 @@
 from typing import Dict, List
 
 from i13c import ast
+from i13c.core.mapping import OneToOne
 from i13c.sem.core import Identifier
-from i13c.sem.infra import Configuration, OneToOne
+from i13c.sem.infra import Configuration
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.callsites import Argument, CallSite, CallSiteId
 from i13c.sem.typing.entities.literals import LiteralId
