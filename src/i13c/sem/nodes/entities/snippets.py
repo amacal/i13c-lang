@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from i13c.core.mapping import OneToOne
-from i13c.sem.core import Identifier, Type, default_ranges, width_from_ranges
+from i13c.sem.core import Identifier, Range, Type, default_range, width_from_range
 from i13c.sem.infra import Configuration
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.instructions import Binding, InstructionId
@@ -34,21 +34,23 @@ def build_snippets(
         # collect slots
         for slot in snippet.slots:
             # default width and ranges for declared type
-            ranges = default_ranges(slot.type.name)
+            range: Range = default_range(slot.type.name)
 
             # override ranges if specified
             if slot.type.range is not None:
-                ranges = (slot.type.range.lower, slot.type.range.upper)
+                range = Range(
+                    lower=slot.type.range.lower,
+                    upper=slot.type.range.upper,
+                )
 
             # derive width from ranges
-            width = width_from_ranges(*ranges)
+            width = width_from_range(range)
 
             # construct slot type with range or default width
             type = Type(
                 name=slot.type.name,
                 width=width,
-                lower=ranges[0],
-                upper=ranges[1],
+                range=range,
             )
 
             if slot.bind.name == b"imm":

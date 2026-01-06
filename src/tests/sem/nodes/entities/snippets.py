@@ -192,13 +192,13 @@ def can_build_a_snippet_with_properly_derived_types():
     assert slot1.bind.name == b"rax"
     assert slot1.type.name == b"u64"
     assert slot1.type.width == 16
-    assert slot1.type.lower == 0x0000
-    assert slot1.type.upper == 0xFFFF
+    assert slot1.type.range.lower == 0x0000
+    assert slot1.type.range.upper == 0xFFFF
 
     slot2 = value.slots[1]
     assert slot2.name.name == b"r2"
     assert slot2.bind.name == b"rbx"
     assert slot2.type.name == b"u8"
     assert slot2.type.width == 8
-    assert slot2.type.lower == 0x00
-    assert slot2.type.upper == 0x10
+    assert slot2.type.range.lower == 0x00
+    assert slot2.type.range.upper == 0x10

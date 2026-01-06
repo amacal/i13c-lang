@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from i13c.core.mapping import OneToOne
-from i13c.sem.core import Identifier, Type, default_ranges, width_from_ranges
+from i13c.sem.core import Identifier, Range, Type, default_range, width_from_range
 from i13c.sem.infra import Configuration
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.callsites import CallSiteId
@@ -32,21 +32,23 @@ def build_functions(
 
         for parameter in function.parameters:
             # default width and ranges for declared type
-            ranges = default_ranges(parameter.type.name)
+            range: Range = default_range(parameter.type.name)
 
             # override ranges if specified
             if parameter.type.range is not None:
-                ranges = (parameter.type.range.lower, parameter.type.range.upper)
+                range = Range(
+                    lower=parameter.type.range.lower,
+                    upper=parameter.type.range.upper,
+                )
 
             # derive width from ranges
-            width = width_from_ranges(*ranges)
+            width = width_from_range(range)
 
             # construct slot type with range or default width
             type = Type(
                 name=parameter.type.name,
                 width=width,
-                lower=parameter.type.range.lower if parameter.type.range else ranges[0],
-                upper=parameter.type.range.upper if parameter.type.range else ranges[1],
+                range=range,
             )
 
             parameters.append(

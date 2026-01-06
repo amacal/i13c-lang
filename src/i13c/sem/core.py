@@ -14,14 +14,29 @@ class Identifier:
 
 
 @dataclass(kw_only=True, frozen=True)
-class Type:
-    name: bytes
-    width: Width
+class Range:
     lower: int
     upper: int
 
     def __str__(self) -> str:
-        return f"{self.name.decode()}[{self.lower}..{self.upper}]"
+        return f"[{self.lower}..{self.upper}]"
+
+    @staticmethod
+    def intersection(left: Range, right: Range) -> Range:
+        return Range(
+            lower=max(left.lower, right.lower),
+            upper=min(left.upper, right.upper),
+        )
+
+
+@dataclass(kw_only=True, frozen=True)
+class Type:
+    name: bytes
+    width: Width
+    range: Range
+
+    def __str__(self) -> str:
+        return f"{self.name.decode()}[{self.range}]"
 
 
 def derive_width(value: int) -> Width:
@@ -51,18 +66,18 @@ def default_width(name: bytes) -> Width:
     assert False, f"Unknown type name: {name.decode()}"
 
 
-def default_ranges(name: bytes) -> Tuple[int, int]:
+def default_range(name: bytes) -> Range:
     if name == b"u8":
-        return (0, 0xFF)
+        return Range(lower=0, upper=0xFF)
     if name == b"u16":
-        return (0, 0xFFFF)
+        return Range(lower=0, upper=0xFFFF)
     if name == b"u32":
-        return (0, 0xFFFFFFFF)
+        return Range(lower=0, upper=0xFFFFFFFF)
     if name == b"u64":
-        return (0, 0xFFFFFFFFFFFFFFFF)
+        return Range(lower=0, upper=0xFFFFFFFFFFFFFFFF)
 
     assert False, f"Unknown type name: {name.decode()}"
 
 
-def width_from_ranges(lower: int, upper: int) -> Width:
-    return derive_width(upper)
+def width_from_range(range: Range) -> Width:
+    return derive_width(range.upper)

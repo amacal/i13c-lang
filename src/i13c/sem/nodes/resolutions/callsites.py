@@ -46,7 +46,7 @@ def match_literal(literal: Literal, type: Type) -> bool:
                 return False
 
             # range constraint
-            if not (type.lower <= target.value <= type.upper):
+            if not (type.range.lower <= target.value <= type.range.upper):
                 return False
 
             # success
