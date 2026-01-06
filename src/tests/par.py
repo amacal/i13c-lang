@@ -486,6 +486,27 @@ def can_parse_function_with_ranged_parameter():
     assert parameter.type.range.upper == 0x20
 
 
+def can_parse_argument_span_without_trailing_whitespace():
+    code = src.open_text("fn main() { exit(0x01 ); }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    function = program.value.functions[0]
+    statement = function.statements[0]
+    argument = statement.arguments[0]
+
+    assert isinstance(argument, ast.IntegerLiteral)
+    assert argument.value == 0x01
+    assert code.extract(argument.ref) == b"0x01"
+
+    assert argument.ref.length == len(b"0x01")
+    assert argument.ref.offset == code.data.find(b"0x01")
+
+
 def can_handle_end_of_tokens():
     code = src.open_text("asm main() { mov rax, rbx")
 

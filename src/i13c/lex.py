@@ -308,6 +308,10 @@ def read_hex(lexer: Lexer, tokens: List[Token]) -> None:
     lexer.expect(b"x")
     lexer.advance(1)  # consume the 'x'
 
+    # be explicit about EOF
+    if lexer.is_eof():
+        raise UnexpectedEndOfFile(lexer.offset)
+
     # accept subsequent hex digits
     while not lexer.is_eof() and lexer.is_in(CLASS_HEX):
         lexer.advance(1)  # consume hex digits

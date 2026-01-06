@@ -50,3 +50,16 @@ def can_reject_main_as_entrypoint_when_noreturn_is_false():
 
     assert diagnostic.code == err.ERROR_3011
     assert source.extract(diagnostic.ref) == b""
+
+
+def can_accept_main_when_terminality_is_unresolved():
+    _, program = prepare_program(
+        """
+            fn main() noreturn { missing(); }
+        """
+    )
+
+    model = build_semantic_graph(build_syntax_graph(program))
+    diagnostics = sem.e3011.validate_entrypoint_exists(model)
+
+    assert len(diagnostics) == 0

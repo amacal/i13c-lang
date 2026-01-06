@@ -170,3 +170,35 @@ def can_accept_movregimm_instruction_with_referenced_register_binding():
 
     assert isinstance(acceptance.bindings[0], Reference)
     assert isinstance(acceptance.bindings[1], Immediate)
+
+
+def can_accept_movregimm_instruction_with_narrow_register_binding():
+    _, program = prepare_program(
+        """
+            asm main(code@rax: u8) noreturn { mov code, 0x01; }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    instructions = semantic.indices.resolution_by_instruction
+
+    assert instructions.size() == 1
+    _, value = instructions.peak()
+
+    assert len(value.rejected) == 3
+    assert len(value.accepted) == 1
+    acceptance = value.accepted[0]
+
+    assert acceptance.mnemonic.name == b"mov"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.register(),
+        OperandSpec.immediate(8),
+    )
+
+    assert isinstance(acceptance.bindings[0], Reference)
+    assert isinstance(acceptance.bindings[1], Immediate)

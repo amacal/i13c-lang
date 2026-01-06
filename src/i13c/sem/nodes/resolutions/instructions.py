@@ -186,7 +186,7 @@ def build_resolution_by_instruction(
             else:
                 registers[slot.name.name] = Register(
                     name=slot.bind.name,
-                    width=slot.type.width,
+                    width=64,
                 )
 
         # don't attempt to match instructions if names are not unique

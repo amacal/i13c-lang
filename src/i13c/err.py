@@ -46,10 +46,12 @@ def report_e1001_unexpected_end_of_file(offset: int) -> diag.Diagnostic:
 
 
 def report_e1002_unexpected_value(offset: int, expected: bytes) -> diag.Diagnostic:
+    characters = [repr(chr(character)) for character in sorted(expected)]
+
     return diag.Diagnostic(
         ref=src.Span(offset=offset, length=1),
         code=ERROR_1002,
-        message=f"Unexpected value at offset {offset}, expected one of: {list(sorted(expected))}",
+        message=f"Unexpected value at offset {offset}, expected one of: {characters}",
     )
 
 
@@ -170,15 +172,20 @@ def report_e3006_duplicated_function_names(
 def report_e3007_no_matching_overload(
     ref: src.SpanLike, name: bytes, candidates: List[str]
 ) -> diag.Diagnostic:
-    lines = "\n".join([f"  - {c}" for c in candidates])
+    template = (
+        "Called symbol '{name}' has no matching overload.\n"
+        "Tried candidates:\n{candidates}"
+    )
+
+    args = dict(
+        name=name.decode(),
+        candidates="\n".join([f"  - {c}" for c in candidates]),
+    )
 
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_3007,
-        message=(
-            "Called symbol '{name}' has no matching overload.\n"
-            "Tried candidates:\n{canidates}"
-        ).format(name=str(name), canidates=lines),
+        message=template.format(**args),
     )
 
 

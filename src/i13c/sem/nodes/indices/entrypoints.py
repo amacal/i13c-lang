@@ -6,7 +6,6 @@ from i13c.sem.typing.entities.callables import CallableTarget
 from i13c.sem.typing.entities.functions import Function, FunctionId
 from i13c.sem.typing.entities.snippets import Snippet, SnippetId
 from i13c.sem.typing.indices.entrypoints import EntryPoint, EntryPointName
-from i13c.sem.typing.indices.terminalities import Terminality
 
 
 def configure_entrypoint_by_callable() -> Configuration:
@@ -17,7 +16,6 @@ def configure_entrypoint_by_callable() -> Configuration:
             {
                 ("functions", "entities/functions"),
                 ("snippets", "entities/snippets"),
-                ("terminalities", "indices/terminality-by-function"),
             }
         ),
     )
@@ -26,17 +24,14 @@ def configure_entrypoint_by_callable() -> Configuration:
 def build_entrypoints(
     functions: OneToOne[FunctionId, Function],
     snippets: OneToOne[SnippetId, Snippet],
-    terminalities: OneToOne[FunctionId, Terminality],
 ) -> OneToOne[CallableTarget, EntryPoint]:
 
     out: Dict[CallableTarget, EntryPoint] = {}
 
     for fid, function in functions.items():
         if function.identifier.name == EntryPointName:
-            if not function.parameters:
-                if terminality := terminalities.find(fid):
-                    if terminality.noreturn:
-                        out[fid] = EntryPoint(kind=b"function", target=fid)
+            if function.noreturn and not function.parameters:
+                out[fid] = EntryPoint(kind=b"function", target=fid)
 
     for sid, snippet in snippets.items():
         if snippet.identifier.name == EntryPointName:

@@ -297,7 +297,7 @@ def can_detect_hex_with_invalid_characters():
     assert diagnostic.code == err.ERROR_1002
 
 
-def can_detect_too_short_hex():
+def can_detect_too_short_hex_when_eof():
     code = src.open_text("0x")
     tokens = lex.tokenize(code)
 
@@ -309,7 +309,7 @@ def can_detect_too_short_hex():
 
     assert diagnostic.ref.offset == 2
     assert diagnostic.ref.length == 1
-    assert diagnostic.code == err.ERROR_1002
+    assert diagnostic.code == err.ERROR_1001
 
 
 def can_detect_too_long_hex():

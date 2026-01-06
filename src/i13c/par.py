@@ -46,7 +46,7 @@ class ParsingState:
     def span(self, token: lex.Token) -> src.Span:
         return src.Span(
             offset=token.offset,
-            length=self.tokens[self.position].offset - token.offset,
+            length=token.length,
         )
 
     def between(self, left: lex.Token, right: lex.Token) -> src.Span:
