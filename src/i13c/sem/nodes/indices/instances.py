@@ -111,17 +111,28 @@ def rewrite_operand(
         if binding.kind != b"slot":
             continue
 
+        # satisfy type constraints
+        assert isinstance(binding.target, Slot)
+
+        # reference name must match bound slot name
+        # we need to find binding for this reference
+        if binding.target.name.name != reference.name:
+            continue
+
+        # register bindings can rewrite to register operands
+        if binding.target.bind.via_register():
+            return Operand.register(name=binding.target.bind.name)
+
+        # only immediate bindings can continue
+        if not binding.target.bind.via_immediate():
+            continue
+
         # only literal arguments can rewrite operands
         if binding.argument.kind != b"literal":
             continue
 
         # satisfy type constraints
-        assert isinstance(binding.target, Slot)
         assert isinstance(binding.argument.target, LiteralId)
-
-        # reference name must match bound slot name
-        if binding.target.name.name != reference.name:
-            continue
 
         # the literal can be used to rewrite the operand
         literal = literals.get(binding.argument.target)

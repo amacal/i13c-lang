@@ -1,6 +1,6 @@
 from i13c.sem import model, syntax
 from i13c.sem.typing.entities.callsites import CallSiteId
-from i13c.sem.typing.entities.operands import Immediate
+from i13c.sem.typing.entities.operands import Immediate, Register
 from i13c.sem.typing.indices.instances import Instance
 from tests.sem import prepare_program
 
@@ -215,3 +215,38 @@ def can_generate_instance_even_when_immediate_is_not_used():
     instances = semantic.indices.instance_by_callsite
 
     assert instances.size() == 1
+
+
+def can_rewrite_register_bound_slot_to_register():
+    _, program = prepare_program(
+        """
+            asm foo(code@rax: u64) noreturn { mov code, 0x01; }
+            fn main() noreturn { foo(0x42); }
+        """
+    )
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    instances = semantic.indices.instance_by_callsite
+
+    assert instances.size() == 1
+    _, value = instances.peak()
+
+    assert isinstance(value, Instance)
+
+    # kept register-bound argument
+    assert len(value.bindings) == 1
+
+    # register-bound slot should be rewritten to register
+    assert len(value.operands) == 1
+
+    id, operand = next(iter(value.operands.items()))
+    reference = semantic.basic.operands.get(id)
+
+    assert reference.kind == b"reference"
+    assert operand.kind == b"register"
+
+    assert isinstance(operand.target, Register)
+    assert operand.target.name == b"rax"

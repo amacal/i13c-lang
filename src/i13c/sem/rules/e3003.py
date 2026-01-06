@@ -13,6 +13,12 @@ def validate_duplicated_slot_bindings(
         seen: Set[bytes] = set()
 
         for slot in snippet.slots:
+
+            # ignore immediate bindings
+            # they are non-unique by nature
+            if slot.bind.via_immediate():
+                continue
+
             if slot.bind.name in seen:
                 diagnostics.append(
                     err.report_e3003_duplicated_slot_bindings(

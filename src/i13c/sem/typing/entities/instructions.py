@@ -24,6 +24,9 @@ class Binding:
     def via_immediate(self) -> bool:
         return self.kind == b"immediate"
 
+    def via_register(self) -> bool:
+        return self.kind == b"register"
+
     def __str__(self) -> str:
         return self.name.decode()
 

@@ -1,6 +1,7 @@
 from i13c import ir
 from i13c.lowering.build import build_low_level_graph
 from i13c.lowering.linear import build_instruction_flow
+from i13c.lowering.registers import IR_REGISTER_MAP
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
 from tests.sem import prepare_program
@@ -48,6 +49,28 @@ def can_lower_mov_program():
 
     assert isinstance(flow[0], ir.Label)
     assert isinstance(flow[1], ir.MovRegImm)
+
+
+def can_lower_mov_with_register_bound_slot():
+    _, program = prepare_program(
+        """
+            asm set(dst@rax: u64, val@imm: u8) noreturn { mov dst, val; }
+            fn main() noreturn { set(0x01, 0x42); }
+        """
+    )
+
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    llg = build_low_level_graph(model)
+    flow = build_instruction_flow(llg)
+
+    # extract mov instructions
+    movs = [item for item in flow if isinstance(item, ir.MovRegImm)]
+
+    assert len(movs) == 2
+    assert movs[0].dst == IR_REGISTER_MAP[b"rax"]
+    assert movs[1].dst == IR_REGISTER_MAP[b"rax"]
 
 
 def can_lower_shl_program():
