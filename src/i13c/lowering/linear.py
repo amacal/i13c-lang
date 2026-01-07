@@ -1,6 +1,6 @@
 from typing import List, Optional, Set
 
-from i13c.ir import InstructionFlow, Jump, Label, Stop, Terminator
+from i13c.ir import Emit, InstructionFlow, Jump, Label, Stop, Terminator
 from i13c.lowering.build import LowLevelGraph
 from i13c.lowering.nodes import BlockId
 
@@ -51,6 +51,10 @@ def emit_control_transfer(
     # stop terminator, nothing to emit
     if isinstance(term, Stop):
         assert len(successors) == 0
+        return None
+
+    if isinstance(term, Emit):
+        assert len(successors) > 0
         return None
 
     # expecting only single successor

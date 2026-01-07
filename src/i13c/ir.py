@@ -12,7 +12,12 @@ class Stop:
     pass
 
 
-Terminator = Union[FallThrough, Stop]
+@dataclass
+class Emit:
+    pass
+
+
+Terminator = Union[FallThrough, Stop, Emit]
 
 
 @dataclass

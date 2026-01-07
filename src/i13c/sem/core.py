@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
-from typing import Tuple
 
 Width = Kind[8, 16, 32, 64]
 

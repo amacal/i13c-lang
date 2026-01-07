@@ -135,3 +135,47 @@ def can_lower_function_final_statement_to_stop():
     assert len(flow) == 3  # 2 labels + 1 instruction
 
     assert isinstance(flow[2], ir.SysCall)
+
+
+def can_lower_function_calling_another_function():
+    _, program = prepare_program(
+        """
+            fn main() noreturn { foo(); }
+            fn foo() noreturn { bar(); }
+            asm bar() noreturn { syscall; }
+        """
+    )
+
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    llg = build_low_level_graph(model)
+    flow = build_instruction_flow(llg)
+
+    instrs = [item for item in flow if not isinstance(item, ir.Label)]
+
+    assert len(instrs) == 1
+    assert isinstance(instrs[0], ir.SysCall)
+
+
+def can_lower_function_calling_another_function_reusing():
+    _, program = prepare_program(
+        """
+            fn main() noreturn { foo1(); foo2(); }
+            fn foo1() noreturn { foo3(); }
+            fn foo2() noreturn { foo3(); }
+            fn foo3() noreturn { bar(); }
+            asm bar() noreturn { syscall; }
+        """
+    )
+
+    graph = build_syntax_graph(program)
+    model = build_semantic_graph(graph)
+
+    llg = build_low_level_graph(model)
+    flow = build_instruction_flow(llg)
+
+    instrs = [item for item in flow if not isinstance(item, ir.Label)]
+
+    assert len(instrs) == 1
+    assert isinstance(instrs[0], ir.SysCall)
