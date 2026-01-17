@@ -2,11 +2,22 @@ from typing import Dict, List, Optional, Union
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.ir import Emit, FallThrough, Instruction, Stop, Terminator
+from i13c.ir import (
+    Block,
+    BlockId,
+    Call,
+    Exit,
+    FallThrough,
+    Instruction,
+    InstructionFlow,
+    Label,
+    Stop,
+    Terminator,
+)
 from i13c.lowering.bind import lower_callsite_bindings
 from i13c.lowering.graph import LowLevelContext, LowLevelGraph
 from i13c.lowering.instructions import lower_instruction
-from i13c.lowering.nodes import Block, BlockId
+from i13c.lowering.linear import build_instruction_flow
 from i13c.sem.model import SemanticGraph
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.functions import FunctionId
@@ -23,6 +34,7 @@ def get_context(graph: SemanticGraph) -> LowLevelContext:
         generator=graph.generator,
         nodes={},
         edges={},
+        flows={},
         entry={},
         exit={},
     )
@@ -41,67 +53,53 @@ def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
             if graph.live.entrypoints.contains(fid):
                 entry = block
 
-    # optionally lower snippet entrypoint
-    if entry is None:
-        for snid in graph.live.entrypoints.keys():
-            assert isinstance(snid, SnippetId)
-            entry = lower_snippet(ctx, snid)
-
     # entry has to be found
     assert entry is not None
 
-    # patch CFG edges
-    for bid, block in ctx.nodes.items():
+    # patch function calls
+    for block in ctx.nodes.values():
 
-        # only callsite blocks have outgoing edges
+        # only callsite blocks may have calls
         if not isinstance(block.origin, CallSiteId):
             continue
 
-        resolution = ctx.graph.indices.resolution_by_callsite.get(block.origin)
-        acceptance = resolution.accepted[0]
+        # patch all calls within block
+        for instr in block.instructions:
+            if isinstance(instr, Call):
+                if isinstance(instr.target, FunctionId):
+                    instr.target = ctx.entry[instr.target]
 
-        # only function callables have edges
-        if not isinstance(acceptance.callable.target, FunctionId):
-            continue
+    # emit entry first
+    ctx.flows[entry] = build_instruction_flow(ctx, entry)
 
-        # retrieve current successors
-        successors = ctx.edges[bid]
+    # emit all other functions
+    for fid in ctx.entry.keys():
+        if ctx.entry[fid] != entry:
+            ctx.flows[ctx.entry[fid]] = build_instruction_flow(ctx, ctx.entry[fid])
 
-        # wire callsite exit to function entry
-        ctx.edges[bid] = [ctx.entry[acceptance.callable.target]]
+    # collect active labels
+    active = {
+        instr.target.value
+        for flow in ctx.flows.values()
+        for instr in flow
+        if isinstance(instr, Call) and isinstance(instr.target, BlockId)
+    }
 
-        # only if function has an exit
-        if acceptance.callable.target in ctx.exit:
-            # wire function exit to current successors
-            ctx.edges[ctx.exit[acceptance.callable.target]].extend(successors)
-
-    for bid, block in ctx.nodes.items():
-        if not ctx.edges[bid]:
-            block.terminator = Stop()
+    # remove inactive labels
+    for fid in ctx.flows.keys():
+        ctx.flows[fid] = [
+            instr
+            for instr in ctx.flows[fid]
+            if not isinstance(instr, Label) or instr.id in active
+        ]
 
     return LowLevelGraph(
         generator=graph.generator,
         entry=entry,
         nodes=OneToOne[BlockId, Block].instance(ctx.nodes),
         edges=OneToMany[BlockId, BlockId].instance(ctx.edges),
+        flows=OneToMany[BlockId, InstructionFlow].instance(ctx.flows),
     )
-
-
-def lower_snippet(
-    ctx: LowLevelContext,
-    snid: SnippetId,
-) -> BlockId:
-
-    # create instructions for snippet
-    bid = BlockId(value=ctx.generator.next())
-    snippet = ctx.graph.basic.snippets.get(snid)
-    instrs = lower_instance_or_snippet(ctx, snippet)
-
-    # append to graph
-    ctx.edges[bid] = []
-    ctx.nodes[bid] = Block(origin=snid, instructions=instrs, terminator=Stop())
-
-    return bid
 
 
 def lower_function_flow(
@@ -118,7 +116,7 @@ def lower_function_flow(
         ctx.edges[mapping[node]] = []
 
     for node in flow.nodes():
-        # entry node is noop just transfers control
+        # entry node is noop just to fall through
         if isinstance(node, FlowEntry):
             ctx.nodes[mapping[node]] = Block(
                 origin=fid,
@@ -128,19 +126,19 @@ def lower_function_flow(
 
             ctx.entry[fid] = mapping[node]
 
-        # exit node is also noop, but stops control flow
+        # exit node is also noop, but emits exit
         elif isinstance(node, FlowExit):
             ctx.nodes[mapping[node]] = Block(
                 origin=fid,
                 instructions=[],
-                terminator=Emit(),
+                terminator=Exit(),
             )
 
             ctx.exit[fid] = mapping[node]
 
-        # otherwise just callsite
+        # otherwise just callsite emitting either fallthrough or stop
         else:
-            terminator = Emit() if not flow.edges.get(node) else FallThrough()
+            terminator = FallThrough() if flow.edges.get(node) else Stop()
             ctx.nodes[mapping[node]] = lower_callsite(ctx, node, terminator)
 
     # wire edges
@@ -202,6 +200,9 @@ def lower_callsite(
 
         # append callsite specific bindings
         instructions.extend(lower_callsite_bindings(ctx, []))
+
+        # append callsite call instructions
+        instructions.extend([Call(target=resolution.accepted[0].callable.target)])
 
     return Block(
         origin=cid,

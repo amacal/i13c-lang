@@ -1,27 +1,26 @@
-asm exit(code@rdi: u32[0x01..0x0f], left@imm: u16[0x01..0x02]) noreturn {
-    shl rdi, left;
+asm exit() noreturn {
     mov rax, 0x3c;
     syscall;
 }
 
-asm shift(left@imm: u16[0x01..0x02]) {
-    shl rdi, left;
+asm shift() {
+    shl rdi, 0x00;
+}
+
+fn shiftme() {
+    shift();
 }
 
 fn f1() {
-    shift(0x01);
+    shiftme();
 }
 
 fn f2() {
-    shift(0x02);
-}
-
-fn aux() noreturn {
-    f2();
-    exit(0x01, 0x02);
+    shiftme();
 }
 
 fn main() noreturn {
+    f2();
     f1();
-    aux();
+    exit();
 }

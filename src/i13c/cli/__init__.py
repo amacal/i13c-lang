@@ -98,7 +98,7 @@ def linear_command(path: str) -> None:
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
     for idx, instruction in enumerate(flow):
         click.echo(f"{idx:04}: {str(instruction)}")
@@ -121,9 +121,9 @@ def bin_command(path: str) -> None:
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
-    binary = enc.encode(flow)
+    binary = enc.encode(list(flow))
     sys.stdout.buffer.write(binary)
 
 
@@ -144,9 +144,9 @@ def elf_command(path: str) -> None:
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
-    binary = enc.encode(flow)
+    binary = enc.encode(list(flow))
     executable = elf.emit(binary)
 
     with open("a.out", "wb") as f:

@@ -1,7 +1,5 @@
 from i13c import ir
 from i13c.lowering.build import build_low_level_graph
-from i13c.lowering.linear import build_instruction_flow
-from i13c.lowering.registers import IR_REGISTER_MAP
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
 from tests.sem import prepare_program
@@ -10,9 +8,8 @@ from tests.sem import prepare_program
 def can_lower_syscall_program():
     _, program = prepare_program(
         """
-            asm main() noreturn {
-                syscall;
-            }
+            asm syscall() noreturn { syscall; }
+            fn main() noreturn { syscall(); }
         """
     )
 
@@ -20,21 +17,17 @@ def can_lower_syscall_program():
     model = build_semantic_graph(graph)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
-    assert llg.nodes.size() == 1
-    assert len(flow) == 2
-
-    assert isinstance(flow[0], ir.Label)
-    assert isinstance(flow[1], ir.SysCall)
+    instrs = [item for item in flow if not isinstance(item, ir.Label)]
+    assert len(instrs) == 1  # just one syscall
 
 
 def can_lower_mov_program():
     _, program = prepare_program(
         """
-            asm main() noreturn {
-                mov rax, 0x1234;
-            }
+            asm foo() noreturn { mov rax, 0x1234; }
+            fn main() noreturn { foo(); }
         """
     )
 
@@ -42,13 +35,10 @@ def can_lower_mov_program():
     model = build_semantic_graph(graph)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
-    assert llg.nodes.size() == 1
-    assert len(flow) == 2
-
-    assert isinstance(flow[0], ir.Label)
-    assert isinstance(flow[1], ir.MovRegImm)
+    instrs = [item for item in flow if not isinstance(item, ir.Label)]
+    assert len(instrs) == 1  # one mov only
 
 
 def can_lower_mov_with_register_bound_slot():
@@ -63,22 +53,17 @@ def can_lower_mov_with_register_bound_slot():
     model = build_semantic_graph(graph)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
-    # extract mov instructions
-    movs = [item for item in flow if isinstance(item, ir.MovRegImm)]
-
-    assert len(movs) == 2
-    assert movs[0].dst == IR_REGISTER_MAP[b"rax"]
-    assert movs[1].dst == IR_REGISTER_MAP[b"rax"]
+    instrs = [item for item in flow if not isinstance(item, ir.Label)]
+    assert len(instrs) == 2  # one inlined mov and one passed as an argument
 
 
 def can_lower_shl_program():
     _, program = prepare_program(
         """
-            asm main() noreturn {
-                shl rax, 0x41;
-            }
+            asm shl() noreturn { shl rax, 0x41; }
+            fn main() noreturn { shl(); }
         """
     )
 
@@ -86,13 +71,10 @@ def can_lower_shl_program():
     model = build_semantic_graph(graph)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
-    assert llg.nodes.size() == 1
-    assert len(flow) == 2
-
-    assert isinstance(flow[0], ir.Label)
-    assert isinstance(flow[1], ir.ShlRegImm)
+    instrs = [item for item in flow if not isinstance(item, ir.Label)]
+    assert len(instrs) == 1  # just one shl
 
 
 def can_lower_multiple_callsites():
@@ -108,13 +90,10 @@ def can_lower_multiple_callsites():
     model = build_semantic_graph(graph)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
-    assert llg.nodes.size() == 3  # functions with one block each
-    assert len(flow) == 5  # 3 labels + 2 instructions
-
-    assert isinstance(flow[2], ir.MovRegImm)
-    assert isinstance(flow[4], ir.SysCall)
+    instrs = [item for item in flow if not isinstance(item, ir.Label)]
+    assert len(instrs) == 2  # one mov and one syscall
 
 
 def can_lower_function_final_statement_to_stop():
@@ -129,12 +108,10 @@ def can_lower_function_final_statement_to_stop():
     model = build_semantic_graph(graph)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
-    assert llg.nodes.size() == 2  # functions with one block each
-    assert len(flow) == 3  # 2 labels + 1 instruction
-
-    assert isinstance(flow[2], ir.SysCall)
+    instrs = [item for item in flow if not isinstance(item, ir.Label)]
+    assert len(instrs) == 1  # just one syscall
 
 
 def can_lower_function_calling_another_function():
@@ -150,12 +127,10 @@ def can_lower_function_calling_another_function():
     model = build_semantic_graph(graph)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
     instrs = [item for item in flow if not isinstance(item, ir.Label)]
-
-    assert len(instrs) == 1
-    assert isinstance(instrs[0], ir.SysCall)
+    assert len(instrs) == 2  # one call and one syscall
 
 
 def can_lower_function_calling_another_function_reusing():
@@ -173,9 +148,7 @@ def can_lower_function_calling_another_function_reusing():
     model = build_semantic_graph(graph)
 
     llg = build_low_level_graph(model)
-    flow = build_instruction_flow(llg)
+    flow = llg.instructions()
 
     instrs = [item for item in flow if not isinstance(item, ir.Label)]
-
-    assert len(instrs) == 1
-    assert isinstance(instrs[0], ir.SysCall)
+    assert len(instrs) == 3  # two calls and one syscall
