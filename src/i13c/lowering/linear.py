@@ -37,6 +37,7 @@ def build_instruction_flow(ctx: LowLevelContext, entry: BlockId) -> List[Instruc
         block = ctx.nodes[bid]
         successors = ctx.edges[bid]
 
+        # determine next block in order
         next = ordered[idx + 1] if idx + 1 < len(ordered) else None
         args = (block.terminator, successors, next)
 

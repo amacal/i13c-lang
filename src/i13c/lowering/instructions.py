@@ -22,7 +22,6 @@ def lower_instruction(
         return lower_instruction_syscall()
 
     assert False, f"unsupported mnemonic: {instruction.mnemonic.name}"
-    # raise UnsupportedMnemonic(instruction.ref, instruction.mnemonic.name)
 
 
 def lower_instruction_mov(

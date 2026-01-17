@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional, Set
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
@@ -6,8 +6,8 @@ from i13c.lowering.bind import lower_callsite_bindings
 from i13c.lowering.graph import LowLevelContext, LowLevelGraph
 from i13c.lowering.instructions import lower_instruction
 from i13c.lowering.linear import build_instruction_flow
-from i13c.lowering.typing.blocks import Block
-from i13c.lowering.typing.flows import BlockId, CallFlow, Flow
+from i13c.lowering.typing.blocks import Block, BlockInstruction
+from i13c.lowering.typing.flows import BlockId, CallFlow
 from i13c.lowering.typing.instructions import Call, Instruction, Label
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
@@ -18,35 +18,24 @@ from i13c.lowering.typing.terminators import (
 from i13c.sem.model import SemanticGraph
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.functions import FunctionId
-from i13c.sem.typing.entities.instructions import InstructionId
 from i13c.sem.typing.entities.operands import Operand, OperandId
-from i13c.sem.typing.entities.snippets import Snippet, SnippetId
+from i13c.sem.typing.entities.snippets import SnippetId
 from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowExit, FlowGraph, FlowNode
 from i13c.sem.typing.indices.instances import Instance
 
 
-def get_context(graph: SemanticGraph) -> LowLevelContext:
-    return LowLevelContext(
-        graph=graph,
-        generator=graph.generator,
-        nodes={},
-        edges={},
-        flows={},
-        entry={},
-        exit={},
-    )
-
-
 def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
     entry: Optional[BlockId] = None
-    ctx: LowLevelContext = get_context(graph)
+    ctx = LowLevelContext.empty(graph)
 
-    # lower all callables
+    # lower all live callables
     for fid in graph.callable_live:
         if isinstance(fid, FunctionId):
+            # find flowgraph and generate blocks
             flowgraph = graph.live.flowgraph_by_function.get(fid)
             block = lower_function_flow(ctx, fid, flowgraph)
 
+            # returned block may be an entrypoint
             if graph.live.entrypoints.contains(fid):
                 entry = block
 
@@ -55,7 +44,6 @@ def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
 
     # patch function calls
     for block in ctx.nodes.values():
-
         # only callsite blocks may have calls
         if not isinstance(block.origin, CallSiteId):
             continue
@@ -65,7 +53,7 @@ def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
             if isinstance(instr, CallFlow):
                 block.instructions[idx] = Call(target=ctx.entry[instr.target])
 
-    # emit entry first
+    # emit entrypoint first
     ctx.flows[entry] = build_instruction_flow(ctx, entry)
 
     # emit all other functions
@@ -89,6 +77,7 @@ def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
             if not isinstance(instr, Label) or instr.id.value in active
         ]
 
+    # materialize low-level graph
     return LowLevelGraph(
         generator=graph.generator,
         entry=entry,
@@ -132,11 +121,12 @@ def lower_function_flow(
 
             ctx.exit[fid] = mapping[node]
 
-        # otherwise just callsite emitting either fallthrough or stop
+        # otherwise just callsite emitting either fallthrough or a trap
         else:
-            terminator = (
-                FallThroughTerminator() if flow.edges.get(node) else TrapTerminator()
-            )
+            has_successors = len(flow.edges.get(node) or []) > 0
+            terminator = FallThroughTerminator() if has_successors else TrapTerminator()
+
+            # lower callsite block
             ctx.nodes[mapping[node]] = lower_callsite(ctx, node, terminator)
 
     # wire edges
@@ -146,23 +136,15 @@ def lower_function_flow(
     return mapping[flow.entry]
 
 
-def lower_instance_or_snippet(
+def lower_instance(
     ctx: LowLevelContext,
-    target: Union[Instance, Snippet],
+    target: Instance,
 ) -> List[Instruction]:
     out: List[Instruction] = []
 
-    # placeholders
-    instrs: List[InstructionId]
-    operands: Dict[OperandId, Operand]
-
-    # determine what we are lowering
-    if isinstance(target, Snippet):
-        operands = {}
-        instrs = target.instructions
-    else:
-        operands = target.operands
-        instrs = ctx.graph.basic.snippets.get(target.target).instructions
+    # values
+    operands: Dict[OperandId, Operand] = target.operands
+    instrs = ctx.graph.basic.snippets.get(target.target).instructions
 
     # lower all instructions
     for iid in instrs:
@@ -177,7 +159,7 @@ def lower_callsite(
     cid: CallSiteId,
     terminator: Terminator,
 ) -> Block:
-    instructions: List[Union[Instruction, Flow]] = []
+    instructions: List[BlockInstruction] = []
 
     # retrieve callsite resolution
     resolution = ctx.graph.indices.resolution_by_callsite.get(cid)
@@ -192,7 +174,7 @@ def lower_callsite(
         instructions.extend(lower_callsite_bindings(ctx, instance.bindings))
 
         # append instance instructions
-        instructions.extend(lower_instance_or_snippet(ctx, instance))
+        instructions.extend(lower_instance(ctx, instance))
 
     else:
 

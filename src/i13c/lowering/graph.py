@@ -36,3 +36,15 @@ class LowLevelContext:
 
     entry: Dict[FunctionId, BlockId]
     exit: Dict[FunctionId, BlockId]
+
+    @staticmethod
+    def empty(graph: SemanticGraph) -> LowLevelContext:
+        return LowLevelContext(
+            graph=graph,
+            generator=graph.generator,
+            nodes={},
+            edges={},
+            flows={},
+            entry={},
+            exit={},
+        )
