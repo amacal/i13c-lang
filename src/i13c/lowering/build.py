@@ -1,6 +1,6 @@
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.graph import LowLevelContext, LowLevelGraph
-from i13c.lowering.linear import emit_all_blocks
+from i13c.lowering.nodes.blocks import emit_all_blocks
 from i13c.lowering.nodes.callsites import patch_all_callsites
 from i13c.lowering.nodes.functions import lower_active_functions
 from i13c.lowering.typing.blocks import Block
@@ -10,6 +10,7 @@ from i13c.sem.model import SemanticGraph
 
 
 def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
+    # an empty lowering context
     ctx = LowLevelContext.empty(graph)
 
     # lower all active functions in any order

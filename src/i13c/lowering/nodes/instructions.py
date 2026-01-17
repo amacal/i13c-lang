@@ -1,6 +1,6 @@
 from typing import Dict
 
-from i13c.lowering.registers import IR_REGISTER_MAP
+from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.instructions import Instruction, MovRegImm, ShlRegImm, SysCall
 from i13c.sem.model import SemanticGraph
 from i13c.sem.typing.entities.instructions import Instruction as SemanticInstruction

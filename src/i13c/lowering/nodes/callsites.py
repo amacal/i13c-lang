@@ -1,7 +1,7 @@
 from typing import List
 
-from i13c.lowering.bind import lower_callsite_bindings
 from i13c.lowering.graph import LowLevelContext
+from i13c.lowering.nodes.bindings import lower_callsite_bindings
 from i13c.lowering.nodes.instances import lower_instance
 from i13c.lowering.typing.blocks import Block, BlockInstruction
 from i13c.lowering.typing.flows import CallFlow
