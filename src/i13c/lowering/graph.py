@@ -12,9 +12,7 @@ from i13c.sem.typing.entities.functions import FunctionId
 
 @dataclass(kw_only=True)
 class LowLevelGraph:
-    generator: Generator
     entry: BlockId
-
     nodes: OneToOne[BlockId, Block]
     edges: OneToMany[BlockId, BlockId]
     flows: OneToMany[BlockId, Instruction]
