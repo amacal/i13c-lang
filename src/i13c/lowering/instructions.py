@@ -1,17 +1,17 @@
 from typing import Dict
 
-from i13c import ir
 from i13c.lowering.registers import IR_REGISTER_MAP
+from i13c.lowering.typing.instructions import Instruction, MovRegImm, ShlRegImm, SysCall
 from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.entities.instructions import Instruction
+from i13c.sem.typing.entities.instructions import Instruction as SemanticInstruction
 from i13c.sem.typing.entities.operands import Immediate, Operand, OperandId, Register
 
 
 def lower_instruction(
     graph: SemanticGraph,
-    instruction: Instruction,
+    instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
-) -> ir.Instruction:
+) -> Instruction:
     if instruction.mnemonic.name == b"mov":
         return lower_instruction_mov(graph, instruction, operands)
 
@@ -27,9 +27,9 @@ def lower_instruction(
 
 def lower_instruction_mov(
     graph: SemanticGraph,
-    instruction: Instruction,
+    instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
-) -> ir.Instruction:
+) -> Instruction:
 
     # first try out rewritten operands
     dst = operands.get(instruction.operands[0])
@@ -45,14 +45,14 @@ def lower_instruction_mov(
     dst_reg = IR_REGISTER_MAP[dst.target.name]
     src_imm = src.target.value
 
-    return ir.MovRegImm(dst=dst_reg, imm=src_imm)
+    return MovRegImm(dst=dst_reg, imm=src_imm)
 
 
 def lower_instruction_shl(
     graph: SemanticGraph,
-    instruction: Instruction,
+    instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
-) -> ir.Instruction:
+) -> Instruction:
 
     # first try out rewritten operands
     dst = operands.get(instruction.operands[0])
@@ -68,8 +68,8 @@ def lower_instruction_shl(
     dst_reg = IR_REGISTER_MAP[dst.target.name]
     src_imm = src.target.value
 
-    return ir.ShlRegImm(dst=dst_reg, imm=src_imm)
+    return ShlRegImm(dst=dst_reg, imm=src_imm)
 
 
-def lower_instruction_syscall() -> ir.Instruction:
-    return ir.SysCall()
+def lower_instruction_syscall() -> Instruction:
+    return SysCall()

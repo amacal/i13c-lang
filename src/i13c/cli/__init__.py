@@ -9,7 +9,6 @@ from i13c import elf, enc, lex, par, sem, src
 from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap
 from i13c.cli.semantic import attach
 from i13c.lowering.build import build_low_level_graph
-from i13c.lowering.linear import build_instruction_flow
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
 

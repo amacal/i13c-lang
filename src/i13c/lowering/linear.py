@@ -1,28 +1,18 @@
 from typing import List, Optional, Set
 
-from i13c.ir import (
-    BlockId,
-    Call,
-    Exit,
-    InstructionFlow,
-    Jump,
-    Label,
-    Return,
-    Stop,
-    Terminator,
-)
 from i13c.lowering.graph import LowLevelContext
+from i13c.lowering.typing.flows import BlockId, Flow
+from i13c.lowering.typing.instructions import Instruction, Label, Return
+from i13c.lowering.typing.terminators import ExitTerminator, Terminator, TrapTerminator
 
 
-def build_instruction_flow(
-    ctx: LowLevelContext, entry: BlockId
-) -> List[InstructionFlow]:
+def build_instruction_flow(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]:
 
     visited: Set[BlockId] = set()
     queue: List[BlockId] = [entry]
 
     ordered: List[BlockId] = []
-    emited: List[InstructionFlow] = []
+    emited: List[Instruction] = []
 
     while queue:
         bid = queue.pop(0)
@@ -36,10 +26,11 @@ def build_instruction_flow(
 
     for idx, bid in enumerate(ordered):
         # emit label for block
-        emited.append(Label(id=bid.value))
+        emited.append(Label(id=bid))
 
         # emit all instructions
         for instr in ctx.nodes[bid].instructions:
+            assert not isinstance(instr, Flow)
             emited.append(instr)
 
         # determine control transfer
@@ -50,8 +41,8 @@ def build_instruction_flow(
         args = (block.terminator, successors, next)
 
         # emit control transfer if needed
-        if jump := emit_control_transfer(*args):
-            emited.append(jump)
+        if derived := emit_control_transfer(*args):
+            emited.append(derived)
 
     return emited
 
@@ -60,15 +51,15 @@ def emit_control_transfer(
     term: Terminator,
     successors: List[BlockId],
     next: Optional[BlockId],
-) -> Optional[Jump | Call | Return]:
+) -> Optional[Instruction]:
 
     # stop terminator, nothing to emit
-    if isinstance(term, Stop):
+    if isinstance(term, TrapTerminator):
         assert len(successors) == 0
         return None
 
     # exit terminator, nothing to emit
-    if isinstance(term, Exit):
+    if isinstance(term, ExitTerminator):
         assert len(successors) == 0
         return Return()
 
@@ -80,4 +71,4 @@ def emit_control_transfer(
         return None
 
     # otherwise emit jump
-    return Jump(target=successors[0].value)
+    assert False, "Jump emission not implemented yet"

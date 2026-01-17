@@ -1,20 +1,28 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Protocol, Type, Union
 
-from i13c import ir
+from i13c.lowering.typing.instructions import (
+    Call,
+    Instruction,
+    Label,
+    MovRegImm,
+    Return,
+    ShlRegImm,
+    SysCall,
+)
 
 
-def encode(instructions: List[ir.InstructionFlow]) -> bytes:
+def encode(instructions: List[Instruction]) -> bytes:
     bytecode = bytearray()
-    labels: Dict[int, Label] = {}
-    relocations: List[Relocation] = []
+    labels: Dict[int, LabelArtifact] = {}
+    relocations: List[RelocationArtifact] = []
 
     for instruction in instructions:
-        if result := DISPATCH_TABLE[type(instruction)](instruction, bytecode):
-            if isinstance(result, Label):
-                labels[result.target] = result
+        if artifact := DISPATCH_TABLE[type(instruction)](instruction, bytecode):
+            if isinstance(artifact, LabelArtifact):
+                labels[artifact.target] = artifact
             else:
-                relocations.append(result)
+                relocations.append(artifact)
 
     for relocation in relocations:
         target = labels[relocation.target].offset - (relocation.offset + 4)
@@ -26,8 +34,8 @@ def encode(instructions: List[ir.InstructionFlow]) -> bytes:
 
 
 def encode_mov_reg_imm(
-    instruction: ir.MovRegImm, bytecode: bytearray
-) -> Optional[Union[Label, Relocation]]:
+    instruction: MovRegImm, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
     # REX.W + B8+rd io
     rex = 0x40 | 0x08 | (0x01 if instruction.dst >= 8 else 0x00)
     opcode = 0xB8 | (instruction.dst & 0x07)
@@ -37,8 +45,8 @@ def encode_mov_reg_imm(
 
 
 def encode_shl_reg_imm(
-    instruction: ir.ShlRegImm, bytecode: bytearray
-) -> Optional[Union[Label, Relocation]]:
+    instruction: ShlRegImm, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
     # REX.W + C1 /4 ib
     rex = 0x40 | 0x08 | (0x01 if instruction.dst >= 8 else 0x00)
     opcode = 0xC1
@@ -49,53 +57,53 @@ def encode_shl_reg_imm(
 
 
 def encode_syscall(
-    instruction: ir.SysCall, bytecode: bytearray
-) -> Optional[Union[Label, Relocation]]:
+    instruction: SysCall, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
     bytecode.extend([0x0F, 0x05])
 
 
 def encode_return(
-    instruction: ir.Return, bytecode: bytearray
-) -> Optional[Union[Label, Relocation]]:
+    instruction: Return, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
     bytecode.extend([0xC3])
 
 
 def encode_label(
-    instruction: ir.Label, bytecode: bytearray
-) -> Optional[Union[Label, Relocation]]:
-    return Label(target=instruction.id, offset=len(bytecode))
+    instruction: Label, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    return LabelArtifact(target=instruction.id.value, offset=len(bytecode))
 
 
 def encode_call(
-    instruction: ir.Call, bytecode: bytearray
-) -> Optional[Union[Label, Relocation]]:
+    instruction: Call, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
     bytecode.extend([0xE8, 0x00, 0x00, 0x00, 0x00])
-    return Relocation(target=instruction.target.value, offset=len(bytecode) - 4)
+    return RelocationArtifact(target=instruction.target.value, offset=len(bytecode) - 4)
 
 
 @dataclass(kw_only=True)
-class Label:
+class LabelArtifact:
     target: int
     offset: int
 
 
 @dataclass(kw_only=True)
-class Relocation:
+class RelocationArtifact:
     target: int
     offset: int
 
 
 class Encoder(Protocol):
     def __call__(
-        self, instruction: ir.InstructionFlow, out: bytearray
-    ) -> Optional[Union[Label, Relocation]]: ...
+        self, instruction: Instruction, out: bytearray
+    ) -> Optional[Union[LabelArtifact, RelocationArtifact]]: ...
 
 
-DISPATCH_TABLE: Dict[Type[ir.InstructionFlow], Encoder] = {
-    ir.MovRegImm: encode_mov_reg_imm,
-    ir.ShlRegImm: encode_shl_reg_imm,
-    ir.SysCall: encode_syscall,
-    ir.Return: encode_return,
-    ir.Label: encode_label,
-    ir.Call: encode_call,
+DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
+    MovRegImm: encode_mov_reg_imm,
+    ShlRegImm: encode_shl_reg_imm,
+    SysCall: encode_syscall,
+    Return: encode_return,
+    Label: encode_label,
+    Call: encode_call,
 }  # pyright: ignore[reportAssignmentType]

@@ -1,8 +1,8 @@
 from typing import List
 
-from i13c.ir import Instruction, MovRegImm
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.registers import IR_REGISTER_MAP
+from i13c.lowering.typing.instructions import Instruction, MovRegImm
 from i13c.sem.typing.entities.literals import Hex
 from i13c.sem.typing.entities.snippets import Slot
 from i13c.sem.typing.resolutions.callsites import CallSiteBinding

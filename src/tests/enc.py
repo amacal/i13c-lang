@@ -1,12 +1,20 @@
 from typing import List
 
-from i13c import enc, ir
+from i13c import enc
+from i13c.lowering.typing.flows import BlockId
+from i13c.lowering.typing.instructions import (
+    Instruction,
+    Label,
+    MovRegImm,
+    ShlRegImm,
+    SysCall,
+)
 
 
 def can_encode_instructions_mov_rax_imm():
-    flow: List[ir.InstructionFlow] = [
-        ir.Label(id=0),
-        ir.MovRegImm(dst=0, imm=0x1234),
+    flow: List[Instruction] = [
+        Label(id=BlockId(value=0)),
+        MovRegImm(dst=0, imm=0x1234),
     ]
 
     bytecode = enc.encode(flow)
@@ -16,9 +24,9 @@ def can_encode_instructions_mov_rax_imm():
 
 
 def can_encode_instructions_mov_r10_imm():
-    flow: List[ir.InstructionFlow] = [
-        ir.Label(id=0),
-        ir.MovRegImm(dst=10, imm=0x1234),
+    flow: List[Instruction] = [
+        Label(id=BlockId(value=0)),
+        MovRegImm(dst=10, imm=0x1234),
     ]
 
     bytecode = enc.encode(flow)
@@ -28,9 +36,9 @@ def can_encode_instructions_mov_r10_imm():
 
 
 def can_encode_instructions_shl_rbx_imm():
-    flow: List[ir.InstructionFlow] = [
-        ir.Label(id=0),
-        ir.ShlRegImm(dst=3, imm=0x01),
+    flow: List[Instruction] = [
+        Label(id=BlockId(value=0)),
+        ShlRegImm(dst=3, imm=0x01),
     ]
 
     bytecode = enc.encode(flow)
@@ -40,9 +48,9 @@ def can_encode_instructions_shl_rbx_imm():
 
 
 def can_encode_instructions_syscall():
-    flow: List[ir.InstructionFlow] = [
-        ir.Label(id=0),
-        ir.SysCall(),
+    flow: List[Instruction] = [
+        Label(id=BlockId(value=0)),
+        SysCall(),
     ]
 
     bytecode = enc.encode(flow)
