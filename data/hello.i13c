@@ -4,23 +4,19 @@ asm exit() noreturn {
 }
 
 asm shift() {
-    shl rdi, 0x00;
+    shl rdi, 0x01;
 }
 
-fn shiftme() {
-    shift();
+fn x() {
+  shift();
 }
 
-fn f1() {
-    shiftme();
-}
-
-fn f2() {
-    shiftme();
+fn y() {
+  shift();
 }
 
 fn main() noreturn {
-    f2();
-    f1();
+    x();
+    y();
     exit();
 }

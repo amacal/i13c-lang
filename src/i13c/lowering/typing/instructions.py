@@ -36,4 +36,9 @@ class Return:
     pass
 
 
-Instruction = Union[MovRegImm, ShlRegImm, SysCall, Label, Call, Return]
+@dataclass(kw_only=True)
+class Jump:
+    target: BlockId
+
+
+Instruction = Union[MovRegImm, ShlRegImm, SysCall, Label, Call, Return, Jump]

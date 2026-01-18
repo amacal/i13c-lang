@@ -2,8 +2,13 @@ from typing import List, Optional, Set
 
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.typing.flows import BlockId, Flow
-from i13c.lowering.typing.instructions import Call, Instruction, Label, Return
-from i13c.lowering.typing.terminators import ExitTerminator, Terminator, TrapTerminator
+from i13c.lowering.typing.instructions import Call, Instruction, Jump, Label, Return
+from i13c.lowering.typing.terminators import (
+    ExitTerminator,
+    JumpTerminator,
+    Terminator,
+    TrapTerminator,
+)
 
 
 def emit_all_blocks(ctx: LowLevelContext, entry: BlockId) -> None:
@@ -60,13 +65,9 @@ def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]
             assert not isinstance(instr, Flow)
             emited.append(instr)
 
-        # determine control transfer
-        block = ctx.nodes[bid]
-        successors = ctx.edges[bid]
-
         # determine next block in order
         next = ordered[idx + 1] if idx + 1 < len(ordered) else None
-        args = (block.terminator, successors, next)
+        args = (ctx.nodes[bid].terminator, next)
 
         # emit control transfer if needed
         if derived := emit_control_transfer(*args):
@@ -77,27 +78,23 @@ def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]
 
 
 def emit_control_transfer(
-    term: Terminator,
-    successors: List[BlockId],
-    next: Optional[BlockId],
+    term: Terminator, next: Optional[BlockId]
 ) -> Optional[Instruction]:
 
     # stop terminator, nothing to emit
     if isinstance(term, TrapTerminator):
-        assert len(successors) == 0
         return None
 
     # exit terminator, nothing to emit
     if isinstance(term, ExitTerminator):
-        assert len(successors) == 0
         return Return()
 
-    # expecting only single successor
-    assert len(successors) == 1
+    # accept only jump terminator
+    assert isinstance(term, JumpTerminator)
 
-    # we are ok with fallthrough
-    if next is not None and successors[0].value == next.value:
+    # are ok with fallthrough?
+    if next is not None and term.target.value == next.value:
         return None
 
     # otherwise emit jump
-    assert False, "Jump emission not implemented yet"
+    return Jump(target=term.target)

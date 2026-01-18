@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import Union
 
+from i13c.lowering.typing.flows import BlockId
+
 
 @dataclass
-class FallThroughTerminator:
-    pass
+class JumpTerminator:
+    target: BlockId
 
 
 @dataclass
@@ -17,4 +19,4 @@ class ExitTerminator:
     pass
 
 
-Terminator = Union[FallThroughTerminator, TrapTerminator, ExitTerminator]
+Terminator = Union[JumpTerminator, TrapTerminator, ExitTerminator]

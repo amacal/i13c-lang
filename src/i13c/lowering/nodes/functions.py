@@ -7,7 +7,7 @@ from i13c.lowering.typing.blocks import Block
 from i13c.lowering.typing.flows import BlockId
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
-    FallThroughTerminator,
+    JumpTerminator,
     TrapTerminator,
 )
 from i13c.sem.typing.entities.functions import FunctionId
@@ -51,12 +51,21 @@ def lower_function_flow(
     for node in flow.nodes():
         # entry node is noop just to fall through
         if isinstance(node, FlowEntry):
+            # obtain successors
+            successors = flow.edges.get(node, [])
+            assert len(successors) == 1
+
+            # create jump terminator to successor
+            terminator = JumpTerminator(target=mapping[successors[0]])
+
+            # create empty block with jump
             ctx.nodes[mapping[node]] = Block(
                 origin=fid,
                 instructions=[],
-                terminator=FallThroughTerminator(),
+                terminator=terminator,
             )
 
+            # register entry block
             ctx.entry[fid] = mapping[node]
 
         # exit node is also noop, but emits exit
@@ -71,8 +80,16 @@ def lower_function_flow(
 
         # otherwise just callsite emitting either fallthrough or a trap
         else:
-            has_successors = len(flow.edges.get(node) or []) > 0
-            terminator = FallThroughTerminator() if has_successors else TrapTerminator()
+            # obtain successors
+            successors = flow.edges.get(node, [])
+            assert len(successors) in (0, 1)
+
+            # create jump or trap
+            terminator = (
+                JumpTerminator(target=mapping[successors[0]])
+                if len(successors) == 1
+                else TrapTerminator()
+            )
 
             # lower callsite block
             ctx.nodes[mapping[node]] = lower_callsite(ctx, node, terminator)
