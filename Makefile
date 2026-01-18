@@ -19,7 +19,13 @@ test:
 asm:
 	@ndisasm -b 64 -k0,120 a.out
 
-.PHONY: dump
-dump:
-	@find ./src/i13c -type f -name '*.py' -print0 \
-	| xargs -0 -I{} sh -c 'cat "{}"; echo' > dump
+.PHONY: dump-lowering
+dump-lowering:
+	@find ./src/i13c/lowering -type f -name '*.py' -print0 \
+	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump
+
+
+.PHONY: dump-semantic
+dump-semantic:
+	@find ./src/i13c/sem -type f -name '*.py' -print0 \
+	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump

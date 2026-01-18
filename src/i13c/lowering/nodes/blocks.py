@@ -1,4 +1,4 @@
-from typing import List, Optional, Set
+from typing import Dict, List, Optional, Set
 
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.typing.flows import BlockId, Flow
@@ -37,12 +37,12 @@ def emit_all_blocks(ctx: LowLevelContext, entry: BlockId) -> None:
         ]
 
 
-def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]:
+def linearize_blocks(
+    entry: BlockId, edges: Dict[BlockId, List[BlockId]]
+) -> List[BlockId]:
     visited: Set[BlockId] = set()
     queue: List[BlockId] = [entry]
-
     ordered: List[BlockId] = []
-    emited: List[Instruction] = []
 
     # naive BFS to determine block order
     while queue:
@@ -52,8 +52,16 @@ def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]
             visited.add(bid)
             ordered.append(bid)
 
-            for next in ctx.edges[bid]:
+            for next in edges[bid]:
                 queue.append(next)
+
+    # success
+    return ordered
+
+
+def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]:
+    emited: List[Instruction] = []
+    ordered: List[BlockId] = linearize_blocks(entry, ctx.edges)
 
     # emit instructions in order
     for idx, bid in enumerate(ordered):

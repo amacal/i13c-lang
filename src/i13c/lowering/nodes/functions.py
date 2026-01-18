@@ -42,7 +42,7 @@ def lower_flow_entry(
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
     node: FlowEntry,
-) -> None:
+) -> Block:
     # obtain successors
     successors = flow.edges.get(node, [])
     assert len(successors) == 1
@@ -50,15 +50,15 @@ def lower_flow_entry(
     # create jump terminator to successor
     terminator = JumpTerminator(target=mapping[successors[0]])
 
+    # register entry block
+    ctx.entry[fid] = mapping[node]
+
     # create empty block with jump
-    ctx.nodes[mapping[node]] = Block(
+    return Block(
         origin=fid,
         instructions=[],
         terminator=terminator,
     )
-
-    # register entry block
-    ctx.entry[fid] = mapping[node]
 
 
 def lower_flow_exit(
@@ -67,16 +67,16 @@ def lower_flow_exit(
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
     node: FlowExit,
-) -> None:
+) -> Block:
+    # register exit block
+    ctx.exit[fid] = mapping[node]
+
     # create empty block with exit
-    ctx.nodes[mapping[node]] = Block(
+    return Block(
         origin=fid,
         instructions=[],
         terminator=ExitTerminator(),
     )
-
-    # register exit block
-    ctx.exit[fid] = mapping[node]
 
 
 def lower_flow_callsite(
@@ -85,7 +85,7 @@ def lower_flow_callsite(
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
     node: CallSiteId,
-) -> None:
+) -> Block:
     # obtain successors
     successors = flow.edges.get(node, [])
     assert len(successors) in (0, 1)
@@ -98,7 +98,11 @@ def lower_flow_callsite(
     )
 
     # lower callsite block
-    ctx.nodes[mapping[node]] = lower_callsite(ctx, node, terminator)
+    return Block(
+        origin=node,
+        instructions=lower_callsite(ctx, node),
+        terminator=terminator,
+    )
 
 
 class FlowNodeLowerer(Protocol):
@@ -109,7 +113,7 @@ class FlowNodeLowerer(Protocol):
         flow: FlowGraph,
         mapping: Dict[FlowNode, BlockId],
         node: FlowNode,
-    ) -> None: ...
+    ) -> Block: ...
 
 
 DISPATCH_TABLE: Dict[Type[FlowNode], FlowNodeLowerer] = {
@@ -132,8 +136,11 @@ def lower_function_flow(
         mapping[node] = BlockId(value=generator.next())
         ctx.edges[mapping[node]] = []
 
+    # lower each FlowNode
     for node in flow.nodes():
-        DISPATCH_TABLE[type(node)](ctx, fid, flow, mapping, node)
+        ctx.nodes[mapping[node]] = DISPATCH_TABLE[type(node)](
+            ctx, fid, flow, mapping, node
+        )
 
     # wire edges
     for node, successors in flow.edges.items():

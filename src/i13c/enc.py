@@ -65,20 +65,33 @@ def encode_syscall(
 def encode_return(
     instruction: Return, bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    # C3 is simply RET
     bytecode.extend([0xC3])
 
 
 def encode_label(
     instruction: Label, bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
-    return LabelArtifact(target=instruction.id.value, offset=len(bytecode))
+    # record label position
+    offset = len(bytecode)
+    target = instruction.id.value
+
+    # the label points at the current bytecode length
+    return LabelArtifact(target=target, offset=offset)
 
 
 def encode_call(
     instruction: Call, bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    # emit E8 cd --- where cd is a signed 32-bit offset
     bytecode.extend([0xE8, 0x00, 0x00, 0x00, 0x00])
-    return RelocationArtifact(target=instruction.target.value, offset=len(bytecode) - 4)
+
+    # record relocation info
+    offset = len(bytecode) - 4
+    target = instruction.target.value
+
+    # record relocation to be fixed up later
+    return RelocationArtifact(target=target, offset=offset)
 
 
 @dataclass(kw_only=True)

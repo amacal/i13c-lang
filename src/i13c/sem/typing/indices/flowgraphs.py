@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Set, Union
+from typing import Dict, Iterable, List, Optional, Set, Union
 
 from i13c.sem.typing.entities.functions import Statement
 
@@ -41,11 +41,11 @@ class FlowGraph:
 
     def show(self) -> Iterable[str]:
         path: List[str] = []
-        node: FlowNode = self.entry
+        node: Optional[FlowNode] = self.entry
 
         # simplified path traversal
-        while node != self.exit:
+        while node is not None:
             path.append(node.identify(2))
-            node = self.edges[node][0]
+            node = self.edges[node][0] if node in self.edges else None
 
         return path

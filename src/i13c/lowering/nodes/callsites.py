@@ -3,10 +3,9 @@ from typing import List
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.nodes.bindings import lower_callsite_bindings
 from i13c.lowering.nodes.instances import lower_instance
-from i13c.lowering.typing.blocks import Block, BlockInstruction
+from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import CallFlow
 from i13c.lowering.typing.instructions import Call
-from i13c.lowering.typing.terminators import Terminator
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.snippets import SnippetId
 
@@ -14,8 +13,7 @@ from i13c.sem.typing.entities.snippets import SnippetId
 def lower_callsite(
     ctx: LowLevelContext,
     cid: CallSiteId,
-    terminator: Terminator,
-) -> Block:
+) -> List[BlockInstruction]:
     instructions: List[BlockInstruction] = []
 
     # retrieve callsite resolution
@@ -38,14 +36,14 @@ def lower_callsite(
         # append callsite specific bindings
         instructions.extend(lower_callsite_bindings(ctx, []))
 
-        # append callsite call instructions
-        instructions.extend([CallFlow(target=resolution.accepted[0].callable.target)])
+        # extract successfully resolved target
+        target = resolution.accepted[0].callable.target
 
-    return Block(
-        origin=cid,
-        instructions=instructions,
-        terminator=terminator,
-    )
+        # append callsite call instructions
+        instructions.extend([CallFlow(target=target)])
+
+    # callsite instructions
+    return instructions
 
 
 def patch_all_callsites(ctx: LowLevelContext) -> None:
