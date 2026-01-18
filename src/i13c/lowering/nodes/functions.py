@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Protocol, Type
 
 from i13c.core.generator import Generator
 from i13c.lowering.graph import LowLevelContext
@@ -10,6 +10,7 @@ from i13c.lowering.typing.terminators import (
     JumpTerminator,
     TrapTerminator,
 )
+from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.functions import FunctionId
 from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowExit, FlowGraph, FlowNode
 
@@ -35,6 +36,89 @@ def lower_active_functions(ctx: LowLevelContext) -> BlockId:
     return entry
 
 
+def lower_flow_entry(
+    ctx: LowLevelContext,
+    fid: FunctionId,
+    flow: FlowGraph,
+    mapping: Dict[FlowNode, BlockId],
+    node: FlowEntry,
+) -> None:
+    # obtain successors
+    successors = flow.edges.get(node, [])
+    assert len(successors) == 1
+
+    # create jump terminator to successor
+    terminator = JumpTerminator(target=mapping[successors[0]])
+
+    # create empty block with jump
+    ctx.nodes[mapping[node]] = Block(
+        origin=fid,
+        instructions=[],
+        terminator=terminator,
+    )
+
+    # register entry block
+    ctx.entry[fid] = mapping[node]
+
+
+def lower_flow_exit(
+    ctx: LowLevelContext,
+    fid: FunctionId,
+    flow: FlowGraph,
+    mapping: Dict[FlowNode, BlockId],
+    node: FlowExit,
+) -> None:
+    # create empty block with exit
+    ctx.nodes[mapping[node]] = Block(
+        origin=fid,
+        instructions=[],
+        terminator=ExitTerminator(),
+    )
+
+    # register exit block
+    ctx.exit[fid] = mapping[node]
+
+
+def lower_flow_callsite(
+    ctx: LowLevelContext,
+    fid: FunctionId,
+    flow: FlowGraph,
+    mapping: Dict[FlowNode, BlockId],
+    node: CallSiteId,
+) -> None:
+    # obtain successors
+    successors = flow.edges.get(node, [])
+    assert len(successors) in (0, 1)
+
+    # create jump or trap
+    terminator = (
+        JumpTerminator(target=mapping[successors[0]])
+        if len(successors) == 1
+        else TrapTerminator()
+    )
+
+    # lower callsite block
+    ctx.nodes[mapping[node]] = lower_callsite(ctx, node, terminator)
+
+
+class FlowNodeLowerer(Protocol):
+    def __call__(
+        self,
+        ctx: LowLevelContext,
+        fid: FunctionId,
+        flow: FlowGraph,
+        mapping: Dict[FlowNode, BlockId],
+        node: FlowNode,
+    ) -> None: ...
+
+
+DISPATCH_TABLE: Dict[Type[FlowNode], FlowNodeLowerer] = {
+    FlowEntry: lower_flow_entry,
+    FlowExit: lower_flow_exit,
+    CallSiteId: lower_flow_callsite,
+}  # pyright: ignore[reportAssignmentType]
+
+
 def lower_function_flow(
     ctx: LowLevelContext,
     fid: FunctionId,
@@ -49,50 +133,7 @@ def lower_function_flow(
         ctx.edges[mapping[node]] = []
 
     for node in flow.nodes():
-        # entry node is noop just to fall through
-        if isinstance(node, FlowEntry):
-            # obtain successors
-            successors = flow.edges.get(node, [])
-            assert len(successors) == 1
-
-            # create jump terminator to successor
-            terminator = JumpTerminator(target=mapping[successors[0]])
-
-            # create empty block with jump
-            ctx.nodes[mapping[node]] = Block(
-                origin=fid,
-                instructions=[],
-                terminator=terminator,
-            )
-
-            # register entry block
-            ctx.entry[fid] = mapping[node]
-
-        # exit node is also noop, but emits exit
-        elif isinstance(node, FlowExit):
-            ctx.nodes[mapping[node]] = Block(
-                origin=fid,
-                instructions=[],
-                terminator=ExitTerminator(),
-            )
-
-            ctx.exit[fid] = mapping[node]
-
-        # otherwise just callsite emitting either fallthrough or a trap
-        else:
-            # obtain successors
-            successors = flow.edges.get(node, [])
-            assert len(successors) in (0, 1)
-
-            # create jump or trap
-            terminator = (
-                JumpTerminator(target=mapping[successors[0]])
-                if len(successors) == 1
-                else TrapTerminator()
-            )
-
-            # lower callsite block
-            ctx.nodes[mapping[node]] = lower_callsite(ctx, node, terminator)
+        DISPATCH_TABLE[type(node)](ctx, fid, flow, mapping, node)
 
     # wire edges
     for node, successors in flow.edges.items():
