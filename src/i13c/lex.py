@@ -56,6 +56,7 @@ SEPARATORS = (
 SET_REGS = {
     b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
     b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
+    b"cl",
 }
 
 SET_TYPES = {

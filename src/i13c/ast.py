@@ -11,6 +11,7 @@ class Visitor(Protocol):
     def on_function(self, function: Function) -> None: ...
     def on_statement(self, statement: Statement) -> None: ...
     def on_literal(self, literal: Literal) -> None: ...
+    def on_expression(self, expression: Expression) -> None: ...
     def on_operand(self, operand: Operand) -> None: ...
 
 
@@ -50,8 +51,14 @@ class IntegerLiteral:
     value: int
 
 
+@dataclass(kw_only=True, eq=False)
+class Expression:
+    ref: src.Span
+    name: bytes
+
+
 Literal = Union[IntegerLiteral]
-Argument = Union[Literal]
+Argument = Union[Literal, Expression]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -77,13 +84,16 @@ class Instruction:
 class CallStatement:
     ref: src.Span
     name: bytes
-    arguments: List[IntegerLiteral]
+    arguments: List[Argument]
 
     def accept(self, visitor: Visitor) -> None:
         visitor.on_statement(self)
 
         for argument in self.arguments:
-            visitor.on_literal(argument)
+            if isinstance(argument, IntegerLiteral):
+                visitor.on_literal(argument)
+            if isinstance(argument, Expression):
+                visitor.on_expression(argument)
 
 
 @dataclass(kw_only=True)

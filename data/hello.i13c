@@ -1,22 +1,22 @@
-asm exit() noreturn {
+asm exit(code@rdi: u8[0x00..0x0f]) noreturn clobbers rcx, r11, rax {
     mov rax, 0x3c;
     syscall;
 }
 
-asm shift() {
-    shl rdi, 0x01;
+asm shift(count@cl: u8[0x00..0x3f]) clobbers rdi {
+    shl rdi, count;
 }
 
-fn x() {
-  shift();
+fn x(count: u8[0x00..0x1f]) {
+  shift(count);
 }
 
-fn y() {
-  shift();
+fn y(count: u8[0x20..0x3f]) {
+  shift(count);
 }
 
 fn main() noreturn {
-    x();
-    y();
-    exit();
+    x(0x10);
+    y(0x30);
+    exit(0x01);
 }

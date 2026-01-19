@@ -71,6 +71,9 @@ class NodesVisitor:
     def on_literal(self, literal: ast.Literal) -> None:
         self.graph.literals.append(self.next(), literal)
 
+    def on_expression(self, expression: ast.Expression) -> None:
+        self.graph.expressions.append(self.next(), expression)
+
     def on_operand(self, operand: ast.Operand) -> None:
         self.graph.operands.append(self.next(), operand)
 
@@ -84,6 +87,7 @@ class SyntaxGraph:
     functions: Bidirectional[ast.Function]
     statements: Bidirectional[ast.Statement]
     literals: Bidirectional[ast.Literal]
+    expressions: Bidirectional[ast.Expression]
 
     @staticmethod
     def empty(generator: Generator) -> SyntaxGraph:
@@ -95,6 +99,7 @@ class SyntaxGraph:
             functions=Bidirectional[ast.Function].empty(),
             statements=Bidirectional[ast.Statement].empty(),
             literals=Bidirectional[ast.Literal].empty(),
+            expressions=Bidirectional[ast.Expression].empty(),
         )
 
     def next(self) -> int:

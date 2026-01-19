@@ -1,0 +1,20 @@
+from dataclasses import dataclass
+
+from i13c.src import Span
+
+
+@dataclass(kw_only=True, frozen=True)
+class ExpressionId:
+    value: int
+
+    def identify(self, length: int) -> str:
+        return "#".join(("expression", f"{self.value:<{length}}"))
+
+
+@dataclass(kw_only=True)
+class Expression:
+    ref: Span
+    name: bytes
+
+    def describe(self) -> str:
+        return f"name={self.name.decode()}"

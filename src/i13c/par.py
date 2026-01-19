@@ -382,14 +382,14 @@ def parse_clobbers(state: ParsingState) -> List[ast.Register]:
 
 
 def parse_statement(state: ParsingState) -> ast.CallStatement:
-    arguments = []
+    arguments: List[ast.Argument] = []
     ident = state.expect(lex.TOKEN_IDENT)
 
     # expect opening round bracket
     state.expect(lex.TOKEN_ROUND_OPEN)
 
     # optional arguments
-    if state.is_in(lex.TOKEN_HEX):
+    if state.is_in(lex.TOKEN_HEX, lex.TOKEN_IDENT):
         arguments = parse_arguments(state)
 
     # expect closed round bracket
@@ -426,8 +426,8 @@ def parse_instruction(state: ParsingState) -> ast.Instruction:
     )
 
 
-def parse_arguments(state: ParsingState) -> List[ast.IntegerLiteral]:
-    arguments: List[ast.IntegerLiteral] = []
+def parse_arguments(state: ParsingState) -> List[ast.Argument]:
+    arguments: List[ast.Argument] = []
     arguments.append(parse_argument(state))
 
     # a comma suggests next argument
@@ -448,12 +448,20 @@ def parse_operands(state: ParsingState) -> List[ast.Operand]:
     return operands
 
 
-def parse_argument(state: ParsingState) -> ast.IntegerLiteral:
-    token = state.expect(lex.TOKEN_HEX)
+def parse_argument(state: ParsingState) -> ast.Argument:
+    token = state.expect(lex.TOKEN_HEX, lex.TOKEN_IDENT)
 
-    return ast.IntegerLiteral(
+    # a hex can be only an integer literal
+    if token.code == lex.TOKEN_HEX:
+        return ast.IntegerLiteral(
+            ref=state.span(token),
+            value=int(state.extract(token), 16),
+        )
+
+    # an identifier can be only an expression
+    return ast.Expression(
         ref=state.span(token),
-        value=int(state.extract(token), 16),
+        name=state.extract(token),
     )
 
 

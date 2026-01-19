@@ -8,7 +8,7 @@ def can_detect_multiple_entrypoints():
     _, program = prepare_program(
         """
             asm exit() noreturn { }
-            asm main() noreturn { }
+            fn main() noreturn { }
             fn main() noreturn { exit(); }
         """
     )

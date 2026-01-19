@@ -33,9 +33,4 @@ def build_entrypoints(
             if function.noreturn and not function.parameters:
                 out[fid] = EntryPoint(kind=b"function", target=fid)
 
-    for sid, snippet in snippets.items():
-        if snippet.identifier.name == EntryPointName:
-            if snippet.noreturn and not snippet.slots:
-                out[sid] = EntryPoint(kind=b"snippet", target=sid)
-
     return OneToOne[CallableTarget, EntryPoint].instance(out)

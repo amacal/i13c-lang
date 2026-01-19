@@ -6,6 +6,7 @@ from i13c.sem.core import Identifier
 from i13c.sem.infra import Configuration
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.callsites import Argument, CallSite, CallSiteId
+from i13c.sem.typing.entities.expressions import ExpressionId
 from i13c.sem.typing.entities.literals import LiteralId
 
 
@@ -39,6 +40,15 @@ def build_callsites(
                         Argument(
                             kind=b"literal",
                             target=LiteralId(value=lid.value),
+                        )
+                    )
+                case ast.Expression() as expr:
+                    eid = graph.expressions.get_by_node(expr)
+
+                    arguments.append(
+                        Argument(
+                            kind=b"expression",
+                            target=ExpressionId(value=eid.value),
                         )
                     )
 

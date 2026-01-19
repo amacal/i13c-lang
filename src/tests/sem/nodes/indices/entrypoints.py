@@ -1,6 +1,5 @@
 from i13c.sem import model, syntax
 from i13c.sem.typing.entities.functions import FunctionId
-from i13c.sem.typing.entities.snippets import SnippetId
 from i13c.sem.typing.indices.entrypoints import EntryPoint
 from tests.sem import prepare_program
 
@@ -64,7 +63,7 @@ def can_reject_snippet_with_arguments():
     assert entrypoints.size() == 0
 
 
-def can_accept_terminal_snippet():
+def can_reject_terminal_snippet():
     _, program = prepare_program(
         """
             asm main() noreturn { }
@@ -77,14 +76,4 @@ def can_accept_terminal_snippet():
     assert semantic is not None
     entrypoints = semantic.live.entrypoints
 
-    assert entrypoints.size() == 1
-    _, value = entrypoints.pop()
-
-    assert isinstance(value, EntryPoint)
-    assert value.kind == b"snippet"
-
-    assert isinstance(value.target, SnippetId)
-    sid = syntax.NodeId(value=value.target.value)
-
-    target = graph.snippets.get_by_id(sid)
-    assert target.name == b"main"
+    assert entrypoints.size() == 0

@@ -3,7 +3,7 @@ from typing import List
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.instructions import Instruction, MovRegImm
-from i13c.sem.typing.entities.literals import Hex
+from i13c.sem.typing.entities.literals import Hex, LiteralId
 from i13c.sem.typing.entities.snippets import Slot
 from i13c.sem.typing.resolutions.callsites import CallSiteBinding
 
@@ -19,6 +19,8 @@ def lower_callsite_bindings(
 
         # we know all slots are literals for now
         assert binding.argument.kind == b"literal"
+        assert isinstance(binding.argument.target, LiteralId)
+
         literal = ctx.graph.basic.literals.get(binding.argument.target)
 
         # we know all literals are hex for now

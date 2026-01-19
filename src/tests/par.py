@@ -669,3 +669,23 @@ def can_detect_duplicated_flags_noreturn_with_clobbers_after():
     assert diagnostic.code == err.ERROR_2003
     assert diagnostic.ref.offset == 20  # offset of 2nd "noreturn"
     assert diagnostic.ref.length == 8  # length of 2nd "noreturn"
+
+
+def can_accept_call_with_hex_literal():
+    code = src.open_text("fn main() { exit(0xdeadbeef); }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+
+def can_accept_call_with_parameter_reference():
+    code = src.open_text("fn main(code: u32) { exit(code); }")
+
+    tokens = lex.tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = par.parse(code, tokens.value)
+    assert isinstance(program, res.Ok)

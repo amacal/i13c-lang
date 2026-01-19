@@ -1,12 +1,15 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Literal as Kind
+from typing import Union
 
 from i13c.sem.core import Identifier
+from i13c.sem.typing.entities.expressions import ExpressionId
 from i13c.sem.typing.entities.literals import LiteralId
 from i13c.src import Span
 
-ArgumentKind = Kind[b"literal"]
+ArgumentKind = Kind[b"literal", b"expression"]
+ArgumentTarget = Union[LiteralId, ExpressionId]
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -20,7 +23,7 @@ class CallSiteId:
 @dataclass(kw_only=True)
 class Argument:
     kind: ArgumentKind
-    target: LiteralId
+    target: ArgumentTarget
 
 
 @dataclass(kw_only=True)
