@@ -3,8 +3,8 @@ from typing import Dict, Generic, Iterable, List, Optional, Protocol, Tuple, Typ
 
 
 class Identified(Protocol):
-    @property
-    def value(self) -> int: ...
+    # @property
+    # def value(self) -> int: ...
 
     def identify(self, length: int) -> str: ...
 

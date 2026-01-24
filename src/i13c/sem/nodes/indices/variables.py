@@ -25,7 +25,7 @@ def build_variables_by_parameters(
     variables: Dict[VariableId, Variable] = {}
     parameters: Dict[ParameterId, VariableId] = {}
 
-    for fid, function in functions.items():
+    for _, function in functions.items():
         for pid in function.parameters:
             # for now we reuse parameter IDs
             vid = VariableId(value=pid.value)
@@ -35,7 +35,7 @@ def build_variables_by_parameters(
 
             # create the variable
             variables[vid] = Variable(
-                kind="parameter",
+                kind=b"parameter",
                 source=pid,
             )
 

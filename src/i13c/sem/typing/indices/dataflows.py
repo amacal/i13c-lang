@@ -9,3 +9,6 @@ class DataFlow:
     declares: List[VariableId]
     reads: List[VariableId]
     writes: List[VariableId]
+
+    def describe(self) -> str:
+        return f"declares={len(self.declares)}, reads={len(self.reads)}, writes={len(self.writes)}"

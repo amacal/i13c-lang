@@ -26,7 +26,7 @@ class Function:
     statements: List[Statement]
 
     def signature(self) -> str:
-        parameters = ", ".join([parameter.signature() for parameter in self.parameters])
+        parameters = ", ".join([parameter.identify(2) for parameter in self.parameters])
         return f"{self.identifier.name.decode()}/{len(self.parameters)} ({parameters})"
 
     def describe(self) -> str:

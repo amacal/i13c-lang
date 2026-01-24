@@ -8,6 +8,7 @@ from i13c.sem.typing.entities.callables import Callable
 from i13c.sem.typing.entities.callsites import Argument, CallSite, CallSiteId
 from i13c.sem.typing.entities.functions import Function, FunctionId
 from i13c.sem.typing.entities.literals import Hex, Literal, LiteralId
+from i13c.sem.typing.entities.parameters import Parameter, ParameterId
 from i13c.sem.typing.entities.snippets import Snippet, SnippetId
 from i13c.sem.typing.resolutions.callsites import (
     CallSiteAcceptance,
@@ -28,6 +29,7 @@ def configure_resolution_by_callsite() -> Configuration:
                 ("snippets", "entities/snippets"),
                 ("callsites", "entities/callsites"),
                 ("literals", "entities/literals"),
+                ("parameters", "entities/parameters"),
             }
         ),
     )
@@ -61,6 +63,7 @@ def build_resolution_by_callsite(
     snippets: OneToOne[SnippetId, Snippet],
     callsites: OneToOne[CallSiteId, CallSite],
     literals: OneToOne[LiteralId, Literal],
+    parameters: OneToOne[ParameterId, Parameter],
 ) -> OneToOne[CallSiteId, CallSiteResolution]:
     resolutions: Dict[CallSiteId, CallSiteResolution] = {}
 
@@ -78,14 +81,19 @@ def build_resolution_by_callsite(
         return Ok(list(bindings))
 
     def match_function(
-        callsite: CallSite, function: Function
+        callsite: CallSite,
+        function: Function,
     ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
         if len(function.parameters) != len(callsite.arguments):
             return Err(b"wrong-arity")
 
+        # find actual parameter variables
+        params = [parameters.get(pid) for pid in function.parameters]
+
+        # combine as bindings
         bindings = [
             CallSiteBinding.parameter(parameter.type, argument, parameter)
-            for argument, parameter in zip(callsite.arguments, function.parameters)
+            for argument, parameter in zip(callsite.arguments, params)
         ]
 
         return match_bindings(bindings)

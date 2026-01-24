@@ -15,8 +15,14 @@ class VariableId:
     def identify(self, length: int) -> str:
         return "#".join(("variable", f"{self.value:<{length}}"))
 
+    def describe(self) -> str:
+        return f"var#{self.value}"
+
 
 @dataclass(kw_only=True)
 class Variable:
     kind: VariableKind
     source: VariableSource
+
+    def describe(self) -> str:
+        return f"kind={self.kind.decode()}"

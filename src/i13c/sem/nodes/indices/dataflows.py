@@ -1,7 +1,9 @@
-from typing import Dict, List
+from typing import Dict
 
 from i13c.core.mapping import OneToOne
 from i13c.sem.infra import Configuration
+from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
+from i13c.sem.typing.entities.expressions import Expression, ExpressionId
 from i13c.sem.typing.entities.functions import Function, FunctionId
 from i13c.sem.typing.entities.parameters import ParameterId
 from i13c.sem.typing.indices.controlflows import FlowEntry, FlowGraph, FlowNode
@@ -16,6 +18,8 @@ def configure_dataflow_by_flownode() -> Configuration:
         requires=frozenset(
             {
                 ("functions", "entities/functions"),
+                ("callsites", "entities/callsites"),
+                ("expressions", "entities/expressions"),
                 ("controlflows", "indices/flowgraph-by-function"),
                 ("variables", "indices/variables-by-parameter"),
             }
@@ -25,9 +29,11 @@ def configure_dataflow_by_flownode() -> Configuration:
 
 def build_dataflows(
     functions: OneToOne[FunctionId, Function],
+    callsites: OneToOne[CallSiteId, CallSite],
+    expressions: OneToOne[ExpressionId, Expression],
     controlflows: OneToOne[FunctionId, FlowGraph],
     variables: OneToOne[ParameterId, VariableId],
-) -> OneToOne[FunctionId, FlowGraph]:
+) -> OneToOne[FlowNode, DataFlow]:
 
     # found dataflows for each entry
     dataflows: Dict[FlowNode, DataFlow] = {}
@@ -47,4 +53,13 @@ def build_dataflows(
             vid = variables.get(pid)
             dataflows[entry].declares.append(vid)
 
-    return OneToOne[FunctionId, FlowGraph].instance(dataflows)
+        for node in flowgraph.nodes():
+            if isinstance(node, CallSiteId):
+                callsite = callsites.get(node)
+
+                for argument in callsite.arguments:
+                    if argument.kind == b"expression":
+                        assert isinstance(argument.target, ExpressionId)
+                        assert False
+
+    return OneToOne[FlowNode, DataFlow].instance(dataflows)

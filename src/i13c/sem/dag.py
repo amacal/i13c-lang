@@ -6,6 +6,7 @@ from i13c.sem.nodes.analyses.callables import configure_callables_live
 from i13c.sem.nodes.analyses.callgraphs import configure_callgraphs_live
 from i13c.sem.nodes.analyses.controlflows import configure_flowgraphs_live
 from i13c.sem.nodes.entities.callsites import configure_callsites
+from i13c.sem.nodes.entities.expressions import configure_expressions
 from i13c.sem.nodes.entities.functions import configure_functions
 from i13c.sem.nodes.entities.instructions import configure_instructions
 from i13c.sem.nodes.entities.literals import configure_literals
@@ -72,6 +73,7 @@ def configure_semantic_model(graph: SyntaxGraph) -> Dict[str, Any]:
         syntax,
         configure_callgraphs(),
         configure_callsites(),
+        configure_expressions(),
         configure_functions(),
         configure_instructions(),
         configure_literals(),
