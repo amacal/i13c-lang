@@ -53,8 +53,9 @@ def build_functions(
 
             parameters.append(
                 Parameter(
-                    name=Identifier(name=parameter.name),
+                    ref=parameter.ref,
                     type=type,
+                    ident=Identifier(name=parameter.name),
                 )
             )
 

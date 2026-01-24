@@ -26,13 +26,13 @@ def validate_duplicated_parameter_names(
         seen: Set[bytes] = set()
 
         for parameter in function.parameters:
-            if parameter.name.name in seen:
+            if parameter.ident.name in seen:
                 diagnostics.append(
                     err.report_e3004_duplicated_parameter_names(
-                        function.ref, parameter.name.name
+                        function.ref, parameter.ident.name
                     )
                 )
             else:
-                seen.add(parameter.name.name)
+                seen.add(parameter.ident.name)
 
     return diagnostics

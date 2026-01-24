@@ -18,11 +18,12 @@ class FunctionId:
 
 @dataclass(kw_only=True)
 class Parameter:
-    name: Identifier
+    ref: Span
     type: Type
+    ident: Identifier
 
     def signature(self) -> str:
-        return f"{self.name}:{self.type}"
+        return f"{self.ident}:{self.type}"
 
 
 @dataclass(kw_only=True)

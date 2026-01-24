@@ -13,6 +13,7 @@ class Visitor(Protocol):
     def on_literal(self, literal: Literal) -> None: ...
     def on_expression(self, expression: Expression) -> None: ...
     def on_operand(self, operand: Operand) -> None: ...
+    def on_parameter(self, parameter: Parameter) -> None: ...
 
 
 @dataclass(kw_only=True, eq=False)
@@ -118,8 +119,12 @@ class Slot:
 
 @dataclass(kw_only=True, eq=False)
 class Parameter:
+    ref: src.Span
     name: bytes
     type: Type
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_parameter(self)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -148,6 +153,9 @@ class Function:
 
     def accept(self, visitor: Visitor) -> None:
         visitor.on_function(self)
+
+        for parameter in self.parameters:
+            parameter.accept(visitor)
 
         for statement in self.statements:
             statement.accept(visitor)

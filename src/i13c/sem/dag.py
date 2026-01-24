@@ -11,6 +11,7 @@ from i13c.sem.nodes.entities.instructions import configure_instructions
 from i13c.sem.nodes.entities.literals import configure_literals
 from i13c.sem.nodes.entities.operands import configure_operands
 from i13c.sem.nodes.entities.snippets import configure_snippets
+from i13c.sem.nodes.entities.variables import configure_variables
 from i13c.sem.nodes.indices.callgraphs import configure_callgraphs
 from i13c.sem.nodes.indices.entrypoints import configure_entrypoint_by_callable
 from i13c.sem.nodes.indices.flowgraphs import configure_flowgraph_by_function
@@ -67,22 +68,23 @@ def configure_semantic_model(graph: SyntaxGraph) -> Dict[str, Any]:
 
     configs: List[Configuration] = [
         syntax,
+        configure_callgraphs(),
+        configure_callsites(),
         configure_functions(),
-        configure_snippets(),
+        configure_instructions(),
         configure_literals(),
         configure_operands(),
-        configure_instructions(),
-        configure_callsites(),
-        configure_callgraphs(),
-        configure_flowgraph_by_function(),
-        configure_terminality_by_function(),
+        configure_snippets(),
+        configure_variables(),
         configure_entrypoint_by_callable(),
+        configure_flowgraph_by_function(),
         configure_instance_by_callsite(),
         configure_resolution_by_callsite(),
         configure_resolution_by_instruction(),
-        configure_flowgraphs_live(),
+        configure_terminality_by_function(),
         configure_callables_live(),
         configure_callgraphs_live(),
+        configure_flowgraphs_live(),
     ]
 
     artifacts: Dict[str, Any] = {}

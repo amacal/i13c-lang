@@ -23,6 +23,7 @@ FlowNode = Union[FlowEntry, FlowExit, Statement]
 class FlowGraph:
     entry: FlowEntry
     exit: FlowExit
+
     edges: Dict[FlowNode, List[FlowNode]]
 
     def nodes(self) -> Set[FlowNode]:

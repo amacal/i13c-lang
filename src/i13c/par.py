@@ -264,6 +264,7 @@ def parse_parameter(state: ParsingState) -> ast.Parameter:
         range = parse_range(state)
 
     return ast.Parameter(
+        ref=state.span(ident),
         name=state.extract(ident),
         type=ast.Type(name=state.extract(type), range=range),
     )
