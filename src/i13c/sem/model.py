@@ -11,8 +11,8 @@ from i13c.sem.typing.entities.functions import Function, FunctionId
 from i13c.sem.typing.entities.instructions import Instruction, InstructionId
 from i13c.sem.typing.entities.literals import Literal, LiteralId
 from i13c.sem.typing.entities.operands import Operand, OperandId
+from i13c.sem.typing.entities.parameters import Parameter, ParameterId
 from i13c.sem.typing.entities.snippets import Snippet, SnippetId
-from i13c.sem.typing.entities.variables import Variable, VariableId
 from i13c.sem.typing.indices.callgraphs import CallPair
 from i13c.sem.typing.indices.controlflows import FlowGraph, FlowNode
 from i13c.sem.typing.indices.dataflows import DataFlow
@@ -31,7 +31,7 @@ class BasicNodes:
     snippets: OneToOne[SnippetId, Snippet]
     functions: OneToOne[FunctionId, Function]
     callsites: OneToOne[CallSiteId, CallSite]
-    variables: OneToOne[VariableId, Variable]
+    parameters: OneToOne[ParameterId, Parameter]
 
 
 @dataclass
@@ -81,7 +81,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
             snippets=artifacts["entities/snippets"],
             functions=artifacts["entities/functions"],
             callsites=artifacts["entities/callsites"],
-            variables=artifacts["entities/variables"],
+            parameters=artifacts["entities/parameters"],
         ),
         indices=IndexEdges(
             terminality_by_function=artifacts["indices/terminality-by-function"],

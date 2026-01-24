@@ -4,25 +4,25 @@ from i13c.core.mapping import OneToOne
 from i13c.sem.core import Identifier, Range, Type, default_range, width_from_range
 from i13c.sem.infra import Configuration
 from i13c.sem.syntax import SyntaxGraph
-from i13c.sem.typing.entities.variables import Variable, VariableId
+from i13c.sem.typing.entities.parameters import Parameter, ParameterId
 
 
-def configure_variables() -> Configuration:
+def configure_parameters() -> Configuration:
     return Configuration(
-        builder=build_variables,
-        produces=("entities/variables",),
+        builder=build_parameters,
+        produces=("entities/parameters",),
         requires=frozenset({("graph", "syntax/graph")}),
     )
 
 
-def build_variables(
+def build_parameters(
     graph: SyntaxGraph,
-) -> OneToOne[VariableId, Variable]:
-    variables: Dict[VariableId, Variable] = {}
+) -> OneToOne[ParameterId, Parameter]:
+    parameters: Dict[ParameterId, Parameter] = {}
 
     for pid, parameter in graph.parameters.items():
         # derive parameter ID from globally unique node ID
-        variable_id = VariableId(value=pid.value)
+        parameter_id = ParameterId(value=pid.value)
 
         # default width and ranges for declared type
         range: Range = default_range(parameter.type.name)
@@ -44,11 +44,10 @@ def build_variables(
             range=range,
         )
 
-        variables[variable_id] = Variable(
+        parameters[parameter_id] = Parameter(
             ref=parameter.ref,
             type=type,
-            owner=None,
             ident=Identifier(name=parameter.name),
         )
 
-    return OneToOne[VariableId, Variable].instance(variables)
+    return OneToOne[ParameterId, Parameter].instance(parameters)

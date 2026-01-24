@@ -25,7 +25,9 @@ def validate_duplicated_parameter_names(
     for function in graph.basic.functions.values():
         seen: Set[bytes] = set()
 
-        for parameter in function.parameters:
+        for pid in function.parameters:
+            parameter = graph.basic.parameters.get(pid)
+
             if parameter.ident.name in seen:
                 diagnostics.append(
                     err.report_e3004_duplicated_parameter_names(

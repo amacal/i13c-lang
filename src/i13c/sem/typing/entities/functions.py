@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import List, Union
 
-from i13c.sem.core import Identifier, Type
+from i13c.sem.core import Identifier
 from i13c.sem.typing.entities.callsites import CallSiteId
+from i13c.sem.typing.entities.parameters import ParameterId
 from i13c.src import Span
 
 Statement = Union[CallSiteId]
@@ -17,21 +18,11 @@ class FunctionId:
 
 
 @dataclass(kw_only=True)
-class Parameter:
-    ref: Span
-    type: Type
-    ident: Identifier
-
-    def signature(self) -> str:
-        return f"{self.ident}:{self.type}"
-
-
-@dataclass(kw_only=True)
 class Function:
     ref: Span
     identifier: Identifier
     noreturn: bool
-    parameters: List[Parameter]
+    parameters: List[ParameterId]
     statements: List[Statement]
 
     def signature(self) -> str:

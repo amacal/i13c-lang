@@ -6,7 +6,7 @@ from typing import Union
 from i13c.sem.core import Type
 from i13c.sem.typing.entities.callables import Callable
 from i13c.sem.typing.entities.callsites import Argument
-from i13c.sem.typing.entities.functions import Parameter
+from i13c.sem.typing.entities.parameters import Parameter
 from i13c.sem.typing.entities.snippets import Slot
 
 CallSiteRejectionReason = Kind[

@@ -12,8 +12,8 @@ def iterate_candidates(graph: SemanticGraph) -> Iterator[Tuple[Span, Type]]:
             yield snippet.ref, slot.type
 
     for function in graph.basic.functions.values():
-        for parameter in function.parameters:
-            yield function.ref, parameter.type
+        for pid in function.parameters:
+            yield function.ref, graph.basic.parameters.get(pid).type
 
 
 def validate_type_ranges(graph: SemanticGraph) -> List[diag.Diagnostic]:

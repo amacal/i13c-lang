@@ -105,6 +105,7 @@ def can_build_function_with_properly_derived_types():
 
     assert semantic is not None
     functions = semantic.basic.functions
+    parameters = semantic.basic.parameters
 
     assert functions.size() == 1
     _, value = functions.peak()
@@ -112,14 +113,14 @@ def can_build_function_with_properly_derived_types():
     assert value.identifier.name == b"main"
     assert len(value.parameters) == 2
 
-    param1 = value.parameters[0]
+    param1 = parameters.get(value.parameters[0])
     assert param1.ident.name == b"r1"
     assert param1.type.name == b"u64"
     assert param1.type.width == 16
     assert param1.type.range.lower == 0x0000
     assert param1.type.range.upper == 0xFFFF
 
-    param2 = value.parameters[1]
+    param2 = parameters.get(value.parameters[1])
     assert param2.ident.name == b"r2"
     assert param2.type.name == b"u8"
     assert param2.type.width == 8

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from i13c.sem.typing.entities.variables import VariableId
+from i13c.sem.typing.indices.variables import VariableId
 
 
 @dataclass(kw_only=True)
