@@ -19,6 +19,7 @@ from i13c.sem.nodes.indices.dataflows import configure_dataflow_by_flownode
 from i13c.sem.nodes.indices.entrypoints import configure_entrypoint_by_callable
 from i13c.sem.nodes.indices.instances import configure_instance_by_callsite
 from i13c.sem.nodes.indices.terminalities import configure_terminality_by_function
+from i13c.sem.nodes.indices.usages import configure_usages_by_expression
 from i13c.sem.nodes.indices.variables import configure_variables_by_parameters
 from i13c.sem.nodes.resolutions.callsites import configure_resolution_by_callsite
 from i13c.sem.nodes.resolutions.instructions import configure_resolution_by_instruction
@@ -87,6 +88,7 @@ def configure_semantic_model(graph: SyntaxGraph) -> Dict[str, Any]:
         configure_resolution_by_callsite(),
         configure_resolution_by_instruction(),
         configure_terminality_by_function(),
+        configure_usages_by_expression(),
         configure_variables_by_parameters(),
         configure_callables_live(),
         configure_callgraphs_live(),
