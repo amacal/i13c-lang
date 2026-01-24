@@ -47,6 +47,7 @@ def build_variables(
         variables[variable_id] = Variable(
             ref=parameter.ref,
             type=type,
+            owner=None,
             ident=Identifier(name=parameter.name),
         )
 

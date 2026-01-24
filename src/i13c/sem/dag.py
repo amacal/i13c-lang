@@ -14,6 +14,7 @@ from i13c.sem.nodes.entities.snippets import configure_snippets
 from i13c.sem.nodes.entities.variables import configure_variables
 from i13c.sem.nodes.indices.callgraphs import configure_callgraphs
 from i13c.sem.nodes.indices.controlflows import configure_flowgraph_by_function
+from i13c.sem.nodes.indices.dataflows import configure_dataflow_by_flownode
 from i13c.sem.nodes.indices.entrypoints import configure_entrypoint_by_callable
 from i13c.sem.nodes.indices.instances import configure_instance_by_callsite
 from i13c.sem.nodes.indices.terminalities import configure_terminality_by_function
@@ -76,6 +77,7 @@ def configure_semantic_model(graph: SyntaxGraph) -> Dict[str, Any]:
         configure_operands(),
         configure_snippets(),
         configure_variables(),
+        configure_dataflow_by_flownode(),
         configure_entrypoint_by_callable(),
         configure_flowgraph_by_function(),
         configure_instance_by_callsite(),

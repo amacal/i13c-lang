@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from i13c.sem.core import Identifier, Type
+from i13c.sem.typing.entities.functions import FunctionId
 from i13c.src import Span
 
 
@@ -17,6 +18,7 @@ class Variable:
     ref: Span
     type: Type
     ident: Identifier
+    owner: FunctionId
 
     def describe(self) -> str:
-        return f"Variable(ident={self.ident}, type={self.type})"
+        return f"Variable(ident={self.ident}, type={self.type}, owner={self.owner})"
