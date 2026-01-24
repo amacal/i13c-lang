@@ -14,8 +14,8 @@ from i13c.sem.typing.entities.operands import Operand, OperandId
 from i13c.sem.typing.entities.snippets import Snippet, SnippetId
 from i13c.sem.typing.entities.variables import Variable, VariableId
 from i13c.sem.typing.indices.callgraphs import CallPair
+from i13c.sem.typing.indices.controlflows import FlowGraph
 from i13c.sem.typing.indices.entrypoints import EntryPoint
-from i13c.sem.typing.indices.flowgraphs import FlowGraph
 from i13c.sem.typing.indices.instances import Instance
 from i13c.sem.typing.indices.terminalities import Terminality
 from i13c.sem.typing.resolutions.callsites import CallSiteResolution

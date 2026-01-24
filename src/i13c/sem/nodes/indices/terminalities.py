@@ -6,7 +6,7 @@ from i13c.sem.typing.entities.callables import Callable
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.functions import Function, FunctionId
 from i13c.sem.typing.entities.snippets import Snippet, SnippetId
-from i13c.sem.typing.indices.flowgraphs import FlowGraph, FlowNode
+from i13c.sem.typing.indices.controlflows import FlowGraph, FlowNode
 from i13c.sem.typing.indices.terminalities import Terminality
 from i13c.sem.typing.resolutions.callsites import CallSiteResolution
 

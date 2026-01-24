@@ -1,7 +1,7 @@
 from i13c.sem import model, syntax
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.functions import FunctionId
-from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowExit, FlowGraph
+from i13c.sem.typing.indices.controlflows import FlowEntry, FlowExit, FlowGraph
 from tests.sem import prepare_program
 
 

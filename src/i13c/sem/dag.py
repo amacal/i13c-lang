@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Set
 from i13c.sem.infra import Configuration
 from i13c.sem.nodes.analyses.callables import configure_callables_live
 from i13c.sem.nodes.analyses.callgraphs import configure_callgraphs_live
-from i13c.sem.nodes.analyses.flowgraphs import configure_flowgraphs_live
+from i13c.sem.nodes.analyses.controlflows import configure_flowgraphs_live
 from i13c.sem.nodes.entities.callsites import configure_callsites
 from i13c.sem.nodes.entities.functions import configure_functions
 from i13c.sem.nodes.entities.instructions import configure_instructions
@@ -13,8 +13,8 @@ from i13c.sem.nodes.entities.operands import configure_operands
 from i13c.sem.nodes.entities.snippets import configure_snippets
 from i13c.sem.nodes.entities.variables import configure_variables
 from i13c.sem.nodes.indices.callgraphs import configure_callgraphs
+from i13c.sem.nodes.indices.controlflows import configure_flowgraph_by_function
 from i13c.sem.nodes.indices.entrypoints import configure_entrypoint_by_callable
-from i13c.sem.nodes.indices.flowgraphs import configure_flowgraph_by_function
 from i13c.sem.nodes.indices.instances import configure_instance_by_callsite
 from i13c.sem.nodes.indices.terminalities import configure_terminality_by_function
 from i13c.sem.nodes.resolutions.callsites import configure_resolution_by_callsite

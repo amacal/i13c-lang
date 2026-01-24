@@ -5,7 +5,7 @@ from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.callables import CallableTarget
 from i13c.sem.typing.entities.functions import FunctionId
 from i13c.sem.typing.indices.callgraphs import CallPair
-from i13c.sem.typing.indices.flowgraphs import FlowGraph, FlowNode
+from i13c.sem.typing.indices.controlflows import FlowGraph, FlowNode
 
 
 def configure_callgraphs_live() -> Configuration:

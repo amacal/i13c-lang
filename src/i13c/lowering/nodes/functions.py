@@ -12,7 +12,12 @@ from i13c.lowering.typing.terminators import (
 )
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.functions import FunctionId
-from i13c.sem.typing.indices.flowgraphs import FlowEntry, FlowExit, FlowGraph, FlowNode
+from i13c.sem.typing.indices.controlflows import (
+    FlowEntry,
+    FlowExit,
+    FlowGraph,
+    FlowNode,
+)
 
 
 def lower_active_functions(ctx: LowLevelContext) -> BlockId:
