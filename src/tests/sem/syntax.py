@@ -3,11 +3,9 @@ from tests.sem import prepare_program
 
 
 def can_visit_all_nodes_in_a_snippet() -> None:
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() { mov rax, 0x1234; }
-        """
-    )
+        """)
 
     visitor = NodesVisitor()
     program.accept(visitor)
@@ -21,11 +19,9 @@ def can_visit_all_nodes_in_a_snippet() -> None:
 
 
 def can_visit_all_nodes_in_a_function() -> None:
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { foo(0x42); }
-        """
-    )
+        """)
 
     visitor = NodesVisitor()
     program.accept(visitor)

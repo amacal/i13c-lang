@@ -6,11 +6,9 @@ from tests.sem import prepare_program
 
 
 def can_do_nothing_without_any_function():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -22,11 +20,9 @@ def can_do_nothing_without_any_function():
 
 
 def can_build_flowgraph_for_a_function_without_any_statement():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -53,11 +49,9 @@ def can_build_flowgraph_for_a_function_without_any_statement():
 
 
 def can_build_flowgraph_for_a_function_with_a_single_statement():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() noreturn { foo(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -88,11 +82,9 @@ def can_build_flowgraph_for_a_function_with_a_single_statement():
 
 
 def can_build_flowgraph_for_a_function_with_multiple_statements_ordered():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { foo(); bar(); baz(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

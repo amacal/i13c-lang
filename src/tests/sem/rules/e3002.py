@@ -5,13 +5,11 @@ from tests.sem import prepare_program
 
 
 def can_detect_invalid_operand_types_of_mov():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm main() noreturn {
                 mov 0x1234, 0x5678;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3002.validate_assembly_operand_types(model)
@@ -25,13 +23,11 @@ def can_detect_invalid_operand_types_of_mov():
 
 
 def can_detect_invalid_operand_types_of_shl():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm main() noreturn {
                 shl rax, rbx;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3002.validate_assembly_operand_types(model)
@@ -43,13 +39,11 @@ def can_detect_invalid_operand_types_of_shl():
 
 
 def can_accept_valid_operand_type_of_shl_reg64_imm8():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn {
                 shl rax, 0x08;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3002.validate_assembly_operand_types(model)
@@ -58,13 +52,11 @@ def can_accept_valid_operand_type_of_shl_reg64_imm8():
 
 
 def can_accept_valid_operand_type_of_shl_reg64_imm8_via_parameters():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(count@imm: u8) noreturn {
                 shl rax, count;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3002.validate_assembly_operand_types(model)

@@ -5,11 +5,9 @@ from tests.sem import prepare_program
 
 
 def can_do_nothing_without_any_function():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -21,11 +19,9 @@ def can_do_nothing_without_any_function():
 
 
 def can_build_a_function_with_no_statements():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -45,11 +41,9 @@ def can_build_a_function_with_no_statements():
 
 
 def can_build_a_function_with_no_return_statement():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -69,11 +63,9 @@ def can_build_a_function_with_no_return_statement():
 
 
 def can_build_a_function_with_call_statement():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { foo(0x42); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -101,14 +93,12 @@ def can_build_a_function_with_call_statement():
 
 
 def can_build_function_with_properly_derived_types():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main(
                 r1: u64[0x0000..0xffff],
                 r2: u8[0x00..0x10]
             ) {}
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

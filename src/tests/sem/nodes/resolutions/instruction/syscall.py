@@ -3,11 +3,9 @@ from tests.sem import prepare_program
 
 
 def can_accept_syscall_instruction_with_no_operands():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { syscall; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -28,11 +26,9 @@ def can_accept_syscall_instruction_with_no_operands():
 
 
 def can_reject_syscall_instruction_with_unexpected_operand():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { syscall rax; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

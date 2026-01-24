@@ -5,12 +5,10 @@ from tests.sem import prepare_program
 
 
 def can_detect_overloaded_symbol_by_arity():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm foo(abc@rax: u32) { }
             fn main() { foo(); }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3007.validate_called_symbol_resolved(model)
@@ -23,12 +21,10 @@ def can_detect_overloaded_symbol_by_arity():
 
 
 def can_detect_overloaded_symbol_by_range():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm foo(abc@rax: u32[0x01..0x09]) { }
             fn main() { foo(0x10); }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3007.validate_called_symbol_resolved(model)

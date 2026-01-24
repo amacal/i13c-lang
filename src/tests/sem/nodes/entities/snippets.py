@@ -6,11 +6,9 @@ from tests.sem import prepare_program
 
 
 def can_do_nothing_without_any_snippet():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -22,11 +20,9 @@ def can_do_nothing_without_any_snippet():
 
 
 def can_build_a_snippet_with_no_instruction():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -45,11 +41,9 @@ def can_build_a_snippet_with_no_instruction():
 
 
 def can_build_a_snippet_with_no_noreturn():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -68,11 +62,9 @@ def can_build_a_snippet_with_no_noreturn():
 
 
 def can_build_a_snippet_with_noreturn():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -91,11 +83,9 @@ def can_build_a_snippet_with_noreturn():
 
 
 def can_build_a_snippet_with_clobber_list():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() clobbers rax, rbx { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -117,11 +107,9 @@ def can_build_a_snippet_with_clobber_list():
 
 
 def can_build_a_snippet_with_mov_instruction():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() { mov rax, 0x1234; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -166,14 +154,12 @@ def can_build_a_snippet_with_mov_instruction():
 
 
 def can_build_a_snippet_with_properly_derived_types():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(
                 r1@rax: u64[0x0000..0xffff],
                 r2@rbx: u8[0x00..0x10]
             ) {}
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

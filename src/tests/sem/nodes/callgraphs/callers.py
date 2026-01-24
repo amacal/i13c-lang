@@ -5,11 +5,9 @@ from tests.sem import prepare_program
 
 
 def can_build_callgraphs_from_single_function():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -28,11 +26,9 @@ def can_build_callgraphs_from_single_function():
 
 
 def can_build_callgraphs_from_single_snippet():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm foo() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -51,12 +47,10 @@ def can_build_callgraphs_from_single_snippet():
 
 
 def can_build_callgraphs_when_function_calls_snippet():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm foo() noreturn { }
             fn main() noreturn { foo(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

@@ -7,12 +7,10 @@ from tests.sem import prepare_program
 
 
 def can_resolve_callsite_calling_snippet():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm foo(arg1@rax: u32) { }
             fn main() { foo(0x42); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -38,12 +36,10 @@ def can_resolve_callsite_calling_snippet():
 
 
 def can_reject_callsite_due_to_wrong_arity_more_than_expected():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm foo() { }
             fn main() { foo(0x42); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -71,12 +67,10 @@ def can_reject_callsite_due_to_wrong_arity_more_than_expected():
 
 
 def can_reject_callsite_due_to_wrong_arity_less_than_expected():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm foo(arg1@rax: u32) { }
             fn main() { foo(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -104,12 +98,10 @@ def can_reject_callsite_due_to_wrong_arity_less_than_expected():
 
 
 def can_reject_callsite_due_to_wrong_hex_width():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm foo(arg1@rax: u8) { }
             fn main() { foo(0x842); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -137,13 +129,11 @@ def can_reject_callsite_due_to_wrong_hex_width():
 
 
 def can_resolve_function_and_snippet_with_same_name():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm foo(arg1@rax: u32) { }
             fn foo() { }
             fn main() { foo(0x42); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -180,12 +170,10 @@ def can_resolve_function_and_snippet_with_same_name():
 
 
 def can_resolve_by_type_u64_max():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm foo(arg1@rax: u64) { }
             fn main() { foo(0xffffffffffffffff); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

@@ -5,13 +5,11 @@ from tests.sem import prepare_program
 
 
 def can_detect_duplicated_slot_clobbers():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm main() clobbers rax, rbx, rax {
                 syscall;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3005.validate_duplicated_snippet_clobbers(model)

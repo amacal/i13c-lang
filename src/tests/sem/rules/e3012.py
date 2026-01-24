@@ -5,13 +5,11 @@ from tests.sem import prepare_program
 
 
 def can_detect_multiple_entrypoints():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm exit() noreturn { }
             fn main() noreturn { }
             fn main() noreturn { exit(); }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3012.validate_entrypoint_is_single(model)

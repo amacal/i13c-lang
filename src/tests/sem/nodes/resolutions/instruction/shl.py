@@ -5,11 +5,9 @@ from tests.sem import prepare_program
 
 
 def can_reject_shlregimm_instruction_with_arity_mismatch():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { shl rax; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -29,11 +27,9 @@ def can_reject_shlregimm_instruction_with_arity_mismatch():
 
 
 def can_reject_shlregimm_instruction_with_width_mismatch():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { shl rax, 0x1234; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -53,11 +49,9 @@ def can_reject_shlregimm_instruction_with_width_mismatch():
 
 
 def can_reject_shlregimm_instruction_with_unresolved_operand_reference():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { shl rax, shift; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -77,11 +71,9 @@ def can_reject_shlregimm_instruction_with_unresolved_operand_reference():
 
 
 def can_accept_shlregimm_instruction_with_valid_operands():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { shl rax, 0x01; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -109,11 +101,9 @@ def can_accept_shlregimm_instruction_with_valid_operands():
 
 
 def can_accept_shlregimm_instruction_with_rewritten_operand_reference():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(val@imm: u8) noreturn { shl rax, val; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -142,11 +132,9 @@ def can_accept_shlregimm_instruction_with_rewritten_operand_reference():
 
 
 def can_reject_shlregimm_instruction_with_rewritten_operand_reference_of_wrong_width():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(val@imm: u16) noreturn { shl rax, val; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -166,11 +154,9 @@ def can_reject_shlregimm_instruction_with_rewritten_operand_reference_of_wrong_w
 
 
 def can_reject_shlregimm_instruction_with_immediate_out_of_range():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { shl rax, 0x0142; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -190,11 +176,9 @@ def can_reject_shlregimm_instruction_with_immediate_out_of_range():
 
 
 def can_reject_shlregimm_instruction_with_reference_out_of_range():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(val@imm: u16) noreturn { shl rax, val; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -214,11 +198,9 @@ def can_reject_shlregimm_instruction_with_reference_out_of_range():
 
 
 def can_accept_shlregimm_instruction_with_reference_within_range():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(val@imm: u16[0x00..0xff]) noreturn { shl rax, val; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

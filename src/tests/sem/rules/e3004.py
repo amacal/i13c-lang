@@ -5,13 +5,11 @@ from tests.sem import prepare_program
 
 
 def can_detect_duplicated_slot_names():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm main(code@rdi: u32, code@rax: u16) noreturn {
                 syscall;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3004.validate_duplicated_parameter_names(model)
@@ -24,12 +22,10 @@ def can_detect_duplicated_slot_names():
 
 
 def can_detect_duplicated_parameter_names():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             fn aux(code: u32, code: u16) {
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3004.validate_duplicated_parameter_names(model)

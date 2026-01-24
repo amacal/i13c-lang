@@ -5,11 +5,9 @@ from tests.sem import prepare_program
 
 
 def can_accept_movregimm_instruction_with_two_operands():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { mov rax, 0x42; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -37,11 +35,9 @@ def can_accept_movregimm_instruction_with_two_operands():
 
 
 def can_reject_movregimm_instruction_with_wrong_arity():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { mov rax; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -61,11 +57,9 @@ def can_reject_movregimm_instruction_with_wrong_arity():
 
 
 def can_reject_movregimm_instruction_with_type_mismatch():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { mov 0x42, rax; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -85,11 +79,9 @@ def can_reject_movregimm_instruction_with_type_mismatch():
 
 
 def can_accept_movregimm_instruction_with_rewritten_operands():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(val@imm: u64) noreturn { mov rax, val; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -117,11 +109,9 @@ def can_accept_movregimm_instruction_with_rewritten_operands():
 
 
 def can_reject_movregimm_instruction_with_unresolved_operand_reference():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { mov rax, val; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -141,11 +131,9 @@ def can_reject_movregimm_instruction_with_unresolved_operand_reference():
 
 
 def can_accept_movregimm_instruction_with_referenced_register_binding():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(code@rax: u64) noreturn { mov code, 0x01; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -173,11 +161,9 @@ def can_accept_movregimm_instruction_with_referenced_register_binding():
 
 
 def can_accept_movregimm_instruction_with_narrow_register_binding():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(code@rax: u8) noreturn { mov code, 0x01; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

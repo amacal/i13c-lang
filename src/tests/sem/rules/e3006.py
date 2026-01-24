@@ -5,8 +5,7 @@ from tests.sem import prepare_program
 
 
 def can_detect_duplicated_snippet_names():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm main() noreturn {
                 syscall;
             }
@@ -14,8 +13,7 @@ def can_detect_duplicated_snippet_names():
             asm main() {
                 syscall;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3006.validate_duplicated_function_names(model)
@@ -28,15 +26,13 @@ def can_detect_duplicated_snippet_names():
 
 
 def can_detect_duplicated_function_names():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             fn main() noreturn {
             }
 
             fn main() {
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3006.validate_duplicated_function_names(model)
@@ -49,16 +45,14 @@ def can_detect_duplicated_function_names():
 
 
 def can_detect_duplicated_mixed_function_names():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm main() {
                 syscall;
             }
 
             fn main() {
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3006.validate_duplicated_function_names(model)

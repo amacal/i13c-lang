@@ -5,11 +5,9 @@ from tests.sem import prepare_program
 
 
 def can_do_nothing_without_any_function():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -21,11 +19,9 @@ def can_do_nothing_without_any_function():
 
 
 def can_build_terminalities_for_single_function_without_any_statement():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -43,12 +39,10 @@ def can_build_terminalities_for_single_function_without_any_statement():
 
 
 def can_build_terminalities_for_a_function_calling_terminal_snippet():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm exit() noreturn { }
             fn main() { exit(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -66,12 +60,10 @@ def can_build_terminalities_for_a_function_calling_terminal_snippet():
 
 
 def can_build_terminalities_for_a_function_calling_non_terminal_snippet():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm exit() { }
             fn main() { exit(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -89,11 +81,9 @@ def can_build_terminalities_for_a_function_calling_non_terminal_snippet():
 
 
 def can_do_nothing_when_callsite_is_not_resolved():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { unknown(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -105,13 +95,11 @@ def can_do_nothing_when_callsite_is_not_resolved():
 
 
 def can_do_nothing_for_ambiguous_callsites():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm exit() noreturn { }
             asm exit() { }
             fn main() { exit(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

@@ -5,13 +5,11 @@ from tests.sem import prepare_program
 
 
 def can_accept_operands_arity_of_syscall():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn {
                 syscall;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3000.validate_assembly_mnemonic(model)
@@ -20,13 +18,11 @@ def can_accept_operands_arity_of_syscall():
 
 
 def can_accept_operands_arity_of_mov():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn {
                 mov rax, 0x1234;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3000.validate_assembly_mnemonic(model)
@@ -35,13 +31,11 @@ def can_accept_operands_arity_of_mov():
 
 
 def can_accept_shl_reg64_imm8_with_0x01():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn {
                 shl rax, 0x01;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3000.validate_assembly_mnemonic(model)
@@ -50,13 +44,11 @@ def can_accept_shl_reg64_imm8_with_0x01():
 
 
 def can_accept_shl_reg64_imm8_with_0x41():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn {
                 shl rax, 0x41;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3000.validate_assembly_mnemonic(model)
@@ -65,13 +57,11 @@ def can_accept_shl_reg64_imm8_with_0x41():
 
 
 def can_detect_invalid_instruction():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             asm main() noreturn {
                 xyz;
             }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3000.validate_assembly_mnemonic(model)

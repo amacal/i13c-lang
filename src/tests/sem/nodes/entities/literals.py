@@ -4,11 +4,9 @@ from tests.sem import prepare_program
 
 
 def can_do_nothing_without_any_literal():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -20,11 +18,9 @@ def can_do_nothing_without_any_literal():
 
 
 def can_detect_hex_literal():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { foo(0x476); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -46,11 +42,9 @@ def can_detect_hex_literal():
 
 
 def can_detect_two_literals_even_if_identical():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() { foo(0x1a2b); bar(0x1a2b); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

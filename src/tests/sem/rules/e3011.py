@@ -5,12 +5,10 @@ from tests.sem import prepare_program
 
 
 def can_survive_existing_entrypoint():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm exit() noreturn { }
             fn main() noreturn { exit(); }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3011.validate_entrypoint_exists(model)
@@ -19,11 +17,9 @@ def can_survive_existing_entrypoint():
 
 
 def can_detect_nonexistent_entrypoint_even_if_function_is_called_main2():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             fn main2() noreturn { }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3011.validate_entrypoint_exists(model)
@@ -36,11 +32,9 @@ def can_detect_nonexistent_entrypoint_even_if_function_is_called_main2():
 
 
 def can_reject_main_as_entrypoint_when_noreturn_is_false():
-    source, program = prepare_program(
-        """
+    source, program = prepare_program("""
             fn main() { }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3011.validate_entrypoint_exists(model)
@@ -53,11 +47,9 @@ def can_reject_main_as_entrypoint_when_noreturn_is_false():
 
 
 def can_accept_main_when_terminality_is_unresolved():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main() noreturn { missing(); }
-        """
-    )
+        """)
 
     model = build_semantic_graph(build_syntax_graph(program))
     diagnostics = sem.e3011.validate_entrypoint_exists(model)

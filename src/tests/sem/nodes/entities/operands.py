@@ -10,11 +10,9 @@ from tests.sem import prepare_program
 
 
 def can_do_nothing_without_any_instruction():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -26,11 +24,9 @@ def can_do_nothing_without_any_instruction():
 
 
 def can_do_nothing_without_any_operand():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { nop; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -42,11 +38,9 @@ def can_do_nothing_without_any_operand():
 
 
 def can_detect_an_immediate_operand_one_byte():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { nop 0x42; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -68,11 +62,9 @@ def can_detect_an_immediate_operand_one_byte():
 
 
 def can_detect_an_immediate_operand_four_bytes():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { nop 0x1122334455667788; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -94,11 +86,9 @@ def can_detect_an_immediate_operand_four_bytes():
 
 
 def can_detect_a_register_operand():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { nop rax; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -120,11 +110,9 @@ def can_detect_a_register_operand():
 
 
 def can_detect_a_reference_operand():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { nop var; }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)

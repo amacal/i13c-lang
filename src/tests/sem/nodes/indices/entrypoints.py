@@ -5,11 +5,9 @@ from tests.sem import prepare_program
 
 
 def can_reject_function_with_arguments():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             fn main(arg1: u32) noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -21,12 +19,10 @@ def can_reject_function_with_arguments():
 
 
 def can_accept_terminal_function():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm exit() noreturn { }
             fn main() noreturn { exit(); }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -48,11 +44,9 @@ def can_accept_terminal_function():
 
 
 def can_reject_snippet_with_arguments():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main(arg1@rax: u32) noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
@@ -64,11 +58,9 @@ def can_reject_snippet_with_arguments():
 
 
 def can_reject_terminal_snippet():
-    _, program = prepare_program(
-        """
+    _, program = prepare_program("""
             asm main() noreturn { }
-        """
-    )
+        """)
 
     graph = syntax.build_syntax_graph(program)
     semantic = model.build_semantic_graph(graph)
