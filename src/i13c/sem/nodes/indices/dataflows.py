@@ -1,13 +1,14 @@
 from typing import Dict
 
-from i13c.core.mapping import OneToOne
+from i13c.core.mapping import OneToMany, OneToOne
 from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
-from i13c.sem.typing.entities.expressions import Expression, ExpressionId
+from i13c.sem.typing.entities.expressions import ExpressionId
 from i13c.sem.typing.entities.functions import Function, FunctionId
-from i13c.sem.typing.entities.parameters import Parameter, ParameterId
+from i13c.sem.typing.entities.parameters import ParameterId
 from i13c.sem.typing.indices.controlflows import FlowGraph, FlowNode
 from i13c.sem.typing.indices.dataflows import DataFlow
+from i13c.sem.typing.indices.usages import UsageId
 from i13c.sem.typing.indices.variables import VariableId
 
 
@@ -19,10 +20,9 @@ def configure_dataflow_by_flownode() -> Configuration:
             {
                 ("functions", "entities/functions"),
                 ("callsites", "entities/callsites"),
-                ("expressions", "entities/expressions"),
-                ("parameters", "entities/parameters"),
                 ("controlflows", "indices/flowgraph-by-function"),
                 ("variables", "indices/variables-by-parameter"),
+                ("usages", "indices/usages-by-expression"),
             }
         ),
     )
@@ -31,10 +31,9 @@ def configure_dataflow_by_flownode() -> Configuration:
 def build_dataflows(
     functions: OneToOne[FunctionId, Function],
     callsites: OneToOne[CallSiteId, CallSite],
-    expressions: OneToOne[ExpressionId, Expression],
-    parameters: OneToOne[ParameterId, Parameter],
     controlflows: OneToOne[FunctionId, FlowGraph],
     variables: OneToOne[ParameterId, VariableId],
+    usages: OneToMany[ExpressionId, UsageId],
 ) -> OneToOne[FlowNode, DataFlow]:
 
     # found dataflows for each entry
@@ -66,14 +65,9 @@ def build_dataflows(
                 for argument in callsite.arguments:
                     if argument.kind == b"expression":
                         assert isinstance(argument.target, ExpressionId)
-                        expression = expressions.get(argument.target)
 
-                        # match expression to parameter
-                        for pid in function.parameters:
-                            parameter = parameters.get(pid)
-
-                            if expression.ident.name == parameter.ident.name:
-                                vid = variables.get(pid)
-                                dataflows[node].uses.append(vid)
+                        # find usages of this expression
+                        usage_ids = usages.get(argument.target)
+                        dataflows[node].uses.extend(usage_ids)
 
     return OneToOne[FlowNode, DataFlow].instance(dataflows)

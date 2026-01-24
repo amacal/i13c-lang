@@ -45,7 +45,6 @@ def build_usages_by_expression(
                 ident=Identifier(name=argument.name),
             )
 
-
     return (
         OneToOne[UsageId, Usage].instance(usages),
         OneToMany[ExpressionId, UsageId].instance(mapping),

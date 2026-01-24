@@ -166,5 +166,5 @@ def can_build_dataflow_for_a_function_with_callsite_and_unresolved_identifier():
     assert len(exit.drops) == 0
 
     assert len(callsite.declares) == 0
-    assert len(callsite.uses) == 0
+    assert len(callsite.uses) == 1
     assert len(callsite.drops) == 0
