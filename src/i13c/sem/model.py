@@ -19,6 +19,7 @@ from i13c.sem.typing.indices.dataflows import DataFlow
 from i13c.sem.typing.indices.entrypoints import EntryPoint
 from i13c.sem.typing.indices.instances import Instance
 from i13c.sem.typing.indices.terminalities import Terminality
+from i13c.sem.typing.indices.variables import Variable, VariableId
 from i13c.sem.typing.resolutions.callsites import CallSiteResolution
 from i13c.sem.typing.resolutions.instructions import InstructionResolution
 
@@ -32,6 +33,7 @@ class BasicNodes:
     functions: OneToOne[FunctionId, Function]
     callsites: OneToOne[CallSiteId, CallSite]
     parameters: OneToOne[ParameterId, Parameter]
+    variables: OneToOne[VariableId, Variable]
 
 
 @dataclass
@@ -42,6 +44,7 @@ class IndexEdges:
     flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
     dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
     instance_by_callsite: OneToOne[CallSiteId, Instance]
+    variables_by_parameter: OneToOne[ParameterId, VariableId]
 
 
 @dataclass
@@ -82,6 +85,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
             functions=artifacts["entities/functions"],
             callsites=artifacts["entities/callsites"],
             parameters=artifacts["entities/parameters"],
+            variables=artifacts["entities/variables"],
         ),
         indices=IndexEdges(
             terminality_by_function=artifacts["indices/terminality-by-function"],
@@ -90,6 +94,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
             flowgraph_by_function=artifacts["indices/flowgraph-by-function"],
             instance_by_callsite=artifacts["indices/instance-by-callsite"],
             dataflow_by_flownode=artifacts["indices/dataflow-by-flownode"],
+            variables_by_parameter=artifacts["indices/variables-by-parameter"],
         ),
         callgraph=CallGraph(
             calls_by_caller=artifacts["indices/calls-by-caller"],
