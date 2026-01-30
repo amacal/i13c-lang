@@ -6,10 +6,14 @@ from i13c.sem.core import Type
 from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.callables import Callable
 from i13c.sem.typing.entities.callsites import Argument, CallSite, CallSiteId
+from i13c.sem.typing.entities.expressions import Expression, ExpressionId
 from i13c.sem.typing.entities.functions import Function, FunctionId
 from i13c.sem.typing.entities.literals import Hex, Literal, LiteralId
 from i13c.sem.typing.entities.parameters import Parameter, ParameterId
 from i13c.sem.typing.entities.snippets import Snippet, SnippetId
+from i13c.sem.typing.indices.controlflows import FlowNode
+from i13c.sem.typing.indices.environments import Environment
+from i13c.sem.typing.indices.variables import Variable, VariableId
 from i13c.sem.typing.resolutions.callsites import (
     CallSiteAcceptance,
     CallSiteBinding,
@@ -30,6 +34,9 @@ def configure_resolution_by_callsite() -> Configuration:
                 ("callsites", "entities/callsites"),
                 ("literals", "entities/literals"),
                 ("parameters", "entities/parameters"),
+                ("variables", "entities/variables"),
+                ("expressions", "entities/expressions"),
+                ("environments", "indices/environment-by-flownode"),
             }
         ),
     )
@@ -58,16 +65,36 @@ def match_literal(literal: Literal, type: Type) -> bool:
             return False
 
 
+def match_variable(variable: Variable, type: Type) -> bool:
+    # width constraint
+    if variable.type.width > type.width:
+        return False
+
+    # range constraint
+    if not (
+        type.range.lower <= variable.type.range.lower
+        and variable.type.range.upper <= type.range.upper
+    ):
+        return False
+
+    # success
+    return True
+
+
 def build_resolution_by_callsite(
     functions: OneToOne[FunctionId, Function],
     snippets: OneToOne[SnippetId, Snippet],
     callsites: OneToOne[CallSiteId, CallSite],
     literals: OneToOne[LiteralId, Literal],
     parameters: OneToOne[ParameterId, Parameter],
+    variables: OneToOne[VariableId, Variable],
+    expressions: OneToOne[ExpressionId, Expression],
+    environments: OneToOne[FlowNode, Environment],
 ) -> OneToOne[CallSiteId, CallSiteResolution]:
     resolutions: Dict[CallSiteId, CallSiteResolution] = {}
 
     def match_bindings(
+        environment: Environment,
         bindings: Iterable[CallSiteBinding],
     ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
         for binding in bindings:
@@ -75,6 +102,20 @@ def build_resolution_by_callsite(
                 case Argument(kind=b"literal", target=LiteralId() as lit):
                     if not match_literal(literals.get(lit), type=binding.type):
                         return Err(b"type-mismatch")
+
+                case Argument(kind=b"expression", target=ExpressionId() as eid):
+                    # first extract expression and variable from environment
+                    expression = expressions.get(eid)
+                    variable = environment.variables.get(expression.ident)
+
+                    # check variable existence
+                    if variable is None:
+                        return Err(b"unknown-target")
+
+                    # check type match
+                    if not match_variable(variables.get(variable), type=binding.type):
+                        return Err(b"type-mismatch")
+
                 case _:
                     return Err(b"type-mismatch")
 
@@ -89,6 +130,7 @@ def build_resolution_by_callsite(
 
         # find actual parameter variables
         params = [parameters.get(pid) for pid in function.parameters]
+        environment = environments.get(callsite.id)
 
         # combine as bindings
         bindings = [
@@ -96,7 +138,7 @@ def build_resolution_by_callsite(
             for argument, parameter in zip(callsite.arguments, params)
         ]
 
-        return match_bindings(bindings)
+        return match_bindings(environment, bindings)
 
     def match_snippet(
         callsite: CallSite, snippet: Snippet
@@ -109,7 +151,7 @@ def build_resolution_by_callsite(
             for argument, slot in zip(callsite.arguments, snippet.slots)
         ]
 
-        return match_bindings(bindings)
+        return match_bindings(Environment.empty(), bindings)
 
     def match_callable(
         callsite: CallSite, callable: Callable

@@ -36,7 +36,7 @@ def build_dataflows(
     usages: OneToMany[ExpressionId, UsageId],
 ) -> OneToOne[FlowNode, DataFlow]:
 
-    # found dataflows for each entry
+    # found dataflows for each flow node
     dataflows: Dict[FlowNode, DataFlow] = {}
 
     # process each function

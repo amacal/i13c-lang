@@ -29,6 +29,7 @@ class Argument:
 @dataclass(kw_only=True)
 class CallSite:
     ref: Span
+    id: CallSiteId
     callee: Identifier
     arguments: List[Argument]
 

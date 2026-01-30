@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 from typing import Union
 
+from i13c.sem.core import Identifier, Type
 from i13c.sem.typing.entities.parameters import ParameterId
 
 VariableKind = Kind[b"parameter"]
@@ -24,5 +25,8 @@ class Variable:
     kind: VariableKind
     source: VariableSource
 
+    type: Type
+    ident: Identifier
+
     def describe(self) -> str:
-        return f"kind={self.kind.decode()}"
+        return f"source={self.source.identify(2)}, type={self.type}, ident={self.ident}"

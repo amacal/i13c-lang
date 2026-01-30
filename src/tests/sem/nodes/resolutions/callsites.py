@@ -225,3 +225,66 @@ def can_resolve_by_type_u64_max():
 
     value = semantic.basic.snippets.get(callables.target)
     assert value.identifier.name == b"foo"
+
+
+def can_resolve_by_expression_as_arg():
+    _, program = prepare_program("""
+        fn foo(arg1: u64) { }
+        fn main(arg2: u64) { foo(arg2); }
+    """)
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    resolutions = semantic.indices.resolution_by_callsite
+
+    assert resolutions.size() == 1
+    id, value = resolutions.peak()
+
+    assert isinstance(id, CallSiteId)
+    assert isinstance(value, CallSiteResolution)
+
+    assert len(value.accepted) == 1
+    assert len(value.rejected) == 0
+
+    callables = value.accepted[0].callable
+    bindings = value.accepted[0].bindings
+
+    assert callables.kind == b"function"
+    assert isinstance(callables.target, FunctionId)
+
+    value = semantic.basic.functions.get(callables.target)
+    assert value.identifier.name == b"foo"
+
+    assert len(bindings) == 1
+
+
+def can_reject_by_expression_as_arg():
+    _, program = prepare_program("""
+        fn foo(arg1: u32) { }
+        fn main(arg2: u64) { foo(arg2); }
+    """)
+
+    graph = syntax.build_syntax_graph(program)
+    semantic = model.build_semantic_graph(graph)
+
+    assert semantic is not None
+    resolutions = semantic.indices.resolution_by_callsite
+
+    assert resolutions.size() == 1
+    id, value = resolutions.peak()
+
+    assert isinstance(id, CallSiteId)
+    assert isinstance(value, CallSiteResolution)
+
+    assert len(value.accepted) == 0
+    assert len(value.rejected) == 1
+
+    callables = value.rejected[0].callable
+
+    assert callables.kind == b"function"
+    assert isinstance(callables.target, FunctionId)
+
+    value = semantic.basic.functions.get(callables.target)
+    assert value.identifier.name == b"foo"
