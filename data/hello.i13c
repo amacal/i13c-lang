@@ -3,16 +3,16 @@ asm exit(code@rdi: u8[0x00..0x0f]) noreturn clobbers rcx, r11, rax {
     syscall;
 }
 
-asm shift(count@cl: u8[0x00..0x3f]) clobbers rdi {
+asm shift(count@imm: u8[0x00..0x3f]) clobbers rdi {
     shl rdi, count;
 }
 
 fn x(count: u8[0x00..0x1f]) {
-  shift(count);
+  shift(0x01);
 }
 
 fn y(count: u8[0x20..0x3f]) {
-  shift(count);
+  shift(0x02);
 }
 
 fn main() noreturn {
