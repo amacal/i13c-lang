@@ -39,11 +39,14 @@ class OneToOneFeature:
 
 
 ONE2ONE: Dict[str, OneToOneFeature] = {
-    "literals": OneToOneFeature(list=lambda model: model.basic.literals),
-    "instructions": OneToOneFeature(list=lambda model: model.basic.instructions),
-    "snippets": OneToOneFeature(list=lambda model: model.basic.snippets),
-    "functions": OneToOneFeature(list=lambda model: model.basic.functions),
     "callsites": OneToOneFeature(list=lambda model: model.basic.callsites),
+    "functions": OneToOneFeature(list=lambda model: model.basic.functions),
+    "instructions": OneToOneFeature(list=lambda model: model.basic.instructions),
+    "literals": OneToOneFeature(list=lambda model: model.basic.literals),
+    "operands": OneToOneFeature(list=lambda model: model.basic.operands),
+    "parameters": OneToOneFeature(list=lambda model: model.basic.parameters),
+    "snippets": OneToOneFeature(list=lambda model: model.basic.snippets),
+    "variables": OneToOneFeature(list=lambda model: model.basic.variables),
     "terminality-by-function": OneToOneFeature(
         list=lambda model: model.indices.terminality_by_function
     ),
@@ -56,6 +59,15 @@ ONE2ONE: Dict[str, OneToOneFeature] = {
     "flowgraph-by-function": OneToOneFeature(
         list=lambda model: model.indices.flowgraph_by_function,
         show=lambda model: model.indices.flowgraph_by_function,
+    ),
+    "dataflow-by-flownode": OneToOneFeature(
+        list=lambda model: model.indices.dataflow_by_flownode
+    ),
+    "instance-by-callsite": OneToOneFeature(
+        list=lambda model: model.indices.instance_by_callsite
+    ),
+    "variables-by-parameter": OneToOneFeature(
+        list=lambda model: model.indices.variables_by_parameter
     ),
 }
 

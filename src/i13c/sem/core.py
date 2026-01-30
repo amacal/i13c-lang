@@ -18,7 +18,7 @@ class Range:
     upper: int
 
     def __str__(self) -> str:
-        return f"[{self.lower}..{self.upper}]"
+        return f"{self.lower}..{self.upper}"
 
     @staticmethod
     def intersection(left: Range, right: Range) -> Range:
