@@ -6,14 +6,18 @@ from i13c.sem.typing.entities.functions import Statement
 
 @dataclass(kw_only=True, frozen=True)
 class FlowEntry:
+    value: int
+
     def identify(self, length: int) -> str:
-        return "entry"
+        return "#".join(("entry", f"{self.value:<{length}}"))
 
 
 @dataclass(kw_only=True, frozen=True)
 class FlowExit:
+    value: int
+
     def identify(self, length: int) -> str:
-        return "exit"
+        return "#".join(("exit", f"{self.value:<{length}}"))
 
 
 FlowNode = Union[FlowEntry, FlowExit, Statement]
