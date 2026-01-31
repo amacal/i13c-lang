@@ -70,7 +70,7 @@ def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]
 
         # emit all instructions
         for instr in ctx.nodes[bid].instructions:
-            assert not isinstance(instr, Flow)
+            assert not isinstance(instr, Flow), str(instr)
             emited.append(instr)
 
         # determine next block in order

@@ -3,6 +3,7 @@ from i13c.lowering.graph import LowLevelContext, LowLevelGraph
 from i13c.lowering.nodes.blocks import emit_all_blocks, patch_registers
 from i13c.lowering.nodes.callsites import patch_all_callsites
 from i13c.lowering.nodes.functions import lower_active_functions
+from i13c.lowering.nodes.stacks import patch_stack_frames
 from i13c.lowering.typing.blocks import Block
 from i13c.lowering.typing.flows import BlockId
 from i13c.lowering.typing.instructions import Instruction
@@ -24,6 +25,10 @@ def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
     # each block must maintain alive registers
     # this is required for correct register allocation
     patch_registers(ctx)
+
+    # all prologues/epilogues must have stack frames assigned
+    # currently they are only initialized as flows
+    patch_stack_frames(ctx)
 
     # each block now can be linearized independently
     # connection between blocks is already known

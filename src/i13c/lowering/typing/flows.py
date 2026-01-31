@@ -17,4 +17,24 @@ class CallFlow:
     target: FunctionId
 
 
-Flow = Union[CallFlow]
+@dataclass(kw_only=True)
+class PrologueFlow:
+    target: FunctionId
+
+
+@dataclass(kw_only=True)
+class EpilogueFlow:
+    target: FunctionId
+
+
+@dataclass(kw_only=True)
+class PreserveFlow:
+    pass
+
+
+@dataclass(kw_only=True)
+class RestoreFlow:
+    pass
+
+
+Flow = Union[CallFlow, PrologueFlow, EpilogueFlow, PreserveFlow, RestoreFlow]

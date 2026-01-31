@@ -1,11 +1,11 @@
-from typing import Dict, Optional, Protocol, Type
+from typing import Dict, List, Optional, Protocol, Type
 
 from i13c.core.generator import Generator
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.nodes.callsites import lower_callsite
 from i13c.lowering.nodes.registers import caller_saved
-from i13c.lowering.typing.blocks import Block, Registers
-from i13c.lowering.typing.flows import BlockId
+from i13c.lowering.typing.blocks import Block, BlockInstruction, Registers
+from i13c.lowering.typing.flows import BlockId, EpilogueFlow, PrologueFlow
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
     JumpTerminator,
@@ -56,13 +56,16 @@ def lower_flow_entry(
     # create jump terminator to successor
     terminator = JumpTerminator(target=mapping[successors[0]])
 
+    # prepare entry instructions
+    instructions: List[BlockInstruction] = [PrologueFlow(target=fid)]
+
     # register entry block
     ctx.entry[fid] = mapping[node]
 
     # create empty block with jump
     return Block(
         origin=fid,
-        instructions=[],
+        instructions=instructions,
         registers=Registers.provides(caller_saved()),
         terminator=terminator,
     )
@@ -78,10 +81,13 @@ def lower_flow_exit(
     # register exit block
     ctx.exit[fid] = mapping[node]
 
+    # prepare exit instructions
+    instructions: List[BlockInstruction] = [EpilogueFlow(target=fid)]
+
     # create empty block with exit
     return Block(
         origin=fid,
-        instructions=[],
+        instructions=instructions,
         registers=Registers.empty(),
         terminator=ExitTerminator(),
     )

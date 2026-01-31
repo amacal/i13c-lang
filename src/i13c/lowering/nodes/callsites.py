@@ -5,7 +5,7 @@ from i13c.lowering.nodes.bindings import lower_callsite_bindings
 from i13c.lowering.nodes.instances import lower_instance
 from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
-from i13c.lowering.typing.flows import CallFlow
+from i13c.lowering.typing.flows import CallFlow, PreserveFlow, RestoreFlow
 from i13c.lowering.typing.instructions import Call
 from i13c.sem.typing.entities.callsites import CallSiteId
 from i13c.sem.typing.entities.snippets import SnippetId
@@ -26,6 +26,9 @@ def lower_callsite(
     # we expected no ambiguity here
     assert len(resolution.accepted) == 1
 
+    # append preserve instructions
+    instructions.append(PreserveFlow())
+
     if isinstance(resolution.accepted[0].callable.target, SnippetId):
         instance = ctx.graph.indices.instance_by_callsite.get(cid)
         snippet = ctx.graph.basic.snippets.get(instance.target)
@@ -33,7 +36,7 @@ def lower_callsite(
         # append callsite specific bindings
         instructions.extend(lower_callsite_bindings(ctx, instance.bindings))
 
-        # append emited instructions
+        # append emitted instructions
         instructions.extend(lower_instance(ctx, instance))
 
         # update clobbered registers
@@ -54,6 +57,9 @@ def lower_callsite(
 
         # all IR registers are clobbered by function calls
         clobbers.update(set(IR_REGISTER_MAP.values()))
+
+    # append restore instructions
+    instructions.append(RestoreFlow())
 
     # callsite instructions and clobbers
     return instructions, clobbers

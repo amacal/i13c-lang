@@ -6,6 +6,7 @@ from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.typing.blocks import Block
 from i13c.lowering.typing.flows import BlockId
 from i13c.lowering.typing.instructions import Instruction
+from i13c.lowering.typing.stacks import StackFrame
 from i13c.sem.model import SemanticGraph
 from i13c.sem.typing.entities.functions import FunctionId
 
@@ -38,6 +39,7 @@ class LowLevelContext:
 
     entry: Dict[FunctionId, BlockId]
     exit: Dict[FunctionId, BlockId]
+    stack: Dict[FunctionId, StackFrame]
 
     @staticmethod
     def empty(graph: SemanticGraph) -> LowLevelContext:
@@ -50,4 +52,5 @@ class LowLevelContext:
             flows={},
             entry={},
             exit={},
+            stack={},
         )
