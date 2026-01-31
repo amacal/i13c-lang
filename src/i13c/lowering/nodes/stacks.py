@@ -1,16 +1,16 @@
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.nodes.blocks import linearize_blocks
+from i13c.lowering.typing.abstracts import (
+    EnterFrame,
+    ExitFrame,
+    Preserve,
+    Restore,
+)
 from i13c.lowering.typing.flows import (
     EpilogueFlow,
     PreserveFlow,
     PrologueFlow,
     RestoreFlow,
-)
-from i13c.lowering.typing.instructions import (
-    EnterFrame,
-    ExitFrame,
-    Preserve,
-    Restore,
 )
 from i13c.lowering.typing.stacks import StackFrame
 

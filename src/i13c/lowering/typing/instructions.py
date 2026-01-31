@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Union
+from typing import Union
 
 from i13c.lowering.typing.flows import BlockId
 
@@ -31,6 +31,18 @@ class ShlRegImm:
 
 
 @dataclass(kw_only=True)
+class SubRegImm:
+    dst: int
+    imm: int
+
+
+@dataclass(kw_only=True)
+class AddRegImm:
+    dst: int
+    imm: int
+
+
+@dataclass(kw_only=True)
 class SysCall:
     pass
 
@@ -55,38 +67,16 @@ class Jump:
     target: BlockId
 
 
-@dataclass(kw_only=True)
-class EnterFrame:
-    size: int
-
-
-@dataclass(kw_only=True)
-class ExitFrame:
-    size: int
-
-
-@dataclass(kw_only=True)
-class Preserve:
-    registers: Dict[int, int]
-
-
-@dataclass(kw_only=True)
-class Restore:
-    registers: Dict[int, int]
-
-
 Instruction = Union[
     MovRegImm,
     MovOffReg,
     MovRegOff,
     ShlRegImm,
+    SubRegImm,
+    AddRegImm,
     SysCall,
     Label,
     Call,
     Return,
     Jump,
-    EnterFrame,
-    ExitFrame,
-    Preserve,
-    Restore,
 ]

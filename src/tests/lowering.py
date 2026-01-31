@@ -1,5 +1,5 @@
 from i13c.lowering.build import build_low_level_graph
-from i13c.lowering.typing.instructions import Label
+from i13c.lowering.typing.instructions import Call, MovRegImm, ShlRegImm, SysCall
 from i13c.sem.model import build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
 from tests.sem import prepare_program
@@ -17,7 +17,7 @@ def can_lower_syscall_program():
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
-    instrs = [item for item in flow if not isinstance(item, Label)]
+    instrs = [item for item in flow if isinstance(item, (MovRegImm, Call, SysCall))]
     assert len(instrs) == 1  # just one syscall
 
 
@@ -33,7 +33,7 @@ def can_lower_mov_program():
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
-    instrs = [item for item in flow if not isinstance(item, Label)]
+    instrs = [item for item in flow if isinstance(item, (MovRegImm, Call, SysCall))]
     assert len(instrs) == 1  # one mov only
 
 
@@ -49,7 +49,7 @@ def can_lower_mov_with_register_bound_slot():
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
-    instrs = [item for item in flow if not isinstance(item, Label)]
+    instrs = [item for item in flow if isinstance(item, (MovRegImm, Call, SysCall))]
     assert len(instrs) == 2  # one inlined mov and one passed as an argument
 
 
@@ -65,7 +65,7 @@ def can_lower_shl_program():
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
-    instrs = [item for item in flow if not isinstance(item, Label)]
+    instrs = [item for item in flow if isinstance(item, (ShlRegImm, Call, SysCall))]
     assert len(instrs) == 1  # just one shl
 
 
@@ -82,7 +82,7 @@ def can_lower_multiple_callsites():
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
-    instrs = [item for item in flow if not isinstance(item, Label)]
+    instrs = [item for item in flow if isinstance(item, (MovRegImm, Call, SysCall))]
     assert len(instrs) == 2  # one mov and one syscall
 
 
@@ -98,7 +98,7 @@ def can_lower_function_final_statement_to_stop():
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
-    instrs = [item for item in flow if not isinstance(item, Label)]
+    instrs = [item for item in flow if isinstance(item, (MovRegImm, Call, SysCall))]
     assert len(instrs) == 1  # just one syscall
 
 
@@ -115,7 +115,7 @@ def can_lower_function_calling_another_function():
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
-    instrs = [item for item in flow if not isinstance(item, Label)]
+    instrs = [item for item in flow if isinstance(item, (MovRegImm, Call, SysCall))]
     assert len(instrs) == 2  # one call and one syscall
 
 
@@ -134,5 +134,5 @@ def can_lower_function_calling_another_function_reusing():
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
-    instrs = [item for item in flow if not isinstance(item, Label)]
+    instrs = [item for item in flow if isinstance(item, (MovRegImm, Call, SysCall))]
     assert len(instrs) == 3  # two calls and one syscall

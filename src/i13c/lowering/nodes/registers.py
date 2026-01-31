@@ -9,4 +9,4 @@ IR_REGISTER_MAP: Dict[bytes, int] = {
 
 
 def caller_saved() -> Set[int]:
-    return set(range(0, 8))
+    return set(range(0, 8)) - {IR_REGISTER_MAP[b"rsp"]}

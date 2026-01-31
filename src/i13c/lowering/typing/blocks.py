@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Set, Union
 
+from i13c.lowering.typing.abstracts import Abstracts
 from i13c.lowering.typing.flows import Flow
 from i13c.lowering.typing.instructions import Instruction
 from i13c.lowering.typing.terminators import Terminator
@@ -9,7 +10,7 @@ from i13c.sem.typing.entities.functions import FunctionId
 from i13c.sem.typing.entities.snippets import SnippetId
 
 BlockOrigin = Union[FunctionId, SnippetId, CallSiteId]
-BlockInstruction = Union[Instruction, Flow]
+BlockInstruction = Union[Instruction, Abstracts, Flow]
 
 
 @dataclass

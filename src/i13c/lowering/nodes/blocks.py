@@ -1,14 +1,66 @@
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Protocol, Set, Type
 
 from i13c.lowering.graph import LowLevelContext
+from i13c.lowering.nodes.registers import IR_REGISTER_MAP
+from i13c.lowering.typing.abstracts import (
+    Abstracts,
+    EnterFrame,
+    ExitFrame,
+    Preserve,
+    Restore,
+)
 from i13c.lowering.typing.flows import BlockId, Flow
-from i13c.lowering.typing.instructions import Call, Instruction, Jump, Label, Return
+from i13c.lowering.typing.instructions import (
+    AddRegImm,
+    Call,
+    Instruction,
+    Jump,
+    Label,
+    MovOffReg,
+    MovRegOff,
+    Return,
+    SubRegImm,
+)
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
     JumpTerminator,
     Terminator,
     TrapTerminator,
 )
+
+
+class AbstractConverter(Protocol):
+    def __call__(self, abstract: Abstracts) -> List[Instruction]: ...
+
+
+def dispatch_enter_frame(abstract: EnterFrame) -> List[Instruction]:
+    return [SubRegImm(dst=IR_REGISTER_MAP[b"rsp"], imm=abstract.size)]
+
+
+def dispatch_exit_frame(abstract: ExitFrame) -> List[Instruction]:
+    return [AddRegImm(dst=IR_REGISTER_MAP[b"rsp"], imm=abstract.size)]
+
+
+def dispatch_preserve(abstract: Preserve) -> List[Instruction]:
+    return [
+        MovOffReg(dst=IR_REGISTER_MAP[b"rsp"], src=reg, off=idx * 8)
+        for idx, reg in abstract.registers.items()
+    ]
+
+
+def dispatch_restore(abstract: Restore) -> List[Instruction]:
+    return [
+        MovRegOff(dst=reg, src=IR_REGISTER_MAP[b"rsp"], off=idx * 8)
+        for idx, reg in abstract.registers.items()
+    ]
+
+
+DISPATCH_TABLE: Dict[Type[Abstracts], AbstractConverter] = {
+    EnterFrame: dispatch_enter_frame,
+    ExitFrame: dispatch_exit_frame,
+    Preserve: dispatch_preserve,
+    Restore: dispatch_restore,
+}  # pyright: ignore[reportAssignmentType]
 
 
 def emit_all_blocks(ctx: LowLevelContext, entry: BlockId) -> None:
@@ -70,8 +122,12 @@ def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]
 
         # emit all instructions
         for instr in ctx.nodes[bid].instructions:
-            assert not isinstance(instr, Flow), str(instr)
-            emited.append(instr)
+            assert not isinstance(instr, Flow)
+
+            if isinstance(instr, Abstracts):
+                emited.extend(DISPATCH_TABLE[type(instr)](instr))
+            else:
+                emited.append(instr)
 
         # determine next block in order
         next = ordered[idx + 1] if idx + 1 < len(ordered) else None
