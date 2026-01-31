@@ -109,5 +109,27 @@ def emit_control_transfer(
 
 
 def patch_registers(ctx: LowLevelContext):
-    for fid, bid in ctx.entry.items():
-        pass
+    changed = True
+    while changed:
+        changed = False
+
+        for bid in ctx.nodes.keys():
+            if predecessors := ctx.backward[bid]:
+                inputs = set(ctx.nodes[predecessors[0]].registers.outputs)
+
+                for pred in predecessors[1:]:
+                    inputs.intersection_update(ctx.nodes[pred].registers.outputs)
+
+            else:
+                inputs = ctx.nodes[bid].registers.inputs
+
+            outputs = inputs - ctx.nodes[bid].registers.clobbered
+            outputs = outputs.union(ctx.nodes[bid].registers.generated)
+
+            if inputs != ctx.nodes[bid].registers.inputs:
+                ctx.nodes[bid].registers.inputs = inputs
+                changed = True
+
+            if outputs != ctx.nodes[bid].registers.outputs:
+                ctx.nodes[bid].registers.outputs = outputs
+                changed = True

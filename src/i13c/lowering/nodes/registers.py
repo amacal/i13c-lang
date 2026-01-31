@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Set
 
 # fmt: off
 IR_REGISTER_MAP: Dict[bytes, int] = {
@@ -6,3 +6,7 @@ IR_REGISTER_MAP: Dict[bytes, int] = {
     b"r8": 8, b"r9": 9, b"r10": 10, b"r11": 11, b"r12": 12, b"r13": 13, b"r14": 14, b"r15": 15,
 }
 # fmt: on
+
+
+def caller_saved() -> Set[int]:
+    return set(range(0, 8))

@@ -3,6 +3,7 @@ from typing import Dict, Optional, Protocol, Type
 from i13c.core.generator import Generator
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.nodes.callsites import lower_callsite
+from i13c.lowering.nodes.registers import caller_saved
 from i13c.lowering.typing.blocks import Block, Registers
 from i13c.lowering.typing.flows import BlockId
 from i13c.lowering.typing.terminators import (
@@ -62,7 +63,7 @@ def lower_flow_entry(
     return Block(
         origin=fid,
         instructions=[],
-        registers=Registers.empty(),
+        registers=Registers.provides(caller_saved()),
         terminator=terminator,
     )
 
@@ -154,8 +155,12 @@ def lower_function_flow(
             ctx, fid, flow, mapping, node
         )
 
-    # wire edges
+    # wire forward edges
     for node, successors in flow.forward.items():
         ctx.forward[mapping[node]].extend([mapping[next] for next in successors])
+
+    # wire backward edges
+    for node, predecessors in flow.backward.items():
+        ctx.backward[mapping[node]].extend([mapping[prev] for prev in predecessors])
 
     return mapping[flow.entry]

@@ -30,6 +30,15 @@ class Registers:
         )
 
     @staticmethod
+    def provides(registers: Set[int]) -> Registers:
+        return Registers(
+            generated=set(),
+            clobbered=set(),
+            inputs=registers,
+            outputs=set(),
+        )
+
+    @staticmethod
     def clobbers(registers: Set[int]) -> Registers:
         return Registers(
             generated=set(),
