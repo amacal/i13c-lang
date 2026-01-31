@@ -45,7 +45,7 @@ def build_environments(
         environments[flowgraph.entry] = Environment(variables=env)
 
         while node != flowgraph.exit:
-            for successor in flowgraph.edges.get(node, [flowgraph.exit]):
+            for successor in flowgraph.forward.get(node, [flowgraph.exit]):
                 node = successor
 
             # just clone current environment for now

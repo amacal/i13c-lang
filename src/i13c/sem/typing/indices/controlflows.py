@@ -28,11 +28,12 @@ class FlowGraph:
     entry: FlowEntry
     exit: FlowExit
 
-    edges: Dict[FlowNode, List[FlowNode]]
+    forward: Dict[FlowNode, List[FlowNode]]
+    backward: Dict[FlowNode, List[FlowNode]]
 
     def nodes(self) -> Set[FlowNode]:
-        values = (next for edge in self.edges.values() for next in edge)
-        nodes = set(self.edges.keys()) | set(values)
+        values = (next for edge in self.forward.values() for next in edge)
+        nodes = set(self.forward.keys()) | set(values)
 
         return nodes
 
@@ -41,8 +42,10 @@ class FlowGraph:
         nodes = self.nodes()
 
         # count number of edges
-        edges = sum(len(v) for v in self.edges.values())
-        return f"nodes={len(nodes)}, edges={edges}"
+        forward = sum(len(v) for v in self.forward.values())
+        backward = sum(len(v) for v in self.backward.values())
+
+        return f"nodes={len(nodes)}, forward={forward}, backward={backward}"
 
     def show(self) -> Iterable[str]:
         path: List[str] = []
@@ -51,6 +54,6 @@ class FlowGraph:
         # simplified path traversal
         while node is not None:
             path.append(node.identify(2))
-            node = self.edges[node][0] if node in self.edges else None
+            node = self.forward[node][0] if node in self.forward else None
 
         return path

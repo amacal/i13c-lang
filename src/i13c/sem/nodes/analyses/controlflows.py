@@ -31,9 +31,13 @@ def prune_flowgraph(
     resolutions: OneToOne[CallSiteId, CallSiteResolution],
     noreturn: Set[CallableTarget],
 ) -> FlowGraph:
-    edges: Dict[FlowNode, List[FlowNode]] = {}
+    forward: Dict[FlowNode, List[FlowNode]] = {}
+    backward: Dict[FlowNode, List[FlowNode]] = {}
 
-    for node, successors in flowgraph.edges.items():
+    for node in flowgraph.backward.keys():
+        backward[node] = []
+
+    for node, successors in flowgraph.forward.items():
         if isinstance(node, CallSiteId):
             # node is a callsite
             resolution = resolutions.get(node)
@@ -53,7 +57,12 @@ def prune_flowgraph(
             if not acceptable:
                 successors = []
 
-        edges[node] = list(successors)
+        # register successors
+        forward[node] = list(successors)
+
+        # register backwards edges
+        for successor in successors:
+            backward[successor].append(node)
 
     queue: List[FlowNode] = [flowgraph.entry]
     visited: Set[FlowNode] = set()
@@ -65,24 +74,32 @@ def prune_flowgraph(
 
         visited.add(node)
 
-        for successor in edges.get(node, []):
+        for successor in forward.get(node, []):
             if successor not in visited:
                 queue.append(successor)
 
-    # prune edges to visited nodes only
-    edges = {
+    # prune forward edges to visited nodes only
+    forward = {
         node: [s for s in successors if s in visited]
-        for node, successors in edges.items()
+        for node, successors in forward.items()
+        if node in visited
+    }
+
+    # prune backward edges to visited nodes only
+    backward = {
+        node: [p for p in predecessors if p in visited]
+        for node, predecessors in backward.items()
         if node in visited
     }
 
     # let's be sure entry is still there
-    assert flowgraph.entry in edges
+    assert flowgraph.entry in forward
 
     return FlowGraph(
         entry=flowgraph.entry,
         exit=flowgraph.exit,
-        edges=edges,
+        forward=forward,
+        backward=backward,
     )
 
 

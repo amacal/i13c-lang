@@ -29,6 +29,7 @@ def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
     return LowLevelGraph(
         entry=entry,
         nodes=OneToOne[BlockId, Block].instance(ctx.nodes),
-        edges=OneToMany[BlockId, BlockId].instance(ctx.edges),
+        forward=OneToMany[BlockId, BlockId].instance(ctx.forward),
+        backward=OneToMany[BlockId, BlockId].instance(ctx.backward),
         flows=OneToMany[BlockId, Instruction].instance(ctx.flows),
     )

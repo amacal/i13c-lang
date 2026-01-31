@@ -14,8 +14,10 @@ from i13c.sem.typing.entities.functions import FunctionId
 class LowLevelGraph:
     entry: BlockId
     nodes: OneToOne[BlockId, Block]
-    edges: OneToMany[BlockId, BlockId]
     flows: OneToMany[BlockId, Instruction]
+
+    forward: OneToMany[BlockId, BlockId]
+    backward: OneToMany[BlockId, BlockId]
 
     def instructions(self) -> Iterator[Instruction]:
         for flow in self.flows.values():
@@ -29,8 +31,10 @@ class LowLevelContext:
     generator: Generator
 
     nodes: Dict[BlockId, Block]
-    edges: Dict[BlockId, List[BlockId]]
     flows: Dict[BlockId, List[Instruction]]
+
+    forward: Dict[BlockId, List[BlockId]]
+    backward: Dict[BlockId, List[BlockId]]
 
     entry: Dict[FunctionId, BlockId]
     exit: Dict[FunctionId, BlockId]
@@ -41,7 +45,8 @@ class LowLevelContext:
             graph=graph,
             generator=graph.generator,
             nodes={},
-            edges={},
+            forward={},
+            backward={},
             flows={},
             entry={},
             exit={},

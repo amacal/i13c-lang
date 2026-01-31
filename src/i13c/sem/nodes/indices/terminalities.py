@@ -80,7 +80,7 @@ def build_terminalities(
                     continue
 
             # pick up successors
-            for successor in flowgraph.edges.get(node, []):
+            for successor in flowgraph.forward.get(node, []):
                 stack.append(successor)
 
         return False

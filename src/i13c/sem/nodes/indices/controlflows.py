@@ -37,25 +37,33 @@ def build_flowgraphs(
     for fid, function in functions.items():
         entry = FlowEntry(value=generator.next())
         exit = FlowExit(value=generator.next())
-        edges: Dict[FlowNode, List[FlowNode]] = {}
+
+        forward: Dict[FlowNode, List[FlowNode]] = {}
+        backward: Dict[FlowNode, List[FlowNode]] = {}
 
         if not function.statements:
-            edges[entry] = [exit]
+            forward[entry] = [exit]
+            backward[exit] = [entry]
 
         else:
 
             stmts = function.statements
-            edges[entry] = [stmts[0]]
+
+            forward[entry] = [stmts[0]]
+            backward[stmts[0]] = [entry]
 
             for predecessor, successor in zip(stmts, stmts[1:]):
-                edges[predecessor] = [successor]
+                forward[predecessor] = [successor]
+                backward[successor] = [predecessor]
 
-            edges[stmts[-1]] = [exit]
+            forward[stmts[-1]] = [exit]
+            backward[exit] = [stmts[-1]]
 
         flowgraphs[fid] = FlowGraph(
             entry=entry,
             exit=exit,
-            edges=edges,
+            forward=forward,
+            backward=backward,
         )
 
     return OneToOne[FunctionId, FlowGraph].instance(flowgraphs)

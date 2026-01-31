@@ -69,7 +69,7 @@ def llg_command(path: str) -> None:
     for idx, (bid, block) in enumerate(llg.nodes.items()):
         click.echo(f"Block: {bid.value}")
         click.echo(f"  Origin: {block.origin.identify(2)}")
-        click.echo(f"  Edges: {[succ.value for succ in llg.edges.find(bid)]}")
+        click.echo(f"  Edges: {[succ.value for succ in llg.forward.find(bid)]}")
         click.echo(f"  Terminator: {block.terminator}")
 
         click.echo("  Instructions:")

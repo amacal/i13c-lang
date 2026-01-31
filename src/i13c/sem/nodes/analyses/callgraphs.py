@@ -37,7 +37,7 @@ def build_callgraph_live(
                 continue
 
             visited.add(node)
-            for successor in flowgraph.edges.get(node, []):
+            for successor in flowgraph.forward.get(node, []):
                 stack.append(successor)
 
         return visited

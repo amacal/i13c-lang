@@ -61,7 +61,7 @@ def linearize_blocks(
 
 def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]:
     emited: List[Instruction] = []
-    ordered: List[BlockId] = linearize_blocks(entry, ctx.edges)
+    ordered: List[BlockId] = linearize_blocks(entry, ctx.forward)
 
     # emit instructions in order
     for idx, bid in enumerate(ordered):
@@ -106,3 +106,8 @@ def emit_control_transfer(
 
     # otherwise emit jump
     return Jump(target=term.target)
+
+
+def patch_registers(ctx: LowLevelContext):
+    for fid, bid in ctx.entry.items():
+        pass

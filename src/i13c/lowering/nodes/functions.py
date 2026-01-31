@@ -3,7 +3,7 @@ from typing import Dict, Optional, Protocol, Type
 from i13c.core.generator import Generator
 from i13c.lowering.graph import LowLevelContext
 from i13c.lowering.nodes.callsites import lower_callsite
-from i13c.lowering.typing.blocks import Block
+from i13c.lowering.typing.blocks import Block, Registers
 from i13c.lowering.typing.flows import BlockId
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
@@ -49,7 +49,7 @@ def lower_flow_entry(
     node: FlowEntry,
 ) -> Block:
     # obtain successors
-    successors = flow.edges.get(node, [])
+    successors = flow.forward.get(node, [])
     assert len(successors) == 1
 
     # create jump terminator to successor
@@ -62,6 +62,7 @@ def lower_flow_entry(
     return Block(
         origin=fid,
         instructions=[],
+        registers=Registers.empty(),
         terminator=terminator,
     )
 
@@ -80,6 +81,7 @@ def lower_flow_exit(
     return Block(
         origin=fid,
         instructions=[],
+        registers=Registers.empty(),
         terminator=ExitTerminator(),
     )
 
@@ -92,7 +94,7 @@ def lower_flow_callsite(
     node: CallSiteId,
 ) -> Block:
     # obtain successors
-    successors = flow.edges.get(node, [])
+    successors = flow.forward.get(node, [])
     assert len(successors) in (0, 1)
 
     # create jump or trap
@@ -102,11 +104,15 @@ def lower_flow_callsite(
         else TrapTerminator()
     )
 
+    # lower callsite instructions and clobbers
+    instructions, clobbers = lower_callsite(ctx, node)
+
     # lower callsite block
     return Block(
         origin=node,
-        instructions=lower_callsite(ctx, node),
         terminator=terminator,
+        instructions=instructions,
+        registers=Registers.clobbers(clobbers),
     )
 
 
@@ -139,7 +145,8 @@ def lower_function_flow(
     # assign ID to each FlowNode
     for node in flow.nodes():
         mapping[node] = BlockId(value=generator.next())
-        ctx.edges[mapping[node]] = []
+        ctx.forward[mapping[node]] = []
+        ctx.backward[mapping[node]] = []
 
     # lower each FlowNode
     for node in flow.nodes():
@@ -148,7 +155,7 @@ def lower_function_flow(
         )
 
     # wire edges
-    for node, successors in flow.edges.items():
-        ctx.edges[mapping[node]].extend([mapping[next] for next in successors])
+    for node, successors in flow.forward.items():
+        ctx.forward[mapping[node]].extend([mapping[next] for next in successors])
 
     return mapping[flow.entry]
