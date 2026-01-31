@@ -2,12 +2,16 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Protocol, Type, Union
 
 from i13c.lowering.typing.instructions import (
+    AddRegImm,
     Call,
     Instruction,
     Label,
+    MovOffReg,
     MovRegImm,
+    MovRegOff,
     Return,
     ShlRegImm,
+    SubRegImm,
     SysCall,
 )
 
@@ -44,6 +48,56 @@ def encode_mov_reg_imm(
     bytecode.extend([rex, opcode, *imm])
 
 
+def encode_mov_off_reg(
+    instruction: MovOffReg, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    # REX.W + 89 /r
+    rex = (
+        0x40
+        | 0x08
+        | (0x04 if instruction.src >= 8 else 0x00)
+        | (0x01 if instruction.dst >= 8 else 0x00)
+    )
+
+    opcode = 0x89
+    modrm = 0x80 | ((instruction.src & 0x07) << 3) | (instruction.dst & 0x07)
+
+    # append REX, opcode, modrm
+    bytecode.extend([rex, opcode, modrm])
+
+    # handle SIB for RSP
+    if (instruction.dst & 0x07) == 4:
+        bytecode.append((0 << 6) | (4 << 3) | (instruction.dst & 0x07))
+
+    # append 32-bit offset
+    bytecode.extend(instruction.off.to_bytes(4, byteorder="little", signed=True))
+
+
+def encode_mov_reg_off(
+    instruction: MovRegOff, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    # REX.W + 89 /r
+    rex = (
+        0x40
+        | 0x08
+        | (0x04 if instruction.dst >= 8 else 0x00)
+        | (0x01 if instruction.src >= 8 else 0x00)
+    )
+
+    opcode = 0x8B
+    modrm = 0x80 | ((instruction.dst & 0x07) << 3) | (instruction.src & 0x07)
+
+    # append REX, opcode, modrm
+    bytecode.extend([rex, opcode, modrm])
+
+    # handle SIB for RSP
+    if (instruction.src & 0x07) == 4:
+        bytecode.append((0 << 6) | (4 << 3) | (instruction.src & 0x07))
+
+    # append 32-bit offset
+    bytecode.extend(instruction.off.to_bytes(4, byteorder="little", signed=True))
+
+
 def encode_shl_reg_imm(
     instruction: ShlRegImm, bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
@@ -52,6 +106,30 @@ def encode_shl_reg_imm(
     opcode = 0xC1
     modrm = 0xE0 | (4 << 3) | (instruction.dst & 0x07)
     imm = instruction.imm.to_bytes(1, byteorder="little", signed=False)
+
+    bytecode.extend([rex, opcode, modrm, *imm])
+
+
+def encode_sub_reg_imm(
+    instruction: SubRegImm, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    # REX.W + 81 /5 id
+    rex = 0x40 | 0x08 | (0x01 if instruction.dst >= 8 else 0x00)
+    opcode = 0x81
+    modrm = 0xE0 | (5 << 3) | (instruction.dst & 0x07)
+    imm = instruction.imm.to_bytes(4, byteorder="little", signed=False)
+
+    bytecode.extend([rex, opcode, modrm, *imm])
+
+
+def encode_add_reg_imm(
+    instruction: AddRegImm, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    # REX.W + 81 /0 id
+    rex = 0x40 | 0x08 | (0x01 if instruction.dst >= 8 else 0x00)
+    opcode = 0x81
+    modrm = 0xC0 | (0 << 3) | (instruction.dst & 0x07)
+    imm = instruction.imm.to_bytes(4, byteorder="little", signed=False)
 
     bytecode.extend([rex, opcode, modrm, *imm])
 
@@ -114,7 +192,11 @@ class Encoder(Protocol):
 
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
     MovRegImm: encode_mov_reg_imm,
+    MovOffReg: encode_mov_off_reg,
+    MovRegOff: encode_mov_reg_off,
     ShlRegImm: encode_shl_reg_imm,
+    SubRegImm: encode_sub_reg_imm,
+    AddRegImm: encode_add_reg_imm,
     SysCall: encode_syscall,
     Return: encode_return,
     Label: encode_label,
