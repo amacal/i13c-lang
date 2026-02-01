@@ -146,12 +146,15 @@ def build_resolution_by_callsite(
         if len(snippet.slots) != len(callsite.arguments):
             return Err(b"wrong-arity")
 
+        # find environment at callsite
+        environment = environments.get(callsite.id)
+
         bindings = [
             CallSiteBinding.slot(slot.type, argument, slot)
             for argument, slot in zip(callsite.arguments, snippet.slots)
         ]
 
-        return match_bindings({}, bindings)
+        return match_bindings(environment.variables, bindings)
 
     def match_callable(
         callsite: CallSite, callable: Callable

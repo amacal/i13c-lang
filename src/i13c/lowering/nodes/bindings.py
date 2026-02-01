@@ -22,22 +22,34 @@ def lower_snippet_bindings(
         # because this is a snippet callsite
         assert isinstance(binding.target, Slot)
 
-        # we know all slots are literals for now
-        assert binding.argument.kind == b"literal"
-        assert isinstance(binding.argument.target, LiteralId)
+        # we know slots may be literals
+        if binding.argument.kind == b"literal":
+            assert isinstance(binding.argument.target, LiteralId)
 
-        literal = ctx.graph.basic.literals.get(binding.argument.target)
+            literal = ctx.graph.basic.literals.get(binding.argument.target)
 
-        # we know all literals are hex for now
-        assert literal.kind == b"hex"
-        assert isinstance(literal.target, Hex)
+            # we know all literals are hex for now
+            assert literal.kind == b"hex"
+            assert isinstance(literal.target, Hex)
 
-        # extract slot binding
-        bind = binding.target.bind
-        imm = literal.target.value
+            # extract slot binding
+            bind = binding.target.bind
+            imm = literal.target.value
 
-        # emit move instruction for binding
-        out.append(MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm))
+            # emit move instruction for binding
+            out.append(MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm))
+
+        # or slots may be expressions
+        if binding.argument.kind == b"expression":
+            assert isinstance(binding.argument.target, ExpressionId)
+
+            # emit flow binding to be patched later
+            out.append(
+                BindingFlow(
+                    dst=IR_REGISTER_MAP[binding.target.bind.name],
+                    src=binding.argument.target,
+                )
+            )
 
     return out
 
@@ -51,7 +63,7 @@ def lower_function_bindings(
         # because this is a function callsite
         assert isinstance(binding.target, Parameter)
 
-        # we know all parameters are literals for now
+        # we know parameters may be literals
         if binding.argument.kind == b"literal":
             # satisfy type checker
             assert isinstance(binding.argument.target, LiteralId)
@@ -69,12 +81,18 @@ def lower_function_bindings(
             # emit move instruction for binding
             out.append(MovRegImm(dst=idx, imm=imm))
 
+        # or parameters may be expressions
         if binding.argument.kind == b"expression":
             # satisfy type checker
             assert isinstance(binding.argument.target, ExpressionId)
 
             # emit flow binding to be patched later
-            out.append(BindingFlow(dst=idx, src=binding.argument.target))
+            out.append(
+                BindingFlow(
+                    dst=idx,
+                    src=binding.argument.target,
+                )
+            )
 
     return out
 
