@@ -10,6 +10,7 @@ from i13c.lowering.typing.instructions import (
     MovOffReg,
     MovRegImm,
     MovRegOff,
+    MovRegReg,
     Return,
     ShlRegImm,
     SubRegImm,
@@ -67,6 +68,40 @@ def encode_mov_reg_imm(
     )
 
     bytecode.extend([rex.to_byte(), opcode.to_byte(), *imm64.to_bytes()])
+
+
+def encode_mov_reg_reg(
+    instruction: MovRegReg, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+
+    # chosen encoding: REX.W + 89 /r
+    # encoded as: [rex] [opcode] [modrm]
+
+    modrm = ModRM(
+        mod=0b11,
+        reg=instruction.src,
+        rm=instruction.dst,
+    )
+
+    rex = REX(
+        w=True,
+        r=modrm.rex_r(),
+        x=False,
+        b=modrm.rex_b(),
+    )
+
+    opcode = Opcode(
+        hex=0x89,
+        reg=None,
+    )
+
+    bytecode.extend(
+        [
+            rex.to_byte(),
+            opcode.to_byte(),
+            modrm.to_byte(),
+        ]
+    )
 
 
 def encode_mov_off_reg(
@@ -346,6 +381,7 @@ class Encoder(Protocol):
 
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
     MovRegImm: encode_mov_reg_imm,
+    MovRegReg: encode_mov_reg_reg,
     MovOffReg: encode_mov_off_reg,
     MovRegOff: encode_mov_reg_off,
     ShlRegImm: encode_shl_reg_imm,
