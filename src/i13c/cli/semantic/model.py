@@ -42,6 +42,7 @@ ONE2ONE: Dict[str, OneToOneFeature] = {
     "callsites": OneToOneFeature(list=lambda model: model.basic.callsites),
     "functions": OneToOneFeature(list=lambda model: model.basic.functions),
     "instructions": OneToOneFeature(list=lambda model: model.basic.instructions),
+    "expressions": OneToOneFeature(list=lambda model: model.basic.expressions),
     "literals": OneToOneFeature(list=lambda model: model.basic.literals),
     "operands": OneToOneFeature(list=lambda model: model.basic.operands),
     "parameters": OneToOneFeature(list=lambda model: model.basic.parameters),

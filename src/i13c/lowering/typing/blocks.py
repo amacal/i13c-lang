@@ -15,6 +15,7 @@ BlockInstruction = Union[Instruction, Abstracts, Flow]
 
 @dataclass
 class Registers:
+    consumed: Set[int]
     generated: Set[int]
     clobbered: Set[int]
 
@@ -24,6 +25,7 @@ class Registers:
     @staticmethod
     def empty() -> Registers:
         return Registers(
+            consumed=set(),
             generated=set(),
             clobbered=set(),
             inputs=set(),
@@ -33,6 +35,7 @@ class Registers:
     @staticmethod
     def provides(registers: Set[int]) -> Registers:
         return Registers(
+            consumed=set(),
             generated=set(),
             clobbered=set(),
             inputs=registers,
@@ -42,6 +45,7 @@ class Registers:
     @staticmethod
     def clobbers(registers: Set[int]) -> Registers:
         return Registers(
+            consumed=set(),
             generated=set(),
             clobbered=registers,
             inputs=set(),

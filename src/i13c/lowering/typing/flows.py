@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Union
 
+from i13c.sem.typing.entities.expressions import ExpressionId
 from i13c.sem.typing.entities.functions import FunctionId
 
 
@@ -15,6 +16,12 @@ class BlockId:
 @dataclass(kw_only=True)
 class CallFlow:
     target: FunctionId
+
+
+@dataclass(kw_only=True)
+class BindingFlow:
+    dst: int
+    src: ExpressionId
 
 
 @dataclass(kw_only=True)
@@ -37,4 +44,6 @@ class RestoreFlow:
     pass
 
 
-Flow = Union[CallFlow, PrologueFlow, EpilogueFlow, PreserveFlow, RestoreFlow]
+Flow = Union[
+    CallFlow, BindingFlow, PrologueFlow, EpilogueFlow, PreserveFlow, RestoreFlow
+]

@@ -234,7 +234,7 @@ def encode_sub_reg_imm(
     imm32 = Immediate(
         value=instruction.imm,
         width=4,
-        signed=False,
+        signed=True,
     )
 
     bytecode.extend(
@@ -275,7 +275,7 @@ def encode_add_reg_imm(
     imm32 = Immediate(
         value=instruction.imm,
         width=4,
-        signed=False,
+        signed=True,
     )
 
     bytecode.extend(

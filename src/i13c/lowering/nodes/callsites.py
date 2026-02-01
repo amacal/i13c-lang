@@ -1,7 +1,7 @@
 from typing import List, Set, Tuple
 
 from i13c.lowering.graph import LowLevelContext
-from i13c.lowering.nodes.bindings import lower_callsite_bindings
+from i13c.lowering.nodes.bindings import lower_function_bindings, lower_snippet_bindings
 from i13c.lowering.nodes.instances import lower_instance
 from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
@@ -34,7 +34,7 @@ def lower_callsite(
         snippet = ctx.graph.basic.snippets.get(instance.target)
 
         # append callsite specific bindings
-        instructions.extend(lower_callsite_bindings(ctx, instance.bindings))
+        instructions.extend(lower_snippet_bindings(ctx, instance.bindings))
 
         # append emitted instructions
         instructions.extend(lower_instance(ctx, instance))
@@ -46,8 +46,11 @@ def lower_callsite(
 
     else:
 
+        # extract bindings
+        bindings = resolution.accepted[0].bindings
+
         # append callsite specific bindings
-        instructions.extend(lower_callsite_bindings(ctx, []))
+        instructions.extend(lower_function_bindings(ctx, bindings))
 
         # extract successfully resolved target
         target = resolution.accepted[0].callable.target

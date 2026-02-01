@@ -11,6 +11,12 @@ class MovRegImm:
 
 
 @dataclass(kw_only=True)
+class MovRegReg:
+    dst: int
+    src: int
+
+
+@dataclass(kw_only=True)
 class MovOffReg:
     dst: int
     src: int
@@ -69,6 +75,7 @@ class Jump:
 
 Instruction = Union[
     MovRegImm,
+    MovRegReg,
     MovOffReg,
     MovRegOff,
     ShlRegImm,

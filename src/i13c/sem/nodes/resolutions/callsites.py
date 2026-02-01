@@ -2,7 +2,7 @@ from typing import Dict, Iterable, List, Protocol, Tuple
 
 from i13c.core.mapping import OneToOne
 from i13c.res import Err, Ok, Result
-from i13c.sem.core import Type
+from i13c.sem.core import Identifier, Type
 from i13c.sem.infra import Configuration
 from i13c.sem.typing.entities.callables import Callable
 from i13c.sem.typing.entities.callsites import Argument, CallSite, CallSiteId
@@ -94,7 +94,7 @@ def build_resolution_by_callsite(
     resolutions: Dict[CallSiteId, CallSiteResolution] = {}
 
     def match_bindings(
-        environment: Environment,
+        environment: Dict[Identifier, VariableId],
         bindings: Iterable[CallSiteBinding],
     ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
         for binding in bindings:
@@ -106,7 +106,7 @@ def build_resolution_by_callsite(
                 case Argument(kind=b"expression", target=ExpressionId() as eid):
                     # first extract expression and variable from environment
                     expression = expressions.get(eid)
-                    variable = environment.variables.get(expression.ident)
+                    variable = environment.get(expression.ident)
 
                     # check variable existence
                     if variable is None:
@@ -138,7 +138,7 @@ def build_resolution_by_callsite(
             for argument, parameter in zip(callsite.arguments, params)
         ]
 
-        return match_bindings(environment, bindings)
+        return match_bindings(environment.variables, bindings)
 
     def match_snippet(
         callsite: CallSite, snippet: Snippet
@@ -151,7 +151,7 @@ def build_resolution_by_callsite(
             for argument, slot in zip(callsite.arguments, snippet.slots)
         ]
 
-        return match_bindings(Environment.empty(), bindings)
+        return match_bindings({}, bindings)
 
     def match_callable(
         callsite: CallSite, callable: Callable

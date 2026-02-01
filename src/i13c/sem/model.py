@@ -7,6 +7,7 @@ from i13c.sem.dag import configure_semantic_model
 from i13c.sem.syntax import SyntaxGraph
 from i13c.sem.typing.entities.callables import CallableTarget
 from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
+from i13c.sem.typing.entities.expressions import Expression, ExpressionId
 from i13c.sem.typing.entities.functions import Function, FunctionId
 from i13c.sem.typing.entities.instructions import Instruction, InstructionId
 from i13c.sem.typing.entities.literals import Literal, LiteralId
@@ -17,6 +18,7 @@ from i13c.sem.typing.indices.callgraphs import CallPair
 from i13c.sem.typing.indices.controlflows import FlowGraph, FlowNode
 from i13c.sem.typing.indices.dataflows import DataFlow
 from i13c.sem.typing.indices.entrypoints import EntryPoint
+from i13c.sem.typing.indices.environments import Environment
 from i13c.sem.typing.indices.instances import Instance
 from i13c.sem.typing.indices.terminalities import Terminality
 from i13c.sem.typing.indices.variables import Variable, VariableId
@@ -29,6 +31,7 @@ class BasicNodes:
     literals: OneToOne[LiteralId, Literal]
     operands: OneToOne[OperandId, Operand]
     instructions: OneToOne[InstructionId, Instruction]
+    expressions: OneToOne[ExpressionId, Expression]
     snippets: OneToOne[SnippetId, Snippet]
     functions: OneToOne[FunctionId, Function]
     callsites: OneToOne[CallSiteId, CallSite]
@@ -45,6 +48,7 @@ class IndexEdges:
     dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
     instance_by_callsite: OneToOne[CallSiteId, Instance]
     variables_by_parameter: OneToOne[ParameterId, VariableId]
+    environment_by_flownode: OneToOne[FlowNode, Environment]
 
 
 @dataclass
@@ -81,6 +85,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
             literals=artifacts["entities/literals"],
             operands=artifacts["entities/operands"],
             instructions=artifacts["entities/instructions"],
+            expressions=artifacts["entities/expressions"],
             snippets=artifacts["entities/snippets"],
             functions=artifacts["entities/functions"],
             callsites=artifacts["entities/callsites"],
@@ -95,6 +100,7 @@ def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
             instance_by_callsite=artifacts["indices/instance-by-callsite"],
             dataflow_by_flownode=artifacts["indices/dataflow-by-flownode"],
             variables_by_parameter=artifacts["indices/variables-by-parameter"],
+            environment_by_flownode=artifacts["indices/environment-by-flownode"],
         ),
         callgraph=CallGraph(
             calls_by_caller=artifacts["indices/calls-by-caller"],

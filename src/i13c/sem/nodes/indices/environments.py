@@ -42,14 +42,14 @@ def build_environments(
 
         # collect intitial environment
         env = collect_entry(variables, dataflows, flowgraph.entry)
-        environments[flowgraph.entry] = Environment(variables=env)
+        environments[flowgraph.entry] = Environment(owner=fid, variables=env)
 
         while node != flowgraph.exit:
             for successor in flowgraph.forward.get(node, [flowgraph.exit]):
                 node = successor
 
             # just clone current environment for now
-            environments[node] = Environment(variables=dict(env))
+            environments[node] = Environment(owner=fid, variables=dict(env))
 
     return OneToOne[FlowNode, Environment].instance(environments)
 

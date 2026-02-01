@@ -1,5 +1,6 @@
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.graph import LowLevelContext, LowLevelGraph
+from i13c.lowering.nodes.bindings import patch_bindings
 from i13c.lowering.nodes.blocks import emit_all_blocks, patch_registers
 from i13c.lowering.nodes.callsites import patch_all_callsites
 from i13c.lowering.nodes.functions import lower_active_functions
@@ -17,6 +18,10 @@ def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:
     # lower all active functions in any order
     # also obtain entrypoint of the program
     entry = lower_active_functions(ctx)
+
+    # some bindings are still unresolved
+    # we need to lower expressions into instructions
+    patch_bindings(ctx)
 
     # some callsites still contain not resolved calls
     # we need to map FunctionId to BlockId
