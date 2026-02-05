@@ -1,3 +1,7 @@
+.PHONY: install
+install:
+	@pipx install poetry==2.3.1
+
 .PHONY: deps
 deps:
 	@poetry install --no-root
