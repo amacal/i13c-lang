@@ -9,5 +9,4 @@ RUN cd /opt && make install
 USER vscode
 RUN poetry completions bash >> ~/.bash_completion
 
-ENV PYTHONPATH="/workspaces/i13c-lang/src"
 ENV PATH="$PATH:/workspaces/i13c-lang/scripts"
