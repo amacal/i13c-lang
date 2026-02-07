@@ -23,11 +23,11 @@ def build_operands(
     for nid, operand in graph.operands.items():
         match operand:
             case ast.Register() as reg:
-                target = Operand.register(name=reg.name)
+                target = Operand.register(operand.ref, reg.name)
             case ast.Immediate() as imm:
-                target = Operand.immediate(value=imm.value)
+                target = Operand.immediate(operand.ref, imm.value)
             case ast.Reference() as ref:
-                target = Operand.reference(name=ref.name)
+                target = Operand.reference(operand.ref, ref.name)
 
         # derive operand ID from globally unique node ID
         operand_id = OperandId(value=nid.value)

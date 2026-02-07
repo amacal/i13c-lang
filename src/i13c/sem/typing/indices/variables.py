@@ -4,6 +4,7 @@ from typing import Union
 
 from i13c.sem.core import Identifier, Type
 from i13c.sem.typing.entities.parameters import ParameterId
+from i13c.src import Span
 
 VariableKind = Kind[b"parameter"]
 VariableSource = Union[ParameterId]
@@ -22,6 +23,7 @@ class VariableId:
 
 @dataclass(kw_only=True)
 class Variable:
+    ref: Span
     kind: VariableKind
     source: VariableSource
 

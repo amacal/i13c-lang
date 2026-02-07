@@ -7,6 +7,9 @@ class Span:
     offset: int
     length: int
 
+    def __str__(self) -> str:
+        return f"{self.offset}:{self.offset+self.length}"
+
 
 class SpanLike(Protocol):
     offset: int

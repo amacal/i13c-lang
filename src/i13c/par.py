@@ -372,12 +372,14 @@ def parse_clobbers(state: ParsingState) -> List[ast.Register]:
 
     # at least one register is expected
     clobber = state.expect(lex.TOKEN_REG)
-    clobbers.append(ast.Register(name=state.extract(clobber)))
+    clobbers.append(ast.Register(ref=state.span(clobber), name=state.extract(clobber)))
 
     # a comma suggests next clobber
     while state.accept(lex.TOKEN_COMMA):
         clobber = state.expect(lex.TOKEN_REG)
-        clobbers.append(ast.Register(name=state.extract(clobber)))
+        clobbers.append(
+            ast.Register(ref=state.span(clobber), name=state.extract(clobber))
+        )
 
     return clobbers
 
@@ -471,12 +473,12 @@ def parse_operand(state: ParsingState) -> ast.Operand:
 
     # register has to provide its name
     if token.code == lex.TOKEN_REG:
-        return ast.Register(name=state.extract(token))
+        return ast.Register(ref=state.span(token), name=state.extract(token))
 
     # immediate has to provide its decimal value
     elif token.code == lex.TOKEN_HEX:
-        return ast.Immediate(value=int(state.extract(token), 16))
+        return ast.Immediate(ref=state.span(token), value=int(state.extract(token), 16))
 
     # reference has to provide its identifier
     else:
-        return ast.Reference(name=state.extract(token))
+        return ast.Reference(ref=state.span(token), name=state.extract(token))

@@ -17,7 +17,7 @@ lint:
 
 .PHONY: test
 test:
-	@poetry run pytest -vo python_files='*.py' -o python_functions="can_*" src/tests
+	@poetry run pytest -vvo python_files='*.py' -o python_functions="can_*" src/tests
 
 .PHONY: asm
 asm:

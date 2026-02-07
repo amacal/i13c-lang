@@ -35,6 +35,9 @@ class Binding:
 class Mnemonic:
     name: bytes
 
+    def __str__(self) -> str:
+        return self.name.decode()
+
 
 @dataclass(kw_only=True, frozen=True)
 class InstructionId:

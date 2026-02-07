@@ -39,6 +39,7 @@ def build_variables_by_parameters(
 
             # create the variable
             variables[vid] = Variable(
+                ref=parameter.ref,
                 source=pid,
                 type=parameter.type,
                 kind=b"parameter",

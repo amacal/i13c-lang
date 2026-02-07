@@ -121,7 +121,7 @@ def rewrite_operand(
 
         # register bindings can rewrite to register operands
         if binding.target.bind.via_register():
-            return Operand.register(name=binding.target.bind.name)
+            return Operand.register(None, binding.target.bind.name)
 
         # only immediate bindings can continue
         if not binding.target.bind.via_immediate():
@@ -145,7 +145,7 @@ def rewrite_operand(
         assert isinstance(literal.target, Hex)
 
         # construct immediate operand from literal value
-        return Operand.immediate(value=literal.target.value)
+        return Operand.immediate(None, literal.target.value)
 
     # failed
     return None

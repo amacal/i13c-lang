@@ -30,16 +30,19 @@ class Range:
 
 @dataclass(kw_only=True, eq=False)
 class Register:
+    ref: src.Span
     name: bytes
 
 
 @dataclass(kw_only=True, eq=False)
 class Immediate:
+    ref: src.Span
     value: int
 
 
 @dataclass(kw_only=True, eq=False)
 class Reference:
+    ref: src.Span
     name: bytes
 
 
