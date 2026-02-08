@@ -1,7 +1,7 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 
 
 class CallSiteListExtractor:

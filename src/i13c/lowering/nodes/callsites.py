@@ -7,8 +7,8 @@ from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import CallFlow, PreserveFlow, RestoreFlow
 from i13c.lowering.typing.instructions import Call
-from i13c.sem.typing.entities.callsites import CallSiteId
-from i13c.sem.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.snippets import SnippetId
 
 
 def lower_callsite(

@@ -5,13 +5,13 @@ from dataclasses import asdict
 
 import click
 
-from i13c import elf, lex, par, sem, src
+from i13c import elf, lex, par, semantic, src
 from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap
 from i13c.cli.semantic import attach
 from i13c.encoding import encode
 from i13c.lowering.build import build_low_level_graph
-from i13c.sem.model import build_semantic_graph
-from i13c.sem.syntax import build_syntax_graph
+from i13c.semantic.model import build_semantic_graph
+from i13c.semantic.syntax import build_syntax_graph
 
 
 @click.group()
@@ -62,7 +62,7 @@ def llg_command(path: str) -> None:
     graph = build_syntax_graph(program)
     model = build_semantic_graph(graph)
 
-    if diagnostics := sem.validate(model, program):
+    if diagnostics := semantic.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
@@ -97,7 +97,7 @@ def linear_command(path: str) -> None:
     graph = build_syntax_graph(program)
     model = build_semantic_graph(graph)
 
-    if diagnostics := sem.validate(model, program):
+    if diagnostics := semantic.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
@@ -120,7 +120,7 @@ def bin_command(path: str) -> None:
     graph = build_syntax_graph(program)
     model = build_semantic_graph(graph)
 
-    if diagnostics := sem.validate(model, program):
+    if diagnostics := semantic.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
@@ -143,7 +143,7 @@ def elf_command(path: str) -> None:
     graph = build_syntax_graph(program)
     model = build_semantic_graph(graph)
 
-    if diagnostics := sem.validate(model, program):
+    if diagnostics := semantic.validate(model, program):
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)

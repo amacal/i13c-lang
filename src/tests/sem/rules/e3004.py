@@ -1,6 +1,6 @@
-from i13c import err, sem
-from i13c.sem.model import build_semantic_graph
-from i13c.sem.syntax import build_syntax_graph
+from i13c import err, semantic
+from i13c.semantic.model import build_semantic_graph
+from i13c.semantic.syntax import build_syntax_graph
 from tests.sem import prepare_program
 
 
@@ -12,7 +12,7 @@ def can_detect_duplicated_slot_names():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3004.validate_duplicated_parameter_names(model)
+    diagnostics = semantic.e3004.validate_duplicated_parameter_names(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -28,7 +28,7 @@ def can_detect_duplicated_parameter_names():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3004.validate_duplicated_parameter_names(model)
+    diagnostics = semantic.e3004.validate_duplicated_parameter_names(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

@@ -1,6 +1,6 @@
 from i13c import ast
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.functions import Function, FunctionId
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.functions import Function, FunctionId
 from tests.sem import prepare_program
 
 

@@ -4,8 +4,8 @@ from i13c.diag import Diagnostic
 from i13c.lex import tokenize
 from i13c.par import parse
 from i13c.res import Err, Ok
-from i13c.sem.model import SemanticGraph, build_semantic_graph
-from i13c.sem.syntax import build_syntax_graph
+from i13c.semantic.model import SemanticGraph, build_semantic_graph
+from i13c.semantic.syntax import build_syntax_graph
 from i13c.src import open_text
 
 

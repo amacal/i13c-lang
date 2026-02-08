@@ -1,8 +1,8 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.callsites import CallSiteId
-from i13c.sem.typing.entities.functions import FunctionId
-from i13c.sem.typing.entities.snippets import SnippetId
-from i13c.sem.typing.resolutions.callsites import CallSiteResolution
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from tests.sem import prepare_program
 
 

@@ -1,6 +1,6 @@
-from i13c import err, sem
-from i13c.sem.model import build_semantic_graph
-from i13c.sem.syntax import build_syntax_graph
+from i13c import err, semantic
+from i13c.semantic.model import build_semantic_graph
+from i13c.semantic.syntax import build_syntax_graph
 from tests.sem import prepare_program
 
 
@@ -11,7 +11,7 @@ def can_detect_overloaded_symbol_by_arity():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3007.validate_called_symbol_resolved(model)
+    diagnostics = semantic.e3007.validate_called_symbol_resolved(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -27,7 +27,7 @@ def can_detect_overloaded_symbol_by_range():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3007.validate_called_symbol_resolved(model)
+    diagnostics = semantic.e3007.validate_called_symbol_resolved(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

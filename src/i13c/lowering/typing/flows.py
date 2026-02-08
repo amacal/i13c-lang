@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Union
 
-from i13c.sem.typing.entities.expressions import ExpressionId
-from i13c.sem.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.expressions import ExpressionId
+from i13c.semantic.typing.entities.functions import FunctionId
 
 
 @dataclass(kw_only=True, frozen=True)

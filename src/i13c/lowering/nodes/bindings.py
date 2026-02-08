@@ -5,12 +5,12 @@ from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import BindingFlow
 from i13c.lowering.typing.instructions import MovRegImm, MovRegReg
-from i13c.sem.typing.entities.callsites import CallSiteId
-from i13c.sem.typing.entities.expressions import ExpressionId
-from i13c.sem.typing.entities.literals import Hex, LiteralId
-from i13c.sem.typing.entities.parameters import Parameter
-from i13c.sem.typing.entities.snippets import Slot
-from i13c.sem.typing.resolutions.callsites import CallSiteBinding
+from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.expressions import ExpressionId
+from i13c.semantic.typing.entities.literals import Hex, LiteralId
+from i13c.semantic.typing.entities.parameters import Parameter
+from i13c.semantic.typing.entities.snippets import Slot
+from i13c.semantic.typing.resolutions.callsites import CallSiteBinding
 
 
 def lower_snippet_bindings(

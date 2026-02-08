@@ -1,4 +1,4 @@
-from i13c.sem import core
+from i13c.semantic import core
 
 
 def can_derive_width_respects_boundaries():

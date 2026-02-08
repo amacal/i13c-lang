@@ -1,7 +1,7 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.instructions import InstructionId
-from i13c.sem.typing.entities.operands import Immediate, Operand, Register
-from i13c.sem.typing.entities.snippets import Snippet, SnippetId
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.instructions import InstructionId
+from i13c.semantic.typing.entities.operands import Immediate, Operand, Register
+from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from tests.sem import prepare_program
 
 

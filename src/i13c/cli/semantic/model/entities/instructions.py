@@ -1,7 +1,7 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.entities.instructions import Instruction, InstructionId
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 
 
 class InstructionListExtractor:

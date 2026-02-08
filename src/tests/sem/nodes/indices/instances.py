@@ -1,7 +1,7 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.callsites import CallSiteId
-from i13c.sem.typing.entities.operands import Immediate, Register
-from i13c.sem.typing.indices.instances import Instance
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.operands import Immediate, Register
+from i13c.semantic.typing.indices.instances import Instance
 from tests.sem import prepare_program
 
 

@@ -5,7 +5,7 @@ import click
 
 from i13c import lex, par, src
 from i13c.cli import BytesAsTextEncoder, unwrap
-from i13c.sem.syntax import build_syntax_graph
+from i13c.semantic.syntax import build_syntax_graph
 
 
 def attach(target: click.Group) -> List[click.Command]:

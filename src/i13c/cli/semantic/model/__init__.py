@@ -35,8 +35,8 @@ from i13c.cli.semantic.model.indices.terminalities import TerminalityListExtract
 from i13c.cli.semantic.model.indices.variables import ParameterVariablesListExtractor
 from i13c.core.mapping import Descriptive, Identified
 from i13c.core.table import Table, draw_table
-from i13c.sem.model import SemanticGraph, build_semantic_graph
-from i13c.sem.syntax import build_syntax_graph
+from i13c.semantic.model import SemanticGraph, build_semantic_graph
+from i13c.semantic.syntax import build_syntax_graph
 
 ListItem = TypeVar("ListItem")
 

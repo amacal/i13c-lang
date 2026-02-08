@@ -1,10 +1,10 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
-from i13c.sem.typing.entities.instructions import Instruction, InstructionId
-from i13c.sem.typing.resolutions.callsites import CallSiteResolution
-from i13c.sem.typing.resolutions.instructions import InstructionResolution
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
+from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
+from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
+from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 
 
 class InstructionResolutionListExtractor:

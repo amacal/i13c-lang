@@ -1,8 +1,8 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.entities.functions import Function, FunctionId
-from i13c.sem.typing.indices.controlflows import FlowGraph
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.functions import Function, FunctionId
+from i13c.semantic.typing.indices.controlflows import FlowGraph
 
 
 class ControlFlowListExtractor:

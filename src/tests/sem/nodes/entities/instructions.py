@@ -1,5 +1,5 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.instructions import Instruction, InstructionId
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from tests.sem import prepare_program
 
 

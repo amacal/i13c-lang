@@ -1,6 +1,6 @@
-from i13c import err, sem
-from i13c.sem.model import build_semantic_graph
-from i13c.sem.syntax import build_syntax_graph
+from i13c import err, semantic
+from i13c.semantic.model import build_semantic_graph
+from i13c.semantic.syntax import build_syntax_graph
 from tests.sem import prepare_program
 
 
@@ -12,7 +12,7 @@ def can_accept_operands_arity_of_syscall():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
+    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
 
     assert len(diagnostics) == 0
 
@@ -25,7 +25,7 @@ def can_accept_operands_arity_of_mov():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
+    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
 
     assert len(diagnostics) == 0
 
@@ -38,7 +38,7 @@ def can_accept_shl_reg64_imm8_with_0x01():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
+    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
 
     assert len(diagnostics) == 0
 
@@ -51,7 +51,7 @@ def can_accept_shl_reg64_imm8_with_0x41():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
+    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
 
     assert len(diagnostics) == 0
 
@@ -64,7 +64,7 @@ def can_detect_invalid_instruction():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3000.validate_assembly_mnemonic(model)
+    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

@@ -8,7 +8,7 @@ from i13c.lowering.nodes.stacks import patch_stack_frames
 from i13c.lowering.typing.blocks import Block
 from i13c.lowering.typing.flows import BlockId
 from i13c.lowering.typing.instructions import Instruction
-from i13c.sem.model import SemanticGraph
+from i13c.semantic.model import SemanticGraph
 
 
 def build_low_level_graph(graph: SemanticGraph) -> LowLevelGraph:

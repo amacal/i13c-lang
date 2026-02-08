@@ -11,9 +11,9 @@ from i13c.lowering.typing.terminators import (
     JumpTerminator,
     TrapTerminator,
 )
-from i13c.sem.typing.entities.callsites import CallSiteId
-from i13c.sem.typing.entities.functions import FunctionId
-from i13c.sem.typing.indices.controlflows import (
+from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.indices.controlflows import (
     FlowEntry,
     FlowExit,
     FlowGraph,

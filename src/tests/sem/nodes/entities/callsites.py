@@ -1,6 +1,6 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.callsites import CallSite, CallSiteId
-from i13c.sem.typing.entities.literals import Hex, LiteralId
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
+from i13c.semantic.typing.entities.literals import Hex, LiteralId
 from tests.sem import prepare_program
 
 

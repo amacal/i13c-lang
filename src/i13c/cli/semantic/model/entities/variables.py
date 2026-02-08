@@ -1,7 +1,7 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.indices.variables import Variable, VariableId
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.indices.variables import Variable, VariableId
 
 
 class VariableListExtractor:

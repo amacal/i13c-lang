@@ -1,9 +1,9 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.entities.functions import Function, FunctionId
-from i13c.sem.typing.indices.controlflows import FlowNode
-from i13c.sem.typing.indices.dataflows import DataFlow
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.functions import Function, FunctionId
+from i13c.semantic.typing.indices.controlflows import FlowNode
+from i13c.semantic.typing.indices.dataflows import DataFlow
 
 
 class DataFlowListExtractor:

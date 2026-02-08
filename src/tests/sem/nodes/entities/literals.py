@@ -1,5 +1,5 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.literals import Hex, Literal, LiteralId
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
 from tests.sem import prepare_program
 
 

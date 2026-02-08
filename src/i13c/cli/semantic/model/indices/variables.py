@@ -1,8 +1,8 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.entities.parameters import Parameter, ParameterId
-from i13c.sem.typing.indices.variables import VariableId
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
+from i13c.semantic.typing.indices.variables import VariableId
 
 
 class ParameterVariablesListExtractor:

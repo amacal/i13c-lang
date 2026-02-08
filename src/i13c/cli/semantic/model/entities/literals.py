@@ -1,7 +1,7 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.sem.model import SemanticGraph
-from i13c.sem.typing.entities.literals import Literal, LiteralId
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.literals import Literal, LiteralId
 
 
 class LiteralListExtractor:

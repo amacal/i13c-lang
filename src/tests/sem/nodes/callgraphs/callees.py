@@ -1,6 +1,6 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.functions import FunctionId
-from i13c.sem.typing.entities.snippets import SnippetId
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.snippets import SnippetId
 from tests.sem import prepare_program
 
 

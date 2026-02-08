@@ -1,6 +1,6 @@
-from i13c import err, sem
-from i13c.sem.model import build_semantic_graph
-from i13c.sem.syntax import build_syntax_graph
+from i13c import err, semantic
+from i13c.semantic.model import build_semantic_graph
+from i13c.semantic.syntax import build_syntax_graph
 from tests.sem import prepare_program
 
 
@@ -12,7 +12,7 @@ def can_accept_default_snippet_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 0
 
@@ -25,7 +25,7 @@ def can_accept_default_function_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 0
 
@@ -38,7 +38,7 @@ def can_accept_custom_snippet_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 0
 
@@ -51,7 +51,7 @@ def can_accept_custom_function_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 0
 
@@ -64,7 +64,7 @@ def can_accept_equal_snippet_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 0
 
@@ -77,7 +77,7 @@ def can_accept_equal_function_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 0
 
@@ -90,7 +90,7 @@ def can_reject_invalid_snippet_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == err.ERROR_3001
@@ -105,7 +105,7 @@ def can_reject_invalid_function_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == err.ERROR_3001
@@ -120,7 +120,7 @@ def can_reject_invalid_snippet_ranges_out_of_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == err.ERROR_3001
@@ -135,7 +135,7 @@ def can_reject_invalid_function_ranges_out_of_type_ranges():
         """)
 
     model = build_semantic_graph(build_syntax_graph(program))
-    diagnostics = sem.e3001.validate_type_ranges(model)
+    diagnostics = semantic.e3001.validate_type_ranges(model)
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == err.ERROR_3001

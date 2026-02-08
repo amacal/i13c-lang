@@ -1,6 +1,6 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.operands import Immediate, Reference, Register
-from i13c.sem.typing.resolutions.instructions import OperandSpec
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.operands import Immediate, Reference, Register
+from i13c.semantic.typing.resolutions.instructions import OperandSpec
 from tests.sem import prepare_program
 
 

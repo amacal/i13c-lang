@@ -1,4 +1,4 @@
-from i13c.sem import model, syntax
+from i13c.semantic import model, syntax
 from tests.sem import prepare_program
 
 

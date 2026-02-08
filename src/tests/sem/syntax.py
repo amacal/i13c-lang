@@ -1,4 +1,4 @@
-from i13c.sem.syntax import NodesVisitor
+from i13c.semantic.syntax import NodesVisitor
 from tests.sem import prepare_program
 
 

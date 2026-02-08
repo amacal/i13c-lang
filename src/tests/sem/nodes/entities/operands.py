@@ -1,5 +1,5 @@
-from i13c.sem import model, syntax
-from i13c.sem.typing.entities.operands import (
+from i13c.semantic import model, syntax
+from i13c.semantic.typing.entities.operands import (
     Immediate,
     Operand,
     OperandId,
