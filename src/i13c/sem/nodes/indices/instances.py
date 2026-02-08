@@ -9,6 +9,7 @@ from i13c.sem.typing.entities.operands import Operand, OperandId, Reference
 from i13c.sem.typing.entities.snippets import Slot, Snippet, SnippetId
 from i13c.sem.typing.indices.instances import Instance
 from i13c.sem.typing.resolutions.callsites import CallSiteBinding, CallSiteResolution
+from i13c.src import Span
 
 
 def configure_instance_by_callsite() -> Configuration:
@@ -81,7 +82,7 @@ def build_instances(
 
                     # we need operand as reference, original bindings
                     # and all literals to attempt rewriting
-                    args = (operand.target, acceptance.bindings, literals)
+                    args = (operand.ref, operand.target, acceptance.bindings, literals)
 
                     # if operand can be rewritten, do so
                     if new_operand := rewrite_operand(*args):
@@ -97,6 +98,7 @@ def build_instances(
 
 
 def rewrite_operand(
+    span: Span,
     reference: Reference,
     bindings: List[CallSiteBinding],
     literals: OneToOne[LiteralId, Literal],
@@ -121,7 +123,7 @@ def rewrite_operand(
 
         # register bindings can rewrite to register operands
         if binding.target.bind.via_register():
-            return Operand.register(None, binding.target.bind.name)
+            return Operand.register(span, binding.target.bind.name)
 
         # only immediate bindings can continue
         if not binding.target.bind.via_immediate():
@@ -145,7 +147,7 @@ def rewrite_operand(
         assert isinstance(literal.target, Hex)
 
         # construct immediate operand from literal value
-        return Operand.immediate(None, literal.target.value)
+        return Operand.immediate(span, literal.target.value)
 
     # failed
     return None
