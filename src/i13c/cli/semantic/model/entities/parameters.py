@@ -19,10 +19,10 @@ class ParameterListExtractor:
         }
 
     @staticmethod
-    def rows(key: ParameterId, value: Parameter) -> Dict[str, str]:
+    def rows(entry: Tuple[ParameterId, Parameter]) -> Dict[str, str]:
         return {
-            "ref": str(value.ref),
-            "id": key.identify(1),
-            "name": str(value.ident),
-            "type": str(value.type),
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "name": str(entry[1].ident),
+            "type": str(entry[1].type),
         }

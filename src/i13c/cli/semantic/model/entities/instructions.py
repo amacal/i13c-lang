@@ -19,10 +19,10 @@ class InstructionListExtractor:
         }
 
     @staticmethod
-    def rows(key: InstructionId, value: Instruction) -> Dict[str, str]:
+    def rows(entry: Tuple[InstructionId, Instruction]) -> Dict[str, str]:
         return {
-            "ref": str(value.ref),
-            "id": key.identify(1),
-            "mnemonic": str(value.mnemonic),
-            "ops": str(len(value.operands)),
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "mnemonic": str(entry[1].mnemonic),
+            "ops": str(len(entry[1].operands)),
         }

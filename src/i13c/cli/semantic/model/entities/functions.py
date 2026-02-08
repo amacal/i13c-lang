@@ -20,11 +20,11 @@ class FunctionListExtractor:
         }
 
     @staticmethod
-    def rows(key: FunctionId, value: Function) -> Dict[str, str]:
+    def rows(entry: Tuple[FunctionId, Function]) -> Dict[str, str]:
         return {
-            "ref": str(value.ref),
-            "id": key.identify(1),
-            "name": str(value.identifier),
-            "params": str(len(value.parameters)),
-            "stmts": str(len(value.statements)),
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "name": str(entry[1].identifier),
+            "params": str(len(entry[1].parameters)),
+            "stmts": str(len(entry[1].statements)),
         }

@@ -21,12 +21,12 @@ class SnippetListExtractor:
         }
 
     @staticmethod
-    def rows(key: SnippetId, value: Snippet) -> Dict[str, str]:
+    def rows(entry: Tuple[SnippetId, Snippet]) -> Dict[str, str]:
         return {
-            "ref": str(value.ref),
-            "id": key.identify(1),
-            "name": str(value.identifier),
-            "slots": str(len(value.slots)),
-            "clbbrs": str(len(value.clobbers)),
-            "instrs": str(len(value.instructions)),
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "name": str(entry[1].identifier),
+            "slots": str(len(entry[1].slots)),
+            "clbbrs": str(len(entry[1].clobbers)),
+            "instrs": str(len(entry[1].instructions)),
         }

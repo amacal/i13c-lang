@@ -1,5 +1,5 @@
 from i13c.cli.semantic.model import draw_list
-from i13c.cli.semantic.model.snippets import SnippetListExtractor
+from i13c.cli.semantic.model.entities.snippets import SnippetListExtractor
 from i13c.sem.model import SemanticGraph
 from tests.cli.semantic.model import prepare_semantic_graph
 

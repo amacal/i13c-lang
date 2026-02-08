@@ -15,40 +15,48 @@ import click
 
 from i13c import lex, par, src
 from i13c.cli import unwrap
-from i13c.cli.semantic.model.callsites import CallSiteListExtractor
-from i13c.cli.semantic.model.expressions import ExpressionListExtractor
-from i13c.cli.semantic.model.functions import FunctionListExtractor
-from i13c.cli.semantic.model.instructions import InstructionListExtractor
-from i13c.cli.semantic.model.literals import LiteralListExtractor
-from i13c.cli.semantic.model.operands import OperandListExtractor
-from i13c.cli.semantic.model.parameters import ParameterListExtractor
-from i13c.cli.semantic.model.snippets import SnippetListExtractor
-from i13c.cli.semantic.model.variables import VariableListExtractor
+from i13c.cli.semantic.model.entities.callsites import CallSiteListExtractor
+from i13c.cli.semantic.model.entities.expressions import ExpressionListExtractor
+from i13c.cli.semantic.model.entities.functions import FunctionListExtractor
+from i13c.cli.semantic.model.entities.instructions import InstructionListExtractor
+from i13c.cli.semantic.model.entities.literals import LiteralListExtractor
+from i13c.cli.semantic.model.entities.operands import OperandListExtractor
+from i13c.cli.semantic.model.entities.parameters import ParameterListExtractor
+from i13c.cli.semantic.model.entities.snippets import SnippetListExtractor
+from i13c.cli.semantic.model.entities.variables import VariableListExtractor
+from i13c.cli.semantic.model.indices.controlflows import ControlFlowListExtractor
+from i13c.cli.semantic.model.indices.dataflows import DataFlowListExtractor
+from i13c.cli.semantic.model.indices.instances import InstanceListExtractor
+from i13c.cli.semantic.model.indices.resolutions import (
+    CallSiteResolutionListExtractor,
+    InstructionResolutionListExtractor,
+)
+from i13c.cli.semantic.model.indices.terminalities import TerminalityListExtractor
+from i13c.cli.semantic.model.indices.variables import ParameterVariablesListExtractor
 from i13c.core.mapping import Descriptive, Identified
 from i13c.core.table import Table, draw_table
 from i13c.sem.model import SemanticGraph, build_semantic_graph
 from i13c.sem.syntax import build_syntax_graph
 
-ListKey = TypeVar("ListKey")
-ListValue = TypeVar("ListValue")
+ListItem = TypeVar("ListItem")
 
 
-class AbstractListExtractor(Protocol[ListKey, ListValue]):
+class AbstractListExtractor(Protocol[ListItem]):
     @staticmethod
     def headers() -> Dict[str, str]: ...
 
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[Tuple[ListKey, ListValue]]: ...
+    def extract(graph: SemanticGraph) -> Iterable[ListItem]: ...
 
     @staticmethod
-    def rows(key: ListKey, value: ListValue) -> Dict[str, str]: ...
+    def rows(entry: ListItem) -> Dict[str, str]: ...
 
 
 def draw_list(
-    extractor: AbstractListExtractor[ListKey, ListValue], graph: SemanticGraph
+    extractor: AbstractListExtractor[ListItem], graph: SemanticGraph
 ) -> Table:
     entries = extractor.extract(graph)
-    rows = [extractor.rows(*entry) for entry in entries]
+    rows = [extractor.rows(entry) for entry in entries]
 
     return draw_table(extractor.headers(), rows)
 
@@ -81,61 +89,34 @@ class OneToOneFeature:
     show: Optional[Callable[[SemanticGraph], OneToOneLike[Identified, Showable]]] = None
 
 
-ONE2ONE: Dict[str, AbstractListExtractor[Any, Any]] = {
-    "functions": FunctionListExtractor,
-    "callsites": CallSiteListExtractor,
-    "expressions": ExpressionListExtractor,
-    "instructions": InstructionListExtractor,
-    "literals": LiteralListExtractor,
-    "operands": OperandListExtractor,
-    "parameters": ParameterListExtractor,
-    "snippets": SnippetListExtractor,
-    "variables": VariableListExtractor,
-    # "terminality-by-function": OneToOneFeature(
-    #     list=lambda model: model.indices.terminality_by_function
-    # ),
-    # "resolution-by-instruction": OneToOneFeature(
-    #     list=lambda model: model.indices.resolution_by_instruction
-    # ),
-    # "resolution-by-callsite": OneToOneFeature(
-    #     list=lambda model: model.indices.resolution_by_callsite
-    # ),
-    # "flowgraph-by-function": OneToOneFeature(
-    #     list=lambda model: model.indices.flowgraph_by_function,
-    #     show=lambda model: model.indices.flowgraph_by_function,
-    # ),
-    # "dataflow-by-flownode": OneToOneFeature(
-    #     list=lambda model: model.indices.dataflow_by_flownode
-    # ),
-    # "instance-by-callsite": OneToOneFeature(
-    #     list=lambda model: model.indices.instance_by_callsite
-    # ),
-    # "variables-by-parameter": OneToOneFeature(
-    #     list=lambda model: model.indices.variables_by_parameter
-    # ),
+ENTITIES: Dict[str, AbstractListExtractor[Any]] = {
+    "entities/functions": FunctionListExtractor,
+    "entities/callsites": CallSiteListExtractor,
+    "entities/expressions": ExpressionListExtractor,
+    "entities/instructions": InstructionListExtractor,
+    "entities/literals": LiteralListExtractor,
+    "entities/operands": OperandListExtractor,
+    "entities/parameters": ParameterListExtractor,
+    "entities/snippets": SnippetListExtractor,
+    "entities/variables": VariableListExtractor,
 }
 
-ONE2MANY: Dict[str, ExtractOneToMany] = {
-    "calls-by-caller": lambda model: model.callgraph.calls_by_caller,
-    "calls-by-callee": lambda model: model.callgraph.calls_by_callee,
+INDICES: Dict[str, AbstractListExtractor[Any]] = {
+    "indices/controlflow-by-function": ControlFlowListExtractor,
+    "indices/dataflow-by-flownode": DataFlowListExtractor,
+    "indices/instance-by-callsite": InstanceListExtractor,
+    "indices/resolution-by-callsite": CallSiteResolutionListExtractor,
+    "indices/resolution-by-instruction": InstructionResolutionListExtractor,
+    "indices/variables-by-parameter": ParameterVariablesListExtractor,
+    "indices/terminality-by-function": TerminalityListExtractor,
 }
-
-
-class ListOne2OneLike(Protocol):
-    def __call__(self, nodes: OneToOneLike[Identified, Descriptive]) -> None: ...
 
 
 def list_one2one_semantic(
-    extractor: AbstractListExtractor[Any, Any], model: SemanticGraph
+    extractor: AbstractListExtractor[Any], model: SemanticGraph
 ) -> None:
     for line in draw_list(extractor, model).entries:
         click.echo(line)
-
-
-def list_one2many_semantic(nodes: OneToManyLike[Identified, Descriptive]) -> None:
-    for id, node_list in nodes.items():
-        for node in node_list:
-            click.echo(f"{id.identify(2)} {node.describe()}")
 
 
 def show_one2one_semantic(
@@ -162,55 +143,19 @@ def load_model(path: str) -> SemanticGraph:
 
 
 def attach_one2one_commands(
-    target: click.Group, node: str, extractor: AbstractListExtractor[Any, Any]
+    target: click.Group, node: str, extractor: AbstractListExtractor[Any]
 ) -> List[click.Command]:
-    commands: List[click.Command] = []
 
     # introduce a sub-command group for each semantic mapping
     @target.group(node)
     def group() -> None:
         pass
-
-        # introduce a "list" command for each mapping
-        # if extractor.list is not None:
 
     @group.command("list")
     @click.argument("path", type=click.Path(exists=True))
     def list(path: str) -> None:
         # if extract.list is not None:
         list_one2one_semantic(extractor, load_model(path))
-
-        commands.append(list)
-
-    # # introduce a "show" command for each mapping
-    # if extract.show is not None:
-
-    #     @group.command("show")
-    #     @click.option("--node-id", type=int, required=True)
-    #     @click.argument("path", type=click.Path(exists=True))
-    #     def show(node_id: int, path: str) -> None:
-    #         if extract.show is not None:
-    #             show_one2one_semantic(extract.show(load_model(path)), node_id)
-
-    #     commands.append(show)
-
-    return commands
-
-
-def attach_one2many_commands(
-    target: click.Group, node: str, extract: ExtractOneToMany
-) -> List[click.Command]:
-
-    # introduce a sub-command group for each semantic mapping
-    @target.group(node)
-    def group() -> None:
-        pass
-
-    # introduce a "list" command for each mapping
-    @group.command("list")
-    @click.argument("path", type=click.Path(exists=True))
-    def list(path: str) -> None:
-        list_one2many_semantic(extract(load_model(path)))
 
     return [list]
 
@@ -222,10 +167,10 @@ def attach(target: click.Group) -> List[click.Command]:
     def model() -> None:
         pass
 
-    for key, extractor in ONE2ONE.items():
+    for key, extractor in ENTITIES.items():
         commands.extend(attach_one2one_commands(model, key, extractor))
 
-    for key, extract in ONE2MANY.items():
-        commands.extend(attach_one2many_commands(model, key, extract))
+    for key, extractor in INDICES.items():
+        commands.extend(attach_one2one_commands(model, key, extractor))
 
     return commands

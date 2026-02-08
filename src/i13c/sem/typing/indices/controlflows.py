@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional, Set, Union
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from i13c.sem.typing.entities.functions import Statement
 
@@ -36,6 +36,11 @@ class FlowGraph:
         nodes = set(self.forward.keys()) | set(values)
 
         return nodes
+
+    def edges(self) -> Iterable[Tuple[FlowNode, FlowNode]]:
+        for node, nexts in self.forward.items():
+            for next in nexts:
+                yield (node, next)
 
     def describe(self) -> str:
         # compute unique nodes

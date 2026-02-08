@@ -29,26 +29,34 @@ class OperandListExtractor:
         }
 
     @staticmethod
-    def rows(key: OperandId, value: Operand) -> Dict[str, str]:
+    def rows(entry: Tuple[OperandId, Operand]) -> Dict[str, str]:
         return {
-            "ref": str(value.ref),
-            "id": key.identify(1),
-            "kind": value.kind.decode(),
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "kind": entry[1].kind.decode(),
             "reg_name": (
-                value.target.name.decode() if isinstance(value.target, Register) else ""
+                entry[1].target.name.decode()
+                if isinstance(entry[1].target, Register)
+                else ""
             ),
             "reg_width": (
-                str(value.target.width) if isinstance(value.target, Register) else ""
+                str(entry[1].target.width)
+                if isinstance(entry[1].target, Register)
+                else ""
             ),
             "imm_value": (
-                str(value.target.value) if isinstance(value.target, Immediate) else ""
+                str(entry[1].target.value)
+                if isinstance(entry[1].target, Immediate)
+                else ""
             ),
             "imm_width": (
-                str(value.target.width) if isinstance(value.target, Immediate) else ""
+                str(entry[1].target.width)
+                if isinstance(entry[1].target, Immediate)
+                else ""
             ),
             "ref_name": (
-                value.target.name.decode()
-                if isinstance(value.target, Reference)
+                entry[1].target.name.decode()
+                if isinstance(entry[1].target, Reference)
                 else ""
             ),
         }

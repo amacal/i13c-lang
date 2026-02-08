@@ -19,10 +19,10 @@ class CallSiteListExtractor:
         }
 
     @staticmethod
-    def rows(key: CallSiteId, value: CallSite) -> Dict[str, str]:
+    def rows(entry: Tuple[CallSiteId, CallSite]) -> Dict[str, str]:
         return {
-            "ref": str(value.ref),
-            "id": key.identify(1),
-            "name": str(value.callee),
-            "args": str(len(value.arguments)),
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "name": str(entry[1].callee),
+            "args": str(len(entry[1].arguments)),
         }

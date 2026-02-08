@@ -20,11 +20,11 @@ class LiteralListExtractor:
         }
 
     @staticmethod
-    def rows(key: LiteralId, value: Literal) -> Dict[str, str]:
+    def rows(entry: Tuple[LiteralId, Literal]) -> Dict[str, str]:
         return {
-            "ref": str(value.ref),
-            "id": key.identify(1),
-            "kind": value.kind.decode(),
-            "hex-value": str(value.target.value),
-            "hex-width": str(value.target.width),
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "kind": entry[1].kind.decode(),
+            "hex-value": str(entry[1].target.value),
+            "hex-width": str(entry[1].target.width),
         }

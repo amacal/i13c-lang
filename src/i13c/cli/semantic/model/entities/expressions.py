@@ -18,9 +18,9 @@ class ExpressionListExtractor:
         }
 
     @staticmethod
-    def rows(key: ExpressionId, value: Expression) -> Dict[str, str]:
+    def rows(entry: Tuple[ExpressionId, Expression]) -> Dict[str, str]:
         return {
-            "ref": str(value.ref),
-            "id": key.identify(1),
-            "name": str(value.ident),
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "name": str(entry[1].ident),
         }
