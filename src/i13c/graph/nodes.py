@@ -1,7 +1,7 @@
 from i13c.ast import Program
 from i13c.core.dag import GraphGroup, evaluate
 from i13c.semantic.graph import configure_semantic_graph
-from i13c.semantic.model import SemanticGraph, build_semantic_graph
+from i13c.semantic.model import SemanticGraph
 from i13c.semantic.syntax import configure_syntax_graph
 
 
@@ -20,4 +20,4 @@ def run(program: Program) -> SemanticGraph:
         },
     )
 
-    return build_semantic_graph(artifacts)
+    return artifacts["semantic/graph"]

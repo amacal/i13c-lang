@@ -1,9 +1,18 @@
 from typing import Iterable, List, Protocol, Set
 
 from i13c import diag, err
+from i13c.core.dag import GraphNode
 from i13c.semantic.core import Identifier
 from i13c.semantic.model import SemanticGraph
 from i13c.src import Span
+
+
+def configure_e3006() -> GraphNode:
+    return GraphNode(
+        builder=validate_duplicated_function_names,
+        produces=("rules/e3006",),
+        requires=frozenset({("graph", "semantic/graph")}),
+    )
 
 
 class Callable(Protocol):

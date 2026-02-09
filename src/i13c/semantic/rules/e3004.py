@@ -1,7 +1,16 @@
 from typing import List, Set
 
 from i13c import diag, err
+from i13c.core.dag import GraphNode
 from i13c.semantic.model import SemanticGraph
+
+
+def configure_e3004() -> GraphNode:
+    return GraphNode(
+        builder=validate_duplicated_parameter_names,
+        produces=("rules/e3004",),
+        requires=frozenset({("graph", "semantic/graph")}),
+    )
 
 
 def validate_duplicated_parameter_names(

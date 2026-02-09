@@ -1,7 +1,16 @@
 from typing import List
 
 from i13c import diag, err
+from i13c.core.dag import GraphNode
 from i13c.semantic.model import SemanticGraph
+
+
+def configure_e3002() -> GraphNode:
+    return GraphNode(
+        builder=validate_assembly_operand_types,
+        produces=("rules/e3002",),
+        requires=frozenset({("graph", "semantic/graph")}),
+    )
 
 
 def validate_assembly_operand_types(graph: SemanticGraph) -> List[diag.Diagnostic]:

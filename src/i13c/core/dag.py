@@ -1,15 +1,25 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, FrozenSet, List, Set, Tuple, Union
+from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Set, Tuple, Union
+
+
+@dataclass(kw_only=True, frozen=True)
+class Prefix:
+    value: str
+
+    def find(self, nodes: Iterable[str]) -> Set[str]:
+        return {node for node in nodes if node.startswith(self.value)}
+
 
 GraphBuilder = Callable[..., Any]
+Requirement = FrozenSet[Tuple[str, Union[str, Prefix]]]
 
 
 @dataclass(kw_only=True, frozen=True)
 class GraphNode:
     builder: GraphBuilder
     produces: Tuple[str, ...]
-    requires: FrozenSet[Tuple[str, str]]
+    requires: Requirement
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -37,14 +47,22 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
             producer[product] = node
 
     # build dependency graph
-    edges: Dict[GraphNode, Set[GraphNode]] = defaultdict(set)
+    edges: Dict[GraphNode, List[GraphNode]] = defaultdict(list)
     indeg: Dict[GraphNode, int] = {node: 0 for node in nodes}
 
     for node in nodes:
         for _, req in node.requires:
-            dep = producer[req]
-            edges[dep].add(node)
-            indeg[node] += 1
+            # make sure all requirements are some keys
+            if isinstance(req, Prefix):
+                reqs = list(req.find(producer.keys()))
+            else:
+                reqs = [req]
+
+            # now make dependencies
+            for item in reqs:
+                dep = producer[item]
+                edges[dep].append(node)
+                indeg[node] += 1
 
     # topological sorting
     queue = [node for node in nodes if indeg[node] == 0]
@@ -69,15 +87,21 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
     for key, value in initial.items():
         nodes.append(
             GraphNode(
-                builder=lambda: value,
+                builder=(lambda: value),
                 produces=(key,),
                 requires=frozenset(),
             )
         )
 
+    def expand(req: Union[str, Prefix]) -> Any:
+        if isinstance(req, Prefix):
+            return {key: artifacts[key] for key in req.find(artifacts.keys())}
+        else:
+            return artifacts[req]
+
     for node in reorder_configurations(nodes):
         # prepare arguments
-        args = {name: artifacts[req] for name, req in node.requires}
+        args = {name: expand(req) for name, req in node.requires}
 
         # build dataset
         dataset = node.builder(**args)

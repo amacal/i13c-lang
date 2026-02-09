@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List, Set
+from typing import Dict, List, Set
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
@@ -72,40 +72,3 @@ class SemanticGraph:
     indices: IndexEdges
     callgraph: CallGraph
     live: LiveComponents
-
-
-def build_semantic_graph(artifacts: Dict[str, Any]) -> SemanticGraph:
-    return SemanticGraph(
-        generator=artifacts["syntax/graph"].generator,
-        basic=BasicNodes(
-            literals=artifacts["entities/literals"],
-            operands=artifacts["entities/operands"],
-            instructions=artifacts["entities/instructions"],
-            expressions=artifacts["entities/expressions"],
-            snippets=artifacts["entities/snippets"],
-            functions=artifacts["entities/functions"],
-            callsites=artifacts["entities/callsites"],
-            parameters=artifacts["entities/parameters"],
-            variables=artifacts["entities/variables"],
-        ),
-        indices=IndexEdges(
-            terminality_by_function=artifacts["indices/terminality-by-function"],
-            resolution_by_callsite=artifacts["resolutions/callsites"],
-            resolution_by_instruction=artifacts["resolutions/instructions"],
-            flowgraph_by_function=artifacts["indices/flowgraph-by-function"],
-            instance_by_callsite=artifacts["indices/instance-by-callsite"],
-            dataflow_by_flownode=artifacts["indices/dataflow-by-flownode"],
-            variables_by_parameter=artifacts["indices/variables-by-parameter"],
-            environment_by_flownode=artifacts["indices/environment-by-flownode"],
-        ),
-        callgraph=CallGraph(
-            calls_by_caller=artifacts["indices/calls-by-caller"],
-            calls_by_callee=artifacts["indices/calls-by-callee"],
-        ),
-        live=LiveComponents(
-            entrypoints=artifacts["indices/entrypoints-by-callable"],
-            flowgraph_by_function=artifacts["analyses/flowgraph-by-function/live"],
-        ),
-        callable_live=artifacts["analyses/callables/live"],
-        callgraph_live=artifacts["analyses/calls-by-caller/live"],
-    )

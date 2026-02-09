@@ -1,9 +1,18 @@
 from typing import List, Optional, Union
 
 from i13c import diag, err
+from i13c.core.dag import GraphNode
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
+
+
+def configure_e3007() -> GraphNode:
+    return GraphNode(
+        builder=validate_called_symbol_resolved,
+        produces=("rules/e3007",),
+        requires=frozenset({("graph", "semantic/graph")}),
+    )
 
 
 def validate_called_symbol_resolved(
