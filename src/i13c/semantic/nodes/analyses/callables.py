@@ -1,15 +1,15 @@
 from typing import List, Set
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.indices.callgraphs import CallPair
 from i13c.semantic.typing.indices.entrypoints import EntryPoint
 
 
-def configure_callables_live() -> Configuration:
-    return Configuration(
+def configure_callables_live() -> GraphNode:
+    return GraphNode(
         builder=build_callable_live,
         produces=("analyses/callables/live",),
         requires=frozenset(

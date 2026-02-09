@@ -1,14 +1,14 @@
 from typing import Dict
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Identifier, Range, Type, default_range, width_from_range
-from i13c.semantic.infra import Configuration
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 
 
-def configure_parameters() -> Configuration:
-    return Configuration(
+def configure_parameters() -> GraphNode:
+    return GraphNode(
         builder=build_parameters,
         produces=("entities/parameters",),
         requires=frozenset({("graph", "syntax/graph")}),

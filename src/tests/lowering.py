@@ -1,7 +1,6 @@
+from i13c.graph.nodes import run as run_graph
 from i13c.lowering.build import build_low_level_graph
 from i13c.lowering.typing.instructions import Call, MovRegImm, ShlRegImm, SysCall
-from i13c.semantic.model import build_semantic_graph
-from i13c.semantic.syntax import build_syntax_graph
 from tests.sem import prepare_program
 
 
@@ -11,9 +10,7 @@ def can_lower_syscall_program():
             fn main() noreturn { syscall(); }
         """)
 
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
-
+    model = run_graph(program)
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -27,9 +24,7 @@ def can_lower_mov_program():
             fn main() noreturn { foo(); }
         """)
 
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
-
+    model = run_graph(program)
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -43,9 +38,7 @@ def can_lower_mov_with_register_bound_slot():
             fn main() noreturn { set(0x01, 0x42); }
         """)
 
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
-
+    model = run_graph(program)
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -59,9 +52,7 @@ def can_lower_shl_program():
             fn main() noreturn { shl(); }
         """)
 
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
-
+    model = run_graph(program)
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -76,9 +67,7 @@ def can_lower_multiple_callsites():
             asm bar() noreturn { syscall; }
         """)
 
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
-
+    model = run_graph(program)
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -92,9 +81,7 @@ def can_lower_function_final_statement_to_stop():
             asm foo() noreturn { syscall; }
         """)
 
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
-
+    model = run_graph(program)
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -109,9 +96,7 @@ def can_lower_function_calling_another_function():
             asm bar() noreturn { syscall; }
         """)
 
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
-
+    model = run_graph(program)
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -128,9 +113,7 @@ def can_lower_function_calling_another_function_reusing():
             asm bar() noreturn { syscall; }
         """)
 
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
-
+    model = run_graph(program)
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 

@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.indices.terminalities import Terminality
 from tests.sem import prepare_program
@@ -9,8 +9,7 @@ def can_do_nothing_without_any_function():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     terminalities = semantic.indices.terminality_by_function
@@ -23,8 +22,7 @@ def can_build_terminalities_for_single_function_without_any_statement():
             fn main() { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     terminalities = semantic.indices.terminality_by_function
@@ -44,8 +42,7 @@ def can_build_terminalities_for_a_function_calling_terminal_snippet():
             fn main() { exit(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     terminalities = semantic.indices.terminality_by_function
@@ -65,8 +62,7 @@ def can_build_terminalities_for_a_function_calling_non_terminal_snippet():
             fn main() { exit(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     terminalities = semantic.indices.terminality_by_function
@@ -85,8 +81,7 @@ def can_do_nothing_when_callsite_is_not_resolved():
             fn main() { unknown(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     terminalities = semantic.indices.terminality_by_function
@@ -101,8 +96,7 @@ def can_do_nothing_for_ambiguous_callsites():
             fn main() { exit(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     terminalities = semantic.indices.terminality_by_function

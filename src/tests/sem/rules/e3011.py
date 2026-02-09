@@ -1,6 +1,5 @@
 from i13c import err, semantic
-from i13c.semantic.model import build_semantic_graph
-from i13c.semantic.syntax import build_syntax_graph
+from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
 
@@ -10,7 +9,7 @@ def can_survive_existing_entrypoint():
             fn main() noreturn { exit(); }
         """)
 
-    model = build_semantic_graph(build_syntax_graph(program))
+    model = run_graph(program)
     diagnostics = semantic.e3011.validate_entrypoint_exists(model)
 
     assert len(diagnostics) == 0
@@ -21,7 +20,7 @@ def can_detect_nonexistent_entrypoint_even_if_function_is_called_main2():
             fn main2() noreturn { }
         """)
 
-    model = build_semantic_graph(build_syntax_graph(program))
+    model = run_graph(program)
     diagnostics = semantic.e3011.validate_entrypoint_exists(model)
 
     assert len(diagnostics) == 1
@@ -36,7 +35,7 @@ def can_reject_main_as_entrypoint_when_noreturn_is_false():
             fn main() { }
         """)
 
-    model = build_semantic_graph(build_syntax_graph(program))
+    model = run_graph(program)
     diagnostics = semantic.e3011.validate_entrypoint_exists(model)
 
     assert len(diagnostics) == 1
@@ -51,7 +50,7 @@ def can_accept_main_when_terminality_is_unresolved():
             fn main() noreturn { missing(); }
         """)
 
-    model = build_semantic_graph(build_syntax_graph(program))
+    model = run_graph(program)
     diagnostics = semantic.e3011.validate_entrypoint_exists(model)
 
     assert len(diagnostics) == 0

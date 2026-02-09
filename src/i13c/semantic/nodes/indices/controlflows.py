@@ -1,8 +1,8 @@
 from typing import Dict, List
 
+from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.indices.controlflows import (
@@ -13,8 +13,8 @@ from i13c.semantic.typing.indices.controlflows import (
 )
 
 
-def configure_flowgraph_by_function() -> Configuration:
-    return Configuration(
+def configure_flowgraph_by_function() -> GraphNode:
+    return GraphNode(
         builder=build_flowgraphs,
         produces=("indices/flowgraph-by-function",),
         requires=frozenset(

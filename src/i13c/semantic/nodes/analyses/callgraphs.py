@@ -1,15 +1,15 @@
 from typing import Dict, List, Set
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.indices.callgraphs import CallPair
 from i13c.semantic.typing.indices.controlflows import FlowGraph, FlowNode
 
 
-def configure_callgraphs_live() -> Configuration:
-    return Configuration(
+def configure_callgraphs_live() -> GraphNode:
+    return GraphNode(
         builder=build_callgraph_live,
         produces=("analyses/calls-by-caller/live",),
         requires=frozenset(

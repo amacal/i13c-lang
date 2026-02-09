@@ -1,7 +1,7 @@
 from typing import Dict
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
@@ -12,8 +12,8 @@ from i13c.semantic.typing.indices.usages import UsageId
 from i13c.semantic.typing.indices.variables import VariableId
 
 
-def configure_dataflow_by_flownode() -> Configuration:
-    return Configuration(
+def configure_dataflow_by_flownode() -> GraphNode:
+    return GraphNode(
         builder=build_dataflows,
         produces=("indices/dataflow-by-flownode",),
         requires=frozenset(

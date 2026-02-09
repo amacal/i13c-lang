@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
 from tests.sem import prepare_program
@@ -9,8 +9,7 @@ def can_do_nothing_without_any_callsite():
             fn main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     callsites = semantic.basic.callsites
@@ -23,8 +22,7 @@ def can_build_callsite_with_no_arguments():
             fn main() noreturn { foo(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     callsites = semantic.basic.callsites
@@ -44,8 +42,7 @@ def can_build_callsite_with_single_argument():
             fn main() noreturn { foo(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     callsites = semantic.basic.callsites
@@ -76,8 +73,7 @@ def can_build_callsite_with_multiple_arguments():
             fn main() { foo(0x1, 0x2, 0x3); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     callsites = semantic.basic.callsites

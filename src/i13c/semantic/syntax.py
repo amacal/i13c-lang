@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, Optional, Protocol, Tuple, TypeVar, Union
 
 from i13c import ast
+from i13c.core.dag import GraphGroup, GraphNode
 from i13c.core.generator import Generator
 
 AstNode = TypeVar("AstNode")
@@ -131,3 +132,16 @@ def build_syntax_graph(program: ast.Program) -> SyntaxGraph:
     program.accept(visitor)
 
     return visitor.graph
+
+
+def configure_syntax_graph() -> GraphGroup:
+    def produce(program: ast.Program) -> SyntaxGraph:
+        return build_syntax_graph(program)
+
+    node = GraphNode(
+        builder=produce,
+        produces=("syntax/graph",),
+        requires=frozenset({("program", "ast/program")}),
+    )
+
+    return GraphGroup(nodes=[node])

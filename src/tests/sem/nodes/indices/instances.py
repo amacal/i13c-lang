@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.operands import Immediate, Register
 from i13c.semantic.typing.indices.instances import Instance
@@ -10,8 +10,7 @@ def can_do_nothing_without_any_snippet():
             fn main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -25,8 +24,7 @@ def can_do_nothing_without_any_callsite():
             fn main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -40,8 +38,7 @@ def can_do_nothing_without_accepted_callsite():
             fn main() noreturn { exit(0x1001); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -56,8 +53,7 @@ def can_do_nothing_with_ambiguous_callsite():
             fn main() noreturn { exit(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -71,8 +67,7 @@ def can_generate_instance_for_accepted_callsite():
             fn main() noreturn { exit(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -115,8 +110,7 @@ def can_generate_instance_with_callsite_of_multiple_arguments():
             fn main() noreturn { exit(0x1234, 0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -140,8 +134,7 @@ def can_generate_instance_with_reference_used_twice():
             fn main() noreturn { exit(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -165,8 +158,7 @@ def can_generate_instance_with_two_references():
             fn main() noreturn { exit(0x1234, 0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -190,8 +182,7 @@ def can_generate_instance_even_when_immediate_is_not_used():
             fn main() noreturn { exit(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite
@@ -205,8 +196,7 @@ def can_rewrite_register_bound_slot_to_register():
             fn main() noreturn { foo(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instances = semantic.indices.instance_by_callsite

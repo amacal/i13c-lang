@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
 
@@ -8,8 +8,7 @@ def can_build_live_flowgraph_without_need_of_pruning():
             fn main() { halt(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic.live.flowgraph_by_function.size() == 1
     fid, flowgraph = semantic.live.flowgraph_by_function.peak()
@@ -40,8 +39,7 @@ def can_remove_callsite_after_terminal_call():
             fn main() noreturn { halt(); ignored(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic.live.flowgraph_by_function.size() == 1
     fid, flowgraph = semantic.live.flowgraph_by_function.peak()

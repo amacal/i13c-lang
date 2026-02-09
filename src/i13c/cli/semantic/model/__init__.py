@@ -35,8 +35,8 @@ from i13c.cli.semantic.model.indices.terminalities import TerminalityListExtract
 from i13c.cli.semantic.model.indices.variables import ParameterVariablesListExtractor
 from i13c.core.mapping import Descriptive, Identified
 from i13c.core.table import Table, draw_table
-from i13c.semantic.model import SemanticGraph, build_semantic_graph
-from i13c.semantic.syntax import build_syntax_graph
+from i13c.graph.nodes import run as run_graph
+from i13c.semantic.model import SemanticGraph
 
 ListItem = TypeVar("ListItem")
 
@@ -136,8 +136,7 @@ def load_model(path: str) -> SemanticGraph:
     code = src.open_text(text)
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
-    graph = build_syntax_graph(program)
-    model = build_semantic_graph(graph)
+    model = run_graph(program)
 
     return model
 

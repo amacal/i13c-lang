@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
 
@@ -7,8 +7,7 @@ def can_do_nothing_without_any_snippet():
             fn main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -21,8 +20,7 @@ def can_do_nothing_without_any_instruction():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -35,8 +33,7 @@ def can_do_nothing_with_ambiguous_reference():
             asm main(val@imm: u8, val@rax: u16) noreturn { nop val; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction

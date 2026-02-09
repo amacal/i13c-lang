@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.operands import Immediate, Operand, Register
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
@@ -10,8 +10,7 @@ def can_do_nothing_without_any_snippet():
             fn main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -24,8 +23,7 @@ def can_build_a_snippet_with_no_instruction():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -45,8 +43,7 @@ def can_build_a_snippet_with_no_noreturn():
             asm main() { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -66,8 +63,7 @@ def can_build_a_snippet_with_noreturn():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -87,8 +83,7 @@ def can_build_a_snippet_with_clobber_list():
             asm main() clobbers rax, rbx { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -111,8 +106,7 @@ def can_build_a_snippet_with_mov_instruction():
             asm main() { mov rax, 0x1234; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -161,8 +155,7 @@ def can_build_a_snippet_with_properly_derived_types():
             ) {}
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     snippets = semantic.basic.snippets

@@ -1,15 +1,15 @@
 from typing import Dict
 
 from i13c import ast
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import derive_width
-from i13c.semantic.infra import Configuration
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
 
 
-def configure_literals() -> Configuration:
-    return Configuration(
+def configure_literals() -> GraphNode:
+    return GraphNode(
         builder=build_literals,
         produces=("entities/literals",),
         requires=frozenset({("graph", "syntax/graph")}),

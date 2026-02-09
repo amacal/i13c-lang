@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.indices.entrypoints import EntryPoint
 from tests.sem import prepare_program
@@ -9,8 +9,7 @@ def can_reject_function_with_arguments():
             fn main(arg1: u32) noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     entrypoints = semantic.live.entrypoints
@@ -24,23 +23,21 @@ def can_accept_terminal_function():
             fn main() noreturn { exit(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     entrypoints = semantic.live.entrypoints
 
     assert entrypoints.size() == 1
-    _, value = entrypoints.pop()
+    _, value = entrypoints.peak()
 
     assert isinstance(value, EntryPoint)
     assert value.kind == b"function"
 
     assert isinstance(value.target, FunctionId)
-    fid = syntax.NodeId(value=value.target.value)
 
-    target = graph.functions.get_by_id(fid)
-    assert target.name == b"main"
+    function = semantic.basic.functions.get(value.target)
+    assert function.identifier.name == b"main"
 
 
 def can_reject_snippet_with_arguments():
@@ -48,8 +45,7 @@ def can_reject_snippet_with_arguments():
             asm main(arg1@rax: u32) noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     entrypoints = semantic.live.entrypoints
@@ -62,8 +58,7 @@ def can_reject_terminal_snippet():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     entrypoints = semantic.live.entrypoints

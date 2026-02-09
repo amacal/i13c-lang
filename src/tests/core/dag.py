@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from i13c.core.dag import GraphNode, evaluate
+from i13c.core.dag import GraphGroup, GraphNode, evaluate
 
 
 def can_evaluate_one_node_without_dependencies():
@@ -101,3 +101,27 @@ def can_use_initial_artifacts():
     assert len(artifacts) == 2
     assert artifacts["x"] == 41
     assert artifacts["abc"] == 42
+
+
+def can_evaluate_group():
+    node1: GraphNode = GraphNode(
+        builder=lambda: 42,
+        produces=("abc",),
+        requires=frozenset(),
+    )
+
+    def consume(x: int) -> int:
+        return x + 1
+
+    node2: GraphNode = GraphNode(
+        builder=consume,
+        produces=("cde",),
+        requires=frozenset({("x", "abc")}),
+    )
+
+    group: GraphGroup = GraphGroup(nodes=[node1, node2])
+    artifacts = evaluate(group.flatten(), initial={})
+
+    assert len(artifacts) == 2
+    assert artifacts["abc"] == 42
+    assert artifacts["cde"] == 43

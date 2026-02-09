@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
 from tests.sem import prepare_program
 
@@ -8,8 +8,7 @@ def can_do_nothing_without_any_literal():
             fn main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     literals = semantic.basic.literals
@@ -22,8 +21,7 @@ def can_detect_hex_literal():
             fn main() { foo(0x476); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     literals = semantic.basic.literals
@@ -46,8 +44,7 @@ def can_detect_two_literals_even_if_identical():
             fn main() { foo(0x1a2b); bar(0x1a2b); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     literals = semantic.basic.literals

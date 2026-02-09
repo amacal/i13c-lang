@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from tests.sem import prepare_program
@@ -9,8 +9,7 @@ def can_build_callgraphs_from_single_function():
             fn main() { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     callgraph = semantic.callgraph.calls_by_caller
@@ -30,8 +29,7 @@ def can_build_callgraphs_from_single_snippet():
             asm foo() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     callgraph = semantic.callgraph.calls_by_caller
@@ -52,8 +50,7 @@ def can_build_callgraphs_when_function_calls_snippet():
             fn main() noreturn { foo(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     callgraph = semantic.callgraph.calls_by_caller

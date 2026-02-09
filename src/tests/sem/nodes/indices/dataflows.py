@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
 
@@ -7,8 +7,7 @@ def can_do_nothing_without_any_function():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     values = semantic.indices.dataflow_by_flownode
@@ -21,8 +20,7 @@ def can_build_dataflow_for_a_function_without_any_parameters():
             fn main() { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function
@@ -47,8 +45,7 @@ def can_build_dataflow_for_a_function_with_single_parameter():
             fn main(val: u8) { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function
@@ -73,8 +70,7 @@ def can_build_dataflow_for_a_function_with_callsite_and_literal():
             fn main() { foo(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function
@@ -107,8 +103,7 @@ def can_build_dataflow_for_a_function_with_callsite_and_identifier():
             fn main(abc: u8) { foo(abc); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function
@@ -141,8 +136,7 @@ def can_build_dataflow_for_a_function_with_callsite_and_unresolved_identifier():
             fn main() { foo(abc); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function

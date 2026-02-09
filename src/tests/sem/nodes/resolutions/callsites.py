@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.snippets import SnippetId
@@ -12,8 +12,7 @@ def can_resolve_callsite_calling_snippet():
             fn main() { foo(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite
@@ -41,8 +40,7 @@ def can_resolve_callsite_calling_function():
         fn main() { foo(0x42); }
     """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite
@@ -70,8 +68,7 @@ def can_reject_callsite_due_to_wrong_arity_more_than_expected():
         fn main() { foo(0x42); }
     """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite
@@ -101,8 +98,7 @@ def can_reject_callsite_due_to_wrong_arity_less_than_expected():
         fn main() { foo(); }
     """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite
@@ -132,8 +128,7 @@ def can_reject_callsite_due_to_wrong_hex_width():
         fn main() { foo(0x842); }
     """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite
@@ -164,8 +159,7 @@ def can_resolve_function_and_snippet_with_same_name():
         fn main() { foo(0x42); }
     """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite
@@ -204,8 +198,7 @@ def can_resolve_by_type_u64_max():
         fn main() { foo(0xffffffffffffffff); }
     """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite
@@ -233,8 +226,7 @@ def can_resolve_by_expression_as_arg():
         fn main(arg2: u64) { foo(arg2); }
     """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite
@@ -266,8 +258,7 @@ def can_reject_by_expression_as_arg():
         fn main(arg2: u64) { foo(arg2); }
     """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     resolutions = semantic.indices.resolution_by_callsite

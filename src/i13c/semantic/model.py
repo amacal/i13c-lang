@@ -3,8 +3,6 @@ from typing import Any, Dict, List, Set
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.dag import configure_semantic_model
-from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
@@ -76,11 +74,9 @@ class SemanticGraph:
     live: LiveComponents
 
 
-def build_semantic_graph(graph: SyntaxGraph) -> SemanticGraph:
-    artifacts: Dict[str, Any] = configure_semantic_model(graph)
-
+def build_semantic_graph(artifacts: Dict[str, Any]) -> SemanticGraph:
     return SemanticGraph(
-        generator=graph.generator,
+        generator=artifacts["syntax/graph"].generator,
         basic=BasicNodes(
             literals=artifacts["entities/literals"],
             operands=artifacts["entities/operands"],

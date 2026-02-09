@@ -1,8 +1,8 @@
 from typing import Dict
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Identifier
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.indices.controlflows import FlowEntry, FlowGraph, FlowNode
 from i13c.semantic.typing.indices.dataflows import DataFlow
@@ -10,8 +10,8 @@ from i13c.semantic.typing.indices.environments import Environment
 from i13c.semantic.typing.indices.variables import Variable, VariableId
 
 
-def configure_environment_by_flownode() -> Configuration:
-    return Configuration(
+def configure_environment_by_flownode() -> GraphNode:
+    return GraphNode(
         builder=build_environments,
         produces=("indices/environment-by-flownode",),
         requires=frozenset(

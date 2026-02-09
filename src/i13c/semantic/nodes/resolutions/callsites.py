@@ -1,9 +1,9 @@
 from typing import Dict, Iterable, List, Protocol, Tuple
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.res import Err, Ok, Result
 from i13c.semantic.core import Identifier, Type
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.callables import Callable
 from i13c.semantic.typing.entities.callsites import Argument, CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
@@ -23,8 +23,8 @@ from i13c.semantic.typing.resolutions.callsites import (
 )
 
 
-def configure_resolution_by_callsite() -> Configuration:
-    return Configuration(
+def configure_resolution_by_callsite() -> GraphNode:
+    return GraphNode(
         builder=build_resolution_by_callsite,
         produces=("resolutions/callsites",),
         requires=frozenset(

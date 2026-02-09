@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.operands import Immediate, Reference, Register
 from i13c.semantic.typing.resolutions.instructions import OperandSpec
 from tests.sem import prepare_program
@@ -9,8 +9,7 @@ def can_accept_movregimm_instruction_with_two_operands():
             asm main() noreturn { mov rax, 0x42; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -39,8 +38,7 @@ def can_reject_movregimm_instruction_with_wrong_arity():
             asm main() noreturn { mov rax; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -61,8 +59,7 @@ def can_reject_movregimm_instruction_with_type_mismatch():
             asm main() noreturn { mov 0x42, rax; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -83,8 +80,7 @@ def can_accept_movregimm_instruction_with_rewritten_operands():
             asm main(val@imm: u64) noreturn { mov rax, val; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -113,8 +109,7 @@ def can_reject_movregimm_instruction_with_unresolved_operand_reference():
             asm main() noreturn { mov rax, val; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -135,8 +130,7 @@ def can_accept_movregimm_instruction_with_referenced_register_binding():
             asm main(code@rax: u64) noreturn { mov code, 0x01; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -165,8 +159,7 @@ def can_accept_movregimm_instruction_with_narrow_register_binding():
             asm main(code@rax: u8) noreturn { mov code, 0x01; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction

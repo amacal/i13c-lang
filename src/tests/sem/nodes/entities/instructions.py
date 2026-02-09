@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from tests.sem import prepare_program
 
@@ -8,8 +8,7 @@ def can_do_nothing_without_any_instruction():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.basic.instructions
@@ -22,8 +21,7 @@ def can_build_an_instruction_with_no_operands():
             asm main() noreturn { nop; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.basic.instructions
@@ -43,8 +41,7 @@ def can_build_an_instruction_with_multiple_operands():
             asm main() noreturn { mov rax, 0x42; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.basic.instructions
@@ -64,8 +61,7 @@ def can_build_an_instruction_with_reference_operand():
             asm main() noreturn { mov rax, src; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.basic.instructions

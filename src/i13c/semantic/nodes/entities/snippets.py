@@ -1,16 +1,16 @@
 from typing import Dict, List
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Identifier, Range, Type, default_range, width_from_range
-from i13c.semantic.infra import Configuration
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.instructions import Binding, InstructionId
 from i13c.semantic.typing.entities.operands import Register
 from i13c.semantic.typing.entities.snippets import Slot, Snippet, SnippetId
 
 
-def configure_snippets() -> Configuration:
-    return Configuration(
+def configure_snippets() -> GraphNode:
+    return GraphNode(
         builder=build_snippets,
         produces=("entities/snippets",),
         requires=frozenset({("graph", "syntax/graph")}),

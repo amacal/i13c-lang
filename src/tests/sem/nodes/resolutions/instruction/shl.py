@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.operands import Immediate, Reference, Register
 from i13c.semantic.typing.resolutions.instructions import OperandSpec
 from tests.sem import prepare_program
@@ -9,8 +9,7 @@ def can_reject_shlregimm_instruction_with_arity_mismatch():
             asm main() noreturn { shl rax; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -31,8 +30,7 @@ def can_reject_shlregimm_instruction_with_width_mismatch():
             asm main() noreturn { shl rax, 0x1234; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -53,8 +51,7 @@ def can_reject_shlregimm_instruction_with_unresolved_operand_reference():
             asm main() noreturn { shl rax, shift; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -75,8 +72,7 @@ def can_accept_shlregimm_instruction_with_valid_operands():
             asm main() noreturn { shl rax, 0x01; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -105,8 +101,7 @@ def can_accept_shlregimm_instruction_with_rewritten_operand_reference():
             asm main(val@imm: u8) noreturn { shl rax, val; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -136,8 +131,7 @@ def can_reject_shlregimm_instruction_with_rewritten_operand_reference_of_wrong_w
             asm main(val@imm: u16) noreturn { shl rax, val; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -158,8 +152,7 @@ def can_reject_shlregimm_instruction_with_immediate_out_of_range():
             asm main() noreturn { shl rax, 0x0142; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -180,8 +173,7 @@ def can_reject_shlregimm_instruction_with_reference_out_of_range():
             asm main(val@imm: u16) noreturn { shl rax, val; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -202,8 +194,7 @@ def can_accept_shlregimm_instruction_with_reference_within_range():
             asm main(val@imm: u16[0x00..0xff]) noreturn { shl rax, val; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction

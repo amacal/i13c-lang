@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
 
@@ -7,8 +7,7 @@ def can_accept_syscall_instruction_with_no_operands():
             asm main() noreturn { syscall; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -30,8 +29,7 @@ def can_reject_syscall_instruction_with_unexpected_operand():
             asm main() noreturn { syscall rax; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction

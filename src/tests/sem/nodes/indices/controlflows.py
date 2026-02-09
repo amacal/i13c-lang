@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.indices.controlflows import FlowEntry, FlowExit, FlowGraph
@@ -10,8 +10,7 @@ def can_do_nothing_without_any_function():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     values = semantic.indices.flowgraph_by_function
@@ -24,8 +23,7 @@ def can_build_flowgraph_for_a_function_without_any_statement():
             fn main() { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     values = semantic.indices.flowgraph_by_function
@@ -60,8 +58,7 @@ def can_build_flowgraph_for_a_function_with_a_single_statement():
             fn main() noreturn { foo(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     values = semantic.indices.flowgraph_by_function
@@ -82,10 +79,10 @@ def can_build_flowgraph_for_a_function_with_a_single_statement():
     bn1s = flow.backward.get(flow.exit)
 
     assert fn1s is not None and len(fn1s) == 1
-    assert isinstance(fn1s[0], model.CallSiteId)
+    assert isinstance(fn1s[0], CallSiteId)
 
     assert bn1s is not None and len(bn1s) == 1
-    assert isinstance(bn1s[0], model.CallSiteId)
+    assert isinstance(bn1s[0], CallSiteId)
 
     assert semantic.basic.callsites.get(fn1s[0]).callee.name == b"foo"
     assert semantic.basic.callsites.get(bn1s[0]).callee.name == b"foo"
@@ -104,8 +101,7 @@ def can_build_flowgraph_for_a_function_with_multiple_statements_ordered():
             fn main() { foo(); bar(); baz(); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     values = semantic.indices.flowgraph_by_function

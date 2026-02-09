@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Type, Width
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.operands import (
     Immediate,
@@ -25,8 +25,8 @@ from i13c.semantic.typing.resolutions.instructions import (
 )
 
 
-def configure_resolution_by_instruction() -> Configuration:
-    return Configuration(
+def configure_resolution_by_instruction() -> GraphNode:
+    return GraphNode(
         builder=build_resolution_by_instruction,
         produces=("resolutions/instructions",),
         requires=frozenset(

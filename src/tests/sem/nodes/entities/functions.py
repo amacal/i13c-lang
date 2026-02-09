@@ -1,5 +1,5 @@
-from i13c import ast
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from tests.sem import prepare_program
 
@@ -9,8 +9,7 @@ def can_do_nothing_without_any_function():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     functions = semantic.basic.functions
@@ -23,8 +22,7 @@ def can_build_a_function_with_no_statements():
             fn main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     functions = semantic.basic.functions
@@ -45,8 +43,7 @@ def can_build_a_function_with_no_return_statement():
             fn main() { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     functions = semantic.basic.functions
@@ -67,14 +64,13 @@ def can_build_a_function_with_call_statement():
             fn main() { foo(0x42); }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     functions = semantic.basic.functions
 
     assert functions.size() == 1
-    id, value = functions.pop()
+    id, value = functions.peak()
 
     assert isinstance(id, FunctionId)
     assert isinstance(value, Function)
@@ -83,13 +79,12 @@ def can_build_a_function_with_call_statement():
     assert value.noreturn is False
 
     assert len(value.statements) == 1
-    sid = syntax.NodeId(value=value.statements[0].value)
+    assert isinstance(value.statements[0], CallSiteId)
 
-    statement = graph.statements.get_by_id(sid)
-    assert isinstance(statement, ast.CallStatement)
+    callsite = semantic.basic.callsites.get(value.statements[0])
 
-    assert statement.name == b"foo"
-    assert len(statement.arguments) == 1
+    assert callsite.callee.name == b"foo"
+    assert len(callsite.arguments) == 1
 
 
 def can_build_function_with_properly_derived_types():
@@ -100,8 +95,7 @@ def can_build_function_with_properly_derived_types():
             ) {}
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     functions = semantic.basic.functions

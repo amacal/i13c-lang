@@ -1,7 +1,7 @@
 from typing import Dict, List, Set
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -11,8 +11,8 @@ from i13c.semantic.typing.indices.terminalities import Terminality
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 
 
-def configure_flowgraphs_live() -> Configuration:
-    return Configuration(
+def configure_flowgraphs_live() -> GraphNode:
+    return GraphNode(
         builder=build_flowgraphs_live,
         produces=("analyses/flowgraph-by-function/live",),
         requires=frozenset(

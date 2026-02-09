@@ -1,6 +1,5 @@
 from i13c import err, semantic
-from i13c.semantic.model import build_semantic_graph
-from i13c.semantic.syntax import build_syntax_graph
+from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
 
@@ -11,7 +10,7 @@ def can_detect_invalid_operand_types_of_mov():
             }
         """)
 
-    model = build_semantic_graph(build_syntax_graph(program))
+    model = run_graph(program)
     diagnostics = semantic.e3002.validate_assembly_operand_types(model)
 
     assert len(diagnostics) == 4
@@ -29,7 +28,7 @@ def can_detect_invalid_operand_types_of_shl():
             }
         """)
 
-    model = build_semantic_graph(build_syntax_graph(program))
+    model = run_graph(program)
     diagnostics = semantic.e3002.validate_assembly_operand_types(model)
 
     assert len(diagnostics) == 1
@@ -45,7 +44,7 @@ def can_accept_valid_operand_type_of_shl_reg64_imm8():
             }
         """)
 
-    model = build_semantic_graph(build_syntax_graph(program))
+    model = run_graph(program)
     diagnostics = semantic.e3002.validate_assembly_operand_types(model)
 
     assert len(diagnostics) == 0
@@ -58,7 +57,7 @@ def can_accept_valid_operand_type_of_shl_reg64_imm8_via_parameters():
             }
         """)
 
-    model = build_semantic_graph(build_syntax_graph(program))
+    model = run_graph(program)
     diagnostics = semantic.e3002.validate_assembly_operand_types(model)
 
     assert len(diagnostics) == 0

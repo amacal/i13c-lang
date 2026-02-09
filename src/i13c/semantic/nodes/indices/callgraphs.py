@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
@@ -10,8 +10,8 @@ from i13c.semantic.typing.indices.callgraphs import CallPair
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 
 
-def configure_callgraphs() -> Configuration:
-    return Configuration(
+def configure_callgraphs() -> GraphNode:
+    return GraphNode(
         builder=build_callgraphs,
         produces=(
             "indices/calls-by-caller",

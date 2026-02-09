@@ -1,14 +1,14 @@
 from typing import Dict
 
 from i13c import ast
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 
 
-def configure_operands() -> Configuration:
-    return Configuration(
+def configure_operands() -> GraphNode:
+    return GraphNode(
         builder=build_operands,
         produces=("entities/operands",),
         requires=frozenset({("graph", "syntax/graph")}),

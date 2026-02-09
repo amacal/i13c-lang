@@ -1,6 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, FrozenSet, List, Set, Tuple
+from typing import Any, Callable, Dict, FrozenSet, List, Set, Tuple, Union
 
 GraphBuilder = Callable[..., Any]
 
@@ -10,6 +10,22 @@ class GraphNode:
     builder: GraphBuilder
     produces: Tuple[str, ...]
     requires: FrozenSet[Tuple[str, str]]
+
+
+@dataclass(kw_only=True, frozen=True)
+class GraphGroup:
+    nodes: List[Union[GraphNode, GraphGroup]]
+
+    def flatten(self) -> List[GraphNode]:
+        out: List[GraphNode] = []
+
+        for node in self.nodes:
+            if isinstance(node, GraphGroup):
+                out.extend(node.flatten())
+            else:
+                out.append(node)
+
+        return out
 
 
 def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:

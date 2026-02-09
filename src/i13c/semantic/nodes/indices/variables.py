@@ -1,14 +1,14 @@
 from typing import Dict, Tuple
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.indices.variables import Variable, VariableId
 
 
-def configure_variables_by_parameters() -> Configuration:
-    return Configuration(
+def configure_variables_by_parameters() -> GraphNode:
+    return GraphNode(
         builder=build_variables_by_parameters,
         produces=(
             "entities/variables",

@@ -1,15 +1,15 @@
 from typing import Dict
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.indices.entrypoints import EntryPoint, EntryPointName
 
 
-def configure_entrypoint_by_callable() -> Configuration:
-    return Configuration(
+def configure_entrypoint_by_callable() -> GraphNode:
+    return GraphNode(
         builder=build_entrypoints,
         produces=("indices/entrypoints-by-callable",),
         requires=frozenset(

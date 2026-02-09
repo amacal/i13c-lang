@@ -31,5 +31,5 @@ dump-lowering:
 
 .PHONY: dump-semantic
 dump-semantic:
-	@find ./src/i13c/sem -type f -name '*.py' -print0 \
+	@find ./src/i13c/semantic -type f -name '*.py' -print0 \
 	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump

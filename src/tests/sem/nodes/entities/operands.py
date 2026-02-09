@@ -1,4 +1,4 @@
-from i13c.semantic import model, syntax
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.operands import (
     Immediate,
     Operand,
@@ -14,8 +14,7 @@ def can_do_nothing_without_any_instruction():
             asm main() noreturn { }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -28,8 +27,7 @@ def can_do_nothing_without_any_operand():
             asm main() noreturn { nop; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -42,8 +40,7 @@ def can_detect_an_immediate_operand_one_byte():
             asm main() noreturn { nop 0x42; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -66,8 +63,7 @@ def can_detect_an_immediate_operand_four_bytes():
             asm main() noreturn { nop 0x1122334455667788; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -90,8 +86,7 @@ def can_detect_a_register_operand():
             asm main() noreturn { nop rax; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -114,8 +109,7 @@ def can_detect_a_reference_operand():
             asm main() noreturn { nop var; }
         """)
 
-    graph = syntax.build_syntax_graph(program)
-    semantic = model.build_semantic_graph(graph)
+    semantic = run_graph(program)
 
     assert semantic is not None
     operands = semantic.basic.operands

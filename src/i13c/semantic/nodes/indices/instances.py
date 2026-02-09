@@ -1,19 +1,22 @@
 from typing import Dict, List, Optional
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
 from i13c.semantic.typing.entities.operands import Operand, OperandId, Reference
 from i13c.semantic.typing.entities.snippets import Slot, Snippet, SnippetId
 from i13c.semantic.typing.indices.instances import Instance
-from i13c.semantic.typing.resolutions.callsites import CallSiteBinding, CallSiteResolution
+from i13c.semantic.typing.resolutions.callsites import (
+    CallSiteBinding,
+    CallSiteResolution,
+)
 from i13c.src import Span
 
 
-def configure_instance_by_callsite() -> Configuration:
-    return Configuration(
+def configure_instance_by_callsite() -> GraphNode:
+    return GraphNode(
         builder=build_instances,
         produces=("indices/instance-by-callsite",),
         requires=frozenset(

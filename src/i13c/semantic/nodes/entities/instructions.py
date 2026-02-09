@@ -1,14 +1,18 @@
 from typing import Dict, List
 
+from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.infra import Configuration
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.instructions import Instruction, InstructionId, Mnemonic
+from i13c.semantic.typing.entities.instructions import (
+    Instruction,
+    InstructionId,
+    Mnemonic,
+)
 from i13c.semantic.typing.entities.operands import OperandId
 
 
-def configure_instructions() -> Configuration:
-    return Configuration(
+def configure_instructions() -> GraphNode:
+    return GraphNode(
         builder=build_instructions,
         produces=("entities/instructions",),
         requires=frozenset({("graph", "syntax/graph")}),
