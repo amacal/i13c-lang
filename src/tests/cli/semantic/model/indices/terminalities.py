@@ -1,15 +1,14 @@
 from i13c.cli.semantic.model import draw_list
 from i13c.cli.semantic.model.indices.terminalities import TerminalityListExtractor
-from i13c.semantic.model import SemanticGraph
-from tests.cli.semantic.model import prepare_semantic_graph
+from tests.cli.semantic.model import prepare_artifacts
 
 
 def can_draw_a_table_with_terminalities():
-    graph: SemanticGraph = prepare_semantic_graph("""
+    artifacts = prepare_artifacts("""
         fn main() noreturn { }
     """)
 
-    draw_list(TerminalityListExtractor, graph).equals("""
+    draw_list(TerminalityListExtractor, artifacts).equals("""
         | --------- | ----------- | ------------- | ----------------- | -------------------- |
         | Reference | Function ID | Function Name | Function NoReturn | Terminality NoReturn |
         | --------- | ----------- | ------------- | ----------------- | -------------------- |

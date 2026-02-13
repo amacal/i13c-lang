@@ -3,16 +3,15 @@ from i13c.cli.semantic.model.indices.resolutions import (
     CallSiteResolutionListExtractor,
     InstructionResolutionListExtractor,
 )
-from i13c.semantic.model import SemanticGraph
-from tests.cli.semantic.model import prepare_semantic_graph
+from tests.cli.semantic.model import prepare_artifacts
 
 
 def can_draw_a_table_with_instruction_resolutions():
-    graph: SemanticGraph = prepare_semantic_graph("""
+    artifacts = prepare_artifacts("""
         asm main() { mov rax, 0x01; }
     """)
 
-    draw_list(InstructionResolutionListExtractor, graph).equals("""
+    draw_list(InstructionResolutionListExtractor, artifacts).equals("""
         | --------- | -------------- | -------- | -------- | -------- | -------- |
         | Reference | Instruction ID | Mnemonic | Operands | Accepted | Rejected |
         | --------- | -------------- | -------- | -------- | -------- | -------- |
@@ -22,13 +21,13 @@ def can_draw_a_table_with_instruction_resolutions():
 
 
 def can_draw_a_table_with_callsite_resolutions():
-    graph: SemanticGraph = prepare_semantic_graph("""
+    artifacts = prepare_artifacts("""
         fn foo() {}
         fn foo(x: u16) {}
         fn main() { foo(0x123); }
     """)
 
-    draw_list(CallSiteResolutionListExtractor, graph).equals("""
+    draw_list(CallSiteResolutionListExtractor, artifacts).equals("""
         | --------- | ----------- | ----------- | --------- | -------- | -------- |
         | Reference | CallSite ID | Callee Name | Arguments | Accepted | Rejected |
         | --------- | ----------- | ----------- | --------- | -------- | -------- |

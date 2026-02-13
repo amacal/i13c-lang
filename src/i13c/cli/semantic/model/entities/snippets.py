@@ -1,13 +1,13 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 
 
 class SnippetListExtractor:
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[Tuple[SnippetId, Snippet]]:
-        return graph.basic.snippets.items()
+    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[SnippetId, Snippet]]:
+        return artifacts.semantic_graph().basic.snippets.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

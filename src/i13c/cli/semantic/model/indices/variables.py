@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.indices.variables import VariableId
 
@@ -8,11 +8,11 @@ from i13c.semantic.typing.indices.variables import VariableId
 class ParameterVariablesListExtractor:
     @staticmethod
     def extract(
-        graph: SemanticGraph,
+        artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[ParameterId, VariableId, Parameter]]:
         return (
-            (pid, vid, graph.basic.parameters.get(pid))
-            for pid, vid in graph.indices.variables_by_parameter.items()
+            (pid, vid, artifacts.semantic_graph().basic.parameters.get(pid))
+            for pid, vid in artifacts.semantic_graph().indices.variables_by_parameter.items()
         )
 
     @staticmethod

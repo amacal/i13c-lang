@@ -1,13 +1,13 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.literals import Literal, LiteralId
 
 
 class LiteralListExtractor:
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[Tuple[LiteralId, Literal]]:
-        return graph.basic.literals.items()
+    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[LiteralId, Literal]]:
+        return artifacts.semantic_graph().basic.literals.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

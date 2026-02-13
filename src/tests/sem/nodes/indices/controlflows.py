@@ -7,10 +7,10 @@ from tests.sem import prepare_program
 
 def can_do_nothing_without_any_function():
     _, program = prepare_program("""
-            asm main() noreturn { }
-        """)
+        asm main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     values = semantic.indices.flowgraph_by_function
@@ -20,10 +20,10 @@ def can_do_nothing_without_any_function():
 
 def can_build_flowgraph_for_a_function_without_any_statement():
     _, program = prepare_program("""
-            fn main() { }
-        """)
+        fn main() { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     values = semantic.indices.flowgraph_by_function
@@ -55,10 +55,10 @@ def can_build_flowgraph_for_a_function_without_any_statement():
 
 def can_build_flowgraph_for_a_function_with_a_single_statement():
     _, program = prepare_program("""
-            fn main() noreturn { foo(); }
-        """)
+        fn main() noreturn { foo(); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     values = semantic.indices.flowgraph_by_function
@@ -98,10 +98,10 @@ def can_build_flowgraph_for_a_function_with_a_single_statement():
 
 def can_build_flowgraph_for_a_function_with_multiple_statements_ordered():
     _, program = prepare_program("""
-            fn main() { foo(); bar(); baz(); }
-        """)
+        fn main() { foo(); bar(); baz(); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     values = semantic.indices.flowgraph_by_function

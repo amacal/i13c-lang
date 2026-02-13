@@ -5,10 +5,10 @@ from tests.sem import prepare_program
 
 def can_do_nothing_without_any_instruction():
     _, program = prepare_program("""
-            asm main() noreturn { }
-        """)
+        asm main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     instructions = semantic.basic.instructions
@@ -18,10 +18,10 @@ def can_do_nothing_without_any_instruction():
 
 def can_build_an_instruction_with_no_operands():
     _, program = prepare_program("""
-            asm main() noreturn { nop; }
-        """)
+        asm main() noreturn { nop; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     instructions = semantic.basic.instructions
@@ -38,10 +38,10 @@ def can_build_an_instruction_with_no_operands():
 
 def can_build_an_instruction_with_multiple_operands():
     _, program = prepare_program("""
-            asm main() noreturn { mov rax, 0x42; }
-        """)
+        asm main() noreturn { mov rax, 0x42; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     instructions = semantic.basic.instructions
@@ -58,10 +58,10 @@ def can_build_an_instruction_with_multiple_operands():
 
 def can_build_an_instruction_with_reference_operand():
     _, program = prepare_program("""
-            asm main() noreturn { mov rax, src; }
-        """)
+        asm main() noreturn { mov rax, src; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     instructions = semantic.basic.instructions

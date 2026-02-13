@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
@@ -10,11 +10,11 @@ from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 class InstructionResolutionListExtractor:
     @staticmethod
     def extract(
-        graph: SemanticGraph,
+        artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[InstructionId, Instruction, InstructionResolution]]:
         return (
-            (iid, graph.basic.instructions.get(iid), resolution)
-            for iid, resolution in graph.indices.resolution_by_instruction.items()
+            (iid, artifacts.semantic_graph().basic.instructions.get(iid), resolution)
+            for iid, resolution in artifacts.semantic_graph().indices.resolution_by_instruction.items()
         )
 
     @staticmethod
@@ -45,11 +45,11 @@ class InstructionResolutionListExtractor:
 class CallSiteResolutionListExtractor:
     @staticmethod
     def extract(
-        graph: SemanticGraph,
+        artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[CallSiteId, CallSite, CallSiteResolution]]:
         return (
-            (cid, graph.basic.callsites.get(cid), resolution)
-            for cid, resolution in graph.indices.resolution_by_callsite.items()
+            (cid, artifacts.semantic_graph().basic.callsites.get(cid), resolution)
+            for cid, resolution in artifacts.semantic_graph().indices.resolution_by_callsite.items()
         )
 
     @staticmethod

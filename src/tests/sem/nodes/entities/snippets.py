@@ -7,10 +7,10 @@ from tests.sem import prepare_program
 
 def can_do_nothing_without_any_snippet():
     _, program = prepare_program("""
-            fn main() noreturn { }
-        """)
+        fn main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -20,10 +20,10 @@ def can_do_nothing_without_any_snippet():
 
 def can_build_a_snippet_with_no_instruction():
     _, program = prepare_program("""
-            asm main() noreturn { }
-        """)
+        asm main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -40,10 +40,10 @@ def can_build_a_snippet_with_no_instruction():
 
 def can_build_a_snippet_with_no_noreturn():
     _, program = prepare_program("""
-            asm main() { }
-        """)
+        asm main() { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -60,10 +60,10 @@ def can_build_a_snippet_with_no_noreturn():
 
 def can_build_a_snippet_with_noreturn():
     _, program = prepare_program("""
-            asm main() noreturn { }
-        """)
+        asm main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -80,10 +80,10 @@ def can_build_a_snippet_with_noreturn():
 
 def can_build_a_snippet_with_clobber_list():
     _, program = prepare_program("""
-            asm main() clobbers rax, rbx { }
-        """)
+        asm main() clobbers rax, rbx { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -103,10 +103,10 @@ def can_build_a_snippet_with_clobber_list():
 
 def can_build_a_snippet_with_mov_instruction():
     _, program = prepare_program("""
-            asm main() { mov rax, 0x1234; }
-        """)
+        asm main() { mov rax, 0x1234; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     snippets = semantic.basic.snippets
@@ -149,13 +149,13 @@ def can_build_a_snippet_with_mov_instruction():
 
 def can_build_a_snippet_with_properly_derived_types():
     _, program = prepare_program("""
-            asm main(
-                r1@rax: u64[0x0000..0xffff],
-                r2@rbx: u8[0x00..0x10]
-            ) {}
-        """)
+        asm main(
+            r1@rax: u64[0x0000..0xffff],
+            r2@rbx: u8[0x00..0x10]
+        ) {}
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     snippets = semantic.basic.snippets

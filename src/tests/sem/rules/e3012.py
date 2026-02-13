@@ -10,7 +10,7 @@ def can_detect_multiple_entrypoints():
             fn main() noreturn { exit(); }
         """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     diagnostics = semantic.e3012.validate_entrypoint_is_single(model)
 
     assert len(diagnostics) == 1

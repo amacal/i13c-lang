@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.indices.terminalities import Terminality
 
@@ -8,11 +8,11 @@ from i13c.semantic.typing.indices.terminalities import Terminality
 class TerminalityListExtractor:
     @staticmethod
     def extract(
-        graph: SemanticGraph,
+        artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[FunctionId, Function, Terminality]]:
         return (
-            (fid, graph.basic.functions.get(fid), terminality)
-            for fid, terminality in graph.indices.terminality_by_function.items()
+            (fid, artifacts.semantic_graph().basic.functions.get(fid), terminality)
+            for fid, terminality in artifacts.semantic_graph().indices.terminality_by_function.items()
         )
 
     @staticmethod

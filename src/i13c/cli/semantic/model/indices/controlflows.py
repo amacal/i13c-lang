@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.indices.controlflows import FlowGraph
 
@@ -8,11 +8,11 @@ from i13c.semantic.typing.indices.controlflows import FlowGraph
 class ControlFlowListExtractor:
     @staticmethod
     def extract(
-        graph: SemanticGraph,
+        artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[FunctionId, Function, FlowGraph]]:
         return (
-            (fid, graph.basic.functions.get(fid), flowgraph)
-            for fid, flowgraph in graph.indices.flowgraph_by_function.items()
+            (fid, artifacts.semantic_graph().basic.functions.get(fid), flowgraph)
+            for fid, flowgraph in artifacts.semantic_graph().indices.flowgraph_by_function.items()
         )
 
     @staticmethod

@@ -10,7 +10,7 @@ def can_detect_missing_called_symbol():
             }
         """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     diagnostics = semantic.e3008.validate_called_symbol_exists(model)
 
     assert len(diagnostics) == 1

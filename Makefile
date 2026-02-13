@@ -12,10 +12,10 @@ update:
 
 .PHONY: lint
 lint:
-	@poetry run pyright src/i13c
-	@poetry run ruff check src/i13c
 	@poetry run black src/i13c src/tests
 	@poetry run isort src/i13c src/tests
+	@poetry run pyright src/i13c src/tests
+	@poetry run ruff check src/i13c src/tests --fix
 
 .PHONY: test
 test:

@@ -6,10 +6,10 @@ from tests.sem import prepare_program
 
 def can_do_nothing_without_any_callsite():
     _, program = prepare_program("""
-            fn main() noreturn { }
-        """)
+        fn main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     callsites = semantic.basic.callsites
@@ -19,10 +19,10 @@ def can_do_nothing_without_any_callsite():
 
 def can_build_callsite_with_no_arguments():
     _, program = prepare_program("""
-            fn main() noreturn { foo(); }
-        """)
+        fn main() noreturn { foo(); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     callsites = semantic.basic.callsites
@@ -39,10 +39,10 @@ def can_build_callsite_with_no_arguments():
 
 def can_build_callsite_with_single_argument():
     _, program = prepare_program("""
-            fn main() noreturn { foo(0x42); }
-        """)
+        fn main() noreturn { foo(0x42); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     callsites = semantic.basic.callsites
@@ -70,10 +70,10 @@ def can_build_callsite_with_single_argument():
 
 def can_build_callsite_with_multiple_arguments():
     _, program = prepare_program("""
-            fn main() { foo(0x1, 0x2, 0x3); }
-        """)
+        fn main() { foo(0x1, 0x2, 0x3); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     callsites = semantic.basic.callsites

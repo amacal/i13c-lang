@@ -1,13 +1,13 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 
 
 class ExpressionListExtractor:
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[Tuple[ExpressionId, Expression]]:
-        return graph.basic.expressions.items()
+    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[ExpressionId, Expression]]:
+        return artifacts.semantic_graph().basic.expressions.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

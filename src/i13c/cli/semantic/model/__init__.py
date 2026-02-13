@@ -1,10 +1,7 @@
-from dataclasses import dataclass
 from typing import (
     Any,
-    Callable,
     Iterable,
     List,
-    Optional,
     Protocol,
     Tuple,
     TypeVar,
@@ -17,16 +14,17 @@ from i13c.cli import unwrap
 from i13c.cli.semantic.model.abstract import AbstractListExtractor, ListItem
 from i13c.cli.semantic.model.entities import ENTITIES
 from i13c.cli.semantic.model.indices import INDICES
-from i13c.core.mapping import Descriptive, Identified
+from i13c.cli.semantic.model.syntax import SYNTAX
+from i13c.core.mapping import Identified
 from i13c.core.table import Table, draw_table
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.graph.nodes import run as run_graph
-from i13c.semantic.model import SemanticGraph
 
 
 def draw_list(
-    extractor: AbstractListExtractor[ListItem], graph: SemanticGraph
+    extractor: AbstractListExtractor[ListItem], artifacts: GraphArtifacts
 ) -> Table:
-    entries = extractor.extract(graph)
+    entries = extractor.extract(artifacts)
     rows = [extractor.rows(entry) for entry in entries]
 
     return draw_table(extractor.headers(), rows)
@@ -48,22 +46,10 @@ class OneToManyLike(Protocol[SemanticId, SemanticNode]):
     def items(self) -> Iterable[Tuple[SemanticId, Iterable[SemanticNode]]]: ...
 
 
-ExtractOneToOne = Callable[[SemanticGraph], OneToOneLike[Identified, Descriptive]]
-ExtractOneToMany = Callable[[SemanticGraph], OneToManyLike[Identified, Descriptive]]
-
-
-@dataclass(kw_only=True)
-class OneToOneFeature:
-    list: Optional[Callable[[SemanticGraph], OneToOneLike[Identified, Descriptive]]] = (
-        None
-    )
-    show: Optional[Callable[[SemanticGraph], OneToOneLike[Identified, Showable]]] = None
-
-
 def list_one2one_semantic(
-    extractor: AbstractListExtractor[Any], model: SemanticGraph
+    extractor: AbstractListExtractor[Any], artifacts: GraphArtifacts
 ) -> None:
-    for line in draw_list(extractor, model).entries:
+    for line in draw_list(extractor, artifacts).entries:
         click.echo(line)
 
 
@@ -77,16 +63,16 @@ def show_one2one_semantic(
                 click.echo(f"  {line}")
 
 
-def load_model(path: str) -> SemanticGraph:
+def load_artifacts(path: str) -> GraphArtifacts:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
     code = src.open_text(text)
     tokens = unwrap(lex.tokenize(code), source=code)
     program = unwrap(par.parse(code, tokens), source=code)
-    model = run_graph(program)
+    artifacts = run_graph(program)
 
-    return model
+    return artifacts
 
 
 def attach_one2one_commands(
@@ -101,8 +87,7 @@ def attach_one2one_commands(
     @group.command("list")
     @click.argument("path", type=click.Path(exists=True))
     def list(path: str) -> None:
-        # if extract.list is not None:
-        list_one2one_semantic(extractor, load_model(path))
+        list_one2one_semantic(extractor, load_artifacts(path))
 
     return [list]
 
@@ -118,6 +103,9 @@ def attach(target: click.Group) -> List[click.Command]:
         commands.extend(attach_one2one_commands(model, key, extractor))
 
     for key, extractor in INDICES.items():
+        commands.extend(attach_one2one_commands(model, key, extractor))
+
+    for key, extractor in SYNTAX.items():
         commands.extend(attach_one2one_commands(model, key, extractor))
 
     return commands

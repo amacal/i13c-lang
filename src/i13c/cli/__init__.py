@@ -59,12 +59,12 @@ def llg_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
 
     program = unwrap(par.parse(code, tokens), source=code)
-    model = run_graph(program)
+    artifacts = run_graph(program)
 
-    if diagnostics := validate(model):
+    if diagnostics := validate(artifacts.semantic_graph()):
         emit_and_exit(diagnostics, source=code)
 
-    llg = build_low_level_graph(model)
+    llg = build_low_level_graph(artifacts.semantic_graph())
 
     for idx, (bid, block) in enumerate(llg.nodes.items()):
         click.echo(f"Block: {bid.value}")
@@ -93,12 +93,12 @@ def linear_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
 
     program = unwrap(par.parse(code, tokens), source=code)
-    model = run_graph(program)
+    artifacts = run_graph(program)
 
-    if diagnostics := validate(model):
+    if diagnostics := validate(artifacts.semantic_graph()):
         emit_and_exit(diagnostics, source=code)
 
-    llg = build_low_level_graph(model)
+    llg = build_low_level_graph(artifacts.semantic_graph())
     flow = llg.instructions()
 
     for idx, instruction in enumerate(flow):
@@ -115,12 +115,12 @@ def bin_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
 
     program = unwrap(par.parse(code, tokens), source=code)
-    model = run_graph(program)
+    artifacts = run_graph(program)
 
-    if diagnostics := validate(model):
+    if diagnostics := validate(artifacts.semantic_graph()):
         emit_and_exit(diagnostics, source=code)
 
-    llg = build_low_level_graph(model)
+    llg = build_low_level_graph(artifacts.semantic_graph())
     flow = llg.instructions()
 
     binary = encode(list(flow))
@@ -137,12 +137,12 @@ def elf_command(path: str) -> None:
     tokens = unwrap(lex.tokenize(code), source=code)
 
     program = unwrap(par.parse(code, tokens), source=code)
-    model = run_graph(program)
+    artifacts = run_graph(program)
 
-    if diagnostics := validate(model):
+    if diagnostics := validate(artifacts.semantic_graph()):
         emit_and_exit(diagnostics, source=code)
 
-    llg = build_low_level_graph(model)
+    llg = build_low_level_graph(artifacts.semantic_graph())
     flow = llg.instructions()
 
     binary = encode(list(flow))

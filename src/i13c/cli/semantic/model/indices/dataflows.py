@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.indices.controlflows import FlowNode
 from i13c.semantic.typing.indices.dataflows import DataFlow
@@ -9,16 +9,16 @@ from i13c.semantic.typing.indices.dataflows import DataFlow
 class DataFlowListExtractor:
     @staticmethod
     def extract(
-        graph: SemanticGraph,
+        artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[FunctionId, Function, FlowNode, DataFlow]]:
         return (
             (
                 fid,
-                graph.basic.functions.get(fid),
+                artifacts.semantic_graph().basic.functions.get(fid),
                 flownode,
-                graph.indices.dataflow_by_flownode.get(flownode),
+                artifacts.semantic_graph().indices.dataflow_by_flownode.get(flownode),
             )
-            for fid, controlflow in graph.indices.flowgraph_by_function.items()
+            for fid, controlflow in artifacts.semantic_graph().indices.flowgraph_by_function.items()
             for flownode in sorted(controlflow.nodes(), key=lambda n: n.identify(1))
         )
 

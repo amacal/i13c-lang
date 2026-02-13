@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.operands import (
     Immediate,
     Operand,
@@ -12,8 +12,8 @@ from i13c.semantic.typing.entities.operands import (
 
 class OperandListExtractor:
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[Tuple[OperandId, Operand]]:
-        return graph.basic.operands.items()
+    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[OperandId, Operand]]:
+        return artifacts.semantic_graph().basic.operands.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

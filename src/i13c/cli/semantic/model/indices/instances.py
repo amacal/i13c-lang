@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.indices.instances import Instance
 
@@ -8,11 +8,11 @@ from i13c.semantic.typing.indices.instances import Instance
 class InstanceListExtractor:
     @staticmethod
     def extract(
-        graph: SemanticGraph,
+        artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[CallSiteId, CallSite, Instance]]:
         return (
-            (cid, graph.basic.callsites.get(cid), instance)
-            for cid, instance in graph.indices.instance_by_callsite.items()
+            (cid, artifacts.semantic_graph().basic.callsites.get(cid), instance)
+            for cid, instance in artifacts.semantic_graph().indices.instance_by_callsite.items()
         )
 
     @staticmethod

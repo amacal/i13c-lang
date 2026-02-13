@@ -11,10 +11,10 @@ from tests.sem import prepare_program
 
 def can_do_nothing_without_any_instruction():
     _, program = prepare_program("""
-            asm main() noreturn { }
-        """)
+        asm main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -24,10 +24,10 @@ def can_do_nothing_without_any_instruction():
 
 def can_do_nothing_without_any_operand():
     _, program = prepare_program("""
-            asm main() noreturn { nop; }
-        """)
+        asm main() noreturn { nop; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -37,10 +37,10 @@ def can_do_nothing_without_any_operand():
 
 def can_detect_an_immediate_operand_one_byte():
     _, program = prepare_program("""
-            asm main() noreturn { nop 0x42; }
-        """)
+        asm main() noreturn { nop 0x42; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -60,10 +60,10 @@ def can_detect_an_immediate_operand_one_byte():
 
 def can_detect_an_immediate_operand_four_bytes():
     _, program = prepare_program("""
-            asm main() noreturn { nop 0x1122334455667788; }
-        """)
+        asm main() noreturn { nop 0x1122334455667788; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -83,10 +83,10 @@ def can_detect_an_immediate_operand_four_bytes():
 
 def can_detect_a_register_operand():
     _, program = prepare_program("""
-            asm main() noreturn { nop rax; }
-        """)
+        asm main() noreturn { nop rax; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     operands = semantic.basic.operands
@@ -106,10 +106,10 @@ def can_detect_a_register_operand():
 
 def can_detect_a_reference_operand():
     _, program = prepare_program("""
-            asm main() noreturn { nop var; }
-        """)
+        asm main() noreturn { nop var; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     operands = semantic.basic.operands

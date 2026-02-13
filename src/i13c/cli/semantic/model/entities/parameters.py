@@ -1,13 +1,13 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 
 
 class ParameterListExtractor:
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[Tuple[ParameterId, Parameter]]:
-        return graph.basic.parameters.items()
+    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[ParameterId, Parameter]]:
+        return artifacts.semantic_graph().basic.parameters.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

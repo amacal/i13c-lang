@@ -1,15 +1,14 @@
 from i13c.cli.semantic.model import draw_list
 from i13c.cli.semantic.model.entities.operands import OperandListExtractor
-from i13c.semantic.model import SemanticGraph
-from tests.cli.semantic.model import prepare_semantic_graph
+from tests.cli.semantic.model import prepare_artifacts
 
 
 def can_draw_a_table_with_operands():
-    graph: SemanticGraph = prepare_semantic_graph("""
+    artifacts = prepare_artifacts("""
         asm main(abc@rbx: u64) { mov rax, abc; }
     """)
 
-    draw_list(OperandListExtractor, graph).equals("""
+    draw_list(OperandListExtractor, artifacts).equals("""
         | --------- | ---------- | ------------ | ------------- | -------------- | --------------- | --------------- | -------------- |
         | Reference | Operand ID | Operand Kind | Register Name | Register Width | Immediate Value | Immediate Width | Reference Name |
         | --------- | ---------- | ------------ | ------------- | -------------- | --------------- | --------------- | -------------- |

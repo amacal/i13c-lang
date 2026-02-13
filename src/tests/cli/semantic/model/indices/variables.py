@@ -1,15 +1,14 @@
 from i13c.cli.semantic.model import draw_list
 from i13c.cli.semantic.model.indices.variables import ParameterVariablesListExtractor
-from i13c.semantic.model import SemanticGraph
-from tests.cli.semantic.model import prepare_semantic_graph
+from tests.cli.semantic.model import prepare_artifacts
 
 
 def can_draw_a_table_with_parameter_variables():
-    graph: SemanticGraph = prepare_semantic_graph("""
+    artifacts = prepare_artifacts("""
         fn main(arg1: u8, arg2: u16) { foo(arg1); bar(arg2); }
     """)
 
-    draw_list(ParameterVariablesListExtractor, graph).equals("""
+    draw_list(ParameterVariablesListExtractor, artifacts).equals("""
         | --------- | ------------ | -------------- | ----------- |
         | Reference | Parameter ID | Parameter Name | Variable ID |
         | --------- | ------------ | -------------- | ----------- |

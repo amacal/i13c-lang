@@ -6,11 +6,11 @@ from tests.sem import prepare_program
 
 def can_lower_syscall_program():
     _, program = prepare_program("""
-            asm syscall() noreturn { syscall; }
-            fn main() noreturn { syscall(); }
-        """)
+        asm syscall() noreturn { syscall; }
+        fn main() noreturn { syscall(); }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -20,11 +20,11 @@ def can_lower_syscall_program():
 
 def can_lower_mov_program():
     _, program = prepare_program("""
-            asm foo() noreturn { mov rax, 0x1234; }
-            fn main() noreturn { foo(); }
-        """)
+        asm foo() noreturn { mov rax, 0x1234; }
+        fn main() noreturn { foo(); }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -34,11 +34,11 @@ def can_lower_mov_program():
 
 def can_lower_mov_with_register_bound_slot():
     _, program = prepare_program("""
-            asm set(dst@rax: u64, val@imm: u8) noreturn { mov dst, val; }
-            fn main() noreturn { set(0x01, 0x42); }
-        """)
+        asm set(dst@rax: u64, val@imm: u8) noreturn { mov dst, val; }
+        fn main() noreturn { set(0x01, 0x42); }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -48,11 +48,11 @@ def can_lower_mov_with_register_bound_slot():
 
 def can_lower_shl_program():
     _, program = prepare_program("""
-            asm shl() noreturn { shl rax, 0x41; }
-            fn main() noreturn { shl(); }
-        """)
+        asm shl() noreturn { shl rax, 0x41; }
+        fn main() noreturn { shl(); }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -62,12 +62,12 @@ def can_lower_shl_program():
 
 def can_lower_multiple_callsites():
     _, program = prepare_program("""
-            fn main() noreturn { foo(); bar(); }
-            asm foo() { mov rax, 0x01; }
-            asm bar() noreturn { syscall; }
-        """)
+        fn main() noreturn { foo(); bar(); }
+        asm foo() { mov rax, 0x01; }
+        asm bar() noreturn { syscall; }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -77,11 +77,11 @@ def can_lower_multiple_callsites():
 
 def can_lower_function_final_statement_to_stop():
     _, program = prepare_program("""
-            fn main() noreturn { foo(); }
-            asm foo() noreturn { syscall; }
-        """)
+        fn main() noreturn { foo(); }
+        asm foo() noreturn { syscall; }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -91,12 +91,12 @@ def can_lower_function_final_statement_to_stop():
 
 def can_lower_function_calling_another_function():
     _, program = prepare_program("""
-            fn main() noreturn { foo(); }
-            fn foo() noreturn { bar(); }
-            asm bar() noreturn { syscall; }
-        """)
+        fn main() noreturn { foo(); }
+        fn foo() noreturn { bar(); }
+        asm bar() noreturn { syscall; }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 
@@ -106,14 +106,14 @@ def can_lower_function_calling_another_function():
 
 def can_lower_function_calling_another_function_reusing():
     _, program = prepare_program("""
-            fn main() noreturn { foo1(); foo2(); }
-            fn foo1() noreturn { foo3(); }
-            fn foo2() noreturn { foo3(); }
-            fn foo3() noreturn { bar(); }
-            asm bar() noreturn { syscall; }
-        """)
+        fn main() noreturn { foo1(); foo2(); }
+        fn foo1() noreturn { foo3(); }
+        fn foo2() noreturn { foo3(); }
+        fn foo3() noreturn { bar(); }
+        asm bar() noreturn { syscall; }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     llg = build_low_level_graph(model)
     flow = llg.instructions()
 

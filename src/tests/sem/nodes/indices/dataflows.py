@@ -4,10 +4,10 @@ from tests.sem import prepare_program
 
 def can_do_nothing_without_any_function():
     _, program = prepare_program("""
-            asm main() noreturn { }
-        """)
+        asm main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     values = semantic.indices.dataflow_by_flownode
@@ -17,10 +17,10 @@ def can_do_nothing_without_any_function():
 
 def can_build_dataflow_for_a_function_without_any_parameters():
     _, program = prepare_program("""
-            fn main() { }
-        """)
+        fn main() { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function
@@ -42,10 +42,10 @@ def can_build_dataflow_for_a_function_without_any_parameters():
 
 def can_build_dataflow_for_a_function_with_single_parameter():
     _, program = prepare_program("""
-            fn main(val: u8) { }
-        """)
+        fn main(val: u8) { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function
@@ -67,10 +67,10 @@ def can_build_dataflow_for_a_function_with_single_parameter():
 
 def can_build_dataflow_for_a_function_with_callsite_and_literal():
     _, program = prepare_program("""
-            fn main() { foo(0x42); }
-        """)
+        fn main() { foo(0x42); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function
@@ -100,10 +100,10 @@ def can_build_dataflow_for_a_function_with_callsite_and_literal():
 
 def can_build_dataflow_for_a_function_with_callsite_and_identifier():
     _, program = prepare_program("""
-            fn main(abc: u8) { foo(abc); }
-        """)
+        fn main(abc: u8) { foo(abc); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function
@@ -133,10 +133,10 @@ def can_build_dataflow_for_a_function_with_callsite_and_identifier():
 
 def can_build_dataflow_for_a_function_with_callsite_and_unresolved_identifier():
     _, program = prepare_program("""
-            fn main() { foo(abc); }
-        """)
+        fn main() { foo(abc); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     controlflows = semantic.indices.flowgraph_by_function

@@ -4,10 +4,10 @@ from tests.sem import prepare_program
 
 def can_accept_syscall_instruction_with_no_operands():
     _, program = prepare_program("""
-            asm main() noreturn { syscall; }
-        """)
+        asm main() noreturn { syscall; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction
@@ -26,10 +26,10 @@ def can_accept_syscall_instruction_with_no_operands():
 
 def can_reject_syscall_instruction_with_unexpected_operand():
     _, program = prepare_program("""
-            asm main() noreturn { syscall rax; }
-        """)
+        asm main() noreturn { syscall rax; }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     instructions = semantic.indices.resolution_by_instruction

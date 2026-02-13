@@ -1,13 +1,13 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 
 
 class CallSiteListExtractor:
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[Tuple[CallSiteId, CallSite]]:
-        return graph.basic.callsites.items()
+    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[CallSiteId, CallSite]]:
+        return artifacts.semantic_graph().basic.callsites.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

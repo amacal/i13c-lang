@@ -1,13 +1,15 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 
 
 class InstructionListExtractor:
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[Tuple[InstructionId, Instruction]]:
-        return graph.basic.instructions.items()
+    def extract(
+        artifacts: GraphArtifacts,
+    ) -> Iterable[Tuple[InstructionId, Instruction]]:
+        return artifacts.semantic_graph().basic.instructions.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, Protocol, TypeVar
 
-from i13c.semantic.model import SemanticGraph
+from i13c.graph.artifacts import GraphArtifacts
 
 ListItem = TypeVar("ListItem")
 
@@ -10,7 +10,7 @@ class AbstractListExtractor(Protocol[ListItem]):
     def headers() -> Dict[str, str]: ...
 
     @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[ListItem]: ...
+    def extract(artifacts: GraphArtifacts) -> Iterable[ListItem]: ...
 
     @staticmethod
     def rows(entry: ListItem) -> Dict[str, str]: ...

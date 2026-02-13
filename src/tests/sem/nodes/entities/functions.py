@@ -6,10 +6,10 @@ from tests.sem import prepare_program
 
 def can_do_nothing_without_any_function():
     _, program = prepare_program("""
-            asm main() noreturn { }
-        """)
+        asm main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     functions = semantic.basic.functions
@@ -19,10 +19,10 @@ def can_do_nothing_without_any_function():
 
 def can_build_a_function_with_no_statements():
     _, program = prepare_program("""
-            fn main() noreturn { }
-        """)
+        fn main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     functions = semantic.basic.functions
@@ -40,10 +40,10 @@ def can_build_a_function_with_no_statements():
 
 def can_build_a_function_with_no_return_statement():
     _, program = prepare_program("""
-            fn main() { }
-        """)
+        fn main() { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     functions = semantic.basic.functions
@@ -61,10 +61,10 @@ def can_build_a_function_with_no_return_statement():
 
 def can_build_a_function_with_call_statement():
     _, program = prepare_program("""
-            fn main() { foo(0x42); }
-        """)
+        fn main() { foo(0x42); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     functions = semantic.basic.functions
@@ -89,13 +89,13 @@ def can_build_a_function_with_call_statement():
 
 def can_build_function_with_properly_derived_types():
     _, program = prepare_program("""
-            fn main(
-                r1: u64[0x0000..0xffff],
-                r2: u8[0x00..0x10]
-            ) {}
-        """)
+        fn main(
+            r1: u64[0x0000..0xffff],
+            r2: u8[0x00..0x10]
+        ) {}
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     functions = semantic.basic.functions

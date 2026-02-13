@@ -5,10 +5,10 @@ from tests.sem import prepare_program
 
 def can_do_nothing_without_any_literal():
     _, program = prepare_program("""
-            fn main() noreturn { }
-        """)
+        fn main() noreturn { }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     literals = semantic.basic.literals
@@ -18,10 +18,10 @@ def can_do_nothing_without_any_literal():
 
 def can_detect_hex_literal():
     _, program = prepare_program("""
-            fn main() { foo(0x476); }
-        """)
+        fn main() { foo(0x476); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     literals = semantic.basic.literals
@@ -41,10 +41,10 @@ def can_detect_hex_literal():
 
 def can_detect_two_literals_even_if_identical():
     _, program = prepare_program("""
-            fn main() { foo(0x1a2b); bar(0x1a2b); }
-        """)
+        fn main() { foo(0x1a2b); bar(0x1a2b); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
     literals = semantic.basic.literals

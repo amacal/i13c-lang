@@ -1,15 +1,14 @@
 from i13c.cli.semantic.model import draw_list
 from i13c.cli.semantic.model.indices.dataflows import DataFlowListExtractor
-from i13c.semantic.model import SemanticGraph
-from tests.cli.semantic.model import prepare_semantic_graph
+from tests.cli.semantic.model import prepare_artifacts
 
 
 def can_draw_a_table_with_dataflows():
-    graph: SemanticGraph = prepare_semantic_graph("""
+    artifacts = prepare_artifacts("""
         fn main(arg1: u8, arg2: u8) { foo(arg1); bar(arg2); }
     """)
 
-    draw_list(DataFlowListExtractor, graph).equals("""
+    draw_list(DataFlowListExtractor, artifacts).equals("""
         | --------- | ----------- | ------------- | ---------------- | ----------------- | ------------- | -------------- |
         | Reference | Function ID | Function Name | ControlFlow Node | DataFlow Declares | DataFlow Uses | DataFlow Drops |
         | --------- | ----------- | ------------- | ---------------- | ----------------- | ------------- | -------------- |

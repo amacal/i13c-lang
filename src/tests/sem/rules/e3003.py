@@ -5,12 +5,10 @@ from tests.sem import prepare_program
 
 def can_detect_duplicated_slot_bindings():
     source, program = prepare_program("""
-            asm main(code@rdi: u32, id@rdi: u16) noreturn {
-                syscall;
-            }
-        """)
+        asm main(code@rdi: u32, id@rdi: u16) noreturn { syscall; }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     diagnostics = semantic.e3003.validate_duplicated_slot_bindings(model)
 
     assert len(diagnostics) == 1
@@ -22,12 +20,10 @@ def can_detect_duplicated_slot_bindings():
 
 def can_ignore_immediate_slot_bindings():
     _, program = prepare_program("""
-            asm first(code@imm: u32, id@imm: u16) noreturn {
-                syscall;
-            }
-        """)
+        asm first(code@imm: u32, id@imm: u16) noreturn { syscall; }
+    """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     diagnostics = semantic.e3003.validate_duplicated_slot_bindings(model)
 
     assert len(diagnostics) == 0

@@ -1,18 +1,17 @@
 from i13c.cli.semantic.model import draw_list
 from i13c.cli.semantic.model.entities.functions import FunctionListExtractor
-from i13c.semantic.model import SemanticGraph
-from tests.cli.semantic.model import prepare_semantic_graph
+from tests.cli.semantic.model import prepare_artifacts
 
 
 def can_draw_a_table_with_functions():
-    graph: SemanticGraph = prepare_semantic_graph("""
+    artifacts = prepare_artifacts("""
         fn main() { }
     """)
 
-    draw_list(FunctionListExtractor, graph).equals("""
-        | --------- | ----------- | ------------- | ---------- | ---------- |
-        | Reference | Function ID | Function Name | Parameters | Statements |
-        | --------- | ----------- | ------------- | ---------- | ---------- |
-        | 12:18     | function#1  | main          | 0          | 0          |
-        | --------- | ----------- | ------------- | ---------- | ---------- |
+    draw_list(FunctionListExtractor, artifacts).equals("""
+        | --------- | ----------- | ------------- | --------- | ---------- | ---------- |
+        | Reference | Function ID | Function Name | No Return | Parameters | Statements |
+        | --------- | ----------- | ------------- | --------- | ---------- | ---------- |
+        | 12:18     | function#1  | main          | false     | 0          | 0          |
+        | --------- | ----------- | ------------- | --------- | ---------- | ---------- |
     """)

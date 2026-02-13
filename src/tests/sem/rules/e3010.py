@@ -9,7 +9,7 @@ def can_survive_non_terminal_callee_symbol():
             fn bar() { foo(); }
         """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     diagnostics = semantic.e3010.validate_called_symbol_terminality(model)
 
     assert len(diagnostics) == 0
@@ -21,7 +21,7 @@ def can_detect_non_terminal_caller_symbol():
             fn bar() noreturn { foo(); }
         """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     diagnostics = semantic.e3010.validate_called_symbol_terminality(model)
 
     assert len(diagnostics) == 1
@@ -38,7 +38,7 @@ def can_survive_non_terminal_caller_symbol_not_last_call():
             fn bar() noreturn { foo1(); foo2(); }
         """)
 
-    model = run_graph(program)
+    model = run_graph(program).semantic_graph()
     diagnostics = semantic.e3010.validate_called_symbol_terminality(model)
 
     assert len(diagnostics) == 0

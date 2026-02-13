@@ -4,11 +4,11 @@ from tests.sem import prepare_program
 
 def can_build_live_flowgraph_without_need_of_pruning():
     _, program = prepare_program("""
-            asm halt() { syscall; }
-            fn main() { halt(); }
-        """)
+        asm halt() { syscall; }
+        fn main() { halt(); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic.live.flowgraph_by_function.size() == 1
     fid, flowgraph = semantic.live.flowgraph_by_function.peak()
@@ -35,11 +35,11 @@ def can_build_live_flowgraph_without_need_of_pruning():
 
 def can_remove_callsite_after_terminal_call():
     _, program = prepare_program("""
-            asm halt() noreturn { syscall; }
-            fn main() noreturn { halt(); ignored(); }
-        """)
+        asm halt() noreturn { syscall; }
+        fn main() noreturn { halt(); ignored(); }
+    """)
 
-    semantic = run_graph(program)
+    semantic = run_graph(program).semantic_graph()
 
     assert semantic.live.flowgraph_by_function.size() == 1
     fid, flowgraph = semantic.live.flowgraph_by_function.peak()

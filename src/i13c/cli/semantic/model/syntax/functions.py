@@ -1,19 +1,20 @@
 from typing import Dict, Iterable, Tuple
 
+from i13c.ast import Function
 from i13c.graph.artifacts import GraphArtifacts
-from i13c.semantic.typing.entities.functions import Function, FunctionId
+from i13c.semantic.syntax import NodeId
 
 
 class FunctionListExtractor:
     @staticmethod
-    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[FunctionId, Function]]:
-        return artifacts.semantic_graph().basic.functions.items()
+    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[NodeId, Function]]:
+        return artifacts.syntax_graph().functions.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:
         return {
             "ref": "Reference",
-            "id": "Function ID",
+            "id": "Node ID",
             "name": "Function Name",
             "noreturn": "No Return",
             "params": "Parameters",
@@ -21,11 +22,11 @@ class FunctionListExtractor:
         }
 
     @staticmethod
-    def rows(entry: Tuple[FunctionId, Function]) -> Dict[str, str]:
+    def rows(entry: Tuple[NodeId, Function]) -> Dict[str, str]:
         return {
             "ref": str(entry[1].ref),
-            "id": entry[0].identify(1),
-            "name": str(entry[1].identifier),
+            "id": f"#{entry[0].value}",
+            "name": str(entry[1].name.decode()),
             "noreturn": str(entry[1].noreturn).lower(),
             "params": str(len(entry[1].parameters)),
             "stmts": str(len(entry[1].statements)),
