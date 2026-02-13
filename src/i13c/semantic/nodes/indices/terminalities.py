@@ -110,7 +110,7 @@ def build_terminalities(
             if detected is None:
                 ignored.add(fid)
 
-            if detected == False:
+            if not detected:
                 terminalities[fid] = Terminality(noreturn=True)
                 changed = True
 
