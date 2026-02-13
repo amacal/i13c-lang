@@ -1,5 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
+from logging import Logger, getLogger
 from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Set, Tuple, Union
 
 
@@ -82,6 +83,7 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
 
 def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
     artifacts: Dict[str, Any] = {}
+    logger: Logger = getLogger("dag")
 
     # seed initial artifacts
     for key, value in initial.items():
@@ -100,6 +102,9 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
             return artifacts[req]
 
     for node in reorder_configurations(nodes):
+        for target in node.produces:
+            logger.info(f"producing {target} ...")
+
         # prepare arguments
         args = {name: expand(req) for name, req in node.requires}
 

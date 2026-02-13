@@ -1,6 +1,6 @@
 from typing import Callable, List
 
-from i13c import ast, diag
+from i13c import diag
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.rules import (
     e3000,
@@ -33,7 +33,7 @@ RULES: List[Callable[[SemanticGraph], List[diag.Diagnostic]]] = [
 ]
 
 
-def validate(model: SemanticGraph, program: ast.Program) -> List[diag.Diagnostic]:
+def validate(model: SemanticGraph) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
     for rule in RULES:

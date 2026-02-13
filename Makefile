@@ -1,6 +1,6 @@
 .PHONY: install
 install:
-	@pipx install poetry==2.3.1 --force
+	@pipx install poetry==2.3.2 --force
 
 .PHONY: deps
 deps:

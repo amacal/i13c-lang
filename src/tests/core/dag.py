@@ -1,6 +1,6 @@
-from typing import Tuple
+from typing import Dict, Tuple
 
-from i13c.core.dag import GraphGroup, GraphNode, evaluate
+from i13c.core.dag import GraphGroup, GraphNode, Prefix, evaluate
 
 
 def can_evaluate_one_node_without_dependencies():
@@ -125,3 +125,39 @@ def can_evaluate_group():
     assert len(artifacts) == 2
     assert artifacts["abc"] == 42
     assert artifacts["cde"] == 43
+
+
+def can_consume_prefix_from_single_multi_producer():
+    def produce_entities():
+        return 1, 2, 3
+
+    producer = GraphNode(
+        builder=produce_entities,
+        produces=(
+            "entities/a",
+            "entities/b",
+            "entities/c",
+        ),
+        requires=frozenset(),
+    )
+
+    def consume_entities(entities: Dict[str, int]) -> int:
+        # Prefix should give all artifacts at once
+        return sum(entities.values())
+
+    consumer = GraphNode(
+        builder=consume_entities,
+        produces=("result",),
+        requires=frozenset(
+            {
+                ("entities", Prefix(value="entities/")),
+            }
+        ),
+    )
+
+    artifacts = evaluate([producer, consumer], initial={})
+
+    assert artifacts["entities/a"] == 1
+    assert artifacts["entities/b"] == 2
+    assert artifacts["entities/c"] == 3
+    assert artifacts["result"] == 6

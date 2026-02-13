@@ -9,6 +9,7 @@ from i13c import elf, lex, par, semantic, src
 from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap
 from i13c.cli.semantic import attach
 from i13c.encoding import encode
+from i13c.semantic import validate
 from i13c.graph.nodes import run as run_graph
 from i13c.lowering.build import build_low_level_graph
 
@@ -60,7 +61,7 @@ def llg_command(path: str) -> None:
     program = unwrap(par.parse(code, tokens), source=code)
     model = run_graph(program)
 
-    if diagnostics := semantic.validate(model, program):
+    if diagnostics := validate(model):
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
@@ -94,7 +95,7 @@ def linear_command(path: str) -> None:
     program = unwrap(par.parse(code, tokens), source=code)
     model = run_graph(program)
 
-    if diagnostics := semantic.validate(model, program):
+    if diagnostics := validate(model):
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
@@ -116,7 +117,7 @@ def bin_command(path: str) -> None:
     program = unwrap(par.parse(code, tokens), source=code)
     model = run_graph(program)
 
-    if diagnostics := semantic.validate(model, program):
+    if diagnostics := validate(model):
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
@@ -138,7 +139,7 @@ def elf_command(path: str) -> None:
     program = unwrap(par.parse(code, tokens), source=code)
     model = run_graph(program)
 
-    if diagnostics := semantic.validate(model, program):
+    if diagnostics := validate(model):
         emit_and_exit(diagnostics, source=code)
 
     llg = build_low_level_graph(model)
