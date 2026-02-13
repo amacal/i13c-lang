@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import (
     Any,
     Callable,
-    Dict,
     Iterable,
     List,
     Optional,
@@ -15,41 +14,13 @@ import click
 
 from i13c import lex, par, src
 from i13c.cli import unwrap
-from i13c.cli.semantic.model.entities.callsites import CallSiteListExtractor
-from i13c.cli.semantic.model.entities.expressions import ExpressionListExtractor
-from i13c.cli.semantic.model.entities.functions import FunctionListExtractor
-from i13c.cli.semantic.model.entities.instructions import InstructionListExtractor
-from i13c.cli.semantic.model.entities.literals import LiteralListExtractor
-from i13c.cli.semantic.model.entities.operands import OperandListExtractor
-from i13c.cli.semantic.model.entities.parameters import ParameterListExtractor
-from i13c.cli.semantic.model.entities.snippets import SnippetListExtractor
-from i13c.cli.semantic.model.entities.variables import VariableListExtractor
-from i13c.cli.semantic.model.indices.controlflows import ControlFlowListExtractor
-from i13c.cli.semantic.model.indices.dataflows import DataFlowListExtractor
-from i13c.cli.semantic.model.indices.instances import InstanceListExtractor
-from i13c.cli.semantic.model.indices.resolutions import (
-    CallSiteResolutionListExtractor,
-    InstructionResolutionListExtractor,
-)
-from i13c.cli.semantic.model.indices.terminalities import TerminalityListExtractor
-from i13c.cli.semantic.model.indices.variables import ParameterVariablesListExtractor
+from i13c.cli.semantic.model.abstract import AbstractListExtractor, ListItem
+from i13c.cli.semantic.model.entities import ENTITIES
+from i13c.cli.semantic.model.indices import INDICES
 from i13c.core.mapping import Descriptive, Identified
 from i13c.core.table import Table, draw_table
 from i13c.graph.nodes import run as run_graph
 from i13c.semantic.model import SemanticGraph
-
-ListItem = TypeVar("ListItem")
-
-
-class AbstractListExtractor(Protocol[ListItem]):
-    @staticmethod
-    def headers() -> Dict[str, str]: ...
-
-    @staticmethod
-    def extract(graph: SemanticGraph) -> Iterable[ListItem]: ...
-
-    @staticmethod
-    def rows(entry: ListItem) -> Dict[str, str]: ...
 
 
 def draw_list(
@@ -87,29 +58,6 @@ class OneToOneFeature:
         None
     )
     show: Optional[Callable[[SemanticGraph], OneToOneLike[Identified, Showable]]] = None
-
-
-ENTITIES: Dict[str, AbstractListExtractor[Any]] = {
-    "entities/functions": FunctionListExtractor,
-    "entities/callsites": CallSiteListExtractor,
-    "entities/expressions": ExpressionListExtractor,
-    "entities/instructions": InstructionListExtractor,
-    "entities/literals": LiteralListExtractor,
-    "entities/operands": OperandListExtractor,
-    "entities/parameters": ParameterListExtractor,
-    "entities/snippets": SnippetListExtractor,
-    "entities/variables": VariableListExtractor,
-}
-
-INDICES: Dict[str, AbstractListExtractor[Any]] = {
-    "indices/controlflow-by-function": ControlFlowListExtractor,
-    "indices/dataflow-by-flownode": DataFlowListExtractor,
-    "indices/instance-by-callsite": InstanceListExtractor,
-    "indices/resolution-by-callsite": CallSiteResolutionListExtractor,
-    "indices/resolution-by-instruction": InstructionResolutionListExtractor,
-    "indices/variables-by-parameter": ParameterVariablesListExtractor,
-    "indices/terminality-by-function": TerminalityListExtractor,
-}
 
 
 def list_one2one_semantic(
