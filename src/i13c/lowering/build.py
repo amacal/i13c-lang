@@ -59,14 +59,8 @@ def configure_llvm_graph() -> GraphNode:
         produces=("llvm/graph",),
         requires=frozenset(
             {
-                (
-                    "graph",
-                    "semantic/graph",
-                ),
-                (
-                    "rules",
-                    "rules/semantic",
-                ),
+                ("graph", "semantic/graph"),
+                ("rules", "rules/semantic"),
             }
         ),
     )
