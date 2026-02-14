@@ -29,6 +29,9 @@ def configure_e3xxx() -> GraphNode:
 class SemanticRules:
     data: Dict[str, List[Diagnostic]]
 
+    def count(self) -> int:
+        return sum(len(diags) for diags in self.data.values())
+
 
 def build(rules: Dict[str, List[Diagnostic]]) -> SemanticRules:
     return SemanticRules(data=rules)
