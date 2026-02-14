@@ -4,12 +4,13 @@ from tests.llvm import GraphFixtureException, prepare_graph
 
 
 def can_prepare_graph_from_a_valid_program():
-    graph = prepare_graph("""
+    semantic, llvm = prepare_graph("""
         asm exit() noreturn { syscall; }
         fn main() noreturn { exit(); }
     """)
 
-    assert graph is not None
+    assert semantic is not None
+    assert llvm is not None
 
 
 def can_raise_exception_if_program_has_semantic_errors():

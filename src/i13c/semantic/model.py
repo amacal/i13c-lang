@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
@@ -72,3 +72,10 @@ class SemanticGraph:
     indices: IndexEdges
     callgraph: CallGraph
     live: LiveComponents
+
+    def find_function_by_name(self, name: bytes) -> Optional[FunctionId]:
+        for fid, function in self.basic.functions.items():
+            if function.identifier.name == name:
+                return fid
+
+        return None
