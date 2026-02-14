@@ -15,7 +15,6 @@ from i13c.cli.semantic.model.abstract import AbstractListExtractor, ListItem
 from i13c.cli.semantic.model.entities import ENTITIES
 from i13c.cli.semantic.model.indices import INDICES
 from i13c.cli.semantic.model.syntax import SYNTAX
-from i13c.core.mapping import Identified
 from i13c.core.table import Table, draw_table
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.graph.nodes import run as run_graph
@@ -51,16 +50,6 @@ def list_one2one_semantic(
 ) -> None:
     for line in draw_list(extractor, artifacts).entries:
         click.echo(line)
-
-
-def show_one2one_semantic(
-    nodes: OneToOneLike[Identified, Showable], node_id: int
-) -> None:
-    for id, node in nodes.items():
-        if id.value == node_id:
-            click.echo(f"{id.identify(2)}")
-            for line in node.show():
-                click.echo(f"  {line}")
 
 
 def load_artifacts(path: str) -> GraphArtifacts:

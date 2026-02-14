@@ -1,5 +1,5 @@
-from dataclasses import asdict, dataclass
-from typing import Any, Dict, Iterable, Optional, Protocol, Tuple, TypeVar, Union
+from dataclasses import dataclass
+from typing import Dict, Iterable, Tuple, TypeVar
 
 from i13c import ast
 from i13c.core.dag import GraphGroup, GraphNode
@@ -11,10 +11,6 @@ AstNode = TypeVar("AstNode")
 @dataclass(kw_only=True, frozen=True)
 class NodeId:
     value: int
-
-
-class BidirectionalLike(Protocol):
-    def as_dict(self) -> Dict[int, Dict[str, Any]]: ...
 
 
 @dataclass(kw_only=True)
@@ -38,12 +34,6 @@ class Bidirectional[AstNode]:
 
     def get_by_node(self, node: AstNode) -> NodeId:
         return self.node_to_id[node]
-
-    def as_dict(self) -> Dict[int, Dict[str, Any]]:
-        return {
-            k.value: asdict(v)  # type: ignore[reportUnknownMemberType]
-            for k, v in self.id_to_node.items()
-        }
 
 
 class NodesVisitor:
@@ -110,21 +100,6 @@ class SyntaxGraph:
 
     def next(self) -> int:
         return self.generator.next()
-
-    def as_dict(
-        self, key: str
-    ) -> Optional[Union[Dict[int, Dict[str, Any]], Dict[str, Any]]]:
-        # split the key and id if present
-        key, id = key.split("#", maxsplit=1) if "#" in key else (key, None)
-
-        # get the appropriate relation
-        field: Optional[BidirectionalLike] = getattr(self, key, None)
-
-        # guard the missing field case
-        data = field.as_dict() if field else {}
-
-        # return either the full data or the specific node
-        return data if not id else data.get(int(id))
 
 
 def build_syntax_graph(program: ast.Program) -> SyntaxGraph:

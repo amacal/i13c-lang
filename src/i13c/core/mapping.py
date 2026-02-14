@@ -1,20 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict, Generic, Iterable, List, Optional, Protocol, Tuple, TypeVar
+from typing import Dict, Generic, Iterable, List, Optional, Tuple, TypeVar
 
-
-class Identified(Protocol):
-    @property
-    def value(self) -> int: ...
-
-    def identify(self, length: int) -> str: ...
-
-
-class Descriptive(Protocol):
-    def describe(self) -> str: ...
-
-
-SemanticId = TypeVar("SemanticId", bound=Identified)
-SemanticNode = TypeVar("SemanticNode", bound=Descriptive)
+SemanticId = TypeVar("SemanticId")
+SemanticNode = TypeVar("SemanticNode")
 
 
 @dataclass(kw_only=True)
