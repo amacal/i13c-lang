@@ -32,6 +32,7 @@ from i13c.semantic.nodes.resolutions.callsites import configure_resolution_by_ca
 from i13c.semantic.nodes.resolutions.instructions import (
     configure_resolution_by_instruction,
 )
+from i13c.semantic.rules import configure_e3xxx
 from i13c.semantic.rules.e3000 import configure_e3000
 from i13c.semantic.rules.e3001 import configure_e3001
 from i13c.semantic.rules.e3002 import configure_e3002
@@ -89,6 +90,7 @@ def configure_semantic_graph() -> GraphGroup:
             configure_e3010(),
             configure_e3011(),
             configure_e3012(),
+            configure_e3xxx(),
         ]
     )
 
