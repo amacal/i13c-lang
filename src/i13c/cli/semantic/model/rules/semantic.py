@@ -4,7 +4,7 @@ from i13c.diag import Diagnostic
 from i13c.graph.artifacts import GraphArtifacts
 
 
-class SummaryListExtractor:
+class SemanticListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Diagnostic]:
         def inner() -> Iterable[Diagnostic]:
