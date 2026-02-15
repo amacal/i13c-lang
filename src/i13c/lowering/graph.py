@@ -59,18 +59,3 @@ class LowLevelContext:
 
     stack: Dict[FunctionId, StackFrame]
     values: Dict[ExpressionId, int]
-
-    @staticmethod
-    def empty(graph: SemanticGraph) -> LowLevelContext:
-        return LowLevelContext(
-            graph=graph,
-            generator=graph.generator,
-            nodes={},
-            forward={},
-            backward={},
-            flows={},
-            entry={},
-            exit={},
-            stack={},
-            values={},
-        )

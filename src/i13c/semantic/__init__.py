@@ -31,12 +31,3 @@ RULES: List[Callable[[SemanticGraph], List[diag.Diagnostic]]] = [
     e3011.validate_entrypoint_exists,
     e3012.validate_entrypoint_is_single,
 ]
-
-
-def validate(model: SemanticGraph) -> List[diag.Diagnostic]:
-    diagnostics: List[diag.Diagnostic] = []
-
-    for rule in RULES:
-        diagnostics.extend(rule(model))
-
-    return diagnostics

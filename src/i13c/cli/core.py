@@ -1,7 +1,7 @@
 import json
 import sys
 from functools import partial
-from typing import Any, List, NoReturn
+from typing import Any, Iterable, List, NoReturn
 
 import click
 
@@ -17,7 +17,7 @@ class BytesAsTextEncoder(json.JSONEncoder):
 
 
 def emit_and_exit(
-    diagnostics: List[diag.Diagnostic], /, source: src.SourceCode
+    diagnostics: Iterable[diag.Diagnostic], /, source: src.SourceCode
 ) -> NoReturn:
     for diagnostic in diagnostics:
         click.echo(

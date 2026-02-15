@@ -1,5 +1,7 @@
 .PHONY: install
 install:
+	@sudo apt update
+	@sudo apt install -y nasm
 	@pipx install poetry==2.3.2 --force
 
 .PHONY: deps

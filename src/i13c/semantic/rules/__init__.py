@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, Iterable, List
 
 from i13c.core.dag import GraphGroup, GraphNode, Prefix
 from i13c.diag import Diagnostic
@@ -31,6 +31,10 @@ class SemanticRules:
 
     def count(self) -> int:
         return sum(len(diags) for diags in self.data.values())
+
+    def enumerate(self) -> Iterable[Diagnostic]:
+        for diags in self.data.values():
+            yield from diags
 
 
 def build(rules: Dict[str, List[Diagnostic]]) -> SemanticRules:

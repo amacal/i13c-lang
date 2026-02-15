@@ -7,12 +7,13 @@ from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import CallFlow, PreserveFlow, RestoreFlow
 from i13c.lowering.typing.instructions import Call
+from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.snippets import SnippetId
 
 
 def lower_callsite(
-    ctx: LowLevelContext,
+    graph: SemanticGraph,
     cid: CallSiteId,
 ) -> Tuple[List[BlockInstruction], Set[int]]:
 
@@ -21,7 +22,7 @@ def lower_callsite(
     instructions: List[BlockInstruction] = []
 
     # retrieve callsite resolution
-    resolution = ctx.graph.indices.resolution_by_callsite.get(cid)
+    resolution = graph.indices.resolution_by_callsite.get(cid)
 
     # we expected no ambiguity here
     assert len(resolution.accepted) == 1
@@ -30,14 +31,14 @@ def lower_callsite(
     instructions.append(PreserveFlow())
 
     if isinstance(resolution.accepted[0].callable.target, SnippetId):
-        instance = ctx.graph.indices.instance_by_callsite.get(cid)
-        snippet = ctx.graph.basic.snippets.get(instance.target)
+        instance = graph.indices.instance_by_callsite.get(cid)
+        snippet = graph.basic.snippets.get(instance.target)
 
         # append callsite specific bindings
-        instructions.extend(lower_snippet_bindings(ctx, instance.bindings))
+        instructions.extend(lower_snippet_bindings(graph, instance.bindings))
 
         # append emitted instructions
-        instructions.extend(lower_instance(ctx, instance))
+        instructions.extend(lower_instance(graph, instance))
 
         # update clobbered registers
         clobbers.update(
@@ -50,7 +51,7 @@ def lower_callsite(
         bindings = resolution.accepted[0].bindings
 
         # append callsite specific bindings
-        instructions.extend(lower_function_bindings(ctx, bindings))
+        instructions.extend(lower_function_bindings(graph, bindings))
 
         # extract successfully resolved target
         target = resolution.accepted[0].callable.target

@@ -1,7 +1,9 @@
-from typing import Dict, List, Optional, Protocol, Type
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Protocol, Tuple, Type
 
+from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
-from i13c.lowering.graph import LowLevelContext
+from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.nodes.callsites import lower_callsite
 from i13c.lowering.nodes.registers import caller_saved
 from i13c.lowering.typing.blocks import Block, BlockInstruction, Registers
@@ -11,6 +13,8 @@ from i13c.lowering.typing.terminators import (
     JumpTerminator,
     TrapTerminator,
 )
+from i13c.semantic.model import SemanticGraph
+from i13c.semantic.rules import SemanticRules
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.indices.controlflows import (
@@ -21,29 +25,89 @@ from i13c.semantic.typing.indices.controlflows import (
 )
 
 
-def lower_active_functions(ctx: LowLevelContext) -> BlockId:
-    entry: Optional[BlockId] = None
+def configure_functions() -> GraphNode:
+    return GraphNode(
+        builder=lower_active_functions,
+        produces=(
+            "llvm/entrypoint",
+            "llvm/blocks",
+            "llvm/forward",
+            "llvm/backward",
+            "llvm/entries",
+            "llvm/exits",
+        ),
+        requires=frozenset({("graph", "semantic/graph"), ("rules", "rules/semantic")}),
+    )
+
+
+@dataclass(kw_only=True)
+class Context:
+    graph: SemanticGraph
+    generator: Generator
+    entrypoint: Optional[BlockId]
+
+    nodes: Dict[BlockId, Block]
+    forward: Dict[BlockId, List[BlockId]]
+    backward: Dict[BlockId, List[BlockId]]
+
+    entries: Dict[FunctionId, BlockId]
+    exits: Dict[FunctionId, BlockId]
+
+    @staticmethod
+    def empty(graph: SemanticGraph) -> "Context":
+        return Context(
+            graph=graph,
+            generator=graph.generator,
+            entrypoint=None,
+            nodes={},
+            forward={},
+            backward={},
+            entries={},
+            exits={},
+        )
+
+
+def lower_active_functions(
+    graph: SemanticGraph,
+    rules: SemanticRules,
+) -> Tuple[
+    Optional[BlockId],
+    OneToOne[BlockId, Block],
+    OneToMany[BlockId, BlockId],
+    OneToMany[BlockId, BlockId],
+    OneToOne[FunctionId, BlockId],
+    OneToOne[FunctionId, BlockId],
+]:
+    ctx = Context.empty(graph)
 
     # lower all live callables
-    for fid in ctx.graph.callable_live:
-        if isinstance(fid, FunctionId):
-            # find flowgraph and generate blocks
-            flowgraph = ctx.graph.live.flowgraph_by_function.get(fid)
-            block = lower_function_flow(ctx, fid, flowgraph)
+    if rules.count() == 0:
+        for fid in graph.callable_live:
+            if isinstance(fid, FunctionId):
+                # find flowgraph and generate blocks
+                flowgraph = graph.live.flowgraph_by_function.get(fid)
+                block = lower_function_flow(ctx, fid, flowgraph)
 
-            # returned block may be an entrypoint
-            if ctx.graph.live.entrypoints.contains(fid):
-                entry = block
+                # returned block may be an entrypoint
+                if graph.live.entrypoints.contains(fid):
+                    ctx.entrypoint = block
 
-    # entry has to be found
-    assert entry is not None
+        # entry has to be found
+        assert ctx.entrypoint is not None
 
     # success
-    return entry
+    return (
+        ctx.entrypoint,
+        OneToOne[BlockId, Block].instance(ctx.nodes),
+        OneToMany[BlockId, BlockId].instance(ctx.forward),
+        OneToMany[BlockId, BlockId].instance(ctx.backward),
+        OneToOne[FunctionId, BlockId].instance(ctx.entries),
+        OneToOne[FunctionId, BlockId].instance(ctx.exits),
+    )
 
 
 def lower_flow_entry(
-    ctx: LowLevelContext,
+    ctx: Context,
     fid: FunctionId,
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
@@ -60,7 +124,7 @@ def lower_flow_entry(
     instructions: List[BlockInstruction] = [PrologueFlow(target=fid)]
 
     # register entry block
-    ctx.entry[fid] = mapping[node]
+    ctx.entries[fid] = mapping[node]
 
     # create empty block with jump
     return Block(
@@ -72,14 +136,14 @@ def lower_flow_entry(
 
 
 def lower_flow_exit(
-    ctx: LowLevelContext,
+    ctx: Context,
     fid: FunctionId,
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
     node: FlowExit,
 ) -> Block:
     # register exit block
-    ctx.exit[fid] = mapping[node]
+    ctx.exits[fid] = mapping[node]
 
     # prepare exit instructions
     instructions: List[BlockInstruction] = [EpilogueFlow(target=fid)]
@@ -94,7 +158,7 @@ def lower_flow_exit(
 
 
 def lower_flow_callsite(
-    ctx: LowLevelContext,
+    ctx: Context,
     fid: FunctionId,
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
@@ -112,7 +176,7 @@ def lower_flow_callsite(
     )
 
     # lower callsite instructions and clobbers
-    instructions, clobbers = lower_callsite(ctx, node)
+    instructions, clobbers = lower_callsite(ctx.graph, node)
 
     # lower callsite block
     return Block(
@@ -126,7 +190,7 @@ def lower_flow_callsite(
 class FlowNodeLowerer(Protocol):
     def __call__(
         self,
-        ctx: LowLevelContext,
+        ctx: Context,
         fid: FunctionId,
         flow: FlowGraph,
         mapping: Dict[FlowNode, BlockId],
@@ -142,16 +206,15 @@ DISPATCH_TABLE: Dict[Type[FlowNode], FlowNodeLowerer] = {
 
 
 def lower_function_flow(
-    ctx: LowLevelContext,
+    ctx: Context,
     fid: FunctionId,
     flow: FlowGraph,
 ) -> BlockId:
     mapping: Dict[FlowNode, BlockId] = {}
-    generator: Generator = ctx.generator
 
     # assign ID to each FlowNode
     for node in flow.nodes():
-        mapping[node] = BlockId(value=generator.next())
+        mapping[node] = BlockId(value=ctx.generator.next())
         ctx.forward[mapping[node]] = []
         ctx.backward[mapping[node]] = []
 

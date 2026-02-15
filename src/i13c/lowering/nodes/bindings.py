@@ -5,6 +5,7 @@ from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import BindingFlow
 from i13c.lowering.typing.instructions import MovRegImm, MovRegReg
+from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
@@ -14,7 +15,7 @@ from i13c.semantic.typing.resolutions.callsites import CallSiteBinding
 
 
 def lower_snippet_bindings(
-    ctx: LowLevelContext, bindings: List[CallSiteBinding]
+    graph: SemanticGraph, bindings: List[CallSiteBinding]
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
@@ -26,7 +27,7 @@ def lower_snippet_bindings(
         if binding.argument.kind == b"literal":
             assert isinstance(binding.argument.target, LiteralId)
 
-            literal = ctx.graph.basic.literals.get(binding.argument.target)
+            literal = graph.basic.literals.get(binding.argument.target)
 
             # we know all literals are hex for now
             assert literal.kind == b"hex"
@@ -55,7 +56,7 @@ def lower_snippet_bindings(
 
 
 def lower_function_bindings(
-    ctx: LowLevelContext, bindings: List[CallSiteBinding]
+    graph: SemanticGraph, bindings: List[CallSiteBinding]
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
@@ -69,7 +70,7 @@ def lower_function_bindings(
             assert isinstance(binding.argument.target, LiteralId)
 
             # find the literal behind the target
-            literal = ctx.graph.basic.literals.get(binding.argument.target)
+            literal = graph.basic.literals.get(binding.argument.target)
 
             # we know all literals are hex for now
             assert literal.kind == b"hex"
@@ -98,7 +99,6 @@ def lower_function_bindings(
 
 
 def patch_bindings(ctx: LowLevelContext) -> None:
-
     values: Dict[ExpressionId, int] = {}
 
     for cid, callsite in ctx.graph.basic.callsites.items():

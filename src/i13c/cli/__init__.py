@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 from dataclasses import asdict
 
 import click
@@ -10,8 +9,6 @@ from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap
 from i13c.cli.semantic import attach
 from i13c.encoding import encode
 from i13c.graph.nodes import run as run_graph
-from i13c.lowering.build import build_low_level_graph
-from i13c.semantic import validate
 
 
 @click.group()
@@ -49,84 +46,6 @@ def ast_command(path: str) -> None:
     click.echo(json.dumps(asdict(program), cls=BytesAsTextEncoder))
 
 
-@i13c.command("llg")
-@click.argument("path", type=click.Path(exists=True))
-def llg_command(path: str) -> None:
-    with open(path, "r", encoding="utf-8") as f:
-        text = f.read()
-
-    code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code), source=code)
-
-    program = unwrap(par.parse(code, tokens), source=code)
-    artifacts = run_graph(program)
-
-    if diagnostics := validate(artifacts.semantic_graph()):
-        emit_and_exit(diagnostics, source=code)
-
-    llg = build_low_level_graph(artifacts.semantic_graph())
-
-    for idx, (bid, block) in enumerate(llg.nodes.items()):
-        click.echo(f"Block: {bid.value}")
-        click.echo(f"  Origin: {block.origin.identify(2)}")
-        click.echo(f"  Inputs: {list(block.registers.inputs)}")
-        click.echo(f"  Outputs: {list(block.registers.outputs)}")
-        click.echo(f"  Forward: {[succ.value for succ in llg.forward.find(bid)]}")
-        click.echo(f"  Backward: {[pred.value for pred in llg.backward.find(bid)]}")
-        click.echo(f"  Terminator: {block.terminator}")
-
-        click.echo("  Instructions:")
-        for instruction in block.instructions:
-            click.echo(f"    {str(instruction)}")
-
-        if idx < llg.nodes.size() - 1:
-            click.echo("")
-
-
-@i13c.command("linear")
-@click.argument("path", type=click.Path(exists=True))
-def linear_command(path: str) -> None:
-    with open(path, "r", encoding="utf-8") as f:
-        text = f.read()
-
-    code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code), source=code)
-
-    program = unwrap(par.parse(code, tokens), source=code)
-    artifacts = run_graph(program)
-
-    if diagnostics := validate(artifacts.semantic_graph()):
-        emit_and_exit(diagnostics, source=code)
-
-    llg = build_low_level_graph(artifacts.semantic_graph())
-    flow = llg.instructions()
-
-    for idx, instruction in enumerate(flow):
-        click.echo(f"{idx:04}: {str(instruction)}")
-
-
-@i13c.command("bin")
-@click.argument("path", type=click.Path(exists=True))
-def bin_command(path: str) -> None:
-    with open(path, "r", encoding="utf-8") as f:
-        text = f.read()
-
-    code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code), source=code)
-
-    program = unwrap(par.parse(code, tokens), source=code)
-    artifacts = run_graph(program)
-
-    if diagnostics := validate(artifacts.semantic_graph()):
-        emit_and_exit(diagnostics, source=code)
-
-    llg = build_low_level_graph(artifacts.semantic_graph())
-    flow = llg.instructions()
-
-    binary = encode(list(flow))
-    sys.stdout.buffer.write(binary)
-
-
 @i13c.command("elf")
 @click.argument("path", type=click.Path(exists=True))
 def elf_command(path: str) -> None:
@@ -139,12 +58,13 @@ def elf_command(path: str) -> None:
     program = unwrap(par.parse(code, tokens), source=code)
     artifacts = run_graph(program)
 
-    if diagnostics := validate(artifacts.semantic_graph()):
-        emit_and_exit(diagnostics, source=code)
+    if artifacts.rules().count() > 0:
+        emit_and_exit(artifacts.rules().enumerate(), source=code)
 
-    llg = build_low_level_graph(artifacts.semantic_graph())
+    llg = artifacts.llvm_graph()
+    assert llg is not None
+
     flow = llg.instructions()
-
     binary = encode(list(flow))
     executable = elf.emit(binary)
 
