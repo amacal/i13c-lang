@@ -29,12 +29,12 @@ def can_draw_a_table_with_block_instructions():
     """)
 
     draw_list(BlockInstructionsListExtractor, artifacts).equals("""
-        | -------- | ---------- | ----- | ----------- | ------------------------ |
-        | Block ID | Origin     | Index | Kind        | Instruction              |
-        | -------- | ---------- | ----- | ----------- | ------------------------ |
-        | block#7  | callsite#4 | 0     | flow        | PreserveFlow()           |
-        | block#7  | callsite#4 | 1     | instruction | SysCall()                |
-        | block#7  | callsite#4 | 2     | flow        | RestoreFlow()            |
-        | block#8  | function#3 | 0     | flow        | PrologueFlow(function#3) |
-        | -------- | ---------- | ----- | ----------- | ------------------------ |
+        | -------- | ---------- | ----- | ----------- | ------------------- |
+        | Block ID | Origin     | Index | Kind        | Instruction         |
+        | -------- | ---------- | ----- | ----------- | ------------------- |
+        | block#7  | callsite#4 | 0     | flow        | preserve            |
+        | block#7  | callsite#4 | 1     | instruction | syscall             |
+        | block#7  | callsite#4 | 2     | flow        | restore             |
+        | block#8  | function#3 | 0     | flow        | prologue function#3 |
+        | -------- | ---------- | ----- | ----------- | ------------------- |
     """)

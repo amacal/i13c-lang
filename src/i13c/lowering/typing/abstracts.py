@@ -6,20 +6,34 @@ from typing import Dict, Tuple, Union
 class EnterFrame:
     size: int
 
+    def native(self) -> str:
+        return f"enter {self.size:#010x}"
+
 
 @dataclass(kw_only=True)
 class ExitFrame:
     size: int
+
+    def native(self) -> str:
+        return f"exit {self.size:#010x}"
 
 
 @dataclass(kw_only=True)
 class Preserve:
     registers: Dict[int, int]
 
+    def native(self) -> str:
+        regs = ", ".join(f"{k}:{v}" for k, v in self.registers.items())
+        return f"preserve {regs}"
+
 
 @dataclass(kw_only=True)
 class Restore:
     registers: Dict[int, int]
+
+    def native(self) -> str:
+        regs = ", ".join(f"{k}:{v}" for k, v in self.registers.items())
+        return f"restore {regs}"
 
 
 Abstracts = Union[

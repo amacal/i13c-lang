@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple, Union
 
+from i13c.lowering.typing.registers import IR_REGISTER_BACKWARD
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 
@@ -8,12 +9,6 @@ from i13c.semantic.typing.entities.functions import FunctionId
 @dataclass(kw_only=True, frozen=True)
 class BlockId:
     value: int
-
-    def ref(self) -> str:
-        return f".{self.value}"
-
-    def label(self) -> str:
-        return f".{self.identify(1)}:"
 
     def identify(self, length: int) -> str:
         return "#".join(("block", f"{self.value:<{length}}"))
@@ -23,37 +18,46 @@ class BlockId:
 class CallFlow:
     target: FunctionId
 
+    def native(self) -> str:
+        return f"call {self.target.identify(1)}"
+
 
 @dataclass(kw_only=True)
 class BindingFlow:
     dst: int
     src: ExpressionId
 
+    def native(self) -> str:
+        dst = IR_REGISTER_BACKWARD[self.dst].decode()
+        return f"bind {dst}, {self.src.identify(1)}"
+
 
 @dataclass(kw_only=True)
 class PrologueFlow:
     target: FunctionId
 
-    def __str__(self) -> str:
-        return f"PrologueFlow({self.target.identify(1)})"
+    def native(self) -> str:
+        return f"prologue {self.target.identify(1)}"
 
 
 @dataclass(kw_only=True)
 class EpilogueFlow:
     target: FunctionId
 
-    def __str__(self) -> str:
-        return f"EpilogueFlow({self.target.identify(1)})"
+    def native(self) -> str:
+        return f"epilogue {self.target.identify(1)}"
 
 
 @dataclass(kw_only=True)
 class PreserveFlow:
-    pass
+    def native(self) -> str:
+        return "preserve"
 
 
 @dataclass(kw_only=True)
 class RestoreFlow:
-    pass
+    def native(self) -> str:
+        return "restore"
 
 
 Flow = Union[

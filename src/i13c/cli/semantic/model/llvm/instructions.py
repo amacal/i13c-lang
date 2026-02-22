@@ -31,5 +31,5 @@ class InstructionsListExtractor:
             "bid": entry[0].identify(1),
             "origin": str(entry[1].origin.identify(1)),
             "idx": str(entry[2]),
-            "instruction": str(entry[3]),
+            "instruction": entry[3].native(),
         }

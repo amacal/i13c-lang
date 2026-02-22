@@ -10,10 +10,10 @@ def can_draw_a_table_with_instructions():
     """)
 
     draw_list(InstructionsListExtractor, artifacts).equals("""
-        | -------- | ---------- | ----- | ----------------------- |
-        | Block ID | Origin     | Index | Instruction             |
-        | -------- | ---------- | ----- | ----------------------- |
-        | block#8  | function#3 | 0     | SubRegImm(dst=4, imm=0) |
-        | block#8  | function#3 | 1     | SysCall()               |
-        | -------- | ---------- | ----- | ----------------------- |
+        | -------- | ---------- | ----- | ------------------- |
+        | Block ID | Origin     | Index | Instruction         |
+        | -------- | ---------- | ----- | ------------------- |
+        | block#8  | function#3 | 0     | sub rsp, 0x00000000 |
+        | block#8  | function#3 | 1     | syscall             |
+        | -------- | ---------- | ----- | ------------------- |
     """)

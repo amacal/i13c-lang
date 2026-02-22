@@ -29,7 +29,7 @@ def can_lower_function_calling_another_function():
 
     instructions = llvm.instructions_of(function)
     assert list(instructions) == [
-        block.label(),
+        f"label {block.identify(1)}",
         "sub rsp, 0x00000000",
         "syscall",
     ]
@@ -63,7 +63,7 @@ def can_lower_function_calling_another_function_twice():
 
     instructions = llvm.instructions_of(function)
     assert list(instructions) == [
-        block.label(),
+        f"label {block.identify(1)}",
         "sub rsp, 0x00000000",
         "syscall",
     ]

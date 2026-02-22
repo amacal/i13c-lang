@@ -66,5 +66,5 @@ class BlockInstructionsListExtractor:
             "origin": str(entry[1].origin.identify(1)),
             "idx": str(entry[2]),
             "kind": into_kind(entry[3]),
-            "instruction": str(entry[3][1]),
+            "instruction": entry[3][1].native(),
         }

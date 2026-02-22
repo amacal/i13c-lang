@@ -92,7 +92,7 @@ class Call:
     target: BlockId
 
     def native(self) -> str:
-        return f"call .{self.target.value}"
+        return f"call {self.target.identify(1)}"
 
 
 @dataclass(kw_only=True)
@@ -100,7 +100,7 @@ class Label:
     id: BlockId
 
     def native(self) -> str:
-        return f".{self.id.identify(1)}:"
+        return f"label {self.id.identify(1)}"
 
 
 @dataclass(kw_only=True)
@@ -114,7 +114,7 @@ class Jump:
     target: BlockId
 
     def native(self) -> str:
-        return f"jmp .{self.target.identify(1)}"
+        return f"jmp {self.target.identify(1)}"
 
 
 Instruction = Union[
