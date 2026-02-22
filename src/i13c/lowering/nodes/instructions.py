@@ -1,7 +1,6 @@
 from typing import Dict
 
 from i13c.core.generator import Generator
-from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.instructions import (
     InstructionEntry,
     InstructionId,
@@ -9,6 +8,7 @@ from i13c.lowering.typing.instructions import (
     ShlRegImm,
     SysCall,
 )
+from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
@@ -55,7 +55,7 @@ def lower_instruction_mov(
     assert isinstance(dst.target, Register)
     assert isinstance(src.target, Immediate)
 
-    dst_reg = IR_REGISTER_MAP[dst.target.name]
+    dst_reg = IR_REGISTER_FORWARD[dst.target.name]
     src_imm = src.target.value
 
     return (
@@ -81,7 +81,7 @@ def lower_instruction_shl(
     assert isinstance(dst.target, Register)
     assert isinstance(src.target, Immediate)
 
-    dst_reg = IR_REGISTER_MAP[dst.target.name]
+    dst_reg = IR_REGISTER_FORWARD[dst.target.name]
     src_imm = src.target.value
 
     return (

@@ -4,7 +4,6 @@ from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.nodes.bindings import lower_function_bindings, lower_snippet_bindings
 from i13c.lowering.nodes.instances import lower_instance
-from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import (
     BlockId,
@@ -14,6 +13,7 @@ from i13c.lowering.typing.flows import (
     RestoreFlow,
 )
 from i13c.lowering.typing.instructions import Call, InstructionEntry, InstructionId
+from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -51,7 +51,7 @@ def lower_callsite(
 
         # update clobbered registers
         clobbers.update(
-            [IR_REGISTER_MAP[register.name] for register in snippet.clobbers]
+            [IR_REGISTER_FORWARD[register.name] for register in snippet.clobbers]
         )
 
     else:
@@ -70,7 +70,7 @@ def lower_callsite(
         instructions.extend([(iid, CallFlow(target=target))])
 
         # all IR registers are clobbered by function calls
-        clobbers.update(set(IR_REGISTER_MAP.values()))
+        clobbers.update(set(IR_REGISTER_FORWARD.values()))
 
     # append restore instructions
     iid = FlowId(value=graph.generator.next())

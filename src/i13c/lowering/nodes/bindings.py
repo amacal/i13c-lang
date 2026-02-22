@@ -2,7 +2,6 @@ from typing import Dict, List
 
 from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import BindingFlow, BlockId, FlowId
 from i13c.lowering.typing.instructions import (
@@ -11,6 +10,7 @@ from i13c.lowering.typing.instructions import (
     MovRegImm,
     MovRegReg,
 )
+from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
@@ -44,7 +44,7 @@ def lower_snippet_bindings(
 
             # emit move instruction for binding
             iid = InstructionId(value=graph.generator.next())
-            instr = MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm)
+            instr = MovRegImm(dst=IR_REGISTER_FORWARD[bind.name], imm=imm)
 
             out.append((iid, instr))
 
@@ -53,7 +53,7 @@ def lower_snippet_bindings(
             assert isinstance(binding.argument.target, ExpressionId)
 
             src = binding.argument.target
-            dst = IR_REGISTER_MAP[binding.target.bind.name]
+            dst = IR_REGISTER_FORWARD[binding.target.bind.name]
 
             # emit flow binding to be patched later
             fid = FlowId(value=graph.generator.next())

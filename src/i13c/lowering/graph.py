@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterator, Optional, Tuple
+from typing import Iterator, Optional
 
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.typing.blocks import Block, BlockInstruction, BlockOrigin
@@ -28,11 +28,11 @@ class LowLevelGraph:
             for instr in batch:
                 yield instr
 
-    def instructions_of(self, origin: BlockOrigin) -> Iterator[Tuple[str, ...]]:
+    def instructions_of(self, origin: BlockOrigin) -> Iterator[str]:
         for bid, batch in self.instructions.items():
             if self.nodes.get(bid).origin == origin:
                 for instr in batch:
-                    yield instr.raw()
+                    yield instr.native()
 
     def find_block_by_origin(self, origin: BlockOrigin) -> Optional[BlockId]:
         for bid, block in self.nodes.items():

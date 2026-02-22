@@ -9,6 +9,12 @@ from i13c.semantic.typing.entities.functions import FunctionId
 class BlockId:
     value: int
 
+    def ref(self) -> str:
+        return f".{self.value}"
+
+    def label(self) -> str:
+        return f".{self.identify(1)}:"
+
     def identify(self, length: int) -> str:
         return "#".join(("block", f"{self.value:<{length}}"))
 

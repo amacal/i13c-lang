@@ -3,7 +3,6 @@ from typing import Dict, List, Optional, Protocol, Set, Tuple, Type
 
 from i13c.core.dag import GraphNode, Prefix
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.abstracts import (
     AbstractEntry,
     Abstracts,
@@ -25,6 +24,7 @@ from i13c.lowering.typing.instructions import (
     Return,
     SubRegImm,
 )
+from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
     JumpTerminator,
@@ -39,23 +39,23 @@ class AbstractConverter(Protocol):
 
 
 def dispatch_enter_frame(abstract: EnterFrame) -> List[Instruction]:
-    return [SubRegImm(dst=IR_REGISTER_MAP[b"rsp"], imm=abstract.size)]
+    return [SubRegImm(dst=IR_REGISTER_FORWARD[b"rsp"], imm=abstract.size)]
 
 
 def dispatch_exit_frame(abstract: ExitFrame) -> List[Instruction]:
-    return [AddRegImm(dst=IR_REGISTER_MAP[b"rsp"], imm=abstract.size)]
+    return [AddRegImm(dst=IR_REGISTER_FORWARD[b"rsp"], imm=abstract.size)]
 
 
 def dispatch_preserve(abstract: Preserve) -> List[Instruction]:
     return [
-        MovOffReg(dst=IR_REGISTER_MAP[b"rsp"], src=reg, off=idx * 8)
+        MovOffReg(dst=IR_REGISTER_FORWARD[b"rsp"], src=reg, off=idx * 8)
         for idx, reg in abstract.registers.items()
     ]
 
 
 def dispatch_restore(abstract: Restore) -> List[Instruction]:
     return [
-        MovRegOff(dst=reg, src=IR_REGISTER_MAP[b"rsp"], off=idx * 8)
+        MovRegOff(dst=reg, src=IR_REGISTER_FORWARD[b"rsp"], off=idx * 8)
         for idx, reg in abstract.registers.items()
     ]
 
