@@ -2,9 +2,23 @@ from dataclasses import dataclass
 from typing import Iterator, Optional
 
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.typing.blocks import Block, BlockInstruction, BlockOrigin
+from i13c.lowering.typing.blocks import Block, BlockInstruction, BlockOrigin, Registers
 from i13c.lowering.typing.flows import BlockId
 from i13c.lowering.typing.instructions import Instruction
+from i13c.semantic.typing.entities.functions import FunctionId
+
+
+@dataclass(kw_only=True)
+class FunctionsNode:
+    entries: OneToOne[FunctionId, BlockId]
+    exits: OneToOne[FunctionId, BlockId]
+
+
+@dataclass(kw_only=True)
+class RegistersNode:
+    inputs: OneToOne[BlockId, Registers]
+    outputs: OneToOne[BlockId, Registers]
+    clobbers: OneToOne[BlockId, Registers]
 
 
 @dataclass(kw_only=True)
@@ -17,6 +31,9 @@ class LowLevelGraph:
 
     forward: OneToMany[BlockId, BlockId]
     backward: OneToMany[BlockId, BlockId]
+
+    functions: FunctionsNode
+    registers: RegistersNode
 
     def flows_all(self) -> Iterator[BlockInstruction]:
         for _, flow in self.flows.items():

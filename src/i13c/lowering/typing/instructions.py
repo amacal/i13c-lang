@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Tuple, Union
 
 from i13c.lowering.typing.flows import BlockId
-from i13c.lowering.typing.registers import IR_REGISTER_BACKWARD
+from i13c.lowering.typing.registers import reg_to_name
 
 
 @dataclass(kw_only=True)
@@ -11,7 +11,7 @@ class MovRegImm:
     imm: int
 
     def native(self) -> str:
-        return f"mov {IR_REGISTER_BACKWARD[self.dst].decode()}, {self.imm:#010x}"
+        return f"mov {reg_to_name(self.dst)}, {self.imm:#010x}"
 
 
 @dataclass(kw_only=True)
@@ -20,8 +20,8 @@ class MovRegReg:
     src: int
 
     def native(self) -> str:
-        src = IR_REGISTER_BACKWARD[self.src].decode()
-        dst = IR_REGISTER_BACKWARD[self.dst].decode()
+        src = reg_to_name(self.src)
+        dst = reg_to_name(self.dst)
 
         return f"mov {dst}, {src}"
 
@@ -33,8 +33,8 @@ class MovOffReg:
     off: int
 
     def native(self) -> str:
-        src = IR_REGISTER_BACKWARD[self.src].decode()
-        dst = IR_REGISTER_BACKWARD[self.dst].decode()
+        src = reg_to_name(self.src)
+        dst = reg_to_name(self.dst)
         sign = "+" if self.off >= 0 else "-"
 
         return f"mov {dst}, [{src} {sign} {abs(self.off):#010x}]"
@@ -47,8 +47,8 @@ class MovRegOff:
     off: int
 
     def native(self) -> str:
-        dst = IR_REGISTER_BACKWARD[self.dst].decode()
-        src = IR_REGISTER_BACKWARD[self.src].decode()
+        dst = reg_to_name(self.dst)
+        src = reg_to_name(self.src)
         sign = "+" if self.off >= 0 else "-"
 
         return f"mov {dst}, [{src} {sign} {abs(self.off):#010x}]"
@@ -60,7 +60,7 @@ class ShlRegImm:
     imm: int
 
     def native(self) -> str:
-        return f"shl {IR_REGISTER_BACKWARD[self.dst].decode()}, {self.imm:#010x}"
+        return f"shl {reg_to_name(self.dst)}, {self.imm:#010x}"
 
 
 @dataclass(kw_only=True)
@@ -69,7 +69,7 @@ class SubRegImm:
     imm: int
 
     def native(self) -> str:
-        return f"sub {IR_REGISTER_BACKWARD[self.dst].decode()}, {self.imm:#010x}"
+        return f"sub {reg_to_name(self.dst)}, {self.imm:#010x}"
 
 
 @dataclass(kw_only=True)
@@ -78,7 +78,7 @@ class AddRegImm:
     imm: int
 
     def native(self) -> str:
-        return f"add {IR_REGISTER_BACKWARD[self.dst].decode()}, {self.imm:#010x}"
+        return f"add {reg_to_name(self.dst)}, {self.imm:#010x}"
 
 
 @dataclass(kw_only=True)

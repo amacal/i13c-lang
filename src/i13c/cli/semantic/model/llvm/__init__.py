@@ -5,19 +5,18 @@ from i13c.cli.semantic.model.llvm.blocks import (
     BlockInstructionsListExtractor,
     BlockListExtractor,
 )
+from i13c.cli.semantic.model.llvm.functions import (
+    EntriesListExtractor,
+    ExitsListExtractor,
+)
 from i13c.cli.semantic.model.llvm.instructions import InstructionsListExtractor
+from i13c.cli.semantic.model.llvm.registers import RegistersListExtractor
 
 LLVM: Dict[str, AbstractListExtractor[Any]] = {
     "llvm/blocks": BlockListExtractor,
     "llvm/blocks/instructions": BlockInstructionsListExtractor,
-    # "llvm/blocks/registers": None,
-    # "llvm/blocks/forward": None,
-    # "llvm/blocks/backward": None,
     "llvm/instructions": InstructionsListExtractor,
-    # "llvm/abstracts": None,
-    # "llvm/abstracts/instructions": None,
-    # "llvm/flows": None,
-    # "llvm/flows/instructions": None,
-    # "llvm/function/entries": None,
-    # "llvm/function/exits": None,
+    "llvm/functions/entries": EntriesListExtractor,
+    "llvm/functions/exits": ExitsListExtractor,
+    "llvm/registers": RegistersListExtractor,
 }

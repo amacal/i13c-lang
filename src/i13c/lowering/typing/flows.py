@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple, Union
 
-from i13c.lowering.typing.registers import IR_REGISTER_BACKWARD
+from i13c.lowering.typing.registers import reg_to_name
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 
@@ -28,7 +28,7 @@ class BindingFlow:
     src: ExpressionId
 
     def native(self) -> str:
-        dst = IR_REGISTER_BACKWARD[self.dst].decode()
+        dst = reg_to_name(self.dst)
         return f"bind {dst}, {self.src.identify(1)}"
 
 
