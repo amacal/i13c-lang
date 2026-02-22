@@ -1,15 +1,19 @@
-from typing import Dict, List, Optional, Protocol, Set, Type
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Protocol, Set, Tuple, Type
 
-from i13c.lowering.graph import LowLevelContext
+from i13c.core.dag import GraphNode, Prefix
+from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.abstracts import (
+    AbstractEntry,
     Abstracts,
     EnterFrame,
     ExitFrame,
     Preserve,
     Restore,
 )
-from i13c.lowering.typing.flows import BlockId, Flow
+from i13c.lowering.typing.blocks import Block, BlockInstruction, Registers
+from i13c.lowering.typing.flows import BlockId, Flow, FlowId
 from i13c.lowering.typing.instructions import (
     AddRegImm,
     Call,
@@ -27,6 +31,7 @@ from i13c.lowering.typing.terminators import (
     Terminator,
     TrapTerminator,
 )
+from i13c.semantic.typing.entities.functions import FunctionId
 
 
 class AbstractConverter(Protocol):
@@ -63,34 +68,82 @@ DISPATCH_TABLE: Dict[Type[Abstracts], AbstractConverter] = {
 }  # pyright: ignore[reportAssignmentType]
 
 
-def emit_all_blocks(ctx: LowLevelContext, entry: BlockId) -> None:
+@dataclass(kw_only=True)
+class Context:
+    flows: Dict[BlockId, List[Instruction]]
+    entries: OneToOne[FunctionId, BlockId]
+    blocks: OneToOne[BlockId, Block]
+    forward: OneToMany[BlockId, BlockId]
+    instructions: OneToMany[BlockId, BlockInstruction]
+    patching: Dict[str, OneToOne[FlowId, AbstractEntry]]
+
+
+def configure_instruction_emission() -> GraphNode:
+    return GraphNode(
+        builder=emit_all_instructions,
+        constraint=None,
+        produces=("llvm/instructions",),
+        requires=frozenset(
+            {
+                ("entrypoint", "llvm/entrypoint"),
+                ("entries", "llvm/functions/entries"),
+                ("blocks", "llvm/blocks"),
+                ("forward", "llvm/blocks/forward"),
+                ("instructions", "llvm/blocks/instructions"),
+                ("patching", Prefix(value="llvm/patches/")),
+            }
+        ),
+    )
+
+
+def emit_all_instructions(
+    entrypoint: BlockId,
+    entries: OneToOne[FunctionId, BlockId],
+    blocks: OneToOne[BlockId, Block],
+    forward: OneToMany[BlockId, BlockId],
+    instructions: OneToMany[BlockId, BlockInstruction],
+    patching: Dict[str, OneToOne[FlowId, AbstractEntry]],
+) -> OneToMany[BlockId, Instruction]:
+
+    result: Dict[BlockId, List[Instruction]] = {}
+    ctx = Context(
+        flows=result,
+        entries=entries,
+        blocks=blocks,
+        forward=forward,
+        patching=patching,
+        instructions=instructions,
+    )
+
     # emit entrypoint first
-    ctx.flows[entry] = emit_instructions(ctx, entry)
+    result[entrypoint] = emit_instructions(ctx, entrypoint)
 
     # emit all other functions
-    for fid in ctx.entry.keys():
-        if ctx.entry[fid] != entry:
-            ctx.flows[ctx.entry[fid]] = emit_instructions(ctx, ctx.entry[fid])
+    for fid, bid in entries.items():
+        if bid != entrypoint:
+            result[bid] = emit_instructions(ctx, bid)
 
     # collect active labels
     active: Set[int] = {
         instr.target.value
-        for flow in ctx.flows.values()
+        for flow in result.values()
         for instr in flow
         if isinstance(instr, Call)
     }
 
     # remove inactive labels
-    for fid in ctx.flows.keys():
-        ctx.flows[fid] = [
+    for fid in result.keys():
+        result[fid] = [
             instr
-            for instr in ctx.flows[fid]
+            for instr in result[fid]
             if not isinstance(instr, Label) or instr.id.value in active
         ]
 
+    return OneToMany[BlockId, Instruction].instance(result)
+
 
 def linearize_blocks(
-    entry: BlockId, edges: Dict[BlockId, List[BlockId]]
+    entry: BlockId, forward: OneToMany[BlockId, BlockId]
 ) -> List[BlockId]:
     visited: Set[BlockId] = set()
     queue: List[BlockId] = [entry]
@@ -104,14 +157,14 @@ def linearize_blocks(
             visited.add(bid)
             ordered.append(bid)
 
-            for next in edges[bid]:
+            for next in forward.get(bid):
                 queue.append(next)
 
     # success
     return ordered
 
 
-def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]:
+def emit_instructions(ctx: Context, entry: BlockId) -> List[Instruction]:
     emited: List[Instruction] = []
     ordered: List[BlockId] = linearize_blocks(entry, ctx.forward)
 
@@ -121,7 +174,18 @@ def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]
         emited.append(Label(id=bid))
 
         # emit all instructions
-        for instr in ctx.nodes[bid].instructions:
+        for fid, instr in ctx.instructions.get(bid):
+            # check if the instruction has been patched
+            if isinstance(instr, Flow):
+                for _, mapping in ctx.patching.items():
+                    assert isinstance(fid, FlowId)
+
+                    # if patched, obtain the patched abstract entry
+                    if mapping.contains(fid):
+                        fid, instr = mapping.get(fid)
+                        break
+
+            # all flows should be handled by patching
             assert not isinstance(instr, Flow)
 
             if isinstance(instr, Abstracts):
@@ -131,7 +195,7 @@ def emit_instructions(ctx: LowLevelContext, entry: BlockId) -> List[Instruction]
 
         # determine next block in order
         next = ordered[idx + 1] if idx + 1 < len(ordered) else None
-        args = (ctx.nodes[bid].terminator, next)
+        args = (ctx.blocks.get(bid).terminator, next)
 
         # emit control transfer if needed
         if derived := emit_control_transfer(*args):
@@ -164,28 +228,60 @@ def emit_control_transfer(
     return Jump(target=term.target)
 
 
-def patch_registers(ctx: LowLevelContext):
+def configure_register_patching() -> GraphNode:
+    return GraphNode(
+        builder=patch_registers,
+        constraint=None,
+        produces=("llvm/registers/inputs", "llvm/registers/outputs"),
+        requires=frozenset(
+            {
+                ("blocks", "llvm/blocks"),
+                ("backward", "llvm/blocks/backward"),
+                ("clobbers", "llvm/registers/clobbers"),
+            }
+        ),
+    )
+
+
+def patch_registers(
+    blocks: OneToOne[BlockId, Block],
+    backward: OneToMany[BlockId, BlockId],
+    clobbers: OneToOne[BlockId, Registers],
+) -> Tuple[OneToOne[BlockId, Registers], OneToOne[BlockId, Registers]]:
+
+    inputs: Dict[BlockId, Registers] = {}
+    outputs: Dict[BlockId, Registers] = {}
+
+    for bid in blocks.keys():
+        inputs[bid] = Registers.empty()
+        outputs[bid] = Registers.empty()
+
     changed = True
     while changed:
         changed = False
 
-        for bid in ctx.nodes.keys():
-            if predecessors := ctx.backward[bid]:
-                inputs = set(ctx.nodes[predecessors[0]].registers.outputs)
+        for bid in blocks.keys():
+            if predecessors := backward.get(bid):
+                regin = set(outputs[predecessors[0]].items)
 
                 for pred in predecessors[1:]:
-                    inputs.intersection_update(ctx.nodes[pred].registers.outputs)
+                    regin.intersection_update(outputs[pred].items)
 
             else:
-                inputs = ctx.nodes[bid].registers.inputs
+                regin = inputs[bid].items
 
-            outputs = inputs - ctx.nodes[bid].registers.clobbered
-            outputs = outputs.union(ctx.nodes[bid].registers.generated)
+            regout = regin - clobbers.get(bid).items
+            # regout = regout.union(ctx.nodes[bid].registers.generated)
 
-            if inputs != ctx.nodes[bid].registers.inputs:
-                ctx.nodes[bid].registers.inputs = inputs
+            if regin != inputs.get(bid, Registers.empty()).items:
+                inputs[bid] = Registers(items=regin)
                 changed = True
 
-            if outputs != ctx.nodes[bid].registers.outputs:
-                ctx.nodes[bid].registers.outputs = outputs
+            if regout != outputs.get(bid, Registers.empty()).items:
+                outputs[bid] = Registers(items=regout)
                 changed = True
+
+    return (
+        OneToOne[BlockId, Registers].instance(inputs),
+        OneToOne[BlockId, Registers].instance(outputs),
+    )

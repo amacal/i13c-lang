@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Protocol, Tuple, Type
+from typing import Any, Dict, List, Optional, Protocol, Tuple, Type
 
 from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
@@ -7,7 +7,7 @@ from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.nodes.callsites import lower_callsite
 from i13c.lowering.nodes.registers import caller_saved
 from i13c.lowering.typing.blocks import Block, BlockInstruction, Registers
-from i13c.lowering.typing.flows import BlockId, EpilogueFlow, PrologueFlow
+from i13c.lowering.typing.flows import BlockId, EpilogueFlow, FlowId, PrologueFlow
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
     JumpTerminator,
@@ -24,19 +24,36 @@ from i13c.semantic.typing.indices.controlflows import (
     FlowNode,
 )
 
+# the goal of this module is to convert all active functions into blocks with instructions;
+# each block can have forward and backward edges and each function has its entries and exits;
+# additionally exactly one entrypoint must be found;
+
+
+def verify(rules: SemanticRules, **kwargs: Dict[str, Any]) -> bool:
+    return rules.count() == 0
+
 
 def configure_functions() -> GraphNode:
     return GraphNode(
         builder=lower_active_functions,
+        constraint=verify,
         produces=(
             "llvm/entrypoint",
             "llvm/blocks",
-            "llvm/forward",
-            "llvm/backward",
-            "llvm/entries",
-            "llvm/exits",
+            "llvm/blocks/forward",
+            "llvm/blocks/backward",
+            "llvm/blocks/instructions",
+            "llvm/registers/inputs",
+            "llvm/registers/clobbers",
+            "llvm/functions/entries",
+            "llvm/functions/exits",
         ),
-        requires=frozenset({("graph", "semantic/graph"), ("rules", "rules/semantic")}),
+        requires=frozenset(
+            {
+                ("graph", "semantic/graph"),
+                ("rules", "rules/semantic"),
+            }
+        ),
     )
 
 
@@ -46,7 +63,12 @@ class Context:
     generator: Generator
     entrypoint: Optional[BlockId]
 
-    nodes: Dict[BlockId, Block]
+    blocks: Dict[BlockId, Block]
+    instructions: Dict[BlockId, List[BlockInstruction]]
+
+    inputs: Dict[BlockId, Registers]
+    clobbers: Dict[BlockId, Registers]
+
     forward: Dict[BlockId, List[BlockId]]
     backward: Dict[BlockId, List[BlockId]]
 
@@ -59,7 +81,10 @@ class Context:
             graph=graph,
             generator=graph.generator,
             entrypoint=None,
-            nodes={},
+            blocks={},
+            instructions={},
+            inputs={},
+            clobbers={},
             forward={},
             backward={},
             entries={},
@@ -69,38 +94,43 @@ class Context:
 
 def lower_active_functions(
     graph: SemanticGraph,
-    rules: SemanticRules,
+    **kwargs: Dict[str, Any],
 ) -> Tuple[
     Optional[BlockId],
     OneToOne[BlockId, Block],
     OneToMany[BlockId, BlockId],
     OneToMany[BlockId, BlockId],
+    OneToMany[BlockId, BlockInstruction],
+    OneToOne[BlockId, Registers],
+    OneToOne[BlockId, Registers],
     OneToOne[FunctionId, BlockId],
     OneToOne[FunctionId, BlockId],
 ]:
     ctx = Context.empty(graph)
 
     # lower all live callables
-    if rules.count() == 0:
-        for fid in graph.callable_live:
-            if isinstance(fid, FunctionId):
-                # find flowgraph and generate blocks
-                flowgraph = graph.live.flowgraph_by_function.get(fid)
-                block = lower_function_flow(ctx, fid, flowgraph)
+    for fid in graph.callable_live:
+        if isinstance(fid, FunctionId):
+            # find flowgraph and generate blocks
+            flowgraph = graph.live.flowgraph_by_function.get(fid)
+            block = lower_function_flow(ctx, fid, flowgraph)
 
-                # returned block may be an entrypoint
-                if graph.live.entrypoints.contains(fid):
-                    ctx.entrypoint = block
+            # returned block may be an entrypoint
+            if graph.live.entrypoints.contains(fid):
+                ctx.entrypoint = block
 
-        # entry has to be found
-        assert ctx.entrypoint is not None
+    # entry has to be found
+    assert ctx.entrypoint is not None
 
     # success
     return (
         ctx.entrypoint,
-        OneToOne[BlockId, Block].instance(ctx.nodes),
+        OneToOne[BlockId, Block].instance(ctx.blocks),
         OneToMany[BlockId, BlockId].instance(ctx.forward),
         OneToMany[BlockId, BlockId].instance(ctx.backward),
+        OneToMany[BlockId, BlockInstruction].instance(ctx.instructions),
+        OneToOne[BlockId, Registers].instance(ctx.inputs),
+        OneToOne[BlockId, Registers].instance(ctx.clobbers),
         OneToOne[FunctionId, BlockId].instance(ctx.entries),
         OneToOne[FunctionId, BlockId].instance(ctx.exits),
     )
@@ -112,7 +142,7 @@ def lower_flow_entry(
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
     node: FlowEntry,
-) -> Block:
+) -> FlowNodeContext:
     # obtain successors
     successors = flow.forward.get(node, [])
     assert len(successors) == 1
@@ -121,17 +151,18 @@ def lower_flow_entry(
     terminator = JumpTerminator(target=mapping[successors[0]])
 
     # prepare entry instructions
-    instructions: List[BlockInstruction] = [PrologueFlow(target=fid)]
+    iid = FlowId(value=ctx.generator.next())
+    instructions: List[BlockInstruction] = [(iid, PrologueFlow(target=fid))]
 
     # register entry block
     ctx.entries[fid] = mapping[node]
 
     # create empty block with jump
-    return Block(
-        origin=fid,
+    return FlowNodeContext(
+        block=Block(origin=fid, terminator=terminator),
         instructions=instructions,
-        registers=Registers.provides(caller_saved()),
-        terminator=terminator,
+        inputs=Registers.instance(caller_saved()),
+        clobbers=Registers.empty(),
     )
 
 
@@ -141,19 +172,20 @@ def lower_flow_exit(
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
     node: FlowExit,
-) -> Block:
+) -> FlowNodeContext:
     # register exit block
     ctx.exits[fid] = mapping[node]
 
     # prepare exit instructions
-    instructions: List[BlockInstruction] = [EpilogueFlow(target=fid)]
+    iid = FlowId(value=ctx.generator.next())
+    instructions: List[BlockInstruction] = [(iid, EpilogueFlow(target=fid))]
 
     # create empty block with exit
-    return Block(
-        origin=fid,
+    return FlowNodeContext(
+        block=Block(origin=fid, terminator=ExitTerminator()),
         instructions=instructions,
-        registers=Registers.empty(),
-        terminator=ExitTerminator(),
+        inputs=Registers.empty(),
+        clobbers=Registers.empty(),
     )
 
 
@@ -163,7 +195,7 @@ def lower_flow_callsite(
     flow: FlowGraph,
     mapping: Dict[FlowNode, BlockId],
     node: CallSiteId,
-) -> Block:
+) -> FlowNodeContext:
     # obtain successors
     successors = flow.forward.get(node, [])
     assert len(successors) in (0, 1)
@@ -179,12 +211,20 @@ def lower_flow_callsite(
     instructions, clobbers = lower_callsite(ctx.graph, node)
 
     # lower callsite block
-    return Block(
-        origin=node,
-        terminator=terminator,
+    return FlowNodeContext(
+        block=Block(origin=node, terminator=terminator),
         instructions=instructions,
-        registers=Registers.clobbers(clobbers),
+        inputs=Registers.empty(),
+        clobbers=Registers.instance(clobbers),
     )
+
+
+@dataclass
+class FlowNodeContext:
+    block: Block
+    instructions: List[BlockInstruction]
+    inputs: Registers
+    clobbers: Registers
 
 
 class FlowNodeLowerer(Protocol):
@@ -195,7 +235,7 @@ class FlowNodeLowerer(Protocol):
         flow: FlowGraph,
         mapping: Dict[FlowNode, BlockId],
         node: FlowNode,
-    ) -> Block: ...
+    ) -> FlowNodeContext: ...
 
 
 DISPATCH_TABLE: Dict[Type[FlowNode], FlowNodeLowerer] = {
@@ -220,9 +260,13 @@ def lower_function_flow(
 
     # lower each FlowNode
     for node in flow.nodes():
-        ctx.nodes[mapping[node]] = DISPATCH_TABLE[type(node)](
-            ctx, fid, flow, mapping, node
-        )
+        output = DISPATCH_TABLE[type(node)](ctx, fid, flow, mapping, node)
+
+        # register block, instructions and registers
+        ctx.blocks[mapping[node]] = output.block
+        ctx.instructions[mapping[node]] = output.instructions
+        ctx.inputs[mapping[node]] = output.inputs
+        ctx.clobbers[mapping[node]] = output.clobbers
 
     # wire forward edges
     for node, successors in flow.forward.items():

@@ -13,6 +13,7 @@ from i13c.semantic.typing.entities.literals import LiteralId
 def configure_callsites() -> GraphNode:
     return GraphNode(
         builder=build_callsites,
+        constraint=None,
         produces=("entities/callsites",),
         requires=frozenset({("graph", "syntax/graph")}),
     )

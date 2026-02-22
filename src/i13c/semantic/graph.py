@@ -26,10 +26,12 @@ def configure_semantic_graph() -> GraphGroup:
 def configure_self() -> GraphNode:
     return GraphNode(
         builder=build,
+        constraint=None,
         produces=("semantic/graph",),
         requires=frozenset(
             {
                 ("syntax", "syntax/graph"),
+                ("rules", "rules/semantic"),
                 ("entities", Prefix(value="entities/")),
                 ("indices", Prefix(value="indices/")),
                 ("resolutions", Prefix(value="resolutions/")),
@@ -45,6 +47,7 @@ def build(
     indices: Dict[str, Any],
     resolutions: Dict[str, Any],
     analyses: Dict[str, Any],
+    **kwargs: Dict[str, Any],
 ) -> SemanticGraph:
     return SemanticGraph(
         generator=syntax.generator,

@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -8,8 +8,7 @@ def can_detect_duplicated_slot_clobbers():
             asm main() clobbers rax, rbx, rax { syscall; }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3005.validate_duplicated_snippet_clobbers(model)
+    diagnostics = run_graph(program).rule_by_name("e3005")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Union
+from typing import Dict, Tuple, Union
 
 
 @dataclass(kw_only=True)
@@ -28,3 +28,14 @@ Abstracts = Union[
     Preserve,
     Restore,
 ]
+
+
+@dataclass(kw_only=True, frozen=True)
+class AbstractId:
+    value: int
+
+    def identify(self, length: int) -> str:
+        return "#".join(("abstract", f"{self.value:<{length}}"))
+
+
+AbstractEntry = Tuple[AbstractId, Abstracts]

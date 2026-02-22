@@ -10,6 +10,7 @@ from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 def configure_parameters() -> GraphNode:
     return GraphNode(
         builder=build_parameters,
+        constraint=None,
         produces=("entities/parameters",),
         requires=frozenset({("graph", "syntax/graph")}),
     )

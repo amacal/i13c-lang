@@ -14,6 +14,7 @@ from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 def configure_flowgraphs_live() -> GraphNode:
     return GraphNode(
         builder=build_flowgraphs_live,
+        constraint=None,
         produces=("analyses/flowgraph-by-function/live",),
         requires=frozenset(
             {

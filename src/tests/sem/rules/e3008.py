@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -10,8 +10,7 @@ def can_detect_missing_called_symbol():
             }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3008.validate_called_symbol_exists(model)
+    diagnostics = run_graph(program).rule_by_name("e3008")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

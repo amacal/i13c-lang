@@ -1,7 +1,18 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from logging import Logger, getLogger
-from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Set, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -13,12 +24,14 @@ class Prefix:
 
 
 GraphBuilder = Callable[..., Any]
+GraphConstraint = Optional[Callable[..., bool]]
 Requirement = FrozenSet[Tuple[str, Union[str, Prefix]]]
 
 
 @dataclass(kw_only=True, frozen=True)
 class GraphNode:
     builder: GraphBuilder
+    constraint: GraphConstraint
     produces: Tuple[str, ...]
     requires: Requirement
 
@@ -90,16 +103,17 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
         nodes.append(
             GraphNode(
                 builder=(lambda: value),
+                constraint=None,
                 produces=(key,),
                 requires=frozenset(),
             )
         )
 
-    def expand(req: Union[str, Prefix]) -> Any:
+    def expand(req: Union[str, Prefix]) -> Optional[Any]:
         if isinstance(req, Prefix):
             return {key: artifacts[key] for key in req.find(artifacts.keys())}
         else:
-            return artifacts[req]
+            return artifacts.get(req, None)
 
     for node in reorder_configurations(nodes):
         for target in node.produces:
@@ -107,17 +121,19 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
 
         # prepare arguments
         args = {name: expand(req) for name, req in node.requires}
+        ready = all(arg is not None for arg in args.values())
 
-        # build dataset
-        dataset = node.builder(**args)
+        # optionally build dataset
+        if ready and (not node.constraint or node.constraint(**args)):
+            dataset = node.builder(**args)
 
-        # store single artifact
-        for producer in node.produces:
-            artifacts[producer] = dataset
+            # store single artifact
+            for producer in node.produces:
+                artifacts[producer] = dataset
 
-        # store multiple artifacts
-        if len(node.produces) > 1:
-            for idx, producer in enumerate(node.produces):
-                artifacts[producer] = dataset[idx]
+            # store multiple artifacts
+            if len(node.produces) > 1:
+                for idx, producer in enumerate(node.produces):
+                    artifacts[producer] = dataset[idx]
 
     return artifacts

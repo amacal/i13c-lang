@@ -2,22 +2,25 @@ from typing import List
 
 from i13c import diag, err
 from i13c.core.dag import GraphNode
-from i13c.semantic.model import SemanticGraph
+from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.callables import CallableTarget
+from i13c.semantic.typing.indices.entrypoints import EntryPoint
 
 
 def configure_e3011() -> GraphNode:
     return GraphNode(
         builder=validate_entrypoint_exists,
+        constraint=None,
         produces=("rules/e3011",),
-        requires=frozenset({("graph", "semantic/graph")}),
+        requires=frozenset({("entrypoints", "indices/entrypoints-by-callable")}),
     )
 
 
 def validate_entrypoint_exists(
-    graph: SemanticGraph,
+    entrypoints: OneToOne[CallableTarget, EntryPoint],
 ) -> List[diag.Diagnostic]:
 
-    if graph.live.entrypoints.size() > 0:
+    if entrypoints.size() > 0:
         return []
 
     return [err.report_e3011_missing_entrypoint_function()]

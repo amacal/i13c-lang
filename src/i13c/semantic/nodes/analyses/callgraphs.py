@@ -11,6 +11,7 @@ from i13c.semantic.typing.indices.controlflows import FlowGraph, FlowNode
 def configure_callgraphs_live() -> GraphNode:
     return GraphNode(
         builder=build_callgraph_live,
+        constraint=None,
         produces=("analyses/calls-by-caller/live",),
         requires=frozenset(
             {

@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -8,8 +8,7 @@ def can_detect_duplicated_slot_bindings():
         asm main(code@rdi: u32, id@rdi: u16) noreturn { syscall; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3003.validate_duplicated_slot_bindings(model)
+    diagnostics = run_graph(program).rule_by_name("e3003")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -23,7 +22,6 @@ def can_ignore_immediate_slot_bindings():
         asm first(code@imm: u32, id@imm: u16) noreturn { syscall; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3003.validate_duplicated_slot_bindings(model)
+    diagnostics = run_graph(program).rule_by_name("e3003")
 
     assert len(diagnostics) == 0

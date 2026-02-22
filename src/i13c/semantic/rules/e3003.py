@@ -2,23 +2,25 @@ from typing import List, Set
 
 from i13c import diag, err
 from i13c.core.dag import GraphNode
-from i13c.semantic.model import SemanticGraph
+from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 
 
 def configure_e3003() -> GraphNode:
     return GraphNode(
         builder=validate_duplicated_slot_bindings,
+        constraint=None,
         produces=("rules/e3003",),
-        requires=frozenset({("graph", "semantic/graph")}),
+        requires=frozenset({("snippets", "entities/snippets")}),
     )
 
 
 def validate_duplicated_slot_bindings(
-    graph: SemanticGraph,
+    snippets: OneToOne[SnippetId, Snippet],
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for snippet in graph.basic.snippets.values():
+    for snippet in snippets.values():
         seen: Set[bytes] = set()
 
         for slot in snippet.slots:

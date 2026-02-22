@@ -16,6 +16,7 @@ from i13c.semantic.typing.indices.controlflows import (
 def configure_flowgraph_by_function() -> GraphNode:
     return GraphNode(
         builder=build_flowgraphs,
+        constraint=None,
         produces=("indices/flowgraph-by-function",),
         requires=frozenset(
             {

@@ -115,6 +115,7 @@ def configure_syntax_graph() -> GraphGroup:
 
     node = GraphNode(
         builder=produce,
+        constraint=None,
         produces=("syntax/graph",),
         requires=frozenset({("program", "ast/program")}),
     )

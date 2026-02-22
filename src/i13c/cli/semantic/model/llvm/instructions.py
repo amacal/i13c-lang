@@ -12,7 +12,7 @@ class InstructionsListExtractor:
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[BlockId, Block, int, Instruction]]:
         if llvm := artifacts.llvm_graph():
-            for bid, instructions in llvm.flows.items():
+            for bid, instructions in llvm.instructions.items():
                 for idx, instr in enumerate(instructions):
                     yield (bid, llvm.nodes.get(bid), idx, instr)
 

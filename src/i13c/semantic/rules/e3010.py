@@ -2,25 +2,34 @@ from typing import List
 
 from i13c import diag, err
 from i13c.core.dag import GraphNode
-from i13c.semantic.model import SemanticGraph
+from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.functions import Function, FunctionId
+from i13c.semantic.typing.indices.terminalities import Terminality
 
 
 def configure_e3010() -> GraphNode:
     return GraphNode(
         builder=validate_called_symbol_terminality,
+        constraint=None,
         produces=("rules/e3010",),
-        requires=frozenset({("graph", "semantic/graph")}),
+        requires=frozenset(
+            {
+                ("functions", "entities/functions"),
+                ("terminalities", "indices/terminality-by-function"),
+            }
+        ),
     )
 
 
 def validate_called_symbol_terminality(
-    graph: SemanticGraph,
+    functions: OneToOne[FunctionId, Function],
+    terminalities: OneToOne[FunctionId, Terminality],
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for fid, terminality in graph.indices.terminality_by_function.items():
+    for fid, terminality in terminalities.items():
         # we need to compare against the function definition
-        function = graph.basic.functions.get(fid)
+        function = functions.get(fid)
 
         # if the terminality expectations do not match, report an error
         if function.noreturn != terminality.noreturn:

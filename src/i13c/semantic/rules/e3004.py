@@ -2,23 +2,35 @@ from typing import List, Set
 
 from i13c import diag, err
 from i13c.core.dag import GraphNode
-from i13c.semantic.model import SemanticGraph
+from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.functions import Function, FunctionId
+from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
+from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 
 
 def configure_e3004() -> GraphNode:
     return GraphNode(
         builder=validate_duplicated_parameter_names,
+        constraint=None,
         produces=("rules/e3004",),
-        requires=frozenset({("graph", "semantic/graph")}),
+        requires=frozenset(
+            {
+                ("snippets", "entities/snippets"),
+                ("functions", "entities/functions"),
+                ("parameters", "entities/parameters"),
+            }
+        ),
     )
 
 
 def validate_duplicated_parameter_names(
-    graph: SemanticGraph,
+    snippets: OneToOne[SnippetId, Snippet],
+    functions: OneToOne[FunctionId, Function],
+    parameters: OneToOne[ParameterId, Parameter],
 ) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for snippet in graph.basic.snippets.values():
+    for snippet in snippets.values():
         seen: Set[bytes] = set()
 
         for slot in snippet.slots:
@@ -31,11 +43,11 @@ def validate_duplicated_parameter_names(
             else:
                 seen.add(slot.name.name)
 
-    for function in graph.basic.functions.values():
+    for function in functions.values():
         seen: Set[bytes] = set()
 
         for pid in function.parameters:
-            parameter = graph.basic.parameters.get(pid)
+            parameter = parameters.get(pid)
 
             if parameter.ident.name in seen:
                 diagnostics.append(

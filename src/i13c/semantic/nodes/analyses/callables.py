@@ -11,6 +11,7 @@ from i13c.semantic.typing.indices.entrypoints import EntryPoint
 def configure_callables_live() -> GraphNode:
     return GraphNode(
         builder=build_callable_live,
+        constraint=None,
         produces=("analyses/callables/live",),
         requires=frozenset(
             {

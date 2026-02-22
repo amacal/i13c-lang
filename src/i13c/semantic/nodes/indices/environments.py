@@ -13,6 +13,7 @@ from i13c.semantic.typing.indices.variables import Variable, VariableId
 def configure_environment_by_flownode() -> GraphNode:
     return GraphNode(
         builder=build_environments,
+        constraint=None,
         produces=("indices/environment-by-flownode",),
         requires=frozenset(
             {

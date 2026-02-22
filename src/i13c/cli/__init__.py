@@ -64,7 +64,7 @@ def elf_command(path: str) -> None:
     llg = artifacts.llvm_graph()
     assert llg is not None
 
-    flow = llg.instructions()
+    flow = llg.instructions_all()
     binary = encode(list(flow))
     executable = elf.emit(binary)
 

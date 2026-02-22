@@ -10,6 +10,7 @@ from i13c.semantic.typing.indices.variables import Variable, VariableId
 def configure_variables_by_parameters() -> GraphNode:
     return GraphNode(
         builder=build_variables_by_parameters,
+        constraint=None,
         produces=(
             "entities/variables",
             "indices/variables-by-parameter",

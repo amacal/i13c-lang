@@ -13,6 +13,7 @@ from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 def configure_callgraphs() -> GraphNode:
     return GraphNode(
         builder=build_callgraphs,
+        constraint=None,
         produces=(
             "indices/calls-by-caller",
             "indices/calls-by-callee",

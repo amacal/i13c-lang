@@ -119,3 +119,14 @@ Instruction = Union[
     Return,
     Jump,
 ]
+
+
+@dataclass(kw_only=True, frozen=True)
+class InstructionId:
+    value: int
+
+    def identify(self, length: int) -> str:
+        return "#".join(("instruction", f"{self.value:<{length}}"))
+
+
+InstructionEntry = Tuple[InstructionId, Instruction]

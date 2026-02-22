@@ -14,6 +14,7 @@ from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 def configure_terminality_by_function() -> GraphNode:
     return GraphNode(
         builder=build_terminalities,
+        constraint=None,
         produces=("indices/terminality-by-function",),
         requires=frozenset(
             {

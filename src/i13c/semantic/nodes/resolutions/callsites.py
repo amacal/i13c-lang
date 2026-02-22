@@ -26,6 +26,7 @@ from i13c.semantic.typing.resolutions.callsites import (
 def configure_resolution_by_callsite() -> GraphNode:
     return GraphNode(
         builder=build_resolution_by_callsite,
+        constraint=None,
         produces=("resolutions/callsites",),
         requires=frozenset(
             {

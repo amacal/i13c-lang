@@ -15,6 +15,7 @@ from i13c.semantic.typing.indices.variables import VariableId
 def configure_dataflow_by_flownode() -> GraphNode:
     return GraphNode(
         builder=build_dataflows,
+        constraint=None,
         produces=("indices/dataflow-by-flownode",),
         requires=frozenset(
             {

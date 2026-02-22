@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -10,8 +10,7 @@ def can_detect_multiple_entrypoints():
             fn main() noreturn { exit(); }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3012.validate_entrypoint_is_single(model)
+    diagnostics = run_graph(program).rule_by_name("e3012")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

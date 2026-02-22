@@ -14,6 +14,7 @@ from i13c.semantic.typing.entities.operands import OperandId
 def configure_instructions() -> GraphNode:
     return GraphNode(
         builder=build_instructions,
+        constraint=None,
         produces=("entities/instructions",),
         requires=frozenset({("graph", "syntax/graph")}),
     )

@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -8,8 +8,7 @@ def can_detect_duplicated_slot_names():
         asm main(code@rdi: u32, code@rax: u16) noreturn { syscall; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3004.validate_duplicated_parameter_names(model)
+    diagnostics = run_graph(program).rule_by_name("e3004")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -23,8 +22,7 @@ def can_detect_duplicated_parameter_names():
         fn aux(code: u32, code: u16) {}
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3004.validate_duplicated_parameter_names(model)
+    diagnostics = run_graph(program).rule_by_name("e3004")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

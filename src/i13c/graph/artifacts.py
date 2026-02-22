@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List
 
+from i13c.diag import Diagnostic
 from i13c.lowering.graph import LowLevelGraph
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.rules import SemanticRules
@@ -20,5 +21,8 @@ class GraphArtifacts:
     def rules(self) -> SemanticRules:
         return self.data["rules/semantic"]
 
-    def llvm_graph(self) -> Optional[LowLevelGraph]:
+    def rule_by_name(self, name: str) -> List[Diagnostic]:
+        return self.rules().get(name)
+
+    def llvm_graph(self) -> LowLevelGraph:
         return self.data["llvm/graph"]

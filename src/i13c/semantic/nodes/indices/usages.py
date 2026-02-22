@@ -12,6 +12,7 @@ from i13c.semantic.typing.indices.usages import Usage, UsageId
 def configure_usages_by_expression() -> GraphNode:
     return GraphNode(
         builder=build_usages_by_expression,
+        constraint=None,
         produces=("entities/usages", "indices/usages-by-expression"),
         requires=frozenset({("graph", "syntax/graph")}),
     )

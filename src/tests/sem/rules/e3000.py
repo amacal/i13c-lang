@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -8,8 +8,7 @@ def can_accept_operands_arity_of_syscall():
         asm main() noreturn { syscall; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
+    diagnostics = run_graph(program).rule_by_name("e3000")
 
     assert len(diagnostics) == 0
 
@@ -19,8 +18,7 @@ def can_accept_operands_arity_of_mov():
         asm main() noreturn { mov rax, 0x1234; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
+    diagnostics = run_graph(program).rule_by_name("e3000")
 
     assert len(diagnostics) == 0
 
@@ -30,8 +28,7 @@ def can_accept_shl_reg64_imm8_with_0x01():
         asm main() noreturn { shl rax, 0x01; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
+    diagnostics = run_graph(program).rule_by_name("e3000")
 
     assert len(diagnostics) == 0
 
@@ -41,8 +38,7 @@ def can_accept_shl_reg64_imm8_with_0x41():
         asm main() noreturn { shl rax, 0x41; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
+    diagnostics = run_graph(program).rule_by_name("e3000")
 
     assert len(diagnostics) == 0
 
@@ -52,8 +48,7 @@ def can_detect_invalid_instruction():
         asm main() noreturn { xyz; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3000.validate_assembly_mnemonic(model)
+    diagnostics = run_graph(program).rule_by_name("e3000")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

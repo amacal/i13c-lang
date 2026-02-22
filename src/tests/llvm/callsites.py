@@ -8,7 +8,8 @@ def can_lower_function_calling_another_function():
         asm bar() noreturn { syscall; }
     """)
 
-    assert llvm.flows.size() == 2
+    # TODO: check instructions
+    assert llvm.flows.size() == 4
 
     origin = semantic.find_function_by_name(b"main")
     assert origin is not None
@@ -41,7 +42,8 @@ def can_lower_function_calling_another_function_twice():
         asm bar() noreturn { syscall; }
     """)
 
-    assert llvm.flows.size() == 2
+    # TODO: check instructions
+    assert llvm.flows.size() == 4
 
     origin = semantic.find_function_by_name(b"main")
     assert origin is not None

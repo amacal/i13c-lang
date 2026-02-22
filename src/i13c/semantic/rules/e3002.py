@@ -2,26 +2,37 @@ from typing import List
 
 from i13c import diag, err
 from i13c.core.dag import GraphNode
-from i13c.semantic.model import SemanticGraph
+from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
+from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 
 
 def configure_e3002() -> GraphNode:
     return GraphNode(
         builder=validate_assembly_operand_types,
+        constraint=None,
         produces=("rules/e3002",),
-        requires=frozenset({("graph", "semantic/graph")}),
+        requires=frozenset(
+            {
+                ("instructions", "entities/instructions"),
+                ("resolutions", "resolutions/instructions"),
+            }
+        ),
     )
 
 
-def validate_assembly_operand_types(graph: SemanticGraph) -> List[diag.Diagnostic]:
+def validate_assembly_operand_types(
+    instructions: OneToOne[InstructionId, Instruction],
+    resolutions: OneToOne[InstructionId, InstructionResolution],
+) -> List[diag.Diagnostic]:
     diagnostics: List[diag.Diagnostic] = []
 
-    for iid, resolution in graph.indices.resolution_by_instruction.items():
+    for iid, resolution in resolutions.items():
         if not resolution.accepted and resolution.rejected:
             for rejection in resolution.rejected:
                 diagnostics.append(
                     err.report_e3002_invalid_operand_types(
-                        graph.basic.instructions.get(iid).ref,
+                        instructions.get(iid).ref,
                         [str(spec) for spec in rejection.variant],
                     )
                 )

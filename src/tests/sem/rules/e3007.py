@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -9,8 +9,7 @@ def can_detect_overloaded_symbol_by_arity():
             fn main() { foo(); }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3007.validate_called_symbol_resolved(model)
+    diagnostics = run_graph(program).rule_by_name("e3007")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -25,8 +24,7 @@ def can_detect_overloaded_symbol_by_range():
             fn main() { foo(0x10); }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3007.validate_called_symbol_resolved(model)
+    diagnostics = run_graph(program).rule_by_name("e3007")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]

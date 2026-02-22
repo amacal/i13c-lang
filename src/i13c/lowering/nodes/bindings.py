@@ -1,12 +1,17 @@
 from typing import Dict, List
 
-from i13c.lowering.graph import LowLevelContext
+from i13c.core.dag import GraphNode
+from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.nodes.registers import IR_REGISTER_MAP
 from i13c.lowering.typing.blocks import BlockInstruction
-from i13c.lowering.typing.flows import BindingFlow
-from i13c.lowering.typing.instructions import MovRegImm, MovRegReg
+from i13c.lowering.typing.flows import BindingFlow, BlockId, FlowId
+from i13c.lowering.typing.instructions import (
+    InstructionEntry,
+    InstructionId,
+    MovRegImm,
+    MovRegReg,
+)
 from i13c.semantic.model import SemanticGraph
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
 from i13c.semantic.typing.entities.parameters import Parameter
@@ -38,19 +43,23 @@ def lower_snippet_bindings(
             imm = literal.target.value
 
             # emit move instruction for binding
-            out.append(MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm))
+            iid = InstructionId(value=graph.generator.next())
+            instr = MovRegImm(dst=IR_REGISTER_MAP[bind.name], imm=imm)
+
+            out.append((iid, instr))
 
         # or slots may be expressions
         if binding.argument.kind == b"expression":
             assert isinstance(binding.argument.target, ExpressionId)
 
+            src = binding.argument.target
+            dst = IR_REGISTER_MAP[binding.target.bind.name]
+
             # emit flow binding to be patched later
-            out.append(
-                BindingFlow(
-                    dst=IR_REGISTER_MAP[binding.target.bind.name],
-                    src=binding.argument.target,
-                )
-            )
+            fid = FlowId(value=graph.generator.next())
+            flow = BindingFlow(dst=dst, src=src)
+
+            out.append((fid, flow))
 
     return out
 
@@ -80,29 +89,50 @@ def lower_function_bindings(
             imm = literal.target.value
 
             # emit move instruction for binding
-            out.append(MovRegImm(dst=idx, imm=imm))
+            iid = InstructionId(value=graph.generator.next())
+            instr = MovRegImm(dst=idx, imm=imm)
+
+            out.append((iid, instr))
 
         # or parameters may be expressions
         if binding.argument.kind == b"expression":
             # satisfy type checker
             assert isinstance(binding.argument.target, ExpressionId)
 
+            src = binding.argument.target
+            dst = idx
+
+            fid = FlowId(value=graph.generator.next())
+            flow = BindingFlow(dst=dst, src=src)
+
             # emit flow binding to be patched later
-            out.append(
-                BindingFlow(
-                    dst=idx,
-                    src=binding.argument.target,
-                )
-            )
+            out.append((fid, flow))
 
     return out
 
 
-def patch_bindings(ctx: LowLevelContext) -> None:
-    values: Dict[ExpressionId, int] = {}
+def configure_binding_patching() -> GraphNode:
+    return GraphNode(
+        builder=patch_bindings,
+        constraint=None,
+        produces=("llvm/patches/bindings",),
+        requires=frozenset(
+            {
+                ("graph", "semantic/graph"),
+                ("instructions", "llvm/blocks/instructions"),
+            }
+        ),
+    )
 
-    for cid, callsite in ctx.graph.basic.callsites.items():
-        environment = ctx.graph.indices.environment_by_flownode.get(cid)
+
+def patch_bindings(
+    graph: SemanticGraph, instructions: OneToMany[BlockId, BlockInstruction]
+) -> OneToOne[FlowId, InstructionEntry]:
+    mapping: Dict[ExpressionId, int] = {}
+    bindings: Dict[FlowId, InstructionEntry] = {}
+
+    for cid, callsite in graph.basic.callsites.items():
+        environment = graph.indices.environment_by_flownode.get(cid)
 
         for arg in callsite.arguments:
             if arg.kind != b"expression":
@@ -111,25 +141,26 @@ def patch_bindings(ctx: LowLevelContext) -> None:
             # satisfy type checker
             assert isinstance(arg.target, ExpressionId)
 
-            expression = ctx.graph.basic.expressions.get(arg.target)
+            expression = graph.basic.expressions.get(arg.target)
             vid = environment.variables[expression.ident]
 
-            variable = ctx.graph.basic.variables.get(vid)
-            function = ctx.graph.basic.functions.get(environment.owner)
+            variable = graph.basic.variables.get(vid)
+            function = graph.basic.functions.get(environment.owner)
 
             for idx, pid in enumerate(function.parameters):
                 if pid == variable.source:
-                    values[arg.target] = idx
+                    mapping[arg.target] = idx
 
-    for block in ctx.nodes.values():
-        # only callsite blocks may have binding flows
-        if not isinstance(block.origin, CallSiteId):
-            continue
+    for batch in instructions.values():
+        for fid, flow in batch:
+            if isinstance(flow, BindingFlow):
+                # BindingFlow is referenced by FlowId
+                assert isinstance(fid, FlowId)
 
-        # patch all bindings with an actual move
-        for idx, instr in enumerate(block.instructions):
-            if isinstance(instr, BindingFlow):
-                block.instructions[idx] = MovRegReg(
-                    dst=instr.dst,
-                    src=values[instr.src],
+                # append new patched binding
+                bindings[fid] = (
+                    InstructionId(value=graph.generator.next()),
+                    MovRegReg(dst=flow.dst, src=mapping[flow.src]),
                 )
+
+    return OneToOne[FlowId, InstructionEntry].instance(bindings)

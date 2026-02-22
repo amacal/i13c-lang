@@ -11,6 +11,7 @@ from i13c.semantic.typing.indices.entrypoints import EntryPoint, EntryPointName
 def configure_entrypoint_by_callable() -> GraphNode:
     return GraphNode(
         builder=build_entrypoints,
+        constraint=None,
         produces=("indices/entrypoints-by-callable",),
         requires=frozenset(
             {

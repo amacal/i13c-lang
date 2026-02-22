@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -9,8 +9,7 @@ def can_survive_existing_entrypoint():
             fn main() noreturn { exit(); }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3011.validate_entrypoint_exists(model)
+    diagnostics = run_graph(program).rule_by_name("e3011")
 
     assert len(diagnostics) == 0
 
@@ -20,8 +19,7 @@ def can_detect_nonexistent_entrypoint_even_if_function_is_called_main2():
             fn main2() noreturn { }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3011.validate_entrypoint_exists(model)
+    diagnostics = run_graph(program).rule_by_name("e3011")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -35,8 +33,7 @@ def can_reject_main_as_entrypoint_when_noreturn_is_false():
             fn main() { }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3011.validate_entrypoint_exists(model)
+    diagnostics = run_graph(program).rule_by_name("e3011")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -50,7 +47,6 @@ def can_accept_main_when_terminality_is_unresolved():
             fn main() noreturn { missing(); }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3011.validate_entrypoint_exists(model)
+    diagnostics = run_graph(program).rule_by_name("e3011")
 
     assert len(diagnostics) == 0

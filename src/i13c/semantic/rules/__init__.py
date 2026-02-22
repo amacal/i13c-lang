@@ -20,6 +20,7 @@ from i13c.semantic.rules.e3012 import configure_e3012
 def configure_e3xxx() -> GraphNode:
     return GraphNode(
         builder=build,
+        constraint=None,
         produces=("rules/semantic",),
         requires=frozenset({("rules", Prefix(value="rules/e3"))}),
     )
@@ -31,6 +32,9 @@ class SemanticRules:
 
     def count(self) -> int:
         return sum(len(diags) for diags in self.data.values())
+
+    def get(self, name: str) -> List[Diagnostic]:
+        return self.data.get(f"rules/{name}", [])
 
     def enumerate(self) -> Iterable[Diagnostic]:
         for diags in self.data.values():

@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -8,8 +8,7 @@ def can_detect_invalid_operand_types_of_mov():
         asm main() noreturn { mov 0x1234, 0x5678; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3002.validate_assembly_operand_types(model)
+    diagnostics = run_graph(program).rule_by_name("e3002")
 
     assert len(diagnostics) == 4
 
@@ -24,8 +23,7 @@ def can_detect_invalid_operand_types_of_shl():
         asm main() noreturn { shl rax, rbx; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3002.validate_assembly_operand_types(model)
+    diagnostics = run_graph(program).rule_by_name("e3002")
 
     assert len(diagnostics) == 1
 
@@ -38,8 +36,7 @@ def can_accept_valid_operand_type_of_shl_reg64_imm8():
         asm main() noreturn { shl rax, 0x08; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3002.validate_assembly_operand_types(model)
+    diagnostics = run_graph(program).rule_by_name("e3002")
 
     assert len(diagnostics) == 0
 
@@ -49,7 +46,6 @@ def can_accept_valid_operand_type_of_shl_reg64_imm8_via_parameters():
         asm main(count@imm: u8) noreturn { shl rax, count; }
     """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3002.validate_assembly_operand_types(model)
+    diagnostics = run_graph(program).rule_by_name("e3002")
 
     assert len(diagnostics) == 0

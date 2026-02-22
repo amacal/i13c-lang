@@ -28,6 +28,7 @@ from i13c.semantic.typing.resolutions.instructions import (
 def configure_resolution_by_instruction() -> GraphNode:
     return GraphNode(
         builder=build_resolution_by_instruction,
+        constraint=None,
         produces=("resolutions/instructions",),
         requires=frozenset(
             {

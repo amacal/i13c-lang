@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -9,8 +9,7 @@ def can_survive_non_terminal_callee_symbol():
             fn bar() { foo(); }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3010.validate_called_symbol_terminality(model)
+    diagnostics = run_graph(program).rule_by_name("e3010")
 
     assert len(diagnostics) == 0
 
@@ -21,8 +20,7 @@ def can_detect_non_terminal_caller_symbol():
             fn bar() noreturn { foo(); }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3010.validate_called_symbol_terminality(model)
+    diagnostics = run_graph(program).rule_by_name("e3010")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -38,7 +36,6 @@ def can_survive_non_terminal_caller_symbol_not_last_call():
             fn bar() noreturn { foo1(); foo2(); }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3010.validate_called_symbol_terminality(model)
+    diagnostics = run_graph(program).rule_by_name("e3010")
 
     assert len(diagnostics) == 0

@@ -13,12 +13,12 @@ def can_draw_a_table_with_blocks():
     """)
 
     draw_list(BlockListExtractor, artifacts).equals("""
-        | -------- | ---------- | ------------- | ------------ |
-        | Block ID | Origin     | Terminator    | Instructions |
-        | -------- | ---------- | ------------- | ------------ |
-        | block#7  | callsite#4 | Trap          | 3            |
-        | block#8  | function#3 | Jump(block#7) | 1            |
-        | -------- | ---------- | ------------- | ------------ |
+        | -------- | ---------- | ------------- |
+        | Block ID | Origin     | Terminator    |
+        | -------- | ---------- | ------------- |
+        | block#7  | callsite#4 | Trap          |
+        | block#8  | function#3 | Jump(block#7) |
+        | -------- | ---------- | ------------- |
     """)
 
 
@@ -29,12 +29,12 @@ def can_draw_a_table_with_block_instructions():
     """)
 
     draw_list(BlockInstructionsListExtractor, artifacts).equals("""
-        | -------- | ---------- | ----- | ----------- | ---------------------- |
-        | Block ID | Origin     | Index | Kind        | Instruction            |
-        | -------- | ---------- | ----- | ----------- | ---------------------- |
-        | block#7  | callsite#4 | 0     | abstract    | Preserve(registers={}) |
-        | block#7  | callsite#4 | 1     | instruction | SysCall()              |
-        | block#7  | callsite#4 | 2     | abstract    | Restore(registers={})  |
-        | block#8  | function#3 | 0     | abstract    | EnterFrame(size=0)     |
-        | -------- | ---------- | ----- | ----------- | ---------------------- |
+        | -------- | ---------- | ----- | ----------- | ------------------------ |
+        | Block ID | Origin     | Index | Kind        | Instruction              |
+        | -------- | ---------- | ----- | ----------- | ------------------------ |
+        | block#7  | callsite#4 | 0     | flow        | PreserveFlow()           |
+        | block#7  | callsite#4 | 1     | instruction | SysCall()                |
+        | block#7  | callsite#4 | 2     | flow        | RestoreFlow()            |
+        | block#8  | function#3 | 0     | flow        | PrologueFlow(function#3) |
+        | -------- | ---------- | ----- | ----------- | ------------------------ |
     """)

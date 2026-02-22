@@ -12,6 +12,7 @@ from i13c.semantic.typing.entities.snippets import Slot, Snippet, SnippetId
 def configure_snippets() -> GraphNode:
     return GraphNode(
         builder=build_snippets,
+        constraint=None,
         produces=("entities/snippets",),
         requires=frozenset({("graph", "syntax/graph")}),
     )

@@ -6,6 +6,7 @@ from i13c.core.dag import GraphGroup, GraphNode, Prefix, evaluate
 def can_evaluate_one_node_without_dependencies():
     node: GraphNode = GraphNode(
         builder=lambda: 42,
+        constraint=None,
         produces=("abc",),
         requires=frozenset(),
     )
@@ -19,6 +20,7 @@ def can_evaluate_one_node_without_dependencies():
 def can_evaluate_multiple_nodes_with_dependencies():
     node1: GraphNode = GraphNode(
         builder=lambda: 42,
+        constraint=None,
         produces=("abc",),
         requires=frozenset(),
     )
@@ -28,6 +30,7 @@ def can_evaluate_multiple_nodes_with_dependencies():
 
     node2: GraphNode = GraphNode(
         builder=consume,
+        constraint=None,
         produces=("cde",),
         requires=frozenset({("x", "abc")}),
     )
@@ -45,6 +48,7 @@ def can_produce_multiple_artifacts():
 
     node: GraphNode = GraphNode(
         builder=produce_multiple,
+        constraint=None,
         produces=("abc", "cde"),
         requires=frozenset(),
     )
@@ -59,12 +63,14 @@ def can_produce_multiple_artifacts():
 def can_consume_multiple_artifacts():
     node1: GraphNode = GraphNode(
         builder=lambda: 42,
+        constraint=None,
         produces=("abc",),
         requires=frozenset(),
     )
 
     node2: GraphNode = GraphNode(
         builder=lambda: "world",
+        constraint=None,
         produces=("cde",),
         requires=frozenset(),
     )
@@ -74,6 +80,7 @@ def can_consume_multiple_artifacts():
 
     node3: GraphNode = GraphNode(
         builder=consume_multiple,
+        constraint=None,
         produces=("efg",),
         requires=frozenset({("x", "abc"), ("y", "cde")}),
     )
@@ -92,6 +99,7 @@ def can_use_initial_artifacts():
 
     node: GraphNode = GraphNode(
         builder=consume_initial,
+        constraint=None,
         produces=("abc",),
         requires=frozenset({("x", "x")}),
     )
@@ -106,6 +114,7 @@ def can_use_initial_artifacts():
 def can_evaluate_group():
     node1: GraphNode = GraphNode(
         builder=lambda: 42,
+        constraint=None,
         produces=("abc",),
         requires=frozenset(),
     )
@@ -115,6 +124,7 @@ def can_evaluate_group():
 
     node2: GraphNode = GraphNode(
         builder=consume,
+        constraint=None,
         produces=("cde",),
         requires=frozenset({("x", "abc")}),
     )
@@ -133,6 +143,7 @@ def can_consume_prefix_from_single_multi_producer():
 
     producer = GraphNode(
         builder=produce_entities,
+        constraint=None,
         produces=(
             "entities/a",
             "entities/b",
@@ -147,6 +158,7 @@ def can_consume_prefix_from_single_multi_producer():
 
     consumer = GraphNode(
         builder=consume_entities,
+        constraint=None,
         produces=("result",),
         requires=frozenset(
             {

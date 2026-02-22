@@ -18,6 +18,7 @@ from i13c.src import Span
 def configure_instance_by_callsite() -> GraphNode:
     return GraphNode(
         builder=build_instances,
+        constraint=None,
         produces=("indices/instance-by-callsite",),
         requires=frozenset(
             {

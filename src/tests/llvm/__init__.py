@@ -38,8 +38,7 @@ def prepare_graph(code: str) -> Tuple[SemanticGraph, LowLevelGraph]:
 
     artifacts = run_graph(program)
 
-    match artifacts.llvm_graph():
-        case None:
-            raise GraphFixtureException()
-        case graph:
-            return artifacts.semantic_graph(), graph
+    if artifacts.rules().count() > 0:
+        raise GraphFixtureException()
+
+    return artifacts.semantic_graph(), artifacts.llvm_graph()

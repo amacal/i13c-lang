@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Tuple, Union
 
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -28,10 +28,16 @@ class BindingFlow:
 class PrologueFlow:
     target: FunctionId
 
+    def __str__(self) -> str:
+        return f"PrologueFlow({self.target.identify(1)})"
+
 
 @dataclass(kw_only=True)
 class EpilogueFlow:
     target: FunctionId
+
+    def __str__(self) -> str:
+        return f"EpilogueFlow({self.target.identify(1)})"
 
 
 @dataclass(kw_only=True)
@@ -47,3 +53,14 @@ class RestoreFlow:
 Flow = Union[
     CallFlow, BindingFlow, PrologueFlow, EpilogueFlow, PreserveFlow, RestoreFlow
 ]
+
+
+@dataclass(kw_only=True, frozen=True)
+class FlowId:
+    value: int
+
+    def identify(self, length: int) -> str:
+        return "#".join(("flow", f"{self.value:<{length}}"))
+
+
+FlowEntry = Tuple[FlowId, Flow]

@@ -20,7 +20,6 @@ class BlockListExtractor:
             "id": "Block ID",
             "origin": "Origin",
             "terminator": "Terminator",
-            "instructions": "Instructions",
         }
 
     @staticmethod
@@ -29,7 +28,6 @@ class BlockListExtractor:
             "id": entry[0].identify(1),
             "origin": str(entry[1].origin.identify(1)),
             "terminator": str(entry[1].terminator),
-            "instructions": str(len(entry[1].instructions)),
         }
 
 
@@ -40,7 +38,7 @@ class BlockInstructionsListExtractor:
     ) -> Iterable[Tuple[BlockId, Block, int, BlockInstruction]]:
         if llvm := artifacts.llvm_graph():
             for bid, block in llvm.nodes.items():
-                for idx, instr in enumerate(block.instructions):
+                for idx, instr in enumerate(llvm.flows.get(bid)):
                     yield (bid, block, idx, instr)
 
     @staticmethod
@@ -56,9 +54,9 @@ class BlockInstructionsListExtractor:
     @staticmethod
     def rows(entry: Tuple[BlockId, Block, int, BlockInstruction]) -> Dict[str, str]:
         def into_kind(target: BlockInstruction) -> str:
-            if isinstance(target, Abstracts):
+            if isinstance(target[1], Abstracts):
                 return "abstract"
-            elif isinstance(target, Flow):
+            elif isinstance(target[1], Flow):
                 return "flow"
             else:
                 return "instruction"
@@ -68,5 +66,5 @@ class BlockInstructionsListExtractor:
             "origin": str(entry[1].origin.identify(1)),
             "idx": str(entry[2]),
             "kind": into_kind(entry[3]),
-            "instruction": str(entry[3]),
+            "instruction": str(entry[3][1]),
         }

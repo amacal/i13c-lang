@@ -11,6 +11,7 @@ from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
 def configure_literals() -> GraphNode:
     return GraphNode(
         builder=build_literals,
+        constraint=None,
         produces=("entities/literals",),
         requires=frozenset({("graph", "syntax/graph")}),
     )

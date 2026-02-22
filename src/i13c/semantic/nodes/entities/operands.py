@@ -10,6 +10,7 @@ from i13c.semantic.typing.entities.operands import Operand, OperandId
 def configure_operands() -> GraphNode:
     return GraphNode(
         builder=build_operands,
+        constraint=None,
         produces=("entities/operands",),
         requires=frozenset({("graph", "syntax/graph")}),
     )

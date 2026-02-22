@@ -11,6 +11,7 @@ from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 def configure_expressions() -> GraphNode:
     return GraphNode(
         builder=build_expressions,
+        constraint=None,
         produces=("entities/expressions",),
         requires=frozenset({("graph", "syntax/graph")}),
     )

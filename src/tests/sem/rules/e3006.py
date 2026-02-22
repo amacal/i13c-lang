@@ -1,4 +1,4 @@
-from i13c import err, semantic
+from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.sem import prepare_program
 
@@ -9,8 +9,7 @@ def can_detect_duplicated_snippet_names():
             asm main() { syscall; }
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3006.validate_duplicated_function_names(model)
+    diagnostics = run_graph(program).rule_by_name("e3006")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -25,8 +24,7 @@ def can_detect_duplicated_function_names():
             fn main() {}
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3006.validate_duplicated_function_names(model)
+    diagnostics = run_graph(program).rule_by_name("e3006")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
@@ -41,8 +39,7 @@ def can_detect_duplicated_mixed_function_names():
             fn main() {}
         """)
 
-    model = run_graph(program).semantic_graph()
-    diagnostics = semantic.e3006.validate_duplicated_function_names(model)
+    diagnostics = run_graph(program).rule_by_name("e3006")
 
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
