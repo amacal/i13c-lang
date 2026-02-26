@@ -11,8 +11,20 @@ from i13c.lowering.typing.abstracts import (
     Preserve,
     Restore,
 )
-from i13c.lowering.typing.blocks import Block, BlockInstruction, Registers
-from i13c.lowering.typing.flows import BlockId, Flow, FlowId
+from i13c.lowering.typing.blocks import (
+    Block,
+    BlockInstruction,
+    BlockInstructionId,
+    InstructionPosition,
+    Registers,
+)
+from i13c.lowering.typing.flows import (
+    BindingFlow,
+    BlockId,
+    Flow,
+    FlowId,
+    SnapshotFlow,
+)
 from i13c.lowering.typing.instructions import (
     AddRegImm,
     Call,
@@ -21,9 +33,11 @@ from i13c.lowering.typing.instructions import (
     Label,
     MovOffReg,
     MovRegOff,
+    Nop,
     Return,
     SubRegImm,
 )
+from i13c.lowering.typing.intervals import IntervalPressure, RegisterInterval
 from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
@@ -82,14 +96,14 @@ def configure_instruction_emission() -> GraphNode:
     return GraphNode(
         builder=emit_all_instructions,
         constraint=None,
-        produces=("llvm/instructions",),
+        produces=("assembler/instructions",),
         requires=frozenset(
             {
                 ("entrypoint", "llvm/entrypoint"),
                 ("entries", "llvm/functions/entries"),
                 ("blocks", "llvm/blocks"),
                 ("forward", "llvm/blocks/forward"),
-                ("instructions", "llvm/blocks/instructions"),
+                ("instructions", "llvm/instructions"),
                 ("patching", Prefix(value="llvm/patches/")),
             }
         ),
@@ -186,11 +200,12 @@ def emit_instructions(ctx: Context, entry: BlockId) -> List[Instruction]:
                         break
 
             # all flows should be handled by patching
-            assert not isinstance(instr, Flow)
+            assert not isinstance(instr, Flow), f"Unpatched flow {instr} in block {bid}"
 
             if isinstance(instr, Abstracts):
                 emited.extend(DISPATCH_TABLE[type(instr)](instr))
-            else:
+
+            elif not isinstance(instr, Nop):
                 emited.append(instr)
 
         # determine next block in order
@@ -228,60 +243,350 @@ def emit_control_transfer(
     return Jump(target=term.target)
 
 
-def configure_register_patching() -> GraphNode:
+def configure_function_blocks() -> GraphNode:
     return GraphNode(
-        builder=patch_registers,
+        builder=build_function_blocks,
         constraint=None,
-        produces=("llvm/registers/inputs", "llvm/registers/outputs"),
+        produces=("llvm/functions/blocks",),
         requires=frozenset(
             {
-                ("blocks", "llvm/blocks"),
-                ("backward", "llvm/blocks/backward"),
-                ("clobbers", "llvm/registers/clobbers"),
+                ("forward", "llvm/blocks/forward"),
+                ("entries", "llvm/functions/entries"),
             }
         ),
     )
 
 
-def patch_registers(
-    blocks: OneToOne[BlockId, Block],
-    backward: OneToMany[BlockId, BlockId],
-    clobbers: OneToOne[BlockId, Registers],
+def build_function_blocks(
+    forward: OneToMany[BlockId, BlockId],
+    entries: OneToOne[FunctionId, BlockId],
+) -> OneToMany[FunctionId, BlockId]:
+
+    result: Dict[FunctionId, List[BlockId]] = {}
+
+    for fid, bid in entries.items():
+        result[fid] = linearize_blocks(bid, forward)
+
+    return OneToMany[FunctionId, BlockId].instance(result)
+
+
+def configure_function_instructions() -> GraphNode:
+    return GraphNode(
+        builder=build_function_instructions,
+        constraint=None,
+        produces=("llvm/functions/instructions",),
+        requires=frozenset(
+            {
+                ("blocks", "llvm/functions/blocks"),
+                ("instructions", "llvm/instructions"),
+            }
+        ),
+    )
+
+
+def build_function_instructions(
+    blocks: OneToMany[FunctionId, BlockId],
+    instructions: OneToMany[BlockId, BlockInstruction],
+) -> OneToMany[FunctionId, InstructionPosition]:
+
+    result: Dict[FunctionId, List[InstructionPosition]] = {}
+
+    for fid, bids in blocks.items():
+        index: int = 0
+        order: List[InstructionPosition] = []
+
+        for bid in bids:
+            for iid, _ in instructions.get(bid):
+                order.append(InstructionPosition(target=iid, block=bid, index=index))
+                index += 1
+
+        result[fid] = order
+
+    return OneToMany[FunctionId, InstructionPosition].instance(result)
+
+
+def configure_register_intervals() -> GraphNode:
+    return GraphNode(
+        builder=build_register_intervals,
+        constraint=None,
+        produces=("llvm/functions/intervals",),
+        requires=frozenset(
+            {
+                ("instructions", "llvm/functions/instructions"),
+                ("idef", "llvm/instructions/registers/def"),
+                ("iout", "llvm/instructions/registers/out"),
+            }
+        ),
+    )
+
+
+def build_register_intervals(
+    instructions: OneToMany[FunctionId, InstructionPosition],
+    idef: OneToOne[BlockInstructionId, Registers],
+    iout: OneToOne[BlockInstructionId, Registers],
+) -> OneToMany[FunctionId, RegisterInterval]:
+
+    intervals: Dict[FunctionId, List[RegisterInterval]] = {}
+
+    for fid, positions in instructions.items():
+        ending: Dict[int, int] = {}
+        starting: Dict[int, int] = {}
+
+        for position in positions:
+            for reg in idef.get(position.target).items:
+                starting[reg] = position.index
+
+            for reg in iout.get(position.target).items:
+                ending[reg] = position.index
+
+        intervals[fid] = [
+            RegisterInterval(
+                vreg=reg,
+                start=starting[reg],
+                end=ending.get(reg, starting[reg]),
+            )
+            for reg in starting.keys() | ending.keys()
+        ]
+
+    return OneToMany[FunctionId, RegisterInterval].instance(intervals)
+
+
+def configure_register_interval_pressure() -> GraphNode:
+    return GraphNode(
+        builder=build_register_interval_pressure,
+        constraint=None,
+        produces=("llvm/functions/intervals/pressure",),
+        requires=frozenset(
+            {
+                ("intervals", "llvm/functions/intervals"),
+            }
+        ),
+    )
+
+
+def build_register_interval_pressure(
+    intervals: OneToMany[FunctionId, RegisterInterval],
+) -> OneToMany[FunctionId, IntervalPressure]:
+
+    pressure: Dict[FunctionId, List[IntervalPressure]] = {}
+
+    for fid, ivs in intervals.items():
+        datapoints = max(iv.end for iv in ivs) + 1 if ivs else 0
+        instructions = [0] * datapoints
+
+        for iv in ivs:
+            for idx in range(iv.start, iv.end + 1):
+                instructions[idx] += 1
+
+        pressure[fid] = [
+            IntervalPressure(
+                index=idx,
+                pressure=pres,
+                registers=[iv.vreg for iv in ivs if iv.start <= idx <= iv.end],
+            )
+            for idx, pres in enumerate(instructions)
+        ]
+
+    return OneToMany[FunctionId, IntervalPressure].instance(pressure)
+
+
+def configure_defined_and_used_registers_for_instructions() -> GraphNode:
+    return GraphNode(
+        builder=find_defined_and_used_registers_for_instructions,
+        constraint=None,
+        produces=(
+            "llvm/instructions/registers/def",
+            "llvm/instructions/registers/use",
+        ),
+        requires=frozenset(
+            {
+                ("instructions", "llvm/instructions"),
+            }
+        ),
+    )
+
+
+def find_defined_and_used_registers_for_instructions(
+    instructions: OneToMany[BlockId, BlockInstruction],
+) -> Tuple[
+    OneToOne[BlockInstructionId, Registers],
+    OneToOne[BlockInstructionId, Registers],
+]:
+
+    defined: Dict[BlockInstructionId, Registers] = {}
+    usages: Dict[BlockInstructionId, Registers] = {}
+
+    # we want to carefully cover all instructions to determine defined and used registers
+    # we can only scan for move and binding flows for now
+
+    for _, batch in instructions.items():
+        for iid, instr in batch:
+            if isinstance(instr, SnapshotFlow):
+                defined[iid] = Registers(items={instr.dst})
+            else:
+                defined[iid] = Registers.empty()
+
+            if isinstance(instr, BindingFlow):
+                usages[iid] = Registers(items={instr.src})
+            else:
+                usages[iid] = Registers.empty()
+
+    return (
+        OneToOne[BlockInstructionId, Registers].instance(defined),
+        OneToOne[BlockInstructionId, Registers].instance(usages),
+    )
+
+
+def configure_defined_and_used_registers_for_blocks() -> GraphNode:
+    return GraphNode(
+        builder=find_defined_and_used_registers_for_blocks,
+        constraint=None,
+        produces=(
+            "llvm/blocks/registers/def",
+            "llvm/blocks/registers/use",
+        ),
+        requires=frozenset(
+            {
+                ("instructions", "llvm/instructions"),
+                ("idef", "llvm/instructions/registers/def"),
+                ("iuse", "llvm/instructions/registers/use"),
+            }
+        ),
+    )
+
+
+def find_defined_and_used_registers_for_blocks(
+    instructions: OneToMany[BlockId, BlockInstruction],
+    idef: OneToOne[BlockInstructionId, Registers],
+    iuse: OneToOne[BlockInstructionId, Registers],
 ) -> Tuple[OneToOne[BlockId, Registers], OneToOne[BlockId, Registers]]:
 
-    inputs: Dict[BlockId, Registers] = {}
-    outputs: Dict[BlockId, Registers] = {}
+    bdef: Dict[BlockId, Registers] = {}
+    buse: Dict[BlockId, Registers] = {}
 
-    for bid in blocks.keys():
-        inputs[bid] = Registers.empty()
-        outputs[bid] = Registers.empty()
+    # block level is simply the union of all instruction level
 
+    for bid, batch in instructions.items():
+        sdef: Set[int] = set()
+        suse: Set[int] = set()
+
+        for iid, _ in batch:
+            sdef.update(idef.get(iid).items)
+            suse.update(iuse.get(iid).items)
+
+        bdef[bid] = Registers(items=sdef)
+        buse[bid] = Registers(items=suse)
+
+    return (
+        OneToOne[BlockId, Registers].instance(bdef),
+        OneToOne[BlockId, Registers].instance(buse),
+    )
+
+
+def configure_in_and_out_registers_for_blocks() -> GraphNode:
+    return GraphNode(
+        builder=find_in_and_out_registers_for_blocks,
+        constraint=None,
+        produces=(
+            "llvm/blocks/registers/in",
+            "llvm/blocks/registers/out",
+        ),
+        requires=frozenset(
+            {
+                ("backward", "llvm/blocks/backward"),
+                ("buse", "llvm/blocks/registers/use"),
+            }
+        ),
+    )
+
+
+def find_in_and_out_registers_for_blocks(
+    backward: OneToMany[BlockId, BlockId],
+    buse: OneToOne[BlockId, Registers],
+) -> Tuple[OneToOne[BlockId, Registers], OneToOne[BlockId, Registers]]:
+
+    iin: Dict[BlockId, Registers] = {}
+    iout: Dict[BlockId, Registers] = {}
+
+    for bid in buse.keys():
+        iin[bid] = Registers.empty()
+        iout[bid] = Registers.empty()
+
+    regout: Set[int]
     changed = True
+
     while changed:
         changed = False
 
-        for bid in blocks.keys():
+        for bid in buse.keys():
+            regin = set(buse.get(bid).items)  # start with used-registers
+            regin.update(iout[bid].items)  # add out-registers from previous iteration
+
             if predecessors := backward.get(bid):
-                regin = set(outputs[predecessors[0]].items)
+                regout = set(
+                    iin[predecessors[0]].items
+                )  # start with in-registers of first predecessor
 
                 for pred in predecessors[1:]:
-                    regin.intersection_update(outputs[pred].items)
+                    regout.update(
+                        iin[pred].items
+                    )  # add in-registers of other predecessors
 
             else:
-                regin = inputs[bid].items
+                regout = set()
 
-            regout = regin - clobbers.get(bid).items
-            # regout = regout.union(ctx.nodes[bid].registers.generated)
-
-            if regin != inputs.get(bid, Registers.empty()).items:
-                inputs[bid] = Registers(items=regin)
+            if regin != iin[bid].items:
+                iin[bid] = Registers(items=regin)
                 changed = True
 
-            if regout != outputs.get(bid, Registers.empty()).items:
-                outputs[bid] = Registers(items=regout)
+            if regout != iout[bid].items:
+                iout[bid] = Registers(items=regout)
                 changed = True
 
     return (
-        OneToOne[BlockId, Registers].instance(inputs),
-        OneToOne[BlockId, Registers].instance(outputs),
+        OneToOne[BlockId, Registers].instance(iin),
+        OneToOne[BlockId, Registers].instance(iout),
+    )
+
+
+def configure_in_and_out_registers_for_instructions() -> GraphNode:
+    return GraphNode(
+        builder=find_in_and_out_registers_for_instructions,
+        constraint=None,
+        produces=(
+            "llvm/instructions/registers/in",
+            "llvm/instructions/registers/out",
+        ),
+        requires=frozenset(
+            {
+                ("instructions", "llvm/instructions"),
+                ("iuse", "llvm/instructions/registers/use"),
+                ("bout", "llvm/blocks/registers/out"),
+            }
+        ),
+    )
+
+
+def find_in_and_out_registers_for_instructions(
+    instructions: OneToMany[BlockId, BlockInstruction],
+    iuse: OneToOne[BlockInstructionId, Registers],
+    bout: OneToOne[BlockId, Registers],
+) -> Tuple[
+    OneToOne[BlockInstructionId, Registers], OneToOne[BlockInstructionId, Registers]
+]:
+
+    iin: Dict[BlockInstructionId, Registers] = {}
+    iout: Dict[BlockInstructionId, Registers] = {}
+
+    for bid, batch in instructions.items():
+        live = set(bout.get(bid).items)
+
+        for iid, _ in reversed(batch):
+            iout[iid] = Registers(items=live.copy())
+            live.update(iuse.get(iid).items)
+            iin[iid] = Registers(items=live.copy())
+
+    return (
+        OneToOne[BlockInstructionId, Registers].instance(iin),
+        OneToOne[BlockInstructionId, Registers].instance(iout),
     )

@@ -23,23 +23,25 @@ from i13c.semantic.typing.entities.operands import (
 
 def lower_instruction(
     graph: SemanticGraph,
+    generator: Generator,
     instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
 ) -> InstructionEntry:
     if instruction.mnemonic.name == b"mov":
-        return lower_instruction_mov(graph, instruction, operands)
+        return lower_instruction_mov(graph, generator, instruction, operands)
 
     elif instruction.mnemonic.name == b"shl":
-        return lower_instruction_shl(graph, instruction, operands)
+        return lower_instruction_shl(graph, generator, instruction, operands)
 
     elif instruction.mnemonic.name == b"syscall":
-        return lower_instruction_syscall(graph.generator)
+        return lower_instruction_syscall(generator)
 
     assert False, f"unsupported mnemonic: {instruction.mnemonic.name}"
 
 
 def lower_instruction_mov(
     graph: SemanticGraph,
+    generator: Generator,
     instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
 ) -> InstructionEntry:
@@ -59,13 +61,14 @@ def lower_instruction_mov(
     src_imm = src.target.value
 
     return (
-        InstructionId(value=graph.generator.next()),
+        InstructionId(value=generator.next()),
         MovRegImm(dst=dst_reg, imm=src_imm),
     )
 
 
 def lower_instruction_shl(
     graph: SemanticGraph,
+    generator: Generator,
     instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
 ) -> InstructionEntry:
@@ -85,7 +88,7 @@ def lower_instruction_shl(
     src_imm = src.target.value
 
     return (
-        InstructionId(value=graph.generator.next()),
+        InstructionId(value=generator.next()),
         ShlRegImm(dst=dst_reg, imm=src_imm),
     )
 

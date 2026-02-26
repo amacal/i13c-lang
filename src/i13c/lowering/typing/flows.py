@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Tuple, Union
+from typing import List, Tuple, Union
 
 from i13c.lowering.typing.registers import reg_to_name
-from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 
 
@@ -15,6 +14,15 @@ class BlockId:
 
 
 @dataclass(kw_only=True)
+class SnapshotFlow:
+    src: int
+    dst: int
+
+    def native(self) -> str:
+        return f"snapshot {reg_to_name(self.dst)}, {reg_to_name(self.src)}"
+
+
+@dataclass(kw_only=True)
 class CallFlow:
     target: FunctionId
 
@@ -23,13 +31,20 @@ class CallFlow:
 
 
 @dataclass(kw_only=True)
-class BindingFlow:
-    dst: int
-    src: ExpressionId
+class ClobbersFlow:
+    clobbers: List[int]
 
     def native(self) -> str:
-        dst = reg_to_name(self.dst)
-        return f"bind {dst}, {self.src.identify(1)}"
+        return f"clobbers {', '.join(map(reg_to_name, sorted(self.clobbers)))}"
+
+
+@dataclass(kw_only=True)
+class BindingFlow:
+    dst: int
+    src: int
+
+    def native(self) -> str:
+        return f"bind {reg_to_name(self.dst)}, {reg_to_name(self.src)}"
 
 
 @dataclass(kw_only=True)
@@ -61,7 +76,12 @@ class RestoreFlow:
 
 
 Flow = Union[
-    CallFlow, BindingFlow, PrologueFlow, EpilogueFlow, PreserveFlow, RestoreFlow
+    CallFlow,
+    ClobbersFlow,
+    BindingFlow,
+    PrologueFlow,
+    EpilogueFlow,
+    SnapshotFlow,
 ]
 
 

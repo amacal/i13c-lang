@@ -74,6 +74,10 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
 
             # now make dependencies
             for item in reqs:
+
+                # the ugly way of be most precise possible in error reporting
+                assert item in producer, f"node {node.produces} expects {item}"
+
                 dep = producer[item]
                 edges[dep].append(node)
                 indeg[node] += 1
@@ -98,11 +102,14 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
     artifacts: Dict[str, Any] = {}
     logger: Logger = getLogger("dag")
 
+    def seed(value: Any) -> Callable[[], Any]:
+        return lambda: value
+
     # seed initial artifacts
     for key, value in initial.items():
         nodes.append(
             GraphNode(
-                builder=(lambda: value),
+                builder=seed(value),
                 constraint=None,
                 produces=(key,),
                 requires=frozenset(),

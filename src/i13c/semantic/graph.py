@@ -50,7 +50,6 @@ def build(
     **kwargs: Dict[str, Any],
 ) -> SemanticGraph:
     return SemanticGraph(
-        generator=syntax.generator,
         basic=BasicNodes(
             literals=entities["entities/literals"],
             operands=entities["entities/operands"],

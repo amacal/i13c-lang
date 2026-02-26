@@ -56,6 +56,9 @@ class OneToMany[SemanticId, SemanticNode]:
     def size(self) -> int:
         return len(self.data)
 
+    def keys(self) -> Iterable[SemanticId]:
+        return self.data.keys()
+
     def pop(self) -> Tuple[SemanticId, List[SemanticNode]]:
         return self.data.popitem()
 

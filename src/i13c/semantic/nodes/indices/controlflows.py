@@ -3,7 +3,6 @@ from typing import Dict, List
 from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
-from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.indices.controlflows import (
     FlowEntry,
@@ -20,7 +19,7 @@ def configure_flowgraph_by_function() -> GraphNode:
         produces=("indices/flowgraph-by-function",),
         requires=frozenset(
             {
-                ("graph", "syntax/graph"),
+                ("generator", "core/generator"),
                 ("functions", "entities/functions"),
             }
         ),
@@ -28,11 +27,10 @@ def configure_flowgraph_by_function() -> GraphNode:
 
 
 def build_flowgraphs(
-    graph: SyntaxGraph,
+    generator: Generator,
     functions: OneToOne[FunctionId, Function],
 ) -> OneToOne[FunctionId, FlowGraph]:
 
-    generator: Generator = graph.generator
     flowgraphs: Dict[FunctionId, FlowGraph] = {}
 
     for fid, function in functions.items():

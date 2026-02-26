@@ -1,6 +1,7 @@
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List
 
 from i13c.core.dag import GraphNode
+from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.nodes.bindings import lower_function_bindings, lower_snippet_bindings
 from i13c.lowering.nodes.instances import lower_instance
@@ -8,51 +9,53 @@ from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import (
     BlockId,
     CallFlow,
+    ClobbersFlow,
     FlowId,
-    PreserveFlow,
-    RestoreFlow,
 )
-from i13c.lowering.typing.instructions import Call, InstructionEntry, InstructionId
-from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
+from i13c.lowering.typing.instructions import Call, InstructionEntry, InstructionId, Nop
+from i13c.lowering.typing.registers import VirtualRegister, name_to_reg
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.indices.variables import VariableId
 
 
 def lower_callsite(
+    generator: Generator,
     graph: SemanticGraph,
-    cid: CallSiteId,
-) -> Tuple[List[BlockInstruction], Set[int]]:
+    node: CallSiteId,
+    registers: Dict[VariableId, VirtualRegister],
+) -> List[BlockInstruction]:
 
-    # prepare result containers
-    clobbers: Set[int] = set()
+    # prepare instructions
     instructions: List[BlockInstruction] = []
 
     # retrieve callsite resolution
-    resolution = graph.indices.resolution_by_callsite.get(cid)
+    resolution = graph.indices.resolution_by_callsite.get(node)
 
     # we expected no ambiguity here
     assert len(resolution.accepted) == 1
 
-    # append preserve instructions
-    iid = FlowId(value=graph.generator.next())
-    instructions.append((iid, PreserveFlow()))
-
     if isinstance(resolution.accepted[0].callable.target, SnippetId):
-        instance = graph.indices.instance_by_callsite.get(cid)
-        snippet = graph.basic.snippets.get(instance.target)
+        instance = graph.indices.instance_by_callsite.get(node)
+        target = resolution.accepted[0].callable.target
+
+        snippet = graph.basic.snippets.get(target)
+        clobbers = [name_to_reg(reg.name.decode()) for reg in snippet.clobbers]
 
         # append callsite specific bindings
-        instructions.extend(lower_snippet_bindings(graph, instance.bindings))
+        instructions.extend(
+            lower_snippet_bindings(graph, generator, node, instance.bindings, registers)
+        )
 
         # append emitted instructions
-        instructions.extend(lower_instance(graph, instance))
+        instructions.extend(lower_instance(graph, generator, instance))
 
-        # update clobbered registers
-        clobbers.update(
-            [IR_REGISTER_FORWARD[register.name] for register in snippet.clobbers]
-        )
+        if clobbers:
+            # append callsite snippet flow
+            iid = FlowId(value=generator.next())
+            instructions.extend([(iid, ClobbersFlow(clobbers=clobbers))])
 
     else:
 
@@ -60,24 +63,19 @@ def lower_callsite(
         bindings = resolution.accepted[0].bindings
 
         # append callsite specific bindings
-        instructions.extend(lower_function_bindings(graph, bindings))
+        instructions.extend(
+            lower_function_bindings(graph, generator, node, bindings, registers)
+        )
 
         # extract successfully resolved target
         target = resolution.accepted[0].callable.target
 
         # append callsite call instructions
-        iid = FlowId(value=graph.generator.next())
+        iid = FlowId(value=generator.next())
         instructions.extend([(iid, CallFlow(target=target))])
 
-        # all IR registers are clobbered by function calls
-        clobbers.update(set(IR_REGISTER_FORWARD.values()))
-
-    # append restore instructions
-    iid = FlowId(value=graph.generator.next())
-    instructions.append((iid, RestoreFlow()))
-
-    # callsite instructions and clobbers
-    return instructions, clobbers
+    # callsite instructions
+    return instructions
 
 
 def configure_callsites() -> GraphNode:
@@ -87,8 +85,8 @@ def configure_callsites() -> GraphNode:
         produces=("llvm/patches/callsites",),
         requires=frozenset(
             {
-                ("graph", "semantic/graph"),
-                ("instructions", "llvm/blocks/instructions"),
+                ("generator", "core/generator"),
+                ("instructions", "llvm/instructions"),
                 ("entries", "llvm/functions/entries"),
             }
         ),
@@ -96,7 +94,7 @@ def configure_callsites() -> GraphNode:
 
 
 def patch_all_callsites(
-    graph: SemanticGraph,
+    generator: Generator,
     instructions: OneToMany[BlockId, BlockInstruction],
     entries: OneToOne[FunctionId, BlockId],
 ) -> OneToOne[FlowId, InstructionEntry]:
@@ -109,8 +107,45 @@ def patch_all_callsites(
                 assert isinstance(fid, FlowId)
 
                 calls[fid] = (
-                    InstructionId(value=graph.generator.next()),
+                    InstructionId(value=generator.next()),
                     Call(target=entries.get(flow.target)),
                 )
 
     return OneToOne[FlowId, InstructionEntry].instance(calls)
+
+
+def configure_clobbers_patching() -> GraphNode:
+    return GraphNode(
+        builder=patch_clobbers,
+        constraint=None,
+        produces=("llvm/patches/clobbers",),
+        requires=frozenset(
+            {
+                ("generator", "core/generator"),
+                ("blocks", "llvm/functions/blocks"),
+                ("instructions", "llvm/instructions"),
+            }
+        ),
+    )
+
+
+def patch_clobbers(
+    generator: Generator,
+    blocks: OneToMany[FunctionId, BlockId],
+    instructions: OneToMany[BlockId, BlockInstruction],
+) -> OneToOne[FlowId, InstructionEntry]:
+    bindings: Dict[FlowId, InstructionEntry] = {}
+
+    for _, bids in blocks.items():
+        for bid in bids:
+            for iid, instr in instructions.get(bid):
+                if not isinstance(iid, FlowId):
+                    continue
+
+                if isinstance(instr, ClobbersFlow):
+                    # ClobbersFlow is referenced by FlowId
+                    assert isinstance(iid, FlowId)
+
+                    bindings[iid] = (InstructionId(value=generator.next()), Nop())
+
+    return OneToOne[FlowId, InstructionEntry].instance(bindings)

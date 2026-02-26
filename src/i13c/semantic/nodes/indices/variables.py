@@ -6,6 +6,9 @@ from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.indices.variables import Variable, VariableId
 
+# builds a collection of variables for each parameter;
+# also provides index to retrieve variable by parameter-id;
+
 
 def configure_variables_by_parameters() -> GraphNode:
     return GraphNode(

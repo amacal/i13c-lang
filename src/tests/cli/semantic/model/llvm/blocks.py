@@ -32,9 +32,7 @@ def can_draw_a_table_with_block_instructions():
         | -------- | ---------- | ----- | ----------- | ------------------- |
         | Block ID | Origin     | Index | Kind        | Instruction         |
         | -------- | ---------- | ----- | ----------- | ------------------- |
-        | block#7  | callsite#4 | 0     | flow        | preserve            |
-        | block#7  | callsite#4 | 1     | instruction | syscall             |
-        | block#7  | callsite#4 | 2     | flow        | restore             |
+        | block#7  | callsite#4 | 0     | instruction | syscall             |
         | block#8  | function#3 | 0     | flow        | prologue function#3 |
         | -------- | ---------- | ----- | ----------- | ------------------- |
     """)

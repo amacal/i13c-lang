@@ -1,5 +1,6 @@
 from i13c.ast import Program
 from i13c.core.dag import GraphGroup, evaluate
+from i13c.core.generator import Generator
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.lowering.build import configure_llvm_graph
 from i13c.semantic.graph import configure_semantic_graph
@@ -18,6 +19,7 @@ def run(program: Program) -> GraphArtifacts:
     artifacts = evaluate(
         nodes.flatten(),
         initial={
+            "core/generator": Generator(),
             "ast/program": program,
         },
     )

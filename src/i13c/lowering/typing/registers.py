@@ -1,4 +1,5 @@
-from typing import Dict
+from dataclasses import dataclass
+from typing import Dict, Set
 
 # fmt: off
 IR_REGISTER_FORWARD: Dict[bytes, int] = {
@@ -13,11 +14,24 @@ IR_REGISTER_BACKWARD: Dict[int, bytes] = {
     8: b"r8", 9: b"r9", 10: b"r10", 11: b"r11", 12: b"r12", 13: b"r13", 14: b"r14", 15: b"r15",
 }
 # fmt: on
-
-
 def reg_to_name(reg: int) -> str:
-    return IR_REGISTER_BACKWARD[reg].decode()
+    return IR_REGISTER_BACKWARD[reg].decode() if reg >= 0 else f"v{abs(reg)}"
 
 
 def name_to_reg(name: str) -> int:
     return IR_REGISTER_FORWARD[name.encode()]
+
+
+def caller_saved() -> Set[int]:
+    return set(range(0, 8)) - {IR_REGISTER_FORWARD[b"rsp"]}
+
+
+@dataclass(kw_only=True)
+class VirtualRegister:
+    id: int
+
+    def ref(self) -> int:
+        return -self.id
+
+    def __str__(self) -> str:
+        return f"v{self.id}"

@@ -37,9 +37,9 @@ class Bidirectional[AstNode]:
 
 
 class NodesVisitor:
-    def __init__(self) -> None:
-        self.generator = Generator()
-        self.graph = SyntaxGraph.empty(self.generator)
+    def __init__(self, generator: Generator) -> None:
+        self.generator = generator
+        self.graph = SyntaxGraph.empty()
 
     def next(self) -> NodeId:
         return NodeId(value=self.generator.next())
@@ -74,7 +74,6 @@ class NodesVisitor:
 
 @dataclass(kw_only=True)
 class SyntaxGraph:
-    generator: Generator
     snippets: Bidirectional[ast.Snippet]
     operands: Bidirectional[ast.Operand]
     instructions: Bidirectional[ast.Instruction]
@@ -85,9 +84,8 @@ class SyntaxGraph:
     parameters: Bidirectional[ast.Parameter]
 
     @staticmethod
-    def empty(generator: Generator) -> SyntaxGraph:
+    def empty() -> SyntaxGraph:
         return SyntaxGraph(
-            generator=generator,
             snippets=Bidirectional[ast.Snippet].empty(),
             operands=Bidirectional[ast.Operand].empty(),
             instructions=Bidirectional[ast.Instruction].empty(),
@@ -98,26 +96,31 @@ class SyntaxGraph:
             parameters=Bidirectional[ast.Parameter].empty(),
         )
 
-    def next(self) -> int:
-        return self.generator.next()
 
-
-def build_syntax_graph(program: ast.Program) -> SyntaxGraph:
-    visitor = NodesVisitor()
+def build_syntax_graph(
+    generator: Generator,
+    program: ast.Program,
+) -> SyntaxGraph:
+    visitor = NodesVisitor(generator)
     program.accept(visitor)
 
     return visitor.graph
 
 
 def configure_syntax_graph() -> GraphGroup:
-    def produce(program: ast.Program) -> SyntaxGraph:
-        return build_syntax_graph(program)
+    def produce(generator: Generator, program: ast.Program) -> SyntaxGraph:
+        return build_syntax_graph(generator, program)
 
     node = GraphNode(
         builder=produce,
         constraint=None,
         produces=("syntax/graph",),
-        requires=frozenset({("program", "ast/program")}),
+        requires=frozenset(
+            {
+                ("generator", "core/generator"),
+                ("program", "ast/program"),
+            }
+        ),
     )
 
     return GraphGroup(nodes=[node])

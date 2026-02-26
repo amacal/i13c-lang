@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from i13c.core.dag import GraphNode
+from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.typing.blocks import BlockInstruction
 from i13c.lowering.typing.flows import BindingFlow, BlockId, FlowId
@@ -8,19 +9,32 @@ from i13c.lowering.typing.instructions import (
     InstructionEntry,
     InstructionId,
     MovRegImm,
-    MovRegReg,
+    MovRegOff,
+    Nop,
 )
-from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
+from i13c.lowering.typing.registers import (
+    IR_REGISTER_FORWARD,
+    VirtualRegister,
+    name_to_reg,
+)
+from i13c.lowering.typing.stacks import StackFrame
 from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
+from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
 from i13c.semantic.typing.entities.parameters import Parameter
 from i13c.semantic.typing.entities.snippets import Slot
+from i13c.semantic.typing.indices.variables import VariableId
 from i13c.semantic.typing.resolutions.callsites import CallSiteBinding
 
 
 def lower_snippet_bindings(
-    graph: SemanticGraph, bindings: List[CallSiteBinding]
+    graph: SemanticGraph,
+    generator: Generator,
+    node: CallSiteId,
+    bindings: List[CallSiteBinding],
+    registers: Dict[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
@@ -43,7 +57,7 @@ def lower_snippet_bindings(
             imm = literal.target.value
 
             # emit move instruction for binding
-            iid = InstructionId(value=graph.generator.next())
+            iid = InstructionId(value=generator.next())
             instr = MovRegImm(dst=IR_REGISTER_FORWARD[bind.name], imm=imm)
 
             out.append((iid, instr))
@@ -52,20 +66,28 @@ def lower_snippet_bindings(
         if binding.argument.kind == b"expression":
             assert isinstance(binding.argument.target, ExpressionId)
 
-            src = binding.argument.target
+            expression = graph.basic.expressions.get(binding.argument.target)
+            environment = graph.indices.environment_by_flownode.get(node)
+            variable = environment.variables[expression.ident]
+
+            src = registers[variable].ref()
             dst = IR_REGISTER_FORWARD[binding.target.bind.name]
 
-            # emit flow binding to be patched later
-            fid = FlowId(value=graph.generator.next())
-            flow = BindingFlow(dst=dst, src=src)
+            iid = FlowId(value=generator.next())
+            instr = BindingFlow(dst=dst, src=src)
 
-            out.append((fid, flow))
+            # emit instruction for virtual move
+            out.append((iid, instr))
 
     return out
 
 
 def lower_function_bindings(
-    graph: SemanticGraph, bindings: List[CallSiteBinding]
+    graph: SemanticGraph,
+    generator: Generator,
+    node: CallSiteId,
+    bindings: List[CallSiteBinding],
+    registers: Dict[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
@@ -89,7 +111,7 @@ def lower_function_bindings(
             imm = literal.target.value
 
             # emit move instruction for binding
-            iid = InstructionId(value=graph.generator.next())
+            iid = InstructionId(value=generator.next())
             instr = MovRegImm(dst=idx, imm=imm)
 
             out.append((iid, instr))
@@ -99,14 +121,15 @@ def lower_function_bindings(
             # satisfy type checker
             assert isinstance(binding.argument.target, ExpressionId)
 
-            src = binding.argument.target
-            dst = idx
+            expression = graph.basic.expressions.get(binding.argument.target)
+            environment = graph.indices.environment_by_flownode.get(node)
+            variable = environment.variables[expression.ident]
 
-            fid = FlowId(value=graph.generator.next())
-            flow = BindingFlow(dst=dst, src=src)
+            iid = FlowId(value=generator.next())
+            instr = BindingFlow(dst=idx, src=registers[variable].ref())
 
-            # emit flow binding to be patched later
-            out.append((fid, flow))
+            # emit instruction for virtual move
+            out.append((iid, instr))
 
     return out
 
@@ -118,49 +141,47 @@ def configure_binding_patching() -> GraphNode:
         produces=("llvm/patches/bindings",),
         requires=frozenset(
             {
-                ("graph", "semantic/graph"),
-                ("instructions", "llvm/blocks/instructions"),
+                ("generator", "core/generator"),
+                ("blocks", "llvm/functions/blocks"),
+                ("instructions", "llvm/instructions"),
+                ("stackframes", "llvm/functions/stackframes"),
             }
         ),
     )
 
 
 def patch_bindings(
-    graph: SemanticGraph, instructions: OneToMany[BlockId, BlockInstruction]
+    generator: Generator,
+    blocks: OneToMany[FunctionId, BlockId],
+    stackframes: OneToOne[FunctionId, StackFrame],
+    instructions: OneToMany[BlockId, BlockInstruction],
 ) -> OneToOne[FlowId, InstructionEntry]:
-    mapping: Dict[ExpressionId, int] = {}
     bindings: Dict[FlowId, InstructionEntry] = {}
 
-    for cid, callsite in graph.basic.callsites.items():
-        environment = graph.indices.environment_by_flownode.get(cid)
+    for fid, bids in blocks.items():
+        for bid in bids:
+            for iid, instr in instructions.get(bid):
+                if not isinstance(iid, FlowId):
+                    continue
 
-        for arg in callsite.arguments:
-            if arg.kind != b"expression":
-                continue
+                if isinstance(instr, BindingFlow):
+                    # BindingFlow is referenced by FlowId
+                    assert isinstance(iid, FlowId)
 
-            # satisfy type checker
-            assert isinstance(arg.target, ExpressionId)
+                    # find stackframe and get a slot entry
+                    stackframe = stackframes.get(fid)
+                    offset = stackframe.slot_at_register(instr.src)
 
-            expression = graph.basic.expressions.get(arg.target)
-            vid = environment.variables[expression.ident]
+                    if offset is None:
+                        bindings[iid] = (InstructionId(value=generator.next()), Nop())
 
-            variable = graph.basic.variables.get(vid)
-            function = graph.basic.functions.get(environment.owner)
-
-            for idx, pid in enumerate(function.parameters):
-                if pid == variable.source:
-                    mapping[arg.target] = idx
-
-    for batch in instructions.values():
-        for fid, flow in batch:
-            if isinstance(flow, BindingFlow):
-                # BindingFlow is referenced by FlowId
-                assert isinstance(fid, FlowId)
-
-                # append new patched binding
-                bindings[fid] = (
-                    InstructionId(value=graph.generator.next()),
-                    MovRegReg(dst=flow.dst, src=mapping[flow.src]),
-                )
+                    else:
+                        # append new patched binding
+                        bindings[iid] = (
+                            InstructionId(value=generator.next()),
+                            MovRegOff(
+                                dst=instr.dst, src=name_to_reg("rsp"), off=offset * 8
+                            ),
+                        )
 
     return OneToOne[FlowId, InstructionEntry].instance(bindings)

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set
 
-from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
@@ -63,8 +62,6 @@ class CallGraph:
 
 @dataclass(kw_only=True)
 class SemanticGraph:
-    generator: Generator
-
     callgraph_live: Dict[CallableTarget, List[CallPair]]
     callable_live: Set[CallableTarget]
 

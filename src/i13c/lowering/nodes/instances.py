@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+from i13c.core.generator import Generator
 from i13c.lowering.nodes.instructions import lower_instruction
 from i13c.lowering.typing.instructions import InstructionEntry
 from i13c.semantic.model import SemanticGraph
@@ -9,6 +10,7 @@ from i13c.semantic.typing.indices.instances import Instance
 
 def lower_instance(
     graph: SemanticGraph,
+    generator: Generator,
     target: Instance,
 ) -> List[InstructionEntry]:
     out: List[InstructionEntry] = []
@@ -20,6 +22,6 @@ def lower_instance(
     # lower all instructions
     for iid in instrs:
         instr = graph.basic.instructions.get(iid)
-        out.append(lower_instruction(graph, instr, operands))
+        out.append(lower_instruction(graph, generator, instr, operands))
 
     return out

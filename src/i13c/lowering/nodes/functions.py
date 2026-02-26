@@ -5,9 +5,22 @@ from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.lowering.nodes.callsites import lower_callsite
-from i13c.lowering.nodes.registers import caller_saved
-from i13c.lowering.typing.blocks import Block, BlockInstruction, Registers
-from i13c.lowering.typing.flows import BlockId, EpilogueFlow, FlowId, PrologueFlow
+from i13c.lowering.typing.blocks import Block, BlockInstruction
+from i13c.lowering.typing.flows import (
+    BlockId,
+    EpilogueFlow,
+    FlowId,
+    PrologueFlow,
+    SnapshotFlow,
+)
+from i13c.lowering.typing.instructions import (
+    InstructionEntry,
+    InstructionId,
+    MovOffReg,
+    Nop,
+)
+from i13c.lowering.typing.registers import VirtualRegister, name_to_reg
+from i13c.lowering.typing.stacks import StackFrame
 from i13c.lowering.typing.terminators import (
     ExitTerminator,
     JumpTerminator,
@@ -23,6 +36,7 @@ from i13c.semantic.typing.indices.controlflows import (
     FlowGraph,
     FlowNode,
 )
+from i13c.semantic.typing.indices.variables import VariableId
 
 # the goal of this module is to convert all active functions into blocks with instructions;
 # each block can have forward and backward edges and each function has its entries and exits;
@@ -42,14 +56,14 @@ def configure_functions() -> GraphNode:
             "llvm/blocks",
             "llvm/blocks/forward",
             "llvm/blocks/backward",
-            "llvm/blocks/instructions",
-            "llvm/registers/inputs",
-            "llvm/registers/clobbers",
+            "llvm/instructions",
             "llvm/functions/entries",
             "llvm/functions/exits",
+            "llvm/registers",
         ),
         requires=frozenset(
             {
+                ("generator", "core/generator"),
                 ("graph", "semantic/graph"),
                 ("rules", "rules/semantic"),
             }
@@ -66,8 +80,7 @@ class Context:
     blocks: Dict[BlockId, Block]
     instructions: Dict[BlockId, List[BlockInstruction]]
 
-    inputs: Dict[BlockId, Registers]
-    clobbers: Dict[BlockId, Registers]
+    registers: Dict[VariableId, VirtualRegister]
 
     forward: Dict[BlockId, List[BlockId]]
     backward: Dict[BlockId, List[BlockId]]
@@ -76,15 +89,14 @@ class Context:
     exits: Dict[FunctionId, BlockId]
 
     @staticmethod
-    def empty(graph: SemanticGraph) -> "Context":
+    def empty(graph: SemanticGraph, generator: Generator) -> "Context":
         return Context(
             graph=graph,
-            generator=graph.generator,
+            generator=generator,
             entrypoint=None,
             blocks={},
             instructions={},
-            inputs={},
-            clobbers={},
+            registers={},
             forward={},
             backward={},
             entries={},
@@ -93,6 +105,7 @@ class Context:
 
 
 def lower_active_functions(
+    generator: Generator,
     graph: SemanticGraph,
     **kwargs: Dict[str, Any],
 ) -> Tuple[
@@ -101,12 +114,11 @@ def lower_active_functions(
     OneToMany[BlockId, BlockId],
     OneToMany[BlockId, BlockId],
     OneToMany[BlockId, BlockInstruction],
-    OneToOne[BlockId, Registers],
-    OneToOne[BlockId, Registers],
     OneToOne[FunctionId, BlockId],
     OneToOne[FunctionId, BlockId],
+    OneToOne[VariableId, VirtualRegister],
 ]:
-    ctx = Context.empty(graph)
+    ctx = Context.empty(graph, generator)
 
     # lower all live callables
     for fid in graph.callable_live:
@@ -129,10 +141,9 @@ def lower_active_functions(
         OneToMany[BlockId, BlockId].instance(ctx.forward),
         OneToMany[BlockId, BlockId].instance(ctx.backward),
         OneToMany[BlockId, BlockInstruction].instance(ctx.instructions),
-        OneToOne[BlockId, Registers].instance(ctx.inputs),
-        OneToOne[BlockId, Registers].instance(ctx.clobbers),
         OneToOne[FunctionId, BlockId].instance(ctx.entries),
         OneToOne[FunctionId, BlockId].instance(ctx.exits),
+        OneToOne[VariableId, VirtualRegister].instance(ctx.registers),
     )
 
 
@@ -154,6 +165,18 @@ def lower_flow_entry(
     iid = FlowId(value=ctx.generator.next())
     instructions: List[BlockInstruction] = [(iid, PrologueFlow(target=fid))]
 
+    # generate virtual registers for parameters
+    for idx, pid in enumerate(ctx.graph.basic.functions.get(fid).parameters):
+        variable = ctx.graph.indices.variables_by_parameter.get(pid)
+        ctx.registers[variable] = VirtualRegister(id=ctx.generator.next())
+
+        # generate virtual move flow between physical and virtual register
+        iid = FlowId(value=ctx.generator.next())
+        instr = SnapshotFlow(dst=ctx.registers[variable].ref(), src=idx)
+
+        # append it
+        instructions.append((iid, instr))
+
     # register entry block
     ctx.entries[fid] = mapping[node]
 
@@ -161,8 +184,6 @@ def lower_flow_entry(
     return FlowNodeContext(
         block=Block(origin=fid, terminator=terminator),
         instructions=instructions,
-        inputs=Registers.instance(caller_saved()),
-        clobbers=Registers.empty(),
     )
 
 
@@ -184,8 +205,6 @@ def lower_flow_exit(
     return FlowNodeContext(
         block=Block(origin=fid, terminator=ExitTerminator()),
         instructions=instructions,
-        inputs=Registers.empty(),
-        clobbers=Registers.empty(),
     )
 
 
@@ -207,15 +226,10 @@ def lower_flow_callsite(
         else TrapTerminator()
     )
 
-    # lower callsite instructions and clobbers
-    instructions, clobbers = lower_callsite(ctx.graph, node)
-
     # lower callsite block
     return FlowNodeContext(
         block=Block(origin=node, terminator=terminator),
-        instructions=instructions,
-        inputs=Registers.empty(),
-        clobbers=Registers.instance(clobbers),
+        instructions=lower_callsite(ctx.generator, ctx.graph, node, ctx.registers),
     )
 
 
@@ -223,8 +237,6 @@ def lower_flow_callsite(
 class FlowNodeContext:
     block: Block
     instructions: List[BlockInstruction]
-    inputs: Registers
-    clobbers: Registers
 
 
 class FlowNodeLowerer(Protocol):
@@ -265,8 +277,6 @@ def lower_function_flow(
         # register block, instructions and registers
         ctx.blocks[mapping[node]] = output.block
         ctx.instructions[mapping[node]] = output.instructions
-        ctx.inputs[mapping[node]] = output.inputs
-        ctx.clobbers[mapping[node]] = output.clobbers
 
     # wire forward edges
     for node, successors in flow.forward.items():
@@ -277,3 +287,56 @@ def lower_function_flow(
         ctx.backward[mapping[node]].extend([mapping[prev] for prev in predecessors])
 
     return mapping[flow.entry]
+
+
+def configure_snapshot_patching() -> GraphNode:
+    return GraphNode(
+        builder=patch_snapshots,
+        constraint=None,
+        produces=("llvm/patches/snapshots",),
+        requires=frozenset(
+            {
+                ("generator", "core/generator"),
+                ("blocks", "llvm/functions/blocks"),
+                ("instructions", "llvm/instructions"),
+                ("stackframes", "llvm/functions/stackframes"),
+            }
+        ),
+    )
+
+
+def patch_snapshots(
+    generator: Generator,
+    blocks: OneToMany[FunctionId, BlockId],
+    stackframes: OneToOne[FunctionId, StackFrame],
+    instructions: OneToMany[BlockId, BlockInstruction],
+) -> OneToOne[FlowId, InstructionEntry]:
+    bindings: Dict[FlowId, InstructionEntry] = {}
+
+    for fid, bids in blocks.items():
+        for bid in bids:
+            for iid, instr in instructions.get(bid):
+                if not isinstance(iid, FlowId):
+                    continue
+
+                if isinstance(instr, SnapshotFlow):
+                    # SnapshotFlow is referenced by FlowId
+                    assert isinstance(iid, FlowId)
+
+                    # find stackframe and get a slot entry
+                    stackframe = stackframes.get(fid)
+                    offset = stackframe.slot_at_register(instr.dst)
+
+                    if offset is None:
+                        bindings[iid] = (InstructionId(value=generator.next()), Nop())
+
+                    else:
+                        # append new patched binding
+                        bindings[iid] = (
+                            InstructionId(value=generator.next()),
+                            MovOffReg(
+                                dst=name_to_reg("rsp"), src=instr.src, off=offset * 8
+                            ),
+                        )
+
+    return OneToOne[FlowId, InstructionEntry].instance(bindings)

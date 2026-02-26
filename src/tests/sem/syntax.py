@@ -1,3 +1,4 @@
+from i13c.core.generator import Generator
 from i13c.semantic.syntax import NodesVisitor
 from tests.sem import prepare_program
 
@@ -7,7 +8,9 @@ def can_visit_all_nodes_in_a_snippet() -> None:
             asm main() { mov rax, 0x1234; }
         """)
 
-    visitor = NodesVisitor()
+    generator = Generator()
+    visitor = NodesVisitor(generator)
+
     program.accept(visitor)
 
     assert len(list(visitor.graph.snippets.items())) == 1
@@ -23,7 +26,9 @@ def can_visit_all_nodes_in_a_function() -> None:
             fn main() { foo(0x42); }
         """)
 
-    visitor = NodesVisitor()
+    generator = Generator()
+    visitor = NodesVisitor(generator)
+
     program.accept(visitor)
 
     assert len(list(visitor.graph.functions.items())) == 1

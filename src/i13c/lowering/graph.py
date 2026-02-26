@@ -2,9 +2,19 @@ from dataclasses import dataclass
 from typing import Iterator, Optional
 
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.typing.blocks import Block, BlockInstruction, BlockOrigin, Registers
-from i13c.lowering.typing.flows import BlockId
-from i13c.lowering.typing.instructions import Instruction
+from i13c.lowering.typing.abstracts import AbstractEntry
+from i13c.lowering.typing.blocks import (
+    Block,
+    BlockInstruction,
+    BlockInstructionId,
+    BlockOrigin,
+    InstructionPosition,
+    Registers,
+)
+from i13c.lowering.typing.flows import BlockId, FlowId
+from i13c.lowering.typing.instructions import Instruction, InstructionEntry
+from i13c.lowering.typing.intervals import IntervalPressure, RegisterInterval
+from i13c.lowering.typing.stacks import StackFrame
 from i13c.semantic.typing.entities.functions import FunctionId
 
 
@@ -12,13 +22,38 @@ from i13c.semantic.typing.entities.functions import FunctionId
 class FunctionsNode:
     entries: OneToOne[FunctionId, BlockId]
     exits: OneToOne[FunctionId, BlockId]
+    blocks: OneToMany[FunctionId, BlockId]
+    stacks: OneToOne[FunctionId, StackFrame]
+    intervals: OneToMany[FunctionId, RegisterInterval]
+    pressures: OneToMany[FunctionId, IntervalPressure]
+    instructions: OneToMany[FunctionId, InstructionPosition]
 
 
 @dataclass(kw_only=True)
-class RegistersNode:
+class InstructionRegistersNode:
+    used: OneToOne[BlockInstructionId, Registers]
+    inputs: OneToOne[BlockInstructionId, Registers]
+    outputs: OneToOne[BlockInstructionId, Registers]
+    clobbers: OneToOne[BlockInstructionId, Registers]
+    generated: OneToOne[BlockInstructionId, Registers]
+
+
+@dataclass(kw_only=True)
+class BlockRegistersNode:
+    used: OneToOne[BlockId, Registers]
     inputs: OneToOne[BlockId, Registers]
     outputs: OneToOne[BlockId, Registers]
     clobbers: OneToOne[BlockId, Registers]
+    generated: OneToOne[BlockId, Registers]
+
+
+@dataclass(kw_only=True)
+class PatchesNode:
+    clobbers: OneToOne[FlowId, InstructionEntry]
+    bindings: OneToOne[FlowId, InstructionEntry]
+    snapshots: OneToOne[FlowId, InstructionEntry]
+    callsites: OneToOne[FlowId, InstructionEntry]
+    stackframes: OneToOne[FlowId, AbstractEntry]
 
 
 @dataclass(kw_only=True)
@@ -33,7 +68,10 @@ class LowLevelGraph:
     backward: OneToMany[BlockId, BlockId]
 
     functions: FunctionsNode
-    registers: RegistersNode
+    patches: PatchesNode
+
+    iregs: InstructionRegistersNode
+    bregs: BlockRegistersNode
 
     def flows_all(self) -> Iterator[BlockInstruction]:
         for _, flow in self.flows.items():

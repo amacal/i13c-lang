@@ -37,7 +37,7 @@ class MovOffReg:
         dst = reg_to_name(self.dst)
         sign = "+" if self.off >= 0 else "-"
 
-        return f"mov {dst}, [{src} {sign} {abs(self.off):#010x}]"
+        return f"mov [{dst} {sign} {abs(self.off):#010x}], {src}"
 
 
 @dataclass(kw_only=True)
@@ -117,6 +117,12 @@ class Jump:
         return f"jmp {self.target.identify(1)}"
 
 
+@dataclass(kw_only=True)
+class Nop:
+    def native(self) -> str:
+        return "nop"
+
+
 Instruction = Union[
     MovRegImm,
     MovRegReg,
@@ -130,6 +136,7 @@ Instruction = Union[
     Call,
     Return,
     Jump,
+    Nop,
 ]
 
 
