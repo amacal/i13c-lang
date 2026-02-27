@@ -3,22 +3,21 @@ asm exit(code@rdi: u8[0x00..0x0f]) noreturn clobbers rcx, r11, rax {
     syscall;
 }
 
-asm shift(count@imm: u8[0x00..0x3f]) clobbers rdi {
-    shl rdi, count;
+asm close(fd@rdi: u8[0x00..0xff]) clobbers rcx, r11, rax {
+    mov rax, 0x03;
+    syscall;
 }
 
-fn x(count: u8[0x00..0x1f]) {
-  shift(0x01);
+fn close_std(fd: u8[0x00..0x02]) {
+  close(fd);
 }
 
-fn y(count: u8[0x20..0x3f]) {
-  shift(0x02);
-}
-
-fn foo(val1: u8[0x00..0x1f], val2: u8[0x20..0x3f], val3: u8[0x00..0x0f]) noreturn {
-  x(val1); y(val2); exit(val3);
+fn foo(fd1: u8[0x00..0x02], fd2: u8[0x00..0x02], code: u8[0x00..0x0f]) noreturn {
+  close_std(fd1);
+  close_std(fd2);
+  exit(code);
 }
 
 fn main() noreturn {
-    foo(0x010, 0x30, 0x02);
+    foo(0x00, 0x01, 0x02);
 }

@@ -25,7 +25,7 @@ def lower_callsite(
     generator: Generator,
     graph: SemanticGraph,
     node: CallSiteId,
-    registers: Dict[VariableId, VirtualRegister],
+    registers: OneToOne[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
 
     # prepare instructions

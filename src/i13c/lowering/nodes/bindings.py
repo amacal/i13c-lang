@@ -34,7 +34,7 @@ def lower_snippet_bindings(
     generator: Generator,
     node: CallSiteId,
     bindings: List[CallSiteBinding],
-    registers: Dict[VariableId, VirtualRegister],
+    registers: OneToOne[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
@@ -70,7 +70,7 @@ def lower_snippet_bindings(
             environment = graph.indices.environment_by_flownode.get(node)
             variable = environment.variables[expression.ident]
 
-            src = registers[variable].ref()
+            src = registers.get(variable).ref()
             dst = IR_REGISTER_FORWARD[binding.target.bind.name]
 
             iid = FlowId(value=generator.next())
@@ -87,7 +87,7 @@ def lower_function_bindings(
     generator: Generator,
     node: CallSiteId,
     bindings: List[CallSiteBinding],
-    registers: Dict[VariableId, VirtualRegister],
+    registers: OneToOne[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
@@ -126,7 +126,7 @@ def lower_function_bindings(
             variable = environment.variables[expression.ident]
 
             iid = FlowId(value=generator.next())
-            instr = BindingFlow(dst=idx, src=registers[variable].ref())
+            instr = BindingFlow(dst=idx, src=registers.get(variable).ref())
 
             # emit instruction for virtual move
             out.append((iid, instr))

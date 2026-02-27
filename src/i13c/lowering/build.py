@@ -29,10 +29,13 @@ from i13c.lowering.nodes.functions import (
     configure_functions,
     configure_snapshot_patching,
 )
+from i13c.lowering.nodes.registers import configure_registers
 from i13c.lowering.nodes.stacks import configure_stack_frames, configure_stack_patching
 from i13c.lowering.typing.blocks import BlockInstruction, BlockInstructionId, Registers
 from i13c.lowering.typing.flows import BlockId
 from i13c.lowering.typing.instructions import Instruction
+from i13c.lowering.typing.registers import VirtualRegister
+from i13c.semantic.typing.indices.variables import VariableId
 
 
 def configure_llvm_graph() -> GraphGroup:
@@ -41,6 +44,7 @@ def configure_llvm_graph() -> GraphGroup:
             configure_self(),
             configure_functions(),
             configure_callsites(),
+            configure_registers(),
             configure_clobbers_patching(),
             configure_binding_patching(),
             configure_snapshot_patching(),
@@ -73,6 +77,7 @@ def configure_self() -> GraphNode:
                 ("functions", Prefix(value="llvm/functions/")),
                 ("blocks", Prefix(value="llvm/blocks")),
                 ("patches", Prefix(value="llvm/patches/")),
+                ("registers", "llvm/registers"),
                 ("iregs", Prefix(value="llvm/instructions/registers/")),
                 ("bregs", Prefix(value="llvm/blocks/registers/")),
             }
@@ -89,6 +94,7 @@ def build(
     patches: Dict[str, Any],
     iregs: Dict[str, OneToOne[BlockInstructionId, Registers]],
     bregs: Dict[str, OneToOne[BlockId, Registers]],
+    registers: OneToOne[VariableId, VirtualRegister],
 ) -> LowLevelGraph:
     return LowLevelGraph(
         entry=entrypoint,
@@ -97,6 +103,7 @@ def build(
         instructions=instructions,
         forward=blocks["llvm/blocks/forward"],
         backward=blocks["llvm/blocks/backward"],
+        registers=registers,
         functions=FunctionsNode(
             entries=functions["llvm/functions/entries"],
             exits=functions["llvm/functions/exits"],

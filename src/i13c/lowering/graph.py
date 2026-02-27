@@ -14,8 +14,10 @@ from i13c.lowering.typing.blocks import (
 from i13c.lowering.typing.flows import BlockId, FlowId
 from i13c.lowering.typing.instructions import Instruction, InstructionEntry
 from i13c.lowering.typing.intervals import IntervalPressure, RegisterInterval
+from i13c.lowering.typing.registers import VirtualRegister
 from i13c.lowering.typing.stacks import StackFrame
 from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.indices.variables import VariableId
 
 
 @dataclass(kw_only=True)
@@ -66,6 +68,7 @@ class LowLevelGraph:
 
     forward: OneToMany[BlockId, BlockId]
     backward: OneToMany[BlockId, BlockId]
+    registers: OneToOne[VariableId, VirtualRegister]
 
     functions: FunctionsNode
     patches: PatchesNode

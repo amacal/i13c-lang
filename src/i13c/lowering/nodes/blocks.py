@@ -53,11 +53,19 @@ class AbstractConverter(Protocol):
 
 
 def dispatch_enter_frame(abstract: EnterFrame) -> List[Instruction]:
-    return [SubRegImm(dst=IR_REGISTER_FORWARD[b"rsp"], imm=abstract.size)]
+    if abstract.size > 0:
+        return [SubRegImm(dst=IR_REGISTER_FORWARD[b"rsp"], imm=abstract.size)]
+
+    else:
+        return []
 
 
 def dispatch_exit_frame(abstract: ExitFrame) -> List[Instruction]:
-    return [AddRegImm(dst=IR_REGISTER_FORWARD[b"rsp"], imm=abstract.size)]
+    if abstract.size > 0:
+        return [AddRegImm(dst=IR_REGISTER_FORWARD[b"rsp"], imm=abstract.size)]
+
+    else:
+        return []
 
 
 def dispatch_preserve(abstract: Preserve) -> List[Instruction]:

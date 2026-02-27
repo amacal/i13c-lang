@@ -15,6 +15,7 @@ CLASS_COMMA = b","
 CLASS_COLON = b":"
 CLASS_SEMICOLON = b";"
 CLASS_WHITESPACE = b" \n"
+CLASS_UNDERSCORE = b"_"
 CLASS_ZERO = b"0"
 CLASS_ROUND_OPEN = b"("
 CLASS_ROUND_CLOSE = b")"
@@ -114,8 +115,11 @@ class Lexer:
     def is_eof(self) -> bool:
         return self.code.is_eof(self.offset)
 
-    def is_in(self, n: bytes) -> bool:
-        return not self.is_eof() and self.code.at(self.offset) in n
+    def is_in(self, *n: bytes) -> bool:
+        if self.is_eof():
+            return False
+
+        return any(self.code.at(self.offset) in chars for chars in n)
 
     def extract(self, token: Token) -> bytes:
         return self.code.extract(token)
@@ -338,7 +342,7 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     lexer.advance(1)  # consume first letter
 
     # accept subsequent letters or digits
-    while not lexer.is_eof() and lexer.is_in(CLASS_ALPHANUM):
+    while not lexer.is_eof() and lexer.is_in(CLASS_ALPHANUM + CLASS_UNDERSCORE):
         lexer.advance(1)  # consume letters and digits
 
     # expect either EOF or valid character after ident

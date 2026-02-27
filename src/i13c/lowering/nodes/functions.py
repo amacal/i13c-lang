@@ -59,13 +59,13 @@ def configure_functions() -> GraphNode:
             "llvm/instructions",
             "llvm/functions/entries",
             "llvm/functions/exits",
-            "llvm/registers",
         ),
         requires=frozenset(
             {
                 ("generator", "core/generator"),
                 ("graph", "semantic/graph"),
                 ("rules", "rules/semantic"),
+                ("registers", "llvm/registers"),
             }
         ),
     )
@@ -80,7 +80,7 @@ class Context:
     blocks: Dict[BlockId, Block]
     instructions: Dict[BlockId, List[BlockInstruction]]
 
-    registers: Dict[VariableId, VirtualRegister]
+    registers: OneToOne[VariableId, VirtualRegister]
 
     forward: Dict[BlockId, List[BlockId]]
     backward: Dict[BlockId, List[BlockId]]
@@ -89,14 +89,18 @@ class Context:
     exits: Dict[FunctionId, BlockId]
 
     @staticmethod
-    def empty(graph: SemanticGraph, generator: Generator) -> "Context":
+    def empty(
+        graph: SemanticGraph,
+        generator: Generator,
+        registers: OneToOne[VariableId, VirtualRegister],
+    ) -> Context:
         return Context(
             graph=graph,
             generator=generator,
             entrypoint=None,
             blocks={},
             instructions={},
-            registers={},
+            registers=registers,
             forward={},
             backward={},
             entries={},
@@ -107,6 +111,7 @@ class Context:
 def lower_active_functions(
     generator: Generator,
     graph: SemanticGraph,
+    registers: OneToOne[VariableId, VirtualRegister],
     **kwargs: Dict[str, Any],
 ) -> Tuple[
     Optional[BlockId],
@@ -116,9 +121,8 @@ def lower_active_functions(
     OneToMany[BlockId, BlockInstruction],
     OneToOne[FunctionId, BlockId],
     OneToOne[FunctionId, BlockId],
-    OneToOne[VariableId, VirtualRegister],
 ]:
-    ctx = Context.empty(graph, generator)
+    ctx = Context.empty(graph, generator, registers)
 
     # lower all live callables
     for fid in graph.callable_live:
@@ -143,7 +147,6 @@ def lower_active_functions(
         OneToMany[BlockId, BlockInstruction].instance(ctx.instructions),
         OneToOne[FunctionId, BlockId].instance(ctx.entries),
         OneToOne[FunctionId, BlockId].instance(ctx.exits),
-        OneToOne[VariableId, VirtualRegister].instance(ctx.registers),
     )
 
 
@@ -167,12 +170,13 @@ def lower_flow_entry(
 
     # generate virtual registers for parameters
     for idx, pid in enumerate(ctx.graph.basic.functions.get(fid).parameters):
+
+        # get a variable behind the fucntion parameter
         variable = ctx.graph.indices.variables_by_parameter.get(pid)
-        ctx.registers[variable] = VirtualRegister(id=ctx.generator.next())
 
         # generate virtual move flow between physical and virtual register
         iid = FlowId(value=ctx.generator.next())
-        instr = SnapshotFlow(dst=ctx.registers[variable].ref(), src=idx)
+        instr = SnapshotFlow(dst=ctx.registers.get(variable).ref(), src=idx)
 
         # append it
         instructions.append((iid, instr))

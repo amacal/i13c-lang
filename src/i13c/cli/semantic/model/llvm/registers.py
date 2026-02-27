@@ -4,7 +4,8 @@ from typing import Dict, Iterable, Optional, Tuple
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.lowering.typing.blocks import Registers
 from i13c.lowering.typing.flows import BlockId
-from i13c.lowering.typing.registers import reg_to_name
+from i13c.lowering.typing.registers import VirtualRegister, reg_to_name
+from i13c.semantic.typing.indices.variables import VariableId
 
 
 @dataclass(kw_only=True)
@@ -119,4 +120,31 @@ class BlockRegistersListExtractor:
             "used": format(entry[1].used),
             "clobbers": format(entry[1].clobbers),
             "outputs": format(entry[1].outputs),
+        }
+
+
+class VirtualRegistersListExtractor:
+    @staticmethod
+    def extract(
+        artifacts: GraphArtifacts,
+    ) -> Iterable[Tuple[VariableId, VirtualRegister]]:
+        llvm = artifacts.llvm_graph()
+
+        for vid, vreg in llvm.registers.items():
+            yield (vid, vreg)
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "vid": "Variable ID",
+            "vreg": "Virtual Register",
+        }
+
+    @staticmethod
+    def rows(
+        entry: Tuple[VariableId, VirtualRegister],
+    ) -> Dict[str, str]:
+        return {
+            "vid": entry[0].identify(1),
+            "vreg": str(entry[1]),
         }

@@ -25,6 +25,7 @@ from i13c.cli.semantic.model.llvm.patches import (
 from i13c.cli.semantic.model.llvm.registers import (
     BlockRegistersListExtractor,
     InstructionRegistersListExtractor,
+    VirtualRegistersListExtractor,
 )
 
 LLVM: Dict[str, AbstractListExtractor[Any]] = {
@@ -37,6 +38,7 @@ LLVM: Dict[str, AbstractListExtractor[Any]] = {
     "llvm/functions/intervals/pressure": IntervalPressureInFunctionsListExtractor,
     "llvm/functions/stackframes": StackFrameInFunctionsListExtractor,
     "llvm/functions/instructions": InstructionsInFunctionsListExtractor,
+    "llvm/registers": VirtualRegistersListExtractor,
     "llvm/registers/instructions": InstructionRegistersListExtractor,
     "llvm/registers/blocks": BlockRegistersListExtractor,
     "llvm/patches/stackframes": PatchesOfStackFramesListExtractor,

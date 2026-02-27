@@ -3,6 +3,7 @@ from typing import Any, Dict
 from i13c.cli.semantic.model.abstract import AbstractListExtractor
 from i13c.cli.semantic.model.indices.controlflows import ControlFlowListExtractor
 from i13c.cli.semantic.model.indices.dataflows import DataFlowListExtractor
+from i13c.cli.semantic.model.indices.environments import EnvironmentListExtractor
 from i13c.cli.semantic.model.indices.instances import InstanceListExtractor
 from i13c.cli.semantic.model.indices.resolutions import (
     CallSiteResolutionListExtractor,
@@ -19,4 +20,5 @@ INDICES: Dict[str, AbstractListExtractor[Any]] = {
     "indices/resolution-by-instruction": InstructionResolutionListExtractor,
     "indices/variables-by-parameter": ParameterVariablesListExtractor,
     "indices/terminality-by-function": TerminalityListExtractor,
+    "indices/environment-by-flownode": EnvironmentListExtractor,
 }

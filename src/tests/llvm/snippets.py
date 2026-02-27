@@ -15,7 +15,6 @@ def can_lower_syscall_program():
 
     instructions = llvm.instructions_of(function)
     assert list(instructions) == [
-        "sub rsp, 0x00000000",
         "syscall",
     ]
 
@@ -34,7 +33,6 @@ def can_lower_mov_program():
 
     instructions = llvm.instructions_of(function)
     assert list(instructions) == [
-        "sub rsp, 0x00000000",
         "mov rax, 0x00001234",
     ]
 
@@ -53,7 +51,6 @@ def can_lower_mov_with_register_bound_slot():
 
     instructions = llvm.instructions_of(function)
     assert list(instructions) == [
-        "sub rsp, 0x00000000",
         "mov rax, 0x00000001",
         "mov rax, 0x00000042",
     ]
@@ -73,7 +70,6 @@ def can_lower_shl_program():
 
     instructions = llvm.instructions_of(function)
     assert list(instructions) == [
-        "sub rsp, 0x00000000",
         "shl rax, 0x00000041",
     ]
 
@@ -93,7 +89,6 @@ def can_lower_multiple_snippet_callsites():
 
     instructions = llvm.instructions_of(function)
     assert list(instructions) == [
-        "sub rsp, 0x00000000",
         "mov rax, 0x00000001",
         "syscall",
     ]
