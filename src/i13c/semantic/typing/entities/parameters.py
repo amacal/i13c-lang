@@ -18,5 +18,5 @@ class Parameter:
     type: Type
     ident: Identifier
 
-    def describe(self) -> str:
-        return f"ident={self.ident}, type={self.type}"
+    def __str__(self) -> str:
+        return f"{self.ident}:{self.type}"

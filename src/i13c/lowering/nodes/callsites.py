@@ -31,22 +31,19 @@ def lower_callsite(
     # prepare instructions
     instructions: List[BlockInstruction] = []
 
-    # retrieve callsite resolution
-    resolution = graph.indices.resolution_by_callsite.get(node)
+    # retrieve callsite bindings
+    bindings = graph.basic.bindings.get(node)
 
-    # we expected no ambiguity here
-    assert len(resolution.accepted) == 1
-
-    if isinstance(resolution.accepted[0].callable.target, SnippetId):
+    if isinstance(bindings.callable.target, SnippetId):
         instance = graph.indices.instance_by_callsite.get(node)
-        target = resolution.accepted[0].callable.target
+        target = bindings.callable.target
 
         snippet = graph.basic.snippets.get(target)
         clobbers = [name_to_reg(reg.name.decode()) for reg in snippet.clobbers]
 
         # append callsite specific bindings
         instructions.extend(
-            lower_snippet_bindings(graph, generator, node, instance.bindings, registers)
+            lower_snippet_bindings(graph, generator, node, bindings, registers)
         )
 
         # append emitted instructions
@@ -59,16 +56,13 @@ def lower_callsite(
 
     else:
 
-        # extract bindings
-        bindings = resolution.accepted[0].bindings
+        # extract successfully resolved target
+        target = bindings.callable.target
 
         # append callsite specific bindings
         instructions.extend(
             lower_function_bindings(graph, generator, node, bindings, registers)
         )
-
-        # extract successfully resolved target
-        target = resolution.accepted[0].callable.target
 
         # append callsite call instructions
         iid = FlowId(value=generator.next())

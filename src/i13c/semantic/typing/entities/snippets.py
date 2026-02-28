@@ -21,7 +21,7 @@ class Slot:
     type: Type
     bind: Binding
 
-    def signature(self) -> str:
+    def __str__(self) -> str:
         return f"{self.name}@{self.bind}:{self.type}"
 
 
@@ -35,7 +35,7 @@ class Snippet:
     instructions: List[InstructionId]
 
     def signature(self) -> str:
-        slots = ", ".join([slot.signature() for slot in self.slots])
+        slots = ", ".join([str(slot) for slot in self.slots])
         return f"{self.identifier.name.decode()}/{len(self.slots)} ({slots})"
 
     def describe(self) -> str:

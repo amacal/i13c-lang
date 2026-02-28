@@ -13,65 +13,57 @@ from i13c.lowering.typing.instructions import (
     Nop,
 )
 from i13c.lowering.typing.registers import (
-    IR_REGISTER_FORWARD,
     VirtualRegister,
     name_to_reg,
 )
 from i13c.lowering.typing.stacks import StackFrame
 from i13c.semantic.model import SemanticGraph
+from i13c.semantic.typing.entities.bindings import CallSiteBindings
 from i13c.semantic.typing.entities.callsites import CallSiteId
-from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
 from i13c.semantic.typing.entities.parameters import Parameter
 from i13c.semantic.typing.entities.snippets import Slot
 from i13c.semantic.typing.indices.variables import VariableId
-from i13c.semantic.typing.resolutions.callsites import CallSiteBinding
 
 
 def lower_snippet_bindings(
     graph: SemanticGraph,
     generator: Generator,
     node: CallSiteId,
-    bindings: List[CallSiteBinding],
+    bindings: CallSiteBindings,
     registers: OneToOne[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
-    for binding in bindings:
-        # because this is a snippet callsite
-        assert isinstance(binding.target, Slot)
+    for binding in bindings.entries:
+
+        assert isinstance(binding.dst, Slot)
 
         # we know slots may be literals
-        if binding.argument.kind == b"literal":
-            assert isinstance(binding.argument.target, LiteralId)
+        if isinstance(binding.src, LiteralId):
 
-            literal = graph.basic.literals.get(binding.argument.target)
+            # find the literal behind the target
+            literal = graph.basic.literals.get(binding.src)
 
             # we know all literals are hex for now
             assert literal.kind == b"hex"
             assert isinstance(literal.target, Hex)
 
             # extract slot binding
-            bind = binding.target.bind
+            bind = binding.dst.bind
             imm = literal.target.value
 
             # emit move instruction for binding
             iid = InstructionId(value=generator.next())
-            instr = MovRegImm(dst=IR_REGISTER_FORWARD[bind.name], imm=imm)
+            instr = MovRegImm(dst=name_to_reg(bind.name.decode()), imm=imm)
 
             out.append((iid, instr))
 
         # or slots may be expressions
-        if binding.argument.kind == b"expression":
-            assert isinstance(binding.argument.target, ExpressionId)
-
-            expression = graph.basic.expressions.get(binding.argument.target)
-            environment = graph.indices.environment_by_flownode.get(node)
-            variable = environment.variables[expression.ident]
-
-            src = registers.get(variable).ref()
-            dst = IR_REGISTER_FORWARD[binding.target.bind.name]
+        if isinstance(binding.src, VariableId):
+            src = registers.get(binding.src).ref()
+            dst = name_to_reg(binding.dst.bind.name.decode())
 
             iid = FlowId(value=generator.next())
             instr = BindingFlow(dst=dst, src=src)
@@ -86,22 +78,20 @@ def lower_function_bindings(
     graph: SemanticGraph,
     generator: Generator,
     node: CallSiteId,
-    bindings: List[CallSiteBinding],
+    bindings: CallSiteBindings,
     registers: OneToOne[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
-    for idx, binding in enumerate(bindings):
-        # because this is a function callsite
-        assert isinstance(binding.target, Parameter)
+    for idx, binding in enumerate(bindings.entries):
+
+        assert isinstance(binding.dst, Parameter)
 
         # we know parameters may be literals
-        if binding.argument.kind == b"literal":
-            # satisfy type checker
-            assert isinstance(binding.argument.target, LiteralId)
+        if isinstance(binding.src, LiteralId):
 
             # find the literal behind the target
-            literal = graph.basic.literals.get(binding.argument.target)
+            literal = graph.basic.literals.get(binding.src)
 
             # we know all literals are hex for now
             assert literal.kind == b"hex"
@@ -117,16 +107,11 @@ def lower_function_bindings(
             out.append((iid, instr))
 
         # or parameters may be expressions
-        if binding.argument.kind == b"expression":
-            # satisfy type checker
-            assert isinstance(binding.argument.target, ExpressionId)
+        if isinstance(binding.src, VariableId):
 
-            expression = graph.basic.expressions.get(binding.argument.target)
-            environment = graph.indices.environment_by_flownode.get(node)
-            variable = environment.variables[expression.ident]
-
+            # emit move instruction for binding
             iid = FlowId(value=generator.next())
-            instr = BindingFlow(dst=idx, src=registers.get(variable).ref())
+            instr = BindingFlow(dst=idx, src=registers.get(binding.src).ref())
 
             # emit instruction for virtual move
             out.append((iid, instr))

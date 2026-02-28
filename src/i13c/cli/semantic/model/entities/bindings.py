@@ -13,7 +13,7 @@ class BindingsListExtractor:
         graph = artifacts.semantic_graph()
 
         for cid, bindings in graph.basic.bindings.items():
-            for binding in bindings.bindings:
+            for binding in bindings.entries:
                 yield (cid, graph.basic.callsites.get(cid), bindings, binding)
 
     @staticmethod
@@ -23,7 +23,8 @@ class BindingsListExtractor:
             "id": "Callsite ID",
             "name": "Callee Name",
             "target": "Callee Target",
-            "bind": "Callee Binding",
+            "dst": "Binding Destination",
+            "src": "Binding Source",
         }
 
     @staticmethod
@@ -35,5 +36,6 @@ class BindingsListExtractor:
             "id": entry[0].identify(1),
             "name": str(entry[1].callee),
             "target": entry[2].callable.target.identify(1),
-            "bind": entry[3].target.identify(1),
+            "dst": str(entry[3].dst),
+            "src": entry[3].src.identify(1),
         }
