@@ -6,6 +6,7 @@ from i13c.cli.semantic.model.indices.dataflows import DataFlowListExtractor
 from i13c.cli.semantic.model.indices.environments import EnvironmentListExtractor
 from i13c.cli.semantic.model.indices.instances import InstanceListExtractor
 from i13c.cli.semantic.model.indices.resolutions import (
+    BindingsOfCallSiteResolutionListExtractor,
     CallSiteResolutionListExtractor,
     InstructionResolutionListExtractor,
 )
@@ -17,6 +18,7 @@ INDICES: Dict[str, AbstractListExtractor[Any]] = {
     "indices/dataflow-by-flownode": DataFlowListExtractor,
     "indices/instance-by-callsite": InstanceListExtractor,
     "indices/resolution-by-callsite": CallSiteResolutionListExtractor,
+    "indices/resolution-by-callsite/bindings": BindingsOfCallSiteResolutionListExtractor,
     "indices/resolution-by-instruction": InstructionResolutionListExtractor,
     "indices/variables-by-parameter": ParameterVariablesListExtractor,
     "indices/terminality-by-function": TerminalityListExtractor,

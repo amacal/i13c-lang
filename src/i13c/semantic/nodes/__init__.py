@@ -2,6 +2,7 @@ from i13c.core.dag import GraphGroup
 from i13c.semantic.nodes.analyses.callables import configure_callables_live
 from i13c.semantic.nodes.analyses.callgraphs import configure_callgraphs_live
 from i13c.semantic.nodes.analyses.controlflows import configure_flowgraphs_live
+from i13c.semantic.nodes.entities.bindings import configure_bindings
 from i13c.semantic.nodes.entities.callsites import configure_callsites
 from i13c.semantic.nodes.entities.expressions import configure_expressions
 from i13c.semantic.nodes.entities.functions import configure_functions
@@ -32,6 +33,7 @@ def configure_nodes() -> GraphGroup:
             configure_callgraphs_live(),
             configure_callgraphs(),
             configure_callsites(),
+            configure_bindings(),
             configure_dataflow_by_flownode(),
             configure_entrypoint_by_callable(),
             configure_environment_by_flownode(),

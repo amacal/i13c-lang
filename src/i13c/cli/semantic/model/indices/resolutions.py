@@ -3,7 +3,10 @@ from typing import Dict, Iterable, Tuple
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
-from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
+from i13c.semantic.typing.resolutions.callsites import (
+    CallSiteBinding,
+    CallSiteResolution,
+)
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 
 
@@ -74,4 +77,43 @@ class CallSiteResolutionListExtractor:
             "args": str(len(entry[1].arguments)),
             "accepted": str(len(entry[2].accepted)),
             "rejected": str(len(entry[2].rejected)),
+        }
+
+
+class BindingsOfCallSiteResolutionListExtractor:
+    @staticmethod
+    def extract(
+        artifacts: GraphArtifacts,
+    ) -> Iterable[
+        Tuple[CallSiteId, CallSite, CallSiteResolution, int, CallSiteBinding]
+    ]:
+        graph = artifacts.semantic_graph()
+
+        return (
+            (cid, graph.basic.callsites.get(cid), resolution, idx, binding)
+            for cid, resolution in graph.indices.resolution_by_callsite.items()
+            for acceptance in resolution.accepted
+            for idx, binding in enumerate(acceptance.bindings)
+        )
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Reference",
+            "id": "CallSite ID",
+            "name": "Callee Name",
+            "idx": "Binding Index",
+            "kind": "Binding Kind",
+        }
+
+    @staticmethod
+    def rows(
+        entry: Tuple[CallSiteId, CallSite, CallSiteResolution, int, CallSiteBinding],
+    ) -> Dict[str, str]:
+        return {
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "name": str(entry[1].callee),
+            "idx": str(entry[3]),
+            "kind": entry[4].kind.decode(),
         }

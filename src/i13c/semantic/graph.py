@@ -60,6 +60,7 @@ def build(
             callsites=entities["entities/callsites"],
             parameters=entities["entities/parameters"],
             variables=entities["entities/variables"],
+            bindings=entities["entities/bindings"],
         ),
         indices=IndexEdges(
             terminality_by_function=indices["indices/terminality-by-function"],

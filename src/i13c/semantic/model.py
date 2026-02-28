@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Set
 
 from i13c.core.mapping import OneToMany, OneToOne
+from i13c.semantic.typing.entities.bindings import CallSiteBindings
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
@@ -34,6 +35,7 @@ class BasicNodes:
     callsites: OneToOne[CallSiteId, CallSite]
     parameters: OneToOne[ParameterId, Parameter]
     variables: OneToOne[VariableId, Variable]
+    bindings: OneToOne[CallSiteId, CallSiteBindings]
 
 
 @dataclass
