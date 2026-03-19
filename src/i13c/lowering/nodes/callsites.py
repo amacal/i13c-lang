@@ -43,7 +43,7 @@ def lower_callsite(
 
         # append callsite specific bindings
         instructions.extend(
-            lower_snippet_bindings(graph, generator, node, bindings, registers)
+            lower_snippet_bindings(graph, generator, bindings, registers)
         )
 
         # append emitted instructions
@@ -61,7 +61,7 @@ def lower_callsite(
 
         # append callsite specific bindings
         instructions.extend(
-            lower_function_bindings(graph, generator, node, bindings, registers)
+            lower_function_bindings(graph, generator, bindings, registers)
         )
 
         # append callsite call instructions

@@ -19,7 +19,6 @@ from i13c.lowering.typing.registers import (
 from i13c.lowering.typing.stacks import StackFrame
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.bindings import CallSiteBindings
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
 from i13c.semantic.typing.entities.parameters import Parameter
@@ -30,7 +29,6 @@ from i13c.semantic.typing.indices.variables import VariableId
 def lower_snippet_bindings(
     graph: SemanticGraph,
     generator: Generator,
-    node: CallSiteId,
     bindings: CallSiteBindings,
     registers: OneToOne[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
@@ -77,7 +75,6 @@ def lower_snippet_bindings(
 def lower_function_bindings(
     graph: SemanticGraph,
     generator: Generator,
-    node: CallSiteId,
     bindings: CallSiteBindings,
     registers: OneToOne[VariableId, VirtualRegister],
 ) -> List[BlockInstruction]:
