@@ -42,7 +42,7 @@ def can_build_dataflow_for_a_function_without_any_parameters():
 
 def can_build_dataflow_for_a_function_with_single_parameter():
     _, program = prepare_program("""
-        fn main(val: u8) { }
+        fn main(value: u8) { }
     """)
 
     semantic = run_graph(program).semantic_graph()

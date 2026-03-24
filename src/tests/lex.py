@@ -46,14 +46,14 @@ def can_tokenize_new_lines():
 
 
 def can_tokenize_single_bytes():
-    text = ";,}{)(:@]["
+    text = ";,}{)(:@][="
     code = src.open_text(text)
 
     tokens = lex.tokenize(code)
     assert tokens is not None
 
     assert isinstance(tokens, res.Ok)
-    assert len(tokens.value) == 11
+    assert len(tokens.value) == 12
 
     assert tokens.value[0] == lex.Token(code=lex.TOKEN_SEMICOLON, offset=0, length=1)
     assert tokens.value[1] == lex.Token(code=lex.TOKEN_COMMA, offset=1, length=1)
@@ -65,7 +65,8 @@ def can_tokenize_single_bytes():
     assert tokens.value[7] == lex.Token(code=lex.TOKEN_AT, offset=7, length=1)
     assert tokens.value[8] == lex.Token(code=lex.TOKEN_SQUARE_CLOSE, offset=8, length=1)
     assert tokens.value[9] == lex.Token(code=lex.TOKEN_SQUARE_OPEN, offset=9, length=1)
-    assert tokens.value[10] == lex.Token(code=lex.TOKEN_EOF, offset=10, length=0)
+    assert tokens.value[10] == lex.Token(code=lex.TOKEN_EQUALS, offset=10, length=1)
+    assert tokens.value[11] == lex.Token(code=lex.TOKEN_EOF, offset=11, length=0)
 
     assert code.extract(tokens.value[0]) == b";"
     assert code.extract(tokens.value[1]) == b","
@@ -77,7 +78,8 @@ def can_tokenize_single_bytes():
     assert code.extract(tokens.value[7]) == b"@"
     assert code.extract(tokens.value[8]) == b"]"
     assert code.extract(tokens.value[9]) == b"["
-    assert code.extract(tokens.value[10]) == b""
+    assert code.extract(tokens.value[10]) == b"="
+    assert code.extract(tokens.value[11]) == b""
 
 
 def can_tokenize_range_operator():

@@ -77,7 +77,7 @@ def can_reject_movregimm_instruction_with_type_mismatch():
 
 def can_accept_movregimm_instruction_with_rewritten_operands():
     _, program = prepare_program("""
-        asm main(val@imm: u64) noreturn { mov rax, val; }
+        asm main(value@imm: u64) noreturn { mov rax, value; }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -106,7 +106,7 @@ def can_accept_movregimm_instruction_with_rewritten_operands():
 
 def can_reject_movregimm_instruction_with_unresolved_operand_reference():
     _, program = prepare_program("""
-        asm main() noreturn { mov rax, val; }
+        asm main() noreturn { mov rax, value; }
     """)
 
     semantic = run_graph(program).semantic_graph()

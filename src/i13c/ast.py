@@ -96,8 +96,29 @@ class CallStatement:
         for argument in self.arguments:
             if isinstance(argument, IntegerLiteral):
                 visitor.on_literal(argument)
+
             if isinstance(argument, Expression):
                 visitor.on_expression(argument)
+
+
+ValueExpression = Union[Literal, Expression]
+
+
+@dataclass(kw_only=True, eq=False)
+class ValueStatement:
+    ref: src.Span
+    name: bytes
+    type: Type
+    expr: ValueExpression
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_statement(self)
+
+        if isinstance(self.expr, IntegerLiteral):
+            visitor.on_literal(self.expr)
+
+        if isinstance(self.expr, Expression):
+            visitor.on_expression(self.expr)
 
 
 @dataclass(kw_only=True)
@@ -105,7 +126,7 @@ class ImmediateBinding:
     pass
 
 
-Statement = Union[CallStatement]
+Statement = Union[CallStatement, ValueStatement]
 
 
 @dataclass(kw_only=True)
@@ -152,7 +173,7 @@ class Function:
     name: bytes
     noreturn: bool
     parameters: List[Parameter]
-    statements: List[CallStatement]
+    statements: List[Statement]
 
     def accept(self, visitor: Visitor) -> None:
         visitor.on_function(self)

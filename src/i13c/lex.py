@@ -17,6 +17,7 @@ CLASS_SEMICOLON = b";"
 CLASS_WHITESPACE = b" \n"
 CLASS_UNDERSCORE = b"_"
 CLASS_ZERO = b"0"
+CLASS_EQUALS = b"="
 CLASS_ROUND_OPEN = b"("
 CLASS_ROUND_CLOSE = b")"
 CLASS_CURLY_OPEN = b"{"
@@ -43,6 +44,7 @@ TOKEN_COLON = 13
 TOKEN_TYPE = 14
 TOKEN_SQUARE_OPEN = 15
 TOKEN_SQUARE_CLOSE = 16
+TOKEN_EQUALS = 17
 TOKEN_EOF = 255
 
 # fmt: off
@@ -65,7 +67,7 @@ SET_TYPES = {
 }
 
 SET_KEYWORDS = {
-    b"asm", b"clobbers", b"noreturn", b"fn", b"imm",
+    b"asm", b"clobbers", b"noreturn", b"fn", b"imm", b"val",
 }
 
 TOKEN_NAMES: Dict[int, str] = {
@@ -83,6 +85,7 @@ TOKEN_NAMES: Dict[int, str] = {
     TOKEN_AT: "at",
     TOKEN_COLON: "colon",
     TOKEN_TYPE: "type",
+    TOKEN_EQUALS: "equals",
     TOKEN_SQUARE_OPEN: "square-open",
     TOKEN_SQUARE_CLOSE: "square-close",
     TOKEN_EOF: "end-of-file",
@@ -215,6 +218,10 @@ class Token:
     def colon_token(offset: int) -> Token:
         return Token(code=TOKEN_COLON, offset=offset, length=1)
 
+    @staticmethod
+    def equals_token(offset: int) -> Token:
+        return Token(code=TOKEN_EQUALS, offset=offset, length=1)
+
 
 def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnostic]]:
     tokens: List[Token] = []
@@ -254,6 +261,9 @@ def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnost
 
             elif lexer.is_in(CLASS_COLON):
                 emit_colon(lexer, tokens)
+
+            elif lexer.is_in(CLASS_EQUALS):
+                emit_equals(lexer, tokens)
 
             elif lexer.is_in(CLASS_DOT):
                 read_dot(lexer, tokens)
@@ -415,3 +425,8 @@ def emit_colon(lexer: Lexer, tokens: List[Token]) -> None:
 def emit_at(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.at_token(offset=lexer.offset))
     lexer.advance(1)  # consume '@'
+
+
+def emit_equals(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token.equals_token(offset=lexer.offset))
+    lexer.advance(1)  # consume '='

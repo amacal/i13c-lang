@@ -27,9 +27,9 @@ def build_callsites(
     for nid, statement in graph.statements.items():
         arguments: List[Argument] = []
 
-        # ignore non-call instructions
-        # if not isinstance(statement, ast.CallStatement):
-        #    continue
+        # accept only call statements
+        if not isinstance(statement, ast.CallStatement):
+            continue
 
         for argument in statement.arguments:
             match argument:
@@ -44,6 +44,7 @@ def build_callsites(
                         )
                     )
                 case ast.Expression() as expr:
+                    # find expression by AST node
                     eid = graph.expressions.get_by_node(expr)
 
                     arguments.append(

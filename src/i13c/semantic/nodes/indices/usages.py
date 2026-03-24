@@ -27,6 +27,10 @@ def build_usages_by_expression(
     for _, statement in graph.statements.items():
         assert isinstance(statement, ast.Statement)
 
+        # TODO
+        if not isinstance(statement, ast.CallStatement):
+            continue
+
         for argument in statement.arguments:
             # not expression must be literals
             if not isinstance(argument, ast.Expression):

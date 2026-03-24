@@ -1,6 +1,6 @@
 from typing import List, Set, Union
 
-from i13c import diag, src
+from i13c import diag, lex, src
 
 ERROR_1000 = "E1000"  # Unrecognized token
 ERROR_1001 = "E1001"  # Unexpected end of file
@@ -73,10 +73,13 @@ def report_e2000_unexpected_end_of_tokens(offset: int) -> diag.Diagnostic:
 def report_e2001_unexpected_token(
     ref: src.SpanLike, expected: List[int], found: int
 ) -> diag.Diagnostic:
+    found_name = lex.TOKEN_NAMES[found]
+    expected_names = [lex.TOKEN_NAMES[token] for token in expected]
+
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_2001,
-        message=f"Unexpected token code {found} at offset {ref.offset}, expected one of: {list(expected)}",
+        message=f"Unexpected token '{found_name}' at offset {ref.offset}, expected one of: {expected_names}",
     )
 
 

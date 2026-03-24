@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+from i13c import ast
 from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Identifier
@@ -33,7 +34,12 @@ def build_functions(
 
         for statement in function.statements:
             sid = graph.statements.get_by_node(statement)
-            statements.append(CallSiteId(value=sid.value))
+
+            match statement:
+                case ast.CallStatement():
+                    statements.append(CallSiteId(value=sid.value))
+                case ast.ValueStatement():
+                    continue
 
         # derive function ID from globally unique node ID
         function_id = FunctionId(value=nid.value)

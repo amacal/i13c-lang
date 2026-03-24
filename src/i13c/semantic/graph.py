@@ -61,6 +61,7 @@ def build(
             parameters=entities["entities/parameters"],
             variables=entities["entities/variables"],
             bindings=entities["entities/bindings"],
+            values=entities["entities/values"],
         ),
         indices=IndexEdges(
             terminality_by_function=indices["indices/terminality-by-function"],

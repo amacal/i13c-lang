@@ -34,7 +34,9 @@ class StatementCallsListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[NodeId, CallStatement]]:
-        return artifacts.syntax_graph().statements.items()
+        for key, value in artifacts.syntax_graph().statements.items():
+            if isinstance(value, CallStatement):
+                yield key, value
 
     @staticmethod
     def headers() -> Dict[str, str]:

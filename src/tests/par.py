@@ -497,6 +497,8 @@ def can_parse_argument_span_without_trailing_whitespace():
 
     function = program.value.functions[0]
     statement = function.statements[0]
+
+    assert isinstance(statement, ast.CallStatement)
     argument = statement.arguments[0]
 
     assert isinstance(argument, ast.IntegerLiteral)

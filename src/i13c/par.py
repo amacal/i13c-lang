@@ -147,7 +147,7 @@ def parse_entity(state: ParsingState) -> Union[ast.Snippet, ast.Function]:
 
 
 def parse_function(state: ParsingState) -> ast.Function:
-    statements: List[ast.CallStatement] = []
+    statements: List[ast.Statement] = []
     parameters: List[ast.Parameter] = []
     noreturn: bool = False
 
@@ -384,9 +384,20 @@ def parse_clobbers(state: ParsingState) -> List[ast.Register]:
     return clobbers
 
 
-def parse_statement(state: ParsingState) -> ast.CallStatement:
+def parse_statement(state: ParsingState) -> ast.Statement:
+    token = state.expect(lex.TOKEN_IDENT, lex.TOKEN_KEYWORD)
+
+    if token.code == lex.TOKEN_IDENT:
+        return parse_callsite(state, token)
+
+    if state.extract(token) == b"val":
+        return parse_value(state)
+
+    raise UnexpectedTokenCode(token, [lex.TOKEN_IDENT, lex.TOKEN_KEYWORD], token.code)
+
+
+def parse_callsite(state: ParsingState, ident: lex.Token) -> ast.CallStatement:
     arguments: List[ast.Argument] = []
-    ident = state.expect(lex.TOKEN_IDENT)
 
     # expect opening round bracket
     state.expect(lex.TOKEN_ROUND_OPEN)
@@ -406,6 +417,36 @@ def parse_statement(state: ParsingState) -> ast.CallStatement:
         name=state.extract(ident),
         arguments=arguments,
     )
+
+
+def parse_value(state: ParsingState) -> ast.ValueStatement:
+    range: Optional[ast.Range] = None
+    ident = state.expect(lex.TOKEN_IDENT)
+
+    # expect ':' followed by type
+    state.expect(lex.TOKEN_COLON)
+    type = state.expect(lex.TOKEN_TYPE)
+
+    if state.is_in(lex.TOKEN_SQUARE_OPEN):
+        range = parse_range(state)
+
+    # expect '=' followed by limited expression
+    state.expect(lex.TOKEN_EQUALS)
+    expression = parse_value_expression(state)
+
+    # expect a semicolon
+    state.expect(lex.TOKEN_SEMICOLON)
+
+    return ast.ValueStatement(
+        ref=state.span(ident),
+        name=state.extract(ident),
+        type=ast.Type(name=state.extract(type), range=range),
+        expr=expression,
+    )
+
+
+def parse_value_expression(state: ParsingState) -> ast.ValueExpression:
+    return parse_argument(state)
 
 
 def parse_instruction(state: ParsingState) -> ast.Instruction:

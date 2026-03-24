@@ -11,6 +11,7 @@ from i13c.semantic.nodes.entities.literals import configure_literals
 from i13c.semantic.nodes.entities.operands import configure_operands
 from i13c.semantic.nodes.entities.parameters import configure_parameters
 from i13c.semantic.nodes.entities.snippets import configure_snippets
+from i13c.semantic.nodes.entities.values import configure_values
 from i13c.semantic.nodes.indices.callgraphs import configure_callgraphs
 from i13c.semantic.nodes.indices.controlflows import configure_flowgraph_by_function
 from i13c.semantic.nodes.indices.dataflows import configure_dataflow_by_flownode
@@ -34,6 +35,7 @@ def configure_nodes() -> GraphGroup:
             configure_callgraphs(),
             configure_callsites(),
             configure_bindings(),
+            configure_values(),
             configure_dataflow_by_flownode(),
             configure_entrypoint_by_callable(),
             configure_environment_by_flownode(),

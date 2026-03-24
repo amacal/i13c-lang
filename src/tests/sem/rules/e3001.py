@@ -5,7 +5,7 @@ from tests.sem import prepare_program
 
 def can_accept_default_snippet_type_ranges():
     _, program = prepare_program("""
-        asm main(val@rax: u64) { syscall; }
+        asm main(value@rax: u64) { syscall; }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
@@ -15,7 +15,7 @@ def can_accept_default_snippet_type_ranges():
 
 def can_accept_default_function_type_ranges():
     _, program = prepare_program("""
-        fn main(val: u64) { exit(); }
+        fn main(value: u64) { exit(); }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
@@ -25,7 +25,7 @@ def can_accept_default_function_type_ranges():
 
 def can_accept_custom_snippet_type_ranges():
     _, program = prepare_program("""
-        asm main(val@rax: u64[0x00..0xff]) { syscall; }
+        asm main(value@rax: u64[0x00..0xff]) { syscall; }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
@@ -35,7 +35,7 @@ def can_accept_custom_snippet_type_ranges():
 
 def can_accept_custom_function_type_ranges():
     _, program = prepare_program("""
-        fn main(val: u64[0x00..0xff]) { exit(); }
+        fn main(value: u64[0x00..0xff]) { exit(); }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
@@ -45,7 +45,7 @@ def can_accept_custom_function_type_ranges():
 
 def can_accept_equal_snippet_type_ranges():
     _, program = prepare_program("""
-        asm main(val@rax: u64[0x42..0x42]) { syscall; }
+        asm main(value@rax: u64[0x42..0x42]) { syscall; }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
@@ -55,7 +55,7 @@ def can_accept_equal_snippet_type_ranges():
 
 def can_accept_equal_function_type_ranges():
     _, program = prepare_program("""
-        fn main(val: u64[0x42..0x42]) { exit(); }
+        fn main(value: u64[0x42..0x42]) { exit(); }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
@@ -65,47 +65,47 @@ def can_accept_equal_function_type_ranges():
 
 def can_reject_invalid_snippet_type_ranges():
     source, program = prepare_program("""
-        asm main(val@rax: u64[0xff..0x00]) { syscall; }
+        asm main(value@rax: u64[0xff..0x00]) { syscall; }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == err.ERROR_3001
-    assert source.extract(diagnostics[0].ref) == b"main(val@rax: u64[0xff..0x00])"
+    assert source.extract(diagnostics[0].ref) == b"main(value@rax: u64[0xff..0x00])"
 
 
 def can_reject_invalid_function_type_ranges():
     source, program = prepare_program("""
-        fn main(val: u64[0xff..0x00]) { exit(); }
+        fn main(value: u64[0xff..0x00]) { exit(); }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == err.ERROR_3001
-    assert source.extract(diagnostics[0].ref) == b"main(val: u64[0xff..0x00])"
+    assert source.extract(diagnostics[0].ref) == b"main(value: u64[0xff..0x00])"
 
 
 def can_reject_invalid_snippet_ranges_out_of_type_ranges():
     source, program = prepare_program("""
-        asm main(val@rax: u8[0x000..0x200]) { syscall; }
+        asm main(value@rax: u8[0x000..0x200]) { syscall; }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == err.ERROR_3001
-    assert source.extract(diagnostics[0].ref) == b"main(val@rax: u8[0x000..0x200])"
+    assert source.extract(diagnostics[0].ref) == b"main(value@rax: u8[0x000..0x200])"
 
 
 def can_reject_invalid_function_ranges_out_of_type_ranges():
     source, program = prepare_program("""
-        fn main(val: u8[0x000..0x200]) { exit(); }
+        fn main(value: u8[0x000..0x200]) { exit(); }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == err.ERROR_3001
-    assert source.extract(diagnostics[0].ref) == b"main(val: u8[0x000..0x200])"
+    assert source.extract(diagnostics[0].ref) == b"main(value: u8[0x000..0x200])"

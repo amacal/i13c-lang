@@ -39,7 +39,7 @@ def can_lower_mov_program():
 
 def can_lower_mov_with_register_bound_slot():
     semantic, llvm = prepare_graph("""
-        asm foo(dst@rax: u64, val@imm: u8) noreturn { mov dst, val; }
+        asm foo(dst@rax: u64, value@imm: u8) noreturn { mov dst, value; }
         fn main() noreturn { foo(0x01, 0x42); }
     """)
 
