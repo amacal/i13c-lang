@@ -15,6 +15,18 @@ class MovRegImm:
 
 
 @dataclass(kw_only=True)
+class MovOffImm:
+    dst: int
+    imm: int
+    off: int
+
+    def native(self) -> str:
+        dst = reg_to_name(self.dst)
+        sign = "+" if self.off >= 0 else "-"
+        return f"mov [{dst} {sign} {abs(self.off):#010x}], {self.imm:#010x}"
+
+
+@dataclass(kw_only=True)
 class MovRegReg:
     dst: int
     src: int
@@ -126,6 +138,7 @@ class Nop:
 Instruction = Union[
     MovRegImm,
     MovRegReg,
+    MovOffImm,
     MovOffReg,
     MovRegOff,
     ShlRegImm,

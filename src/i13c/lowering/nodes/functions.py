@@ -10,12 +10,14 @@ from i13c.lowering.typing.flows import (
     BlockId,
     EpilogueFlow,
     FlowId,
+    ImmediateFlow,
     PrologueFlow,
     SnapshotFlow,
 )
 from i13c.lowering.typing.instructions import (
     InstructionEntry,
     InstructionId,
+    MovOffImm,
     MovOffReg,
     Nop,
 )
@@ -30,7 +32,8 @@ from i13c.semantic.model import SemanticGraph
 from i13c.semantic.rules import SemanticRules
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.values import Value, ValueId
+from i13c.semantic.typing.entities.literals import Hex, LiteralId
+from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.indices.controlflows import (
     FlowEntry,
     FlowExit,
@@ -38,6 +41,7 @@ from i13c.semantic.typing.indices.controlflows import (
     FlowNode,
 )
 from i13c.semantic.typing.indices.variables import VariableId
+from i13c.semantic.typing.resolutions.values import ValueResolution
 
 # the goal of this module is to convert all active functions into blocks with instructions;
 # each block can have forward and backward edges and each function has its entries and exits;
@@ -65,7 +69,7 @@ def configure_functions() -> GraphNode:
             {
                 ("generator", "core/generator"),
                 ("graph", "semantic/graph"),
-                ("values", "entities/values"),
+                ("values", "resolutions/values"),
                 ("rules", "rules/semantic"),
                 ("registers", "llvm/registers"),
             }
@@ -83,7 +87,7 @@ class Context:
     instructions: Dict[BlockId, List[BlockInstruction]]
 
     registers: OneToOne[VariableId, VirtualRegister]
-    values: OneToOne[ValueId, Value]
+    values: OneToOne[ValueId, ValueResolution]
 
     forward: Dict[BlockId, List[BlockId]]
     backward: Dict[BlockId, List[BlockId]]
@@ -95,7 +99,7 @@ class Context:
     def empty(
         graph: SemanticGraph,
         generator: Generator,
-        values: OneToOne[ValueId, Value],
+        values: OneToOne[ValueId, ValueResolution],
         registers: OneToOne[VariableId, VirtualRegister],
     ) -> Context:
         return Context(
@@ -117,7 +121,7 @@ def lower_active_functions(
     generator: Generator,
     graph: SemanticGraph,
     registers: OneToOne[VariableId, VirtualRegister],
-    values: OneToOne[ValueId, Value],
+    values: OneToOne[ValueId, ValueResolution],
     **kwargs: Dict[str, Any],
 ) -> Tuple[
     Optional[BlockId],
@@ -266,6 +270,25 @@ def lower_flow_value(
     # prepare instructions
     instructions: List[BlockInstruction] = []
 
+    resolution = ctx.values.get(node)
+    assert resolution.accepted is not None
+
+    if isinstance(resolution.accepted.binding, LiteralId):
+        literal = ctx.graph.basic.literals.get(resolution.accepted.binding)
+        assert isinstance(literal.target, Hex)
+
+        variable = ctx.graph.indices.variables_by_parameter.get(node)
+        register = ctx.registers.get(variable)
+
+        imm = literal.target.value
+        dst = register.ref()
+
+        iid = FlowId(value=ctx.generator.next())
+        instr = ImmediateFlow(imm=imm, dst=dst)
+
+        instructions.append((iid, instr))
+        # get literal
+
     return FlowNodeContext(
         block=Block(origin=node, terminator=terminator),
         instructions=instructions,
@@ -358,6 +381,26 @@ def patch_snapshots(
             for iid, instr in instructions.get(bid):
                 if not isinstance(iid, FlowId):
                     continue
+
+                if isinstance(instr, ImmediateFlow):
+                    # ImmediateFlow is referenced by FlowId
+                    assert isinstance(iid, FlowId)
+
+                    # find stackframe and get a slot entry
+                    stackframe = stackframes.get(fid)
+                    offset = stackframe.slot_at_register(instr.dst)
+
+                    if offset is None:
+                        bindings[iid] = (InstructionId(value=generator.next()), Nop())
+
+                    else:
+                        # append new patched binding
+                        bindings[iid] = (
+                            InstructionId(value=generator.next()),
+                            MovOffImm(
+                                dst=name_to_reg("rsp"), imm=instr.imm, off=offset * 8
+                            ),
+                        )
 
                 if isinstance(instr, SnapshotFlow):
                     # SnapshotFlow is referenced by FlowId

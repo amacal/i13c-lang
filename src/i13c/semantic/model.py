@@ -21,7 +21,7 @@ from i13c.semantic.typing.indices.environments import Environment
 from i13c.semantic.typing.indices.instances import Instance
 from i13c.semantic.typing.indices.terminalities import Terminality
 from i13c.semantic.typing.indices.usages import Usage, UsageId
-from i13c.semantic.typing.indices.variables import Variable, VariableId
+from i13c.semantic.typing.indices.variables import Variable, VariableId, VariableSource
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from i13c.semantic.typing.resolutions.values import ValueResolution
@@ -54,7 +54,7 @@ class IndexEdges:
     resolution_by_value: OneToOne[ValueId, ValueResolution]
     terminality_by_function: OneToOne[FunctionId, Terminality]
     usages_by_expression: OneToMany[ExpressionId, UsageId]
-    variables_by_parameter: OneToOne[ParameterId, VariableId]
+    variables_by_parameter: OneToOne[VariableSource, VariableId]
 
 
 @dataclass

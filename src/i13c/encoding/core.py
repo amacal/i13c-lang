@@ -98,3 +98,13 @@ class Immediate:
 
     def to_bytes(self) -> bytes:
         return self.value.to_bytes(self.width, byteorder="little", signed=self.signed)
+
+
+@dataclass(kw_only=True)
+class Displacement:
+    value: int
+    width: int
+    signed: bool
+
+    def to_bytes(self) -> bytes:
+        return self.value.to_bytes(self.width, byteorder="little", signed=self.signed)

@@ -23,6 +23,7 @@ from i13c.lowering.typing.flows import (
     BlockId,
     Flow,
     FlowId,
+    ImmediateFlow,
     SnapshotFlow,
 )
 from i13c.lowering.typing.instructions import (
@@ -339,8 +340,12 @@ def build_register_intervals(
     for fid, positions in instructions.items():
         ending: Dict[int, int] = {}
         starting: Dict[int, int] = {}
+        maximum: int = 0
 
         for position in positions:
+            if maximum < position.index:
+                maximum = position.index
+
             for reg in idef.get(position.target).items:
                 starting[reg] = position.index
 
@@ -351,7 +356,7 @@ def build_register_intervals(
             RegisterInterval(
                 vreg=reg,
                 start=starting[reg],
-                end=ending.get(reg, starting[reg]),
+                end=ending.get(reg, maximum),
             )
             for reg in starting.keys() | ending.keys()
         ]
@@ -429,7 +434,7 @@ def find_defined_and_used_registers_for_instructions(
 
     for _, batch in instructions.items():
         for iid, instr in batch:
-            if isinstance(instr, SnapshotFlow):
+            if isinstance(instr, SnapshotFlow) or isinstance(instr, ImmediateFlow):
                 defined[iid] = Registers(items={instr.dst})
             else:
                 defined[iid] = Registers.empty()

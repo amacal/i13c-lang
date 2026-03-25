@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Protocol, Type, Union
 
-from i13c.encoding.core import REX, SIB, Immediate, ModRM, Opcode
+from i13c.encoding.core import REX, SIB, Displacement, Immediate, ModRM, Opcode
 from i13c.lowering.typing.instructions import (
     AddRegImm,
     Call,
     Instruction,
     Label,
+    MovOffImm,
     MovOffReg,
     MovRegImm,
     MovRegOff,
@@ -102,6 +103,79 @@ def encode_mov_reg_reg(
             modrm.to_byte(),
         ]
     )
+
+
+def encode_mov_off_imm(
+    instruction: MovOffImm, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+
+    # will be encoded as single imm32 if possible, otherwise as two moves
+
+    # chosen encoding: REX.W + C7 /0 id
+    # encoded as: [rex] [opcode] [modrm] [sib?] [disp32] [imm32]
+
+    sib = SIB(
+        scale=0,
+        index=None,
+        base=instruction.dst,
+    )
+
+    modrm = ModRM(
+        mod=0b10,
+        reg=0,
+        rm=sib.mod_rm(),
+    )
+
+    rex = REX(
+        w=True,  # sign-extend to 64 bits
+        r=False,
+        x=sib.rex_x(),
+        b=modrm.rex_b() or sib.rex_b(),
+    )
+
+    opcode = Opcode(
+        hex=0xC7,
+        reg=None,
+    )
+
+    disp32 = Displacement(
+        value=instruction.off,
+        width=4,
+        signed=True,
+    )
+
+    imm32 = Immediate(
+        value=instruction.imm & 0xFFFFFFFF,
+        width=4,
+        signed=True,
+    )
+
+    bytecode.extend(
+        [
+            rex.to_byte(),
+            opcode.to_byte(),
+            modrm.to_byte(),
+            *sib.to_bytes(),
+            *disp32.to_bytes(),
+            *imm32.to_bytes(),
+        ]
+    )
+
+    if instruction.imm >= 0x80000000:
+        rex.w = False  # the second move must be a 32-bit zero-extension
+        disp32.value += 4  # the second move is 4 bytes after the first
+        imm32.value = (instruction.imm >> 32) & 0xFFFFFFFF  # high 32 bits
+
+        bytecode.extend(
+            [
+                rex.to_byte(),
+                opcode.to_byte(),
+                modrm.to_byte(),
+                *sib.to_bytes(),
+                *disp32.to_bytes(),
+                *imm32.to_bytes(),
+            ]
+        )
 
 
 def encode_mov_off_reg(
@@ -382,6 +456,7 @@ class Encoder(Protocol):
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
     MovRegImm: encode_mov_reg_imm,
     MovRegReg: encode_mov_reg_reg,
+    MovOffImm: encode_mov_off_imm,
     MovOffReg: encode_mov_off_reg,
     MovRegOff: encode_mov_reg_off,
     ShlRegImm: encode_shl_reg_imm,

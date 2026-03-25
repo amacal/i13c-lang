@@ -77,11 +77,11 @@ class RestoreFlow:
 
 @dataclass(kw_only=True)
 class ImmediateFlow:
-    src: int
+    imm: int
     dst: int
 
     def native(self) -> str:
-        return f"immediate {reg_to_name(self.dst)}, #{self.src}"
+        return f"immediate {reg_to_name(self.dst)}, {self.imm:#010x}"
 
 
 Flow = Union[
