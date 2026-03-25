@@ -9,10 +9,10 @@ asm close(fd@rdi: u8[0x00..0xff]) clobbers rcx, r11, rax {
 }
 
 fn close_std(fd: u8[0x00..0x02]) {
-  val x: u64 = 0x0000000100000000;
+  val x: u8 = 0x01;
   val y: u8 = fd;
 
-  close(fd);
+  close(x);
 }
 
 fn foo(fd1: u8[0x00..0x02], fd2: u8[0x00..0x02], code: u8[0x00..0x0f]) noreturn {

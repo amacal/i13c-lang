@@ -287,7 +287,6 @@ def lower_flow_value(
         instr = ImmediateFlow(imm=imm, dst=dst)
 
         instructions.append((iid, instr))
-        # get literal
 
     return FlowNodeContext(
         block=Block(origin=node, terminator=terminator),

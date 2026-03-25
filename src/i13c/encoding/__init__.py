@@ -147,7 +147,7 @@ def encode_mov_off_imm(
     imm32 = Immediate(
         value=instruction.imm & 0xFFFFFFFF,
         width=4,
-        signed=True,
+        signed=False,
     )
 
     bytecode.extend(
@@ -209,7 +209,7 @@ def encode_mov_off_reg(
         reg=None,
     )
 
-    imm32 = Immediate(
+    disp32 = Displacement(
         value=instruction.off,
         width=4,
         signed=True,
@@ -221,7 +221,7 @@ def encode_mov_off_reg(
             opcode.to_byte(),
             modrm.to_byte(),
             *sib.to_bytes(),
-            *imm32.to_bytes(),
+            *disp32.to_bytes(),
         ]
     )
 
@@ -257,7 +257,7 @@ def encode_mov_reg_off(
         reg=None,
     )
 
-    imm32 = Immediate(
+    disp32 = Displacement(
         value=instruction.off,
         width=4,
         signed=True,
@@ -269,7 +269,7 @@ def encode_mov_reg_off(
             opcode.to_byte(),
             modrm.to_byte(),
             *sib.to_bytes(),
-            *imm32.to_bytes(),
+            *disp32.to_bytes(),
         ]
     )
 
@@ -343,7 +343,7 @@ def encode_sub_reg_imm(
     imm32 = Immediate(
         value=instruction.imm,
         width=4,
-        signed=True,
+        signed=False,
     )
 
     bytecode.extend(
@@ -384,7 +384,7 @@ def encode_add_reg_imm(
     imm32 = Immediate(
         value=instruction.imm,
         width=4,
-        signed=True,
+        signed=False,
     )
 
     bytecode.extend(
