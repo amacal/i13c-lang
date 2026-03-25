@@ -8,8 +8,9 @@ from i13c.lowering.typing.terminators import Terminator
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.values import ValueId
 
-BlockOrigin = Union[FunctionId, SnippetId, CallSiteId]
+BlockOrigin = Union[FunctionId, SnippetId, CallSiteId, ValueId]
 BlockInstruction = Union[InstructionEntry, AbstractEntry, FlowEntry]
 BlockInstructionId = Union[InstructionId, AbstractId, FlowId]
 

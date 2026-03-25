@@ -37,6 +37,13 @@ class Type:
     def __str__(self) -> str:
         return f"{self.name.decode()}[{self.range}]"
 
+    def accepts(self, other: Type) -> bool:
+        return (
+            self.width == other.width
+            and self.range.lower <= other.range.lower
+            and self.range.upper >= other.range.upper
+        )
+
 
 def derive_width(value: int) -> Width:
     if value.bit_length() <= 8:

@@ -4,10 +4,11 @@ from typing import Union
 
 from i13c.semantic.core import Identifier, Type
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.values import ValueId
 from i13c.src import Span
 
-VariableKind = Kind[b"parameter"]
-VariableSource = Union[ParameterId]
+VariableKind = Kind[b"parameter", b"value"]
+VariableSource = Union[ParameterId, ValueId]
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -30,5 +31,5 @@ class Variable:
     type: Type
     ident: Identifier
 
-    def describe(self) -> str:
+    def __str__(self) -> str:
         return f"source={self.source.identify(2)}, type={self.type}, ident={self.ident}"

@@ -8,6 +8,7 @@ from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import Function, FunctionId, Statement
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.values import ValueId
 
 
 def configure_functions() -> GraphNode:
@@ -39,7 +40,7 @@ def build_functions(
                 case ast.CallStatement():
                     statements.append(CallSiteId(value=sid.value))
                 case ast.ValueStatement():
-                    continue
+                    statements.append(ValueId(value=sid.value))
 
         # derive function ID from globally unique node ID
         function_id = FunctionId(value=nid.value)

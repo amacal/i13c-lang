@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.parameters import Parameter
 from i13c.semantic.typing.entities.snippets import Slot
 from i13c.semantic.typing.indices.variables import VariableId
 
-CallSiteBindingSurce = Union[LiteralId, VariableId]
+CallSiteBindingSource = Union[LiteralId, VariableId]
 CallSiteBindingDestination = Union[Parameter, Slot]
 
 
@@ -19,5 +19,5 @@ class CallSiteBindings:
 
 @dataclass(kw_only=True)
 class CallSiteBinding:
-    src: CallSiteBindingSurce
+    src: CallSiteBindingSource
     dst: CallSiteBindingDestination

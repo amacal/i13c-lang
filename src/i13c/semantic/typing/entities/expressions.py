@@ -17,5 +17,5 @@ class Expression:
     ref: Span
     ident: Identifier
 
-    def describe(self) -> str:
+    def __str__(self) -> str:
         return f"ident={self.ident}"

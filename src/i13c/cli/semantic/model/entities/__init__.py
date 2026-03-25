@@ -10,6 +10,7 @@ from i13c.cli.semantic.model.entities.literals import LiteralListExtractor
 from i13c.cli.semantic.model.entities.operands import OperandListExtractor
 from i13c.cli.semantic.model.entities.parameters import ParameterListExtractor
 from i13c.cli.semantic.model.entities.snippets import SnippetListExtractor
+from i13c.cli.semantic.model.entities.usages import UsageListExtractor
 from i13c.cli.semantic.model.entities.values import ValueListExtractor
 from i13c.cli.semantic.model.entities.variables import VariableListExtractor
 
@@ -23,6 +24,7 @@ ENTITIES: Dict[str, AbstractListExtractor[Any]] = {
     "entities/operands": OperandListExtractor,
     "entities/parameters": ParameterListExtractor,
     "entities/snippets": SnippetListExtractor,
+    "entities/usages": UsageListExtractor,
     "entities/values": ValueListExtractor,
     "entities/variables": VariableListExtractor,
 }

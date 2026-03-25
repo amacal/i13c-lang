@@ -11,16 +11,18 @@ from i13c.cli.semantic.model.indices.resolutions import (
     InstructionResolutionListExtractor,
 )
 from i13c.cli.semantic.model.indices.terminalities import TerminalityListExtractor
+from i13c.cli.semantic.model.indices.usages import UsagesByExpressionListExtractor
 from i13c.cli.semantic.model.indices.variables import ParameterVariablesListExtractor
 
 INDICES: Dict[str, AbstractListExtractor[Any]] = {
     "indices/controlflow-by-function": ControlFlowListExtractor,
     "indices/dataflow-by-flownode": DataFlowListExtractor,
+    "indices/environment-by-flownode": EnvironmentListExtractor,
     "indices/instance-by-callsite": InstanceListExtractor,
     "indices/resolution-by-callsite": CallSiteResolutionListExtractor,
     "indices/resolution-by-callsite/bindings": BindingsOfCallSiteResolutionListExtractor,
     "indices/resolution-by-instruction": InstructionResolutionListExtractor,
-    "indices/variables-by-parameter": ParameterVariablesListExtractor,
     "indices/terminality-by-function": TerminalityListExtractor,
-    "indices/environment-by-flownode": EnvironmentListExtractor,
+    "indices/usages-by-expression": UsagesByExpressionListExtractor,
+    "indices/variables-by-source": ParameterVariablesListExtractor,
 }

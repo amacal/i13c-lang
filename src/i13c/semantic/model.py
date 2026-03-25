@@ -20,36 +20,41 @@ from i13c.semantic.typing.indices.entrypoints import EntryPoint
 from i13c.semantic.typing.indices.environments import Environment
 from i13c.semantic.typing.indices.instances import Instance
 from i13c.semantic.typing.indices.terminalities import Terminality
+from i13c.semantic.typing.indices.usages import Usage, UsageId
 from i13c.semantic.typing.indices.variables import Variable, VariableId
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
+from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
 @dataclass
 class BasicNodes:
+    bindings: OneToOne[CallSiteId, CallSiteBindings]
+    callsites: OneToOne[CallSiteId, CallSite]
+    expressions: OneToOne[ExpressionId, Expression]
+    functions: OneToOne[FunctionId, Function]
+    instructions: OneToOne[InstructionId, Instruction]
     literals: OneToOne[LiteralId, Literal]
     operands: OneToOne[OperandId, Operand]
-    instructions: OneToOne[InstructionId, Instruction]
-    expressions: OneToOne[ExpressionId, Expression]
-    snippets: OneToOne[SnippetId, Snippet]
-    functions: OneToOne[FunctionId, Function]
-    callsites: OneToOne[CallSiteId, CallSite]
     parameters: OneToOne[ParameterId, Parameter]
-    variables: OneToOne[VariableId, Variable]
-    bindings: OneToOne[CallSiteId, CallSiteBindings]
+    snippets: OneToOne[SnippetId, Snippet]
+    usages: OneToOne[UsageId, Usage]
     values: OneToOne[ValueId, Value]
+    variables: OneToOne[VariableId, Variable]
 
 
 @dataclass
 class IndexEdges:
-    terminality_by_function: OneToOne[FunctionId, Terminality]
+    dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
+    environment_by_flownode: OneToOne[FlowNode, Environment]
+    flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
+    instance_by_callsite: OneToOne[CallSiteId, Instance]
     resolution_by_callsite: OneToOne[CallSiteId, CallSiteResolution]
     resolution_by_instruction: OneToOne[InstructionId, InstructionResolution]
-    flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
-    dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
-    instance_by_callsite: OneToOne[CallSiteId, Instance]
+    resolution_by_value: OneToOne[ValueId, ValueResolution]
+    terminality_by_function: OneToOne[FunctionId, Terminality]
+    usages_by_expression: OneToMany[ExpressionId, UsageId]
     variables_by_parameter: OneToOne[ParameterId, VariableId]
-    environment_by_flownode: OneToOne[FlowNode, Environment]
 
 
 @dataclass

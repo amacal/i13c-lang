@@ -15,6 +15,7 @@ from i13c.cli.semantic.model.abstract import AbstractListExtractor, ListItem
 from i13c.cli.semantic.model.entities import ENTITIES
 from i13c.cli.semantic.model.indices import INDICES
 from i13c.cli.semantic.model.llvm import LLVM
+from i13c.cli.semantic.model.resolutions import RESOLUTIONS
 from i13c.cli.semantic.model.rules import RULES
 from i13c.cli.semantic.model.syntax import SYNTAX
 from i13c.core.table import Table, draw_table
@@ -103,6 +104,9 @@ def attach(target: click.Group) -> List[click.Command]:
         commands.extend(attach_one2one_commands(model, key, extractor))
 
     for key, extractor in LLVM.items():
+        commands.extend(attach_one2one_commands(model, key, extractor))
+
+    for key, extractor in RESOLUTIONS.items():
         commands.extend(attach_one2one_commands(model, key, extractor))
 
     return commands

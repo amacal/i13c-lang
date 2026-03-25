@@ -30,6 +30,7 @@ from i13c.semantic.model import SemanticGraph
 from i13c.semantic.rules import SemanticRules
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.values import Value, ValueId
 from i13c.semantic.typing.indices.controlflows import (
     FlowEntry,
     FlowExit,
@@ -64,6 +65,7 @@ def configure_functions() -> GraphNode:
             {
                 ("generator", "core/generator"),
                 ("graph", "semantic/graph"),
+                ("values", "entities/values"),
                 ("rules", "rules/semantic"),
                 ("registers", "llvm/registers"),
             }
@@ -81,6 +83,7 @@ class Context:
     instructions: Dict[BlockId, List[BlockInstruction]]
 
     registers: OneToOne[VariableId, VirtualRegister]
+    values: OneToOne[ValueId, Value]
 
     forward: Dict[BlockId, List[BlockId]]
     backward: Dict[BlockId, List[BlockId]]
@@ -92,6 +95,7 @@ class Context:
     def empty(
         graph: SemanticGraph,
         generator: Generator,
+        values: OneToOne[ValueId, Value],
         registers: OneToOne[VariableId, VirtualRegister],
     ) -> Context:
         return Context(
@@ -100,6 +104,7 @@ class Context:
             entrypoint=None,
             blocks={},
             instructions={},
+            values=values,
             registers=registers,
             forward={},
             backward={},
@@ -112,6 +117,7 @@ def lower_active_functions(
     generator: Generator,
     graph: SemanticGraph,
     registers: OneToOne[VariableId, VirtualRegister],
+    values: OneToOne[ValueId, Value],
     **kwargs: Dict[str, Any],
 ) -> Tuple[
     Optional[BlockId],
@@ -122,7 +128,7 @@ def lower_active_functions(
     OneToOne[FunctionId, BlockId],
     OneToOne[FunctionId, BlockId],
 ]:
-    ctx = Context.empty(graph, generator, registers)
+    ctx = Context.empty(graph, generator, values, registers)
 
     # lower all live callables
     for fid in graph.callable_live:
@@ -219,6 +225,7 @@ def lower_flow_callsite(
     mapping: Dict[FlowNode, BlockId],
     node: CallSiteId,
 ) -> FlowNodeContext:
+
     # obtain successors
     successors = flow.forward.get(node, [])
     assert len(successors) in (0, 1)
@@ -234,6 +241,34 @@ def lower_flow_callsite(
     return FlowNodeContext(
         block=Block(origin=node, terminator=terminator),
         instructions=lower_callsite(ctx.generator, ctx.graph, node, ctx.registers),
+    )
+
+
+def lower_flow_value(
+    ctx: Context,
+    fid: FunctionId,
+    flow: FlowGraph,
+    mapping: Dict[FlowNode, BlockId],
+    node: ValueId,
+) -> FlowNodeContext:
+
+    # obtain successors
+    successors = flow.forward.get(node, [])
+    assert len(successors) in (0, 1)
+
+    # create jump or trap
+    terminator = (
+        JumpTerminator(target=mapping[successors[0]])
+        if len(successors) == 1
+        else TrapTerminator()
+    )
+
+    # prepare instructions
+    instructions: List[BlockInstruction] = []
+
+    return FlowNodeContext(
+        block=Block(origin=node, terminator=terminator),
+        instructions=instructions,
     )
 
 
@@ -258,6 +293,7 @@ DISPATCH_TABLE: Dict[Type[FlowNode], FlowNodeLowerer] = {
     FlowEntry: lower_flow_entry,
     FlowExit: lower_flow_exit,
     CallSiteId: lower_flow_callsite,
+    ValueId: lower_flow_value,
 }  # pyright: ignore[reportAssignmentType]
 
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.core import Width
+from i13c.semantic.core import Type, Width
 from i13c.src import Span
 
 LiteralKind = Kind[b"hex"]
@@ -33,5 +33,20 @@ class Literal:
     kind: LiteralKind
     target: Hex
 
-    def describe(self) -> str:
+    def __str__(self) -> str:
         return f"kind={self.kind.decode()} {self.target.describe()}"
+
+    def fits(self, type: Type) -> bool:
+        if self.kind == b"hex":
+            # width constraint
+            if self.target.width > type.width:
+                return False
+
+            # range constraint
+            if not (type.range.lower <= self.target.value <= type.range.upper):
+                return False
+
+            # success
+            return True
+
+        return False

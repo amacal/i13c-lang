@@ -46,10 +46,11 @@ def build_callgraphs(
 
     for fid, function in functions.items():
         for statement in function.statements:
-            for accepted in resolutions.get(statement).accepted:
-                callee = accepted.callable.target
-                by_caller[fid].append(CallPair.instance(statement, callee))
-                by_callee[callee].append(CallPair.instance(statement, fid))
+            if isinstance(statement, CallSiteId):
+                for accepted in resolutions.get(statement).accepted:
+                    callee = accepted.callable.target
+                    by_caller[fid].append(CallPair.instance(statement, callee))
+                    by_callee[callee].append(CallPair.instance(statement, fid))
 
     return (
         OneToMany[CallableTarget, CallPair].instance(by_caller),

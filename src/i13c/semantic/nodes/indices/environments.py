@@ -4,7 +4,7 @@ from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Identifier
 from i13c.semantic.typing.entities.functions import Function, FunctionId
-from i13c.semantic.typing.indices.controlflows import FlowEntry, FlowGraph, FlowNode
+from i13c.semantic.typing.indices.controlflows import FlowGraph, FlowNode
 from i13c.semantic.typing.indices.dataflows import DataFlow
 from i13c.semantic.typing.indices.environments import Environment
 from i13c.semantic.typing.indices.variables import Variable, VariableId
@@ -49,8 +49,12 @@ def build_environments(
             for successor in flowgraph.forward.get(node, [flowgraph.exit]):
                 node = successor
 
-            # just clone current environment for now
-            environments[node] = Environment(owner=fid, variables=dict(env))
+            # collect declared variables at the node
+            vars = collect_entry(variables, dataflows, node)
+
+            # clone current environment and append new variables
+            env = dict(env | vars)
+            environments[node] = Environment(owner=fid, variables=env)
 
     return OneToOne[FlowNode, Environment].instance(environments)
 
@@ -58,10 +62,10 @@ def build_environments(
 def collect_entry(
     variables: OneToOne[VariableId, Variable],
     dataflows: OneToOne[FlowNode, DataFlow],
-    entry: FlowEntry,
+    node: FlowNode,
 ) -> Dict[Identifier, VariableId]:
     # get the dataflow at the node
-    dataflow = dataflows.get(entry)
+    dataflow = dataflows.get(node)
     available: Dict[Identifier, VariableId] = {}
 
     # collect declared variables

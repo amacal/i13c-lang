@@ -8,7 +8,7 @@ from i13c.semantic.typing.entities.callables import Callable
 from i13c.semantic.typing.entities.callsites import Argument, CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
-from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
+from i13c.semantic.typing.entities.literals import Literal, LiteralId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.indices.controlflows import FlowNode
@@ -48,24 +48,6 @@ class BindingLike(Protocol):
     argument: Argument
 
 
-def match_literal(literal: Literal, type: Type) -> bool:
-    match literal:
-        case Literal(kind=b"hex", target=Hex() as target):
-            # width constraint
-            if target.width > type.width:
-                return False
-
-            # range constraint
-            if not (type.range.lower <= target.value <= type.range.upper):
-                return False
-
-            # success
-            return True
-
-        case _:
-            return False
-
-
 def match_variable(variable: Variable, type: Type) -> bool:
     # width constraint
     if variable.type.width > type.width:
@@ -101,7 +83,7 @@ def build_resolution_by_callsite(
         for binding in bindings:
             match binding.argument:
                 case Argument(kind=b"literal", target=LiteralId() as lit):
-                    if not match_literal(literals.get(lit), type=binding.type):
+                    if not literals.get(lit).fits(binding.type):
                         return Err(b"type-mismatch")
 
                 case Argument(kind=b"expression", target=ExpressionId() as eid):
