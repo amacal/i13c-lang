@@ -80,9 +80,9 @@ def patch_stack_frames(
     blocks: OneToMany[FunctionId, BlockId],
     stackframes: OneToOne[FunctionId, StackFrame],
     instructions: OneToMany[BlockId, BlockInstruction],
-) -> OneToOne[FlowId, AbstractEntry]:
+) -> OneToMany[FlowId, AbstractEntry]:
 
-    result: Dict[FlowId, AbstractEntry] = {}
+    result: Dict[FlowId, List[AbstractEntry]] = {}
 
     # then patch all prologues/epilogues
     for fid, bids in blocks.items():
@@ -94,11 +94,11 @@ def patch_stack_frames(
                 if isinstance(instr, PrologueFlow):
                     stackframe = stackframes.get(fid)
                     aid = AbstractId(value=generator.next())
-                    result[iid] = (aid, EnterFrame(size=stackframe.size))
+                    result[iid] = [(aid, EnterFrame(size=stackframe.size))]
 
                 if isinstance(instr, EpilogueFlow):
                     stackframe = stackframes.get(fid)
                     aid = AbstractId(value=generator.next())
-                    result[iid] = (aid, ExitFrame(size=stackframe.size))
+                    result[iid] = [(aid, ExitFrame(size=stackframe.size))]
 
-    return OneToOne[FlowId, AbstractEntry].instance(result)
+    return OneToMany[FlowId, AbstractEntry].instance(result)

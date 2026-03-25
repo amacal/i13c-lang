@@ -51,11 +51,11 @@ class BlockRegistersNode:
 
 @dataclass(kw_only=True)
 class PatchesNode:
-    clobbers: OneToOne[FlowId, InstructionEntry]
-    bindings: OneToOne[FlowId, InstructionEntry]
-    snapshots: OneToOne[FlowId, InstructionEntry]
-    callsites: OneToOne[FlowId, InstructionEntry]
-    stackframes: OneToOne[FlowId, AbstractEntry]
+    clobbers: OneToMany[FlowId, InstructionEntry]
+    bindings: OneToMany[FlowId, InstructionEntry]
+    snapshots: OneToMany[FlowId, InstructionEntry]
+    callsites: OneToMany[FlowId, InstructionEntry]
+    stackframes: OneToMany[FlowId, AbstractEntry]
 
 
 @dataclass(kw_only=True)

@@ -372,8 +372,8 @@ def patch_snapshots(
     blocks: OneToMany[FunctionId, BlockId],
     stackframes: OneToOne[FunctionId, StackFrame],
     instructions: OneToMany[BlockId, BlockInstruction],
-) -> OneToOne[FlowId, InstructionEntry]:
-    bindings: Dict[FlowId, InstructionEntry] = {}
+) -> OneToMany[FlowId, InstructionEntry]:
+    bindings: Dict[FlowId, List[InstructionEntry]] = {}
 
     for fid, bids in blocks.items():
         for bid in bids:
@@ -390,16 +390,20 @@ def patch_snapshots(
                     offset = stackframe.slot_at_register(instr.dst)
 
                     if offset is None:
-                        bindings[iid] = (InstructionId(value=generator.next()), Nop())
+                        bindings[iid] = [(InstructionId(value=generator.next()), Nop())]
 
                     else:
                         # append new patched binding
-                        bindings[iid] = (
-                            InstructionId(value=generator.next()),
-                            MovOffImm(
-                                dst=name_to_reg("rsp"), imm=instr.imm, off=offset * 8
+                        bindings[iid] = [
+                            (
+                                InstructionId(value=generator.next()),
+                                MovOffImm(
+                                    dst=name_to_reg("rsp"),
+                                    imm=instr.imm,
+                                    off=offset * 8,
+                                ),
                             ),
-                        )
+                        ]
 
                 if isinstance(instr, SnapshotFlow):
                     # SnapshotFlow is referenced by FlowId
@@ -410,15 +414,19 @@ def patch_snapshots(
                     offset = stackframe.slot_at_register(instr.dst)
 
                     if offset is None:
-                        bindings[iid] = (InstructionId(value=generator.next()), Nop())
+                        bindings[iid] = [(InstructionId(value=generator.next()), Nop())]
 
                     else:
                         # append new patched binding
-                        bindings[iid] = (
-                            InstructionId(value=generator.next()),
-                            MovOffReg(
-                                dst=name_to_reg("rsp"), src=instr.src, off=offset * 8
+                        bindings[iid] = [
+                            (
+                                InstructionId(value=generator.next()),
+                                MovOffReg(
+                                    dst=name_to_reg("rsp"),
+                                    src=instr.src,
+                                    off=offset * 8,
+                                ),
                             ),
-                        )
+                        ]
 
-    return OneToOne[FlowId, InstructionEntry].instance(bindings)
+    return OneToMany[FlowId, InstructionEntry].instance(bindings)

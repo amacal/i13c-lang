@@ -16,8 +16,9 @@ class PatchesOfStackFramesListExtractor:
             for bid, instructions in llvm.flows.items():
                 for iid, src in instructions:
                     if isinstance(iid, FlowId) and isinstance(src, Flow):
-                        if instruction := llvm.patches.stackframes.find(iid):
-                            yield (bid, iid, src, instruction[0], instruction[1])
+                        if instructions := llvm.patches.stackframes.find(iid):
+                            for instruction in instructions:
+                                yield (bid, iid, src, instruction[0], instruction[1])
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -51,8 +52,9 @@ class PatchesOfBindingsListExtractor:
             for bid, instructions in llvm.flows.items():
                 for iid, src in instructions:
                     if isinstance(iid, FlowId) and isinstance(src, Flow):
-                        if instruction := llvm.patches.bindings.find(iid):
-                            yield (bid, iid, src, instruction[0], instruction[1])
+                        if instructions := llvm.patches.bindings.find(iid):
+                            for instruction in instructions:
+                                yield (bid, iid, src, instruction[0], instruction[1])
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -86,8 +88,9 @@ class PatchesOfCallsitesListExtractor:
             for bid, instructions in llvm.flows.items():
                 for iid, src in instructions:
                     if isinstance(iid, FlowId) and isinstance(src, Flow):
-                        if instruction := llvm.patches.callsites.find(iid):
-                            yield (bid, iid, src, instruction[0], instruction[1])
+                        if instructions := llvm.patches.callsites.find(iid):
+                            for instruction in instructions:
+                                yield (bid, iid, src, instruction[0], instruction[1])
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -121,8 +124,9 @@ class PatchesOfSnapshotsListExtractor:
             for bid, instructions in llvm.flows.items():
                 for iid, src in instructions:
                     if isinstance(iid, FlowId) and isinstance(src, Flow):
-                        if instruction := llvm.patches.snapshots.find(iid):
-                            yield (bid, iid, src, instruction[0], instruction[1])
+                        if instructions := llvm.patches.snapshots.find(iid):
+                            for instruction in instructions:
+                                yield (bid, iid, src, instruction[0], instruction[1])
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -156,8 +160,9 @@ class PatchesOfClobbersListExtractor:
             for bid, instructions in llvm.flows.items():
                 for iid, src in instructions:
                     if isinstance(iid, FlowId) and isinstance(src, Flow):
-                        if instruction := llvm.patches.clobbers.find(iid):
-                            yield (bid, iid, src, instruction[0], instruction[1])
+                        if instructions := llvm.patches.clobbers.find(iid):
+                            for instruction in instructions:
+                                yield (bid, iid, src, instruction[0], instruction[1])
 
     @staticmethod
     def headers() -> Dict[str, str]:

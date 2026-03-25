@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Protocol, Set, Tuple, Type
+from typing import Dict, List, Optional, Protocol, Set, Tuple, Type, Union
 
 from i13c.core.dag import GraphNode, Prefix
 from i13c.core.mapping import OneToMany, OneToOne
@@ -98,7 +98,7 @@ class Context:
     blocks: OneToOne[BlockId, Block]
     forward: OneToMany[BlockId, BlockId]
     instructions: OneToMany[BlockId, BlockInstruction]
-    patching: Dict[str, OneToOne[FlowId, AbstractEntry]]
+    patching: Dict[str, OneToMany[FlowId, AbstractEntry]]
 
 
 def configure_instruction_emission() -> GraphNode:
@@ -125,7 +125,7 @@ def emit_all_instructions(
     blocks: OneToOne[BlockId, Block],
     forward: OneToMany[BlockId, BlockId],
     instructions: OneToMany[BlockId, BlockInstruction],
-    patching: Dict[str, OneToOne[FlowId, AbstractEntry]],
+    patching: Dict[str, OneToMany[FlowId, AbstractEntry]],
 ) -> OneToMany[BlockId, Instruction]:
 
     result: Dict[BlockId, List[Instruction]] = {}
@@ -198,24 +198,32 @@ def emit_instructions(ctx: Context, entry: BlockId) -> List[Instruction]:
 
         # emit all instructions
         for fid, instr in ctx.instructions.get(bid):
+            entries: List[Union[Instruction, Abstracts]] = []
+
             # check if the instruction has been patched
             if isinstance(instr, Flow):
                 for _, mapping in ctx.patching.items():
                     assert isinstance(fid, FlowId)
 
                     # if patched, obtain the patched abstract entry
-                    if mapping.contains(fid):
-                        fid, instr = mapping.get(fid)
+                    if items := mapping.find(fid):
+                        entries.extend(entry for _, entry in items)
                         break
 
+            else:
+                entries.append(instr)
+
             # all flows should be handled by patching
-            assert not isinstance(instr, Flow), f"Unpatched flow {instr} in block {bid}"
+            assert not all(
+                isinstance(instr, Flow) for instr in entries
+            ), f"Unpatched flow {instr} in block {bid}"
 
-            if isinstance(instr, Abstracts):
-                emited.extend(DISPATCH_TABLE[type(instr)](instr))
+            for instr in entries:
+                if isinstance(instr, Abstracts):
+                    emited.extend(DISPATCH_TABLE[type(instr)](instr))
 
-            elif not isinstance(instr, Nop):
-                emited.append(instr)
+                elif not isinstance(instr, Nop):
+                    emited.append(instr)
 
         # determine next block in order
         next = ordered[idx + 1] if idx + 1 < len(ordered) else None

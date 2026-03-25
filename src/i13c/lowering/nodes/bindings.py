@@ -137,8 +137,8 @@ def patch_bindings(
     blocks: OneToMany[FunctionId, BlockId],
     stackframes: OneToOne[FunctionId, StackFrame],
     instructions: OneToMany[BlockId, BlockInstruction],
-) -> OneToOne[FlowId, InstructionEntry]:
-    bindings: Dict[FlowId, InstructionEntry] = {}
+) -> OneToMany[FlowId, InstructionEntry]:
+    bindings: Dict[FlowId, List[InstructionEntry]] = {}
 
     for fid, bids in blocks.items():
         for bid in bids:
@@ -155,15 +155,19 @@ def patch_bindings(
                     offset = stackframe.slot_at_register(instr.src)
 
                     if offset is None:
-                        bindings[iid] = (InstructionId(value=generator.next()), Nop())
+                        bindings[iid] = [(InstructionId(value=generator.next()), Nop())]
 
                     else:
                         # append new patched binding
-                        bindings[iid] = (
-                            InstructionId(value=generator.next()),
-                            MovRegOff(
-                                dst=instr.dst, src=name_to_reg("rsp"), off=offset * 8
-                            ),
-                        )
+                        bindings[iid] = [
+                            (
+                                InstructionId(value=generator.next()),
+                                MovRegOff(
+                                    dst=instr.dst,
+                                    src=name_to_reg("rsp"),
+                                    off=offset * 8,
+                                ),
+                            )
+                        ]
 
-    return OneToOne[FlowId, InstructionEntry].instance(bindings)
+    return OneToMany[FlowId, InstructionEntry].instance(bindings)

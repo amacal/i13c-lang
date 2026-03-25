@@ -91,8 +91,8 @@ def patch_all_callsites(
     generator: Generator,
     instructions: OneToMany[BlockId, BlockInstruction],
     entries: OneToOne[FunctionId, BlockId],
-) -> OneToOne[FlowId, InstructionEntry]:
-    calls: Dict[FlowId, InstructionEntry] = {}
+) -> OneToMany[FlowId, InstructionEntry]:
+    calls: Dict[FlowId, List[InstructionEntry]] = {}
 
     for batch in instructions.values():
         for fid, flow in batch:
@@ -100,12 +100,14 @@ def patch_all_callsites(
                 # CallFlow is referenced by FlowId
                 assert isinstance(fid, FlowId)
 
-                calls[fid] = (
-                    InstructionId(value=generator.next()),
-                    Call(target=entries.get(flow.target)),
-                )
+                calls[fid] = [
+                    (
+                        InstructionId(value=generator.next()),
+                        Call(target=entries.get(flow.target)),
+                    )
+                ]
 
-    return OneToOne[FlowId, InstructionEntry].instance(calls)
+    return OneToMany[FlowId, InstructionEntry].instance(calls)
 
 
 def configure_clobbers_patching() -> GraphNode:
@@ -127,8 +129,8 @@ def patch_clobbers(
     generator: Generator,
     blocks: OneToMany[FunctionId, BlockId],
     instructions: OneToMany[BlockId, BlockInstruction],
-) -> OneToOne[FlowId, InstructionEntry]:
-    bindings: Dict[FlowId, InstructionEntry] = {}
+) -> OneToMany[FlowId, InstructionEntry]:
+    bindings: Dict[FlowId, List[InstructionEntry]] = {}
 
     for _, bids in blocks.items():
         for bid in bids:
@@ -140,6 +142,6 @@ def patch_clobbers(
                     # ClobbersFlow is referenced by FlowId
                     assert isinstance(iid, FlowId)
 
-                    bindings[iid] = (InstructionId(value=generator.next()), Nop())
+                    bindings[iid] = [(InstructionId(value=generator.next()), Nop())]
 
-    return OneToOne[FlowId, InstructionEntry].instance(bindings)
+    return OneToMany[FlowId, InstructionEntry].instance(bindings)
