@@ -11,6 +11,7 @@ from i13c.lowering.typing.flows import (
     EpilogueFlow,
     FlowId,
     ImmediateFlow,
+    MoveFlow,
     PrologueFlow,
     SnapshotFlow,
 )
@@ -20,6 +21,8 @@ from i13c.lowering.typing.instructions import (
     MovOffImm,
     MovOffReg,
     Nop,
+    PopOff,
+    PushOff,
 )
 from i13c.lowering.typing.registers import VirtualRegister, name_to_reg
 from i13c.lowering.typing.stacks import StackFrame
@@ -288,6 +291,17 @@ def lower_flow_value(
 
         instructions.append((iid, instr))
 
+    if isinstance(resolution.accepted.binding, VariableId):
+        variable = ctx.graph.indices.variables_by_parameter.get(node)
+
+        src = ctx.registers.get(resolution.accepted.binding).ref()
+        dst = ctx.registers.get(variable).ref()
+
+        iid = FlowId(value=ctx.generator.next())
+        instr = MoveFlow(src=src, dst=dst)
+
+        instructions.append((iid, instr))
+
     return FlowNodeContext(
         block=Block(origin=node, terminator=terminator),
         instructions=instructions,
@@ -393,7 +407,7 @@ def patch_snapshots(
                         bindings[iid] = [(InstructionId(value=generator.next()), Nop())]
 
                     else:
-                        # append new patched binding
+                        # append new patched immediate
                         bindings[iid] = [
                             (
                                 InstructionId(value=generator.next()),
@@ -404,6 +418,37 @@ def patch_snapshots(
                                 ),
                             ),
                         ]
+
+                if isinstance(instr, MoveFlow):
+                    # MoveFlow is referenced by FlowId
+                    assert isinstance(iid, FlowId)
+
+                    # find stackframe
+                    stackframe = stackframes.get(fid)
+
+                    # find slot entries for source and destination
+                    dst = stackframe.slot_at_register(instr.dst)
+                    src = stackframe.slot_at_register(instr.src)
+
+                    assert src is not None and dst is not None
+
+                    # append new patched move
+                    bindings[iid] = [
+                        (
+                            InstructionId(value=generator.next()),
+                            PushOff(
+                                src=name_to_reg("rsp"),
+                                off=src * 8,
+                            ),
+                        ),
+                        (
+                            InstructionId(value=generator.next()),
+                            PopOff(
+                                dst=name_to_reg("rsp"),
+                                off=dst * 8,
+                            ),
+                        ),
+                    ]
 
                 if isinstance(instr, SnapshotFlow):
                     # SnapshotFlow is referenced by FlowId

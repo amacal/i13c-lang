@@ -67,6 +67,30 @@ class MovRegOff:
 
 
 @dataclass(kw_only=True)
+class PushOff:
+    src: int
+    off: int
+
+    def native(self) -> str:
+        src = reg_to_name(self.src)
+        sign = "+" if self.off >= 0 else "-"
+
+        return f"push [{src} {sign} {abs(self.off):#010x}]"
+
+
+@dataclass(kw_only=True)
+class PopOff:
+    dst: int
+    off: int
+
+    def native(self) -> str:
+        dst = reg_to_name(self.dst)
+        sign = "+" if self.off >= 0 else "-"
+
+        return f"pop [{dst} {sign} {abs(self.off):#010x}]"
+
+
+@dataclass(kw_only=True)
 class ShlRegImm:
     dst: int
     imm: int
@@ -144,6 +168,8 @@ Instruction = Union[
     ShlRegImm,
     SubRegImm,
     AddRegImm,
+    PushOff,
+    PopOff,
     SysCall,
     Label,
     Call,

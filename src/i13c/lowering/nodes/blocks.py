@@ -24,6 +24,7 @@ from i13c.lowering.typing.flows import (
     Flow,
     FlowId,
     ImmediateFlow,
+    MoveFlow,
     SnapshotFlow,
 )
 from i13c.lowering.typing.instructions import (
@@ -442,7 +443,11 @@ def find_defined_and_used_registers_for_instructions(
 
     for _, batch in instructions.items():
         for iid, instr in batch:
-            if isinstance(instr, SnapshotFlow) or isinstance(instr, ImmediateFlow):
+            if (
+                isinstance(instr, SnapshotFlow)
+                or isinstance(instr, ImmediateFlow)
+                or isinstance(instr, MoveFlow)
+            ):
                 defined[iid] = Registers(items={instr.dst})
             else:
                 defined[iid] = Registers.empty()

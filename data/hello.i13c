@@ -1,4 +1,4 @@
-asm exit(code@rdi: u8[0x00..0x0f]) noreturn clobbers rcx, r11, rax {
+asm exit(code@rdi: u8) noreturn clobbers rcx, r11, rax {
     mov rax, 0x3c;
     syscall;
 }
@@ -9,16 +9,16 @@ asm close(fd@rdi: u8[0x00..0xff]) clobbers rcx, r11, rax {
 }
 
 fn close_std(fd: u8[0x00..0x02]) {
-  val x: u8 = 0x01;
-  val y: u8 = fd;
-
-  close(x);
+  close(fd);
 }
 
 fn foo(fd1: u8[0x00..0x02], fd2: u8[0x00..0x02], code: u8[0x00..0x0f]) noreturn {
+  val result: u8 = code;
+
   close_std(fd1);
   close_std(fd2);
-  exit(code);
+
+  exit(result);
 }
 
 fn main() noreturn {

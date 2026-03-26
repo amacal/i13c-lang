@@ -64,24 +64,21 @@ class EpilogueFlow:
 
 
 @dataclass(kw_only=True)
-class PreserveFlow:
-    def native(self) -> str:
-        return "preserve"
-
-
-@dataclass(kw_only=True)
-class RestoreFlow:
-    def native(self) -> str:
-        return "restore"
-
-
-@dataclass(kw_only=True)
 class ImmediateFlow:
     imm: int
     dst: int
 
     def native(self) -> str:
         return f"immediate {reg_to_name(self.dst)}, {self.imm:#010x}"
+
+
+@dataclass(kw_only=True)
+class MoveFlow:
+    src: int
+    dst: int
+
+    def native(self) -> str:
+        return f"move {reg_to_name(self.dst)}, {reg_to_name(self.src)}"
 
 
 Flow = Union[
@@ -92,6 +89,7 @@ Flow = Union[
     EpilogueFlow,
     SnapshotFlow,
     ImmediateFlow,
+    MoveFlow,
 ]
 
 
