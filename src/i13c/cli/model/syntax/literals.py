@@ -1,8 +1,8 @@
 from typing import Dict, Iterable, Tuple
 
-from i13c.ast import IntegerLiteral, Literal
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.syntax import NodeId
+from i13c.syntax.tree import IntegerLiteral, Literal
 
 
 class LiteralListExtractor:

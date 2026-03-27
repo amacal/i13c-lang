@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from i13c.semantic.core import Identifier
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 
 @dataclass(kw_only=True, frozen=True)

@@ -12,7 +12,7 @@ from i13c.semantic.typing.resolutions.callsites import (
     CallSiteBinding,
     CallSiteResolution,
 )
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 
 def configure_instance_by_callsite() -> GraphNode:

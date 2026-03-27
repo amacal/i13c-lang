@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Protocol, Union
 
-from i13c import src
+from i13c.syntax.source import Span
 
 
 class Visitor(Protocol):
@@ -30,19 +30,19 @@ class Range:
 
 @dataclass(kw_only=True, eq=False)
 class Register:
-    ref: src.Span
+    ref: Span
     name: bytes
 
 
 @dataclass(kw_only=True, eq=False)
 class Immediate:
-    ref: src.Span
+    ref: Span
     value: int
 
 
 @dataclass(kw_only=True, eq=False)
 class Reference:
-    ref: src.Span
+    ref: Span
     name: bytes
 
 
@@ -51,13 +51,13 @@ Operand = Union[Register, Immediate, Reference]
 
 @dataclass(kw_only=True, eq=False)
 class IntegerLiteral:
-    ref: src.Span
+    ref: Span
     value: int
 
 
 @dataclass(kw_only=True, eq=False)
 class Expression:
-    ref: src.Span
+    ref: Span
     name: bytes
 
 
@@ -72,7 +72,7 @@ class Mnemonic:
 
 @dataclass(kw_only=True, eq=False)
 class Instruction:
-    ref: src.Span
+    ref: Span
     mnemonic: Mnemonic
     operands: List[Operand]
 
@@ -86,7 +86,7 @@ class Instruction:
 
 @dataclass(kw_only=True, eq=False)
 class CallStatement:
-    ref: src.Span
+    ref: Span
     name: bytes
     arguments: List[Argument]
 
@@ -106,7 +106,7 @@ ValueExpression = Union[Literal, Expression]
 
 @dataclass(kw_only=True, eq=False)
 class ValueStatement:
-    ref: src.Span
+    ref: Span
     name: bytes
     type: Type
     expr: ValueExpression
@@ -143,7 +143,7 @@ class Slot:
 
 @dataclass(kw_only=True, eq=False)
 class Parameter:
-    ref: src.Span
+    ref: Span
     name: bytes
     type: Type
 
@@ -153,7 +153,7 @@ class Parameter:
 
 @dataclass(kw_only=True, eq=False)
 class Snippet:
-    ref: src.Span
+    ref: Span
     name: bytes
     noreturn: bool
     slots: List[Slot]
@@ -169,7 +169,7 @@ class Snippet:
 
 @dataclass(kw_only=True, eq=False)
 class Function:
-    ref: src.Span
+    ref: Span
     name: bytes
     noreturn: bool
     parameters: List[Parameter]

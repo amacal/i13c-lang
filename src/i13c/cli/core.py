@@ -5,7 +5,8 @@ from typing import Any, Iterable, List, NoReturn
 
 import click
 
-from i13c import diag, res, src
+from i13c import diag, res
+from i13c.syntax.source import SourceCode
 
 
 class BytesAsTextEncoder(json.JSONEncoder):
@@ -17,7 +18,7 @@ class BytesAsTextEncoder(json.JSONEncoder):
 
 
 def emit_and_exit(
-    diagnostics: Iterable[diag.Diagnostic], /, source: src.SourceCode
+    diagnostics: Iterable[diag.Diagnostic], /, source: SourceCode
 ) -> NoReturn:
     for diagnostic in diagnostics:
         click.echo(
@@ -33,6 +34,6 @@ def emit_and_exit(
 
 
 def unwrap(
-    result: res.Result[res.A, List[diag.Diagnostic]], /, source: src.SourceCode
+    result: res.Result[res.A, List[diag.Diagnostic]], /, source: SourceCode
 ) -> res.A:
     return res.unwrap(result, partial(emit_and_exit, source=source))

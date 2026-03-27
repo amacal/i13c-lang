@@ -1,6 +1,8 @@
 from typing import List, Set, Union
 
-from i13c import diag, lex, src
+from i13c import diag
+from i13c.syntax.lexing import TOKEN_NAMES
+from i13c.syntax.source import Span, SpanLike
 
 ERROR_1000 = "E1000"  # Unrecognized token
 ERROR_1001 = "E1001"  # Unexpected end of file
@@ -30,7 +32,7 @@ ERROR_4000 = "E4000"  # Unsupported mnemonic
 
 def report_e1000_unrecognized_token(offset: int) -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=src.Span(offset=offset, length=1),
+        ref=Span(offset=offset, length=1),
         code=ERROR_1000,
         message="Unrecognized token",
     )
@@ -38,7 +40,7 @@ def report_e1000_unrecognized_token(offset: int) -> diag.Diagnostic:
 
 def report_e1001_unexpected_end_of_file(offset: int) -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=src.Span(offset=offset, length=1),
+        ref=Span(offset=offset, length=1),
         code=ERROR_1001,
         message="Unexpected end of file",
     )
@@ -48,7 +50,7 @@ def report_e1002_unexpected_value(offset: int, expected: bytes) -> diag.Diagnost
     characters = [repr(chr(character)) for character in sorted(expected)]
 
     return diag.Diagnostic(
-        ref=src.Span(offset=offset, length=1),
+        ref=Span(offset=offset, length=1),
         code=ERROR_1002,
         message=f"Unexpected value at offset {offset}, expected one of: {characters}",
     )
@@ -56,7 +58,7 @@ def report_e1002_unexpected_value(offset: int, expected: bytes) -> diag.Diagnost
 
 def report_e1003_too_large_hex(offset: int, length: int) -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=src.Span(offset=offset, length=length),
+        ref=Span(offset=offset, length=length),
         code=ERROR_1003,
         message=f"Hexadecimal literal too large at offset {offset}",
     )
@@ -64,17 +66,17 @@ def report_e1003_too_large_hex(offset: int, length: int) -> diag.Diagnostic:
 
 def report_e2000_unexpected_end_of_tokens(offset: int) -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=src.Span(offset=offset, length=0),
+        ref=Span(offset=offset, length=0),
         code=ERROR_2000,
         message=f"Unexpected end of tokens at offset {offset}",
     )
 
 
 def report_e2001_unexpected_token(
-    ref: src.SpanLike, expected: List[int], found: int
+    ref: SpanLike, expected: List[int], found: int
 ) -> diag.Diagnostic:
-    found_name = lex.TOKEN_NAMES[found]
-    expected_names = [lex.TOKEN_NAMES[token] for token in expected]
+    found_name = TOKEN_NAMES[found]
+    expected_names = [TOKEN_NAMES[token] for token in expected]
 
     return diag.Diagnostic(
         ref=ref,
@@ -84,7 +86,7 @@ def report_e2001_unexpected_token(
 
 
 def report_e2002_unexpected_keyword(
-    ref: src.SpanLike, expected: Union[List[bytes], Set[bytes]], found: bytes
+    ref: SpanLike, expected: Union[List[bytes], Set[bytes]], found: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -94,7 +96,7 @@ def report_e2002_unexpected_keyword(
 
 
 def report_e2003_flag_already_specified(
-    ref: src.SpanLike, flag: bytes
+    ref: SpanLike, flag: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -103,7 +105,7 @@ def report_e2003_flag_already_specified(
     )
 
 
-def report_e3000_unknown_instruction(ref: src.SpanLike) -> diag.Diagnostic:
+def report_e3000_unknown_instruction(ref: SpanLike) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
         code=ERROR_3000,
@@ -112,7 +114,7 @@ def report_e3000_unknown_instruction(ref: src.SpanLike) -> diag.Diagnostic:
 
 
 def report_e3001_invalid_type_ranges(
-    ref: src.SpanLike, lower: int, upper: int
+    ref: SpanLike, lower: int, upper: int
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -122,7 +124,7 @@ def report_e3001_invalid_type_ranges(
 
 
 def report_e3002_invalid_operand_types(
-    ref: src.SpanLike, found: List[str]
+    ref: SpanLike, found: List[str]
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -132,7 +134,7 @@ def report_e3002_invalid_operand_types(
 
 
 def report_e3003_duplicated_slot_bindings(
-    ref: src.SpanLike, found: bytes
+    ref: SpanLike, found: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -142,7 +144,7 @@ def report_e3003_duplicated_slot_bindings(
 
 
 def report_e3004_duplicated_parameter_names(
-    ref: src.SpanLike, found: bytes
+    ref: SpanLike, found: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -152,7 +154,7 @@ def report_e3004_duplicated_parameter_names(
 
 
 def report_e3005_duplicated_snippet_clobbers(
-    ref: src.SpanLike, found: bytes
+    ref: SpanLike, found: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -162,7 +164,7 @@ def report_e3005_duplicated_snippet_clobbers(
 
 
 def report_e3006_duplicated_function_names(
-    ref: src.SpanLike, found: bytes
+    ref: SpanLike, found: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -172,7 +174,7 @@ def report_e3006_duplicated_function_names(
 
 
 def report_e3007_no_matching_overload(
-    ref: src.SpanLike, name: bytes, candidates: List[str]
+    ref: SpanLike, name: bytes, candidates: List[str]
 ) -> diag.Diagnostic:
     template = (
         "Called symbol '{name}' has no matching overload.\n"
@@ -192,7 +194,7 @@ def report_e3007_no_matching_overload(
 
 
 def report_e3008_called_symbol_missing(
-    ref: src.SpanLike, name: bytes
+    ref: SpanLike, name: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -202,7 +204,7 @@ def report_e3008_called_symbol_missing(
 
 
 def report_e3010_function_has_wrong_terminality(
-    ref: src.SpanLike, name: bytes
+    ref: SpanLike, name: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,
@@ -213,7 +215,7 @@ def report_e3010_function_has_wrong_terminality(
 
 def report_e3011_missing_entrypoint_function() -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=src.Span(offset=0, length=0),
+        ref=Span(offset=0, length=0),
         code=ERROR_3011,
         message="Missing entrypoint function or snippet named 'main'",
     )
@@ -221,14 +223,14 @@ def report_e3011_missing_entrypoint_function() -> diag.Diagnostic:
 
 def report_e3012_multiple_entrypoint_functions() -> diag.Diagnostic:
     return diag.Diagnostic(
-        ref=src.Span(offset=0, length=0),
+        ref=Span(offset=0, length=0),
         code=ERROR_3012,
         message="Multiple entrypoint codeblocks found",
     )
 
 
 def report_e4000_unsupported_mnemonic(
-    ref: src.SpanLike, name: bytes
+    ref: SpanLike, name: bytes
 ) -> diag.Diagnostic:
     return diag.Diagnostic(
         ref=ref,

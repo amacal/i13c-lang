@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 
 from i13c.semantic.core import Type, Width
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 LiteralKind = Kind[b"hex"]
 

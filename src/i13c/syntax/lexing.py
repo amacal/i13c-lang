@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
-from i13c import diag, err, res, src
+from i13c import diag, err, res
+from i13c.syntax.source import SourceCode
 
 # - tabulators and other whitespace characters are
 #   on purpose excluded to enforce only spaces and newlines
@@ -28,24 +29,27 @@ CLASS_LETTER = b"abcdefghijklmnopqrstuvwxyz"
 CLASS_ALPHANUM = b"abcdefghijklmnopqrstuvwxyz0123456789"
 CLASS_HEX = b"0123456789abcdef"
 
-TOKEN_SEMICOLON = 1
-TOKEN_COMMA = 2
-TOKEN_HEX = 3
-TOKEN_IDENT = 4
-TOKEN_REG = 5
-TOKEN_RANGE = 6
-TOKEN_KEYWORD = 7
-TOKEN_ROUND_OPEN = 8
-TOKEN_ROUND_CLOSE = 9
-TOKEN_CURLY_OPEN = 10
-TOKEN_CURLY_CLOSE = 11
-TOKEN_AT = 12
-TOKEN_COLON = 13
-TOKEN_TYPE = 14
-TOKEN_SQUARE_OPEN = 15
-TOKEN_SQUARE_CLOSE = 16
-TOKEN_EQUALS = 17
-TOKEN_EOF = 255
+
+class Tokens:
+    SEMICOLON = 1
+    COMMA = 2
+    HEX = 3
+    IDENT = 4
+    REG = 5
+    RANGE = 6
+    KEYWORD = 7
+    ROUND_OPEN = 8
+    ROUND_CLOSE = 9
+    CURLY_OPEN = 10
+    CURLY_CLOSE = 11
+    AT = 12
+    COLON = 13
+    TYPE = 14
+    SQUARE_OPEN = 15
+    SQUARE_CLOSE = 16
+    EQUALS = 17
+    EOF = 255
+
 
 # fmt: off
 SEPARATORS = (
@@ -71,24 +75,24 @@ SET_KEYWORDS = {
 }
 
 TOKEN_NAMES: Dict[int, str] = {
-    TOKEN_SEMICOLON: "semicolon",
-    TOKEN_COMMA: "comma",
-    TOKEN_HEX: "hex",
-    TOKEN_IDENT: "identifier",
-    TOKEN_REG: "register",
-    TOKEN_RANGE: "range",
-    TOKEN_KEYWORD: "keyword",
-    TOKEN_ROUND_OPEN: "round-open",
-    TOKEN_ROUND_CLOSE: "round-close",
-    TOKEN_CURLY_OPEN: "curly-open",
-    TOKEN_CURLY_CLOSE: "curly-close",
-    TOKEN_AT: "at",
-    TOKEN_COLON: "colon",
-    TOKEN_TYPE: "type",
-    TOKEN_EQUALS: "equals",
-    TOKEN_SQUARE_OPEN: "square-open",
-    TOKEN_SQUARE_CLOSE: "square-close",
-    TOKEN_EOF: "end-of-file",
+    Tokens.SEMICOLON: "semicolon",
+    Tokens.COMMA: "comma",
+    Tokens.HEX: "hex",
+    Tokens.IDENT: "identifier",
+    Tokens.REG: "register",
+    Tokens.RANGE: "range",
+    Tokens.KEYWORD: "keyword",
+    Tokens.ROUND_OPEN: "round-open",
+    Tokens.ROUND_CLOSE: "round-close",
+    Tokens.CURLY_OPEN: "curly-open",
+    Tokens.CURLY_CLOSE: "curly-close",
+    Tokens.AT: "at",
+    Tokens.COLON: "colon",
+    Tokens.TYPE: "type",
+    Tokens.EQUALS: "equals",
+    Tokens.SQUARE_OPEN: "square-open",
+    Tokens.SQUARE_CLOSE: "square-close",
+    Tokens.EOF: "end-of-file",
 }
 # fmt: on
 
@@ -112,7 +116,7 @@ class UnexpectedEndOfFile(Exception):
 
 @dataclass(kw_only=True)
 class Lexer:
-    code: src.SourceCode
+    code: SourceCode
     offset: int
 
     def is_eof(self) -> bool:
@@ -152,78 +156,78 @@ class Token:
 
     @staticmethod
     def semicolon_token(offset: int) -> Token:
-        return Token(code=TOKEN_SEMICOLON, offset=offset, length=1)
+        return Token(code=Tokens.SEMICOLON, offset=offset, length=1)
 
     @staticmethod
     def comma_token(offset: int) -> Token:
-        return Token(code=TOKEN_COMMA, offset=offset, length=1)
+        return Token(code=Tokens.COMMA, offset=offset, length=1)
 
     @staticmethod
     def eof_token(offset: int) -> Token:
-        return Token(code=TOKEN_EOF, offset=offset, length=0)
+        return Token(code=Tokens.EOF, offset=offset, length=0)
 
     @staticmethod
     def hex_token(offset: int, length: int) -> Token:
-        return Token(code=TOKEN_HEX, offset=offset, length=length)
+        return Token(code=Tokens.HEX, offset=offset, length=length)
 
     @staticmethod
     def ident_token(offset: int, length: int) -> Token:
-        return Token(code=TOKEN_IDENT, offset=offset, length=length)
+        return Token(code=Tokens.IDENT, offset=offset, length=length)
 
     @staticmethod
     def reg_token(offset: int, length: int) -> Token:
-        return Token(code=TOKEN_REG, offset=offset, length=length)
+        return Token(code=Tokens.REG, offset=offset, length=length)
 
     @staticmethod
     def range_token(offset: int, length: int) -> Token:
-        return Token(code=TOKEN_RANGE, offset=offset, length=length)
+        return Token(code=Tokens.RANGE, offset=offset, length=length)
 
     @staticmethod
     def keyword_token(offset: int, length: int) -> Token:
-        return Token(code=TOKEN_KEYWORD, offset=offset, length=length)
+        return Token(code=Tokens.KEYWORD, offset=offset, length=length)
 
     @staticmethod
     def type_token(offset: int, length: int) -> Token:
-        return Token(code=TOKEN_TYPE, offset=offset, length=length)
+        return Token(code=Tokens.TYPE, offset=offset, length=length)
 
     @staticmethod
     def round_open_token(offset: int) -> Token:
-        return Token(code=TOKEN_ROUND_OPEN, offset=offset, length=1)
+        return Token(code=Tokens.ROUND_OPEN, offset=offset, length=1)
 
     @staticmethod
     def round_close_token(offset: int) -> Token:
-        return Token(code=TOKEN_ROUND_CLOSE, offset=offset, length=1)
+        return Token(code=Tokens.ROUND_CLOSE, offset=offset, length=1)
 
     @staticmethod
     def curly_open_token(offset: int) -> Token:
-        return Token(code=TOKEN_CURLY_OPEN, offset=offset, length=1)
+        return Token(code=Tokens.CURLY_OPEN, offset=offset, length=1)
 
     @staticmethod
     def curly_close_token(offset: int) -> Token:
-        return Token(code=TOKEN_CURLY_CLOSE, offset=offset, length=1)
+        return Token(code=Tokens.CURLY_CLOSE, offset=offset, length=1)
 
     @staticmethod
     def square_open_token(offset: int) -> Token:
-        return Token(code=TOKEN_SQUARE_OPEN, offset=offset, length=1)
+        return Token(code=Tokens.SQUARE_OPEN, offset=offset, length=1)
 
     @staticmethod
     def square_close_token(offset: int) -> Token:
-        return Token(code=TOKEN_SQUARE_CLOSE, offset=offset, length=1)
+        return Token(code=Tokens.SQUARE_CLOSE, offset=offset, length=1)
 
     @staticmethod
     def at_token(offset: int) -> Token:
-        return Token(code=TOKEN_AT, offset=offset, length=1)
+        return Token(code=Tokens.AT, offset=offset, length=1)
 
     @staticmethod
     def colon_token(offset: int) -> Token:
-        return Token(code=TOKEN_COLON, offset=offset, length=1)
+        return Token(code=Tokens.COLON, offset=offset, length=1)
 
     @staticmethod
     def equals_token(offset: int) -> Token:
-        return Token(code=TOKEN_EQUALS, offset=offset, length=1)
+        return Token(code=Tokens.EQUALS, offset=offset, length=1)
 
 
-def tokenize(code: src.SourceCode) -> res.Result[List[Token], List[diag.Diagnostic]]:
+def tokenize(code: SourceCode) -> res.Result[List[Token], List[diag.Diagnostic]]:
     tokens: List[Token] = []
     diagnostics: List[diag.Diagnostic] = []
     lexer = Lexer(code=code, offset=0)

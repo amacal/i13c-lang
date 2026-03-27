@@ -5,7 +5,7 @@ from i13c.semantic.core import Identifier
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.values import ValueId
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 Statement = Union[CallSiteId, ValueId]
 

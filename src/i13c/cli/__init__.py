@@ -4,11 +4,14 @@ from dataclasses import asdict
 
 import click
 
-from i13c import elf, lex, par, src
+from i13c import elf
 from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap
 from i13c.cli.model import attach
 from i13c.encoding import encode
 from i13c.graph.nodes import run as run_graph
+from i13c.syntax.lexing import TOKEN_NAMES, tokenize
+from i13c.syntax.parsing import parse
+from i13c.syntax.source import open_text
 
 
 @click.group()
@@ -22,12 +25,12 @@ def lex_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code), source=code)
+    code = open_text(text)
+    tokens = unwrap(tokenize(code), source=code)
 
     for token in tokens:
         key = f"{token.code:03}:{token.offset:04}:{token.length:02}"
-        name = f"{lex.TOKEN_NAMES[token.code]:<15}"
+        name = f"{TOKEN_NAMES[token.code]:<15}"
         value = code.extract(token)
 
         click.echo(f"{key}:{name} -> {value!r}")
@@ -39,9 +42,9 @@ def ast_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code), source=code)
-    program = unwrap(par.parse(code, tokens), source=code)
+    code = open_text(text)
+    tokens = unwrap(tokenize(code), source=code)
+    program = unwrap(parse(code, tokens), source=code)
 
     click.echo(json.dumps(asdict(program), cls=BytesAsTextEncoder))
 
@@ -52,10 +55,10 @@ def elf_command(path: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code), source=code)
+    code = open_text(text)
+    tokens = unwrap(tokenize(code), source=code)
 
-    program = unwrap(par.parse(code, tokens), source=code)
+    program = unwrap(parse(code, tokens), source=code)
     artifacts = run_graph(program)
 
     if artifacts.rules().count() > 0:

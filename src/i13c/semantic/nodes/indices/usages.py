@@ -1,12 +1,12 @@
 from typing import Dict, List, Tuple
 
-from i13c import ast
 from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.core import Identifier
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.indices.usages import Usage, UsageId
+from i13c.syntax import tree
 
 
 def configure_usages_by_expression() -> GraphNode:
@@ -27,10 +27,10 @@ def build_usages_by_expression(
     for _, statement in graph.statements.items():
 
         # for callsites we need to handle arguments
-        if isinstance(statement, ast.CallStatement):
+        if isinstance(statement, tree.CallStatement):
             for argument in statement.arguments:
                 # not expression must be literals
-                if not isinstance(argument, ast.Expression):
+                if not isinstance(argument, tree.Expression):
                     continue
 
                 # derive parameter ID from globally unique node ID
@@ -47,9 +47,9 @@ def build_usages_by_expression(
                     ident=Identifier(name=argument.name),
                 )
 
-        if isinstance(statement, ast.ValueStatement):
+        if isinstance(statement, tree.ValueStatement):
             # not expression must be literals
-            if not isinstance(statement.expr, ast.Expression):
+            if not isinstance(statement.expr, tree.Expression):
                 continue
 
             # derive parameter ID from globally unique node ID

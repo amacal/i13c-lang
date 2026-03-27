@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-from i13c import ast
 from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Identifier
@@ -9,6 +8,7 @@ from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import Function, FunctionId, Statement
 from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.values import ValueId
+from i13c.syntax import tree
 
 
 def configure_functions() -> GraphNode:
@@ -37,9 +37,9 @@ def build_functions(
             sid = graph.statements.get_by_node(statement)
 
             match statement:
-                case ast.CallStatement():
+                case tree.CallStatement():
                     statements.append(CallSiteId(value=sid.value))
-                case ast.ValueStatement():
+                case tree.ValueStatement():
                     statements.append(ValueId(value=sid.value))
 
         # derive function ID from globally unique node ID

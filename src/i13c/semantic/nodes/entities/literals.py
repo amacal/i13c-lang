@@ -1,11 +1,11 @@
 from typing import Dict
 
-from i13c import ast
 from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import derive_width
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
+from i13c.syntax import tree
 
 
 def configure_literals() -> GraphNode:
@@ -23,7 +23,7 @@ def build_literals(
     literals: Dict[LiteralId, Literal] = {}
 
     for nid, literal in graph.literals.items():
-        assert isinstance(literal, ast.IntegerLiteral)
+        assert isinstance(literal, tree.IntegerLiteral)
 
         # derive literal ID from globally unique node ID
         literal_id = LiteralId(value=nid.value)

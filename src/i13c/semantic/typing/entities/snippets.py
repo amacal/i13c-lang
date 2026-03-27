@@ -4,7 +4,7 @@ from typing import List
 from i13c.semantic.core import Identifier, Type
 from i13c.semantic.typing.entities.instructions import Binding, InstructionId
 from i13c.semantic.typing.entities.operands import Register
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 
 @dataclass(kw_only=True, frozen=True)

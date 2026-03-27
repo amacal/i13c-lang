@@ -6,7 +6,7 @@ from typing import Union
 from i13c.semantic.core import Identifier
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 ArgumentKind = Kind[b"literal", b"expression"]
 ArgumentTarget = Union[LiteralId, ExpressionId]

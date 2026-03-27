@@ -9,7 +9,6 @@ from typing import (
 
 import click
 
-from i13c import lex, par, src
 from i13c.cli import unwrap
 from i13c.cli.model.abstract import AbstractListExtractor, ListItem
 from i13c.cli.model.entities import ENTITIES
@@ -21,6 +20,9 @@ from i13c.cli.model.syntax import SYNTAX
 from i13c.core.table import Table, draw_table
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.graph.nodes import run as run_graph
+from i13c.syntax.lexing import tokenize
+from i13c.syntax.parsing import parse
+from i13c.syntax.source import open_text
 
 
 def draw_list(
@@ -59,9 +61,9 @@ def load_artifacts(path: str) -> GraphArtifacts:
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    code = src.open_text(text)
-    tokens = unwrap(lex.tokenize(code), source=code)
-    program = unwrap(par.parse(code, tokens), source=code)
+    code = open_text(text)
+    tokens = unwrap(tokenize(code), source=code)
+    program = unwrap(parse(code, tokens), source=code)
     artifacts = run_graph(program)
 
     return artifacts

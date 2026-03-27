@@ -1,11 +1,15 @@
 from dataclasses import dataclass
 from typing import List, Optional, Set, Tuple, Union
 
-from i13c import ast, diag, err, lex, res, src
+from i13c import diag, err, res
+from i13c.syntax import tree
+from i13c.syntax.lexing import Token as LexingToken
+from i13c.syntax.lexing import Tokens
+from i13c.syntax.source import SourceCode, Span
 
 
 class UnexpectedTokenCode(Exception):
-    def __init__(self, token: lex.Token, expected: List[int], found: int) -> None:
+    def __init__(self, token: LexingToken, expected: List[int], found: int) -> None:
         self.token = token
         self.expected = expected
         self.found = found
@@ -18,7 +22,7 @@ class UnexpectedEndOfTokens(Exception):
 
 class UnexpectedKeyword(Exception):
     def __init__(
-        self, token: lex.Token, expected: Union[List[bytes], Set[bytes]], found: bytes
+        self, token: LexingToken, expected: Union[List[bytes], Set[bytes]], found: bytes
     ) -> None:
         self.token = token
         self.expected = expected
@@ -26,31 +30,31 @@ class UnexpectedKeyword(Exception):
 
 
 class FlagAlreadySpecified(Exception):
-    def __init__(self, token: lex.Token, flag: bytes) -> None:
+    def __init__(self, token: LexingToken, flag: bytes) -> None:
         self.token = token
         self.flag = flag
 
 
 @dataclass(kw_only=True)
 class ParsingState:
-    code: src.SourceCode
-    tokens: List[lex.Token]
+    code: SourceCode
+    tokens: List[LexingToken]
     position: int
 
     def is_eof(self) -> bool:
-        return self.tokens[self.position].code == lex.TOKEN_EOF
+        return self.tokens[self.position].code == Tokens.EOF
 
     def is_in(self, *codes: int) -> bool:
         return self.tokens[self.position].code in codes
 
-    def span(self, token: lex.Token) -> src.Span:
-        return src.Span(
+    def span(self, token: LexingToken) -> Span:
+        return Span(
             offset=token.offset,
             length=token.length,
         )
 
-    def between(self, left: lex.Token, right: lex.Token) -> src.Span:
-        return src.Span(
+    def between(self, left: LexingToken, right: LexingToken) -> Span:
+        return Span(
             offset=left.offset,
             length=right.offset + right.length - left.offset,
         )
@@ -63,7 +67,7 @@ class ParsingState:
         else:
             return False
 
-    def expect(self, *codes: int) -> lex.Token:
+    def expect(self, *codes: int) -> LexingToken:
         if self.is_eof():
             raise UnexpectedEndOfTokens(self.tokens[self.position].offset)
 
@@ -83,25 +87,25 @@ class ParsingState:
     def advance(self) -> None:
         self.position += 1
 
-    def extract(self, token: lex.Token) -> bytes:
+    def extract(self, token: LexingToken) -> bytes:
         return self.code.extract(token)
 
 
 def parse(
-    code: src.SourceCode, tokens: List[lex.Token]
-) -> res.Result[ast.Program, List[diag.Diagnostic]]:
+    code: SourceCode, tokens: List[LexingToken]
+) -> res.Result[tree.Program, List[diag.Diagnostic]]:
     state = ParsingState(code=code, tokens=tokens, position=0)
     diagnostics: List[diag.Diagnostic] = []
 
-    snippets: List[ast.Snippet] = []
-    functions: List[ast.Function] = []
+    snippets: List[tree.Snippet] = []
+    functions: List[tree.Function] = []
 
     try:
         while not state.is_eof():
             match parse_entity(state):
-                case ast.Snippet() as snippet:
+                case tree.Snippet() as snippet:
                     snippets.append(snippet)
-                case ast.Function() as function:
+                case tree.Function() as function:
                     functions.append(function)
 
     except UnexpectedEndOfTokens as e:
@@ -125,16 +129,16 @@ def parse(
         return res.Err(diagnostics)
 
     return res.Ok(
-        ast.Program(
+        tree.Program(
             functions=functions,
             snippets=snippets,
         )
     )
 
 
-def parse_entity(state: ParsingState) -> Union[ast.Snippet, ast.Function]:
+def parse_entity(state: ParsingState) -> Union[tree.Snippet, tree.Function]:
     expected = {b"asm", b"fn"}
-    keyword = state.expect(lex.TOKEN_KEYWORD)
+    keyword = state.expect(Tokens.KEYWORD)
 
     if state.extract(keyword) not in expected:
         raise UnexpectedKeyword(keyword, list(expected), state.extract(keyword))
@@ -146,39 +150,39 @@ def parse_entity(state: ParsingState) -> Union[ast.Snippet, ast.Function]:
         return parse_function(state)
 
 
-def parse_function(state: ParsingState) -> ast.Function:
-    statements: List[ast.Statement] = []
-    parameters: List[ast.Parameter] = []
+def parse_function(state: ParsingState) -> tree.Function:
+    statements: List[tree.Statement] = []
+    parameters: List[tree.Parameter] = []
     noreturn: bool = False
 
     # function name is an identifier
-    name = state.expect(lex.TOKEN_IDENT)
+    name = state.expect(Tokens.IDENT)
 
     # expect opening round bracket
-    state.expect(lex.TOKEN_ROUND_OPEN)
+    state.expect(Tokens.ROUND_OPEN)
 
     # optional function parameters
-    if not state.is_in(lex.TOKEN_ROUND_CLOSE):
+    if not state.is_in(Tokens.ROUND_CLOSE):
         parameters = parse_parameters(state)
 
     # expect closed round bracket
-    end = state.expect(lex.TOKEN_ROUND_CLOSE)
+    end = state.expect(Tokens.ROUND_CLOSE)
 
     # optional flags
-    if not state.is_in(lex.TOKEN_CURLY_OPEN):
+    if not state.is_in(Tokens.CURLY_OPEN):
         noreturn = parse_function_flags(state)
 
     # expect opening curly brace
-    state.expect(lex.TOKEN_CURLY_OPEN)
+    state.expect(Tokens.CURLY_OPEN)
 
     # parse statements until closing curly brace
-    while not state.is_in(lex.TOKEN_CURLY_CLOSE):
+    while not state.is_in(Tokens.CURLY_CLOSE):
         statements.append(parse_statement(state))
 
     # expect closed curly brace
-    state.expect(lex.TOKEN_CURLY_CLOSE)
+    state.expect(Tokens.CURLY_CLOSE)
 
-    return ast.Function(
+    return tree.Function(
         ref=state.between(name, end),
         name=state.extract(name),
         noreturn=noreturn,
@@ -187,40 +191,40 @@ def parse_function(state: ParsingState) -> ast.Function:
     )
 
 
-def parse_snippet(state: ParsingState) -> ast.Snippet:
-    instructions: List[ast.Instruction] = []
-    slots: List[ast.Slot] = []
-    clobbers: List[ast.Register] = []
+def parse_snippet(state: ParsingState) -> tree.Snippet:
+    instructions: List[tree.Instruction] = []
+    slots: List[tree.Slot] = []
+    clobbers: List[tree.Register] = []
     noreturn: bool = False
 
     # snippet name is an identifier
-    name = state.expect(lex.TOKEN_IDENT)
+    name = state.expect(Tokens.IDENT)
 
     # expect opening round bracket
-    state.expect(lex.TOKEN_ROUND_OPEN)
+    state.expect(Tokens.ROUND_OPEN)
 
     # optional snippet parameters
-    if not state.is_in(lex.TOKEN_ROUND_CLOSE):
+    if not state.is_in(Tokens.ROUND_CLOSE):
         slots = parse_slots(state)
 
     # expect closed round bracket
-    end = state.expect(lex.TOKEN_ROUND_CLOSE)
+    end = state.expect(Tokens.ROUND_CLOSE)
 
     # optional flags
-    if not state.is_in(lex.TOKEN_CURLY_OPEN):
+    if not state.is_in(Tokens.CURLY_OPEN):
         clobbers, noreturn = parse_snippet_flags(state)
 
     # expect opening curly brace
-    state.expect(lex.TOKEN_CURLY_OPEN)
+    state.expect(Tokens.CURLY_OPEN)
 
     # parse instructions until closing curly brace
-    while not state.is_in(lex.TOKEN_CURLY_CLOSE):
+    while not state.is_in(Tokens.CURLY_CLOSE):
         instructions.append(parse_instruction(state))
 
     # expect closed curly brace
-    state.expect(lex.TOKEN_CURLY_CLOSE)
+    state.expect(Tokens.CURLY_CLOSE)
 
-    return ast.Snippet(
+    return tree.Snippet(
         ref=state.between(name, end),
         name=state.extract(name),
         noreturn=noreturn,
@@ -230,98 +234,98 @@ def parse_snippet(state: ParsingState) -> ast.Snippet:
     )
 
 
-def parse_parameters(state: ParsingState) -> List[ast.Parameter]:
-    parameters: List[ast.Parameter] = []
+def parse_parameters(state: ParsingState) -> List[tree.Parameter]:
+    parameters: List[tree.Parameter] = []
     parameters.append(parse_parameter(state))
 
     # a comma suggests next parameter
-    while state.accept(lex.TOKEN_COMMA):
+    while state.accept(Tokens.COMMA):
         parameters.append(parse_parameter(state))
 
     return parameters
 
 
-def parse_slots(state: ParsingState) -> List[ast.Slot]:
-    parameters: List[ast.Slot] = []
+def parse_slots(state: ParsingState) -> List[tree.Slot]:
+    parameters: List[tree.Slot] = []
     parameters.append(parse_slot(state))
 
     # a comma suggests next parameter
-    while state.accept(lex.TOKEN_COMMA):
+    while state.accept(Tokens.COMMA):
         parameters.append(parse_slot(state))
 
     return parameters
 
 
-def parse_parameter(state: ParsingState) -> ast.Parameter:
-    range: Optional[ast.Range] = None
-    ident = state.expect(lex.TOKEN_IDENT)
+def parse_parameter(state: ParsingState) -> tree.Parameter:
+    range: Optional[tree.Range] = None
+    ident = state.expect(Tokens.IDENT)
 
     # expect ':' followed by type
-    state.expect(lex.TOKEN_COLON)
-    type = state.expect(lex.TOKEN_TYPE)
+    state.expect(Tokens.COLON)
+    type = state.expect(Tokens.TYPE)
 
-    if state.is_in(lex.TOKEN_SQUARE_OPEN):
+    if state.is_in(Tokens.SQUARE_OPEN):
         range = parse_range(state)
 
-    return ast.Parameter(
+    return tree.Parameter(
         ref=state.span(ident),
         name=state.extract(ident),
-        type=ast.Type(name=state.extract(type), range=range),
+        type=tree.Type(name=state.extract(type), range=range),
     )
 
 
-def parse_slot(state: ParsingState) -> ast.Slot:
-    range: Optional[ast.Range] = None
-    ident = state.expect(lex.TOKEN_IDENT)
+def parse_slot(state: ParsingState) -> tree.Slot:
+    range: Optional[tree.Range] = None
+    ident = state.expect(Tokens.IDENT)
 
     # expect '@' followed by register or immediate
-    state.expect(lex.TOKEN_AT)
-    bind = state.expect(lex.TOKEN_REG, lex.TOKEN_KEYWORD)
+    state.expect(Tokens.AT)
+    bind = state.expect(Tokens.REG, Tokens.KEYWORD)
 
     # if it's a keyword, it has to be "imm"
-    if bind.code == lex.TOKEN_KEYWORD:
+    if bind.code == Tokens.KEYWORD:
         if state.extract(bind) != b"imm":
             raise UnexpectedKeyword(bind, [b"imm"], state.extract(bind))
 
     # expect ':' followed by type
-    state.expect(lex.TOKEN_COLON)
-    type = state.expect(lex.TOKEN_TYPE)
+    state.expect(Tokens.COLON)
+    type = state.expect(Tokens.TYPE)
 
-    if state.is_in(lex.TOKEN_SQUARE_OPEN):
+    if state.is_in(Tokens.SQUARE_OPEN):
         range = parse_range(state)
 
-    return ast.Slot(
+    return tree.Slot(
         name=state.extract(ident),
-        bind=ast.Binding(name=state.extract(bind)),
-        type=ast.Type(name=state.extract(type), range=range),
+        bind=tree.Binding(name=state.extract(bind)),
+        type=tree.Type(name=state.extract(type), range=range),
     )
 
 
-def parse_range(state: ParsingState) -> ast.Range:
+def parse_range(state: ParsingState) -> tree.Range:
     # expect opening square bracket
-    state.expect(lex.TOKEN_SQUARE_OPEN)
-    lower = state.expect(lex.TOKEN_HEX)
+    state.expect(Tokens.SQUARE_OPEN)
+    lower = state.expect(Tokens.HEX)
 
     # expect range operator
-    state.expect(lex.TOKEN_RANGE)
-    upper = state.expect(lex.TOKEN_HEX)
+    state.expect(Tokens.RANGE)
+    upper = state.expect(Tokens.HEX)
 
     # expect closing square bracket
-    state.expect(lex.TOKEN_SQUARE_CLOSE)
+    state.expect(Tokens.SQUARE_CLOSE)
 
-    return ast.Range(
+    return tree.Range(
         lower=int(state.extract(lower), 16),
         upper=int(state.extract(upper), 16),
     )
 
 
 def parse_function_flags(state: ParsingState) -> bool:
-    keyword: Optional[lex.Token] = None
+    keyword: Optional[LexingToken] = None
     terminal = False
 
-    while not state.is_in(lex.TOKEN_CURLY_OPEN):
+    while not state.is_in(Tokens.CURLY_OPEN):
         expected = {b"noreturn"}
-        keyword = state.expect(lex.TOKEN_KEYWORD)
+        keyword = state.expect(Tokens.KEYWORD)
 
         # fail if the keyword is not "noreturn"
         if state.extract(keyword) not in expected:
@@ -337,14 +341,14 @@ def parse_function_flags(state: ParsingState) -> bool:
     return terminal
 
 
-def parse_snippet_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
-    keyword: Optional[lex.Token] = None
-    clobbers: Optional[List[ast.Register]] = None
+def parse_snippet_flags(state: ParsingState) -> Tuple[List[tree.Register], bool]:
+    keyword: Optional[LexingToken] = None
+    clobbers: Optional[List[tree.Register]] = None
     terminal = False
 
-    while not state.is_in(lex.TOKEN_CURLY_OPEN):
+    while not state.is_in(Tokens.CURLY_OPEN):
         expected = {b"clobbers", b"noreturn"}
-        keyword = state.expect(lex.TOKEN_KEYWORD)
+        keyword = state.expect(Tokens.KEYWORD)
 
         # fail if the keyword is not "noreturn"
         if state.extract(keyword) not in expected:
@@ -367,159 +371,159 @@ def parse_snippet_flags(state: ParsingState) -> Tuple[List[ast.Register], bool]:
     return clobbers or [], terminal
 
 
-def parse_clobbers(state: ParsingState) -> List[ast.Register]:
-    clobbers: List[ast.Register] = []
+def parse_clobbers(state: ParsingState) -> List[tree.Register]:
+    clobbers: List[tree.Register] = []
 
     # at least one register is expected
-    clobber = state.expect(lex.TOKEN_REG)
-    clobbers.append(ast.Register(ref=state.span(clobber), name=state.extract(clobber)))
+    clobber = state.expect(Tokens.REG)
+    clobbers.append(tree.Register(ref=state.span(clobber), name=state.extract(clobber)))
 
     # a comma suggests next clobber
-    while state.accept(lex.TOKEN_COMMA):
-        clobber = state.expect(lex.TOKEN_REG)
+    while state.accept(Tokens.COMMA):
+        clobber = state.expect(Tokens.REG)
         clobbers.append(
-            ast.Register(ref=state.span(clobber), name=state.extract(clobber))
+            tree.Register(ref=state.span(clobber), name=state.extract(clobber))
         )
 
     return clobbers
 
 
-def parse_statement(state: ParsingState) -> ast.Statement:
-    token = state.expect(lex.TOKEN_IDENT, lex.TOKEN_KEYWORD)
+def parse_statement(state: ParsingState) -> tree.Statement:
+    token = state.expect(Tokens.IDENT, Tokens.KEYWORD)
 
-    if token.code == lex.TOKEN_IDENT:
+    if token.code == Tokens.IDENT:
         return parse_callsite(state, token)
 
     if state.extract(token) == b"val":
         return parse_value(state)
 
-    raise UnexpectedTokenCode(token, [lex.TOKEN_IDENT, lex.TOKEN_KEYWORD], token.code)
+    raise UnexpectedTokenCode(token, [Tokens.IDENT, Tokens.KEYWORD], token.code)
 
 
-def parse_callsite(state: ParsingState, ident: lex.Token) -> ast.CallStatement:
-    arguments: List[ast.Argument] = []
+def parse_callsite(state: ParsingState, ident: LexingToken) -> tree.CallStatement:
+    arguments: List[tree.Argument] = []
 
     # expect opening round bracket
-    state.expect(lex.TOKEN_ROUND_OPEN)
+    state.expect(Tokens.ROUND_OPEN)
 
     # optional arguments
-    if state.is_in(lex.TOKEN_HEX, lex.TOKEN_IDENT):
+    if state.is_in(Tokens.HEX, Tokens.IDENT):
         arguments = parse_arguments(state)
 
     # expect closed round bracket
-    end = state.expect(lex.TOKEN_ROUND_CLOSE)
+    end = state.expect(Tokens.ROUND_CLOSE)
 
     # expect a semicolon
-    state.expect(lex.TOKEN_SEMICOLON)
+    state.expect(Tokens.SEMICOLON)
 
-    return ast.CallStatement(
+    return tree.CallStatement(
         ref=state.between(ident, end),
         name=state.extract(ident),
         arguments=arguments,
     )
 
 
-def parse_value(state: ParsingState) -> ast.ValueStatement:
-    range: Optional[ast.Range] = None
-    ident = state.expect(lex.TOKEN_IDENT)
+def parse_value(state: ParsingState) -> tree.ValueStatement:
+    range: Optional[tree.Range] = None
+    ident = state.expect(Tokens.IDENT)
 
     # expect ':' followed by type
-    state.expect(lex.TOKEN_COLON)
-    type = state.expect(lex.TOKEN_TYPE)
+    state.expect(Tokens.COLON)
+    type = state.expect(Tokens.TYPE)
 
-    if state.is_in(lex.TOKEN_SQUARE_OPEN):
+    if state.is_in(Tokens.SQUARE_OPEN):
         range = parse_range(state)
 
     # expect '=' followed by limited expression
-    state.expect(lex.TOKEN_EQUALS)
+    state.expect(Tokens.EQUALS)
     expression = parse_value_expression(state)
 
     # expect a semicolon
-    state.expect(lex.TOKEN_SEMICOLON)
+    state.expect(Tokens.SEMICOLON)
 
-    return ast.ValueStatement(
+    return tree.ValueStatement(
         ref=state.span(ident),
         name=state.extract(ident),
-        type=ast.Type(name=state.extract(type), range=range),
+        type=tree.Type(name=state.extract(type), range=range),
         expr=expression,
     )
 
 
-def parse_value_expression(state: ParsingState) -> ast.ValueExpression:
+def parse_value_expression(state: ParsingState) -> tree.ValueExpression:
     return parse_argument(state)
 
 
-def parse_instruction(state: ParsingState) -> ast.Instruction:
-    operands: List[ast.Operand] = []
-    token = state.expect(lex.TOKEN_IDENT)
+def parse_instruction(state: ParsingState) -> tree.Instruction:
+    operands: List[tree.Operand] = []
+    token = state.expect(Tokens.IDENT)
 
     # optional operands
-    if state.is_in(lex.TOKEN_REG, lex.TOKEN_HEX, lex.TOKEN_IDENT):
+    if state.is_in(Tokens.REG, Tokens.HEX, Tokens.IDENT):
         operands = parse_operands(state)
 
     # expect a semicolon
-    end = state.expect(lex.TOKEN_SEMICOLON)
+    end = state.expect(Tokens.SEMICOLON)
 
     # build instruction and token reference
-    mnemonic = ast.Mnemonic(name=state.extract(token))
+    mnemonic = tree.Mnemonic(name=state.extract(token))
 
-    return ast.Instruction(
+    return tree.Instruction(
         ref=state.between(token, end),
         mnemonic=mnemonic,
         operands=operands,
     )
 
 
-def parse_arguments(state: ParsingState) -> List[ast.Argument]:
-    arguments: List[ast.Argument] = []
+def parse_arguments(state: ParsingState) -> List[tree.Argument]:
+    arguments: List[tree.Argument] = []
     arguments.append(parse_argument(state))
 
     # a comma suggests next argument
-    while state.accept(lex.TOKEN_COMMA):
+    while state.accept(Tokens.COMMA):
         arguments.append(parse_argument(state))
 
     return arguments
 
 
-def parse_operands(state: ParsingState) -> List[ast.Operand]:
-    operands: List[ast.Operand] = []
+def parse_operands(state: ParsingState) -> List[tree.Operand]:
+    operands: List[tree.Operand] = []
     operands.append(parse_operand(state))
 
     # a comma suggests next operand
-    while state.accept(lex.TOKEN_COMMA):
+    while state.accept(Tokens.COMMA):
         operands.append(parse_operand(state))
 
     return operands
 
 
-def parse_argument(state: ParsingState) -> ast.Argument:
-    token = state.expect(lex.TOKEN_HEX, lex.TOKEN_IDENT)
+def parse_argument(state: ParsingState) -> tree.Argument:
+    token = state.expect(Tokens.HEX, Tokens.IDENT)
 
     # a hex can be only an integer literal
-    if token.code == lex.TOKEN_HEX:
-        return ast.IntegerLiteral(
+    if token.code == Tokens.HEX:
+        return tree.IntegerLiteral(
             ref=state.span(token),
             value=int(state.extract(token), 16),
         )
 
     # an identifier can be only an expression
-    return ast.Expression(
+    return tree.Expression(
         ref=state.span(token),
         name=state.extract(token),
     )
 
 
-def parse_operand(state: ParsingState) -> ast.Operand:
-    token = state.expect(lex.TOKEN_REG, lex.TOKEN_HEX, lex.TOKEN_IDENT)
+def parse_operand(state: ParsingState) -> tree.Operand:
+    token = state.expect(Tokens.REG, Tokens.HEX, Tokens.IDENT)
 
     # register has to provide its name
-    if token.code == lex.TOKEN_REG:
-        return ast.Register(ref=state.span(token), name=state.extract(token))
+    if token.code == Tokens.REG:
+        return tree.Register(ref=state.span(token), name=state.extract(token))
 
     # immediate has to provide its decimal value
-    elif token.code == lex.TOKEN_HEX:
-        return ast.Immediate(ref=state.span(token), value=int(state.extract(token), 16))
+    elif token.code == Tokens.HEX:
+        return tree.Immediate(ref=state.span(token), value=int(state.extract(token), 16))
 
     # reference has to provide its identifier
     else:
-        return ast.Reference(ref=state.span(token), name=state.extract(token))
+        return tree.Reference(ref=state.span(token), name=state.extract(token))

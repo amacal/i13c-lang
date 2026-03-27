@@ -1,16 +1,16 @@
 from dataclasses import dataclass
 
-from i13c import src
+from i13c.syntax.source import SourceCode, SpanLike
 
 
 @dataclass(kw_only=True)
 class Diagnostic:
-    ref: src.SpanLike
+    ref: SpanLike
     code: str
     message: str
 
 
-def show(source: src.SourceCode, diagnostic: Diagnostic) -> str:
+def show(source: SourceCode, diagnostic: Diagnostic) -> str:
     start = source.data.rfind(b"\n", 0, diagnostic.ref.offset)
     end = source.data.find(b"\n", diagnostic.ref.offset + diagnostic.ref.length)
 

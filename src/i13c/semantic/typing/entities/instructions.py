@@ -3,7 +3,7 @@ from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.operands import OperandId
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 BindingKind = Kind[b"register", b"immediate"]
 

@@ -1,10 +1,10 @@
 from typing import Dict
 
-from i13c import ast
 from i13c.core.dag import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.operands import Operand, OperandId
+from i13c.syntax import tree
 
 
 def configure_operands() -> GraphNode:
@@ -23,11 +23,11 @@ def build_operands(
 
     for nid, operand in graph.operands.items():
         match operand:
-            case ast.Register() as reg:
+            case tree.Register() as reg:
                 target = Operand.register(operand.ref, reg.name)
-            case ast.Immediate() as imm:
+            case tree.Immediate() as imm:
                 target = Operand.immediate(operand.ref, imm.value)
-            case ast.Reference() as ref:
+            case tree.Reference() as ref:
                 target = Operand.reference(operand.ref, ref.name)
 
         # derive operand ID from globally unique node ID

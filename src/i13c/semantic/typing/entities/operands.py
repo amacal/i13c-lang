@@ -3,7 +3,7 @@ from typing import Literal as Kind
 from typing import Union
 
 from i13c.semantic.core import Width, derive_width
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 
 @dataclass(kw_only=True)

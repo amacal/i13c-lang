@@ -4,7 +4,7 @@ from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.values import Value, ValueId
 from i13c.semantic.typing.indices.variables import VariableId, VariableSource
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 
 class ParameterVariablesListExtractor:

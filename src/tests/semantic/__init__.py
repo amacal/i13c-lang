@@ -1,11 +1,11 @@
 from typing import List, Tuple
 
-from i13c.ast import Program
 from i13c.diag import Diagnostic
-from i13c.lex import tokenize
-from i13c.par import parse
 from i13c.res import Err, Ok
-from i13c.src import SourceCode, open_text
+from i13c.syntax.lexing import tokenize
+from i13c.syntax.parsing import parse
+from i13c.syntax.source import SourceCode, open_text
+from i13c.syntax.tree import Program
 
 
 class FixtureException(Exception):

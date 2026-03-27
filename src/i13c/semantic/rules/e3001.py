@@ -7,7 +7,7 @@ from i13c.semantic.core import Type, default_range
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
-from i13c.src import Span
+from i13c.syntax.source import Span
 
 
 def configure_e3001() -> GraphNode:

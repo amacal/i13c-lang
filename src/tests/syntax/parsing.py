@@ -1,13 +1,17 @@
-from i13c import ast, err, lex, par, res, src
+from i13c import err, res
+from i13c.syntax import tree
+from i13c.syntax.lexing import tokenize
+from i13c.syntax.parsing import parse
+from i13c.syntax.source import open_text
 
 
 def can_parse_instruction_without_operands():
-    code = src.open_text("asm main() { syscall; }")
+    code = open_text("asm main() { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -24,12 +28,12 @@ def can_parse_instruction_without_operands():
 
 
 def can_parse_instruction_with_operands():
-    code = src.open_text("asm main() { mov rax, rbx; }")
+    code = open_text("asm main() { mov rax, rbx; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -45,21 +49,21 @@ def can_parse_instruction_with_operands():
     assert len(instruction.operands) == 2
 
     operand1 = instruction.operands[0]
-    assert isinstance(operand1, ast.Register)
+    assert isinstance(operand1, tree.Register)
     assert operand1.name == b"rax"
 
     operand2 = instruction.operands[1]
-    assert isinstance(operand2, ast.Register)
+    assert isinstance(operand2, tree.Register)
     assert operand2.name == b"rbx"
 
 
 def can_parse_instruction_with_operands_reference():
-    code = src.open_text("asm main() { mov rax, left; }")
+    code = open_text("asm main() { mov rax, left; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -75,21 +79,21 @@ def can_parse_instruction_with_operands_reference():
     assert len(instruction.operands) == 2
 
     operand1 = instruction.operands[0]
-    assert isinstance(operand1, par.ast.Register)
+    assert isinstance(operand1, tree.Register)
     assert operand1.name == b"rax"
 
     operand2 = instruction.operands[1]
-    assert isinstance(operand2, par.ast.Reference)
+    assert isinstance(operand2, tree.Reference)
     assert operand2.name == b"left"
 
 
 def can_parse_instruction_with_immediate():
-    code = src.open_text("asm main() { mov rax, 0x1234; }")
+    code = open_text("asm main() { mov rax, 0x1234; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -105,21 +109,21 @@ def can_parse_instruction_with_immediate():
     assert len(instruction.operands) == 2
 
     operand1 = instruction.operands[0]
-    assert isinstance(operand1, par.ast.Register)
+    assert isinstance(operand1, tree.Register)
     assert operand1.name == b"rax"
 
     operand2 = instruction.operands[1]
-    assert isinstance(operand2, par.ast.Immediate)
+    assert isinstance(operand2, tree.Immediate)
     assert operand2.value == 0x1234
 
 
 def can_parse_multiple_instructions():
-    code = src.open_text("asm main() { mov rax, rbx; syscall; }")
+    code = open_text("asm main() { mov rax, rbx; syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -139,12 +143,12 @@ def can_parse_multiple_instructions():
 
 
 def can_parse_snippets_with_single_arg():
-    code = src.open_text("asm exit(code@rdi: u32) { syscall; }")
+    code = open_text("asm exit(code@rdi: u32) { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -165,17 +169,17 @@ def can_parse_snippets_with_single_arg():
     assert slot.name == b"code"
     assert slot.type.name == b"u32"
 
-    assert isinstance(slot.bind, ast.Binding)
+    assert isinstance(slot.bind, tree.Binding)
     assert slot.bind.name == b"rdi"
 
 
 def can_parse_snippets_with_multiple_args():
-    code = src.open_text("asm exit(code@rdi: u32, id@rax: u16) { syscall; }")
+    code = open_text("asm exit(code@rdi: u32, id@rax: u16) { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -196,24 +200,24 @@ def can_parse_snippets_with_multiple_args():
     assert slot1.name == b"code"
     assert slot1.type.name == b"u32"
 
-    assert isinstance(slot1.bind, ast.Binding)
+    assert isinstance(slot1.bind, tree.Binding)
     assert slot1.bind.name == b"rdi"
 
     slot2 = slots[1]
     assert slot2.name == b"id"
     assert slot2.type.name == b"u16"
 
-    assert isinstance(slot2.bind, ast.Binding)
+    assert isinstance(slot2.bind, tree.Binding)
     assert slot2.bind.name == b"rax"
 
 
 def can_parse_snippets_with_bind_to_immediate():
-    code = src.open_text("asm exit(code@imm: u32) { }")
+    code = open_text("asm exit(code@imm: u32) { }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -230,17 +234,17 @@ def can_parse_snippets_with_bind_to_immediate():
     assert slot.name == b"code"
     assert slot.type.name == b"u32"
 
-    assert isinstance(slot.bind, ast.Binding)
+    assert isinstance(slot.bind, tree.Binding)
     assert slot.bind.name == b"imm"
 
 
 def can_parse_snippets_with_clobbers():
-    code = src.open_text("asm aux() clobbers rax, rbx { mov rax, rbx; }")
+    code = open_text("asm aux() clobbers rax, rbx { mov rax, rbx; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -261,12 +265,12 @@ def can_parse_snippets_with_clobbers():
 
 
 def can_parse_snippets_with_no_return():
-    code = src.open_text("asm halt() noreturn { syscall; }")
+    code = open_text("asm halt() noreturn { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -283,12 +287,12 @@ def can_parse_snippets_with_no_return():
 
 
 def can_parse_snippets_with_no_return_with_clobbers():
-    code = src.open_text("asm halt() noreturn clobbers rax { syscall; }")
+    code = open_text("asm halt() noreturn clobbers rax { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
@@ -309,18 +313,18 @@ def can_parse_snippets_with_no_return_with_clobbers():
 
 
 def can_parse_snipper_with_ranged_parameter():
-    code = src.open_text("asm main(value@rdi: u8[0x10..0x20]) { }")
+    code = open_text("asm main(value@rdi: u8[0x10..0x20]) { }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.snippets) == 1
     snippet = program.value.snippets[0]
 
-    assert isinstance(snippet, ast.Snippet)
+    assert isinstance(snippet, tree.Snippet)
     assert len(snippet.slots) == 1
 
     slot = snippet.slots[0]
@@ -332,75 +336,75 @@ def can_parse_snipper_with_ranged_parameter():
 
 
 def can_handle_empty_program():
-    code = src.open_text("")
+    code = open_text("")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.functions) == 0
 
 
 def can_parse_function_without_statements():
-    code = src.open_text("fn main() { }")
+    code = open_text("fn main() { }")
 
-    tokens = lex.tokenize(code)
+    tokens =  tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.Function)
+    assert isinstance(function, tree.Function)
     assert function.name == b"main"
     assert function.noreturn is False
     assert len(function.statements) == 0
 
 
 def can_parse_function_with_statements():
-    code = src.open_text("fn main() { exit(0x1); }")
+    code = open_text("fn main() { exit(0x1); }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.Function)
+    assert isinstance(function, tree.Function)
     assert function.name == b"main"
     assert function.noreturn is False
     assert len(function.statements) == 1
 
     statement = function.statements[0]
-    assert isinstance(statement, ast.CallStatement)
+    assert isinstance(statement, tree.CallStatement)
     assert statement.name == b"exit"
     assert len(statement.arguments) == 1
 
     argument = statement.arguments[0]
-    assert isinstance(argument, ast.IntegerLiteral)
+    assert isinstance(argument, tree.IntegerLiteral)
     assert argument.value == 0x1
 
 
 def can_parse_function_with_single_parameter():
-    code = src.open_text("fn main(id: u16) { exit(0x1); }")
+    code = open_text("fn main(id: u16) { exit(0x1); }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.Function)
+    assert isinstance(function, tree.Function)
     assert function.name == b"main"
     assert function.noreturn is False
     assert len(function.parameters) == 1
@@ -411,18 +415,18 @@ def can_parse_function_with_single_parameter():
 
 
 def can_parse_function_with_multiple_parameters():
-    code = src.open_text("fn main(code: u32, id: u16) { exit(0x1); }")
+    code = open_text("fn main(code: u32, id: u16) { exit(0x1); }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.Function)
+    assert isinstance(function, tree.Function)
     assert function.name == b"main"
     assert function.noreturn is False
     assert len(function.parameters) == 2
@@ -437,45 +441,45 @@ def can_parse_function_with_multiple_parameters():
 
 
 def can_parse_function_with_flags_noreturn():
-    code = src.open_text("fn main() noreturn { exit(0x1); }")
+    code = open_text("fn main() noreturn { exit(0x1); }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.Function)
+    assert isinstance(function, tree.Function)
     assert function.name == b"main"
     assert function.noreturn is True
     assert len(function.statements) == 1
 
     statement = function.statements[0]
-    assert isinstance(statement, ast.CallStatement)
+    assert isinstance(statement, tree.CallStatement)
     assert statement.name == b"exit"
     assert len(statement.arguments) == 1
 
     argument = statement.arguments[0]
-    assert isinstance(argument, ast.IntegerLiteral)
+    assert isinstance(argument, tree.IntegerLiteral)
     assert argument.value == 0x1
 
 
 def can_parse_function_with_ranged_parameter():
-    code = src.open_text("fn main(value: u8[0x10..0x20]) { }")
+    code = open_text("fn main(value: u8[0x10..0x20]) { }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     assert len(program.value.functions) == 1
     function = program.value.functions[0]
 
-    assert isinstance(function, ast.Function)
+    assert isinstance(function, tree.Function)
     assert len(function.parameters) == 1
 
     parameter = function.parameters[0]
@@ -487,21 +491,21 @@ def can_parse_function_with_ranged_parameter():
 
 
 def can_parse_argument_span_without_trailing_whitespace():
-    code = src.open_text("fn main() { exit(0x01 ); }")
+    code = open_text("fn main() { exit(0x01 ); }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
     function = program.value.functions[0]
     statement = function.statements[0]
 
-    assert isinstance(statement, ast.CallStatement)
+    assert isinstance(statement, tree.CallStatement)
     argument = statement.arguments[0]
 
-    assert isinstance(argument, ast.IntegerLiteral)
+    assert isinstance(argument, tree.IntegerLiteral)
     assert argument.value == 0x01
     assert code.extract(argument.ref) == b"0x01"
 
@@ -510,12 +514,12 @@ def can_parse_argument_span_without_trailing_whitespace():
 
 
 def can_handle_end_of_tokens():
-    code = src.open_text("asm main() { mov rax, rbx")
+    code = open_text("asm main() { mov rax, rbx")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -528,12 +532,12 @@ def can_handle_end_of_tokens():
 
 
 def can_handle_unexpected_token():
-    code = src.open_text("asm main() { mov rax rbx\nsyscall; }")
+    code = open_text("asm main() { mov rax rbx\nsyscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -546,12 +550,12 @@ def can_handle_unexpected_token():
 
 
 def can_handle_missing_parameter_comma():
-    code = src.open_text("fn main(a: u8 b: u8) { exit(0x1); }")
+    code = open_text("fn main(a: u8 b: u8) { exit(0x1); }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -564,12 +568,12 @@ def can_handle_missing_parameter_comma():
 
 
 def can_handle_missing_slot_comma():
-    code = src.open_text("asm exit(code@rdi: u32 id@rax: u16) { syscall; }")
+    code = open_text("asm exit(code@rdi: u32 id@rax: u16) { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -582,12 +586,12 @@ def can_handle_missing_slot_comma():
 
 
 def can_detect_unknown_function_keyword():
-    code = src.open_text("noreturn main { syscall; }")
+    code = open_text("noreturn main { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -600,12 +604,12 @@ def can_detect_unknown_function_keyword():
 
 
 def can_detect_duplicated_flags_noreturn():
-    code = src.open_text("asm halt() noreturn noreturn { syscall; }")
+    code = open_text("asm halt() noreturn noreturn { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -618,12 +622,12 @@ def can_detect_duplicated_flags_noreturn():
 
 
 def can_detect_duplicated_flags_clobbers():
-    code = src.open_text("asm aux() clobbers rax clobbers rcx { mov rax, rbx; }")
+    code = open_text("asm aux() clobbers rax clobbers rcx { mov rax, rbx; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -636,14 +640,14 @@ def can_detect_duplicated_flags_clobbers():
 
 
 def can_detect_duplicated_flags_clobbers_with_noreturn_after():
-    code = src.open_text(
+    code = open_text(
         "asm aux() clobbers rax clobbers rbx noreturn { mov rax, rbx; }"
     )
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -656,12 +660,12 @@ def can_detect_duplicated_flags_clobbers_with_noreturn_after():
 
 
 def can_detect_duplicated_flags_noreturn_with_clobbers_after():
-    code = src.open_text("asm halt() noreturn noreturn clobbers rax { syscall; }")
+    code = open_text("asm halt() noreturn noreturn clobbers rax { syscall; }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Err)
 
     diagnostics = program.error
@@ -674,20 +678,20 @@ def can_detect_duplicated_flags_noreturn_with_clobbers_after():
 
 
 def can_accept_call_with_hex_literal():
-    code = src.open_text("fn main() { exit(0xdeadbeef); }")
+    code = open_text("fn main() { exit(0xdeadbeef); }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
 
 
 def can_accept_call_with_parameter_reference():
-    code = src.open_text("fn main(code: u32) { exit(code); }")
+    code = open_text("fn main(code: u32) { exit(code); }")
 
-    tokens = lex.tokenize(code)
+    tokens = tokenize(code)
     assert isinstance(tokens, res.Ok)
 
-    program = par.parse(code, tokens.value)
+    program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
