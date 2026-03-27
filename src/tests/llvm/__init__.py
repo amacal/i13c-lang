@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from i13c.diag import Diagnostic
+from i13c.core.diagnostics import Diagnostic
 from i13c.graph.nodes import run as run_graph
 from i13c.llvm.graph import LowLevelGraph
 from i13c.res import Err, Ok

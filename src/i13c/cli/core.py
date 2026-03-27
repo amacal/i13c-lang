@@ -5,7 +5,8 @@ from typing import Any, Iterable, List, NoReturn
 
 import click
 
-from i13c import diag, res
+from i13c import res
+from i13c.core.diagnostics import Diagnostic, show
 from i13c.syntax.source import SourceCode
 
 
@@ -18,22 +19,22 @@ class BytesAsTextEncoder(json.JSONEncoder):
 
 
 def emit_and_exit(
-    diagnostics: Iterable[diag.Diagnostic], /, source: SourceCode
+    messages: Iterable[Diagnostic], /, source: SourceCode
 ) -> NoReturn:
-    for diagnostic in diagnostics:
+    for message in messages:
         click.echo(
-            f"Error {diagnostic.code} at offset {diagnostic.ref.offset}: {diagnostic.message}"
+            f"Error {message.code} at offset {message.ref.offset}: {message.message}"
         )
 
-        if diagnostic.ref.length > 0:
+        if message.ref.length > 0:
             click.echo("\n")
-            click.echo(diag.show(source, diagnostic))
+            click.echo(show(source, message))
             click.echo("\n")
 
     sys.exit(1)
 
 
 def unwrap(
-    result: res.Result[res.A, List[diag.Diagnostic]], /, source: SourceCode
+    result: res.Result[res.A, List[Diagnostic]], /, source: SourceCode
 ) -> res.A:
     return res.unwrap(result, partial(emit_and_exit, source=source))

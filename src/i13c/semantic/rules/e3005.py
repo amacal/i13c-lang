@@ -1,7 +1,8 @@
 from typing import List, Set
 
-from i13c import diag, err
-from i13c.core.dag import GraphNode
+from i13c import err
+from i13c.core import diagnostics
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 
@@ -17,8 +18,8 @@ def configure_e3005() -> GraphNode:
 
 def validate_duplicated_snippet_clobbers(
     snippets: OneToOne[SnippetId, Snippet],
-) -> List[diag.Diagnostic]:
-    diagnostics: List[diag.Diagnostic] = []
+) -> List[diagnostics.Diagnostic]:
+    diagnostics: List[diagnostics.Diagnostic] = []
 
     for snippet in snippets.values():
         seen: Set[bytes] = set()

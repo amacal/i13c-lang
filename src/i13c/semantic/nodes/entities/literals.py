@@ -1,6 +1,6 @@
 from typing import Dict
 
-from i13c.core.dag import GraphNode
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import derive_width
 from i13c.semantic.syntax import SyntaxGraph

@@ -1,6 +1,6 @@
 from typing import Dict, Iterable
 
-from i13c.diag import Diagnostic
+from i13c.core.diagnostics import Diagnostic
 from i13c.graph.artifacts import GraphArtifacts
 
 

@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, Iterable, Tuple, TypeVar
 
-from i13c.core.dag import GraphGroup, GraphNode
 from i13c.core.generator import Generator
+from i13c.core.graph import GraphGroup, GraphNode
 from i13c.syntax import tree
 
 AstNode = TypeVar("AstNode")

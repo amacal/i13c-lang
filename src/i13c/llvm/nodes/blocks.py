@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Protocol, Set, Tuple, Type, Union
 
-from i13c.core.dag import GraphNode, Prefix
+from i13c.core.graph import GraphNode, Prefix
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.llvm.typing.abstracts import (
     AbstractEntry,

@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from i13c.core.dag import GraphGroup, GraphNode, Prefix
+from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.semantic.model import (
     BasicNodes,
     CallGraph,

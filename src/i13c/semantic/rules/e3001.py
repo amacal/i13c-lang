@@ -1,7 +1,8 @@
 from typing import Iterator, List, Tuple
 
-from i13c import diag, err
-from i13c.core.dag import GraphNode
+from i13c import err
+from i13c.core import diagnostics
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Type, default_range
 from i13c.semantic.typing.entities.functions import Function, FunctionId
@@ -43,8 +44,8 @@ def validate_type_ranges(
     snippets: OneToOne[SnippetId, Snippet],
     functions: OneToOne[FunctionId, Function],
     parameters: OneToOne[ParameterId, Parameter],
-) -> List[diag.Diagnostic]:
-    diagnostics: List[diag.Diagnostic] = []
+) -> List[diagnostics.Diagnostic]:
+    diagnostics: List[diagnostics.Diagnostic] = []
 
     for ref, type in iterate_candidates(snippets, functions, parameters):
         defaults = default_range(type.name)

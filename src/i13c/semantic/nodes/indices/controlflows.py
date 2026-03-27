@@ -1,7 +1,7 @@
 from typing import Dict, List
 
-from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.indices.controlflows import (

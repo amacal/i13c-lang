@@ -1,6 +1,6 @@
 from typing import Dict, Tuple
 
-from i13c.core.dag import GraphGroup, GraphNode, Prefix, evaluate
+from i13c.core.graph import GraphGroup, GraphNode, Prefix, evaluate
 
 
 def can_evaluate_one_node_without_dependencies():

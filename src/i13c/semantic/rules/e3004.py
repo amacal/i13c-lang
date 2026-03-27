@@ -1,7 +1,8 @@
 from typing import List, Set
 
-from i13c import diag, err
-from i13c.core.dag import GraphNode
+from i13c import err
+from i13c.core import diagnostics
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
@@ -27,8 +28,8 @@ def validate_duplicated_parameter_names(
     snippets: OneToOne[SnippetId, Snippet],
     functions: OneToOne[FunctionId, Function],
     parameters: OneToOne[ParameterId, Parameter],
-) -> List[diag.Diagnostic]:
-    diagnostics: List[diag.Diagnostic] = []
+) -> List[diagnostics.Diagnostic]:
+    diagnostics: List[diagnostics.Diagnostic] = []
 
     for snippet in snippets.values():
         seen: Set[bytes] = set()

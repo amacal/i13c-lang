@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from i13c.diag import Diagnostic
+from i13c.core.diagnostics import Diagnostic
 from i13c.res import Err, Ok
 from i13c.syntax.lexing import tokenize
 from i13c.syntax.parsing import parse

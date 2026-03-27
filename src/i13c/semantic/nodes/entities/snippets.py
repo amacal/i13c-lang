@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from i13c.core.dag import GraphNode
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Identifier, Range, Type, default_range, width_from_range
 from i13c.semantic.syntax import SyntaxGraph

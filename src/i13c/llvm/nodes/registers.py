@@ -1,7 +1,7 @@
 from typing import Dict
 
-from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.registers import VirtualRegister
 from i13c.semantic.typing.indices.variables import Variable, VariableId

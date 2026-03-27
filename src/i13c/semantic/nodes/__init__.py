@@ -1,4 +1,4 @@
-from i13c.core.dag import GraphGroup
+from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.analyses.callables import configure_callables_live
 from i13c.semantic.nodes.analyses.callgraphs import configure_callgraphs_live
 from i13c.semantic.nodes.analyses.controlflows import configure_flowgraphs_live

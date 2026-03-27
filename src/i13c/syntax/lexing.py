@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
-from i13c import diag, err, res
+from i13c import err, res
+from i13c.core import diagnostics
 from i13c.syntax.source import SourceCode
 
 # - tabulators and other whitespace characters are
@@ -227,9 +228,9 @@ class Token:
         return Token(code=Tokens.EQUALS, offset=offset, length=1)
 
 
-def tokenize(code: SourceCode) -> res.Result[List[Token], List[diag.Diagnostic]]:
+def tokenize(code: SourceCode) -> res.Result[List[Token], List[diagnostics.Diagnostic]]:
     tokens: List[Token] = []
-    diagnostics: List[diag.Diagnostic] = []
+    diagnostics: List[diagnostics.Diagnostic] = []
     lexer = Lexer(code=code, offset=0)
 
     try:

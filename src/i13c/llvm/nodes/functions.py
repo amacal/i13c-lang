@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Protocol, Tuple, Type
 
-from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.llvm.nodes.callsites import lower_callsite
 from i13c.llvm.typing.blocks import Block, BlockInstruction

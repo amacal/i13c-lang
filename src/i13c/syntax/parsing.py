@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Optional, Set, Tuple, Union
 
-from i13c import diag, err, res
+from i13c import err, res
+from i13c.core import diagnostics
 from i13c.syntax import tree
 from i13c.syntax.lexing import Token as LexingToken
 from i13c.syntax.lexing import Tokens
@@ -93,9 +94,9 @@ class ParsingState:
 
 def parse(
     code: SourceCode, tokens: List[LexingToken]
-) -> res.Result[tree.Program, List[diag.Diagnostic]]:
+) -> res.Result[tree.Program, List[diagnostics.Diagnostic]]:
     state = ParsingState(code=code, tokens=tokens, position=0)
-    diagnostics: List[diag.Diagnostic] = []
+    diagnostics: List[diagnostics.Diagnostic] = []
 
     snippets: List[tree.Snippet] = []
     functions: List[tree.Function] = []

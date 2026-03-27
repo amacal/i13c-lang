@@ -1,7 +1,8 @@
 from typing import List
 
-from i13c import diag, err
-from i13c.core.dag import GraphNode
+from i13c import err
+from i13c.core import diagnostics
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
@@ -24,8 +25,8 @@ def configure_e3008() -> GraphNode:
 def validate_called_symbol_exists(
     callsites: OneToOne[CallSiteId, CallSite],
     resolutions: OneToOne[CallSiteId, CallSiteResolution],
-) -> List[diag.Diagnostic]:
-    diagnostics: List[diag.Diagnostic] = []
+) -> List[diagnostics.Diagnostic]:
+    diagnostics: List[diagnostics.Diagnostic] = []
 
     for cid, resolution in resolutions.items():
         if not resolution.accepted:

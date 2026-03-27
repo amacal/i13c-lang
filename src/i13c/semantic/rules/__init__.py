@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, Iterable, List
 
-from i13c.core.dag import GraphGroup, GraphNode, Prefix
-from i13c.diag import Diagnostic
+from i13c.core.diagnostics import Diagnostic
+from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.semantic.rules.e3000 import configure_e3000
 from i13c.semantic.rules.e3001 import configure_e3001
 from i13c.semantic.rules.e3002 import configure_e3002

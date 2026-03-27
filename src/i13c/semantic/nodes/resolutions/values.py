@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from i13c.core.dag import GraphNode
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.literals import Literal, LiteralId

@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple
 
-from i13c.core.dag import GraphNode
+from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSiteId

@@ -1,5 +1,5 @@
-from i13c.core.dag import GraphGroup, evaluate
 from i13c.core.generator import Generator
+from i13c.core.graph import GraphGroup, evaluate
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.llvm.build import configure_llvm_graph
 from i13c.semantic.graph import configure_semantic_graph
