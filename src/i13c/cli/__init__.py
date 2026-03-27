@@ -6,7 +6,7 @@ import click
 
 from i13c import elf, lex, par, src
 from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap
-from i13c.cli.semantic import attach
+from i13c.cli.model import attach
 from i13c.encoding import encode
 from i13c.graph.nodes import run as run_graph
 
