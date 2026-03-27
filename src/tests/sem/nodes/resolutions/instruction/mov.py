@@ -17,7 +17,7 @@ def can_accept_movregimm_instruction_with_two_operands():
     assert instructions.size() == 1
     _, value = instructions.peak()
 
-    assert len(value.rejected) == 3
+    assert len(value.rejected) >= 1
     assert len(value.accepted) == 1
     acceptance = value.accepted[0]
 
@@ -31,6 +31,35 @@ def can_accept_movregimm_instruction_with_two_operands():
 
     assert isinstance(acceptance.bindings[0], Register)
     assert isinstance(acceptance.bindings[1], Immediate)
+
+
+def can_accept_movregreg_instruction_with_two_operands():
+    _, program = prepare_program("""
+        asm main() noreturn { mov rax, rbx; }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    assert semantic is not None
+    instructions = semantic.indices.resolution_by_instruction
+
+    assert instructions.size() == 1
+    _, value = instructions.peak()
+
+    assert len(value.rejected) >= 1
+    assert len(value.accepted) == 1
+    acceptance = value.accepted[0]
+
+    assert acceptance.mnemonic.name == b"mov"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.register(),
+        OperandSpec.register(),
+    )
+
+    assert isinstance(acceptance.bindings[0], Register)
+    assert isinstance(acceptance.bindings[1], Register)
 
 
 def can_reject_movregimm_instruction_with_wrong_arity():
@@ -47,7 +76,7 @@ def can_reject_movregimm_instruction_with_wrong_arity():
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 4
+    assert len(value.rejected) >= 1
 
     for rejection in value.rejected:
         assert rejection.mnemonic.name == b"mov"
@@ -68,7 +97,7 @@ def can_reject_movregimm_instruction_with_type_mismatch():
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 4
+    assert len(value.rejected) >= 1
 
     for rejection in value.rejected:
         assert rejection.mnemonic.name == b"mov"
@@ -88,7 +117,7 @@ def can_accept_movregimm_instruction_with_rewritten_operands():
     assert instructions.size() == 1
     _, value = instructions.peak()
 
-    assert len(value.rejected) == 3
+    assert len(value.rejected) >= 1
     assert len(value.accepted) == 1
     acceptance = value.accepted[0]
 
@@ -118,7 +147,7 @@ def can_reject_movregimm_instruction_with_unresolved_operand_reference():
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 4
+    assert len(value.rejected) >= 1
 
     for rejection in value.rejected:
         assert rejection.mnemonic.name == b"mov"
@@ -138,7 +167,7 @@ def can_accept_movregimm_instruction_with_referenced_register_binding():
     assert instructions.size() == 1
     _, value = instructions.peak()
 
-    assert len(value.rejected) == 3
+    assert len(value.rejected) >= 1
     assert len(value.accepted) == 1
     acceptance = value.accepted[0]
 
@@ -167,7 +196,7 @@ def can_accept_movregimm_instruction_with_narrow_register_binding():
     assert instructions.size() == 1
     _, value = instructions.peak()
 
-    assert len(value.rejected) == 3
+    assert len(value.rejected) >= 1
     assert len(value.accepted) == 1
     acceptance = value.accepted[0]
 

@@ -15,7 +15,7 @@ def can_draw_a_table_with_instruction_resolutions():
         | --------- | -------------- | -------- | -------- | -------- | -------- |
         | Reference | Instruction ID | Mnemonic | Operands | Accepted | Rejected |
         | --------- | -------------- | -------- | -------- | -------- | -------- |
-        | 22:36     | instruction#2  | mov      | 2        | 1        | 3        |
+        | 22:36     | instruction#2  | mov      | 2        | 1        | 4        |
         | --------- | -------------- | -------- | -------- | -------- | -------- |
     """)
 

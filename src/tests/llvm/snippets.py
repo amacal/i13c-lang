@@ -19,7 +19,7 @@ def can_lower_syscall_program():
     ]
 
 
-def can_lower_mov_program():
+def can_lower_movregimm_program():
     semantic, llvm = prepare_graph("""
         asm foo() noreturn { mov rax, 0x1234; }
         fn main() noreturn { foo(); }
@@ -37,7 +37,25 @@ def can_lower_mov_program():
     ]
 
 
-def can_lower_mov_with_register_bound_slot():
+def can_lower_movregreg_program():
+    semantic, llvm = prepare_graph("""
+        asm foo() noreturn { mov rax, rbx; }
+        fn main() noreturn { foo(); }
+    """)
+
+    # TODO: assert somehow flows
+    assert llvm.flows.size() == 2
+
+    function = semantic.find_function_by_name(b"main")
+    assert function is not None
+
+    instructions = llvm.instructions_of(function)
+    assert list(instructions) == [
+        "mov rax, rbx",
+    ]
+
+
+def can_lower_movregimm_with_register_bound_slot():
     semantic, llvm = prepare_graph("""
         asm foo(dst@rax: u64, value@imm: u8) noreturn { mov dst, value; }
         fn main() noreturn { foo(0x01, 0x42); }

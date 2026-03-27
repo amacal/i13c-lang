@@ -5,6 +5,7 @@ from i13c.lowering.typing.instructions import (
     InstructionEntry,
     InstructionId,
     MovRegImm,
+    MovRegReg,
     ShlRegImm,
     SysCall,
 )
@@ -55,15 +56,22 @@ def lower_instruction_mov(
     src = src or graph.basic.operands.get(instruction.operands[1])
 
     assert isinstance(dst.target, Register)
-    assert isinstance(src.target, Immediate)
-
     dst_reg = IR_REGISTER_FORWARD[dst.target.name]
-    src_imm = src.target.value
 
-    return (
-        InstructionId(value=generator.next()),
-        MovRegImm(dst=dst_reg, imm=src_imm),
-    )
+    if isinstance(src.target, Immediate):
+        return (
+            InstructionId(value=generator.next()),
+            MovRegImm(dst=dst_reg, imm=src.target.value),
+        )
+
+    if isinstance(src.target, Register):
+        return (
+            InstructionId(value=generator.next()),
+            MovRegReg(dst=dst_reg, src=IR_REGISTER_FORWARD[src.target.name]),
+        )
+
+    # we forgot to handle something
+    assert False
 
 
 def lower_instruction_shl(
