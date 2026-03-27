@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import Set, Union
 
-from i13c.lowering.typing.abstracts import AbstractEntry, AbstractId
-from i13c.lowering.typing.flows import BlockId, FlowEntry, FlowId
-from i13c.lowering.typing.instructions import InstructionEntry, InstructionId
-from i13c.lowering.typing.terminators import Terminator
+from i13c.llvm.typing.abstracts import AbstractEntry, AbstractId
+from i13c.llvm.typing.flows import BlockId, FlowEntry, FlowId
+from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.terminators import Terminator
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.snippets import SnippetId

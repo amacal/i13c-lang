@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from typing import Dict, Iterable, Optional, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
-from i13c.lowering.typing.blocks import Registers
-from i13c.lowering.typing.flows import BlockId
-from i13c.lowering.typing.registers import VirtualRegister, reg_to_name
+from i13c.llvm.typing.blocks import Registers
+from i13c.llvm.typing.flows import BlockId
+from i13c.llvm.typing.registers import VirtualRegister, reg_to_name
 from i13c.semantic.typing.indices.variables import VariableId
 
 

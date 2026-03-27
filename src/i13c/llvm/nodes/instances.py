@@ -1,8 +1,8 @@
 from typing import Dict, List
 
 from i13c.core.generator import Generator
-from i13c.lowering.nodes.instructions import lower_instruction
-from i13c.lowering.typing.instructions import InstructionEntry
+from i13c.llvm.nodes.instructions import lower_instruction
+from i13c.llvm.typing.instructions import InstructionEntry
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.indices.instances import Instance

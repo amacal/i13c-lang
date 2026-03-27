@@ -1,11 +1,11 @@
 from typing import Dict, Iterable, List, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
-from i13c.lowering.typing.blocks import Block, InstructionPosition
-from i13c.lowering.typing.flows import BlockId
-from i13c.lowering.typing.intervals import IntervalPressure, RegisterInterval
-from i13c.lowering.typing.registers import reg_to_name
-from i13c.lowering.typing.stacks import StackFrame
+from i13c.llvm.typing.blocks import Block, InstructionPosition
+from i13c.llvm.typing.flows import BlockId
+from i13c.llvm.typing.intervals import IntervalPressure, RegisterInterval
+from i13c.llvm.typing.registers import reg_to_name
+from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 
 

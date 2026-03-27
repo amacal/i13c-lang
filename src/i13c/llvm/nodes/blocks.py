@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Protocol, Set, Tuple, Type, Union
 
 from i13c.core.dag import GraphNode, Prefix
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.typing.abstracts import (
+from i13c.llvm.typing.abstracts import (
     AbstractEntry,
     Abstracts,
     EnterFrame,
@@ -11,14 +11,14 @@ from i13c.lowering.typing.abstracts import (
     Preserve,
     Restore,
 )
-from i13c.lowering.typing.blocks import (
+from i13c.llvm.typing.blocks import (
     Block,
     BlockInstruction,
     BlockInstructionId,
     InstructionPosition,
     Registers,
 )
-from i13c.lowering.typing.flows import (
+from i13c.llvm.typing.flows import (
     BindingFlow,
     BlockId,
     Flow,
@@ -27,7 +27,7 @@ from i13c.lowering.typing.flows import (
     MoveFlow,
     SnapshotFlow,
 )
-from i13c.lowering.typing.instructions import (
+from i13c.llvm.typing.instructions import (
     AddRegImm,
     Call,
     Instruction,
@@ -39,9 +39,9 @@ from i13c.lowering.typing.instructions import (
     Return,
     SubRegImm,
 )
-from i13c.lowering.typing.intervals import IntervalPressure, RegisterInterval
-from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
-from i13c.lowering.typing.terminators import (
+from i13c.llvm.typing.intervals import IntervalPressure, RegisterInterval
+from i13c.llvm.typing.registers import IR_REGISTER_FORWARD
+from i13c.llvm.typing.terminators import (
     ExitTerminator,
     JumpTerminator,
     Terminator,

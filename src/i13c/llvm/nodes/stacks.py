@@ -3,21 +3,21 @@ from typing import Dict, List, Set
 from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.typing.abstracts import (
+from i13c.llvm.typing.abstracts import (
     AbstractEntry,
     AbstractId,
     EnterFrame,
     ExitFrame,
 )
-from i13c.lowering.typing.blocks import BlockInstruction
-from i13c.lowering.typing.flows import (
+from i13c.llvm.typing.blocks import BlockInstruction
+from i13c.llvm.typing.flows import (
     BlockId,
     EpilogueFlow,
     FlowId,
     PrologueFlow,
 )
-from i13c.lowering.typing.intervals import IntervalPressure
-from i13c.lowering.typing.stacks import StackFrame
+from i13c.llvm.typing.intervals import IntervalPressure
+from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.typing.entities.functions import FunctionId
 
 

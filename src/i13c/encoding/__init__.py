@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Protocol, Type, Union
 
 from i13c.encoding.core import REX, SIB, Displacement, Immediate, ModRM, Opcode
-from i13c.lowering.typing.instructions import (
+from i13c.llvm.typing.instructions import (
     AddRegImm,
     Call,
     Instruction,

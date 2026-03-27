@@ -4,9 +4,9 @@ from typing import Any, Dict, List, Optional, Protocol, Tuple, Type
 from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.nodes.callsites import lower_callsite
-from i13c.lowering.typing.blocks import Block, BlockInstruction
-from i13c.lowering.typing.flows import (
+from i13c.llvm.nodes.callsites import lower_callsite
+from i13c.llvm.typing.blocks import Block, BlockInstruction
+from i13c.llvm.typing.flows import (
     BlockId,
     EpilogueFlow,
     FlowId,
@@ -15,7 +15,7 @@ from i13c.lowering.typing.flows import (
     PrologueFlow,
     SnapshotFlow,
 )
-from i13c.lowering.typing.instructions import (
+from i13c.llvm.typing.instructions import (
     InstructionEntry,
     InstructionId,
     MovOffImm,
@@ -24,9 +24,9 @@ from i13c.lowering.typing.instructions import (
     PopOff,
     PushOff,
 )
-from i13c.lowering.typing.registers import VirtualRegister, name_to_reg
-from i13c.lowering.typing.stacks import StackFrame
-from i13c.lowering.typing.terminators import (
+from i13c.llvm.typing.registers import VirtualRegister, name_to_reg
+from i13c.llvm.typing.stacks import StackFrame
+from i13c.llvm.typing.terminators import (
     ExitTerminator,
     JumpTerminator,
     TrapTerminator,

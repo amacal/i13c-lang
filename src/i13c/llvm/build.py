@@ -2,15 +2,15 @@ from typing import Any, Dict
 
 from i13c.core.dag import GraphGroup, GraphNode, Prefix
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.graph import (
+from i13c.llvm.graph import (
     BlockRegistersNode,
     FunctionsNode,
     InstructionRegistersNode,
     LowLevelGraph,
     PatchesNode,
 )
-from i13c.lowering.nodes.bindings import configure_binding_patching
-from i13c.lowering.nodes.blocks import (
+from i13c.llvm.nodes.bindings import configure_binding_patching
+from i13c.llvm.nodes.blocks import (
     configure_defined_and_used_registers_for_blocks,
     configure_defined_and_used_registers_for_instructions,
     configure_function_blocks,
@@ -21,20 +21,20 @@ from i13c.lowering.nodes.blocks import (
     configure_register_interval_pressure,
     configure_register_intervals,
 )
-from i13c.lowering.nodes.callsites import (
+from i13c.llvm.nodes.callsites import (
     configure_callsites,
     configure_clobbers_patching,
 )
-from i13c.lowering.nodes.functions import (
+from i13c.llvm.nodes.functions import (
     configure_functions,
     configure_snapshot_patching,
 )
-from i13c.lowering.nodes.registers import configure_registers
-from i13c.lowering.nodes.stacks import configure_stack_frames, configure_stack_patching
-from i13c.lowering.typing.blocks import BlockInstruction, BlockInstructionId, Registers
-from i13c.lowering.typing.flows import BlockId
-from i13c.lowering.typing.instructions import Instruction
-from i13c.lowering.typing.registers import VirtualRegister
+from i13c.llvm.nodes.registers import configure_registers
+from i13c.llvm.nodes.stacks import configure_stack_frames, configure_stack_patching
+from i13c.llvm.typing.blocks import BlockInstruction, BlockInstructionId, Registers
+from i13c.llvm.typing.flows import BlockId
+from i13c.llvm.typing.instructions import Instruction
+from i13c.llvm.typing.registers import VirtualRegister
 from i13c.semantic.typing.indices.variables import VariableId
 
 

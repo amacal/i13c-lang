@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Tuple, Union
 
-from i13c.lowering.typing.flows import BlockId
-from i13c.lowering.typing.registers import reg_to_name
+from i13c.llvm.typing.flows import BlockId
+from i13c.llvm.typing.registers import reg_to_name
 
 
 @dataclass(kw_only=True)

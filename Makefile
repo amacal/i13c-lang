@@ -27,9 +27,9 @@ test:
 asm:
 	@ndisasm -b 64 -k0,120 a.out
 
-.PHONY: dump-lowering
-dump-lowering:
-	@find ./src/i13c/lowering -type f -name '*.py' -print0 \
+.PHONY: dump-llvm
+dump-llvm:
+	@find ./src/i13c/llvm -type f -name '*.py' -print0 \
 	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump
 
 

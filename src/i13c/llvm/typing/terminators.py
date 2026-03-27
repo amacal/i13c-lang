@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Union
 
-from i13c.lowering.typing.flows import BlockId
+from i13c.llvm.typing.flows import BlockId
 
 
 @dataclass

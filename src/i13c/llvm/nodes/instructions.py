@@ -1,7 +1,7 @@
 from typing import Dict
 
 from i13c.core.generator import Generator
-from i13c.lowering.typing.instructions import (
+from i13c.llvm.typing.instructions import (
     InstructionEntry,
     InstructionId,
     MovRegImm,
@@ -9,7 +9,7 @@ from i13c.lowering.typing.instructions import (
     ShlRegImm,
     SysCall,
 )
-from i13c.lowering.typing.registers import IR_REGISTER_FORWARD
+from i13c.llvm.typing.registers import IR_REGISTER_FORWARD
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,

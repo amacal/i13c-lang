@@ -3,17 +3,17 @@ from typing import Dict, List
 from i13c.core.dag import GraphNode
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.nodes.bindings import lower_function_bindings, lower_snippet_bindings
-from i13c.lowering.nodes.instances import lower_instance
-from i13c.lowering.typing.blocks import BlockInstruction
-from i13c.lowering.typing.flows import (
+from i13c.llvm.nodes.bindings import lower_function_bindings, lower_snippet_bindings
+from i13c.llvm.nodes.instances import lower_instance
+from i13c.llvm.typing.blocks import BlockInstruction
+from i13c.llvm.typing.flows import (
     BlockId,
     CallFlow,
     ClobbersFlow,
     FlowId,
 )
-from i13c.lowering.typing.instructions import Call, InstructionEntry, InstructionId, Nop
-from i13c.lowering.typing.registers import VirtualRegister, name_to_reg
+from i13c.llvm.typing.instructions import Call, InstructionEntry, InstructionId, Nop
+from i13c.llvm.typing.registers import VirtualRegister, name_to_reg
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId

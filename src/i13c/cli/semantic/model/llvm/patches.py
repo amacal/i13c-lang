@@ -1,10 +1,10 @@
 from typing import Dict, Iterable, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
-from i13c.lowering.typing.abstracts import AbstractId, Abstracts
-from i13c.lowering.typing.blocks import BlockId
-from i13c.lowering.typing.flows import Flow, FlowId
-from i13c.lowering.typing.instructions import Instruction, InstructionId
+from i13c.llvm.typing.abstracts import AbstractId, Abstracts
+from i13c.llvm.typing.blocks import BlockId
+from i13c.llvm.typing.flows import Flow, FlowId
+from i13c.llvm.typing.instructions import Instruction, InstructionId
 
 
 class PatchesOfStackFramesListExtractor:

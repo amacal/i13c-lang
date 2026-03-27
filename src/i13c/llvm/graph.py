@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import Iterator, Optional
 
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.lowering.typing.abstracts import AbstractEntry
-from i13c.lowering.typing.blocks import (
+from i13c.llvm.typing.abstracts import AbstractEntry
+from i13c.llvm.typing.blocks import (
     Block,
     BlockInstruction,
     BlockInstructionId,
@@ -11,11 +11,11 @@ from i13c.lowering.typing.blocks import (
     InstructionPosition,
     Registers,
 )
-from i13c.lowering.typing.flows import BlockId, FlowId
-from i13c.lowering.typing.instructions import Instruction, InstructionEntry
-from i13c.lowering.typing.intervals import IntervalPressure, RegisterInterval
-from i13c.lowering.typing.registers import VirtualRegister
-from i13c.lowering.typing.stacks import StackFrame
+from i13c.llvm.typing.flows import BlockId, FlowId
+from i13c.llvm.typing.instructions import Instruction, InstructionEntry
+from i13c.llvm.typing.intervals import IntervalPressure, RegisterInterval
+from i13c.llvm.typing.registers import VirtualRegister
+from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.indices.variables import VariableId
 

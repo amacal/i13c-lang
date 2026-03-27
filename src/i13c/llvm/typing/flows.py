@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Tuple, Union
 
-from i13c.lowering.typing.registers import reg_to_name
+from i13c.llvm.typing.registers import reg_to_name
 from i13c.semantic.typing.entities.functions import FunctionId
 
 

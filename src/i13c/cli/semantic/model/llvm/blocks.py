@@ -1,9 +1,9 @@
 from typing import Dict, Iterable, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
-from i13c.lowering.typing.abstracts import Abstracts
-from i13c.lowering.typing.blocks import Block, BlockInstruction
-from i13c.lowering.typing.flows import BlockId, Flow
+from i13c.llvm.typing.abstracts import Abstracts
+from i13c.llvm.typing.blocks import Block, BlockInstruction
+from i13c.llvm.typing.flows import BlockId, Flow
 
 
 class BlockListExtractor:

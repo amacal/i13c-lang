@@ -1,8 +1,8 @@
 from typing import List
 
 from i13c import encoding as enc
-from i13c.lowering.typing.flows import BlockId
-from i13c.lowering.typing.instructions import (
+from i13c.llvm.typing.flows import BlockId
+from i13c.llvm.typing.instructions import (
     Instruction,
     Label,
     MovRegImm,

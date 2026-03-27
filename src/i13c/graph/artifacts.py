@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 
 from i13c.diag import Diagnostic
-from i13c.lowering.graph import LowLevelGraph
+from i13c.llvm.graph import LowLevelGraph
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.rules import SemanticRules
 from i13c.semantic.syntax import SyntaxGraph
