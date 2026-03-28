@@ -18,16 +18,6 @@ ERROR_3012 = "E3012"  # Multiple entrypoint functions
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
 
-def report_e3001_invalid_type_ranges(
-    ref: SpanLike, lower: int, upper: int
-) -> diagnostics.Diagnostic:
-    return diagnostics.Diagnostic(
-        ref=ref,
-        code=ERROR_3001,
-        message=f"Invalid type ranges [{lower}..{upper}] at offset {ref.offset}",
-    )
-
-
 def report_e3002_invalid_operand_types(
     ref: SpanLike, found: List[str]
 ) -> diagnostics.Diagnostic:

@@ -1,14 +1,13 @@
 from typing import Iterator, List, Tuple
 
-from i13c import err
-from i13c.core import diagnostics
+from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Type, default_range
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
-from i13c.syntax.source import Span
+from i13c.syntax.source import Span, SpanLike
 
 
 def configure_e3001() -> GraphNode:
@@ -44,24 +43,34 @@ def validate_type_ranges(
     snippets: OneToOne[SnippetId, Snippet],
     functions: OneToOne[FunctionId, Function],
     parameters: OneToOne[ParameterId, Parameter],
-) -> List[diagnostics.Diagnostic]:
-    diagnostics: List[diagnostics.Diagnostic] = []
+) -> List[Diagnostic]:
+    diagnostics: List[Diagnostic] = []
 
     for ref, type in iterate_candidates(snippets, functions, parameters):
         defaults = default_range(type.name)
 
         if type.range.lower > type.range.upper:
             diagnostics.append(
-                err.report_e3001_invalid_type_ranges(
+                report_e3001_invalid_type_ranges(
                     ref, type.range.lower, type.range.upper
                 )
             )
 
         elif type.range.lower < defaults.lower or type.range.upper > defaults.upper:
             diagnostics.append(
-                err.report_e3001_invalid_type_ranges(
+                report_e3001_invalid_type_ranges(
                     ref, type.range.lower, type.range.upper
                 )
             )
 
     return diagnostics
+
+
+def report_e3001_invalid_type_ranges(
+    ref: SpanLike, lower: int, upper: int
+) -> Diagnostic:
+    return Diagnostic(
+        ref=ref,
+        code="E3001",
+        message=f"Invalid type ranges [{lower}..{upper}] at offset {ref.offset}",
+    )
