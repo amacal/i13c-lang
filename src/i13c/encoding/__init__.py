@@ -21,6 +21,13 @@ from i13c.llvm.typing.instructions import (
 )
 
 
+class MissingLabelError(Exception):
+    def __init__(self, target: int) -> None:
+        self.target = target
+        super().__init__(f"missing target label for relocation {target}")
+
+
+
 def encode(instructions: List[Instruction]) -> bytes:
     bytecode = bytearray()
     labels: Dict[int, LabelArtifact] = {}
@@ -34,6 +41,9 @@ def encode(instructions: List[Instruction]) -> bytes:
                 relocations.append(artifact)
 
     for relocation in relocations:
+        if relocation.target not in labels:
+            raise MissingLabelError(relocation.target)
+
         target = labels[relocation.target].offset - (relocation.offset + 4)
         low, high = relocation.offset, relocation.offset + 4
 
