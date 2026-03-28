@@ -26,10 +26,9 @@ def emit_and_exit(
             f"Error {message.code} at offset {message.ref.offset}: {message.message}"
         )
 
-        if message.ref.length > 0:
-            click.echo("\n")
-            click.echo(show(source, message))
-            click.echo("\n")
+        click.echo("\n")
+        click.echo(show(source, message))
+        click.echo("\n")
 
     sys.exit(1)
 
