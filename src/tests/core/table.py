@@ -7,12 +7,14 @@ def can_draw_empty_table():
     headers = {"name": "Name", "age": "Age"}
     rows: List[Dict[str, str]] = []
 
-    draw_table(headers, rows).equals("""
+    draw_table(headers, rows).equals(
+        """
         | ---- | --- |
         | Name | Age |
         | ---- | --- |
         | ---- | --- |
-    """)
+    """
+    )
 
 
 def can_draw_table_with_rows():
@@ -22,11 +24,32 @@ def can_draw_table_with_rows():
         {"name": "Bob", "age": "25"},
     ]
 
-    draw_table(headers, rows).equals("""
+    draw_table(headers, rows).equals(
+        """
         | ----- | --- |
         | Name  | Age |
         | ----- | --- |
         | Alice | 30  |
         | Bob   | 25  |
         | ----- | --- |
-    """)
+    """
+    )
+
+
+def can_draw_table_with_rows_having_different_key_order():
+    headers = {"name": "Name", "age": "Age"}
+    rows = [
+        {"age": "30", "name": "Alice"},
+        {"age": "25", "name": "Bob"},
+    ]
+
+    draw_table(headers, rows).equals(
+        """
+        | ----- | --- |
+        | Name  | Age |
+        | ----- | --- |
+        | Alice | 30  |
+        | Bob   | 25  |
+        | ----- | --- |
+    """
+    )

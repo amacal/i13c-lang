@@ -31,7 +31,7 @@ def draw_table(headers: Dict[str, str], rows: List[Dict[str, str]]) -> Table:
             draw_separator(widths.values()),
             draw_header(widths.values(), headers),
             draw_separator(widths.values()),
-            *[draw_row(widths.values(), row) for row in rows],
+            *[draw_row(widths.values(), headers, row) for row in rows],
             draw_separator(widths.values()),
         ]
     )
@@ -53,8 +53,8 @@ def draw_header(widths: Iterable[int], headers: Dict[str, str]) -> str:
     return draw("|", zip(headers, widths), lambda x: f" {headers[x[0]]:<{x[1]}} ")
 
 
-def draw_row(widths: Iterable[int], row: Dict[str, str]) -> str:
-    return draw("|", zip(row, widths), lambda x: f" {row[x[0]]:<{x[1]}} ")
+def draw_row(widths: Iterable[int], headers: Dict[str, str], row: Dict[str, str]) -> str:
+    return draw("|", zip(headers, widths), lambda x: f" {row[x[0]]:<{x[1]}} ")
 
 
 def draw(sep: str, items: Iterable[DrawItem], callback: DrawCallback[DrawItem]) -> str:
