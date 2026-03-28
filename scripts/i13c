@@ -1,5 +1,8 @@
-#!/home/vscode/.cache/pypoetry/virtualenvs/i13c-lang-vkXUBngp-py3.14/bin/python
+#!/usr/bin/env bash
+set -euo pipefail
 
-from i13c.cli import i13c
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-i13c()
+cd "$ROOT"
+PYTHONPATH="$ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    exec poetry run python -c 'import sys; from i13c.cli import i13c; sys.argv[0] = "i13c"; i13c()' "$@"
