@@ -173,3 +173,20 @@ def can_consume_prefix_from_single_multi_producer():
     assert artifacts["entities/b"] == 2
     assert artifacts["entities/c"] == 3
     assert artifacts["result"] == 6
+
+
+def can_evaluate_without_mutating_input_nodes_list():
+    node: GraphNode = GraphNode(
+        builder=lambda: 42,
+        constraint=None,
+        produces=("abc",),
+        requires=frozenset(),
+    )
+
+    nodes = [node]
+    artifacts = evaluate(nodes, initial={"x": 41})
+
+    assert artifacts["x"] == 41
+    assert artifacts["abc"] == 42
+    assert len(nodes) == 1
+    assert nodes[0] is node

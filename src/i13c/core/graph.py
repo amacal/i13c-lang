@@ -105,6 +105,9 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
     def seed(value: Any) -> Callable[[], Any]:
         return lambda: value
 
+    # make copy to avoid mutating input list`
+    nodes = list(nodes)
+
     # seed initial artifacts
     for key, value in initial.items():
         nodes.append(
