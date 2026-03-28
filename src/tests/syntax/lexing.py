@@ -59,6 +59,8 @@ def can_reject_windows_line_endings():
 
     diagnostic = tokens.error[0]
     assert diagnostic.code == err.ERROR_1000
+    assert code.extract(diagnostic.ref) == b"\r"
+
     assert diagnostic.ref.offset == 5
     assert diagnostic.ref.length == 1
 
