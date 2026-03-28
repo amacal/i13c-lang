@@ -35,6 +35,7 @@ def can_build_live_flowgraph_without_need_of_pruning():
 
 def can_remove_callsite_after_terminal_call():
     _, program = prepare_program("""
+        asm ignored() { syscall; }
         asm halt() noreturn { syscall; }
         fn main() noreturn { halt(); ignored(); }
     """)
@@ -62,3 +63,14 @@ def can_remove_callsite_after_terminal_call():
 
     assert predecessors is not None
     assert predecessors == [flowgraph.entry]
+
+
+def can_skip_all_functions_if_any_unresolved_callsite_exists():
+    _, program = prepare_program("""
+        fn main() noreturn { halt(); ignored(); }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    # no function should be included in live flowgraph
+    assert semantic.live.flowgraph_by_function.size() == 0

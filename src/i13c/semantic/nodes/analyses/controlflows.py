@@ -112,16 +112,23 @@ def build_flowgraphs_live(
 ) -> OneToOne[FunctionId, FlowGraph]:
     out: Dict[FunctionId, FlowGraph] = {}
     noreturn: Set[CallableTarget] = set()
+    skippable: bool = False
 
-    for fid, terminality in terminalities.items():
-        if terminality.noreturn:
-            noreturn.add(fid)
+    # determine if we can skip prunning at all
+    for resolution in resolutions.values():
+        if not resolution.accepted:
+            skippable = True
 
-    for snid, snippet in snippets.items():
-        if snippet.noreturn:
-            noreturn.add(snid)
+    if not skippable:
+        for fid, terminality in terminalities.items():
+            if terminality.noreturn:
+                noreturn.add(fid)
 
-    for fid, flowgraph in flowgraph_by_function.items():
-        out[fid] = prune_flowgraph(flowgraph, resolutions, noreturn)
+        for snid, snippet in snippets.items():
+            if snippet.noreturn:
+                noreturn.add(snid)
+
+        for fid, flowgraph in flowgraph_by_function.items():
+            out[fid] = prune_flowgraph(flowgraph, resolutions, noreturn)
 
     return OneToOne[FunctionId, FlowGraph].instance(out)
