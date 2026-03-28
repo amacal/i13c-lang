@@ -11,6 +11,10 @@ class Diagnostic:
 
 
 def show(source: SourceCode, diagnostic: Diagnostic) -> str:
+
+    # sanity check to ensure diagnostics always have a message
+    assert diagnostic.message, "Diagnostic message cannot be empty"
+
     start = source.data.rfind(b"\n", 0, diagnostic.ref.offset)
     end = source.data.find(b"\n", diagnostic.ref.offset)
 
