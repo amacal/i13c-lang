@@ -695,3 +695,24 @@ def can_accept_call_with_parameter_reference():
 
     program = parse(code, tokens.value)
     assert isinstance(program, res.Ok)
+
+
+def can_accept_value_without_whitespace_around_equals():
+    code = open_text("fn main() { val value:u32=0x10; }")
+
+    tokens = tokenize(code)
+    assert isinstance(tokens, res.Ok)
+
+    program = parse(code, tokens.value)
+    assert isinstance(program, res.Ok)
+
+    function = program.value.functions[0]
+    assert len(function.statements) == 1
+
+    statement = function.statements[0]
+    assert isinstance(statement, tree.ValueStatement)
+    assert statement.name == b"value"
+    assert statement.type.name == b"u32"
+
+    assert isinstance(statement.expr, tree.IntegerLiteral)
+    assert statement.expr.value == 0x10
