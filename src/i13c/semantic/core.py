@@ -49,6 +49,9 @@ def derive_width(value: int) -> Width:
     if value < 0:
         raise ValueError("Cannot derive width for negative values")
 
+    if value > 0xFFFF_FFFF_FFFF_FFFF:
+        raise ValueError("Cannot derive width for values larger than u64")
+
     if value.bit_length() <= 8:
         return 8
 
