@@ -1,4 +1,4 @@
-from i13c import err, res
+from i13c import res
 from i13c.syntax.lexing import Token, Tokens, tokenize
 from i13c.syntax.source import open_text
 
@@ -58,7 +58,7 @@ def can_reject_windows_line_endings():
     assert len(tokens.error) == 1
 
     diagnostic = tokens.error[0]
-    assert diagnostic.code == err.ERROR_1000
+    assert diagnostic.code == "E1000"
     assert code.extract(diagnostic.ref) == b"\r"
 
     assert diagnostic.ref.offset == 5
@@ -301,7 +301,7 @@ def can_detect_unrecognized_token():
 
     assert diagnostic.ref.offset == 0
     assert diagnostic.ref.length == 1
-    assert diagnostic.code == err.ERROR_1000
+    assert diagnostic.code == "E1000"
 
 
 def can_detect_hex_with_invalid_characters():
@@ -316,7 +316,7 @@ def can_detect_hex_with_invalid_characters():
 
     assert diagnostic.ref.offset == 3
     assert diagnostic.ref.length == 1
-    assert diagnostic.code == err.ERROR_1002
+    assert diagnostic.code == "E1002"
 
 
 def can_detect_too_short_hex_when_eof():
@@ -331,7 +331,7 @@ def can_detect_too_short_hex_when_eof():
 
     assert diagnostic.ref.offset == 2
     assert diagnostic.ref.length == 1
-    assert diagnostic.code == err.ERROR_1001
+    assert diagnostic.code == "E1001"
 
 
 def can_detect_too_long_hex():
@@ -346,7 +346,7 @@ def can_detect_too_long_hex():
 
     assert diagnostic.ref.offset == 0
     assert diagnostic.ref.length == 19
-    assert diagnostic.code == err.ERROR_1003
+    assert diagnostic.code == "E1003"
 
 
 def can_reject_hex_without_digits():
@@ -361,7 +361,7 @@ def can_reject_hex_without_digits():
 
     assert diagnostic.ref.offset == 2
     assert diagnostic.ref.length == 1
-    assert diagnostic.code == err.ERROR_1002
+    assert diagnostic.code == "E1002"
 
 
 def can_detect_incomplete_hex():
@@ -376,7 +376,7 @@ def can_detect_incomplete_hex():
 
     assert diagnostic.ref.offset == 1
     assert diagnostic.ref.length == 1
-    assert diagnostic.code == err.ERROR_1001
+    assert diagnostic.code == "E1001"
 
 
 def can_detect_ident_followed_by_invalid_character():
@@ -391,4 +391,4 @@ def can_detect_ident_followed_by_invalid_character():
 
     assert diagnostic.ref.offset == 5
     assert diagnostic.ref.length == 1
-    assert diagnostic.code == err.ERROR_1002
+    assert diagnostic.code == "E1002"

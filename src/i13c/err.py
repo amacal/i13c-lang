@@ -1,13 +1,7 @@
-from typing import List, Set, Union
+from typing import List
 
 from i13c.core import diagnostics
-from i13c.syntax.lexing import TOKEN_NAMES
 from i13c.syntax.source import Span, SpanLike
-
-ERROR_1000 = "E1000"  # Unrecognized token
-ERROR_1001 = "E1001"  # Unexpected end of file
-ERROR_1002 = "E1002"  # Unexpected value
-ERROR_1003 = "E1003"  # Hexadecimal literal too large
 
 ERROR_2000 = "E2000"  # Unexpected end of tokens
 ERROR_2001 = "E2001"  # Unexpected token
@@ -28,48 +22,6 @@ ERROR_3011 = "E3011"  # Missing entrypoint function or snippet
 ERROR_3012 = "E3012"  # Multiple entrypoint functions
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
-
-
-def report_e2000_unexpected_end_of_tokens(offset: int) -> diagnostics.Diagnostic:
-    return diagnostics.Diagnostic(
-        ref=Span(offset=offset, length=0),
-        code=ERROR_2000,
-        message=f"Unexpected end of tokens at offset {offset}",
-    )
-
-
-def report_e2001_unexpected_token(
-    ref: SpanLike, expected: List[int], found: int
-) -> diagnostics.Diagnostic:
-    found_name = TOKEN_NAMES[found]
-    expected_names = [TOKEN_NAMES[token] for token in expected]
-
-    return diagnostics.Diagnostic(
-        ref=ref,
-        code=ERROR_2001,
-        message=f"Unexpected token '{found_name}' at offset {ref.offset}, expected one of: {expected_names}",
-    )
-
-
-def report_e2002_unexpected_keyword(
-    ref: SpanLike, expected: Union[List[bytes], Set[bytes]], found: bytes
-) -> diagnostics.Diagnostic:
-    return diagnostics.Diagnostic(
-        ref=ref,
-        code=ERROR_2002,
-        message=f"Unexpected keyword '{found.decode()}' at offset {ref.offset}, expected one of: {list(expected)}",
-    )
-
-
-def report_e2003_flag_already_specified(
-    ref: SpanLike, flag: bytes
-) -> diagnostics.Diagnostic:
-    return diagnostics.Diagnostic(
-        ref=ref,
-        code=ERROR_2003,
-        message=f"Function flag '{flag.decode()}' already specified at offset {ref.offset}",
-    )
-
 
 def report_e3000_unknown_instruction(ref: SpanLike) -> diagnostics.Diagnostic:
     return diagnostics.Diagnostic(
