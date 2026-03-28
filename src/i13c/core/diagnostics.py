@@ -17,8 +17,9 @@ def show(source: SourceCode, diagnostic: Diagnostic) -> str:
     start = 0 if start == -1 else start + 1
     end = len(source.data) if end == -1 else end
 
+    # respect zero-length spans by showing a single caret
     caret_start = diagnostic.ref.offset - start
-    caret_length = diagnostic.ref.length
+    caret_length = max(1, diagnostic.ref.length)
 
     line = source.data[start:end]
 
