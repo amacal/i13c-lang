@@ -27,6 +27,11 @@ class MissingLabelError(Exception):
         super().__init__(f"missing target label for relocation {target}")
 
 
+class DuplicateLabelError(Exception):
+    def __init__(self, target: int) -> None:
+        self.target = target
+        super().__init__(f"duplicate label with id {target}")
+
 
 def encode(instructions: List[Instruction]) -> bytes:
     bytecode = bytearray()
@@ -36,6 +41,10 @@ def encode(instructions: List[Instruction]) -> bytes:
     for instruction in instructions:
         if artifact := DISPATCH_TABLE[type(instruction)](instruction, bytecode):
             if isinstance(artifact, LabelArtifact):
+                # check for duplicate labels
+                if artifact.target in labels:
+                    raise DuplicateLabelError(artifact.target)
+
                 labels[artifact.target] = artifact
             else:
                 relocations.append(artifact)
