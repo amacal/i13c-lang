@@ -4,6 +4,7 @@ from pytest import raises
 
 from i13c.core.graph import (
     CyclicDependencyError,
+    DuplicateArtifactError,
     GraphGroup,
     GraphNode,
     Prefix,
@@ -222,3 +223,41 @@ def can_detect_cyclic_dependencies():
         evaluate([node1, node2], initial={})
 
     assert isinstance(error.value, CyclicDependencyError)
+
+
+def can_reject_multiple_nodes_producing_same_artifact():
+    node1: GraphNode = GraphNode(
+        builder=lambda: 1,
+        constraint=None,
+        produces=("abc",),
+        requires=frozenset(),
+    )
+    node2: GraphNode = GraphNode(
+        builder=lambda: 2,
+        constraint=None,
+        produces=("abc",),
+        requires=frozenset(),
+    )
+
+    with raises(DuplicateArtifactError) as error:
+        evaluate([node1, node2], initial={})
+
+    assert isinstance(error.value, DuplicateArtifactError)
+    assert error.value.artifact == "abc"
+    assert set(error.value.producers) == {node1, node2}
+
+
+def can_reject_single_node_producing_duplicate_artifacts():
+    node: GraphNode = GraphNode(
+        builder=lambda: 42,
+        constraint=None,
+        produces=("abc", "abc"),
+        requires=frozenset(),
+    )
+
+    with raises(DuplicateArtifactError) as error:
+        evaluate([node], initial={})
+
+    assert isinstance(error.value, DuplicateArtifactError)
+    assert error.value.artifact == "abc"
+    assert set(error.value.producers) == {node}

@@ -19,6 +19,13 @@ class CyclicDependencyError(Exception):
     pass
 
 
+class DuplicateArtifactError(Exception):
+    def __init__(self, artifact: str, producers: List[GraphNode]) -> None:
+        self.artifact = artifact
+        self.producers = producers
+        super().__init__(f"artifact {artifact} has multiple producers")
+
+
 @dataclass(kw_only=True, frozen=True)
 class Prefix:
     value: str
@@ -62,6 +69,11 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
 
     for node in nodes:
         for product in node.produces:
+
+            # check if product already has a producer, if so raise error
+            if product in producer:
+                raise DuplicateArtifactError(product, [producer[product], node])
+
             producer[product] = node
 
     # build dependency graph
