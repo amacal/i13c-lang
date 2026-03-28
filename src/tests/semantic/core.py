@@ -1,3 +1,5 @@
+from pytest import raises
+
 from i13c.semantic import core
 
 
@@ -25,3 +27,8 @@ def can_derive_width_respects_boundaries():
 
     # 0xffff_ffff_ffff_ffff is the max 64-bit value.
     assert core.derive_width(0xFFFF_FFFF_FFFF_FFFF) == 64
+
+
+def can_reject_deriving_width_for_negative_values():
+    with raises(ValueError):
+        core.derive_width(-1)

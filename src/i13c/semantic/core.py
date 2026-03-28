@@ -46,6 +46,9 @@ class Type:
 
 
 def derive_width(value: int) -> Width:
+    if value < 0:
+        raise ValueError("Cannot derive width for negative values")
+
     if value.bit_length() <= 8:
         return 8
 
