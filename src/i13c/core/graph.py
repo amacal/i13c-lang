@@ -16,7 +16,14 @@ from typing import (
 
 
 class CyclicDependencyError(Exception):
-    pass
+    def __init__(self) -> None:
+        super().__init__("graph contains cyclic dependencies")
+
+
+class MissingPrefixProducerError(Exception):
+    def __init__(self, prefix: Prefix) -> None:
+        self.prefix = prefix
+        super().__init__(f"no producer found for prefix {prefix.value}")
 
 
 class DuplicateArtifactError(Exception):
@@ -85,6 +92,9 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
             # make sure all requirements are some keys
             if isinstance(req, Prefix):
                 reqs = list(req.find(producer.keys()))
+
+                if not reqs:
+                    raise MissingPrefixProducerError(req)
             else:
                 reqs = [req]
 

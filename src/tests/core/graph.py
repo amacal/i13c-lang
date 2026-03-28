@@ -7,6 +7,7 @@ from i13c.core.graph import (
     DuplicateArtifactError,
     GraphGroup,
     GraphNode,
+    MissingPrefixProducerError,
     Prefix,
     evaluate,
 )
@@ -261,3 +262,25 @@ def can_reject_single_node_producing_duplicate_artifacts():
     assert isinstance(error.value, DuplicateArtifactError)
     assert error.value.artifact == "abc"
     assert set(error.value.producers) == {node}
+
+
+def can_reject_missing_prefix_dependency():
+    def build(entities: Dict[str, int]) -> int:
+        return len(entities)
+
+    consumer = GraphNode(
+        builder=build,
+        constraint=None,
+        produces=("result",),
+        requires=frozenset(
+            {
+                ("entities", Prefix(value="entities/")),
+            }
+        ),
+    )
+
+    with raises(MissingPrefixProducerError) as error:
+        evaluate([consumer], initial={})
+
+    assert isinstance(error.value, MissingPrefixProducerError)
+    assert error.value.prefix.value == "entities/"
