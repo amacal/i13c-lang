@@ -7,6 +7,7 @@ from i13c.syntax.source import SourceCode
 
 # - tabulators and other whitespace characters are
 #   on purpose excluded to enforce only spaces and newlines
+# - carriage return is not allowed to avoid Windows (CRLF) line endings
 # - hex digits are lowercase only to simplify the lexer
 #
 # it is a language design decision not a limitation of the lexer

@@ -47,6 +47,22 @@ def can_tokenize_new_lines():
     assert code.extract(tokens.value[3]) == b""
 
 
+def can_reject_windows_line_endings():
+    text = ";  ;;\r\n  "
+    code = open_text(text)
+
+    tokens = tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, res.Err)
+    assert len(tokens.error) == 1
+
+    diagnostic = tokens.error[0]
+    assert diagnostic.code == err.ERROR_1000
+    assert diagnostic.ref.offset == 5
+    assert diagnostic.ref.length == 1
+
+
 def can_tokenize_single_bytes():
     text = ";,}{)(:@][="
     code = open_text(text)
