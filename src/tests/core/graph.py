@@ -284,3 +284,29 @@ def can_reject_missing_prefix_dependency():
 
     assert isinstance(error.value, MissingPrefixProducerError)
     assert error.value.prefix.value == "entities/"
+
+
+def can_not_consume_prefix_if_no_prefix_artifacts_were_produced():
+    def build(entities: Dict[str, int]) -> int:
+        return len(entities)
+
+    producer = GraphNode(
+        builder=lambda: 1,
+        constraint=lambda: False,
+        produces=("entities/a",),
+        requires=frozenset(),
+    )
+
+    consumer = GraphNode(
+        builder=build,
+        constraint=None,
+        produces=("result",),
+        requires=frozenset(
+            {
+                ("entities", Prefix(value="entities/")),
+            }
+        ),
+    )
+
+    # producer didn't produce any artifacts, so consumer should be skipped
+    assert evaluate([producer, consumer], initial={}) == {}

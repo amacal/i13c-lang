@@ -151,7 +151,7 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
 
     def expand(req: Union[str, Prefix]) -> Optional[Any]:
         if isinstance(req, Prefix):
-            return {key: artifacts[key] for key in req.find(artifacts.keys())}
+            return {key: artifacts[key] for key in req.find(artifacts.keys())} or None
         else:
             return artifacts.get(req, None)
 
