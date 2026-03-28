@@ -1,4 +1,3 @@
-from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.semantic import prepare_program
 
@@ -15,6 +14,6 @@ def can_detect_multiple_entrypoints():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3012
+    assert diagnostic.code == "E3012"
     assert diagnostic.ref.offset == 0
     assert diagnostic.ref.length == 0

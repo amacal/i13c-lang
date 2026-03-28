@@ -1,4 +1,3 @@
-from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.semantic import prepare_program
 
@@ -14,7 +13,7 @@ def can_detect_overloaded_symbol_by_arity():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3007
+    assert diagnostic.code == "E3007"
     assert source.extract(diagnostic.ref) == b"foo()"
 
 
@@ -29,5 +28,5 @@ def can_detect_overloaded_symbol_by_range():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3007
+    assert diagnostic.code == "E3007"
     assert source.extract(diagnostic.ref) == b"foo(0x10)"

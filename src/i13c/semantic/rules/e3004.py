@@ -1,12 +1,12 @@
 from typing import List, Set
 
-from i13c import err
-from i13c.core import diagnostics
+from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
+from i13c.syntax.source import SpanLike
 
 
 def configure_e3004() -> GraphNode:
@@ -28,8 +28,8 @@ def validate_duplicated_parameter_names(
     snippets: OneToOne[SnippetId, Snippet],
     functions: OneToOne[FunctionId, Function],
     parameters: OneToOne[ParameterId, Parameter],
-) -> List[diagnostics.Diagnostic]:
-    diagnostics: List[diagnostics.Diagnostic] = []
+) -> List[Diagnostic]:
+    diagnostics: List[Diagnostic] = []
 
     for snippet in snippets.values():
         seen: Set[bytes] = set()
@@ -37,9 +37,7 @@ def validate_duplicated_parameter_names(
         for slot in snippet.slots:
             if slot.name.name in seen:
                 diagnostics.append(
-                    err.report_e3004_duplicated_parameter_names(
-                        snippet.ref, slot.name.name
-                    )
+                    report_e3004_duplicated_parameter_names(snippet.ref, slot.name.name)
                 )
             else:
                 seen.add(slot.name.name)
@@ -52,7 +50,7 @@ def validate_duplicated_parameter_names(
 
             if parameter.ident.name in seen:
                 diagnostics.append(
-                    err.report_e3004_duplicated_parameter_names(
+                    report_e3004_duplicated_parameter_names(
                         function.ref, parameter.ident.name
                     )
                 )
@@ -60,3 +58,11 @@ def validate_duplicated_parameter_names(
                 seen.add(parameter.ident.name)
 
     return diagnostics
+
+
+def report_e3004_duplicated_parameter_names(ref: SpanLike, found: bytes) -> Diagnostic:
+    return Diagnostic(
+        ref=ref,
+        code="E3004",
+        message=f"Duplicated parameter names for ({str(found)}) at offset {ref.offset}",
+    )

@@ -1,4 +1,3 @@
-from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.semantic import prepare_program
 
@@ -71,7 +70,7 @@ def can_reject_invalid_snippet_type_ranges():
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
-    assert diagnostics[0].code == err.ERROR_3001
+    assert diagnostics[0].code == "E3001"
     assert source.extract(diagnostics[0].ref) == b"main(value@rax: u64[0xff..0x00])"
 
 
@@ -83,7 +82,7 @@ def can_reject_invalid_function_type_ranges():
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
-    assert diagnostics[0].code == err.ERROR_3001
+    assert diagnostics[0].code == "E3001"
     assert source.extract(diagnostics[0].ref) == b"main(value: u64[0xff..0x00])"
 
 
@@ -95,7 +94,7 @@ def can_reject_invalid_snippet_ranges_out_of_type_ranges():
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
-    assert diagnostics[0].code == err.ERROR_3001
+    assert diagnostics[0].code == "E3001"
     assert source.extract(diagnostics[0].ref) == b"main(value@rax: u8[0x000..0x200])"
 
 
@@ -107,5 +106,5 @@ def can_reject_invalid_function_ranges_out_of_type_ranges():
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
-    assert diagnostics[0].code == err.ERROR_3001
+    assert diagnostics[0].code == "E3001"
     assert source.extract(diagnostics[0].ref) == b"main(value: u8[0x000..0x200])"

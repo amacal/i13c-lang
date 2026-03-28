@@ -1,10 +1,10 @@
 from typing import List, Set
 
-from i13c import err
-from i13c.core import diagnostics
+from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
+from i13c.syntax.source import SpanLike
 
 
 def configure_e3003() -> GraphNode:
@@ -18,8 +18,8 @@ def configure_e3003() -> GraphNode:
 
 def validate_duplicated_slot_bindings(
     snippets: OneToOne[SnippetId, Snippet],
-) -> List[diagnostics.Diagnostic]:
-    diagnostics: List[diagnostics.Diagnostic] = []
+) -> List[Diagnostic]:
+    diagnostics: List[Diagnostic] = []
 
     for snippet in snippets.values():
         seen: Set[bytes] = set()
@@ -33,7 +33,7 @@ def validate_duplicated_slot_bindings(
 
             if slot.bind.name in seen:
                 diagnostics.append(
-                    err.report_e3003_duplicated_slot_bindings(
+                    report_e3003_duplicated_slot_bindings(
                         snippet.ref,
                         slot.bind.name,
                     )
@@ -42,3 +42,11 @@ def validate_duplicated_slot_bindings(
                 seen.add(slot.bind.name)
 
     return diagnostics
+
+
+def report_e3003_duplicated_slot_bindings(ref: SpanLike, found: bytes) -> Diagnostic:
+    return Diagnostic(
+        ref=ref,
+        code="E3003",
+        message=f"Duplicated parameter bindings for ({str(found)}) at offset {ref.offset}",
+    )

@@ -1,13 +1,12 @@
 from typing import Iterable, List, Protocol, Set
 
-from i13c import err
-from i13c.core import diagnostics
+from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Identifier
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
-from i13c.syntax.source import Span
+from i13c.syntax.source import Span, SpanLike
 
 
 def configure_e3006() -> GraphNode:
@@ -40,14 +39,14 @@ def yield_callables(
 def validate_duplicated_function_names(
     functions: OneToOne[FunctionId, Function],
     snippets: OneToOne[SnippetId, Snippet],
-) -> List[diagnostics.Diagnostic]:
-    diagnostics: List[diagnostics.Diagnostic] = []
+) -> List[Diagnostic]:
+    diagnostics: List[Diagnostic] = []
     seen: Set[bytes] = set()
 
     for callable in yield_callables(functions, snippets):
         if callable.identifier.name in seen:
             diagnostics.append(
-                err.report_e3006_duplicated_function_names(
+                report_e3006_duplicated_function_names(
                     callable.ref,
                     callable.identifier.name,
                 )
@@ -56,3 +55,13 @@ def validate_duplicated_function_names(
             seen.add(callable.identifier.name)
 
     return diagnostics
+
+
+def report_e3006_duplicated_function_names(
+    ref: SpanLike, found: bytes
+) -> Diagnostic:
+    return Diagnostic(
+        ref=ref,
+        code="E3006",
+        message=f"Duplicated function names for ({str(found)}) at offset {ref.offset}",
+    )

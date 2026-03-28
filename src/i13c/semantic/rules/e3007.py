@@ -1,13 +1,13 @@
 from typing import List, Optional, Union
 
-from i13c import err
-from i13c.core import diagnostics
+from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
+from i13c.syntax.source import SpanLike
 
 
 def configure_e3007() -> GraphNode:
@@ -31,8 +31,8 @@ def validate_called_symbol_resolved(
     snippets: OneToOne[SnippetId, Snippet],
     callsites: OneToOne[CallSiteId, CallSite],
     resolutions: OneToOne[CallSiteId, CallSiteResolution],
-) -> List[diagnostics.Diagnostic]:
-    diagnostics: List[diagnostics.Diagnostic] = []
+) -> List[Diagnostic]:
+    diagnostics: List[Diagnostic] = []
 
     for cid, resolution in resolutions.items():
         if not resolution.accepted:
@@ -58,7 +58,7 @@ def validate_called_symbol_resolved(
                     variants.append(f"{reason}: {target.signature()}")
 
                 diagnostics.append(
-                    err.report_e3007_no_matching_overload(
+                    report_e3007_no_matching_overload(
                         callsites.get(cid).ref,
                         callsites.get(cid).callee.name,
                         variants,
@@ -66,3 +66,23 @@ def validate_called_symbol_resolved(
                 )
 
     return diagnostics
+
+
+def report_e3007_no_matching_overload(
+    ref: SpanLike, name: bytes, candidates: List[str]
+) -> Diagnostic:
+    template = (
+        "Called symbol '{name}' has no matching overload.\n"
+        "Tried candidates:\n{candidates}"
+    )
+
+    args = dict(
+        name=name.decode(),
+        candidates="\n".join([f"  - {c}" for c in candidates]),
+    )
+
+    return Diagnostic(
+        ref=ref,
+        code="E3007",
+        message=template.format(**args),
+    )

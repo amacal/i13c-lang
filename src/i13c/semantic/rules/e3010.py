@@ -1,11 +1,11 @@
 from typing import List
 
-from i13c import err
-from i13c.core import diagnostics
+from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.indices.terminalities import Terminality
+from i13c.syntax.source import SpanLike
 
 
 def configure_e3010() -> GraphNode:
@@ -25,8 +25,8 @@ def configure_e3010() -> GraphNode:
 def validate_called_symbol_terminality(
     functions: OneToOne[FunctionId, Function],
     terminalities: OneToOne[FunctionId, Terminality],
-) -> List[diagnostics.Diagnostic]:
-    diagnostics: List[diagnostics.Diagnostic] = []
+) -> List[Diagnostic]:
+    diagnostics: List[Diagnostic] = []
 
     for fid, terminality in terminalities.items():
         # we need to compare against the function definition
@@ -35,10 +35,20 @@ def validate_called_symbol_terminality(
         # if the terminality expectations do not match, report an error
         if function.noreturn != terminality.noreturn:
             diagnostics.append(
-                err.report_e3010_function_has_wrong_terminality(
+                report_e3010_function_has_wrong_terminality(
                     function.ref,
                     function.identifier.name,
                 )
             )
 
     return diagnostics
+
+
+def report_e3010_function_has_wrong_terminality(
+    ref: SpanLike, name: bytes
+) -> Diagnostic:
+    return Diagnostic(
+        ref=ref,
+        code="E3010",
+        message=f"Function '{str(name)}' has wrong terminality: does not match declaration",
+    )

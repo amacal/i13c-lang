@@ -1,4 +1,3 @@
-from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.semantic import prepare_program
 
@@ -14,7 +13,7 @@ def can_detect_duplicated_snippet_names():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3006
+    assert diagnostic.code == "E3006"
     assert source.extract(diagnostic.ref) == b"main()"
 
 
@@ -29,7 +28,7 @@ def can_detect_duplicated_function_names():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3006
+    assert diagnostic.code == "E3006"
     assert source.extract(diagnostic.ref) == b"main()"
 
 
@@ -44,5 +43,5 @@ def can_detect_duplicated_mixed_function_names():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3006
+    assert diagnostic.code == "E3006"
     assert source.extract(diagnostic.ref) == b"main()"

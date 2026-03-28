@@ -1,4 +1,3 @@
-from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.semantic import prepare_program
 
@@ -53,5 +52,5 @@ def can_detect_invalid_instruction():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3000
+    assert diagnostic.code == "E3000"
     assert source.extract(diagnostic.ref) == b"xyz;"

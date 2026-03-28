@@ -1,4 +1,3 @@
-from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.semantic import prepare_program
 
@@ -24,7 +23,7 @@ def can_detect_nonexistent_entrypoint_even_if_function_is_called_main2():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3011
+    assert diagnostic.code == "E3011"
     assert source.extract(diagnostic.ref) == b""
 
 
@@ -38,7 +37,7 @@ def can_reject_main_as_entrypoint_when_noreturn_is_false():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3011
+    assert diagnostic.code == "E3011"
     assert source.extract(diagnostic.ref) == b""
 
 

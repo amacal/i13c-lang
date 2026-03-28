@@ -1,4 +1,3 @@
-from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.semantic import prepare_program
 
@@ -14,7 +13,7 @@ def can_detect_invalid_operand_types_of_mov():
 
     # all of them are related to E3002
     for diagnostic in diagnostics:
-        assert diagnostic.code == err.ERROR_3002
+        assert diagnostic.code == "E3002"
         assert source.extract(diagnostic.ref) == b"mov 0x1234, 0x5678;"
 
 
@@ -27,7 +26,7 @@ def can_detect_invalid_operand_types_of_shl():
 
     assert len(diagnostics) == 1
 
-    assert diagnostics[0].code == err.ERROR_3002
+    assert diagnostics[0].code == "E3002"
     assert source.extract(diagnostics[0].ref) == b"shl rax, rbx;"
 
 

@@ -1,4 +1,3 @@
-from i13c import err
 from i13c.graph.nodes import run as run_graph
 from tests.semantic import prepare_program
 
@@ -25,7 +24,7 @@ def can_detect_non_terminal_caller_symbol():
     assert len(diagnostics) == 1
     diagnostic = diagnostics[0]
 
-    assert diagnostic.code == err.ERROR_3010
+    assert diagnostic.code == "E3010"
     assert source.extract(diagnostic.ref) == b"bar()"
 
 
