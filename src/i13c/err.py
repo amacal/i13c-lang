@@ -3,11 +3,6 @@ from typing import List
 from i13c.core import diagnostics
 from i13c.syntax.source import Span, SpanLike
 
-ERROR_2000 = "E2000"  # Unexpected end of tokens
-ERROR_2001 = "E2001"  # Unexpected token
-ERROR_2002 = "E2002"  # Unexpected keyword
-ERROR_2003 = "E2003"  # Function flag already specified
-
 ERROR_3000 = "E3000"  # Unknown mnemonic
 ERROR_3001 = "E3001"  # Invalid type ranges
 ERROR_3002 = "E3002"  # Invalid operand types
@@ -22,14 +17,6 @@ ERROR_3011 = "E3011"  # Missing entrypoint function or snippet
 ERROR_3012 = "E3012"  # Multiple entrypoint functions
 
 ERROR_4000 = "E4000"  # Unsupported mnemonic
-
-def report_e3000_unknown_instruction(ref: SpanLike) -> diagnostics.Diagnostic:
-    return diagnostics.Diagnostic(
-        ref=ref,
-        code=ERROR_3000,
-        message=f"Unknown instruction mnemonic at offset {ref.offset}",
-    )
-
 
 def report_e3001_invalid_type_ranges(
     ref: SpanLike, lower: int, upper: int

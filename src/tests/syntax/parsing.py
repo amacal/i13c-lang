@@ -1,4 +1,4 @@
-from i13c import err, res
+from i13c import res
 from i13c.syntax import tree
 from i13c.syntax.lexing import tokenize
 from i13c.syntax.parsing import parse
@@ -526,7 +526,7 @@ def can_handle_end_of_tokens():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2000
+    assert diagnostic.code == "E2000"
     assert diagnostic.ref.offset == len(code.data)
     assert diagnostic.ref.length == 0
 
@@ -544,7 +544,7 @@ def can_handle_unexpected_token():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2001
+    assert diagnostic.code == "E2001"
     assert diagnostic.ref.offset == 21  # offset of "rbx"
     assert diagnostic.ref.length == 3  # length of "rbx"
 
@@ -562,7 +562,7 @@ def can_handle_missing_parameter_comma():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2001
+    assert diagnostic.code == "E2001"
     assert diagnostic.ref.offset == 14  # offset of "b"
     assert diagnostic.ref.length == 1  # length of "b"
 
@@ -580,7 +580,7 @@ def can_handle_missing_slot_comma():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2001
+    assert diagnostic.code == "E2001"
     assert diagnostic.ref.offset == 23  # offset of "id"
     assert diagnostic.ref.length == 2  # length of "id"
 
@@ -598,7 +598,7 @@ def can_detect_unknown_function_keyword():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2002
+    assert diagnostic.code == "E2002"
     assert diagnostic.ref.offset == 0  # offset of "noreturn"
     assert diagnostic.ref.length == 8  # length of "noreturn"
 
@@ -616,7 +616,7 @@ def can_detect_duplicated_flags_noreturn():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2003
+    assert diagnostic.code == "E2003"
     assert diagnostic.ref.offset == 20  # offset of 2nd "noreturn"
     assert diagnostic.ref.length == 8  # length of 2nd "noreturn
 
@@ -634,7 +634,7 @@ def can_detect_duplicated_flags_clobbers():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2003
+    assert diagnostic.code == "E2003"
     assert diagnostic.ref.offset == 23  # offset of 2nd "clobbers"
     assert diagnostic.ref.length == 8  # length of 2nd "clobbers"
 
@@ -654,7 +654,7 @@ def can_detect_duplicated_flags_clobbers_with_noreturn_after():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2003
+    assert diagnostic.code == "E2003"
     assert diagnostic.ref.offset == 23  # offset of 2nd "clobbers"
     assert diagnostic.ref.length == 8  # length of 2nd "clobbers"
 
@@ -672,7 +672,7 @@ def can_detect_duplicated_flags_noreturn_with_clobbers_after():
     assert len(diagnostics) == 1
 
     diagnostic = diagnostics[0]
-    assert diagnostic.code == err.ERROR_2003
+    assert diagnostic.code == "E2003"
     assert diagnostic.ref.offset == 20  # offset of 2nd "noreturn"
     assert diagnostic.ref.length == 8  # length of 2nd "noreturn"
 
