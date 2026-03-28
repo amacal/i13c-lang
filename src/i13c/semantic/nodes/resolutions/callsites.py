@@ -2,7 +2,7 @@ from typing import Dict, Iterable, List, Protocol, Tuple
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.res import Err, Ok, Result
+from i13c.core.result import Err, Ok, Result
 from i13c.semantic.core import Identifier, Type
 from i13c.semantic.typing.entities.callables import Callable
 from i13c.semantic.typing.entities.callsites import Argument, CallSite, CallSiteId

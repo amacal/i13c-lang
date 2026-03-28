@@ -5,8 +5,8 @@ from typing import Any, Iterable, List, NoReturn
 
 import click
 
-from i13c import res
 from i13c.core.diagnostics import Diagnostic, show
+from i13c.core.result import A, Result, unwrap
 from i13c.syntax.source import SourceCode
 
 
@@ -33,7 +33,7 @@ def emit_and_exit(
     sys.exit(1)
 
 
-def unwrap(
-    result: res.Result[res.A, List[Diagnostic]], /, source: SourceCode
-) -> res.A:
-    return res.unwrap(result, partial(emit_and_exit, source=source))
+def unwrap_result(
+    result: Result[A, List[Diagnostic]], /, source: SourceCode
+) -> A:
+    return unwrap(result, partial(emit_and_exit, source=source))

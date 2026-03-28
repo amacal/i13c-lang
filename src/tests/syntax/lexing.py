@@ -1,4 +1,4 @@
-from i13c import res
+from i13c.core import result
 from i13c.syntax.lexing import Token, Tokens, tokenize
 from i13c.syntax.source import open_text
 
@@ -10,7 +10,7 @@ def can_tokenize_few_tokens():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 5
 
     assert tokens.value[0] == Token(code=Tokens.HEX, offset=0, length=6)
@@ -33,7 +33,7 @@ def can_tokenize_new_lines():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 4
 
     assert tokens.value[0] == Token(code=Tokens.SEMICOLON, offset=0, length=1)
@@ -54,7 +54,7 @@ def can_reject_windows_line_endings():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Err)
+    assert isinstance(tokens, result.Err)
     assert len(tokens.error) == 1
 
     diagnostic = tokens.error[0]
@@ -72,7 +72,7 @@ def can_tokenize_single_bytes():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 12
 
     assert tokens.value[0] == Token(code=Tokens.SEMICOLON, offset=0, length=1)
@@ -109,7 +109,7 @@ def can_tokenize_range_operator():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 4
 
     assert tokens.value[0] == Token(code=Tokens.HEX, offset=0, length=4)
@@ -130,7 +130,7 @@ def can_tokenize_range_operator_with_spaces():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 4
 
     assert tokens.value[0] == Token(code=Tokens.HEX, offset=0, length=4)
@@ -151,7 +151,7 @@ def can_tokenize_last_hex():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 2
 
     assert tokens.value[0] == Token(code=Tokens.HEX, offset=0, length=8)
@@ -168,7 +168,7 @@ def can_tokenize_last_ident():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 2
 
     assert tokens.value[0] == Token(code=Tokens.IDENT, offset=0, length=6)
@@ -185,7 +185,7 @@ def can_tokenize_registers():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 5
 
     assert tokens.value[0] == Token(code=Tokens.IDENT, offset=0, length=3)
@@ -208,7 +208,7 @@ def can_tokenize_mnemonics():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 3
 
     assert tokens.value[0] == Token(code=Tokens.IDENT, offset=0, length=7)
@@ -227,7 +227,7 @@ def can_tokenize_keywords():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 7
 
     assert tokens.value[0] == Token(code=Tokens.KEYWORD, offset=0, length=3)
@@ -254,7 +254,7 @@ def can_tokenize_types():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 5
 
     assert tokens.value[0] == Token(code=Tokens.TYPE, offset=0, length=2)
@@ -277,7 +277,7 @@ def can_omit_whitespaces():
     tokens = tokenize(code)
     assert tokens is not None
 
-    assert isinstance(tokens, res.Ok)
+    assert isinstance(tokens, result.Ok)
     assert len(tokens.value) == 3
 
     assert tokens.value[0] == Token(code=Tokens.HEX, offset=2, length=4)
@@ -293,7 +293,7 @@ def can_detect_unrecognized_token():
     code = open_text("\xff")
     tokens = tokenize(code)
 
-    assert isinstance(tokens, res.Err)
+    assert isinstance(tokens, result.Err)
     diagnostics = tokens.error
 
     assert len(diagnostics) == 1
@@ -308,7 +308,7 @@ def can_detect_hex_with_invalid_characters():
     code = open_text("0x1g")
     tokens = tokenize(code)
 
-    assert isinstance(tokens, res.Err)
+    assert isinstance(tokens, result.Err)
     diagnostics = tokens.error
 
     assert len(diagnostics) == 1
@@ -323,7 +323,7 @@ def can_detect_too_short_hex_when_eof():
     code = open_text("0x")
     tokens = tokenize(code)
 
-    assert isinstance(tokens, res.Err)
+    assert isinstance(tokens, result.Err)
     diagnostics = tokens.error
 
     assert len(diagnostics) == 1
@@ -338,7 +338,7 @@ def can_detect_too_long_hex():
     code = open_text("0x0011223344556677889")
     tokens = tokenize(code)
 
-    assert isinstance(tokens, res.Err)
+    assert isinstance(tokens, result.Err)
     diagnostics = tokens.error
 
     assert len(diagnostics) == 1
@@ -353,7 +353,7 @@ def can_reject_hex_without_digits():
     code = open_text("0x;")
     tokens = tokenize(code)
 
-    assert isinstance(tokens, res.Err)
+    assert isinstance(tokens, result.Err)
     diagnostics = tokens.error
 
     assert len(diagnostics) == 1
@@ -368,7 +368,7 @@ def can_detect_incomplete_hex():
     code = open_text("0")
     tokens = tokenize(code)
 
-    assert isinstance(tokens, res.Err)
+    assert isinstance(tokens, result.Err)
     diagnostics = tokens.error
 
     assert len(diagnostics) == 1
@@ -383,7 +383,7 @@ def can_detect_ident_followed_by_invalid_character():
     code = open_text("hello-xab")
     tokens = tokenize(code)
 
-    assert isinstance(tokens, res.Err)
+    assert isinstance(tokens, result.Err)
     diagnostics = tokens.error
 
     assert len(diagnostics) == 1

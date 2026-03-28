@@ -1,9 +1,9 @@
 from typing import List
 
 from i13c.core.diagnostics import Diagnostic
+from i13c.core.result import Err, Ok
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.graph.nodes import run as run_graph
-from i13c.res import Err, Ok
 from i13c.syntax.lexing import tokenize
 from i13c.syntax.parsing import parse
 from i13c.syntax.source import open_text

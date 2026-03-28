@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
-from i13c import res
+from i13c.core import result
 from i13c.core.diagnostics import Diagnostic
 from i13c.syntax.source import SourceCode, Span
 
@@ -229,7 +229,7 @@ class Token:
         return Token(code=Tokens.EQUALS, offset=offset, length=1)
 
 
-def tokenize(code: SourceCode) -> res.Result[List[Token], List[Diagnostic]]:
+def tokenize(code: SourceCode) -> result.Result[List[Token], List[Diagnostic]]:
     tokens: List[Token] = []
     diagnostics: List[Diagnostic] = []
     lexer = Lexer(code=code, offset=0)
@@ -296,12 +296,12 @@ def tokenize(code: SourceCode) -> res.Result[List[Token], List[Diagnostic]]:
 
     # any diagnostics stops further processing
     if diagnostics:
-        return res.Err(diagnostics)
+        return result.Err(diagnostics)
 
     # append last EOF token
     tokens.append(Token.eof_token(offset=lexer.offset))
 
-    return res.Ok(tokens)
+    return result.Ok(tokens)
 
 
 def skip_whitespace(lexer: Lexer) -> None:

@@ -9,7 +9,7 @@ from typing import (
 
 import click
 
-from i13c.cli import unwrap
+from i13c.cli import unwrap_result
 from i13c.cli.model.abstract import AbstractListExtractor, ListItem
 from i13c.cli.model.entities import ENTITIES
 from i13c.cli.model.indices import INDICES
@@ -62,8 +62,8 @@ def load_artifacts(path: str) -> GraphArtifacts:
         text = f.read()
 
     code = open_text(text)
-    tokens = unwrap(tokenize(code), source=code)
-    program = unwrap(parse(code, tokens), source=code)
+    tokens = unwrap_result(tokenize(code), source=code)
+    program = unwrap_result(parse(code, tokens), source=code)
     artifacts = run_graph(program)
 
     return artifacts

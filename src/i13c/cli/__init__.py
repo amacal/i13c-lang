@@ -5,7 +5,7 @@ from dataclasses import asdict
 import click
 
 from i13c import elf
-from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap
+from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap_result
 from i13c.cli.model import attach
 from i13c.encoding import encode
 from i13c.graph.nodes import run as run_graph
@@ -26,7 +26,7 @@ def lex_command(path: str) -> None:
         text = f.read()
 
     code = open_text(text)
-    tokens = unwrap(tokenize(code), source=code)
+    tokens = unwrap_result(tokenize(code), source=code)
 
     for token in tokens:
         key = f"{token.code:03}:{token.offset:04}:{token.length:02}"
@@ -43,8 +43,8 @@ def ast_command(path: str) -> None:
         text = f.read()
 
     code = open_text(text)
-    tokens = unwrap(tokenize(code), source=code)
-    program = unwrap(parse(code, tokens), source=code)
+    tokens = unwrap_result(tokenize(code), source=code)
+    program = unwrap_result(parse(code, tokens), source=code)
 
     click.echo(json.dumps(asdict(program), cls=BytesAsTextEncoder))
 
@@ -56,9 +56,9 @@ def elf_command(path: str) -> None:
         text = f.read()
 
     code = open_text(text)
-    tokens = unwrap(tokenize(code), source=code)
+    tokens = unwrap_result(tokenize(code), source=code)
 
-    program = unwrap(parse(code, tokens), source=code)
+    program = unwrap_result(parse(code, tokens), source=code)
     artifacts = run_graph(program)
 
     if artifacts.rules().count() > 0:
