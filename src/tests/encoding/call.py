@@ -1,7 +1,8 @@
 from typing import List
+
 from pytest import raises
 
-from i13c.encoding import MissingLabelError, encode, DuplicateLabelError
+from i13c.encoding import DuplicateLabelError, MissingLabelError, encode
 from i13c.llvm.typing.flows import BlockId
 from i13c.llvm.typing.instructions import Call, Instruction, Label, Return
 

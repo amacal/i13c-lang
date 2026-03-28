@@ -6,12 +6,14 @@ from i13c.llvm.typing.instructions import (
     AddRegImm,
     Call,
     Instruction,
+    Jump,
     Label,
     MovOffImm,
     MovOffReg,
     MovRegImm,
     MovRegOff,
     MovRegReg,
+    Nop,
     PopOff,
     PushOff,
     Return,
@@ -552,6 +554,29 @@ def encode_call(
     return RelocationArtifact(target=target, offset=offset)
 
 
+def encode_jump(
+    instruction: Jump, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    # emit E9 cd --- where cd is a signed 32-bit offset
+    bytecode.extend([0xE9, 0x00, 0x00, 0x00, 0x00])
+
+    # record relocation info
+    offset = len(bytecode) - 4
+    target = instruction.target.value
+
+    # record relocation to be fixed up later
+    return RelocationArtifact(target=target, offset=offset)
+
+
+def encode_nop(
+    instruction: Nop, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+    # 90 is simply NOP
+    bytecode.extend([0x90])
+
+
+
+
 @dataclass(kw_only=True)
 class LabelArtifact:
     target: int
@@ -585,4 +610,6 @@ DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
     Return: encode_return,
     Label: encode_label,
     Call: encode_call,
+    Jump: encode_jump,
+    Nop: encode_nop,
 }  # pyright: ignore[reportAssignmentType]
