@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
-from i13c import err, res
-from i13c.core import diagnostics
-from i13c.syntax.source import SourceCode
+from i13c import res
+from i13c.core.diagnostics import Diagnostic
+from i13c.syntax.source import SourceCode, Span
 
 # - tabulators and other whitespace characters are
 #   on purpose excluded to enforce only spaces and newlines
@@ -229,9 +229,9 @@ class Token:
         return Token(code=Tokens.EQUALS, offset=offset, length=1)
 
 
-def tokenize(code: SourceCode) -> res.Result[List[Token], List[diagnostics.Diagnostic]]:
+def tokenize(code: SourceCode) -> res.Result[List[Token], List[Diagnostic]]:
     tokens: List[Token] = []
-    diagnostics: List[diagnostics.Diagnostic] = []
+    diagnostics: List[Diagnostic] = []
     lexer = Lexer(code=code, offset=0)
 
     try:
@@ -282,17 +282,17 @@ def tokenize(code: SourceCode) -> res.Result[List[Token], List[diagnostics.Diagn
 
             # unrecognized token
             elif not lexer.is_eof():
-                diagnostics.append(err.report_e1000_unrecognized_token(lexer.offset))
+                diagnostics.append(report_e1000_unrecognized_token(lexer.offset))
                 break
 
     except TooLargeHex as e:
-        diagnostics.append(err.report_e1003_too_large_hex(e.offset, e.length))
+        diagnostics.append(report_e1003_too_large_hex(e.offset, e.length))
 
     except UnexpectedEndOfFile as e:
-        diagnostics.append(err.report_e1001_unexpected_end_of_file(e.offset))
+        diagnostics.append(report_e1001_unexpected_end_of_file(e.offset))
 
     except UnexpectedValue as e:
-        diagnostics.append(err.report_e1002_unexpected_value(e.offset, e.expected))
+        diagnostics.append(report_e1002_unexpected_value(e.offset, e.expected))
 
     # any diagnostics stops further processing
     if diagnostics:
@@ -437,3 +437,37 @@ def emit_at(lexer: Lexer, tokens: List[Token]) -> None:
 def emit_equals(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.equals_token(offset=lexer.offset))
     lexer.advance(1)  # consume '='
+
+
+def report_e1000_unrecognized_token(offset: int) -> Diagnostic:
+    return Diagnostic(
+        code="E1000",
+        ref=Span(offset=offset, length=1),
+        message="Unrecognized token",
+    )
+
+
+def report_e1001_unexpected_end_of_file(offset: int) -> Diagnostic:
+    return Diagnostic(
+        code="E1001",
+        ref=Span(offset=offset, length=1),
+        message="Unexpected end of file",
+    )
+
+
+def report_e1002_unexpected_value(offset: int, expected: bytes) -> Diagnostic:
+    characters = [repr(chr(character)) for character in sorted(expected)]
+
+    return Diagnostic(
+        code="E1002",
+        ref=Span(offset=offset, length=1),
+        message=f"Unexpected value at offset {offset}, expected one of: {characters}",
+    )
+
+
+def report_e1003_too_large_hex(offset: int, length: int) -> Diagnostic:
+    return Diagnostic(
+        code="E1003",
+        ref=Span(offset=offset, length=length),
+        message=f"Hexadecimal literal too large at offset {offset}",
+    )

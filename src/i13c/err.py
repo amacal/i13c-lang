@@ -30,40 +30,6 @@ ERROR_3012 = "E3012"  # Multiple entrypoint functions
 ERROR_4000 = "E4000"  # Unsupported mnemonic
 
 
-def report_e1000_unrecognized_token(offset: int) -> diagnostics.Diagnostic:
-    return diagnostics.Diagnostic(
-        ref=Span(offset=offset, length=1),
-        code=ERROR_1000,
-        message="Unrecognized token",
-    )
-
-
-def report_e1001_unexpected_end_of_file(offset: int) -> diagnostics.Diagnostic:
-    return diagnostics.Diagnostic(
-        ref=Span(offset=offset, length=1),
-        code=ERROR_1001,
-        message="Unexpected end of file",
-    )
-
-
-def report_e1002_unexpected_value(offset: int, expected: bytes) -> diagnostics.Diagnostic:
-    characters = [repr(chr(character)) for character in sorted(expected)]
-
-    return diagnostics.Diagnostic(
-        ref=Span(offset=offset, length=1),
-        code=ERROR_1002,
-        message=f"Unexpected value at offset {offset}, expected one of: {characters}",
-    )
-
-
-def report_e1003_too_large_hex(offset: int, length: int) -> diagnostics.Diagnostic:
-    return diagnostics.Diagnostic(
-        ref=Span(offset=offset, length=length),
-        code=ERROR_1003,
-        message=f"Hexadecimal literal too large at offset {offset}",
-    )
-
-
 def report_e2000_unexpected_end_of_tokens(offset: int) -> diagnostics.Diagnostic:
     return diagnostics.Diagnostic(
         ref=Span(offset=offset, length=0),
