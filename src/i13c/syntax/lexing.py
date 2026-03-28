@@ -337,7 +337,8 @@ def read_hex(lexer: Lexer, tokens: List[Token]) -> None:
     while not lexer.is_eof() and lexer.is_in(CLASS_HEX):
         lexer.advance(1)  # consume hex digits
 
-        # arbitrary limit to prevent overflow
+        # literals larger than 16 hex digits are rejected, even with leading zeros
+        # it is design decision to limit hex literals to 64 bits to simplify the lexer
         if lexer.offset - start_offset > 18:
             raise TooLargeHex(start_offset, lexer.offset - start_offset)
 
