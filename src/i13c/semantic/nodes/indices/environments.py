@@ -41,7 +41,7 @@ def build_environments(
         flowgraph = controlflows.get(fid)
         node: FlowNode = flowgraph.entry
 
-        # collect intitial environment
+        # collect initial environment
         env = collect_entry(variables, dataflows, flowgraph.entry)
         environments[flowgraph.entry] = Environment(owner=fid, variables=env)
 

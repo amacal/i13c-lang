@@ -84,7 +84,7 @@ def can_generate_instance_for_accepted_callsite():
     snippet = semantic.basic.snippets.get(value.target)
     assert snippet.identifier.name == b"exit"
 
-    # removed immedate out-of-bound argument
+    # removed immediate out-of-bounds argument
     assert len(value.bindings) == 0
 
     # rewritten operand from reference to immediate
@@ -99,7 +99,7 @@ def can_generate_instance_for_accepted_callsite():
     assert operand.kind == b"immediate"
     assert isinstance(operand.target, Immediate)
 
-    # its value and with are from callsite
+    # its value and width are from callsite
     assert operand.target.value == 0x42
     assert operand.target.width == 8
 
