@@ -46,3 +46,20 @@ def can_show_caret_for_zero_length_span():
                          |-> unexpected end of tokens
         """
     )
+
+
+def can_show_caret_with_multiline_span():
+    source = open_text("fn main() {\n    call()\n}\n")
+    diagnostic = Diagnostic(
+        ref=Span(offset=10, length=15),
+        code="EXXXX",
+        message="multiline diagnostic",
+    )
+
+    assert show(source, diagnostic) == left(
+        """
+            fn main() {
+                      ^
+                      |-> multiline diagnostic
+        """
+    )
