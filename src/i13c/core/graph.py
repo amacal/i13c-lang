@@ -15,6 +15,10 @@ from typing import (
 )
 
 
+class CyclicDependencyError(Exception):
+    pass
+
+
 @dataclass(kw_only=True, frozen=True)
 class Prefix:
     value: str
@@ -94,6 +98,10 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
             indeg[nxt] -= 1
             if indeg[nxt] == 0:
                 queue.append(nxt)
+
+    # diff length of output with input means there is a cycle in the graph
+    if len(out) != len(nodes):
+        raise CyclicDependencyError()
 
     return out
 

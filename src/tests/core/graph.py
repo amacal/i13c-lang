@@ -1,6 +1,14 @@
 from typing import Dict, Tuple
 
-from i13c.core.graph import GraphGroup, GraphNode, Prefix, evaluate
+from pytest import raises
+
+from i13c.core.graph import (
+    CyclicDependencyError,
+    GraphGroup,
+    GraphNode,
+    Prefix,
+    evaluate,
+)
 
 
 def can_evaluate_one_node_without_dependencies():
@@ -190,3 +198,27 @@ def can_evaluate_without_mutating_input_nodes_list():
     assert artifacts["abc"] == 42
     assert len(nodes) == 1
     assert nodes[0] is node
+
+
+def can_detect_cyclic_dependencies():
+    def build(x: int) -> int:
+        return x + 1
+
+    node1: GraphNode = GraphNode(
+        builder=build,
+        constraint=None,
+        produces=("abc",),
+        requires=frozenset({("x", "cde")}),
+    )
+
+    node2: GraphNode = GraphNode(
+        builder=build,
+        constraint=None,
+        produces=("cde",),
+        requires=frozenset({("x", "abc")}),
+    )
+
+    with raises(CyclicDependencyError) as error:
+        evaluate([node1, node2], initial={})
+
+    assert isinstance(error.value, CyclicDependencyError)
