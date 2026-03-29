@@ -7,6 +7,7 @@ from i13c.core.graph import (
     DuplicateArtifactError,
     GraphGroup,
     GraphNode,
+    InvalidDatasetArityError,
     MissingArtifactProducerError,
     MissingPrefixProducerError,
     Prefix,
@@ -330,3 +331,37 @@ def can_reject_missing_artifact_dependency():
     assert isinstance(error.value, MissingArtifactProducerError)
     assert error.value.artifact == "entities/a"
     assert error.value.node is consumer
+
+
+def can_reject_multi_artifact_node_returning_non_tuple():
+    node: GraphNode = GraphNode(
+        builder=lambda: 42,
+        constraint=None,
+        produces=("abc", "cde"),
+        requires=frozenset(),
+    )
+
+    with raises(InvalidDatasetArityError) as error:
+        evaluate([node], initial={})
+
+    assert isinstance(error.value, InvalidDatasetArityError)
+    assert error.value.node is node
+    assert error.value.expected == 2
+    assert error.value.actual == 1
+
+
+def can_reject_multi_artifact_node_returning_wrong_tuple_arity():
+    node: GraphNode = GraphNode(
+        builder=lambda: (42,),
+        constraint=None,
+        produces=("abc", "cde"),
+        requires=frozenset(),
+    )
+
+    with raises(InvalidDatasetArityError) as error:
+        evaluate([node], initial={})
+
+    assert isinstance(error.value, InvalidDatasetArityError)
+    assert error.value.node is node
+    assert error.value.expected == 2
+    assert error.value.actual == 1

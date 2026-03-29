@@ -26,7 +26,6 @@ class MissingPrefixProducerError(Exception):
         super().__init__(f"no producer found for prefix {prefix.value}")
 
 
-
 class MissingArtifactProducerError(Exception):
     def __init__(self, node: GraphNode, artifact: str) -> None:
         self.node = node
@@ -41,6 +40,16 @@ class DuplicateArtifactError(Exception):
         super().__init__(f"artifact {artifact} has multiple producers")
 
 
+class InvalidDatasetArityError(Exception):
+    def __init__(self, node: GraphNode, expected: int, actual: int) -> None:
+        self.node = node
+        self.expected = expected
+        self.actual = actual
+        super().__init__(
+            f"builder for node producing {expected} artifacts returned {actual} values"
+        )
+
+
 @dataclass(kw_only=True, frozen=True)
 class Prefix:
     value: str
@@ -49,7 +58,7 @@ class Prefix:
         return {node for node in nodes if node.startswith(self.value)}
 
 
-GraphBuilder = Callable[..., Any]
+GraphBuilder = Callable[..., Union[Any, Tuple[Any, ...]]]
 GraphConstraint = Optional[Callable[..., bool]]
 Requirement = FrozenSet[Tuple[str, Union[str, Prefix]]]
 
@@ -175,13 +184,19 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
         if ready and (not node.constraint or node.constraint(**args)):
             dataset = node.builder(**args)
 
-            # store single artifact
-            for producer in node.produces:
-                artifacts[producer] = dataset
+            if not isinstance(dataset, tuple):
+               dataset = (dataset,)
+            else:
+               dataset = tuple(dataset) # type: ignore
 
-            # store multiple artifacts
-            if len(node.produces) > 1:
-                for idx, producer in enumerate(node.produces):
-                    artifacts[producer] = dataset[idx]
+            if len(dataset) != len(node.produces):
+                raise InvalidDatasetArityError(
+                    node=node,
+                    expected=len(node.produces),
+                    actual=len(dataset),
+                )
+
+            for idx, producer in enumerate(node.produces):
+                artifacts[producer] = dataset[idx]
 
     return artifacts
