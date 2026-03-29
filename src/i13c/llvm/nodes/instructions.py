@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Protocol
 
 from i13c.core.generator import Generator
 from i13c.llvm.typing.instructions import (
@@ -28,21 +28,18 @@ def lower_instruction(
     instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
 ) -> InstructionEntry:
-    if instruction.mnemonic.name == b"mov":
-        return lower_instruction_mov(graph, generator, instruction, operands)
 
-    elif instruction.mnemonic.name == b"shl":
-        return lower_instruction_shl(graph, generator, instruction, operands)
-
-    elif instruction.mnemonic.name == b"syscall":
-        return lower_instruction_syscall(generator)
+    if instruction.mnemonic.name in DISPATCH_TABLE:
+        return DISPATCH_TABLE[instruction.mnemonic.name](
+            generator, graph, instruction, operands
+        )
 
     assert False, f"unsupported mnemonic: {instruction.mnemonic.name}"
 
 
 def lower_instruction_mov(
-    graph: SemanticGraph,
     generator: Generator,
+    graph: SemanticGraph,
     instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
 ) -> InstructionEntry:
@@ -55,6 +52,7 @@ def lower_instruction_mov(
     dst = dst or graph.basic.operands.get(instruction.operands[0])
     src = src or graph.basic.operands.get(instruction.operands[1])
 
+    # destination operand must be a register for now
     assert isinstance(dst.target, Register)
     dst_reg = IR_REGISTER_FORWARD[dst.target.name]
 
@@ -75,8 +73,8 @@ def lower_instruction_mov(
 
 
 def lower_instruction_shl(
-    graph: SemanticGraph,
     generator: Generator,
+    graph: SemanticGraph,
     instruction: SemanticInstruction,
     operands: Dict[OperandId, Operand],
 ) -> InstructionEntry:
@@ -101,5 +99,29 @@ def lower_instruction_shl(
     )
 
 
-def lower_instruction_syscall(generator: Generator) -> InstructionEntry:
+def lower_instruction_syscall(
+    generator: Generator,
+    graph: SemanticGraph,
+    instruction: SemanticInstruction,
+    operands: Dict[OperandId, Operand],
+) -> InstructionEntry:
+
+    # syscall has no operands, so we can ignore them
     return (InstructionId(value=generator.next()), SysCall())
+
+
+class InstructionHandler(Protocol):
+    def __call__(
+        self,
+        generator: Generator,
+        graph: SemanticGraph,
+        instruction: SemanticInstruction,
+        operands: Dict[OperandId, Operand],
+    ) -> InstructionEntry: ...
+
+
+DISPATCH_TABLE: Dict[bytes, InstructionHandler] = {
+    b"mov": lower_instruction_mov,
+    b"shl": lower_instruction_shl,
+    b"syscall": lower_instruction_syscall,
+}  # pyright: ignore[reportAssignmentType]
