@@ -43,4 +43,4 @@ def can_reject_syscall_instruction_with_unexpected_operand():
 
     assert rejection.mnemonic.name == b"syscall"
     assert len(rejection.variant) == 0
-    assert rejection.reason == b"wrong-arity"
+    assert rejection.reason == b"arity-mismatch"

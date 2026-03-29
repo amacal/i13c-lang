@@ -82,7 +82,7 @@ def can_reject_callsite_due_to_wrong_arity_more_than_expected():
     assert len(value.rejected) == 1
     assert len(value.accepted) == 0
 
-    assert value.rejected[0].reason == b"wrong-arity"
+    assert value.rejected[0].reason == b"arity-mismatch"
     callables = value.rejected[0].callable
 
     assert callables.kind == b"snippet"
@@ -112,7 +112,7 @@ def can_reject_callsite_due_to_wrong_arity_less_than_expected():
     assert len(value.rejected) == 1
     assert len(value.accepted) == 0
 
-    assert value.rejected[0].reason == b"wrong-arity"
+    assert value.rejected[0].reason == b"arity-mismatch"
     callables = value.rejected[0].callable
 
     assert callables.kind == b"snippet"
@@ -184,7 +184,7 @@ def can_resolve_function_and_snippet_with_same_name():
 
     # function was rejected, due to wrong arity
     rejected = value.rejected[0].callable
-    assert value.rejected[0].reason == b"wrong-arity"
+    assert value.rejected[0].reason == b"arity-mismatch"
     assert rejected.kind == b"function"
     assert isinstance(rejected.target, FunctionId)
 

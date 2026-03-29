@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Literal as Kind
-from typing import Optional, Tuple, Union
+from typing import Tuple, Union
 
 from i13c.semantic.core import Width
 from i13c.semantic.typing.entities.instructions import Mnemonic
 from i13c.semantic.typing.entities.operands import (
+    REGISTERS_8,
+    REGISTERS_64,
     Immediate,
     OperandKind,
     Reference,
@@ -13,9 +15,10 @@ from i13c.semantic.typing.entities.operands import (
 )
 
 InstructionRejectionReason = Kind[
-    b"wrong-arity",
+    b"arity-mismatch",
     b"type-mismatch",
     b"width-mismatch",
+    b"register-mismatch",
     b"unresolved",
 ]
 
@@ -30,21 +33,20 @@ class InstructionRejection:
 @dataclass(kw_only=True, frozen=True)
 class OperandSpec:
     kind: OperandKind
-    width: Optional[Width]
-
-    def __str__(self) -> str:
-        return f"{self.kind.decode()}:({self.width})"
+    width: Tuple[Width, ...]
+    names: Tuple[bytes, ...]
 
     @staticmethod
-    def register() -> "OperandSpec":
-        return OperandSpec(kind=b"register", width=64)
+    def registers_8bit(*names: bytes) -> "OperandSpec":
+        return OperandSpec(kind=b"register", width=(8,), names=names or REGISTERS_8)
 
     @staticmethod
-    def immediate(width: Width) -> "OperandSpec":
-        return OperandSpec(kind=b"immediate", width=width)
+    def registers_64bit(*names: bytes) -> "OperandSpec":
+        return OperandSpec(kind=b"register", width=(64,), names=names or REGISTERS_64)
 
-    def describe(self) -> str:
-        return self.kind[0:3].decode()
+    @staticmethod
+    def immediate(*width: Width) -> "OperandSpec":
+        return OperandSpec(kind=b"immediate", width=width, names=())
 
 
 MnemonicBindings = List[Union[Register, Immediate, Reference]]
@@ -56,25 +58,11 @@ class InstructionAcceptance:
     variant: MnemonicVariant
     bindings: MnemonicBindings
 
-    def describe(self) -> str:
-        variants = ":".join(var.describe() for var in self.variant)
-        return f"mnemonic={self.mnemonic.name.decode():<8} variants={variants}"
-
 
 @dataclass(kw_only=True)
 class InstructionResolution:
     accepted: List[InstructionAcceptance]
     rejected: List[InstructionRejection]
-
-    def describe(self) -> str:
-        candidate = ""
-
-        if len(self.accepted) > 0:
-            candidate = self.accepted[0].describe()
-
-        return (
-            f"accepted={len(self.accepted)} rejected={len(self.rejected)} {candidate}"
-        )
 
 
 MnemonicVariant = Tuple[OperandSpec, ...]

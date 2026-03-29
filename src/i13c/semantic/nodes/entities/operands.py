@@ -3,7 +3,10 @@ from typing import Dict
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.operands import Operand, OperandId
+from i13c.semantic.typing.entities.operands import (
+    Operand,
+    OperandId,
+)
 from i13c.syntax import tree
 
 

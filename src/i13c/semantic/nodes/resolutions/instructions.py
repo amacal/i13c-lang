@@ -43,14 +43,12 @@ def configure_resolution_by_instruction() -> GraphNode:
 INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
     b"syscall": [()],
     b"mov": [
-        (OperandSpec.register(), OperandSpec.immediate(64)),
-        (OperandSpec.register(), OperandSpec.immediate(32)),
-        (OperandSpec.register(), OperandSpec.immediate(16)),
-        (OperandSpec.register(), OperandSpec.immediate(8)),
-        (OperandSpec.register(), OperandSpec.register()),
+        (OperandSpec.registers_64bit(), OperandSpec.immediate(8, 16, 32, 64)),
+        (OperandSpec.registers_64bit(), OperandSpec.registers_64bit()),
     ],
     b"shl": [
-        (OperandSpec.register(), OperandSpec.immediate(8)),
+        (OperandSpec.registers_64bit(), OperandSpec.immediate(8)),
+        (OperandSpec.registers_64bit(), OperandSpec.registers_8bit()),
     ],
 }
 
@@ -59,6 +57,7 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
 class OperandSubstitute:
     kind: OperandKind
     width: Width
+    registers: Optional[Tuple[bytes, ...]]
 
 
 def match_operand(
@@ -72,8 +71,15 @@ def match_operand(
     # because instruction variants are defined that way; we can
     # have full control over which immediate widths are allowed
 
-    if operand.width != spec.width:
+    if operand.width not in spec.width:
         return b"width-mismatch"
+
+    # if the spec and operand are registers aware, we need
+    # to check if we all operand registers are allowed by the spec
+
+    if operand.registers is not None and operand.registers:
+        if len(set(spec.names).intersection(operand.registers)) != len(operand.registers):
+            return b"register-mismatch"
 
     return None
 
@@ -98,7 +104,7 @@ def match_instruction(
 
         # first check arity
         if len(instruction.operands) != len(variant):
-            rejected[variant] = b"wrong-arity"
+            rejected[variant] = b"arity-mismatch"
             continue
 
         # then check each operand
@@ -120,6 +126,7 @@ def match_instruction(
                     substitute = OperandSubstitute(
                         kind=b"immediate",
                         width=immediates[operand.target.name].width,
+                        registers=None,
                     )
 
                 # else try to resolve as register
@@ -127,6 +134,7 @@ def match_instruction(
                     substitute = OperandSubstitute(
                         kind=b"register",
                         width=registers[operand.target.name].width,
+                        registers=(registers[operand.target.name].name,),
                     )
 
                 # if we could not resolve, mark as such
@@ -142,6 +150,7 @@ def match_instruction(
                 substitute = OperandSubstitute(
                     kind=operand.kind,
                     width=operand.target.width,
+                    registers=None,
                 )
 
             # otherwise it has to be a register
@@ -152,6 +161,7 @@ def match_instruction(
                 substitute = OperandSubstitute(
                     kind=operand.kind,
                     width=operand.target.width,
+                    registers=(operand.target.name,),
                 )
 
             # any reason requires immediate stop

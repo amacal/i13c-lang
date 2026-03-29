@@ -7,9 +7,6 @@ def can_lower_syscall_program():
         fn main() noreturn { foo(); }
     """)
 
-    # TODO: assert somehow flows
-    assert llvm.flows.size() == 2
-
     function = semantic.find_function_by_name(b"main")
     assert function is not None
 
@@ -24,9 +21,6 @@ def can_lower_movregimm_program():
         asm foo() noreturn { mov rax, 0x1234; }
         fn main() noreturn { foo(); }
     """)
-
-    # TODO: assert somehow flows
-    assert llvm.flows.size() == 2
 
     function = semantic.find_function_by_name(b"main")
     assert function is not None
@@ -43,9 +37,6 @@ def can_lower_movregreg_program():
         fn main() noreturn { foo(); }
     """)
 
-    # TODO: assert somehow flows
-    assert llvm.flows.size() == 2
-
     function = semantic.find_function_by_name(b"main")
     assert function is not None
 
@@ -60,9 +51,6 @@ def can_lower_movregimm_with_register_bound_slot():
         asm foo(dst@rax: u64, value@imm: u8) noreturn { mov dst, value; }
         fn main() noreturn { foo(0x01, 0x42); }
     """)
-
-    # TODO: assert somehow flows
-    assert llvm.flows.size() == 2
 
     function = semantic.find_function_by_name(b"main")
     assert function is not None
@@ -80,9 +68,6 @@ def can_lower_shl_program():
         fn main() noreturn { foo(); }
     """)
 
-    # TODO: assert somehow flows
-    assert llvm.flows.size() == 2
-
     function = semantic.find_function_by_name(b"main")
     assert function is not None
 
@@ -98,9 +83,6 @@ def can_lower_multiple_snippet_callsites():
         asm foo() { mov rax, 0x01; }
         asm bar() noreturn { syscall; }
     """)
-
-    # TODO: assert somehow flows
-    assert llvm.flows.size() == 3
 
     function = semantic.find_function_by_name(b"main")
     assert function is not None

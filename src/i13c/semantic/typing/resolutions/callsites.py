@@ -10,7 +10,7 @@ from i13c.semantic.typing.entities.parameters import Parameter
 from i13c.semantic.typing.entities.snippets import Slot
 
 CallSiteRejectionReason = Kind[
-    b"wrong-arity",
+    b"arity-mismatch",
     b"type-mismatch",
     b"unknown-target",
 ]

@@ -18,11 +18,11 @@ def can_reject_shlregimm_instruction_with_arity_mismatch():
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 1
+    assert len(value.rejected) >= 1
     rejection = value.rejected[0]
 
     assert rejection.mnemonic.name == b"shl"
-    assert rejection.reason == b"wrong-arity"
+    assert rejection.reason == b"arity-mismatch"
 
 
 def can_reject_shlregimm_instruction_with_width_mismatch():
@@ -39,7 +39,7 @@ def can_reject_shlregimm_instruction_with_width_mismatch():
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 1
+    assert len(value.rejected) >= 1
     rejection = value.rejected[0]
 
     assert rejection.mnemonic.name == b"shl"
@@ -60,7 +60,7 @@ def can_reject_shlregimm_instruction_with_unresolved_operand_reference():
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 1
+    assert len(value.rejected) >= 1
     rejection = value.rejected[0]
 
     assert rejection.mnemonic.name == b"shl"
@@ -80,7 +80,7 @@ def can_accept_shlregimm_instruction_with_valid_operands():
     assert instructions.size() == 1
     _, value = instructions.peak()
 
-    assert len(value.rejected) == 0
+    assert len(value.rejected) >= 1
     assert len(value.accepted) == 1
     acceptance = value.accepted[0]
 
@@ -88,7 +88,7 @@ def can_accept_shlregimm_instruction_with_valid_operands():
     assert len(acceptance.variant) == 2
 
     assert acceptance.variant == (
-        OperandSpec.register(),
+        OperandSpec.registers_64bit(),
         OperandSpec.immediate(8),
     )
 
@@ -109,7 +109,7 @@ def can_accept_shlregimm_instruction_with_rewritten_operand_reference():
     assert instructions.size() == 1
     _, value = instructions.peak()
 
-    assert len(value.rejected) == 0
+    assert len(value.rejected) >= 1
     assert len(value.accepted) == 1
 
     acceptance = value.accepted[0]
@@ -118,7 +118,7 @@ def can_accept_shlregimm_instruction_with_rewritten_operand_reference():
     assert len(acceptance.variant) == 2
 
     assert acceptance.variant == (
-        OperandSpec.register(),
+        OperandSpec.registers_64bit(),
         OperandSpec.immediate(8),
     )
 
@@ -140,7 +140,7 @@ def can_reject_shlregimm_instruction_with_rewritten_operand_reference_of_wrong_w
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 1
+    assert len(value.rejected) >= 1
     rejection = value.rejected[0]
 
     assert rejection.mnemonic.name == b"shl"
@@ -161,7 +161,7 @@ def can_reject_shlregimm_instruction_with_immediate_out_of_range():
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 1
+    assert len(value.rejected) >= 1
     rejection = value.rejected[0]
 
     assert rejection.mnemonic.name == b"shl"
@@ -182,7 +182,7 @@ def can_reject_shlregimm_instruction_with_reference_out_of_range():
     _, value = instructions.peak()
 
     assert len(value.accepted) == 0
-    assert len(value.rejected) == 1
+    assert len(value.rejected) >= 1
     rejection = value.rejected[0]
 
     assert rejection.mnemonic.name == b"shl"
@@ -202,7 +202,7 @@ def can_accept_shlregimm_instruction_with_reference_within_range():
     assert instructions.size() == 1
     _, value = instructions.peak()
 
-    assert len(value.rejected) == 0
+    assert len(value.rejected) >= 1
     assert len(value.accepted) == 1
     acceptance = value.accepted[0]
 
@@ -210,9 +210,38 @@ def can_accept_shlregimm_instruction_with_reference_within_range():
     assert len(acceptance.variant) == 2
 
     assert acceptance.variant == (
-        OperandSpec.register(),
+        OperandSpec.registers_64bit(),
         OperandSpec.immediate(8),
     )
 
     assert isinstance(acceptance.bindings[0], Register)
     assert isinstance(acceptance.bindings[1], Reference)
+
+
+def can_accept_shlregreg_instruction_with_cl_as_second_operand():
+    _, program = prepare_program("""
+        asm main() noreturn { shl rax, cl; }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    assert semantic is not None
+    instructions = semantic.indices.resolution_by_instruction
+
+    assert instructions.size() == 1
+    _, value = instructions.peak()
+
+    assert len(value.rejected) >= 1
+    assert len(value.accepted) == 1
+    acceptance = value.accepted[0]
+
+    assert acceptance.mnemonic.name == b"shl"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.registers_64bit(),
+        OperandSpec.registers_8bit(),
+    )
+
+    assert isinstance(acceptance.bindings[0], Register)
+    assert isinstance(acceptance.bindings[1], Register)

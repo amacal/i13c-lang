@@ -109,7 +109,7 @@ def build_resolution_by_callsite(
         function: Function,
     ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
         if len(function.parameters) != len(callsite.arguments):
-            return Err(b"wrong-arity")
+            return Err(b"arity-mismatch")
 
         # find actual parameter variables
         params = [parameters.get(pid) for pid in function.parameters]
@@ -127,7 +127,7 @@ def build_resolution_by_callsite(
         callsite: CallSite, snippet: Snippet
     ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
         if len(snippet.slots) != len(callsite.arguments):
-            return Err(b"wrong-arity")
+            return Err(b"arity-mismatch")
 
         # find environment at callsite
         environment = environments.get(callsite.id)
