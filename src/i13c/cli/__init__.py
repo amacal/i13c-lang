@@ -4,10 +4,9 @@ from dataclasses import asdict
 
 import click
 
-from i13c import elf
 from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap_result
 from i13c.cli.model import attach
-from i13c.encoding import encode
+from i13c.encoding import elf, encode
 from i13c.graph.nodes import run as run_graph
 from i13c.syntax.lexing import TOKEN_NAMES, tokenize
 from i13c.syntax.parsing import parse

@@ -1,4 +1,4 @@
-from i13c import elf
+from i13c.encoding import elf
 
 
 def can_emit_elf():
