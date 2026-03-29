@@ -7,6 +7,7 @@ from i13c.core.graph import (
     DuplicateArtifactError,
     GraphGroup,
     GraphNode,
+    MissingArtifactProducerError,
     MissingPrefixProducerError,
     Prefix,
     evaluate,
@@ -310,3 +311,22 @@ def can_not_consume_prefix_if_no_prefix_artifacts_were_produced():
 
     # producer didn't produce any artifacts, so consumer should be skipped
     assert evaluate([producer, consumer], initial={}) == {}
+
+
+def can_reject_missing_artifact_dependency():
+    def build(x: int) -> int:
+        return x
+
+    consumer = GraphNode(
+        builder=build,
+        constraint=None,
+        produces=("result",),
+        requires=frozenset({("value", "entities/a")}),
+    )
+
+    with raises(MissingArtifactProducerError) as error:
+        evaluate([consumer], initial={})
+
+    assert isinstance(error.value, MissingArtifactProducerError)
+    assert error.value.artifact == "entities/a"
+    assert error.value.node is consumer

@@ -26,6 +26,14 @@ class MissingPrefixProducerError(Exception):
         super().__init__(f"no producer found for prefix {prefix.value}")
 
 
+
+class MissingArtifactProducerError(Exception):
+    def __init__(self, node: GraphNode, artifact: str) -> None:
+        self.node = node
+        self.artifact = artifact
+        super().__init__(f"no producer found for artifact {artifact}")
+
+
 class DuplicateArtifactError(Exception):
     def __init__(self, artifact: str, producers: List[GraphNode]) -> None:
         self.artifact = artifact
@@ -100,9 +108,9 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
 
             # now make dependencies
             for item in reqs:
-
-                # the ugly way of be most precise possible in error reporting
-                assert item in producer, f"node {node.produces} expects {item}"
+                # make sure all requirements are produced by some node
+                if item not in producer:
+                    raise MissingArtifactProducerError(node, item)
 
                 dep = producer[item]
                 edges[dep].append(node)
