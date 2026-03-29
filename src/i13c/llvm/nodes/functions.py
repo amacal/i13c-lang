@@ -184,7 +184,7 @@ def lower_flow_entry(
     # generate virtual registers for parameters
     for idx, pid in enumerate(ctx.graph.basic.functions.get(fid).parameters):
 
-        # get a variable behind the fucntion parameter
+        # get a variable behind the function parameter
         variable = ctx.graph.indices.variables_by_parameter.get(pid)
 
         # generate virtual move flow between physical and virtual register
