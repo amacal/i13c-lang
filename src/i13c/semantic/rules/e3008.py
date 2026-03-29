@@ -3,6 +3,7 @@ from typing import List
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
+from i13c.semantic.core import Identifier
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.syntax.source import SpanLike
@@ -36,7 +37,7 @@ def validate_called_symbol_exists(
                 diagnostics.append(
                     report_e3008_called_symbol_missing(
                         callsites.get(cid).ref,
-                        callsites.get(cid).callee.name,
+                        callsites.get(cid).callee,
                     )
                 )
 
@@ -44,10 +45,10 @@ def validate_called_symbol_exists(
 
 
 def report_e3008_called_symbol_missing(
-    ref: SpanLike, name: bytes
+    ref: SpanLike, symbol: Identifier
 ) -> Diagnostic:
     return Diagnostic(
         ref=ref,
         code="E3008",
-        message=f"Called symbol does not exist: {str(name)}",
+        message=f"Called symbol does not exist: '{symbol}'",
     )

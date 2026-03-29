@@ -12,7 +12,7 @@ def can_draw_a_table_with_semantic_rules_summary():
         | --------- | --------- | --------------------------------------------------- |
         | Reference | Rule Code | Rule Message                                        |
         | --------- | --------- | --------------------------------------------------- |
-        | 21:31     | E3008     | Called symbol does not exist: b'foo'                |
+        | 21:31     | E3008     | Called symbol does not exist: 'foo'                 |
         |           | E3011     | Missing entrypoint function or snippet named 'main' |
         | --------- | --------- | --------------------------------------------------- |
     """)
