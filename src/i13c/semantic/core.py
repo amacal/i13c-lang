@@ -75,7 +75,7 @@ def default_width(name: bytes) -> Width:
     if name == b"u64":
         return 64
 
-    assert False, f"Unknown type name: {name.decode()}"
+    raise ValueError(f"Unknown type name: {name.decode()}")
 
 
 def default_range(name: bytes) -> Range:
@@ -88,7 +88,7 @@ def default_range(name: bytes) -> Range:
     if name == b"u64":
         return Range(lower=0, upper=0xFFFFFFFFFFFFFFFF)
 
-    assert False, f"Unknown type name: {name.decode()}"
+    raise ValueError(f"Unknown type name: {name.decode()}")
 
 
 def width_from_range(range: Range) -> Width:

@@ -1,6 +1,6 @@
 from pytest import raises
 
-from i13c.semantic.core import derive_width
+from i13c.semantic.core import default_range, default_width, derive_width
 
 
 def can_derive_width_respects_boundaries():
@@ -38,3 +38,13 @@ def can_reject_deriving_width_for_negative_values():
 def can_reject_deriving_width_for_values_larger_than_u64():
     with raises(ValueError):
         derive_width(0x1_0000_0000_0000_0000)
+
+
+def can_reject_unknown_type_for_default_width():
+    with raises(ValueError, match="Unknown type name: i128"):
+        default_width(b"i128")
+
+
+def can_reject_unknown_type_for_default_range():
+    with raises(ValueError, match="Unknown type name: i128"):
+        default_range(b"i128")
