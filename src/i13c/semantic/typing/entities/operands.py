@@ -85,5 +85,6 @@ class Operand:
             target=Reference(name=name),
         )
 
-    def describe(self) -> str:
-        return self.kind[0:3].decode()
+    # @staticmethod
+    # def address(ref: Span, base: OperandTarget, offset: Union[Immediate, Register, Reference]) -> Operand:
+    #     pass

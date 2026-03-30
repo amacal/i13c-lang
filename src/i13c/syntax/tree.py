@@ -46,7 +46,14 @@ class Reference:
     name: bytes
 
 
-Operand = Union[Register, Immediate, Reference]
+@dataclass(kw_only=True, eq=False)
+class Address:
+    ref: Span
+    base: Union[Register, Reference]
+    offset: Optional[Union[Immediate, Register, Reference]]
+
+
+Operand = Union[Register, Immediate, Reference, Address]
 
 
 @dataclass(kw_only=True, eq=False)

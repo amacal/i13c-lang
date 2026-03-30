@@ -32,6 +32,8 @@ def build_operands(
                 target = Operand.immediate(operand.ref, imm.value)
             case tree.Reference() as ref:
                 target = Operand.reference(operand.ref, ref.name)
+            case tree.Address():
+                assert False
 
         # derive operand ID from globally unique node ID
         operand_id = OperandId(value=nid.value)
