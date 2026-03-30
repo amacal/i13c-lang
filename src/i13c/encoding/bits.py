@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, Immediate, ModRM, Opcode
-from i13c.llvm.typing.instructions import ShlRegImm
+from i13c.llvm.typing.instructions import ShlRegImm, ShlRegReg
 
 
 def encode_shl_reg_imm(
@@ -42,5 +42,39 @@ def encode_shl_reg_imm(
             opcode.to_byte(),
             modrm.to_byte(),
             *imm8.to_bytes(),
+        ]
+    )
+
+
+def encode_shl_reg_reg(
+    instruction: ShlRegReg, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+
+    # chosen encoding: REX.W + D2 /4
+    # encoded as: [rex] [opcode] [modrm]
+
+    rex = REX(
+        w=True,
+        r=False,
+        x=False,
+        b=instruction.dst >= 8,
+    )
+
+    opcode = Opcode(
+        hex=0xD2,
+        reg=None,
+    )
+
+    modrm = ModRM(
+        mod=0b11,
+        reg=4,
+        rm=instruction.dst & 0x07,
+    )
+
+    bytecode.extend(
+        [
+            rex.to_byte(),
+            opcode.to_byte(),
+            modrm.to_byte(),
         ]
     )

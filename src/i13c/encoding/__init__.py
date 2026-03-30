@@ -1,43 +1,9 @@
 from typing import Dict, List, Optional, Protocol, Type, Union
 
-from i13c.encoding.bits import encode_shl_reg_imm
+from i13c.encoding import bits, jump, math, mov, stack
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
-from i13c.encoding.jump import (
-    encode_call,
-    encode_jump,
-    encode_label,
-    encode_nop,
-    encode_return,
-    encode_syscall,
-)
-from i13c.encoding.math import encode_add_reg_imm, encode_sub_reg_imm
-from i13c.encoding.mov import (
-    encode_mov_off_imm,
-    encode_mov_off_reg,
-    encode_mov_reg_imm,
-    encode_mov_reg_off,
-    encode_mov_reg_reg,
-)
-from i13c.encoding.stack import encode_pop_off, encode_push_off
-from i13c.llvm.typing.instructions import (
-    AddRegImm,
-    Call,
-    Instruction,
-    Jump,
-    Label,
-    MovOffImm,
-    MovOffReg,
-    MovRegImm,
-    MovRegOff,
-    MovRegReg,
-    Nop,
-    PopOff,
-    PushOff,
-    Return,
-    ShlRegImm,
-    SubRegImm,
-    SysCall,
-)
+from i13c.llvm.typing import instructions as llvm
+from i13c.llvm.typing.instructions import Instruction
 
 
 class MissingLabelError(Exception):
@@ -87,20 +53,21 @@ class Encoder(Protocol):
 
 
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
-    MovRegImm: encode_mov_reg_imm,
-    MovRegReg: encode_mov_reg_reg,
-    MovOffImm: encode_mov_off_imm,
-    MovOffReg: encode_mov_off_reg,
-    MovRegOff: encode_mov_reg_off,
-    PushOff: encode_push_off,
-    PopOff: encode_pop_off,
-    ShlRegImm: encode_shl_reg_imm,
-    SubRegImm: encode_sub_reg_imm,
-    AddRegImm: encode_add_reg_imm,
-    SysCall: encode_syscall,
-    Return: encode_return,
-    Label: encode_label,
-    Call: encode_call,
-    Jump: encode_jump,
-    Nop: encode_nop,
+    llvm.MovRegImm: mov.encode_mov_reg_imm,
+    llvm.MovRegReg: mov.encode_mov_reg_reg,
+    llvm.MovOffImm: mov.encode_mov_off_imm,
+    llvm.MovOffReg: mov.encode_mov_off_reg,
+    llvm.MovRegOff: mov.encode_mov_reg_off,
+    llvm.PushOff: stack.encode_push_off,
+    llvm.PopOff: stack.encode_pop_off,
+    llvm.ShlRegImm: bits.encode_shl_reg_imm,
+    llvm.ShlRegReg: bits.encode_shl_reg_reg,
+    llvm.SubRegImm: math.encode_sub_reg_imm,
+    llvm.AddRegImm: math.encode_add_reg_imm,
+    llvm.SysCall: jump.encode_syscall,
+    llvm.Return: jump.encode_return,
+    llvm.Label: jump.encode_label,
+    llvm.Call: jump.encode_call,
+    llvm.Jump: jump.encode_jump,
+    llvm.Nop: jump.encode_nop,
 }  # pyright: ignore[reportAssignmentType]

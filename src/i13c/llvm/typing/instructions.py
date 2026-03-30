@@ -100,6 +100,14 @@ class ShlRegImm:
 
 
 @dataclass(kw_only=True)
+class ShlRegReg:
+    dst: int
+
+    def native(self) -> str:
+        return f"shl {reg_to_name(self.dst)}, cl"
+
+
+@dataclass(kw_only=True)
 class SubRegImm:
     dst: int
     imm: int
@@ -166,6 +174,7 @@ Instruction = Union[
     MovOffReg,
     MovRegOff,
     ShlRegImm,
+    ShlRegReg,
     SubRegImm,
     AddRegImm,
     PushOff,

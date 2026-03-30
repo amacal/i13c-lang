@@ -16,12 +16,12 @@ def lower_instance(
     out: List[InstructionEntry] = []
 
     # values
-    operands: Dict[OperandId, Operand] = target.operands
+    rewritten: Dict[OperandId, Operand] = target.operands
     instrs = graph.basic.snippets.get(target.target).instructions
 
     # lower all instructions
     for iid in instrs:
         instr = graph.basic.instructions.get(iid)
-        out.append(lower_instruction(graph, generator, instr, operands))
+        out.append(lower_instruction(generator, graph.basic.operands, instr, rewritten))
 
     return out
