@@ -21,6 +21,11 @@ class GraphFixtureException(Exception):
         super().__init__("LLVM Graph cannot be created")
 
 
+class MissingMainInFixture(Exception):
+    def __init__(self) -> None:
+        super().__init__("main function is missing in fixture")
+
+
 def prepare_graph(code: str) -> Tuple[SemanticGraph, LowLevelGraph]:
     source = open_text(code)
 
@@ -42,3 +47,13 @@ def prepare_graph(code: str) -> Tuple[SemanticGraph, LowLevelGraph]:
         raise GraphFixtureException()
 
     return artifacts.semantic_graph(), artifacts.llvm_graph()
+
+
+def prepare_main(code: str) -> List[str]:
+    semantic, llvm = prepare_graph(code)
+
+    # if main is found return all instructions in main
+    if main := semantic.find_function_by_name(b"main"):
+        return list(llvm.instructions_of(main))
+
+    raise MissingMainInFixture()
