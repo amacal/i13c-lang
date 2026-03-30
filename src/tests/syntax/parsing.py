@@ -58,7 +58,7 @@ def can_parse_instruction_with_operands():
 
 
 def can_parse_instruction_with_operands_reference():
-    code = open_text("asm main() { mov rax, left; }")
+    code = open_text("asm main() { mov rax, @left; }")
 
     tokens = tokenize(code)
     assert isinstance(tokens, result.Ok)

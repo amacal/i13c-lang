@@ -30,7 +30,7 @@ def can_lower_movregreg_program():
 def can_lower_movregimm_with_register_bound_slot():
     instructions = prepare_main(
         """
-            asm foo(dst@rax: u64, value@imm: u8) noreturn { mov dst, value; }
+            asm foo(dst@rax: u64, value@imm: u8) noreturn { mov @dst, @value; }
             fn main() noreturn { foo(0x01, 0x42); }
         """
     )

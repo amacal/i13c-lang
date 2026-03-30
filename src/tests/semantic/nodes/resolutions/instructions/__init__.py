@@ -30,7 +30,7 @@ def can_do_nothing_without_any_instruction():
 
 def can_do_nothing_with_ambiguous_reference():
     _, program = prepare_program("""
-        asm main(value@imm: u8, value@rax: u16) noreturn { nop value; }
+        asm main(value@imm: u8, value@rax: u16) noreturn { nop @value; }
     """)
 
     semantic = run_graph(program).semantic_graph()

@@ -58,7 +58,7 @@ def can_build_an_instruction_with_multiple_operands():
 
 def can_build_an_instruction_with_reference_operand():
     _, program = prepare_program("""
-        asm main() noreturn { mov rax, src; }
+        asm main() noreturn { mov rax, @src; }
     """)
 
     semantic = run_graph(program).semantic_graph()

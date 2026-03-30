@@ -127,7 +127,7 @@ def can_reject_movregimm_instruction_with_type_mismatch():
 
 def can_accept_movregimm_instruction_with_rewritten_operands():
     _, program = prepare_program("""
-        asm main(value@imm: u64) noreturn { mov rax, value; }
+        asm main(value@imm: u64) noreturn { mov rax, @value; }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -156,7 +156,7 @@ def can_accept_movregimm_instruction_with_rewritten_operands():
 
 def can_reject_movregimm_instruction_with_unresolved_operand_reference():
     _, program = prepare_program("""
-        asm main() noreturn { mov rax, value; }
+        asm main() noreturn { mov rax, @value; }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -177,7 +177,7 @@ def can_reject_movregimm_instruction_with_unresolved_operand_reference():
 
 def can_accept_movregimm_instruction_with_referenced_register_binding():
     _, program = prepare_program("""
-        asm main(code@rax: u64) noreturn { mov code, 0x01; }
+        asm main(code@rax: u64) noreturn { mov @code, 0x01; }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -206,7 +206,7 @@ def can_accept_movregimm_instruction_with_referenced_register_binding():
 
 def can_accept_movregimm_instruction_with_narrow_register_binding():
     _, program = prepare_program("""
-        asm main(code@rax: u8) noreturn { mov code, 0x01; }
+        asm main(code@rax: u8) noreturn { mov @code, 0x01; }
     """)
 
     semantic = run_graph(program).semantic_graph()

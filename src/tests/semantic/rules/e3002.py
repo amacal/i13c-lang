@@ -42,7 +42,7 @@ def can_accept_valid_operand_type_of_shl_reg64_imm8():
 
 def can_accept_valid_operand_type_of_shl_reg64_imm8_via_parameters():
     _, program = prepare_program("""
-        asm main(count@imm: u8) noreturn { shl rax, count; }
+        asm main(count@imm: u8) noreturn { shl rax, @count; }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3002")

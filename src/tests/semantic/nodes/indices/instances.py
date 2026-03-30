@@ -20,7 +20,7 @@ def can_do_nothing_without_any_snippet():
 
 def can_do_nothing_without_any_callsite():
     _, program = prepare_program("""
-        asm exit(code@imm: u8) { shl rax, code; }
+        asm exit(code@imm: u8) { shl rax, @code; }
         fn main() noreturn { }
     """)
 
@@ -34,7 +34,7 @@ def can_do_nothing_without_any_callsite():
 
 def can_do_nothing_without_accepted_callsite():
     _, program = prepare_program("""
-        asm exit(code@imm: u8) { shl rax, code; }
+        asm exit(code@imm: u8) { shl rax, @code; }
         fn main() noreturn { exit(0x1001); }
     """)
 
@@ -48,8 +48,8 @@ def can_do_nothing_without_accepted_callsite():
 
 def can_do_nothing_with_ambiguous_callsite():
     _, program = prepare_program("""
-        asm exit(code@imm: u8) { shl rax, code; }
-        asm exit(code@imm: u64) { shl rax, code; }
+        asm exit(code@imm: u8) { shl rax, @code; }
+        asm exit(code@imm: u64) { shl rax, @code; }
         fn main() noreturn { exit(0x42); }
     """)
 
@@ -63,7 +63,7 @@ def can_do_nothing_with_ambiguous_callsite():
 
 def can_generate_instance_for_accepted_callsite():
     _, program = prepare_program("""
-        asm exit(code@imm: u8) { shl rax, code; }
+        asm exit(code@imm: u8) { shl rax, @code; }
         fn main() noreturn { exit(0x42); }
     """)
 
@@ -106,7 +106,7 @@ def can_generate_instance_for_accepted_callsite():
 
 def can_generate_instance_with_callsite_of_multiple_arguments():
     _, program = prepare_program("""
-        asm exit(id@rax: u64, code@imm: u8) { shl rax, code; }
+        asm exit(id@rax: u64, code@imm: u8) { shl rax, @code; }
         fn main() noreturn { exit(0x1234, 0x42); }
     """)
 
@@ -130,7 +130,7 @@ def can_generate_instance_with_callsite_of_multiple_arguments():
 
 def can_generate_instance_with_reference_used_twice():
     _, program = prepare_program("""
-        asm exit(code@imm: u8) { shl rax, code; shl rbx, code; }
+        asm exit(code@imm: u8) { shl rax, @code; shl rbx, @code; }
         fn main() noreturn { exit(0x42); }
     """)
 
@@ -154,7 +154,7 @@ def can_generate_instance_with_reference_used_twice():
 
 def can_generate_instance_with_two_references():
     _, program = prepare_program("""
-        asm exit(id@imm: u64, code@imm: u8) { shl rax, code; mov rbx, id; }
+        asm exit(id@imm: u64, code@imm: u8) { shl rax, @code; mov rbx, @id; }
         fn main() noreturn { exit(0x1234, 0x42); }
     """)
 
@@ -192,7 +192,7 @@ def can_generate_instance_even_when_immediate_is_not_used():
 
 def can_rewrite_register_bound_slot_to_register():
     _, program = prepare_program("""
-        asm foo(code@rax: u64) noreturn { mov code, 0x01; }
+        asm foo(code@rax: u64) noreturn { mov @code, 0x01; }
         fn main() noreturn { foo(0x42); }
     """)
 

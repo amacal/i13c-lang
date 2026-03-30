@@ -144,7 +144,7 @@ def parse_instruction(state: ParsingState) -> tree.Instruction:
     token = state.expect(Tokens.IDENT)
 
     # optional operands
-    if state.is_in(Tokens.REG, Tokens.HEX, Tokens.IDENT):
+    if state.is_in(Tokens.REG, Tokens.HEX, Tokens.AT):
         operands = parse_operands(state)
 
     # expect a semicolon
@@ -172,7 +172,7 @@ def parse_operands(state: ParsingState) -> List[tree.Operand]:
 
 
 def parse_operand(state: ParsingState) -> tree.Operand:
-    token = state.expect(Tokens.REG, Tokens.HEX, Tokens.IDENT)
+    token = state.expect(Tokens.REG, Tokens.HEX, Tokens.AT)
 
     # register has to provide its name
     if token.code == Tokens.REG:
@@ -186,4 +186,8 @@ def parse_operand(state: ParsingState) -> tree.Operand:
 
     # reference has to provide its identifier
     else:
+        # now we expect an identifier
+        token = state.expect(Tokens.IDENT)
+
+        # which has to be extracted
         return tree.Reference(ref=state.span(token), name=state.extract(token))

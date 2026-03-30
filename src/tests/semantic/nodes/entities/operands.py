@@ -106,7 +106,7 @@ def can_detect_a_register_operand():
 
 def can_detect_a_reference_operand():
     _, program = prepare_program("""
-        asm main() noreturn { nop var; }
+        asm main() noreturn { nop @var; }
     """)
 
     semantic = run_graph(program).semantic_graph()

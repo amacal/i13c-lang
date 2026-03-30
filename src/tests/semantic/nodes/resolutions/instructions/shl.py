@@ -48,7 +48,7 @@ def can_reject_shlregimm_instruction_with_width_mismatch():
 
 def can_reject_shlregimm_instruction_with_unresolved_operand_reference():
     _, program = prepare_program("""
-        asm main() noreturn { shl rax, shift; }
+        asm main() noreturn { shl rax, @shift; }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -98,7 +98,7 @@ def can_accept_shlregimm_instruction_with_valid_operands():
 
 def can_accept_shlregimm_instruction_with_rewritten_operand_reference():
     _, program = prepare_program("""
-        asm main(value@imm: u8) noreturn { shl rax, value; }
+        asm main(value@imm: u8) noreturn { shl rax, @value; }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -128,7 +128,7 @@ def can_accept_shlregimm_instruction_with_rewritten_operand_reference():
 
 def can_reject_shlregimm_instruction_with_rewritten_operand_reference_of_wrong_width():
     _, program = prepare_program("""
-        asm main(value@imm: u16) noreturn { shl rax, value; }
+        asm main(value@imm: u16) noreturn { shl rax, @value; }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -170,7 +170,7 @@ def can_reject_shlregimm_instruction_with_immediate_out_of_range():
 
 def can_reject_shlregimm_instruction_with_reference_out_of_range():
     _, program = prepare_program("""
-        asm main(value@imm: u16) noreturn { shl rax, value; }
+        asm main(value@imm: u16) noreturn { shl rax, @value; }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -191,7 +191,7 @@ def can_reject_shlregimm_instruction_with_reference_out_of_range():
 
 def can_accept_shlregimm_instruction_with_reference_within_range():
     _, program = prepare_program("""
-        asm main(value@imm: u16[0x00..0xff]) noreturn { shl rax, value; }
+        asm main(value@imm: u16[0x00..0xff]) noreturn { shl rax, @value; }
     """)
 
     semantic = run_graph(program).semantic_graph()
