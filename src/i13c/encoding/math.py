@@ -4,6 +4,7 @@ from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, Immediate, ModRM, Opcode
 from i13c.llvm.typing.instructions import (
     AddRegImm,
+    AddRegReg,
     SubRegImm,
 )
 
@@ -86,5 +87,39 @@ def encode_add_reg_imm(
             opcode.to_byte(),
             modrm.to_byte(),
             *imm32.to_bytes(),
+        ]
+    )
+
+
+def encode_add_reg_reg(
+    instruction: AddRegReg, bytecode: bytearray
+) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+
+    # chosen encoding: REX.W + 01 /r
+    # encoded as: [rex] [opcode] [modrm]
+
+    rex = REX(
+        w=True,
+        r=instruction.src >= 8,
+        x=False,
+        b=instruction.dst >= 8,
+    )
+
+    opcode = Opcode(
+        hex=0x01,
+        reg=None,
+    )
+
+    modrm = ModRM(
+        mod=0b11,
+        reg=instruction.src & 0x07,  # source register
+        rm=instruction.dst & 0x07,  # destination register
+    )
+
+    bytecode.extend(
+        [
+            rex.to_byte(),
+            opcode.to_byte(),
+            modrm.to_byte(),
         ]
     )

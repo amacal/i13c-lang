@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Protocol, Type, Union
 
-from i13c.encoding import bits, jump, math, move, stack
+from i13c.encoding import addr, bits, jump, math, move, stack
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.llvm.typing import instructions as llvm
 from i13c.llvm.typing.instructions import Instruction
@@ -54,10 +54,12 @@ class Encoder(Protocol):
 
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
     llvm.AddRegImm: math.encode_add_reg_imm,
+    llvm.AddRegReg: math.encode_add_reg_reg,
     llvm.ByteSwap: bits.encode_bswap,
     llvm.Call: jump.encode_call,
     llvm.Jump: jump.encode_jump,
     llvm.Label: jump.encode_label,
+    llvm.LeaRegOff: addr.encode_lea_reg_off,
     llvm.MovOffImm: move.encode_mov_off_imm,
     llvm.MovOffReg: move.encode_mov_off_reg,
     llvm.MovRegImm: move.encode_mov_reg_imm,
