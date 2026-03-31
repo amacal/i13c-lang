@@ -144,7 +144,7 @@ def parse_instruction(state: ParsingState) -> tree.Instruction:
     token = state.expect(Tokens.IDENT)
 
     # optional operands
-    if state.is_in(Tokens.REG, Tokens.HEX, Tokens.AT):
+    if state.is_in(*OPERANDS_START):
         operands = parse_operands(state)
 
     # expect a semicolon
@@ -160,6 +160,9 @@ def parse_instruction(state: ParsingState) -> tree.Instruction:
     )
 
 
+OPERANDS_START = [Tokens.REG, Tokens.HEX, Tokens.AT, Tokens.SQUARE_OPEN]
+
+
 def parse_operands(state: ParsingState) -> List[tree.Operand]:
     operands: List[tree.Operand] = []
     operands.append(parse_operand(state))
@@ -172,7 +175,7 @@ def parse_operands(state: ParsingState) -> List[tree.Operand]:
 
 
 def parse_operand(state: ParsingState) -> tree.Operand:
-    token = state.expect(Tokens.REG, Tokens.HEX, Tokens.AT)
+    token = state.expect(*OPERANDS_START)
 
     # register has to provide its name
     if token.code == Tokens.REG:
@@ -185,9 +188,41 @@ def parse_operand(state: ParsingState) -> tree.Operand:
         )
 
     # reference has to provide its identifier
-    else:
+    elif token.code == Tokens.AT:
         # now we expect an identifier
         token = state.expect(Tokens.IDENT)
 
         # which has to be extracted
         return tree.Reference(ref=state.span(token), name=state.extract(token))
+
+    # address operands starts with a square open bracket
+    else:
+        offset: Optional[tree.Immediate] = None
+
+        # now we expect a register as the base
+        base = state.expect(Tokens.REG)
+
+        # optionally, an offset can be provided
+        end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
+
+        if end.code == Tokens.PLUS or end.code == Tokens.MINUS:
+            # if there's a plus or minus, we expect an immediate offset
+            value = state.expect(Tokens.HEX)
+
+            # determine the sign of the offset
+            sign = 1 if end.code == Tokens.PLUS else -1
+
+            # to be converted to an immediate operand
+            offset = tree.Immediate(
+                ref=state.span(value),
+                value=sign * int(state.extract(value), 16),
+            )
+
+            # address has to be closed with a square close bracket
+            end = state.expect(Tokens.SQUARE_CLOSE)
+
+        return tree.Address(
+            ref=state.between(token, end),
+            base=tree.Register(ref=state.span(base), name=state.extract(base)),
+            offset=offset,
+        )

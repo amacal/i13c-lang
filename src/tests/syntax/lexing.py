@@ -66,14 +66,14 @@ def can_reject_windows_line_endings():
 
 
 def can_tokenize_single_bytes():
-    text = ";,}{)(:@][="
+    text = ";,}{)(:@][=+-"
     code = open_text(text)
 
     tokens = tokenize(code)
     assert tokens is not None
 
     assert isinstance(tokens, result.Ok)
-    assert len(tokens.value) == 12
+    assert len(tokens.value) == 14
 
     assert tokens.value[0] == Token(code=Tokens.SEMICOLON, offset=0, length=1)
     assert tokens.value[1] == Token(code=Tokens.COMMA, offset=1, length=1)
@@ -86,7 +86,9 @@ def can_tokenize_single_bytes():
     assert tokens.value[8] == Token(code=Tokens.SQUARE_CLOSE, offset=8, length=1)
     assert tokens.value[9] == Token(code=Tokens.SQUARE_OPEN, offset=9, length=1)
     assert tokens.value[10] == Token(code=Tokens.EQUALS, offset=10, length=1)
-    assert tokens.value[11] == Token(code=Tokens.EOF, offset=11, length=0)
+    assert tokens.value[11] == Token(code=Tokens.PLUS, offset=11, length=1)
+    assert tokens.value[12] == Token(code=Tokens.MINUS, offset=12, length=1)
+    assert tokens.value[13] == Token(code=Tokens.EOF, offset=13, length=0)
 
     assert code.extract(tokens.value[0]) == b";"
     assert code.extract(tokens.value[1]) == b","
@@ -99,7 +101,9 @@ def can_tokenize_single_bytes():
     assert code.extract(tokens.value[8]) == b"]"
     assert code.extract(tokens.value[9]) == b"["
     assert code.extract(tokens.value[10]) == b"="
-    assert code.extract(tokens.value[11]) == b""
+    assert code.extract(tokens.value[11]) == b"+"
+    assert code.extract(tokens.value[12]) == b"-"
+    assert code.extract(tokens.value[13]) == b""
 
 
 def can_tokenize_range_operator():
@@ -379,8 +383,8 @@ def can_detect_incomplete_hex():
     assert diagnostic.code == "E1001"
 
 
-def can_detect_ident_followed_by_invalid_character():
-    code = open_text("hello-xab")
+def can_reject_ident_followed_by_invalid_character():
+    code = open_text("hello`xab")
     tokens = tokenize(code)
 
     assert isinstance(tokens, result.Err)

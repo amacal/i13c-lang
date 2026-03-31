@@ -16,6 +16,8 @@ CLASS_AT = b"@"
 CLASS_DOT = b"."
 CLASS_COMMA = b","
 CLASS_COLON = b":"
+CLASS_PLUS = b"+"
+CLASS_MINUS = b"-"
 CLASS_SEMICOLON = b";"
 CLASS_WHITESPACE = b" \n"
 CLASS_UNDERSCORE = b"_"
@@ -50,6 +52,8 @@ class Tokens:
     SQUARE_OPEN = 15
     SQUARE_CLOSE = 16
     EQUALS = 17
+    PLUS = 18
+    MINUS = 19
     EOF = 255
 
 
@@ -59,7 +63,8 @@ SEPARATORS = (
     CLASS_ROUND_OPEN + CLASS_ROUND_CLOSE +
     CLASS_CURLY_OPEN + CLASS_CURLY_CLOSE +
     CLASS_SQUARE_OPEN + CLASS_SQUARE_CLOSE +
-    CLASS_AT + CLASS_COLON + CLASS_DOT + CLASS_EQUALS
+    CLASS_AT + CLASS_COLON + CLASS_DOT + CLASS_EQUALS +
+    CLASS_PLUS + CLASS_MINUS
 )
 
 SET_REGS = {
@@ -271,6 +276,12 @@ def tokenize(code: SourceCode) -> result.Result[List[Token], List[Diagnostic]]:
             elif lexer.is_in(CLASS_EQUALS):
                 emit_equals(lexer, tokens)
 
+            elif lexer.is_in(CLASS_PLUS):
+                emit_plus(lexer, tokens)
+
+            elif lexer.is_in(CLASS_MINUS):
+                emit_minus(lexer, tokens)
+
             elif lexer.is_in(CLASS_DOT):
                 read_dot(lexer, tokens)
 
@@ -437,6 +448,16 @@ def emit_at(lexer: Lexer, tokens: List[Token]) -> None:
 def emit_equals(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.equals_token(offset=lexer.offset))
     lexer.advance(1)  # consume '='
+
+
+def emit_plus(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token(code=Tokens.PLUS, offset=lexer.offset, length=1))
+    lexer.advance(1)  # consume '+'
+
+
+def emit_minus(lexer: Lexer, tokens: List[Token]) -> None:
+    tokens.append(Token(code=Tokens.MINUS, offset=lexer.offset, length=1))
+    lexer.advance(1)  # consume '-'
 
 
 def report_e1000_unrecognized_token(offset: int) -> Diagnostic:

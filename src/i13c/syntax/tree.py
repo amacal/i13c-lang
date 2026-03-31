@@ -49,8 +49,8 @@ class Reference:
 @dataclass(kw_only=True, eq=False)
 class Address:
     ref: Span
-    base: Union[Register, Reference]
-    offset: Optional[Union[Immediate, Register, Reference]]
+    base: Register
+    offset: Optional[Immediate]
 
 
 Operand = Union[Register, Immediate, Reference, Address]
