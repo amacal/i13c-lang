@@ -333,3 +333,72 @@ def can_accept_movoffreg_instruction_with_negative_offset():
 
     assert isinstance(acceptance.bindings[0], Address)
     assert isinstance(acceptance.bindings[1], Register)
+
+
+def can_accept_movregoff_instruction_without_offset():
+    resolution = prepare_resolution(
+        """
+            asm main() noreturn { mov rax, [rbx]; }
+        """
+    )
+
+    assert len(resolution.rejected) >= 1
+    assert len(resolution.accepted) == 1
+    acceptance = resolution.accepted[0]
+
+    assert acceptance.mnemonic.name == b"mov"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.registers_64bit(),
+        OperandSpec.address_64bit(),
+    )
+
+    assert isinstance(acceptance.bindings[0], Register)
+    assert isinstance(acceptance.bindings[1], Address)
+
+
+def can_accept_movregoff_instruction_with_positive_offset():
+    resolution = prepare_resolution(
+        """
+            asm main() noreturn { mov rax, [rbx + 0x01]; }
+        """
+    )
+
+    assert len(resolution.rejected) >= 1
+    assert len(resolution.accepted) == 1
+    acceptance = resolution.accepted[0]
+
+    assert acceptance.mnemonic.name == b"mov"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.registers_64bit(),
+        OperandSpec.address_64bit(),
+    )
+
+    assert isinstance(acceptance.bindings[0], Register)
+    assert isinstance(acceptance.bindings[1], Address)
+
+
+def can_accept_movregoff_instruction_with_negative_offset():
+    resolution = prepare_resolution(
+        """
+            asm main() noreturn { mov rax, [rbx - 0x01]; }
+        """
+    )
+
+    assert len(resolution.rejected) >= 1
+    assert len(resolution.accepted) == 1
+    acceptance = resolution.accepted[0]
+
+    assert acceptance.mnemonic.name == b"mov"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.registers_64bit(),
+        OperandSpec.address_64bit(),
+    )
+
+    assert isinstance(acceptance.bindings[0], Register)
+    assert isinstance(acceptance.bindings[1], Address)
