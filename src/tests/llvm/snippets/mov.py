@@ -117,3 +117,42 @@ def can_lower_movoffreg_program_with_negative_offset():
     assert instructions == [
         "mov [rax - 0x00000010], rbx",
     ]
+
+
+def can_lower_movregoff_program_without_offset():
+    instructions = prepare_main(
+        """
+            asm foo() noreturn { mov rax, [rbx]; }
+            fn main() noreturn { foo(); }
+        """
+    )
+
+    assert instructions == [
+        "mov rax, [rbx + 0x00000000]",
+    ]
+
+
+def can_lower_movregoff_program_with_positive_offset():
+    instructions = prepare_main(
+        """
+            asm foo() noreturn { mov rax, [rbx + 0x10]; }
+            fn main() noreturn { foo(); }
+        """
+    )
+
+    assert instructions == [
+        "mov rax, [rbx + 0x00000010]",
+    ]
+
+
+def can_lower_movregoff_program_with_negative_offset():
+    instructions = prepare_main(
+        """
+            asm foo() noreturn { mov rax, [rbx - 0x10]; }
+            fn main() noreturn { foo(); }
+        """
+    )
+
+    assert instructions == [
+        "mov rax, [rbx - 0x00000010]",
+    ]
