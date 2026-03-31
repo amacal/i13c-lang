@@ -17,8 +17,9 @@ class FixtureException(Exception):
 
 
 class GraphFixtureException(Exception):
-    def __init__(self) -> None:
-        super().__init__("LLVM Graph cannot be created")
+    def __init__(self, diagnostics: List[Diagnostic]) -> None:
+        self.diagnostics = diagnostics
+        super().__init__(f"LLVM Graph cannot be created: {diagnostics[0].message}")
 
 
 class MissingMainInFixture(Exception):
@@ -44,7 +45,7 @@ def prepare_graph(code: str) -> Tuple[SemanticGraph, LowLevelGraph]:
     artifacts = run_graph(program)
 
     if artifacts.rules().count() > 0:
-        raise GraphFixtureException()
+        raise GraphFixtureException(list(artifacts.rules().enumerate()))
 
     return artifacts.semantic_graph(), artifacts.llvm_graph()
 

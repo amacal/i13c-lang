@@ -126,6 +126,28 @@ class AddRegImm:
 
 
 @dataclass(kw_only=True)
+class AddRegReg:
+    dst: int
+    src: int
+
+    def native(self) -> str:
+        return f"add {reg_to_name(self.dst)}, {reg_to_name(self.src)}"
+
+
+@dataclass(kw_only=True)
+class LeaRegOff:
+    dst: int
+    src: int
+    off: int
+
+    def native(self) -> str:
+        dst = reg_to_name(self.dst)
+        src = reg_to_name(self.src)
+        sign = "+" if self.off >= 0 else "-"
+
+        return f"lea {dst}, [{src} {sign} {abs(self.off):#010x}]"
+
+@dataclass(kw_only=True)
 class ByteSwap:
     target: int
 
@@ -176,24 +198,26 @@ class Nop:
 
 
 Instruction = Union[
-    MovRegImm,
-    MovRegReg,
+    AddRegImm,
+    AddRegReg,
+    ByteSwap,
+    Call,
+    Jump,
+    Label,
+    LeaRegOff,
     MovOffImm,
     MovOffReg,
+    MovRegImm,
     MovRegOff,
+    MovRegReg,
+    Nop,
+    PopOff,
+    PushOff,
+    Return,
     ShlRegImm,
     ShlRegReg,
     SubRegImm,
-    AddRegImm,
-    PushOff,
-    PopOff,
     SysCall,
-    Label,
-    Call,
-    Return,
-    Jump,
-    Nop,
-    ByteSwap,
 ]
 
 

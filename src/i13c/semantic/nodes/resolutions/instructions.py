@@ -46,7 +46,10 @@ def configure_resolution_by_instruction() -> GraphNode:
 
 
 INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
-    b"add": [(OperandSpec.registers_64bit(), OperandSpec.registers_64bit())],
+    b"add": [
+        (OperandSpec.registers_64bit(), OperandSpec.immediate(8, 16, 32)),
+        (OperandSpec.registers_64bit(), OperandSpec.registers_64bit()),
+    ],
     b"bswap": [(OperandSpec.registers_64bit(),)],
     b"lea": [(OperandSpec.registers_64bit(), OperandSpec.address_64bit())],
     b"mov": [
