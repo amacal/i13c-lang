@@ -1,6 +1,9 @@
 from i13c.graph.nodes import run as run_graph
-from i13c.semantic.typing.entities.operands import Immediate, Reference, Register
-from i13c.semantic.typing.resolutions.instructions import OperandSpec
+from i13c.semantic.typing.entities.operands import Immediate, Register
+from i13c.semantic.typing.resolutions.instructions import (
+    OperandSpec,
+    ReferenceToImmediate,
+)
 from tests.semantic import prepare_program
 
 
@@ -123,7 +126,7 @@ def can_accept_shlregimm_instruction_with_rewritten_operand_reference():
     )
 
     assert isinstance(acceptance.bindings[0], Register)
-    assert isinstance(acceptance.bindings[1], Reference)
+    assert isinstance(acceptance.bindings[1], ReferenceToImmediate)
 
 
 def can_reject_shlregimm_instruction_with_rewritten_operand_reference_of_wrong_width():
@@ -215,7 +218,7 @@ def can_accept_shlregimm_instruction_with_reference_within_range():
     )
 
     assert isinstance(acceptance.bindings[0], Register)
-    assert isinstance(acceptance.bindings[1], Reference)
+    assert isinstance(acceptance.bindings[1], ReferenceToImmediate)
 
 
 def can_accept_shlregreg_instruction_with_cl_as_second_operand():

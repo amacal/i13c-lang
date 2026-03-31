@@ -8,9 +8,9 @@ from i13c.semantic.typing.entities.instructions import Mnemonic
 from i13c.semantic.typing.entities.operands import (
     REGISTERS_8,
     REGISTERS_64,
+    Address,
     Immediate,
     OperandKind,
-    Reference,
     Register,
 )
 
@@ -48,8 +48,27 @@ class OperandSpec:
     def immediate(*width: Width) -> "OperandSpec":
         return OperandSpec(kind=b"immediate", width=width, names=())
 
+    @staticmethod
+    def address_64bit() -> "OperandSpec":
+        return OperandSpec(
+            kind=b"address",
+            width=(64,),
+            names=(),
+        )
 
-MnemonicBindings = List[Union[Register, Immediate, Reference]]
+
+@dataclass(kw_only=True)
+class ReferenceToImmediate:
+    pass
+
+
+@dataclass(kw_only=True)
+class ReferenceToRegister:
+    pass
+
+
+MnemonicBindingsItem = Union[Register, Immediate, Address, ReferenceToImmediate, ReferenceToRegister]
+MnemonicBindings = List[MnemonicBindingsItem]
 
 
 @dataclass(kw_only=True)

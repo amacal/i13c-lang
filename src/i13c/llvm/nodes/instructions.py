@@ -16,6 +16,7 @@ from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )
 from i13c.semantic.typing.entities.operands import (
+    Address,
     Immediate,
     Operand,
     OperandId,
@@ -68,6 +69,9 @@ def lower_instruction_mov(
             InstructionId(value=generator.next()),
             MovRegReg(dst=dst_reg, src=IR_REGISTER_FORWARD[src.target.name]),
         )
+
+    if isinstance(src.target, Address):
+        pass
 
     # we forgot to handle something
     assert False

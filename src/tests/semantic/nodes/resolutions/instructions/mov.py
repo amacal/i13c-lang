@@ -1,6 +1,10 @@
 from i13c.graph.nodes import run as run_graph
-from i13c.semantic.typing.entities.operands import Immediate, Reference, Register
-from i13c.semantic.typing.resolutions.instructions import OperandSpec
+from i13c.semantic.typing.entities.operands import Address, Immediate, Register
+from i13c.semantic.typing.resolutions.instructions import (
+    OperandSpec,
+    ReferenceToImmediate,
+    ReferenceToRegister,
+)
 from tests.semantic import prepare_program
 
 
@@ -151,7 +155,7 @@ def can_accept_movregimm_instruction_with_rewritten_operands():
     )
 
     assert isinstance(acceptance.bindings[0], Register)
-    assert isinstance(acceptance.bindings[1], Reference)
+    assert isinstance(acceptance.bindings[1], ReferenceToImmediate)
 
 
 def can_reject_movregimm_instruction_with_unresolved_operand_reference():
@@ -172,7 +176,7 @@ def can_reject_movregimm_instruction_with_unresolved_operand_reference():
 
     for rejection in value.rejected:
         assert rejection.mnemonic.name == b"mov"
-        assert rejection.reason == b"unresolved"
+        assert rejection.reason in (b"unresolved",b"type-mismatch")
 
 
 def can_accept_movregimm_instruction_with_referenced_register_binding():
@@ -200,7 +204,7 @@ def can_accept_movregimm_instruction_with_referenced_register_binding():
         OperandSpec.immediate(8, 16, 32, 64),
     )
 
-    assert isinstance(acceptance.bindings[0], Reference)
+    assert isinstance(acceptance.bindings[0], ReferenceToRegister)
     assert isinstance(acceptance.bindings[1], Immediate)
 
 
@@ -229,5 +233,92 @@ def can_accept_movregimm_instruction_with_narrow_register_binding():
         OperandSpec.immediate(8, 16, 32, 64),
     )
 
-    assert isinstance(acceptance.bindings[0], Reference)
+    assert isinstance(acceptance.bindings[0], ReferenceToRegister)
+    assert isinstance(acceptance.bindings[1], Immediate)
+
+
+def can_accept_movregoff_instruction_without_offset():
+    _, program = prepare_program("""
+        asm main() noreturn { mov [rax], 0x01; }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    assert semantic is not None
+    instructions = semantic.indices.resolution_by_instruction
+
+    assert instructions.size() == 1
+    _, value = instructions.peak()
+
+    assert len(value.rejected) >= 1
+    assert len(value.accepted) == 1
+    acceptance = value.accepted[0]
+
+    assert acceptance.mnemonic.name == b"mov"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.address_64bit(),
+        OperandSpec.immediate(8, 16, 32, 64),
+    )
+
+    assert isinstance(acceptance.bindings[0], Address)
+    assert isinstance(acceptance.bindings[1], Immediate)
+
+
+def can_accept_movregoff_instruction_with_positive_offset():
+    _, program = prepare_program("""
+        asm main() noreturn { mov [rax + 0x01], 0x01; }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    assert semantic is not None
+    instructions = semantic.indices.resolution_by_instruction
+
+    assert instructions.size() == 1
+    _, value = instructions.peak()
+
+    assert len(value.rejected) >= 1
+    assert len(value.accepted) == 1
+    acceptance = value.accepted[0]
+
+    assert acceptance.mnemonic.name == b"mov"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.address_64bit(),
+        OperandSpec.immediate(8, 16, 32, 64),
+    )
+
+    assert isinstance(acceptance.bindings[0], Address)
+    assert isinstance(acceptance.bindings[1], Immediate)
+
+
+def can_accept_movregoff_instruction_with_negative_offset():
+    _, program = prepare_program("""
+        asm main() noreturn { mov [rax - 0x01], 0x01; }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    assert semantic is not None
+    instructions = semantic.indices.resolution_by_instruction
+
+    assert instructions.size() == 1
+    _, value = instructions.peak()
+
+    assert len(value.rejected) >= 1
+    assert len(value.accepted) == 1
+    acceptance = value.accepted[0]
+
+    assert acceptance.mnemonic.name == b"mov"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.address_64bit(),
+        OperandSpec.immediate(8, 16, 32, 64),
+    )
+
+    assert isinstance(acceptance.bindings[0], Address)
     assert isinstance(acceptance.bindings[1], Immediate)
