@@ -3,24 +3,27 @@ asm exit(code@rdi: u8) noreturn clobbers rcx, r11, rax {
     syscall;
 }
 
-asm close(fd@rdi: u8[0x00..0xff]) clobbers rcx, r11, rax {
-    mov rax, 0x03;
+asm print_asm(value@rax: u32) clobbers rcx, r11, rax {
+    bswap rax;
+    mov rcx, 0x3030303030303030;
+    add rax, rcx;
+    mov [rsp - 0x10], rax;
+
+    mov r11, 0x0a00000000000000;
+    mov [rsp - 0x08], r11;
+
+    mov rdi, 0x01;
+    lea rsi, [rsp - 0x10];
+    mov rdx, 0x09;
+    mov rax, 0x01;
     syscall;
 }
 
-fn close_std(fd: u8[0x00..0x02]) {
-  close(fd);
-}
-
-fn foo(fd1: u8[0x00..0x02], fd2: u8[0x00..0x02], code: u8[0x00..0x0f]) noreturn {
-  val result: u8 = code;
-
-  close_std(fd1);
-  close_std(fd2);
-
-  exit(result);
+fn print(value: u32) {
+  print_asm(value);
 }
 
 fn main() noreturn {
-  foo(0x00, 0x01, 0x02);
+  print(0x01020304);
+  exit(0x00);
 }
