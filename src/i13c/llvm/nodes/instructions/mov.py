@@ -6,6 +6,7 @@ from i13c.llvm.typing.instructions import (
     InstructionEntry,
     InstructionId,
     MovOffImm,
+    MovOffReg,
     MovRegImm,
     MovRegReg,
 )
@@ -29,9 +30,12 @@ def lower_register_immediate(
     source: Immediate,
 ) -> InstructionEntry:
 
+    dst = IR_REGISTER_FORWARD[destination.name]
+    imm = source.value
+
     return (
         InstructionId(value=generator.next()),
-        MovRegImm(dst=IR_REGISTER_FORWARD[destination.name], imm=source.value),
+        MovRegImm(dst=dst, imm=imm),
     )
 
 
@@ -65,6 +69,22 @@ def lower_address_immediate(
     )
 
 
+def lower_address_register(
+    generator: Generator,
+    destination: Address,
+    source: Register,
+) -> InstructionEntry:
+
+    dst = IR_REGISTER_FORWARD[destination.base.name]
+    src = IR_REGISTER_FORWARD[source.name]
+    off = destination.offset.value if destination.offset is not None else 0
+
+    return (
+        InstructionId(value=generator.next()),
+        MovOffReg(dst=dst, off=off, src=src),
+    )
+
+
 class InstructionHandler(Protocol):
     def __call__(
         self,
@@ -80,6 +100,7 @@ DISPATCH_TABLE: Dict[
     (Register, Immediate): lower_register_immediate,
     (Register, Register): lower_register_register,
     (Address, Immediate): lower_address_immediate,
+    (Address, Register): lower_address_register,
 }  # pyright: ignore[reportAssignmentType]
 
 
