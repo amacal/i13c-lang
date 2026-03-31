@@ -50,7 +50,8 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
     b"mov": [
         (OperandSpec.registers_64bit(), OperandSpec.immediate(8, 16, 32, 64)),
         (OperandSpec.registers_64bit(), OperandSpec.registers_64bit()),
-        (OperandSpec.address_64bit(), OperandSpec.immediate(8, 16, 32, 64)),
+        (OperandSpec.address_64bit(), OperandSpec.immediate(8, 16, 32)),
+        (OperandSpec.address_64bit(), OperandSpec.registers_64bit()),
     ],
     b"shl": [
         (OperandSpec.registers_64bit(), OperandSpec.immediate(8)),
