@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 from i13c.semantic.core import Width, derive_width
 from i13c.syntax.source import Span
@@ -23,6 +23,16 @@ class Register:
     name: bytes
     width: Width
 
+    @staticmethod
+    def from_name(name: bytes) -> Register:
+        if name in REGISTERS_8:
+            return Register(name=name, width=8)
+
+        if name in REGISTERS_64:
+            return Register(name=name, width=64)
+
+        raise ValueError(f"unknown register: {name!r}")
+
     def __str__(self) -> str:
         return self.name.decode()
 
@@ -32,14 +42,28 @@ class Immediate:
     value: int
     width: Width
 
+    @staticmethod
+    def from_value(value: int) -> Immediate:
+        return Immediate(value=value, width=derive_width(abs(value)))
+
+    @staticmethod
+    def optional(value: Optional[int]) -> Optional[Immediate]:
+        return Immediate.from_value(value) if value is not None else None
+
 
 @dataclass(kw_only=True)
 class Reference:
     name: bytes
 
 
-OperandKind = Kind[b"register", b"immediate", b"reference"]
-OperandTarget = Union[Register, Immediate, Reference]
+@dataclass(kw_only=True)
+class Address:
+    base: Register
+    offset: Optional[Immediate]
+
+
+OperandKind = Kind[b"register", b"immediate", b"reference", b"address"]
+OperandTarget = Union[Register, Immediate, Reference, Address]
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -58,15 +82,10 @@ class Operand:
 
     @staticmethod
     def register(ref: Span, name: bytes) -> Operand:
-        width = 64
-
-        if name in REGISTERS_8:
-            width = 8
-
         return Operand(
             ref=ref,
             kind=b"register",
-            target=Register(name=name, width=width),
+            target=Register.from_name(name),
         )
 
     @staticmethod
@@ -74,7 +93,7 @@ class Operand:
         return Operand(
             ref=ref,
             kind=b"immediate",
-            target=Immediate(value=value, width=derive_width(value)),
+            target=Immediate.from_value(value),
         )
 
     @staticmethod
@@ -85,6 +104,10 @@ class Operand:
             target=Reference(name=name),
         )
 
-    # @staticmethod
-    # def address(ref: Span, base: OperandTarget, offset: Union[Immediate, Register, Reference]) -> Operand:
-    #     pass
+    @staticmethod
+    def address(ref: Span, base: Register, offset: Optional[Immediate]) -> Operand:
+        return Operand(
+            ref=ref,
+            kind=b"address",
+            target=Address(base=base, offset=offset),
+        )

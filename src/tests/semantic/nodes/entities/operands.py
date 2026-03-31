@@ -1,5 +1,6 @@
 from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.operands import (
+    Address,
     Immediate,
     Operand,
     OperandId,
@@ -102,6 +103,82 @@ def can_detect_a_register_operand():
 
     assert value.target.name == b"rax"
     assert value.target.width == 64
+
+
+def can_detect_an_address_operand_without_offset():
+    _, program = prepare_program("""
+        asm main() noreturn { nop [rax]; }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    assert semantic is not None
+    operands = semantic.basic.operands
+
+    assert operands.size() == 1
+    id, value = operands.pop()
+
+    assert isinstance(id, OperandId)
+    assert isinstance(value, Operand)
+
+    assert value.kind == b"address"
+    assert isinstance(value.target, Address)
+
+    assert value.target.base.name == b"rax"
+    assert value.target.offset is None
+
+
+
+def can_detect_an_address_operand_with_positive_offset():
+    _, program = prepare_program("""
+        asm main() noreturn { nop [rax + 0x10]; }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    assert semantic is not None
+    operands = semantic.basic.operands
+
+    assert operands.size() == 1
+    id, value = operands.pop()
+
+    assert isinstance(id, OperandId)
+    assert isinstance(value, Operand)
+
+    assert value.kind == b"address"
+    assert isinstance(value.target, Address)
+
+    assert value.target.base.name == b"rax"
+    assert isinstance(value.target.offset, Immediate)
+
+    assert value.target.offset.value == 0x10
+    assert value.target.offset.width == 8
+
+
+def can_detect_an_address_operand_with_negative_offset():
+    _, program = prepare_program("""
+        asm main() noreturn { nop [rax - 0x10]; }
+    """)
+
+    semantic = run_graph(program).semantic_graph()
+
+    assert semantic is not None
+    operands = semantic.basic.operands
+
+    assert operands.size() == 1
+    id, value = operands.pop()
+
+    assert isinstance(id, OperandId)
+    assert isinstance(value, Operand)
+
+    assert value.kind == b"address"
+    assert isinstance(value.target, Address)
+
+    assert value.target.base.name == b"rax"
+    assert isinstance(value.target.offset, Immediate)
+
+    assert value.target.offset.value == -0x10
+    assert value.target.offset.width == 8
 
 
 def can_detect_a_reference_operand():
