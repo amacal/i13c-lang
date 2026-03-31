@@ -1,25 +1,10 @@
-from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.operands import Address, Immediate, Register
 from i13c.semantic.typing.resolutions.instructions import (
-    InstructionResolution,
     OperandSpec,
     ReferenceToImmediate,
     ReferenceToRegister,
 )
-from tests.semantic import prepare_program
-
-
-def prepare_resolution(code: str) -> InstructionResolution:
-    _, program = prepare_program(code)
-    semantic = run_graph(program).semantic_graph()
-
-    assert semantic is not None
-    instructions = semantic.indices.resolution_by_instruction
-
-    assert instructions.size() == 1
-    _, value = instructions.peak()
-
-    return value
+from tests.semantic.nodes.resolutions.instructions import prepare_resolution
 
 
 def can_accept_movregimm_instruction_with_two_operands():

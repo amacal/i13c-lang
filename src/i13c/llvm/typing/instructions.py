@@ -126,6 +126,14 @@ class AddRegImm:
 
 
 @dataclass(kw_only=True)
+class ByteSwap:
+    target: int
+
+    def native(self) -> str:
+        return f"bswap {reg_to_name(self.target)}"
+
+
+@dataclass(kw_only=True)
 class SysCall:
     def native(self) -> str:
         return "syscall"
@@ -185,6 +193,7 @@ Instruction = Union[
     Return,
     Jump,
     Nop,
+    ByteSwap,
 ]
 
 

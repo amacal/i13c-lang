@@ -2,6 +2,7 @@ from typing import Dict, Protocol
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
+from i13c.llvm.nodes.instructions.bswap import lower_instruction_bswap
 from i13c.llvm.nodes.instructions.mov import lower_instruction_mov
 from i13c.llvm.typing.instructions import (
     InstructionEntry,
@@ -97,6 +98,7 @@ class InstructionHandler(Protocol):
 
 
 DISPATCH_TABLE: Dict[bytes, InstructionHandler] = {
+    b"bswap": lower_instruction_bswap,
     b"mov": lower_instruction_mov,
     b"shl": lower_instruction_shl,
     b"syscall": lower_instruction_syscall,

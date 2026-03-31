@@ -46,7 +46,7 @@ def configure_resolution_by_instruction() -> GraphNode:
 
 
 INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
-    b"syscall": [()],
+    b"bswap": [(OperandSpec.registers_64bit(),)],
     b"mov": [
         (OperandSpec.registers_64bit(), OperandSpec.immediate(8, 16, 32, 64)),
         (OperandSpec.registers_64bit(), OperandSpec.registers_64bit()),
@@ -58,9 +58,11 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
         (OperandSpec.registers_64bit(), OperandSpec.immediate(8)),
         (OperandSpec.registers_64bit(), OperandSpec.registers_8bit()),
     ],
+    b"syscall": [()],
 }
 
 OperandSubstituteKind = Kind[b"register", b"immediate", b"address"]
+
 
 @dataclass(kw_only=True)
 class OperandSubstitute:
@@ -87,7 +89,9 @@ def match_operand(
     # to check if we all operand registers are allowed by the spec
 
     if operand.registers is not None and operand.registers:
-        if len(set(spec.names).intersection(operand.registers)) != len(operand.registers):
+        if len(set(spec.names).intersection(operand.registers)) != len(
+            operand.registers
+        ):
             return b"register-mismatch"
 
     return None
