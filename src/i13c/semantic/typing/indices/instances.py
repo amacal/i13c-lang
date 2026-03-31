@@ -11,6 +11,3 @@ class Instance:
     target: SnippetId
     bindings: List[CallSiteBinding]
     operands: Dict[OperandId, Operand]
-
-    def describe(self) -> str:
-        return f"target={self.target.value} bindings={len(self.bindings)} operands={len(self.operands)}"

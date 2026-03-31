@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Type, Width
+from i13c.semantic.core import Identifier, Type, Width
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.operands import (
     Address,
@@ -138,7 +138,8 @@ def match_instruction(
                     )
 
                     # remember immediate as a target
-                    target = ReferenceToImmediate()
+                    identifier = Identifier(name=operand.target.name)
+                    target = ReferenceToImmediate(target=oid, identifier=identifier)
 
                 # else try to resolve as register
                 if operand.target.name in registers:
@@ -149,7 +150,8 @@ def match_instruction(
                     )
 
                     # remember register as a target
-                    target = ReferenceToRegister()
+                    identifier = Identifier(name=operand.target.name)
+                    target = ReferenceToRegister(target=oid, identifier=identifier)
 
                 # if we could not resolve, mark as such
                 if substitute is None:

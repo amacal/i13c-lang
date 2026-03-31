@@ -3,13 +3,14 @@ from typing import List
 from typing import Literal as Kind
 from typing import Tuple, Union
 
-from i13c.semantic.core import Width
+from i13c.semantic.core import Identifier, Width
 from i13c.semantic.typing.entities.instructions import Mnemonic
 from i13c.semantic.typing.entities.operands import (
     REGISTERS_8,
     REGISTERS_64,
     Address,
     Immediate,
+    OperandId,
     OperandKind,
     Register,
 )
@@ -59,12 +60,14 @@ class OperandSpec:
 
 @dataclass(kw_only=True)
 class ReferenceToImmediate:
-    pass
+    target: OperandId
+    identifier: Identifier
 
 
 @dataclass(kw_only=True)
 class ReferenceToRegister:
-    pass
+    target: OperandId
+    identifier: Identifier
 
 
 MnemonicBindingsItem = Union[Register, Immediate, Address, ReferenceToImmediate, ReferenceToRegister]

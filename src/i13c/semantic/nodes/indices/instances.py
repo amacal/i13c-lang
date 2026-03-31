@@ -2,15 +2,21 @@ from typing import Dict, List, Optional
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
+from i13c.semantic.core import Identifier
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
-from i13c.semantic.typing.entities.operands import Operand, OperandId, Reference
+from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.snippets import Slot, Snippet, SnippetId
 from i13c.semantic.typing.indices.instances import Instance
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteBinding,
     CallSiteResolution,
+)
+from i13c.semantic.typing.resolutions.instructions import (
+    InstructionResolution,
+    ReferenceToImmediate,
+    ReferenceToRegister,
 )
 from i13c.syntax.source import Span
 
@@ -26,7 +32,8 @@ def configure_instance_by_callsite() -> GraphNode:
                 ("literals", "entities/literals"),
                 ("operands", "entities/operands"),
                 ("instructions", "entities/instructions"),
-                ("resolutions", "resolutions/callsites"),
+                ("callsites_resolutions", "resolutions/callsites"),
+                ("instructions_resolutions", "resolutions/instructions"),
             }
         ),
     )
@@ -37,63 +44,83 @@ def build_instances(
     literals: OneToOne[LiteralId, Literal],
     operands: OneToOne[OperandId, Operand],
     instructions: OneToOne[InstructionId, Instruction],
-    resolutions: OneToOne[CallSiteId, CallSiteResolution],
+    callsites_resolutions: OneToOne[CallSiteId, CallSiteResolution],
+    instructions_resolutions: OneToOne[InstructionId, InstructionResolution],
 ) -> OneToOne[CallSiteId, Instance]:
     instances: Dict[CallSiteId, Instance] = {}
 
-    for cid, resolution in resolutions.items():
+    for cid, resolution in callsites_resolutions.items():
 
         # don't generate instance for unresolved callsites
         if len(resolution.accepted) != 1:
             continue
 
         # here actually is exactly one acceptance
-        for acceptance in resolution.accepted:
+        for callsite_acceptance in resolution.accepted:
 
             # ignore non-snippet callables
-            if acceptance.callable.kind != b"snippet":
+            if callsite_acceptance.callable.kind != b"snippet":
                 continue
 
             # retrieve snippet
-            assert isinstance(acceptance.callable.target, SnippetId)
-            snippet = snippets.get(acceptance.callable.target)
+            assert isinstance(callsite_acceptance.callable.target, SnippetId)
+            snippet = snippets.get(callsite_acceptance.callable.target)
 
             # collect only non-immediate operand bindings
             bindings: List[CallSiteBinding] = []
 
-            for binding in acceptance.bindings:
-                if binding.kind == b"slot":
-                    assert isinstance(binding.target, Slot)
-                    if not binding.target.bind.via_immediate():
-                        bindings.append(binding)
+            # TODO
+            for callsite_binding in callsite_acceptance.bindings:
+                if callsite_binding.kind == b"slot":
+                    assert isinstance(callsite_binding.target, Slot)
+                    if not callsite_binding.target.bind.via_immediate():
+                        bindings.append(callsite_binding)
 
             # collect only rewritten operands
             rewritten: Dict[OperandId, Operand] = {}
 
             for iid in snippet.instructions:
+                # get the instruction behind its id
                 instruction = instructions.get(iid)
 
-                # iterate over instruction operands
-                for oid in instruction.operands:
-                    operand = operands.get(oid)
+                for instruction_resolution in instructions_resolutions.get(
+                    iid
+                ).accepted:
+                    instruction_bindings = instruction_resolution.bindings
 
-                    # only references can be rewritten
-                    if operand.kind != b"reference":
-                        continue
+                    # the resolved bindings should match the instruction operands
+                    assert len(instruction_bindings) == len(instruction.operands)
 
-                    # satisfy type constraints
-                    assert isinstance(operand.target, Reference)
+                    # iterate over instruction operands
+                    for _, instruction_binding in zip(
+                        instruction.operands, instruction_bindings
+                    ):
+                        # only references-to-immediate can be rewritten
+                        if not isinstance(
+                            instruction_binding,
+                            (ReferenceToImmediate, ReferenceToRegister),
+                        ):
+                            continue
 
-                    # we need operand as reference, original bindings
-                    # and all literals to attempt rewriting
-                    args = (operand.ref, operand.target, acceptance.bindings, literals)
+                        # fetch operand behind the resolved binding
+                        oid = instruction_binding.target
+                        operand = operands.get(oid)
 
-                    # if operand can be rewritten, do so
-                    if new_operand := rewrite_operand(*args):
-                        rewritten[oid] = new_operand
+                        # we need operand as reference, original bindings
+                        # and all literals to attempt rewriting
+                        args = (
+                            operand.ref,
+                            instruction_binding.identifier,
+                            callsite_acceptance.bindings,
+                            literals,
+                        )
+
+                        # if operand can be rewritten, do so
+                        if new_operand := rewrite_operand(*args):
+                            rewritten[oid] = new_operand
 
             instances[cid] = Instance(
-                target=acceptance.callable.target,
+                target=callsite_acceptance.callable.target,
                 bindings=bindings,
                 operands=rewritten,
             )
@@ -103,7 +130,7 @@ def build_instances(
 
 def rewrite_operand(
     span: Span,
-    reference: Reference,
+    reference: Identifier,
     bindings: List[CallSiteBinding],
     literals: OneToOne[LiteralId, Literal],
 ) -> Optional[Operand]:
@@ -112,10 +139,6 @@ def rewrite_operand(
     # because we have guaranteed unique binding names per callsite
 
     for binding in bindings:
-
-        # only slot bindings can rewrite operands
-        if binding.kind != b"slot":
-            continue
 
         # satisfy type constraints
         assert isinstance(binding.target, Slot)
