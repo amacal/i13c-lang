@@ -153,8 +153,7 @@ def rewrite_operand(
             return Operand.register(span, binding.target.bind.name)
 
         # only immediate bindings can continue
-        if not binding.target.bind.via_immediate():
-            continue
+        assert binding.target.bind.via_immediate()
 
         # only literal arguments can rewrite operands
         if binding.argument.kind != b"literal":

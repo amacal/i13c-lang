@@ -2,47 +2,11 @@ from typing import Dict, Iterable, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
-from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.resolutions.callsites import (
+    CallSiteAcceptance,
     CallSiteBinding,
     CallSiteResolution,
 )
-from i13c.semantic.typing.resolutions.instructions import InstructionResolution
-
-
-class InstructionResolutionListExtractor:
-    @staticmethod
-    def extract(
-        artifacts: GraphArtifacts,
-    ) -> Iterable[Tuple[InstructionId, Instruction, InstructionResolution]]:
-        return (
-            (iid, artifacts.semantic_graph().basic.instructions.get(iid), resolution)
-            for iid, resolution in artifacts.semantic_graph().indices.resolution_by_instruction.items()
-        )
-
-    @staticmethod
-    def headers() -> Dict[str, str]:
-        return {
-            "ref": "Reference",
-            "id": "Instruction ID",
-            "mnemonic": "Mnemonic",
-            "operands": "Operands",
-            "accepted": "Accepted",
-            "rejected": "Rejected",
-        }
-
-    @staticmethod
-    def rows(
-        entry: Tuple[InstructionId, Instruction, InstructionResolution],
-    ) -> Dict[str, str]:
-        return {
-            "ref": str(entry[1].ref),
-            "id": entry[0].identify(1),
-            "mnemonic": str(entry[1].mnemonic),
-            "operands": str(len(entry[1].operands)),
-            "accepted": str(len(entry[2].accepted)),
-            "rejected": str(len(entry[2].rejected)),
-        }
 
 
 class CallSiteResolutionListExtractor:
@@ -77,6 +41,44 @@ class CallSiteResolutionListExtractor:
             "args": str(len(entry[1].arguments)),
             "accepted": str(len(entry[2].accepted)),
             "rejected": str(len(entry[2].rejected)),
+        }
+
+
+class AcceptedCallSiteResolutionListExtractor:
+    @staticmethod
+    def extract(
+        artifacts: GraphArtifacts,
+    ) -> Iterable[Tuple[CallSiteId, CallSite, int, CallSiteAcceptance]]:
+        graph = artifacts.semantic_graph()
+
+        return (
+            (cid, graph.basic.callsites.get(cid), idx, acceptance)
+            for cid, resolution in graph.indices.resolution_by_callsite.items()
+            for idx, acceptance in enumerate(resolution.accepted)
+        )
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Reference",
+            "id": "CallSite ID",
+            "name": "Callee Name",
+            "idx": "Accepted Index",
+            "target": "Accepted Target",
+            "bindings": "Accepted Bindings",
+        }
+
+    @staticmethod
+    def rows(
+        entry: Tuple[CallSiteId, CallSite, int, CallSiteAcceptance],
+    ) -> Dict[str, str]:
+        return {
+            "ref": str(entry[1].ref),
+            "id": entry[0].identify(1),
+            "name": str(entry[1].callee),
+            "idx": str(entry[2]),
+            "target": entry[3].callable.target.identify(1),
+            "bindings": str(len(entry[3].bindings)),
         }
 
 
