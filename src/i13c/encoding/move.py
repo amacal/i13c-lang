@@ -39,7 +39,13 @@ def encode_mov_reg_imm(
         signed=False,
     )
 
-    bytecode.extend([rex.to_byte(), opcode.to_byte(), *imm64.to_bytes()])
+    bytecode.extend(
+        [
+            *rex.to_bytes(),
+            opcode.to_byte(),
+            *imm64.to_bytes(),
+        ]
+    )
 
 
 def encode_mov_reg_reg(
@@ -69,7 +75,7 @@ def encode_mov_reg_reg(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
         ]
@@ -123,7 +129,7 @@ def encode_mov_off_imm(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
             *sib.to_bytes(),
@@ -139,7 +145,7 @@ def encode_mov_off_imm(
 
         bytecode.extend(
             [
-                rex.to_byte(),
+                *rex.to_bytes(),
                 opcode.to_byte(),
                 modrm.to_byte(),
                 *sib.to_bytes(),
@@ -188,7 +194,7 @@ def encode_mov_off_reg(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
             *sib.to_bytes(),
@@ -236,7 +242,7 @@ def encode_mov_reg_off(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
             *sib.to_bytes(),

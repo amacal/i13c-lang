@@ -13,7 +13,7 @@ from i13c.llvm.typing.flows import (
     FlowId,
 )
 from i13c.llvm.typing.instructions import Call, InstructionEntry, InstructionId, Nop
-from i13c.llvm.typing.registers import VirtualRegister, name_to_reg
+from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -39,7 +39,7 @@ def lower_callsite(
         target = bindings.callable.target
 
         snippet = graph.basic.snippets.get(target)
-        clobbers = [name_to_reg(reg.name.decode()) for reg in snippet.clobbers]
+        clobbers = [name_to_reg64(reg.name.decode()) for reg in snippet.clobbers]
 
         # append callsite specific bindings
         instructions.extend(

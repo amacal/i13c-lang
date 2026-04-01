@@ -40,7 +40,7 @@ from i13c.llvm.typing.instructions import (
     SubRegImm,
 )
 from i13c.llvm.typing.intervals import IntervalPressure, RegisterInterval
-from i13c.llvm.typing.registers import IR_REGISTER_FORWARD
+from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
 from i13c.llvm.typing.terminators import (
     ExitTerminator,
     JumpTerminator,
@@ -56,7 +56,7 @@ class AbstractConverter(Protocol):
 
 def dispatch_enter_frame(abstract: EnterFrame) -> List[Instruction]:
     if abstract.size > 0:
-        return [SubRegImm(dst=IR_REGISTER_FORWARD[b"rsp"], imm=abstract.size)]
+        return [SubRegImm(dst=IR_REGISTER_FORWARD_64[b"rsp"], imm=abstract.size)]
 
     else:
         return []
@@ -64,7 +64,7 @@ def dispatch_enter_frame(abstract: EnterFrame) -> List[Instruction]:
 
 def dispatch_exit_frame(abstract: ExitFrame) -> List[Instruction]:
     if abstract.size > 0:
-        return [AddRegImm(dst=IR_REGISTER_FORWARD[b"rsp"], imm=abstract.size)]
+        return [AddRegImm(dst=IR_REGISTER_FORWARD_64[b"rsp"], imm=abstract.size)]
 
     else:
         return []
@@ -72,14 +72,14 @@ def dispatch_exit_frame(abstract: ExitFrame) -> List[Instruction]:
 
 def dispatch_preserve(abstract: Preserve) -> List[Instruction]:
     return [
-        MovOffReg(dst=IR_REGISTER_FORWARD[b"rsp"], src=reg, off=idx * 8)
+        MovOffReg(dst=IR_REGISTER_FORWARD_64[b"rsp"], src=reg, off=idx * 8)
         for idx, reg in abstract.registers.items()
     ]
 
 
 def dispatch_restore(abstract: Restore) -> List[Instruction]:
     return [
-        MovRegOff(dst=reg, src=IR_REGISTER_FORWARD[b"rsp"], off=idx * 8)
+        MovRegOff(dst=reg, src=IR_REGISTER_FORWARD_64[b"rsp"], off=idx * 8)
         for idx, reg in abstract.registers.items()
     ]
 

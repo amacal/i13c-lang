@@ -24,7 +24,7 @@ from i13c.llvm.typing.instructions import (
     PopOff,
     PushOff,
 )
-from i13c.llvm.typing.registers import VirtualRegister, name_to_reg
+from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
 from i13c.llvm.typing.stacks import StackFrame
 from i13c.llvm.typing.terminators import (
     ExitTerminator,
@@ -412,7 +412,7 @@ def patch_snapshots(
                             (
                                 InstructionId(value=generator.next()),
                                 MovOffImm(
-                                    dst=name_to_reg("rsp"),
+                                    dst=name_to_reg64("rsp"),
                                     imm=instr.imm,
                                     off=offset * 8,
                                 ),
@@ -437,14 +437,14 @@ def patch_snapshots(
                         (
                             InstructionId(value=generator.next()),
                             PushOff(
-                                src=name_to_reg("rsp"),
+                                src=name_to_reg64("rsp"),
                                 off=src * 8,
                             ),
                         ),
                         (
                             InstructionId(value=generator.next()),
                             PopOff(
-                                dst=name_to_reg("rsp"),
+                                dst=name_to_reg64("rsp"),
                                 off=dst * 8,
                             ),
                         ),
@@ -467,7 +467,7 @@ def patch_snapshots(
                             (
                                 InstructionId(value=generator.next()),
                                 MovOffReg(
-                                    dst=name_to_reg("rsp"),
+                                    dst=name_to_reg64("rsp"),
                                     src=instr.src,
                                     off=offset * 8,
                                 ),

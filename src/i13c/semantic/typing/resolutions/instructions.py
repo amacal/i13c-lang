@@ -7,6 +7,8 @@ from i13c.semantic.core import Identifier, Width
 from i13c.semantic.typing.entities.instructions import Mnemonic
 from i13c.semantic.typing.entities.operands import (
     REGISTERS_8,
+    REGISTERS_16,
+    REGISTERS_32,
     REGISTERS_64,
     Address,
     Immediate,
@@ -40,6 +42,14 @@ class OperandSpec:
     @staticmethod
     def registers_8bit(*names: bytes) -> "OperandSpec":
         return OperandSpec(kind=b"register", width=(8,), names=names or REGISTERS_8)
+
+    @staticmethod
+    def registers_16bit(*names: bytes) -> "OperandSpec":
+        return OperandSpec(kind=b"register", width=(16,), names=names or REGISTERS_16)
+
+    @staticmethod
+    def registers_32bit(*names: bytes) -> "OperandSpec":
+        return OperandSpec(kind=b"register", width=(32,), names=names or REGISTERS_32)
 
     @staticmethod
     def registers_64bit(*names: bytes) -> "OperandSpec":

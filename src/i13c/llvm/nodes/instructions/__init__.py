@@ -13,7 +13,7 @@ from i13c.llvm.typing.instructions import (
     ShlRegReg,
     SysCall,
 )
-from i13c.llvm.typing.registers import IR_REGISTER_FORWARD
+from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )
@@ -58,7 +58,7 @@ def lower_instruction_shl(
     assert isinstance(dst.target, Register)
 
     if isinstance(src.target, Immediate):
-        dst_reg = IR_REGISTER_FORWARD[dst.target.name]
+        dst_reg = IR_REGISTER_FORWARD_64[dst.target.name]
         src_imm = src.target.value
 
         return (
@@ -71,7 +71,7 @@ def lower_instruction_shl(
 
         return (
             InstructionId(value=generator.next()),
-            ShlRegReg(dst=IR_REGISTER_FORWARD[dst.target.name]),
+            ShlRegReg(dst=IR_REGISTER_FORWARD_64[dst.target.name]),
         )
 
     # we forgot to handle something

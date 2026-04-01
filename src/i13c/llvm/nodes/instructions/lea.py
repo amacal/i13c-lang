@@ -7,7 +7,7 @@ from i13c.llvm.typing.instructions import (
     InstructionId,
     LeaRegOff,
 )
-from i13c.llvm.typing.registers import IR_REGISTER_FORWARD
+from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )
@@ -26,8 +26,8 @@ def lower_register_address(
     source: Address,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD[destination.name]
-    src = IR_REGISTER_FORWARD[source.base.name]
+    dst = IR_REGISTER_FORWARD_64[destination.name]
+    src = IR_REGISTER_FORWARD_64[source.base.name]
     off = source.offset.value if source.offset is not None else 0
 
     return (

@@ -2,7 +2,12 @@ from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, Immediate, ModRM, Opcode
-from i13c.llvm.typing.instructions import ByteSwap, ShlRegImm, ShlRegReg
+from i13c.llvm.typing.instructions import (
+    ByteSwapReg32,
+    ByteSwapReg64,
+    ShlRegImm,
+    ShlRegReg,
+)
 
 
 def encode_shl_reg_imm(
@@ -38,7 +43,7 @@ def encode_shl_reg_imm(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
             *imm8.to_bytes(),
@@ -73,7 +78,7 @@ def encode_shl_reg_reg(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
         ]
@@ -81,7 +86,7 @@ def encode_shl_reg_reg(
 
 
 def encode_bswap(
-    instruction: ByteSwap, bytecode: bytearray
+    instruction: Union[ByteSwapReg32, ByteSwapReg64], bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
     # chosen encoding: REX.W + 0F (C8 + rd)
@@ -93,7 +98,7 @@ def encode_bswap(
     )
 
     rex = REX(
-        w=True,
+        w=isinstance(instruction, ByteSwapReg64),
         r=False,
         x=False,
         b=opcode.rex_b(),  # high bit of register
@@ -101,7 +106,7 @@ def encode_bswap(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             0x0F,
             opcode.to_byte(),
         ]

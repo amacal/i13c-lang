@@ -8,7 +8,7 @@ from i13c.llvm.typing.instructions import (
     InstructionEntry,
     InstructionId,
 )
-from i13c.llvm.typing.registers import IR_REGISTER_FORWARD
+from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )
@@ -27,7 +27,7 @@ def lower_register_immediate(
     source: Immediate,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD[destination.name]
+    dst = IR_REGISTER_FORWARD_64[destination.name]
     imm = source.value
 
     return (
@@ -42,8 +42,8 @@ def lower_register_register(
     source: Register,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD[destination.name]
-    src = IR_REGISTER_FORWARD[source.name]
+    dst = IR_REGISTER_FORWARD_64[destination.name]
+    src = IR_REGISTER_FORWARD_64[source.name]
 
     return (
         InstructionId(value=generator.next()),

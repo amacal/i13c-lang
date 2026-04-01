@@ -70,7 +70,12 @@ SEPARATORS = (
 SET_REGS = {
     b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
     b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
-    b"cl",
+    b"eax", b"ebx", b"ecx", b"edx", b"esi", b"edi", b"esp", b"ebp",
+    b"r8d", b"r9d", b"r10d", b"r11d", b"r12d", b"r13d", b"r14d", b"r15d",
+    b"ax", b"bx", b"cx", b"dx", b"si", b"di", b"sp", b"bp",
+    b"r8w", b"r9w", b"r10w", b"r11w", b"r12w", b"r13w", b"r14w", b"r15w",
+    b"al", b"bl", b"cl", b"dl", b"sil", b"dil", b"bpl", b"spl",
+    b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b",
 }
 
 SET_TYPES = {

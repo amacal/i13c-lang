@@ -4,7 +4,7 @@ from i13c.graph.artifacts import GraphArtifacts
 from i13c.llvm.typing.blocks import Block, InstructionPosition
 from i13c.llvm.typing.flows import BlockId
 from i13c.llvm.typing.intervals import IntervalPressure, RegisterInterval
-from i13c.llvm.typing.registers import reg_to_name
+from i13c.llvm.typing.registers import reg64_to_name
 from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 
@@ -160,7 +160,7 @@ class IntervalsInFunctionsListExtractor:
         return {
             "fid": entry[0].identify(1),
             "name": str(entry[1].identifier),
-            "reg": reg_to_name(entry[2].vreg),
+            "reg": reg64_to_name(entry[2].vreg),
             "start": str(entry[2].start),
             "end": str(entry[2].end),
             "graph": " " * entry[2].start + "*" * (entry[2].end - entry[2].start + 1),
@@ -200,7 +200,7 @@ class IntervalPressureInFunctionsListExtractor:
             "idx": str(entry[2].index),
             "pressure": str(entry[2].pressure),
             "registers": " ".join(
-                reg_to_name(reg) for reg in sorted(entry[2].registers, reverse=True)
+                reg64_to_name(reg) for reg in sorted(entry[2].registers, reverse=True)
             ),
         }
 
@@ -239,7 +239,7 @@ class StackFrameInFunctionsListExtractor:
             "size": str(entry[3].size),
             "idx": str(entry[2]),
             "regs": " ".join(
-                reg_to_name(reg)
+                reg64_to_name(reg)
                 for reg in sorted(entry[3].registers_at_slot(entry[2]), reverse=True)
             ),
         }

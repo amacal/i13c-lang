@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Tuple, Union
 
-from i13c.llvm.typing.registers import reg_to_name
+from i13c.llvm.typing.registers import reg64_to_name
 from i13c.semantic.typing.entities.functions import FunctionId
 
 
@@ -19,7 +19,7 @@ class SnapshotFlow:
     dst: int
 
     def native(self) -> str:
-        return f"snapshot {reg_to_name(self.dst)}, {reg_to_name(self.src)}"
+        return f"snapshot {reg64_to_name(self.dst)}, {reg64_to_name(self.src)}"
 
 
 @dataclass(kw_only=True)
@@ -35,7 +35,7 @@ class ClobbersFlow:
     clobbers: List[int]
 
     def native(self) -> str:
-        return f"clobbers {', '.join(map(reg_to_name, sorted(self.clobbers)))}"
+        return f"clobbers {', '.join(map(reg64_to_name, sorted(self.clobbers)))}"
 
 
 @dataclass(kw_only=True)
@@ -44,7 +44,7 @@ class BindingFlow:
     src: int
 
     def native(self) -> str:
-        return f"bind {reg_to_name(self.dst)}, {reg_to_name(self.src)}"
+        return f"bind {reg64_to_name(self.dst)}, {reg64_to_name(self.src)}"
 
 
 @dataclass(kw_only=True)
@@ -69,7 +69,7 @@ class ImmediateFlow:
     dst: int
 
     def native(self) -> str:
-        return f"immediate {reg_to_name(self.dst)}, {self.imm:#010x}"
+        return f"immediate {reg64_to_name(self.dst)}, {self.imm:#010x}"
 
 
 @dataclass(kw_only=True)
@@ -78,7 +78,7 @@ class MoveFlow:
     dst: int
 
     def native(self) -> str:
-        return f"move {reg_to_name(self.dst)}, {reg_to_name(self.src)}"
+        return f"move {reg64_to_name(self.dst)}, {reg64_to_name(self.src)}"
 
 
 Flow = Union[

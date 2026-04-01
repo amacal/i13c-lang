@@ -55,7 +55,8 @@ class Encoder(Protocol):
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
     llvm.AddRegImm: math.encode_add_reg_imm,
     llvm.AddRegReg: math.encode_add_reg_reg,
-    llvm.ByteSwap: bits.encode_bswap,
+    llvm.ByteSwapReg32: bits.encode_bswap,
+    llvm.ByteSwapReg64: bits.encode_bswap,
     llvm.Call: jump.encode_call,
     llvm.Jump: jump.encode_jump,
     llvm.Label: jump.encode_label,

@@ -14,7 +14,7 @@ from i13c.llvm.typing.instructions import (
 )
 from i13c.llvm.typing.registers import (
     VirtualRegister,
-    name_to_reg,
+    name_to_reg64,
 )
 from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.model import SemanticGraph
@@ -54,14 +54,14 @@ def lower_snippet_bindings(
 
             # emit move instruction for binding
             iid = InstructionId(value=generator.next())
-            instr = MovRegImm(dst=name_to_reg(bind.name.decode()), imm=imm)
+            instr = MovRegImm(dst=name_to_reg64(bind.name.decode()), imm=imm)
 
             out.append((iid, instr))
 
         # or slots may be expressions
         if isinstance(binding.src, VariableId):
             src = registers.get(binding.src).ref()
-            dst = name_to_reg(binding.dst.bind.name.decode())
+            dst = name_to_reg64(binding.dst.bind.name.decode())
 
             iid = FlowId(value=generator.next())
             instr = BindingFlow(dst=dst, src=src)
@@ -164,7 +164,7 @@ def patch_bindings(
                                 InstructionId(value=generator.next()),
                                 MovRegOff(
                                     dst=instr.dst,
-                                    src=name_to_reg("rsp"),
+                                    src=name_to_reg64("rsp"),
                                     off=offset * 8,
                                 ),
                             )

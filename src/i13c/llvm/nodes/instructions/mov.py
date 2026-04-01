@@ -11,7 +11,7 @@ from i13c.llvm.typing.instructions import (
     MovRegOff,
     MovRegReg,
 )
-from i13c.llvm.typing.registers import IR_REGISTER_FORWARD
+from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )
@@ -31,7 +31,7 @@ def lower_register_immediate(
     source: Immediate,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD[destination.name]
+    dst = IR_REGISTER_FORWARD_64[destination.name]
     imm = source.value
 
     return (
@@ -46,8 +46,8 @@ def lower_register_register(
     source: Register,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD[destination.name]
-    src = IR_REGISTER_FORWARD[source.name]
+    dst = IR_REGISTER_FORWARD_64[destination.name]
+    src = IR_REGISTER_FORWARD_64[source.name]
 
     return (
         InstructionId(value=generator.next()),
@@ -61,7 +61,7 @@ def lower_address_immediate(
     source: Immediate,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD[destination.base.name]
+    dst = IR_REGISTER_FORWARD_64[destination.base.name]
     off = destination.offset.value if destination.offset is not None else 0
 
     return (
@@ -76,8 +76,8 @@ def lower_address_register(
     source: Register,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD[destination.base.name]
-    src = IR_REGISTER_FORWARD[source.name]
+    dst = IR_REGISTER_FORWARD_64[destination.base.name]
+    src = IR_REGISTER_FORWARD_64[source.name]
     off = destination.offset.value if destination.offset is not None else 0
 
     return (
@@ -92,8 +92,8 @@ def lower_register_address(
     source: Address,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD[destination.name]
-    src = IR_REGISTER_FORWARD[source.base.name]
+    dst = IR_REGISTER_FORWARD_64[destination.name]
+    src = IR_REGISTER_FORWARD_64[source.base.name]
     off = source.offset.value if source.offset is not None else 0
 
     return (

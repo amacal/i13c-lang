@@ -4,7 +4,7 @@ from typing import Dict, Iterable, Optional, Tuple
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.llvm.typing.blocks import Registers
 from i13c.llvm.typing.flows import BlockId
-from i13c.llvm.typing.registers import VirtualRegister, reg_to_name
+from i13c.llvm.typing.registers import VirtualRegister, reg64_to_name
 from i13c.semantic.typing.indices.variables import VariableId
 
 
@@ -56,7 +56,7 @@ class InstructionRegistersListExtractor:
     ) -> Dict[str, str]:
         def format(registers: Optional[Registers]) -> str:
             return (
-                " ".join(reg_to_name(reg) for reg in registers.items)
+                " ".join(reg64_to_name(reg) for reg in registers.items)
                 if registers
                 else ""
             )
@@ -108,7 +108,7 @@ class BlockRegistersListExtractor:
     ) -> Dict[str, str]:
         def format(registers: Optional[Registers]) -> str:
             return (
-                " ".join(reg_to_name(reg) for reg in registers.items)
+                " ".join(reg64_to_name(reg) for reg in registers.items)
                 if registers
                 else ""
             )

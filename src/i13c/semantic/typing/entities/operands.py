@@ -11,11 +11,33 @@ REGISTERS_8: Tuple[bytes, ...] = (
     b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b",
 )
 
+REGISTERS_16: Tuple[bytes, ...] = (
+    b"ax", b"bx", b"cx", b"dx", b"si", b"di", b"sp", b"bp",
+    b"r8w", b"r9w", b"r10w", b"r11w", b"r12w", b"r13w", b"r14w", b"r15w",
+)
+
+REGISTERS_32: Tuple[bytes, ...] = (
+    b"eax", b"ebx", b"ecx", b"edx", b"esi", b"edi", b"esp", b"ebp",
+    b"r8d", b"r9d", b"r10d", b"r11d", b"r12d", b"r13d", b"r14d", b"r15d",
+)
+
 REGISTERS_64: Tuple[bytes, ...] = (
     b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
     b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
 )
 # fmt: on
+
+OperandSymbol = Kind[
+    b"reg8",
+    b"reg16",
+    b"reg32",
+    b"reg64",
+    b"imm8",
+    b"imm16",
+    b"imm32",
+    b"imm64",
+    b"addr",
+]
 
 
 @dataclass(kw_only=True)
@@ -28,10 +50,25 @@ class Register:
         if name in REGISTERS_8:
             return Register(name=name, width=8)
 
+        if name in REGISTERS_32:
+            return Register(name=name, width=32)
+
         if name in REGISTERS_64:
             return Register(name=name, width=64)
 
         raise ValueError(f"unknown register: {name!r}")
+
+    def symbol(self) -> OperandSymbol:
+        if self.width == 8:
+            return b"reg8"
+
+        if self.width == 16:
+            return b"reg16"
+
+        if self.width == 32:
+            return b"reg32"
+
+        return b"reg64"
 
     def __str__(self) -> str:
         return self.name.decode()
@@ -50,16 +87,34 @@ class Immediate:
     def optional(value: Optional[int]) -> Optional[Immediate]:
         return Immediate.from_value(value) if value is not None else None
 
+    def symbol(self) -> OperandSymbol:
+        if self.width == 8:
+            return b"reg8"
+
+        if self.width == 16:
+            return b"reg16"
+
+        if self.width == 32:
+            return b"reg32"
+
+        return b"reg64"
+
 
 @dataclass(kw_only=True)
 class Reference:
     name: bytes
+
+    def symbol(self) -> OperandSymbol:
+        assert False
 
 
 @dataclass(kw_only=True)
 class Address:
     base: Register
     offset: Optional[Immediate]
+
+    def symbol(self) -> OperandSymbol:
+        return b"addr"
 
 
 OperandKind = Kind[b"register", b"immediate", b"reference", b"address"]

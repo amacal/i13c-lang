@@ -44,7 +44,7 @@ def encode_lea_reg_off(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
             *sib.to_bytes(),

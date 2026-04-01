@@ -42,7 +42,7 @@ def encode_sub_reg_imm(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
             *imm32.to_bytes(),
@@ -83,7 +83,7 @@ def encode_add_reg_imm(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
             *imm32.to_bytes(),
@@ -118,7 +118,7 @@ def encode_add_reg_reg(
 
     bytecode.extend(
         [
-            rex.to_byte(),
+            *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
         ]

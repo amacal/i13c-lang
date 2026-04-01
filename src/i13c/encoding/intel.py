@@ -9,7 +9,13 @@ class REX:
     x: bool
     b: bool
 
-    def to_byte(self) -> int:
+    def is_required(self) -> bool:
+        return self.w or self.r or self.x or self.b
+
+    def to_bytes(self) -> bytes:
+        if not self.is_required():
+            return bytes([])
+
         value = 0x40
 
         if self.w:
@@ -24,7 +30,7 @@ class REX:
         if self.b:
             value |= 0x01
 
-        return value
+        return bytes([value])
 
 
 @dataclass(kw_only=True)
