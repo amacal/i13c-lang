@@ -2,10 +2,10 @@ from typing import Dict, Protocol
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
-from i13c.llvm.nodes.instructions.add import lower_instruction_add
-from i13c.llvm.nodes.instructions.bswap import lower_instruction_bswap
-from i13c.llvm.nodes.instructions.lea import lower_instruction_lea
-from i13c.llvm.nodes.instructions.mov import lower_instruction_mov
+from i13c.llvm.nodes.instructions.addr import lower_instruction_lea
+from i13c.llvm.nodes.instructions.bits import lower_instruction_bswap
+from i13c.llvm.nodes.instructions.math import lower_instruction_add
+from i13c.llvm.nodes.instructions.move import lower_instruction_mov
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
 from i13c.llvm.typing.instructions.bits import ShlRegImm, ShlRegReg
 from i13c.llvm.typing.instructions.jump import SysCall

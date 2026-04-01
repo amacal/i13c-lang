@@ -4,7 +4,8 @@ from typing import Tuple, Union
 from i13c.llvm.typing.instructions import addr, bits, jump, math, move, stack
 
 Instruction = Union[
-    addr.LeaRegOff,
+    addr.LeaReg32Off,
+    addr.LeaReg64Off,
     bits.ByteSwapReg32,
     bits.ByteSwapReg64,
     bits.ShlRegImm,

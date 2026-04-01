@@ -53,7 +53,8 @@ class Encoder(Protocol):
 
 
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
-    llvm.addr.LeaRegOff: addr.encode_lea_reg_off,
+    llvm.addr.LeaReg32Off: addr.encode_lea_reg_off,
+    llvm.addr.LeaReg64Off: addr.encode_lea_reg_off,
     llvm.bits.ByteSwapReg32: bits.encode_bswap,
     llvm.bits.ByteSwapReg64: bits.encode_bswap,
     llvm.bits.ShlRegImm: bits.encode_shl_reg_imm,

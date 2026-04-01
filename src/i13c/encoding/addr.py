@@ -2,11 +2,11 @@ from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, SIB, Displacement, ModRM, Opcode
-from i13c.llvm.typing.instructions.addr import LeaRegOff
+from i13c.llvm.typing.instructions.addr import LeaReg32Off, LeaReg64Off
 
 
 def encode_lea_reg_off(
-    instruction: LeaRegOff, bytecode: bytearray
+    instruction: Union[LeaReg32Off, LeaReg64Off], bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
     # chosen encoding: REX.W + 8D /r
@@ -25,7 +25,7 @@ def encode_lea_reg_off(
     )
 
     rex = REX(
-        w=True,
+        w=isinstance(instruction, LeaReg64Off),
         r=modrm.rex_r(),
         x=sib.rex_x(),
         b=modrm.rex_b() or sib.rex_b(),
