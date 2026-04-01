@@ -102,8 +102,12 @@ class Immediate:
     width: int
     signed: bool
 
-    def to_bytes(self) -> bytes:
-        return self.value.to_bytes(self.width, byteorder="little", signed=self.signed)
+    def to_bytes(self, condition: bool = True) -> bytes:
+        return (
+            self.value.to_bytes(self.width, byteorder="little", signed=self.signed)
+            if condition
+            else bytes([])
+        )
 
 
 @dataclass(kw_only=True)

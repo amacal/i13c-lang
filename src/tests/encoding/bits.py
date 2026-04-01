@@ -67,14 +67,23 @@ def can_encode_instructions_bswap_reg32(operand: str, encoding: bytes):
         | --- | --------- | ----------- | --- | --- | --------- | ----------- |
         | dst | immediate | encoding    | *   | dst | immediate | encoding    |
         | --- | --------- | ----------- | --- | --- | --------- | ----------- |
-        | rax | 0x01      | 48 c1 e0 01 | *   | r8  | 0x01      | 49 c1 e0 01 |
-        | rcx | 0x01      | 48 c1 e1 01 | *   | r9  | 0x01      | 49 c1 e1 01 |
-        | rdx | 0x01      | 48 c1 e2 01 | *   | r10 | 0x01      | 49 c1 e2 01 |
-        | rbx | 0x01      | 48 c1 e3 01 | *   | r11 | 0x01      | 49 c1 e3 01 |
-        | rsp | 0x01      | 48 c1 e4 01 | *   | r12 | 0x01      | 49 c1 e4 01 |
-        | rbp | 0x01      | 48 c1 e5 01 | *   | r13 | 0x01      | 49 c1 e5 01 |
-        | rsi | 0x01      | 48 c1 e6 01 | *   | r14 | 0x01      | 49 c1 e6 01 |
-        | rdi | 0x01      | 48 c1 e7 01 | *   | r15 | 0x01      | 49 c1 e7 01 |
+        | rax | 0x01      | 48 d1 e0    | *   | r8  | 0x01      | 49 d1 e0    |
+        | rcx | 0x01      | 48 d1 e1    | *   | r9  | 0x01      | 49 d1 e1    |
+        | rdx | 0x01      | 48 d1 e2    | *   | r10 | 0x01      | 49 d1 e2    |
+        | rbx | 0x01      | 48 d1 e3    | *   | r11 | 0x01      | 49 d1 e3    |
+        | rsp | 0x01      | 48 d1 e4    | *   | r12 | 0x01      | 49 d1 e4    |
+        | rbp | 0x01      | 48 d1 e5    | *   | r13 | 0x01      | 49 d1 e5    |
+        | rsi | 0x01      | 48 d1 e6    | *   | r14 | 0x01      | 49 d1 e6    |
+        | rdi | 0x01      | 48 d1 e7    | *   | r15 | 0x01      | 49 d1 e7    |
+        | --- | --------- | ----------- | --- | --- | --------- | ----------- |
+        | rax | 0x05      | 48 c1 e0 05 | *   | r8  | 0x05      | 49 c1 e0 05 |
+        | rcx | 0x05      | 48 c1 e1 05 | *   | r9  | 0x05      | 49 c1 e1 05 |
+        | rdx | 0x05      | 48 c1 e2 05 | *   | r10 | 0x05      | 49 c1 e2 05 |
+        | rbx | 0x05      | 48 c1 e3 05 | *   | r11 | 0x05      | 49 c1 e3 05 |
+        | rsp | 0x05      | 48 c1 e4 05 | *   | r12 | 0x05      | 49 c1 e4 05 |
+        | rbp | 0x05      | 48 c1 e5 05 | *   | r13 | 0x05      | 49 c1 e5 05 |
+        | rsi | 0x05      | 48 c1 e6 05 | *   | r14 | 0x05      | 49 c1 e6 05 |
+        | rdi | 0x05      | 48 c1 e7 05 | *   | r15 | 0x05      | 49 c1 e7 05 |
         | --- | --------- | ----------- | --- | --- | --------- | ----------- |
         """
 )
@@ -88,32 +97,32 @@ def can_encode_instructions_shl_reg64_imm8(dst: str, immediate: int, encoding: b
 
 def can_encode_instructions_shl_ebx_imm8():
     flow: List[Instruction] = [
-        ShlReg32Imm8(dst=3, imm=0x01),
+        ShlReg32Imm8(dst=3, imm=0x02),
     ]
 
     bytecode = encode(flow)
-    expected = bytes([0xC1, 0xE3, 0x01])
+    expected = bytes([0xC1, 0xE3, 0x02])
 
     assert bytecode == expected
 
 
 def can_encode_instructions_shl_bx_imm8():
     flow: List[Instruction] = [
-        ShlReg16Imm8(dst=3, imm=0x01),
+        ShlReg16Imm8(dst=3, imm=0x02),
     ]
 
     bytecode = encode(flow)
-    expected = bytes([0x66, 0xC1, 0xE3, 0x01])
+    expected = bytes([0x66, 0xC1, 0xE3, 0x02])
 
     assert bytecode == expected
 
 
 def can_encode_instructions_shl_bl_imm8():
     flow: List[Instruction] = [
-        ShlReg8Imm8(dst=3, imm=0x01),
+        ShlReg8Imm8(dst=3, imm=0x02),
     ]
 
     bytecode = encode(flow)
-    expected = bytes([0xC0, 0xE3, 0x01])
+    expected = bytes([0xC0, 0xE3, 0x02])
 
     assert bytecode == expected

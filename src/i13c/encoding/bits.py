@@ -14,10 +14,11 @@ from i13c.llvm.typing.instructions.bits import (
 
 
 def encode_shl_reg_imm(
-    instruction: Union[ShlReg8Imm8, ShlReg16Imm8, ShlReg32Imm8, ShlReg64Imm8], bytecode: bytearray
+    instruction: Union[ShlReg8Imm8, ShlReg16Imm8, ShlReg32Imm8, ShlReg64Imm8],
+    bytecode: bytearray,
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
-    # chosen encoding: 66 + REX + C0|C1 /4 ib
+    # chosen encoding: 66 + REX + C0|C1|D0|D1 /4 ib
     # encoded as: [prefixes?][rex?] [opcode] [modrm] [imm8]
 
     prefixes = Prefixes(
@@ -31,8 +32,13 @@ def encode_shl_reg_imm(
         b=instruction.dst >= 8,
     )
 
+    if isinstance(instruction, ShlReg8Imm8):
+        value = 0xD0 if instruction.imm == 1 else 0xC0
+    else:
+        value = 0xD1 if instruction.imm == 1 else 0xC1
+
     opcode = Opcode(
-        hex=0xC1 if not isinstance(instruction, ShlReg8Imm8) else 0xC0,
+        hex=value,
         reg=None,
     )
 
@@ -54,7 +60,7 @@ def encode_shl_reg_imm(
             *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
-            *imm8.to_bytes(),
+            *imm8.to_bytes(imm8.value > 1),
         ]
     )
 
