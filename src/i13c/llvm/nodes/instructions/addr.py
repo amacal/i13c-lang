@@ -18,7 +18,7 @@ from i13c.semantic.typing.entities.operands import (
 )
 
 
-def lower_reg32_addr64(
+def lower_reg32_addr(
     generator: Generator,
     destination: Register,
     source: Address,
@@ -34,7 +34,7 @@ def lower_reg32_addr64(
     )
 
 
-def lower_reg64_addr64(
+def lower_reg64_addr(
     generator: Generator,
     destination: Register,
     source: Address,
@@ -60,8 +60,8 @@ class InstructionHandler(Protocol):
 
 
 DISPATCH_TABLE: Dict[Tuple[OperandSymbol, OperandSymbol], InstructionHandler] = {
-    (b"reg32", b"addr"): lower_reg32_addr64,
-    (b"reg64", b"addr"): lower_reg64_addr64,
+    (b"reg32", b"addr"): lower_reg32_addr,
+    (b"reg64", b"addr"): lower_reg64_addr,
 }  # pyright: ignore[reportAssignmentType]
 
 

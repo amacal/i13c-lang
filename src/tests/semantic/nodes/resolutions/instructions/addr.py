@@ -3,7 +3,7 @@ from i13c.semantic.typing.resolutions.instructions import OperandSpec
 from tests.semantic.nodes.resolutions.instructions import prepare_resolution
 
 
-def can_accept_lea_reg64_addr64_disp0():
+def can_accept_lea_reg64_addr_disp0():
     resolution = prepare_resolution(
         """
             asm main() noreturn { lea rax, [rbx]; }
@@ -27,7 +27,7 @@ def can_accept_lea_reg64_addr64_disp0():
     assert isinstance(acceptance.bindings[1], Address)
 
 
-def can_accept_lea_reg64_addr64_with_positive_disp32():
+def can_accept_lea_reg64_addr_with_positive_disp32():
     resolution = prepare_resolution(
         """
             asm main() noreturn { lea rax, [rbx + 0x1234]; }
@@ -51,7 +51,7 @@ def can_accept_lea_reg64_addr64_with_positive_disp32():
     assert isinstance(acceptance.bindings[1], Address)
 
 
-def can_accept_lea_reg64_addr64_with_negative_disp32():
+def can_accept_lea_reg64_addr_with_negative_disp32():
     resolution = prepare_resolution(
         """
             asm main() noreturn { lea rax, [rbx - 0x1234]; }
@@ -75,7 +75,7 @@ def can_accept_lea_reg64_addr64_with_negative_disp32():
     assert isinstance(acceptance.bindings[1], Address)
 
 
-def can_accept_lea_reg32_addr64_disp0():
+def can_accept_lea_reg32_addr_disp0():
     resolution = prepare_resolution(
         """
             asm main() noreturn { lea eax, [rbx]; }
@@ -99,7 +99,7 @@ def can_accept_lea_reg32_addr64_disp0():
     assert isinstance(acceptance.bindings[1], Address)
 
 
-def can_accept_lea_reg32_addr64_with_positive_disp32():
+def can_accept_lea_reg32_addr_with_positive_disp32():
     resolution = prepare_resolution(
         """
             asm main() noreturn { lea eax, [rbx + 0x1234]; }
@@ -123,7 +123,7 @@ def can_accept_lea_reg32_addr64_with_positive_disp32():
     assert isinstance(acceptance.bindings[1], Address)
 
 
-def can_accept_lea_reg32_addr64_with_negative_disp32():
+def can_accept_lea_reg32_addr_with_negative_disp32():
     resolution = prepare_resolution(
         """
             asm main() noreturn { lea eax, [rbx - 0x1234]; }
@@ -145,3 +145,33 @@ def can_accept_lea_reg32_addr64_with_negative_disp32():
 
     assert isinstance(acceptance.bindings[0], Register)
     assert isinstance(acceptance.bindings[1], Address)
+
+
+def can_reject_lea_reg16_addr():
+    resolution = prepare_resolution(
+        """
+            asm main() noreturn { lea ax, [rbx]; }
+        """
+    )
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) >= 1
+
+    for rejection in resolution.rejected:
+        assert rejection.mnemonic.name == b"lea"
+        assert rejection.reason == b"width-mismatch"
+
+
+def can_reject_lea_reg8_addr():
+    resolution = prepare_resolution(
+        """
+            asm main() noreturn { lea al, [rbx]; }
+        """
+    )
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) >= 1
+
+    for rejection in resolution.rejected:
+        assert rejection.mnemonic.name == b"lea"
+        assert rejection.reason == b"width-mismatch"

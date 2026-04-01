@@ -1,9 +1,9 @@
-from i13c.semantic.typing.entities.operands import Register
+from i13c.semantic.typing.entities.operands import Immediate, Register
 from i13c.semantic.typing.resolutions.instructions import OperandSpec
 from tests.semantic.nodes.resolutions.instructions import prepare_resolution
 
 
-def can_accept_add_instruction_with_register_and_imm32_operands():
+def can_accept_add_reg64_imm32():
     resolution = prepare_resolution(
         """
             asm main() noreturn { add rax, 0x12345678; }
@@ -24,8 +24,10 @@ def can_accept_add_instruction_with_register_and_imm32_operands():
     )
 
     assert isinstance(acceptance.bindings[0], Register)
+    assert isinstance(acceptance.bindings[1], Immediate)
 
-def can_reject_add_instruction_with_register_and_imm64_operands():
+
+def can_reject_add_reg64_imm64():
     resolution = prepare_resolution(
         """
             asm main() noreturn { add rax, 0x1234567890abcdef; }
@@ -39,7 +41,7 @@ def can_reject_add_instruction_with_register_and_imm64_operands():
         assert rejection.reason in (b"width-mismatch", b"type-mismatch")
 
 
-def can_accept_add_instruction_with_two_register_operands():
+def can_accept_add_reg64_reg64():
     resolution = prepare_resolution(
         """
             asm main() noreturn { add rax, rbx; }

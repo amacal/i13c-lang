@@ -50,6 +50,9 @@ class Register:
         if name in REGISTERS_8:
             return Register(name=name, width=8)
 
+        if name in REGISTERS_16:
+            return Register(name=name, width=16)
+
         if name in REGISTERS_32:
             return Register(name=name, width=32)
 
