@@ -12,7 +12,8 @@ from i13c.llvm.typing.flows import (
     ClobbersFlow,
     FlowId,
 )
-from i13c.llvm.typing.instructions import Call, InstructionEntry, InstructionId, Nop
+from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.jump import Call, Nop
 from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId

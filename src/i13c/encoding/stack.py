@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, SIB, Displacement, ModRM, Opcode
-from i13c.llvm.typing.instructions import PopOff, PushOff
+from i13c.llvm.typing.instructions.stack import PopOff, PushOff
 
 
 def encode_push_off(

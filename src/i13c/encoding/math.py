@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, Immediate, ModRM, Opcode
-from i13c.llvm.typing.instructions import (
+from i13c.llvm.typing.instructions.math import (
     AddRegImm,
     AddRegReg,
     SubRegImm,

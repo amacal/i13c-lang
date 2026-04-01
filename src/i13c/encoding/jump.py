@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
-from i13c.llvm.typing.instructions import Call, Jump, Label, Nop, Return, SysCall
+from i13c.llvm.typing.instructions.jump import Call, Jump, Label, Nop, Return, SysCall
 
 
 def encode_syscall(

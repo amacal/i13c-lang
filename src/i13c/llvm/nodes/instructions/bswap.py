@@ -2,12 +2,8 @@ from typing import Dict, Protocol, Tuple
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
-from i13c.llvm.typing.instructions import (
-    ByteSwapReg32,
-    ByteSwapReg64,
-    InstructionEntry,
-    InstructionId,
-)
+from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.bits import ByteSwapReg32, ByteSwapReg64
 from i13c.llvm.typing.registers import name_to_reg32, name_to_reg64
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,

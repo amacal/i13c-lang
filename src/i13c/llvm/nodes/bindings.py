@@ -5,17 +5,10 @@ from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.llvm.typing.blocks import BlockInstruction
 from i13c.llvm.typing.flows import BindingFlow, BlockId, FlowId
-from i13c.llvm.typing.instructions import (
-    InstructionEntry,
-    InstructionId,
-    MovRegImm,
-    MovRegOff,
-    Nop,
-)
-from i13c.llvm.typing.registers import (
-    VirtualRegister,
-    name_to_reg64,
-)
+from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.jump import Nop
+from i13c.llvm.typing.instructions.move import MovRegImm, MovRegOff
+from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
 from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.bindings import CallSiteBindings

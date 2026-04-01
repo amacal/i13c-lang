@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, SIB, Displacement, ModRM, Opcode
-from i13c.llvm.typing.instructions import LeaRegOff
+from i13c.llvm.typing.instructions.addr import LeaRegOff
 
 
 def encode_lea_reg_off(

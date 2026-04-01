@@ -27,18 +27,10 @@ from i13c.llvm.typing.flows import (
     MoveFlow,
     SnapshotFlow,
 )
-from i13c.llvm.typing.instructions import (
-    AddRegImm,
-    Call,
-    Instruction,
-    Jump,
-    Label,
-    MovOffReg,
-    MovRegOff,
-    Nop,
-    Return,
-    SubRegImm,
-)
+from i13c.llvm.typing.instructions import Instruction
+from i13c.llvm.typing.instructions.jump import Call, Jump, Label, Nop, Return
+from i13c.llvm.typing.instructions.math import AddRegImm, SubRegImm
+from i13c.llvm.typing.instructions.move import MovOffReg, MovRegOff
 from i13c.llvm.typing.intervals import IntervalPressure, RegisterInterval
 from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
 from i13c.llvm.typing.terminators import (

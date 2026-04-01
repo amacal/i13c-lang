@@ -2,9 +2,8 @@ from typing import Dict, Protocol, Tuple, Type
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
-from i13c.llvm.typing.instructions import (
-    InstructionEntry,
-    InstructionId,
+from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.move import (
     MovOffImm,
     MovOffReg,
     MovRegImm,

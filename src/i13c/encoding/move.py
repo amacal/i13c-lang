@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, SIB, Displacement, Immediate, ModRM, Opcode
-from i13c.llvm.typing.instructions import (
+from i13c.llvm.typing.instructions.move import (
     MovOffImm,
     MovOffReg,
     MovRegImm,

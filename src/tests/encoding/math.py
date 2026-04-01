@@ -1,13 +1,12 @@
 from typing import List
 
 from i13c.encoding import encode
-from i13c.llvm.typing.flows import BlockId
-from i13c.llvm.typing.instructions import AddRegImm, AddRegReg, Instruction, Label
+from i13c.llvm.typing.instructions import Instruction
+from i13c.llvm.typing.instructions.math import AddRegImm, AddRegReg
 
 
 def can_encode_instructions_add_rbx_imm32():
     flow: List[Instruction] = [
-        Label(id=BlockId(value=0)),
         AddRegImm(dst=3, imm=0x12345678),
     ]
 
@@ -19,7 +18,6 @@ def can_encode_instructions_add_rbx_imm32():
 
 def can_encode_instructions_add_r15_rbx():
     flow: List[Instruction] = [
-        Label(id=BlockId(value=0)),
         AddRegReg(dst=15, src=3),
     ]
 

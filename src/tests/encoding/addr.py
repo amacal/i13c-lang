@@ -1,13 +1,12 @@
 from typing import List
 
 from i13c.encoding import encode
-from i13c.llvm.typing.flows import BlockId
-from i13c.llvm.typing.instructions import Instruction, Label, LeaRegOff
+from i13c.llvm.typing.instructions import Instruction
+from i13c.llvm.typing.instructions.addr import LeaRegOff
 
 
 def can_encode_instructions_lea_rbx_off():
     flow: List[Instruction] = [
-        Label(id=BlockId(value=0)),
         LeaRegOff(dst=3, src=3, off=0x12345678),
     ]
 

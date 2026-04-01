@@ -6,13 +6,9 @@ from i13c.llvm.nodes.instructions.add import lower_instruction_add
 from i13c.llvm.nodes.instructions.bswap import lower_instruction_bswap
 from i13c.llvm.nodes.instructions.lea import lower_instruction_lea
 from i13c.llvm.nodes.instructions.mov import lower_instruction_mov
-from i13c.llvm.typing.instructions import (
-    InstructionEntry,
-    InstructionId,
-    ShlRegImm,
-    ShlRegReg,
-    SysCall,
-)
+from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.bits import ShlRegImm, ShlRegReg
+from i13c.llvm.typing.instructions.jump import SysCall
 from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,

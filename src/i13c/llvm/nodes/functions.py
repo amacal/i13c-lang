@@ -15,15 +15,10 @@ from i13c.llvm.typing.flows import (
     PrologueFlow,
     SnapshotFlow,
 )
-from i13c.llvm.typing.instructions import (
-    InstructionEntry,
-    InstructionId,
-    MovOffImm,
-    MovOffReg,
-    Nop,
-    PopOff,
-    PushOff,
-)
+from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.jump import Nop
+from i13c.llvm.typing.instructions.move import MovOffImm, MovOffReg
+from i13c.llvm.typing.instructions.stack import PopOff, PushOff
 from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
 from i13c.llvm.typing.stacks import StackFrame
 from i13c.llvm.typing.terminators import (
