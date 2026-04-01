@@ -66,8 +66,11 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
         (OperandSpec.registers_64bit(), OperandSpec.address_64bit()),
     ],
     b"shl": [
+        (OperandSpec.registers_8bit(), OperandSpec.immediate(8)),
+        (OperandSpec.registers_16bit(), OperandSpec.immediate(8)),
+        (OperandSpec.registers_32bit(), OperandSpec.immediate(8)),
         (OperandSpec.registers_64bit(), OperandSpec.immediate(8)),
-        (OperandSpec.registers_64bit(), OperandSpec.registers_8bit()),
+        (OperandSpec.registers_64bit(), OperandSpec.registers_8bit(b"cl")),
     ],
     b"syscall": [()],
 }

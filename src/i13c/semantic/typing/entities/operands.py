@@ -92,15 +92,15 @@ class Immediate:
 
     def symbol(self) -> OperandSymbol:
         if self.width == 8:
-            return b"reg8"
+            return b"imm8"
 
         if self.width == 16:
-            return b"reg16"
+            return b"imm16"
 
         if self.width == 32:
-            return b"reg32"
+            return b"imm32"
 
-        return b"reg64"
+        return b"imm64"
 
 
 @dataclass(kw_only=True)

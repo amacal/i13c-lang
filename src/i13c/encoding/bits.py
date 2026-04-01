@@ -1,31 +1,38 @@
 from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
-from i13c.encoding.intel import REX, Immediate, ModRM, Opcode
+from i13c.encoding.intel import REX, Immediate, ModRM, Opcode, Prefixes
 from i13c.llvm.typing.instructions.bits import (
     ByteSwapReg32,
     ByteSwapReg64,
-    ShlRegImm,
-    ShlRegReg,
+    ShlReg8Imm8,
+    ShlReg16Imm8,
+    ShlReg32Imm8,
+    ShlReg64Cl,
+    ShlReg64Imm8,
 )
 
 
 def encode_shl_reg_imm(
-    instruction: ShlRegImm, bytecode: bytearray
+    instruction: Union[ShlReg8Imm8, ShlReg16Imm8, ShlReg32Imm8, ShlReg64Imm8], bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
-    # chosen encoding: REX.W + C1 /4 ib
-    # encoded as: [rex] [opcode] [modrm] [imm8]
+    # chosen encoding: 66 + REX + C0|C1 /4 ib
+    # encoded as: [prefixes?][rex?] [opcode] [modrm] [imm8]
+
+    prefixes = Prefixes(
+        operand_override=isinstance(instruction, ShlReg16Imm8),
+    )
 
     rex = REX(
-        w=True,
+        w=isinstance(instruction, ShlReg64Imm8),
         r=False,
         x=False,
         b=instruction.dst >= 8,
     )
 
     opcode = Opcode(
-        hex=0xC1,
+        hex=0xC1 if not isinstance(instruction, ShlReg8Imm8) else 0xC0,
         reg=None,
     )
 
@@ -43,6 +50,7 @@ def encode_shl_reg_imm(
 
     bytecode.extend(
         [
+            *prefixes.to_bytes(),
             *rex.to_bytes(),
             opcode.to_byte(),
             modrm.to_byte(),
@@ -51,8 +59,8 @@ def encode_shl_reg_imm(
     )
 
 
-def encode_shl_reg_reg(
-    instruction: ShlRegReg, bytecode: bytearray
+def encode_shl_reg_cl(
+    instruction: ShlReg64Cl, bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
     # chosen encoding: REX.W + D2 /4

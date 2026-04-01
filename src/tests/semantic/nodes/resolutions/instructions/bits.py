@@ -88,10 +88,25 @@ def can_reject_shl_reg64_imm16():
     assert rejection.reason == b"width-mismatch"
 
 
-def can_accept_shl_reg64_imm8():
+def can_reject_shl_reg64_bl():
     resolution = prepare_resolution(
         """
-            asm main() noreturn { shl rax, 0x01; }
+            asm main() noreturn { shl rax, bl; }
+        """
+    )
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) >= 1
+    rejection = resolution.rejected[0]
+
+    assert rejection.mnemonic.name == b"shl"
+    assert rejection.reason == b"width-mismatch"
+
+
+def can_accept_shl_reg32_imm8():
+    resolution = prepare_resolution(
+        """
+            asm main() noreturn { shl eax, 0x01; }
         """
     )
 
@@ -103,7 +118,53 @@ def can_accept_shl_reg64_imm8():
     assert len(acceptance.variant) == 2
 
     assert acceptance.variant == (
-        OperandSpec.registers_64bit(),
+        OperandSpec.registers_32bit(),
+        OperandSpec.immediate(8),
+    )
+
+    assert isinstance(acceptance.bindings[0], Register)
+    assert isinstance(acceptance.bindings[1], Immediate)
+
+
+def can_accept_shl_reg16_imm8():
+    resolution = prepare_resolution(
+        """
+            asm main() noreturn { shl ax, 0x01; }
+        """
+    )
+
+    assert len(resolution.rejected) >= 1
+    assert len(resolution.accepted) == 1
+    acceptance = resolution.accepted[0]
+
+    assert acceptance.mnemonic.name == b"shl"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.registers_16bit(),
+        OperandSpec.immediate(8),
+    )
+
+    assert isinstance(acceptance.bindings[0], Register)
+    assert isinstance(acceptance.bindings[1], Immediate)
+
+
+def can_accept_shl_reg8_imm8():
+    resolution = prepare_resolution(
+        """
+            asm main() noreturn { shl al, 0x01; }
+        """
+    )
+
+    assert len(resolution.rejected) >= 1
+    assert len(resolution.accepted) == 1
+    acceptance = resolution.accepted[0]
+
+    assert acceptance.mnemonic.name == b"shl"
+    assert len(acceptance.variant) == 2
+
+    assert acceptance.variant == (
+        OperandSpec.registers_8bit(),
         OperandSpec.immediate(8),
     )
 
@@ -127,7 +188,7 @@ def can_accept_shl_reg64_cl():
 
     assert acceptance.variant == (
         OperandSpec.registers_64bit(),
-        OperandSpec.registers_8bit(),
+        OperandSpec.registers_8bit(b"cl"),
     )
 
     assert isinstance(acceptance.bindings[0], Register)

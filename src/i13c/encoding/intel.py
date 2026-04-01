@@ -114,3 +114,11 @@ class Displacement:
 
     def to_bytes(self) -> bytes:
         return self.value.to_bytes(self.width, byteorder="little", signed=self.signed)
+
+
+@dataclass(kw_only=True)
+class Prefixes:
+    operand_override: bool
+
+    def to_bytes(self) -> bytes:
+        return bytes([0x66]) if self.operand_override else bytes([])
