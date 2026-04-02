@@ -3,7 +3,7 @@ from typing import Dict, Set
 
 # fmt: off
 IR_REGISTER_FORWARD_8: Dict[bytes, int] = {
-    b"al": 0, b"cl": 1, b"dl": 2, b"bl": 3, b"ah": 4, b"ch": 5, b"dh": 6, b"bh": 7,
+    b"al": 0, b"cl": 1, b"dl": 2, b"bl": 3, b"spl": 4, b"bpl": 5, b"sil": 6, b"dil": 7,
     b"r8b": 8, b"r9b": 9, b"r10b": 10, b"r11b": 11, b"r12b": 12, b"r13b": 13, b"r14b": 14, b"r15b": 15,
 }
 
