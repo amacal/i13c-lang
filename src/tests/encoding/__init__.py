@@ -4,7 +4,7 @@ from pytest import mark
 
 
 def parse_value(header: str, value: str) -> Union[str, int]:
-    return int(value, 16) if header == "immediate" else value
+    return int(value, 16) if header in ("immediate", "disp8", "disp32") else value
 
 
 def parse_samples(

@@ -23,7 +23,7 @@ IR_REGISTER_FORWARD_64: Dict[bytes, int] = {
 }
 
 IR_REGISTER_BACKWARD_8: Dict[int, bytes] = {
-    0: b"al", 1: b"cl", 2: b"dl", 3: b"bl", 4: b"ah", 5: b"ch", 6: b"dh", 7: b"bh",
+    0: b"al", 1: b"cl", 2: b"dl", 3: b"bl", 4: b"spl", 5: b"bpl", 6: b"sil", 7: b"dil",
     8: b"r8b", 9: b"r9b", 10: b"r10b", 11: b"r11b", 12: b"r12b", 13: b"r13b", 14: b"r14b", 15: b"r15b",
 }
 

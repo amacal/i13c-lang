@@ -117,7 +117,11 @@ class Displacement:
     signed: bool
 
     def to_bytes(self) -> bytes:
-        return self.value.to_bytes(self.width, byteorder="little", signed=self.signed)
+        return (
+            self.value.to_bytes(self.width, byteorder="little", signed=self.signed)
+            if self.width > 0
+            else bytes([])
+        )
 
 
 @dataclass(kw_only=True)

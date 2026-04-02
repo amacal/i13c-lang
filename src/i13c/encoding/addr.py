@@ -9,8 +9,7 @@ def encode_lea_reg_off(
     instruction: Union[LeaReg32Off, LeaReg64Off], bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
-    # chosen encoding: REX.W + 8D /r
-    # encoded as: [rex] [opcode] [modrm] [sib?] [disp32]
+    # encoded as: [rex] [opcode] [modrm] [sib?] [disp8/32?]
 
     sib = SIB(
         scale=0,
@@ -18,8 +17,18 @@ def encode_lea_reg_off(
         base=instruction.src,
     )
 
+    if instruction.off == 0 and (instruction.src & 0b111) != 5:  # rbp/r13
+        mod = 0b00
+        disp_width = 0
+    elif -128 <= instruction.off <= 127:
+        mod = 0b01
+        disp_width = 1
+    else:
+        mod = 0b10
+        disp_width = 4
+
     modrm = ModRM(
-        mod=0b10,  # disp32
+        mod=mod,
         reg=instruction.dst,
         rm=sib.mod_rm(),
     )
@@ -38,7 +47,7 @@ def encode_lea_reg_off(
 
     disp32 = Displacement(
         value=instruction.off,
-        width=4,
+        width=disp_width,
         signed=True,
     )
 
