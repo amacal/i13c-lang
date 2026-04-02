@@ -59,6 +59,32 @@ def can_encode_instructions_lea_reg64_disp8(
     assert encode(flow) == encoding
 
 
+@samples(
+    """
+        | --- | --- | ---------- | ----------------------- | --- | --- | --- | ---------- | ----------------------- |
+        | dst | src | disp32     | encoding                | *   | dst | src | disp32     | encoding                |
+        | --- | --- | ---------- | ----------------------- | --- | --- | --- | ---------- | ----------------------- |
+        | rax | rsp | 0x12345678 | 48 8d 84 24 78 56 34 12 | *   | r8  | r12 | 0x12345678 | 4d 8d 84 24 78 56 34 12 |
+        | rcx | rbp | 0x12345678 | 48 8d 8d 78 56 34 12    | *   | r9  | r13 | 0x12345678 | 4d 8d 8d 78 56 34 12    |
+        | rdx | rsi | 0x12345678 | 48 8d 96 78 56 34 12    | *   | r10 | r14 | 0x12345678 | 4d 8d 96 78 56 34 12    |
+        | rbx | rdi | 0x12345678 | 48 8d 9f 78 56 34 12    | *   | r11 | r15 | 0x12345678 | 4d 8d 9f 78 56 34 12    |
+        | rsp | r8  | 0x12345678 | 49 8d a0 78 56 34 12    | *   | r12 | rax | 0x12345678 | 4c 8d a0 78 56 34 12    |
+        | rbp | r9  | 0x12345678 | 49 8d a9 78 56 34 12    | *   | r13 | rcx | 0x12345678 | 4c 8d a9 78 56 34 12    |
+        | rsi | r10 | 0x12345678 | 49 8d b2 78 56 34 12    | *   | r14 | rdx | 0x12345678 | 4c 8d b2 78 56 34 12    |
+        | rdi | r11 | 0x12345678 | 49 8d bb 78 56 34 12    | *   | r15 | rbx | 0x12345678 | 4c 8d bb 78 56 34 12    |
+        | --- | --- | ---------- | ----------------------- | --- | --- | --- | ---------- | ----------------------- |
+    """
+)
+def can_encode_instructions_lea_reg64_disp32(
+    dst: str, src: str, disp32: int, encoding: bytes
+):
+    flow: List[Instruction] = [
+        LeaReg64Off(dst=name_to_reg64(dst), src=name_to_reg64(src), off=disp32),
+    ]
+
+    assert encode(flow) == encoding
+
+
 def can_encode_instructions_lea_ebx_off():
     flow: List[Instruction] = [
         LeaReg32Off(dst=3, src=3, off=0x12345678),
