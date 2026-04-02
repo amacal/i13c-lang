@@ -88,6 +88,30 @@ def can_encode_instructions_lea_reg64_disp32(
 
 @samples(
     """
+        | --- | --- | -------- | --- | ---- | --- | ----------- |
+        | dst | src | encoding | *   | dst  | src | encoding    |
+        | --- | --- | -------- | --- | ---- | --- | ----------- |
+        | eax | rsp | 8d 04 24 | *   | r8d  | r12 | 45 8d 04 24 |
+        | ecx | rbp | 8d 4d 00 | *   | r9d  | r13 | 45 8d 4d 00 |
+        | edx | rsi | 8d 16    | *   | r10d | r14 | 45 8d 16    |
+        | ebx | rdi | 8d 1f    | *   | r11d | r15 | 45 8d 1f    |
+        | esp | r8  | 41 8d 20 | *   | r12d | rax | 44 8d 20    |
+        | ebp | r9  | 41 8d 29 | *   | r13d | rcx | 44 8d 29    |
+        | esi | r10 | 41 8d 32 | *   | r14d | rdx | 44 8d 32    |
+        | edi | r11 | 41 8d 3b | *   | r15d | rbx | 44 8d 3b    |
+        | --- | --- | -------- | --- | ---- | --- | ----------- |
+    """
+)
+def can_encode_instructions_lea_reg32_disp0(dst: str, src: str, encoding: bytes):
+    flow: List[Instruction] = [
+        LeaReg32Off(dst=name_to_reg32(dst), src=name_to_reg64(src), off=0),
+    ]
+
+    assert encode(flow) == encoding
+
+
+@samples(
+    """
         | --- | --- | ----- | ----------- | --- | ---- | --- | ----- | -------------- |
         | dst | src | disp8 | encoding    | *   | dst  | src | disp8 | encoding       |
         | --- | --- | ----- | ----------- | --- | ---- | --- | ----- | -------------- |
