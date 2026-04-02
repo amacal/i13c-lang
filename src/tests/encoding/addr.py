@@ -4,8 +4,8 @@ from i13c.encoding import encode
 from i13c.llvm.typing.instructions import Instruction
 from i13c.llvm.typing.instructions.addr import LeaReg32Off, LeaReg64Off
 from i13c.llvm.typing.registers import (
-    name_to_reg64,
     name_to_reg32,
+    name_to_reg64,
 )
 from tests.encoding import samples
 

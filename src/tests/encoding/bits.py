@@ -69,32 +69,32 @@ def can_encode_instructions_bswap_reg32(operand: str, encoding: bytes):
 
 @samples(
     """
-        | --- | --------- | ----------- | --- | --- | --------- | ----------- |
-        | dst | immediate | encoding    | *   | dst | immediate | encoding    |
-        | --- | --------- | ----------- | --- | --- | --------- | ----------- |
-        | rax | 0x01      | 48 d1 e0    | *   | r8  | 0x01      | 49 d1 e0    |
-        | rcx | 0x01      | 48 d1 e1    | *   | r9  | 0x01      | 49 d1 e1    |
-        | rdx | 0x01      | 48 d1 e2    | *   | r10 | 0x01      | 49 d1 e2    |
-        | rbx | 0x01      | 48 d1 e3    | *   | r11 | 0x01      | 49 d1 e3    |
-        | rsp | 0x01      | 48 d1 e4    | *   | r12 | 0x01      | 49 d1 e4    |
-        | rbp | 0x01      | 48 d1 e5    | *   | r13 | 0x01      | 49 d1 e5    |
-        | rsi | 0x01      | 48 d1 e6    | *   | r14 | 0x01      | 49 d1 e6    |
-        | rdi | 0x01      | 48 d1 e7    | *   | r15 | 0x01      | 49 d1 e7    |
-        | --- | --------- | ----------- | --- | --- | --------- | ----------- |
-        | rax | 0x05      | 48 c1 e0 05 | *   | r8  | 0x05      | 49 c1 e0 05 |
-        | rcx | 0x05      | 48 c1 e1 05 | *   | r9  | 0x05      | 49 c1 e1 05 |
-        | rdx | 0x05      | 48 c1 e2 05 | *   | r10 | 0x05      | 49 c1 e2 05 |
-        | rbx | 0x05      | 48 c1 e3 05 | *   | r11 | 0x05      | 49 c1 e3 05 |
-        | rsp | 0x05      | 48 c1 e4 05 | *   | r12 | 0x05      | 49 c1 e4 05 |
-        | rbp | 0x05      | 48 c1 e5 05 | *   | r13 | 0x05      | 49 c1 e5 05 |
-        | rsi | 0x05      | 48 c1 e6 05 | *   | r14 | 0x05      | 49 c1 e6 05 |
-        | rdi | 0x05      | 48 c1 e7 05 | *   | r15 | 0x05      | 49 c1 e7 05 |
-        | --- | --------- | ----------- | --- | --- | --------- | ----------- |
+        | --- | ---- | ----------- | --- | --- | ---- | ----------- |
+        | dst | imm8 | encoding    | *   | dst | imm8 | encoding    |
+        | --- | ---- | ----------- | --- | --- | ---- | ----------- |
+        | rax | 0x01 | 48 d1 e0    | *   | r8  | 0x01 | 49 d1 e0    |
+        | rcx | 0x01 | 48 d1 e1    | *   | r9  | 0x01 | 49 d1 e1    |
+        | rdx | 0x01 | 48 d1 e2    | *   | r10 | 0x01 | 49 d1 e2    |
+        | rbx | 0x01 | 48 d1 e3    | *   | r11 | 0x01 | 49 d1 e3    |
+        | rsp | 0x01 | 48 d1 e4    | *   | r12 | 0x01 | 49 d1 e4    |
+        | rbp | 0x01 | 48 d1 e5    | *   | r13 | 0x01 | 49 d1 e5    |
+        | rsi | 0x01 | 48 d1 e6    | *   | r14 | 0x01 | 49 d1 e6    |
+        | rdi | 0x01 | 48 d1 e7    | *   | r15 | 0x01 | 49 d1 e7    |
+        | --- | ---- | ----------- | --- | --- | ---- | ----------- |
+        | rax | 0x05 | 48 c1 e0 05 | *   | r8  | 0x05 | 49 c1 e0 05 |
+        | rcx | 0x05 | 48 c1 e1 05 | *   | r9  | 0x05 | 49 c1 e1 05 |
+        | rdx | 0x05 | 48 c1 e2 05 | *   | r10 | 0x05 | 49 c1 e2 05 |
+        | rbx | 0x05 | 48 c1 e3 05 | *   | r11 | 0x05 | 49 c1 e3 05 |
+        | rsp | 0x05 | 48 c1 e4 05 | *   | r12 | 0x05 | 49 c1 e4 05 |
+        | rbp | 0x05 | 48 c1 e5 05 | *   | r13 | 0x05 | 49 c1 e5 05 |
+        | rsi | 0x05 | 48 c1 e6 05 | *   | r14 | 0x05 | 49 c1 e6 05 |
+        | rdi | 0x05 | 48 c1 e7 05 | *   | r15 | 0x05 | 49 c1 e7 05 |
+        | --- | ---- | ----------- | --- | --- | ---- | ----------- |
         """
 )
-def can_encode_instructions_shl_reg64_imm8(dst: str, immediate: int, encoding: bytes):
+def can_encode_instructions_shl_reg64_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        ShlReg64Imm8(dst=name_to_reg64(dst), imm=immediate),
+        ShlReg64Imm8(dst=name_to_reg64(dst), imm=imm8),
     ]
 
     assert encode(flow) == encoding
@@ -102,32 +102,32 @@ def can_encode_instructions_shl_reg64_imm8(dst: str, immediate: int, encoding: b
 
 @samples(
     """
-        | --- | --------- | -------- | --- | ---- | --------- | ----------- |
-        | dst | immediate | encoding | *   | dst  | immediate | encoding    |
-        | --- | --------- | -------- | --- | ---- | --------- | ----------- |
-        | eax | 0x01      | d1 e0    | *   | r8d  | 0x01      | 41 d1 e0    |
-        | ecx | 0x01      | d1 e1    | *   | r9d  | 0x01      | 41 d1 e1    |
-        | edx | 0x01      | d1 e2    | *   | r10d | 0x01      | 41 d1 e2    |
-        | ebx | 0x01      | d1 e3    | *   | r11d | 0x01      | 41 d1 e3    |
-        | esp | 0x01      | d1 e4    | *   | r12d | 0x01      | 41 d1 e4    |
-        | ebp | 0x01      | d1 e5    | *   | r13d | 0x01      | 41 d1 e5    |
-        | esi | 0x01      | d1 e6    | *   | r14d | 0x01      | 41 d1 e6    |
-        | edi | 0x01      | d1 e7    | *   | r15d | 0x01      | 41 d1 e7    |
-        | --- | --------- | -------- | --- | ---- | --------- | ----------- |
-        | eax | 0x05      | c1 e0 05 | *   | r8d  | 0x05      | 41 c1 e0 05 |
-        | ecx | 0x05      | c1 e1 05 | *   | r9d  | 0x05      | 41 c1 e1 05 |
-        | edx | 0x05      | c1 e2 05 | *   | r10d | 0x05      | 41 c1 e2 05 |
-        | ebx | 0x05      | c1 e3 05 | *   | r11d | 0x05      | 41 c1 e3 05 |
-        | esp | 0x05      | c1 e4 05 | *   | r12d | 0x05      | 41 c1 e4 05 |
-        | ebp | 0x05      | c1 e5 05 | *   | r13d | 0x05      | 41 c1 e5 05 |
-        | esi | 0x05      | c1 e6 05 | *   | r14d | 0x05      | 41 c1 e6 05 |
-        | edi | 0x05      | c1 e7 05 | *   | r15d | 0x05      | 41 c1 e7 05 |
-        | --- | --------- | -------- | --- | ---- | --------- | ----------- |
+        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
+        | dst | imm8 | encoding | *   | dst  | imm8 | encoding    |
+        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
+        | eax | 0x01 | d1 e0    | *   | r8d  | 0x01 | 41 d1 e0    |
+        | ecx | 0x01 | d1 e1    | *   | r9d  | 0x01 | 41 d1 e1    |
+        | edx | 0x01 | d1 e2    | *   | r10d | 0x01 | 41 d1 e2    |
+        | ebx | 0x01 | d1 e3    | *   | r11d | 0x01 | 41 d1 e3    |
+        | esp | 0x01 | d1 e4    | *   | r12d | 0x01 | 41 d1 e4    |
+        | ebp | 0x01 | d1 e5    | *   | r13d | 0x01 | 41 d1 e5    |
+        | esi | 0x01 | d1 e6    | *   | r14d | 0x01 | 41 d1 e6    |
+        | edi | 0x01 | d1 e7    | *   | r15d | 0x01 | 41 d1 e7    |
+        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
+        | eax | 0x05 | c1 e0 05 | *   | r8d  | 0x05 | 41 c1 e0 05 |
+        | ecx | 0x05 | c1 e1 05 | *   | r9d  | 0x05 | 41 c1 e1 05 |
+        | edx | 0x05 | c1 e2 05 | *   | r10d | 0x05 | 41 c1 e2 05 |
+        | ebx | 0x05 | c1 e3 05 | *   | r11d | 0x05 | 41 c1 e3 05 |
+        | esp | 0x05 | c1 e4 05 | *   | r12d | 0x05 | 41 c1 e4 05 |
+        | ebp | 0x05 | c1 e5 05 | *   | r13d | 0x05 | 41 c1 e5 05 |
+        | esi | 0x05 | c1 e6 05 | *   | r14d | 0x05 | 41 c1 e6 05 |
+        | edi | 0x05 | c1 e7 05 | *   | r15d | 0x05 | 41 c1 e7 05 |
+        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
     """
 )
-def can_encode_instructions_shl_reg32_imm8(dst: str, immediate: int, encoding: bytes):
+def can_encode_instructions_shl_reg32_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        ShlReg32Imm8(dst=name_to_reg32(dst), imm=immediate),
+        ShlReg32Imm8(dst=name_to_reg32(dst), imm=imm8),
     ]
 
     assert encode(flow) == encoding
@@ -135,32 +135,32 @@ def can_encode_instructions_shl_reg32_imm8(dst: str, immediate: int, encoding: b
 
 @samples(
     """
-        | --- | --------- | ----------- | --- | ---- | --------- | -------------- |
-        | dst | immediate | encoding    | *   | dst  | immediate | encoding       |
-        | --- | --------- | ----------- | --- | ---- | --------- | -------------- |
-        | ax  | 0x01      | 66 d1 e0    | *   | r8w  | 0x01      | 66 41 d1 e0    |
-        | cx  | 0x01      | 66 d1 e1    | *   | r9w  | 0x01      | 66 41 d1 e1    |
-        | dx  | 0x01      | 66 d1 e2    | *   | r10w | 0x01      | 66 41 d1 e2    |
-        | bx  | 0x01      | 66 d1 e3    | *   | r11w | 0x01      | 66 41 d1 e3    |
-        | sp  | 0x01      | 66 d1 e4    | *   | r12w | 0x01      | 66 41 d1 e4    |
-        | bp  | 0x01      | 66 d1 e5    | *   | r13w | 0x01      | 66 41 d1 e5    |
-        | si  | 0x01      | 66 d1 e6    | *   | r14w | 0x01      | 66 41 d1 e6    |
-        | di  | 0x01      | 66 d1 e7    | *   | r15w | 0x01      | 66 41 d1 e7    |
-        | --- | --------- | ----------- | --- | ---- | --------- | -------------- |
-        | ax  | 0x05      | 66 c1 e0 05 | *   | r8w  | 0x05      | 66 41 c1 e0 05 |
-        | cx  | 0x05      | 66 c1 e1 05 | *   | r9w  | 0x05      | 66 41 c1 e1 05 |
-        | dx  | 0x05      | 66 c1 e2 05 | *   | r10w | 0x05      | 66 41 c1 e2 05 |
-        | bx  | 0x05      | 66 c1 e3 05 | *   | r11w | 0x05      | 66 41 c1 e3 05 |
-        | sp  | 0x05      | 66 c1 e4 05 | *   | r12w | 0x05      | 66 41 c1 e4 05 |
-        | bp  | 0x05      | 66 c1 e5 05 | *   | r13w | 0x05      | 66 41 c1 e5 05 |
-        | si  | 0x05      | 66 c1 e6 05 | *   | r14w | 0x05      | 66 41 c1 e6 05 |
-        | di  | 0x05      | 66 c1 e7 05 | *   | r15w | 0x05      | 66 41 c1 e7 05 |
-        | --- | --------- | ----------- | --- | ---- | --------- | -------------- |
+        | --- | ---- | ----------- | --- | ---- | ---- | -------------- |
+        | dst | imm8 | encoding    | *   | dst  | imm8 | encoding       |
+        | --- | ---- | ----------- | --- | ---- | ---- | -------------- |
+        | ax  | 0x01 | 66 d1 e0    | *   | r8w  | 0x01 | 66 41 d1 e0    |
+        | cx  | 0x01 | 66 d1 e1    | *   | r9w  | 0x01 | 66 41 d1 e1    |
+        | dx  | 0x01 | 66 d1 e2    | *   | r10w | 0x01 | 66 41 d1 e2    |
+        | bx  | 0x01 | 66 d1 e3    | *   | r11w | 0x01 | 66 41 d1 e3    |
+        | sp  | 0x01 | 66 d1 e4    | *   | r12w | 0x01 | 66 41 d1 e4    |
+        | bp  | 0x01 | 66 d1 e5    | *   | r13w | 0x01 | 66 41 d1 e5    |
+        | si  | 0x01 | 66 d1 e6    | *   | r14w | 0x01 | 66 41 d1 e6    |
+        | di  | 0x01 | 66 d1 e7    | *   | r15w | 0x01 | 66 41 d1 e7    |
+        | --- | ---- | ----------- | --- | ---- | ---- | -------------- |
+        | ax  | 0x05 | 66 c1 e0 05 | *   | r8w  | 0x05 | 66 41 c1 e0 05 |
+        | cx  | 0x05 | 66 c1 e1 05 | *   | r9w  | 0x05 | 66 41 c1 e1 05 |
+        | dx  | 0x05 | 66 c1 e2 05 | *   | r10w | 0x05 | 66 41 c1 e2 05 |
+        | bx  | 0x05 | 66 c1 e3 05 | *   | r11w | 0x05 | 66 41 c1 e3 05 |
+        | sp  | 0x05 | 66 c1 e4 05 | *   | r12w | 0x05 | 66 41 c1 e4 05 |
+        | bp  | 0x05 | 66 c1 e5 05 | *   | r13w | 0x05 | 66 41 c1 e5 05 |
+        | si  | 0x05 | 66 c1 e6 05 | *   | r14w | 0x05 | 66 41 c1 e6 05 |
+        | di  | 0x05 | 66 c1 e7 05 | *   | r15w | 0x05 | 66 41 c1 e7 05 |
+        | --- | ---- | ----------- | --- | ---- | ---- | -------------- |
     """
 )
-def can_encode_instructions_shl_reg16_imm8(dst: str, immediate: int, encoding: bytes):
+def can_encode_instructions_shl_reg16_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        ShlReg16Imm8(dst=name_to_reg16(dst), imm=immediate),
+        ShlReg16Imm8(dst=name_to_reg16(dst), imm=imm8),
     ]
 
     assert encode(flow) == encoding
@@ -168,32 +168,32 @@ def can_encode_instructions_shl_reg16_imm8(dst: str, immediate: int, encoding: b
 
 @samples(
     """
-        | --- | --------- | -------- | --- | ---- | --------- | ----------- |
-        | dst | immediate | encoding | *   | dst  | immediate | encoding    |
-        | --- | --------- | -------- | --- | ---- | --------- | ----------- |
-        | al  | 0x01      | d0 e0    | *   | r8b  | 0x01      | 41 d0 e0    |
-        | cl  | 0x01      | d0 e1    | *   | r9b  | 0x01      | 41 d0 e1    |
-        | dl  | 0x01      | d0 e2    | *   | r10b | 0x01      | 41 d0 e2    |
-        | bl  | 0x01      | d0 e3    | *   | r11b | 0x01      | 41 d0 e3    |
-        | spl | 0x01      | d0 e4    | *   | r12b | 0x01      | 41 d0 e4    |
-        | bpl | 0x01      | d0 e5    | *   | r13b | 0x01      | 41 d0 e5    |
-        | sil | 0x01      | d0 e6    | *   | r14b | 0x01      | 41 d0 e6    |
-        | dil | 0x01      | d0 e7    | *   | r15b | 0x01      | 41 d0 e7    |
-        | --- | --------- | -------- | --- | ---- | --------- | ----------- |
-        | al  | 0x05      | c0 e0 05 | *   | r8b  | 0x05      | 41 c0 e0 05 |
-        | cl  | 0x05      | c0 e1 05 | *   | r9b  | 0x05      | 41 c0 e1 05 |
-        | dl  | 0x05      | c0 e2 05 | *   | r10b | 0x05      | 41 c0 e2 05 |
-        | bl  | 0x05      | c0 e3 05 | *   | r11b | 0x05      | 41 c0 e3 05 |
-        | spl | 0x05      | c0 e4 05 | *   | r12b | 0x05      | 41 c0 e4 05 |
-        | bpl | 0x05      | c0 e5 05 | *   | r13b | 0x05      | 41 c0 e5 05 |
-        | sil | 0x05      | c0 e6 05 | *   | r14b | 0x05      | 41 c0 e6 05 |
-        | dil | 0x05      | c0 e7 05 | *   | r15b | 0x05      | 41 c0 e7 05 |
-        | --- | --------- | -------- | --- | ---- | --------- | ----------- |
+        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
+        | dst | imm8 | encoding | *   | dst  | imm8 | encoding    |
+        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
+        | al  | 0x01 | d0 e0    | *   | r8b  | 0x01 | 41 d0 e0    |
+        | cl  | 0x01 | d0 e1    | *   | r9b  | 0x01 | 41 d0 e1    |
+        | dl  | 0x01 | d0 e2    | *   | r10b | 0x01 | 41 d0 e2    |
+        | bl  | 0x01 | d0 e3    | *   | r11b | 0x01 | 41 d0 e3    |
+        | spl | 0x01 | d0 e4    | *   | r12b | 0x01 | 41 d0 e4    |
+        | bpl | 0x01 | d0 e5    | *   | r13b | 0x01 | 41 d0 e5    |
+        | sil | 0x01 | d0 e6    | *   | r14b | 0x01 | 41 d0 e6    |
+        | dil | 0x01 | d0 e7    | *   | r15b | 0x01 | 41 d0 e7    |
+        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
+        | al  | 0x05 | c0 e0 05 | *   | r8b  | 0x05 | 41 c0 e0 05 |
+        | cl  | 0x05 | c0 e1 05 | *   | r9b  | 0x05 | 41 c0 e1 05 |
+        | dl  | 0x05 | c0 e2 05 | *   | r10b | 0x05 | 41 c0 e2 05 |
+        | bl  | 0x05 | c0 e3 05 | *   | r11b | 0x05 | 41 c0 e3 05 |
+        | spl | 0x05 | c0 e4 05 | *   | r12b | 0x05 | 41 c0 e4 05 |
+        | bpl | 0x05 | c0 e5 05 | *   | r13b | 0x05 | 41 c0 e5 05 |
+        | sil | 0x05 | c0 e6 05 | *   | r14b | 0x05 | 41 c0 e6 05 |
+        | dil | 0x05 | c0 e7 05 | *   | r15b | 0x05 | 41 c0 e7 05 |
+        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
     """
 )
-def can_encode_instructions_shl_reg8_imm8(dst: str, immediate: int, encoding: bytes):
+def can_encode_instructions_shl_reg8_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        ShlReg8Imm8(dst=name_to_reg8(dst), imm=immediate),
+        ShlReg8Imm8(dst=name_to_reg8(dst), imm=imm8),
     ]
 
     assert encode(flow) == encoding
