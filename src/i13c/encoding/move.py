@@ -18,9 +18,6 @@ def encode_mov_reg_imm(
     # chosen encoding: REX.W + (B8 + rd) + imm64
     # encoded as: [rex] [opcode] [imm64]
 
-    # in this encoding, the low 3 bits of the register are encoded in the opcode,
-    # while the high bit is encoded in the REX.B field
-
     opcode = Opcode(
         hex=0xB8,
         reg=instruction.dst,

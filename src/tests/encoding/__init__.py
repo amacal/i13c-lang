@@ -4,7 +4,11 @@ from pytest import mark
 
 
 def parse_value(header: str, value: str) -> Union[str, int]:
-    return int(value, 16) if header in ("imm8", "imm32", "disp8", "disp32") else value
+    return (
+        int(value, 16)
+        if header in ("imm8", "imm32", "imm64", "disp8", "disp32")
+        else value
+    )
 
 
 def parse_samples(
