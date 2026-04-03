@@ -7,8 +7,7 @@ from i13c.llvm.typing.instructions import addr, bits, ctrl, math, move, stack
 
 Instruction = Union[
     addr.LeaInstruction,
-    bits.ByteSwapReg32,
-    bits.ByteSwapReg64,
+    bits.BSwapInstruction,
     bits.ShlReg8Imm8,
     bits.ShlReg16Imm8,
     bits.ShlReg32Imm8,

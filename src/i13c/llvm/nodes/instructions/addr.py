@@ -7,7 +7,6 @@ from i13c.llvm.typing.instructions.addr import LeaReg32Mem, LeaReg64Mem
 from i13c.llvm.typing.instructions.core import Address as Addr
 from i13c.llvm.typing.instructions.core import Displacement as Disp
 from i13c.llvm.typing.instructions.core import Register as Reg
-from i13c.llvm.typing.registers import name_to_reg32, name_to_reg64
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )
@@ -26,16 +25,14 @@ def lower_reg32_addr(
     destination: Register,
     source: Address,
 ) -> InstructionEntry:
-
-    dst = name_to_reg32(destination.name.decode())
-    src = name_to_reg64(source.base.name.decode())
-    off = source.offset.value if source.offset is not None else 0
-
     return (
         InstructionId(value=generator.next()),
         LeaReg32Mem(
-            dst=Reg.reg32(dst),
-            addr=Addr(base=Reg.reg64(src), disp=Disp.auto(off)),
+            dst=Reg.parse32(destination.name.decode()),
+            addr=Addr(
+                base=Reg.parse64(source.base.name.decode()),
+                disp=Disp.auto(source.offset.value if source.offset is not None else 0),
+            ),
         ),
     )
 
@@ -45,16 +42,14 @@ def lower_reg64_addr(
     destination: Register,
     source: Address,
 ) -> InstructionEntry:
-
-    dst = name_to_reg64(destination.name.decode())
-    src = name_to_reg64(source.base.name.decode())
-    off = source.offset.value if source.offset is not None else 0
-
     return (
         InstructionId(value=generator.next()),
         LeaReg64Mem(
-            dst=Reg.reg64(dst),
-            addr=Addr(base=Reg.reg64(src), disp=Disp.auto(off)),
+            dst=Reg.parse64(destination.name.decode()),
+            addr=Addr(
+                base=Reg.parse64(source.base.name.decode()),
+                disp=Disp.auto(source.offset.value if source.offset is not None else 0),
+            ),
         ),
     )
 

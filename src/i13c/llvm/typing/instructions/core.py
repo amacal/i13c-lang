@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
+from typing import Optional
 
 from i13c.llvm.typing.registers import (
+    name_to_reg8,
+    name_to_reg16,
     name_to_reg32,
     name_to_reg64,
     reg8_to_name,
@@ -32,6 +35,15 @@ class Immediate:
     def imm64(value: int) -> Immediate:
         return Immediate(value=value, width=64)
 
+    def __str__(self) -> str:
+        if self.width == 8:
+            return f"{self.value:#04x}"
+
+        if self.width == 32:
+            return f"{self.value:#010x}"
+
+        return f"{self.value:#018x}"
+
 
 @dataclass(kw_only=True)
 class Displacement:
@@ -39,9 +51,9 @@ class Displacement:
     width: DisplacementWidth
 
     @staticmethod
-    def auto(value: int) -> Displacement:
-        if value == 0:
-            return Displacement(value=value, width=0)
+    def auto(value: Optional[int]) -> Displacement:
+        if value == 0 or value is None:
+            return Displacement(value=0, width=0)
 
         if -128 <= value <= 127:
             return Displacement(value=value, width=8)
@@ -61,6 +73,22 @@ class Displacement:
 class Register:
     id: int
     width: RegisterWidth
+
+    @staticmethod
+    def reg8(id: int) -> Register:
+        return Register.build(8, id)
+
+    @staticmethod
+    def parse8(name: str) -> Register:
+        return Register.reg8(name_to_reg8(name))
+
+    @staticmethod
+    def reg16(id: int) -> Register:
+        return Register.build(16, id)
+
+    @staticmethod
+    def parse16(name: str) -> Register:
+        return Register.reg16(name_to_reg16(name))
 
     @staticmethod
     def reg32(id: int) -> Register:

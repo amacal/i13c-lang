@@ -18,7 +18,7 @@ def parse_samples(
     lines = [line.strip("|\n ") for line in table.splitlines()[2:-1]]
 
     headers = [h.strip().lower() for h in lines[0].split("|")]
-    separator = headers.index("*")
+    separator = headers.index("***")
 
     for line in [line for line in lines[2:-1] if "-" not in line]:
         parts = [p.strip() for p in line.split("|")]

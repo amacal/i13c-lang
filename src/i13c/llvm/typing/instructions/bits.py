@@ -1,76 +1,83 @@
 from dataclasses import dataclass
+from typing import Union
 
-from i13c.llvm.typing.registers import (
-    reg8_to_name,
-    reg16_to_name,
-    reg32_to_name,
-    reg64_to_name,
-)
+from i13c.llvm.typing.instructions.core import Immediate, Register
 
 
 @dataclass(kw_only=True)
 class ByteSwapReg32:
-    target: int
+    dst: Register
 
     def native(self) -> str:
-        return f"bswap {reg32_to_name(self.target)}"
+        return f"bswap {self.dst}"
 
 
 @dataclass(kw_only=True)
 class ByteSwapReg64:
-    target: int
+    dst: Register
 
     def native(self) -> str:
-        return f"bswap {reg64_to_name(self.target)}"
+        return f"bswap {self.dst}"
 
 
 @dataclass(kw_only=True)
 class ShlReg8Imm8:
-    dst: int
-    imm: int
+    dst: Register
+    imm: Immediate
 
     def native(self) -> str:
-        return f"shl {reg8_to_name(self.dst)}, {self.imm:#04x}"
+        return f"shl {self.dst}, {self.imm}"
 
 
 @dataclass(kw_only=True)
 class ShlReg16Imm8:
-    dst: int
-    imm: int
+    dst: Register
+    imm: Immediate
 
     def native(self) -> str:
-        return f"shl {reg16_to_name(self.dst)}, {self.imm:#04x}"
+        return f"shl {self.dst}, {self.imm}"
 
 
 @dataclass(kw_only=True)
 class ShlReg32Imm8:
-    dst: int
-    imm: int
+    dst: Register
+    imm: Immediate
 
     def native(self) -> str:
-        return f"shl {reg32_to_name(self.dst)}, {self.imm:#04x}"
+        return f"shl {self.dst}, {self.imm}"
 
 
 @dataclass(kw_only=True)
 class ShlReg64Imm8:
-    dst: int
-    imm: int
+    dst: Register
+    imm: Immediate
 
     def native(self) -> str:
-        return f"shl {reg64_to_name(self.dst)}, {self.imm:#04x}"
+        return f"shl {self.dst}, {self.imm}"
 
 
 @dataclass(kw_only=True)
 class ShlReg32Cl:
-    dst: int
+    dst: Register
 
     def native(self) -> str:
-        return f"shl {reg32_to_name(self.dst)}, cl"
+        return f"shl {self.dst}, cl"
 
 
 @dataclass(kw_only=True)
 class ShlReg64Cl:
-    dst: int
+    dst: Register
 
     def native(self) -> str:
-        return f"shl {reg64_to_name(self.dst)}, cl"
+        return f"shl {self.dst}, cl"
+
+
+BSwapInstruction = Union[ByteSwapReg32, ByteSwapReg64]
+ShlInstruction = Union[
+    ShlReg8Imm8,
+    ShlReg16Imm8,
+    ShlReg32Imm8,
+    ShlReg64Imm8,
+    ShlReg32Cl,
+    ShlReg64Cl
+]

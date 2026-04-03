@@ -10,12 +10,8 @@ from i13c.llvm.typing.instructions.bits import (
     ShlReg64Cl,
     ShlReg64Imm8,
 )
-from i13c.llvm.typing.registers import (
-    name_to_reg8,
-    name_to_reg16,
-    name_to_reg32,
-    name_to_reg64,
-)
+from i13c.llvm.typing.instructions.core import Immediate as Imm
+from i13c.llvm.typing.instructions.core import Register as Reg
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )
@@ -34,25 +30,26 @@ def lower_reg8_imm8(
     destination: Register,
     source: Immediate,
 ) -> InstructionEntry:
-
-    dst = name_to_reg8(destination.name.decode())
-
     return (
         InstructionId(value=generator.next()),
-        ShlReg8Imm8(dst=dst, imm=source.value),
+        ShlReg8Imm8(
+            dst=Reg.parse8(destination.name.decode()),
+            imm=Imm.imm8(source.value),
+        ),
     )
+
 
 def lower_reg16_imm8(
     generator: Generator,
     destination: Register,
     source: Immediate,
 ) -> InstructionEntry:
-
-    dst = name_to_reg16(destination.name.decode())
-
     return (
         InstructionId(value=generator.next()),
-        ShlReg16Imm8(dst=dst, imm=source.value),
+        ShlReg16Imm8(
+            dst=Reg.parse16(destination.name.decode()),
+            imm=Imm.imm8(source.value),
+        ),
     )
 
 
@@ -61,12 +58,12 @@ def lower_reg32_imm8(
     destination: Register,
     source: Immediate,
 ) -> InstructionEntry:
-
-    dst = name_to_reg32(destination.name.decode())
-
     return (
         InstructionId(value=generator.next()),
-        ShlReg32Imm8(dst=dst, imm=source.value),
+        ShlReg32Imm8(
+            dst=Reg.parse32(destination.name.decode()),
+            imm=Imm.imm8(source.value),
+        ),
     )
 
 
@@ -75,13 +72,14 @@ def lower_reg64_imm8(
     destination: Register,
     source: Immediate,
 ) -> InstructionEntry:
-
-    dst = name_to_reg64(destination.name.decode())
-
     return (
         InstructionId(value=generator.next()),
-        ShlReg64Imm8(dst=dst, imm=source.value),
+        ShlReg64Imm8(
+            dst=Reg.parse64(destination.name.decode()),
+            imm=Imm.imm8(source.value),
+        ),
     )
+
 
 def lower_reg64_cl(
     generator: Generator,
@@ -94,7 +92,7 @@ def lower_reg64_cl(
 
     return (
         InstructionId(value=generator.next()),
-        ShlReg64Cl(dst=name_to_reg64(destination.name.decode())),
+        ShlReg64Cl(dst=Reg.parse64(destination.name.decode())),
     )
 
 

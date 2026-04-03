@@ -3,8 +3,7 @@ from typing import Optional, Union
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, Immediate, ModRM, Opcode, Prefixes
 from i13c.llvm.typing.instructions.bits import (
-    ByteSwapReg32,
-    ByteSwapReg64,
+    BSwapInstruction,
     ShlReg8Imm8,
     ShlReg16Imm8,
     ShlReg32Imm8,
@@ -18,24 +17,24 @@ def encode_shl_reg_imm(
     bytecode: bytearray,
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
-    # chosen encoding: 66 + REX + C0|C1|D0|D1 /4 ib
-    # encoded as: [prefixes?][rex?] [opcode] [modrm] [imm8]
+    # chosen encoding: 66 + REX + (C0|C1|D0|D1) /4 ib
+    # encoded as: [prefixes?] [rex?] [opcode] [modrm] [imm8]
 
     prefixes = Prefixes(
-        operand_override=isinstance(instruction, ShlReg16Imm8),
+        operand_override=instruction.dst.width == 16,
     )
 
     rex = REX(
-        w=isinstance(instruction, ShlReg64Imm8),
+        w=instruction.dst.width == 64,
         r=False,
         x=False,
-        b=instruction.dst >= 8,
+        b=instruction.dst.id >= 8,
     )
 
-    if isinstance(instruction, ShlReg8Imm8):
-        value = 0xD0 if instruction.imm == 1 else 0xC0
+    if instruction.dst.width == 8:
+        value = 0xD0 if instruction.imm.value == 1 else 0xC0
     else:
-        value = 0xD1 if instruction.imm == 1 else 0xC1
+        value = 0xD1 if instruction.imm.value == 1 else 0xC1
 
     opcode = Opcode(
         hex=value,
@@ -45,11 +44,11 @@ def encode_shl_reg_imm(
     modrm = ModRM(
         mod=0b11,
         reg=4,
-        rm=instruction.dst & 0x07,
+        rm=instruction.dst.id & 0x07,
     )
 
     imm8 = Immediate(
-        value=instruction.imm,
+        value=instruction.imm.value,
         width=1,
         signed=False,
     )
@@ -76,7 +75,7 @@ def encode_shl_reg_cl(
         w=True,
         r=False,
         x=False,
-        b=instruction.dst >= 8,
+        b=instruction.dst.id >= 8,
     )
 
     opcode = Opcode(
@@ -87,7 +86,7 @@ def encode_shl_reg_cl(
     modrm = ModRM(
         mod=0b11,
         reg=4,
-        rm=instruction.dst & 0x07,
+        rm=instruction.dst.id & 0x07,
     )
 
     bytecode.extend(
@@ -100,7 +99,7 @@ def encode_shl_reg_cl(
 
 
 def encode_bswap(
-    instruction: Union[ByteSwapReg32, ByteSwapReg64], bytecode: bytearray
+    instruction: BSwapInstruction, bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
     # chosen encoding: REX.W + 0F (C8 + rd)
@@ -108,11 +107,11 @@ def encode_bswap(
 
     opcode = Opcode(
         hex=0xC8,
-        reg=instruction.target,  # low 3 bits go into opcode
+        reg=instruction.dst.id,  # low 3 bits go into opcode
     )
 
     rex = REX(
-        w=isinstance(instruction, ByteSwapReg64),
+        w=instruction.dst.width == 64,
         r=False,
         x=False,
         b=opcode.rex_b(),  # high bit of register
