@@ -1,15 +1,7 @@
 from typing import List
 
 from i13c.encoding import encode
-from i13c.llvm.typing.instructions import Instruction
-from i13c.llvm.typing.instructions.bits import (
-    ByteSwapReg32,
-    ByteSwapReg64,
-    ShlReg8Imm8,
-    ShlReg16Imm8,
-    ShlReg32Imm8,
-    ShlReg64Imm8,
-)
+from i13c.llvm.typing.instructions import Instruction, bits
 from i13c.llvm.typing.instructions.core import Immediate, Register
 from tests.encoding import samples
 
@@ -32,7 +24,7 @@ from tests.encoding import samples
 )
 def can_encode_instructions_bswap_reg64(dst: str, encoding: bytes):
     flow: List[Instruction] = [
-        ByteSwapReg64(dst=Register.parse64(dst)),
+        bits.ByteSwapReg64(dst=Register.parse64(dst)),
     ]
 
     assert encode(flow) == encoding
@@ -56,7 +48,7 @@ def can_encode_instructions_bswap_reg64(dst: str, encoding: bytes):
 )
 def can_encode_instructions_bswap_reg32(dst: str, encoding: bytes):
     flow: List[Instruction] = [
-        ByteSwapReg32(dst=Register.parse32(dst)),
+        bits.ByteSwapReg32(dst=Register.parse32(dst)),
     ]
 
     assert encode(flow) == encoding
@@ -89,7 +81,7 @@ def can_encode_instructions_bswap_reg32(dst: str, encoding: bytes):
 )
 def can_encode_instructions_shl_reg64_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        ShlReg64Imm8(
+        bits.ShlReg64Imm8(
             dst=Register.parse64(dst),
             imm=Immediate.imm8(imm8),
         ),
@@ -125,7 +117,7 @@ def can_encode_instructions_shl_reg64_imm8(dst: str, imm8: int, encoding: bytes)
 )
 def can_encode_instructions_shl_reg32_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        ShlReg32Imm8(
+        bits.ShlReg32Imm8(
             dst=Register.parse32(dst),
             imm=Immediate.imm8(imm8),
         ),
@@ -161,7 +153,7 @@ def can_encode_instructions_shl_reg32_imm8(dst: str, imm8: int, encoding: bytes)
 )
 def can_encode_instructions_shl_reg16_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        ShlReg16Imm8(
+        bits.ShlReg16Imm8(
             dst=Register.parse16(dst),
             imm=Immediate.imm8(imm8),
         ),
@@ -172,34 +164,147 @@ def can_encode_instructions_shl_reg16_imm8(dst: str, imm8: int, encoding: bytes)
 
 @samples(
     """
-        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
-        | dst | imm8 | encoding | *** | dst  | imm8 | encoding    |
-        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
-        | al  | 0x01 | d0 e0    | *** | r8b  | 0x01 | 41 d0 e0    |
-        | cl  | 0x01 | d0 e1    | *** | r9b  | 0x01 | 41 d0 e1    |
-        | dl  | 0x01 | d0 e2    | *** | r10b | 0x01 | 41 d0 e2    |
-        | bl  | 0x01 | d0 e3    | *** | r11b | 0x01 | 41 d0 e3    |
-        | spl | 0x01 | d0 e4    | *** | r12b | 0x01 | 41 d0 e4    |
-        | bpl | 0x01 | d0 e5    | *** | r13b | 0x01 | 41 d0 e5    |
-        | sil | 0x01 | d0 e6    | *** | r14b | 0x01 | 41 d0 e6    |
-        | dil | 0x01 | d0 e7    | *** | r15b | 0x01 | 41 d0 e7    |
-        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
-        | al  | 0x05 | c0 e0 05 | *** | r8b  | 0x05 | 41 c0 e0 05 |
-        | cl  | 0x05 | c0 e1 05 | *** | r9b  | 0x05 | 41 c0 e1 05 |
-        | dl  | 0x05 | c0 e2 05 | *** | r10b | 0x05 | 41 c0 e2 05 |
-        | bl  | 0x05 | c0 e3 05 | *** | r11b | 0x05 | 41 c0 e3 05 |
-        | spl | 0x05 | c0 e4 05 | *** | r12b | 0x05 | 41 c0 e4 05 |
-        | bpl | 0x05 | c0 e5 05 | *** | r13b | 0x05 | 41 c0 e5 05 |
-        | sil | 0x05 | c0 e6 05 | *** | r14b | 0x05 | 41 c0 e6 05 |
-        | dil | 0x05 | c0 e7 05 | *** | r15b | 0x05 | 41 c0 e7 05 |
-        | --- | ---- | -------- | --- | ---- | ---- | ----------- |
+        | --- | ---- | ----------- | --- | ---- | ---- | ----------- |
+        | dst | imm8 | encoding    | *** | dst  | imm8 | encoding    |
+        | --- | ---- | ----------- | --- | ---- | ---- | ----------- |
+        | al  | 0x01 | d0 e0       | *** | r8b  | 0x01 | 41 d0 e0    |
+        | cl  | 0x01 | d0 e1       | *** | r9b  | 0x01 | 41 d0 e1    |
+        | dl  | 0x01 | d0 e2       | *** | r10b | 0x01 | 41 d0 e2    |
+        | bl  | 0x01 | d0 e3       | *** | r11b | 0x01 | 41 d0 e3    |
+        | spl | 0x01 | 40 d0 e4    | *** | r12b | 0x01 | 41 d0 e4    |
+        | bpl | 0x01 | 40 d0 e5    | *** | r13b | 0x01 | 41 d0 e5    |
+        | sil | 0x01 | 40 d0 e6    | *** | r14b | 0x01 | 41 d0 e6    |
+        | dil | 0x01 | 40 d0 e7    | *** | r15b | 0x01 | 41 d0 e7    |
+        | --- | ---- | ----------- | --- | ---- | ---- | ----------- |
+        | al  | 0x05 | c0 e0 05    | *** | r8b  | 0x05 | 41 c0 e0 05 |
+        | cl  | 0x05 | c0 e1 05    | *** | r9b  | 0x05 | 41 c0 e1 05 |
+        | dl  | 0x05 | c0 e2 05    | *** | r10b | 0x05 | 41 c0 e2 05 |
+        | bl  | 0x05 | c0 e3 05    | *** | r11b | 0x05 | 41 c0 e3 05 |
+        | spl | 0x05 | 40 c0 e4 05 | *** | r12b | 0x05 | 41 c0 e4 05 |
+        | bpl | 0x05 | 40 c0 e5 05 | *** | r13b | 0x05 | 41 c0 e5 05 |
+        | sil | 0x05 | 40 c0 e6 05 | *** | r14b | 0x05 | 41 c0 e6 05 |
+        | dil | 0x05 | 40 c0 e7 05 | *** | r15b | 0x05 | 41 c0 e7 05 |
+        | --- | ---- | ----------- | --- | ---- | ---- | ----------- |
+        | ah  | 0x01 | d0 e4       | *** | dh   | 0x01 | d0 e6       |
+        | ch  | 0x01 | d0 e5       | *** | bh   | 0x01 | d0 e7       |
+        | --- | ---- | ----------- | --- | ---- | ---- | ----------- |
+        | ah  | 0x05 | c0 e4 05    | *** | dh   | 0x05 | c0 e6 05    |
+        | ch  | 0x05 | c0 e5 05    | *** | bh   | 0x05 | c0 e7 05    |
+        | --- | ---- | ----------- | --- | ---- | ---- | ----------- |
     """
 )
 def can_encode_instructions_shl_reg8_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        ShlReg8Imm8(
+        bits.ShlReg8Imm8(
             dst=Register.parse8(dst),
             imm=Immediate.imm8(imm8),
+        ),
+    ]
+
+    assert encode(flow) == encoding
+
+
+@samples(
+    """
+        | --- | ----------- | --- | --- | ----------- |
+        | dst | encoding    | *** | dst | encoding    |
+        | --- | ----------- | --- | --- | ----------- |
+        | rax | 48 d3 e0    | *** | r8  | 49 d3 e0    |
+        | rcx | 48 d3 e1    | *** | r9  | 49 d3 e1    |
+        | rdx | 48 d3 e2    | *** | r10 | 49 d3 e2    |
+        | rbx | 48 d3 e3    | *** | r11 | 49 d3 e3    |
+        | rsp | 48 d3 e4    | *** | r12 | 49 d3 e4    |
+        | rbp | 48 d3 e5    | *** | r13 | 49 d3 e5    |
+        | rsi | 48 d3 e6    | *** | r14 | 49 d3 e6    |
+        | rdi | 48 d3 e7    | *** | r15 | 49 d3 e7    |
+        | --- | ----------- | --- | --- | ----------- |
+        """
+)
+def can_encode_instructions_shl_reg64_cl(dst: str, encoding: bytes):
+    flow: List[Instruction] = [
+        bits.ShlReg64Cl(
+            dst=Register.parse64(dst),
+        ),
+    ]
+
+    assert encode(flow) == encoding
+
+
+@samples(
+    """
+        | --- | -------- | --- | ---- | -------- |
+        | dst | encoding | *** | dst  | encoding |
+        | --- | -------- | --- | ---- | -------- |
+        | eax | d3 e0    | *** | r8d  | 41 d3 e0 |
+        | ecx | d3 e1    | *** | r9d  | 41 d3 e1 |
+        | edx | d3 e2    | *** | r10d | 41 d3 e2 |
+        | ebx | d3 e3    | *** | r11d | 41 d3 e3 |
+        | esp | d3 e4    | *** | r12d | 41 d3 e4 |
+        | ebp | d3 e5    | *** | r13d | 41 d3 e5 |
+        | esi | d3 e6    | *** | r14d | 41 d3 e6 |
+        | edi | d3 e7    | *** | r15d | 41 d3 e7 |
+        | --- | -------- | --- | ---- | -------- |
+        """
+)
+def can_encode_instructions_shl_reg32_cl(dst: str, encoding: bytes):
+    flow: List[Instruction] = [
+        bits.ShlReg32Cl(
+            dst=Register.parse32(dst),
+        ),
+    ]
+
+    assert encode(flow) == encoding
+
+
+@samples(
+    """
+        | --- | -------- | --- | ---- | ----------- |
+        | dst | encoding | *** | dst  | encoding    |
+        | --- | -------- | --- | ---- | ----------- |
+        | ax  | 66 d3 e0 | *** | r8w  | 66 41 d3 e0 |
+        | cx  | 66 d3 e1 | *** | r9w  | 66 41 d3 e1 |
+        | dx  | 66 d3 e2 | *** | r10w | 66 41 d3 e2 |
+        | bx  | 66 d3 e3 | *** | r11w | 66 41 d3 e3 |
+        | sp  | 66 d3 e4 | *** | r12w | 66 41 d3 e4 |
+        | bp  | 66 d3 e5 | *** | r13w | 66 41 d3 e5 |
+        | si  | 66 d3 e6 | *** | r14w | 66 41 d3 e6 |
+        | di  | 66 d3 e7 | *** | r15w | 66 41 d3 e7 |
+        | --- | -------- | --- | ---- | ----------- |
+        """
+)
+def can_encode_instructions_shl_reg16_cl(dst: str, encoding: bytes):
+    flow: List[Instruction] = [
+        bits.ShlReg16Cl(
+            dst=Register.parse16(dst),
+        ),
+    ]
+
+    assert encode(flow) == encoding
+
+
+@samples(
+    """
+        | --- | -------- | --- | ---- | -------- |
+        | dst | encoding | *** | dst  | encoding |
+        | --- | -------- | --- | ---- | -------- |
+        | al  | d2 e0    | *** | r8b  | 41 d2 e0 |
+        | cl  | d2 e1    | *** | r9b  | 41 d2 e1 |
+        | dl  | d2 e2    | *** | r10b | 41 d2 e2 |
+        | bl  | d2 e3    | *** | r11b | 41 d2 e3 |
+        | spl | 40 d2 e4 | *** | r12b | 41 d2 e4 |
+        | bpl | 40 d2 e5 | *** | r13b | 41 d2 e5 |
+        | sil | 40 d2 e6 | *** | r14b | 41 d2 e6 |
+        | dil | 40 d2 e7 | *** | r15b | 41 d2 e7 |
+        | --- | -------- | --- | ---- | -------- |
+        | ah  | d2 e4    | *** | dh   | d2 e6    |
+        | ch  | d2 e5    | *** | bh   | d2 e7    |
+        | --- | -------- | --- | ---- | -------- |
+        """
+)
+def can_encode_instructions_shl_reg8_cl(dst: str, encoding: bytes):
+    flow: List[Instruction] = [
+        bits.ShlReg8Cl(
+            dst=Register.parse8(dst),
         ),
     ]
 

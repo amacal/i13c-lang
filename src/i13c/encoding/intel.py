@@ -12,8 +12,8 @@ class REX:
     def is_required(self) -> bool:
         return self.w or self.r or self.x or self.b
 
-    def to_bytes(self) -> bytes:
-        if not self.is_required():
+    def to_bytes(self, /, force: bool = False) -> bytes:
+        if not self.is_required() and not force:
             return bytes([])
 
         value = 0x40

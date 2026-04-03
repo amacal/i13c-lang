@@ -27,8 +27,6 @@ def encode_lea_reg_off(
         mod = 0b10
         disp_width = 4
 
-    print(disp_width)
-
     modrm = ModRM(
         mod=mod,
         reg=instruction.dst.id,
@@ -36,7 +34,7 @@ def encode_lea_reg_off(
     )
 
     rex = REX(
-        w=instruction.dst.width == 64,
+        w=instruction.dst.width == "64bit",
         r=modrm.rex_r(),
         x=sib.rex_x(),
         b=modrm.rex_b() or sib.rex_b(),

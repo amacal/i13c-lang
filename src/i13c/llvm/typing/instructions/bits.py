@@ -57,6 +57,22 @@ class ShlReg64Imm8:
 
 
 @dataclass(kw_only=True)
+class ShlReg8Cl:
+    dst: Register
+
+    def native(self) -> str:
+        return f"shl {self.dst}, cl"
+
+
+@dataclass(kw_only=True)
+class ShlReg16Cl:
+    dst: Register
+
+    def native(self) -> str:
+        return f"shl {self.dst}, cl"
+
+
+@dataclass(kw_only=True)
 class ShlReg32Cl:
     dst: Register
 
@@ -72,12 +88,18 @@ class ShlReg64Cl:
         return f"shl {self.dst}, cl"
 
 
-BSwapInstruction = Union[ByteSwapReg32, ByteSwapReg64]
-ShlInstruction = Union[
+BSwapReg = Union[ByteSwapReg32, ByteSwapReg64]
+
+ShlRegImm = Union[
     ShlReg8Imm8,
     ShlReg16Imm8,
     ShlReg32Imm8,
     ShlReg64Imm8,
+]
+
+ShlRegReg = Union[
+    ShlReg8Cl,
+    ShlReg16Cl,
     ShlReg32Cl,
-    ShlReg64Cl
+    ShlReg64Cl,
 ]

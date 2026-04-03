@@ -1,10 +1,14 @@
 from dataclasses import dataclass
-from typing import Dict, Set
+from typing import Dict, Literal, Set, Tuple
 
 # fmt: off
 IR_REGISTER_FORWARD_8: Dict[bytes, int] = {
     b"al": 0, b"cl": 1, b"dl": 2, b"bl": 3, b"spl": 4, b"bpl": 5, b"sil": 6, b"dil": 7,
     b"r8b": 8, b"r9b": 9, b"r10b": 10, b"r11b": 11, b"r12b": 12, b"r13b": 13, b"r14b": 14, b"r15b": 15,
+}
+
+IR_REGISTER_FORWARD_HIGH: Dict[bytes, int] = {
+    b"ah": 4, b"ch": 5, b"dh": 6, b"bh": 7,
 }
 
 IR_REGISTER_FORWARD_16: Dict[bytes, int] = {
@@ -25,6 +29,10 @@ IR_REGISTER_FORWARD_64: Dict[bytes, int] = {
 IR_REGISTER_BACKWARD_8: Dict[int, bytes] = {
     0: b"al", 1: b"cl", 2: b"dl", 3: b"bl", 4: b"spl", 5: b"bpl", 6: b"sil", 7: b"dil",
     8: b"r8b", 9: b"r9b", 10: b"r10b", 11: b"r11b", 12: b"r12b", 13: b"r13b", 14: b"r14b", 15: b"r15b",
+}
+
+IR_REGISTER_BACKWARD_HIGH: Dict[int, bytes] = {
+    4: b"ah", 5: b"ch", 6: b"dh", 7: b"bh",
 }
 
 IR_REGISTER_BACKWARD_16: Dict[int, bytes] = {
@@ -60,8 +68,14 @@ def reg64_to_name(reg: int) -> str:
     return IR_REGISTER_BACKWARD_64[reg].decode() if reg >= 0 else f"v{abs(reg)}"
 
 
-def name_to_reg8(name: str) -> int:
-    return IR_REGISTER_FORWARD_8[name.encode()]
+def name_to_reg8(name: str) -> Tuple[int, Literal["low", "high", "8bit"]]:
+    if name.endswith("h"):
+        return IR_REGISTER_FORWARD_HIGH[name.encode()], "high"
+
+    if name.endswith("l"):
+        return IR_REGISTER_FORWARD_8[name.encode()], "low"
+
+    return IR_REGISTER_FORWARD_8[name.encode()], "8bit"
 
 
 def name_to_reg16(name: str) -> int:

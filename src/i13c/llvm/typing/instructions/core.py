@@ -14,8 +14,8 @@ from i13c.llvm.typing.registers import (
 )
 
 ImmediateWidth = Kind[8, 32, 64]
-RegisterWidth = Kind[8, 16, 32, 64]
 DisplacementWidth = Kind[0, 8, 32]
+RegisterWidth = Kind["low", "high", "8bit", "16bit", "32bit", "64bit"]
 
 
 @dataclass(kw_only=True)
@@ -75,16 +75,16 @@ class Register:
     width: RegisterWidth
 
     @staticmethod
-    def reg8(id: int) -> Register:
-        return Register.build(8, id)
+    def reg8(id: int, width: Kind["low", "high", "8bit"]) -> Register:
+        return Register.build(width, id)
 
     @staticmethod
     def parse8(name: str) -> Register:
-        return Register.reg8(name_to_reg8(name))
+        return Register.reg8(*name_to_reg8(name))
 
     @staticmethod
     def reg16(id: int) -> Register:
-        return Register.build(16, id)
+        return Register.build("16bit", id)
 
     @staticmethod
     def parse16(name: str) -> Register:
@@ -92,7 +92,7 @@ class Register:
 
     @staticmethod
     def reg32(id: int) -> Register:
-        return Register.build(32, id)
+        return Register.build("32bit", id)
 
     @staticmethod
     def parse32(name: str) -> Register:
@@ -100,7 +100,7 @@ class Register:
 
     @staticmethod
     def reg64(id: int) -> Register:
-        return Register.build(64, id)
+        return Register.build("64bit", id)
 
     @staticmethod
     def parse64(name: str) -> Register:
@@ -113,13 +113,13 @@ class Register:
         return Register(id=id, width=width)
 
     def __str__(self) -> str:
-        if self.width == 8:
+        if self.width in ("low", "high", "8bit"):
             return reg8_to_name(self.id)
 
-        if self.width == 16:
+        if self.width == "16bit":
             return reg16_to_name(self.id)
 
-        if self.width == 32:
+        if self.width == "32bit":
             return reg32_to_name(self.id)
 
         return reg64_to_name(self.id)
