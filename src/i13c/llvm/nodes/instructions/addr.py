@@ -3,7 +3,10 @@ from typing import Dict, Protocol, Tuple
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
-from i13c.llvm.typing.instructions.addr import LeaReg32Off, LeaReg64Off
+from i13c.llvm.typing.instructions.addr import LeaReg32Mem, LeaReg64Mem
+from i13c.llvm.typing.instructions.core import Address as Addr
+from i13c.llvm.typing.instructions.core import Displacement as Disp
+from i13c.llvm.typing.instructions.core import Register as Reg
 from i13c.llvm.typing.registers import name_to_reg32, name_to_reg64
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
@@ -30,7 +33,10 @@ def lower_reg32_addr(
 
     return (
         InstructionId(value=generator.next()),
-        LeaReg32Off(dst=dst, off=off, src=src),
+        LeaReg32Mem(
+            dst=Reg.reg32(dst),
+            addr=Addr(base=Reg.reg64(src), disp=Disp.auto(off)),
+        ),
     )
 
 
@@ -46,7 +52,10 @@ def lower_reg64_addr(
 
     return (
         InstructionId(value=generator.next()),
-        LeaReg64Off(dst=dst, off=off, src=src),
+        LeaReg64Mem(
+            dst=Reg.reg64(dst),
+            addr=Addr(base=Reg.reg64(src), disp=Disp.auto(off)),
+        ),
     )
 
 

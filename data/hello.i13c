@@ -3,23 +3,35 @@ asm exit(code@rdi: u8) noreturn clobbers rcx, r11, rax {
     syscall;
 }
 
-asm print_asm(value@rax: u32) clobbers rcx, r11, rax {
+asm print_asm(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
     bswap rax;
-    mov rcx, 0x3030303030303030;
-    add rax, rcx;
-    mov [rsp - 0x10], rax;
 
-    mov r11, 0x0a;
-    mov [rsp - 0x08], r11;
+    mov rcx, 0x3736353433323130;
+    mov [rsp - 0x10], rcx;
+    mov rcx, 0x6665646362613938;
+    mov [rsp - 0x08], rcx;
+
+    mov rcx, 0x10;
+    label .nibble;
+
+    mov r11, rax;
+    and r11, 0x0f;
+
+    mov r11b, [rsp + r11 - 0x10];
+    mov [rsp + rcx - 0x30], r11b;
+    shr rax, 0x04;
+
+    loop .nibble;
+    mov [rsp - 0x10], 0x0a;
 
     mov rdi, 0x01;
-    lea rsi, [rsp - 0x10];
-    mov rdx, 0x09;
+    lea rsi, [rsp - 0x30];
+    mov rdx, 0x11;
     mov rax, 0x01;
     syscall;
 }
 
-fn print(value: u32) {
+fn print(value: u64) {
   print_asm(value);
 }
 

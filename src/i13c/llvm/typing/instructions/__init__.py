@@ -1,11 +1,12 @@
+#  noqa: F401
+
 from dataclasses import dataclass
 from typing import Tuple, Union
 
-from i13c.llvm.typing.instructions import addr, bits, jump, math, move, stack
+from i13c.llvm.typing.instructions import addr, bits, ctrl, math, move, stack
 
 Instruction = Union[
-    addr.LeaReg32Off,
-    addr.LeaReg64Off,
+    addr.LeaInstruction,
     bits.ByteSwapReg32,
     bits.ByteSwapReg64,
     bits.ShlReg8Imm8,
@@ -14,13 +15,13 @@ Instruction = Union[
     bits.ShlReg64Imm8,
     bits.ShlReg32Cl,
     bits.ShlReg64Cl,
-    jump.Call,
-    jump.Jump,
-    jump.Label,
-    jump.Nop,
-    jump.Nop,
-    jump.Return,
-    jump.SysCall,
+    ctrl.Call,
+    ctrl.Jump,
+    ctrl.Label,
+    ctrl.Nop,
+    ctrl.Nop,
+    ctrl.Return,
+    ctrl.SysCall,
     math.AddRegImm,
     math.AddRegReg,
     math.SubRegImm,

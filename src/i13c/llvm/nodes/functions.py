@@ -16,7 +16,7 @@ from i13c.llvm.typing.flows import (
     SnapshotFlow,
 )
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
-from i13c.llvm.typing.instructions.jump import Nop
+from i13c.llvm.typing.instructions.ctrl import Nop
 from i13c.llvm.typing.instructions.move import MovOffImm, MovOffReg
 from i13c.llvm.typing.instructions.stack import PopOff, PushOff
 from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64

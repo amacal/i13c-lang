@@ -4,7 +4,7 @@ from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
 from i13c.llvm.nodes.instructions import addr, bits, math, move
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
-from i13c.llvm.typing.instructions.jump import SysCall
+from i13c.llvm.typing.instructions.ctrl import SysCall
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )

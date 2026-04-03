@@ -2,11 +2,8 @@ from typing import List
 
 from i13c.encoding import encode
 from i13c.llvm.typing.instructions import Instruction
-from i13c.llvm.typing.instructions.addr import LeaReg32Off, LeaReg64Off
-from i13c.llvm.typing.registers import (
-    name_to_reg32,
-    name_to_reg64,
-)
+from i13c.llvm.typing.instructions.addr import LeaReg32Mem, LeaReg64Mem
+from i13c.llvm.typing.instructions.core import Address, Displacement, Register
 from tests.encoding import samples
 
 
@@ -28,7 +25,13 @@ from tests.encoding import samples
 )
 def can_encode_instructions_lea_reg64_disp0(dst: str, src: str, encoding: bytes):
     flow: List[Instruction] = [
-        LeaReg64Off(dst=name_to_reg64(dst), src=name_to_reg64(src), off=0),
+        LeaReg64Mem(
+            dst=Register.parse64(dst),
+            addr=Address(
+                base=Register.parse64(src),
+                disp=Displacement.auto(0),
+            ),
+        ),
     ]
 
     assert encode(flow) == encoding
@@ -54,7 +57,13 @@ def can_encode_instructions_lea_reg64_disp8(
     dst: str, src: str, disp8: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg64Off(dst=name_to_reg64(dst), src=name_to_reg64(src), off=disp8),
+        LeaReg64Mem(
+            dst=Register.parse64(dst),
+            addr=Address(
+                base=Register.parse64(src),
+                disp=Displacement.auto(disp8),
+            ),
+        ),
     ]
 
     assert encode(flow) == encoding
@@ -80,7 +89,13 @@ def can_encode_instructions_lea_reg64_disp32(
     dst: str, src: str, disp32: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg64Off(dst=name_to_reg64(dst), src=name_to_reg64(src), off=disp32),
+        LeaReg64Mem(
+            dst=Register.parse64(dst),
+            addr=Address(
+                base=Register.parse64(src),
+                disp=Displacement.auto(disp32),
+            ),
+        ),
     ]
 
     assert encode(flow) == encoding
@@ -104,7 +119,13 @@ def can_encode_instructions_lea_reg64_disp32(
 )
 def can_encode_instructions_lea_reg32_disp0(dst: str, src: str, encoding: bytes):
     flow: List[Instruction] = [
-        LeaReg32Off(dst=name_to_reg32(dst), src=name_to_reg64(src), off=0),
+        LeaReg32Mem(
+            dst=Register.parse32(dst),
+            addr=Address(
+                base=Register.parse64(src),
+                disp=Displacement.auto(0),
+            ),
+        ),
     ]
 
     assert encode(flow) == encoding
@@ -130,7 +151,13 @@ def can_encode_instructions_lea_reg32_disp8(
     dst: str, src: str, disp8: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg32Off(dst=name_to_reg32(dst), src=name_to_reg64(src), off=disp8),
+        LeaReg32Mem(
+            dst=Register.parse32(dst),
+            addr=Address(
+                base=Register.parse64(src),
+                disp=Displacement.auto(disp8),
+            ),
+        ),
     ]
 
     assert encode(flow) == encoding
@@ -156,7 +183,13 @@ def can_encode_instructions_lea_reg32_disp32(
     dst: str, src: str, disp32: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg32Off(dst=name_to_reg32(dst), src=name_to_reg64(src), off=disp32),
+        LeaReg32Mem(
+            dst=Register.parse32(dst),
+            addr=Address(
+                base=Register.parse64(src),
+                disp=Displacement.auto(disp32),
+            ),
+        ),
     ]
 
     assert encode(flow) == encoding

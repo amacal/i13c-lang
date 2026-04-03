@@ -5,7 +5,7 @@ from pytest import raises
 from i13c.encoding import DuplicateLabelError, MissingLabelError, encode
 from i13c.llvm.typing.flows import BlockId
 from i13c.llvm.typing.instructions import Instruction
-from i13c.llvm.typing.instructions.jump import Call, Jump, Label, Nop, Return, SysCall
+from i13c.llvm.typing.instructions.ctrl import Call, Jump, Label, Nop, Return, SysCall
 
 
 def can_encode_instructions_nop_twice():

@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Protocol, Type, Union
 
-from i13c.encoding import addr, bits, jump, math, move, stack
+from i13c.encoding import addr, bits, ctrl, math, move, stack
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.llvm.typing import instructions as llvm
 from i13c.llvm.typing.instructions import Instruction
@@ -53,8 +53,8 @@ class Encoder(Protocol):
 
 
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
-    llvm.addr.LeaReg32Off: addr.encode_lea_reg_off,
-    llvm.addr.LeaReg64Off: addr.encode_lea_reg_off,
+    llvm.addr.LeaReg32Mem: addr.encode_lea_reg_off,
+    llvm.addr.LeaReg64Mem: addr.encode_lea_reg_off,
     llvm.bits.ByteSwapReg32: bits.encode_bswap,
     llvm.bits.ByteSwapReg64: bits.encode_bswap,
     llvm.bits.ShlReg8Imm8: bits.encode_shl_reg_imm,
@@ -62,12 +62,12 @@ DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
     llvm.bits.ShlReg32Imm8: bits.encode_shl_reg_imm,
     llvm.bits.ShlReg64Imm8: bits.encode_shl_reg_imm,
     llvm.bits.ShlReg64Cl: bits.encode_shl_reg_cl,
-    llvm.jump.Call: jump.encode_call,
-    llvm.jump.Jump: jump.encode_jump,
-    llvm.jump.Label: jump.encode_label,
-    llvm.jump.Nop: jump.encode_nop,
-    llvm.jump.Return: jump.encode_return,
-    llvm.jump.SysCall: jump.encode_syscall,
+    llvm.ctrl.Call: ctrl.encode_call,
+    llvm.ctrl.Jump: ctrl.encode_jump,
+    llvm.ctrl.Label: ctrl.encode_label,
+    llvm.ctrl.Nop: ctrl.encode_nop,
+    llvm.ctrl.Return: ctrl.encode_return,
+    llvm.ctrl.SysCall: ctrl.encode_syscall,
     llvm.math.AddRegImm: math.encode_add_reg_imm,
     llvm.math.AddRegReg: math.encode_add_reg_reg,
     llvm.math.SubRegImm: math.encode_sub_reg_imm,
