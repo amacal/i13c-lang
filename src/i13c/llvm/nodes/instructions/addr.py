@@ -7,6 +7,7 @@ from i13c.llvm.typing.instructions.addr import LeaReg32Mem, LeaReg64Mem
 from i13c.llvm.typing.instructions.core import Address as Addr
 from i13c.llvm.typing.instructions.core import Displacement as Disp
 from i13c.llvm.typing.instructions.core import Register as Reg
+from i13c.llvm.typing.instructions.core import Scaler
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
 )
@@ -31,7 +32,8 @@ def lower_reg32_addr(
             dst=Reg.parse32(destination.name.decode()),
             addr=Addr(
                 base=Reg.parse64(source.base.name.decode()),
-                disp=Disp.auto(source.offset.value if source.offset is not None else 0),
+                disp=Disp.auto(source.offset),
+                scaler=Scaler.none(),
             ),
         ),
     )
@@ -48,7 +50,8 @@ def lower_reg64_addr(
             dst=Reg.parse64(destination.name.decode()),
             addr=Addr(
                 base=Reg.parse64(source.base.name.decode()),
-                disp=Disp.auto(source.offset.value if source.offset is not None else 0),
+                disp=Disp.auto(source.offset),
+                scaler=Scaler.none(),
             ),
         ),
     )

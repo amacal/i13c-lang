@@ -1,6 +1,10 @@
 from typing import Optional, Union
 
-from i13c.encoding.core import LabelArtifact, RelocationArtifact
+from i13c.encoding.core import (
+    LabelArtifact,
+    RelocationArtifact,
+    UnreachableEncodingError,
+)
 from i13c.encoding.intel import REX, SIB, Displacement, ModRM, Opcode
 from i13c.llvm.typing.instructions.addr import LeaInstruction
 
@@ -11,13 +15,16 @@ def encode_lea_reg_off(
 
     # encoded as: [rex?] [opcode] [modrm] [sib?] [disp8/32?]
 
+    if instruction.addr.scaler.uses_rsp_r12():
+        raise UnreachableEncodingError()
+
     sib = SIB(
-        scale=0,
-        index=None,
+        scale=instruction.addr.scaler.scale_offset(),
+        index=instruction.addr.scaler.index_or_none(),
         base=instruction.addr.base.id,
     )
 
-    if instruction.addr.disp.width == 0 and (instruction.addr.base.id & 0b111) != 5:
+    if instruction.addr.disp.width == 0 and instruction.addr.base.low3bits() != 5:
         mod = 0b00
         disp_width = 0
     elif instruction.addr.disp.width <= 8:  # disp0 with rbp/r13 or disp8

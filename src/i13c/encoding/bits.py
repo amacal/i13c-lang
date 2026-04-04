@@ -41,7 +41,7 @@ def encode_shl_reg_imm(
     modrm = ModRM(
         mod=0b11,
         reg=4,
-        rm=instruction.dst.id & 0x07,
+        rm=instruction.dst.low3bits(),
     )
 
     imm8 = Immediate(
@@ -97,7 +97,7 @@ def encode_shl_reg_cl(
     modrm = ModRM(
         mod=0b11,
         reg=4,
-        rm=instruction.dst.id & 0x07,
+        rm=instruction.dst.low3bits(),
     )
 
     bytecode.extend(
@@ -126,7 +126,7 @@ def encode_bswap(
         w=instruction.dst.width == "64bit",
         r=False,
         x=False,
-        b=opcode.rex_b(),  # high bit of register
+        b=opcode.rex_b(),
     )
 
     bytecode.extend(

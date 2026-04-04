@@ -11,3 +11,7 @@ class LabelArtifact:
 class RelocationArtifact:
     target: int
     offset: int
+
+
+class UnreachableEncodingError(Exception):
+    pass

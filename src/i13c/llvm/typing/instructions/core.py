@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
-from typing import Optional
+from typing import Optional, Protocol, Union
 
 from i13c.llvm.typing.registers import (
     name_to_reg8,
@@ -13,6 +13,7 @@ from i13c.llvm.typing.registers import (
     reg64_to_name,
 )
 
+ScaleValue = Kind[1, 2, 4, 8]
 ImmediateWidth = Kind[8, 32, 64]
 DisplacementWidth = Kind[0, 8, 32]
 RegisterWidth = Kind["low", "high", "8bit", "16bit", "32bit", "64bit"]
@@ -45,15 +46,29 @@ class Immediate:
         return f"{self.value:#018x}"
 
 
+class DisplacementSource(Protocol):
+    @property
+    def value(self) -> int: ...
+
+
 @dataclass(kw_only=True)
 class Displacement:
     value: int
     width: DisplacementWidth
 
     @staticmethod
-    def auto(value: Optional[int]) -> Displacement:
-        if value == 0 or value is None:
-            return Displacement(value=0, width=0)
+    def none() -> Displacement:
+        return Displacement(value=0, width=0)
+
+    @staticmethod
+    def auto(source: Union[int, Optional[DisplacementSource]]) -> Displacement:
+        if isinstance(source, int):
+            value = source
+        else:
+            value = source.value if source is not None else 0
+
+        if value == 0:
+            return Displacement.none()
 
         if -128 <= value <= 127:
             return Displacement(value=value, width=8)
@@ -66,13 +81,17 @@ class Displacement:
         )
 
     def __str__(self) -> str:
-        return f"{'+' if self.value >= 0 else '-'} {abs(self.value):#010x}"
+        return f" {'+' if self.value >= 0 else '-'} {abs(self.value):#010x}"
 
 
 @dataclass(kw_only=True)
 class Register:
     id: int
     width: RegisterWidth
+
+    @staticmethod
+    def none() -> Register:
+        return Register(id=16, width="8bit")
 
     @staticmethod
     def reg8(id: int, width: Kind["low", "high", "8bit"]) -> Register:
@@ -112,6 +131,12 @@ class Register:
 
         return Register(id=id, width=width)
 
+    def low3bits(self) -> int:
+        return self.id & 0x07
+
+    def high_bit(self) -> bool:
+        return ((self.id >> 3) & 0x01) == 0x01
+
     def __str__(self) -> str:
         if self.width in ("low", "high", "8bit"):
             return reg8_to_name(self.id)
@@ -126,9 +151,35 @@ class Register:
 
 
 @dataclass(kw_only=True)
+class Scaler:
+    index: Register
+    scale: ScaleValue
+
+    @staticmethod
+    def none() -> Scaler:
+        return Scaler(index=Register.none(), scale=1)
+
+    def is_available(self) -> bool:
+        return self.index.id != 16
+
+    def uses_rsp_r12(self) -> bool:
+        return self.index.id in (4, 12)
+
+    def index_or_none(self) -> Optional[int]:
+        return self.index.id if self.is_available() else None
+
+    def scale_offset(self) -> int:
+        return [1, 2, 4, 8].index(int(self.scale)) if self.is_available() else 0
+
+    def __str__(self) -> str:
+        return f" + {self.index}*{self.scale}" if self.is_available() else ""
+
+
+@dataclass(kw_only=True)
 class Address:
     base: Register
     disp: Displacement
+    scaler: Scaler
 
     def __str__(self) -> str:
-        return f"[{self.base} {self.disp}]"
+        return f"[{self.base}{self.scaler}{self.disp}]"
