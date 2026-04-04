@@ -131,6 +131,12 @@ class Register:
 
         return Register(id=id, width=width)
 
+    def is_available(self) -> bool:
+        return self.id != 16
+
+    def value_or_none(self) -> Optional[int]:
+        return self.id if self.is_available() else None
+
     def low3bits(self) -> int:
         return self.id & 0x07
 
@@ -160,13 +166,13 @@ class Scaler:
         return Scaler(index=Register.none(), scale=1)
 
     def is_available(self) -> bool:
-        return self.index.id != 16
+        return self.index.is_available()
 
-    def uses_rsp_r12(self) -> bool:
-        return self.index.id in (4, 12)
+    def uses_rsp(self) -> bool:
+        return self.index.id in (4,)
 
     def index_or_none(self) -> Optional[int]:
-        return self.index.id if self.is_available() else None
+        return self.index.value_or_none()
 
     def scale_offset(self) -> int:
         return [1, 2, 4, 8].index(int(self.scale)) if self.is_available() else 0

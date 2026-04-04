@@ -66,7 +66,7 @@ class ModRM:
 
 @dataclass(kw_only=True)
 class SIB:
-    base: int
+    base: Optional[int]
     scale: int
     index: Optional[int]
 
@@ -74,18 +74,25 @@ class SIB:
         return self.index is not None and ((self.index >> 3) & 0x1) == 0x1
 
     def rex_b(self) -> bool:
-        return ((self.base >> 3) & 0x1) == 0x01
+        return ((self.base >> 3) & 0x1) == 0x01 if self.base is not None else False
 
     def is_required(self) -> bool:
-        return (self.base & 0x07) == 0x04 or self.index is not None
+        return self.index is not None or self.base is not None and (self.base & 0x07) == 0x04
 
     def mod_rm(self) -> int:
-        return 0x04 if self.is_required() else self.base & 0x07
+        return 0x04 if self.is_required() or self.base is None else self.base & 0x07
 
     def to_bytes(self) -> bytes:
         if not self.is_required():
             return bytes([])
 
+        # encode optional base
+        if self.base is None:
+            base_bits = 0b101
+        else:
+            base_bits = self.base & 0x07
+
+        # encode optional index and scale
         if self.index is None:
             index_bits = 0b100
             scale_bits = 0
@@ -93,7 +100,7 @@ class SIB:
             index_bits = self.index & 0x07
             scale_bits = self.scale & 0x03
 
-        return bytes([(scale_bits << 6) | (index_bits << 3) | (self.base & 0x07)])
+        return bytes([(scale_bits << 6) | (index_bits << 3) | base_bits])
 
 
 @dataclass(kw_only=True)

@@ -47,12 +47,78 @@ def can_encode_instructions_lea_reg64_base_disp0(dst: str, base: str, encoding: 
 
 @samples(
     """
+        | --- | ----- | ----- | ----------------------- | --- | --- | ----- | ----- | ----------------------- |
+        | dst | scale | index | encoding                | *** | dst | scale | index | encoding                |
+        | --- | ----- | ----- | ----------------------- | --- | --- | ----- | ----- | ----------------------- |
+        | rax | 1     | rdx   | 48 8d 04 15 00 00 00 00 | *** | r8  | 1     | r10   | 4e 8d 04 15 00 00 00 00 |
+        | rcx | 1     | rbx   | 48 8d 0c 1d 00 00 00 00 | *** | r9  | 1     | r11   | 4e 8d 0c 1d 00 00 00 00 |
+        | rdx | 1     | rsp   | !! !! !! !! !! !! !! !! | *** | r10 | 1     | r12   | 4e 8d 14 25 00 00 00 00 |
+        | rbx | 1     | rbp   | 48 8d 1c 2d 00 00 00 00 | *** | r11 | 1     | r13   | 4e 8d 1c 2d 00 00 00 00 |
+        | rsp | 1     | rsi   | 48 8d 24 35 00 00 00 00 | *** | r12 | 1     | r14   | 4e 8d 24 35 00 00 00 00 |
+        | rbp | 1     | rdi   | 48 8d 2c 3d 00 00 00 00 | *** | r13 | 1     | r15   | 4e 8d 2c 3d 00 00 00 00 |
+        | rsi | 1     | r8    | 4a 8d 34 05 00 00 00 00 | *** | r14 | 1     | rax   | 4c 8d 34 05 00 00 00 00 |
+        | rdi | 1     | r9    | 4a 8d 3c 0d 00 00 00 00 | *** | r15 | 1     | rcx   | 4c 8d 3c 0d 00 00 00 00 |
+        | --- | ----- | ----- | ----------------------- | --- | --- | ----- | ----- | ----------------------- |
+        | rax | 2     | rdx   | 48 8d 04 55 00 00 00 00 | *** | r8  | 2     | r10   | 4e 8d 04 55 00 00 00 00 |
+        | rcx | 2     | rbx   | 48 8d 0c 5d 00 00 00 00 | *** | r9  | 2     | r11   | 4e 8d 0c 5d 00 00 00 00 |
+        | rdx | 2     | rsp   | !! !! !! !! !! !! !! !! | *** | r10 | 2     | r12   | 4e 8d 14 65 00 00 00 00 |
+        | rbx | 2     | rbp   | 48 8d 1c 6d 00 00 00 00 | *** | r11 | 2     | r13   | 4e 8d 1c 6d 00 00 00 00 |
+        | rsp | 2     | rsi   | 48 8d 24 75 00 00 00 00 | *** | r12 | 2     | r14   | 4e 8d 24 75 00 00 00 00 |
+        | rbp | 2     | rdi   | 48 8d 2c 7d 00 00 00 00 | *** | r13 | 2     | r15   | 4e 8d 2c 7d 00 00 00 00 |
+        | rsi | 2     | r8    | 4a 8d 34 45 00 00 00 00 | *** | r14 | 2     | rax   | 4c 8d 34 45 00 00 00 00 |
+        | rdi | 2     | r9    | 4a 8d 3c 4d 00 00 00 00 | *** | r15 | 2     | rcx   | 4c 8d 3c 4d 00 00 00 00 |
+        | --- | ----- | ----- | ----------------------- | --- | --- | ----- | ----- | ----------------------- |
+        | rax | 4     | rdx   | 48 8d 04 95 00 00 00 00 | *** | r8  | 4     | r10   | 4e 8d 04 95 00 00 00 00 |
+        | rcx | 4     | rbx   | 48 8d 0c 9d 00 00 00 00 | *** | r9  | 4     | r11   | 4e 8d 0c 9d 00 00 00 00 |
+        | rdx | 4     | rsp   | !! !! !! !! !! !! !! !! | *** | r10 | 4     | r12   | 4e 8d 14 a5 00 00 00 00 |
+        | rbx | 4     | rbp   | 48 8d 1c ad 00 00 00 00 | *** | r11 | 4     | r13   | 4e 8d 1c ad 00 00 00 00 |
+        | rsp | 4     | rsi   | 48 8d 24 b5 00 00 00 00 | *** | r12 | 4     | r14   | 4e 8d 24 b5 00 00 00 00 |
+        | rbp | 4     | rdi   | 48 8d 2c bd 00 00 00 00 | *** | r13 | 4     | r15   | 4e 8d 2c bd 00 00 00 00 |
+        | rsi | 4     | r8    | 4a 8d 34 85 00 00 00 00 | *** | r14 | 4     | rax   | 4c 8d 34 85 00 00 00 00 |
+        | rdi | 4     | r9    | 4a 8d 3c 8d 00 00 00 00 | *** | r15 | 4     | rcx   | 4c 8d 3c 8d 00 00 00 00 |
+        | --- | ----- | ----- | ----------------------- | --- | --- | ----- | ----- | ----------------------- |
+        | rax | 8     | rdx   | 48 8d 04 d5 00 00 00 00 | *** | r8  | 8     | r10   | 4e 8d 04 d5 00 00 00 00 |
+        | rcx | 8     | rbx   | 48 8d 0c dd 00 00 00 00 | *** | r9  | 8     | r11   | 4e 8d 0c dd 00 00 00 00 |
+        | rdx | 8     | rsp   | !! !! !! !! !! !! !! !! | *** | r10 | 8     | r12   | 4e 8d 14 e5 00 00 00 00 |
+        | rbx | 8     | rbp   | 48 8d 1c ed 00 00 00 00 | *** | r11 | 8     | r13   | 4e 8d 1c ed 00 00 00 00 |
+        | rsp | 8     | rsi   | 48 8d 24 f5 00 00 00 00 | *** | r12 | 8     | r14   | 4e 8d 24 f5 00 00 00 00 |
+        | rbp | 8     | rdi   | 48 8d 2c fd 00 00 00 00 | *** | r13 | 8     | r15   | 4e 8d 2c fd 00 00 00 00 |
+        | rsi | 8     | r8    | 4a 8d 34 c5 00 00 00 00 | *** | r14 | 8     | rax   | 4c 8d 34 c5 00 00 00 00 |
+        | rdi | 8     | r9    | 4a 8d 3c cd 00 00 00 00 | *** | r15 | 8     | rcx   | 4c 8d 3c cd 00 00 00 00 |
+        | --- | ----- | ----- | ----------------------- | --- | --- | ----- | ----- | ----------------------- |
+    """
+)
+def can_encode_instructions_lea_reg64_index_disp0(
+    dst: str, scale: ScaleValue, index: str, encoding: Optional[bytes]
+):
+    flow: List[Instruction] = [
+        LeaReg64Mem(
+            dst=Register.parse64(dst),
+            addr=Address(
+                base=Register.none(),
+                disp=Displacement.none(),
+                scaler=Scaler(
+                    scale=scale,
+                    index=Register.parse64(index),
+                ),
+            ),
+        ),
+    ]
+
+    try:
+        assert encode(flow) == encoding
+    except UnreachableEncodingError:
+        assert encoding is None
+
+
+@samples(
+    """
         | --- | ---- | ----- | ----- | -------------- | --- | --- | ---- | ----- | ----- | -------------- |
         | dst | base | scale | index | encoding       | *** | dst | base | scale | index | encoding       |
         | --- | ---- | ----- | ----- | -------------- | --- | --- | ---- | ----- | ----- | -------------- |
         | rax | rsp  | 1     | rdx   | 48 8d 04 14    | *** | r8  | r12  | 1     | r10   | 4f 8d 04 14    |
         | rcx | rbp  | 1     | rbx   | 48 8d 4c 1d 00 | *** | r9  | r13  | 1     | r11   | 4f 8d 4c 1d 00 |
-        | rdx | rsi  | 1     | rsp   | !! !! !! !!    | *** | r10 | r14  | 1     | r12   | !! !! !! !!    |
+        | rdx | rsi  | 1     | rsp   | !! !! !! !!    | *** | r10 | r14  | 1     | r12   | 4f 8d 14 26    |
         | rbx | rdi  | 1     | rbp   | 48 8d 1c 2f    | *** | r11 | r15  | 1     | r13   | 4f 8d 1c 2f    |
         | rsp | r8   | 1     | rsi   | 49 8d 24 30    | *** | r12 | rax  | 1     | r14   | 4e 8d 24 30    |
         | rbp | r9   | 1     | rdi   | 49 8d 2c 39    | *** | r13 | rcx  | 1     | r15   | 4e 8d 2c 39    |
@@ -61,7 +127,7 @@ def can_encode_instructions_lea_reg64_base_disp0(dst: str, base: str, encoding: 
         | --- | ---- | ----- | ----- | -------------- | --- | --- | ---- | ----- | ----- | -------------- |
         | rax | rsp  | 2     | rdx   | 48 8d 04 54    | *** | r8  | r12  | 2     | r10   | 4f 8d 04 54    |
         | rcx | rbp  | 2     | rbx   | 48 8d 4c 5d 00 | *** | r9  | r13  | 2     | r11   | 4f 8d 4c 5d 00 |
-        | rdx | rsi  | 2     | rsp   | !! !! !! !!    | *** | r10 | r14  | 2     | r12   | !! !! !! !!    |
+        | rdx | rsi  | 2     | rsp   | !! !! !! !!    | *** | r10 | r14  | 2     | r12   | 4f 8d 14 66    |
         | rbx | rdi  | 2     | rbp   | 48 8d 1c 6f    | *** | r11 | r15  | 2     | r13   | 4f 8d 1c 6f    |
         | rsp | r8   | 2     | rsi   | 49 8d 24 70    | *** | r12 | rax  | 2     | r14   | 4e 8d 24 70    |
         | rbp | r9   | 2     | rdi   | 49 8d 2c 79    | *** | r13 | rcx  | 2     | r15   | 4e 8d 2c 79    |
@@ -70,7 +136,7 @@ def can_encode_instructions_lea_reg64_base_disp0(dst: str, base: str, encoding: 
         | --- | ---- | ----- | ----- | -------------- | --- | --- | ---- | ----- | ----- | -------------- |
         | rax | rsp  | 4     | rdx   | 48 8d 04 94    | *** | r8  | r12  | 4     | r10   | 4f 8d 04 94    |
         | rcx | rbp  | 4     | rbx   | 48 8d 4c 9d 00 | *** | r9  | r13  | 4     | r11   | 4f 8d 4c 9d 00 |
-        | rdx | rsi  | 4     | rsp   | !! !! !! !!    | *** | r10 | r14  | 4     | r12   | !! !! !! !!    |
+        | rdx | rsi  | 4     | rsp   | !! !! !! !!    | *** | r10 | r14  | 4     | r12   | 4f 8d 14 a6    |
         | rbx | rdi  | 4     | rbp   | 48 8d 1c af    | *** | r11 | r15  | 4     | r13   | 4f 8d 1c af    |
         | rsp | r8   | 4     | rsi   | 49 8d 24 b0    | *** | r12 | rax  | 4     | r14   | 4e 8d 24 b0    |
         | rbp | r9   | 4     | rdi   | 49 8d 2c b9    | *** | r13 | rcx  | 4     | r15   | 4e 8d 2c b9    |
@@ -79,7 +145,7 @@ def can_encode_instructions_lea_reg64_base_disp0(dst: str, base: str, encoding: 
         | --- | ---- | ----- | ----- | -------------- | --- | --- | ---- | ----- | ----- | -------------- |
         | rax | rsp  | 8     | rdx   | 48 8d 04 d4    | *** | r8  | r12  | 8     | r10   | 4f 8d 04 d4    |
         | rcx | rbp  | 8     | rbx   | 48 8d 4c dd 00 | *** | r9  | r13  | 8     | r11   | 4f 8d 4c dd 00 |
-        | rdx | rsi  | 8     | rsp   | !! !! !! !!    | *** | r10 | r14  | 8     | r12   | !! !! !! !!    |
+        | rdx | rsi  | 8     | rsp   | !! !! !! !!    | *** | r10 | r14  | 8     | r12   | 4f 8d 14 e6    |
         | rbx | rdi  | 8     | rbp   | 48 8d 1c ef    | *** | r11 | r15  | 8     | r13   | 4f 8d 1c ef    |
         | rsp | r8   | 8     | rsi   | 49 8d 24 f0    | *** | r12 | rax  | 8     | r14   | 4e 8d 24 f0    |
         | rbp | r9   | 8     | rdi   | 49 8d 2c f9    | *** | r13 | rcx  | 8     | r15   | 4e 8d 2c f9    |

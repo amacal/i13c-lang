@@ -15,13 +15,13 @@ def encode_lea_reg_off(
 
     # encoded as: [rex?] [opcode] [modrm] [sib?] [disp8/32?]
 
-    if instruction.addr.scaler.uses_rsp_r12():
+    if instruction.addr.scaler.uses_rsp():
         raise UnreachableEncodingError()
 
     sib = SIB(
         scale=instruction.addr.scaler.scale_offset(),
         index=instruction.addr.scaler.index_or_none(),
-        base=instruction.addr.base.id,
+        base=instruction.addr.base.value_or_none(),
     )
 
     if instruction.addr.disp.width == 0 and instruction.addr.base.low3bits() != 5:
@@ -33,6 +33,9 @@ def encode_lea_reg_off(
     else:
         mod = 0b10
         disp_width = 4
+
+    if not instruction.addr.base.is_available():
+        disp_width = max(disp_width, 4)
 
     modrm = ModRM(
         mod=mod,
