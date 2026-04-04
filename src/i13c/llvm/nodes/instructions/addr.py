@@ -4,7 +4,7 @@ from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
 from i13c.llvm.typing.instructions.addr import LeaReg32Mem, LeaReg64Mem
-from i13c.llvm.typing.instructions.core import Address as Addr
+from i13c.llvm.typing.instructions.core import ComputedAddress
 from i13c.llvm.typing.instructions.core import Displacement as Disp
 from i13c.llvm.typing.instructions.core import Register as Reg
 from i13c.llvm.typing.instructions.core import Scaler
@@ -30,7 +30,7 @@ def lower_reg32_addr(
         InstructionId(value=generator.next()),
         LeaReg32Mem(
             dst=Reg.parse32(destination.name.decode()),
-            addr=Addr(
+            addr=ComputedAddress(
                 base=Reg.parse64(source.base.name.decode()),
                 disp=Disp.auto(source.offset),
                 scaler=Scaler.none(),
@@ -48,7 +48,7 @@ def lower_reg64_addr(
         InstructionId(value=generator.next()),
         LeaReg64Mem(
             dst=Reg.parse64(destination.name.decode()),
-            addr=Addr(
+            addr=ComputedAddress(
                 base=Reg.parse64(source.base.name.decode()),
                 disp=Disp.auto(source.offset),
                 scaler=Scaler.none(),

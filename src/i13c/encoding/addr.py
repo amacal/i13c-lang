@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 from i13c.encoding.core import (
+    Address,
     LabelArtifact,
     RelocationArtifact,
     UnreachableEncodingError,
@@ -13,34 +14,35 @@ def encode_lea_reg_off(
     instruction: LeaInstruction, bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
-    # encoded as: [rex?] [opcode] [modrm] [sib?] [disp8/32?]
-
-    if instruction.addr.scaler.uses_rsp():
+    if Address.index_uses_rsp(instruction.addr):
         raise UnreachableEncodingError()
 
     sib = SIB(
-        scale=instruction.addr.scaler.scale_offset(),
-        index=instruction.addr.scaler.index_or_none(),
-        base=instruction.addr.base.value_or_none(),
+        scale=Address.scale_offset(instruction.addr),
+        index=Address.index_or_none(instruction.addr),
+        base=Address.base_or_none(instruction.addr),
     )
 
-    if instruction.addr.disp.width == 0 and instruction.addr.base.low3bits() != 5:
-        mod = 0b00
+    if Address.is_relative(instruction.addr):
+        modrm_mod = 0b00
+        disp_width = 4
+    elif instruction.addr.disp.width == 0 and not Address.base_uses_rbp_r13(instruction.addr):
+        modrm_mod = 0b00
         disp_width = 0
     elif instruction.addr.disp.width <= 8:  # disp0 with rbp/r13 or disp8
-        mod = 0b01
+        modrm_mod = 0b01
         disp_width = 1
     else:
-        mod = 0b10
+        modrm_mod = 0b10
         disp_width = 4
 
-    if not instruction.addr.base.is_available():
+    if not Address.base_is_available(instruction.addr):
         disp_width = max(disp_width, 4)
 
     modrm = ModRM(
-        mod=mod,
+        mod=modrm_mod,
         reg=instruction.dst.id,
-        rm=sib.mod_rm(),
+        rm=0b101 if Address.is_relative(instruction.addr) else sib.mod_rm(),
     )
 
     rex = REX(

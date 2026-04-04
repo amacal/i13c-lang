@@ -168,7 +168,7 @@ class Scaler:
     def is_available(self) -> bool:
         return self.index.is_available()
 
-    def uses_rsp(self) -> bool:
+    def index_uses_rsp(self) -> bool:
         return self.index.id in (4,)
 
     def index_or_none(self) -> Optional[int]:
@@ -182,10 +182,21 @@ class Scaler:
 
 
 @dataclass(kw_only=True)
-class Address:
+class ComputedAddress:
     base: Register
     disp: Displacement
     scaler: Scaler
 
     def __str__(self) -> str:
         return f"[{self.base}{self.scaler}{self.disp}]"
+
+
+@dataclass(kw_only=True)
+class RelativeAddress:
+    disp: Displacement
+
+    def __str__(self) -> str:
+        return f"[rip{self.disp}]"
+
+
+Address = Union[ComputedAddress, RelativeAddress]

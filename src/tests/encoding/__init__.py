@@ -4,11 +4,18 @@ from pytest import mark
 
 
 def parse_value(header: str, value: str) -> Union[str, int]:
-    return (
-        int(value, 16)
-        if header in ("imm8", "imm32", "imm64", "disp8", "disp32")
-        else value
-    )
+    if header in ("imm8", "imm32", "imm64"):
+        return int(value, 16)
+
+    if header == "disp8":
+        x = int(value, 16)
+        return x if x < 0x80 else x - 0x100
+
+    if header == "disp32":
+        x = int(value, 16)
+        return x if x < 0x80000000 else x - 0x100000000
+
+    return value
 
 
 def parse_encoding(value: str) -> Optional[bytes]:

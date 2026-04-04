@@ -70,6 +70,10 @@ class SIB:
     scale: int
     index: Optional[int]
 
+    @staticmethod
+    def none() -> SIB:
+        return SIB(base=None, scale=0, index=None)
+
     def rex_x(self) -> bool:
         return self.index is not None and ((self.index >> 3) & 0x1) == 0x1
 
@@ -82,6 +86,9 @@ class SIB:
     def mod_rm(self) -> int:
         return 0x04 if self.is_required() or self.base is None else self.base & 0x07
 
+    def base_bits(self) -> int:
+        return self.base & 0x07 if self.base is not None else 0
+
     def to_bytes(self) -> bytes:
         if not self.is_required():
             return bytes([])
@@ -90,7 +97,7 @@ class SIB:
         if self.base is None:
             base_bits = 0b101
         else:
-            base_bits = self.base & 0x07
+            base_bits = self.base_bits()
 
         # encode optional index and scale
         if self.index is None:
