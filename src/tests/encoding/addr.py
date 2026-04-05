@@ -3,7 +3,7 @@ from typing import List, Optional
 from i13c.encoding import encode
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.llvm.typing.instructions import Instruction
-from i13c.llvm.typing.instructions.addr import LeaReg32Mem, LeaReg64Mem
+from i13c.llvm.typing.instructions.addr import LeaInstruction
 from i13c.llvm.typing.instructions.core import (
     ComputedAddress,
     Displacement,
@@ -33,9 +33,10 @@ from tests.encoding import samples
 )
 def can_encode_instructions_lea_reg64_base_disp0(dst: str, base: str, encoding: bytes):
     flow: List[Instruction] = [
-        LeaReg64Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse64(dst),
-            addr=ComputedAddress(
+            src=ComputedAddress(
                 base=Register.parse64(base),
                 disp=Displacement.none(),
                 scaler=Scaler.none(),
@@ -93,9 +94,10 @@ def can_encode_instructions_lea_reg64_index_disp0(
     dst: str, scale: ScaleValue, index: str, encoding: Optional[bytes]
 ):
     flow: List[Instruction] = [
-        LeaReg64Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse64(dst),
-            addr=ComputedAddress(
+            src=ComputedAddress(
                 base=Register.none(),
                 disp=Displacement.none(),
                 scaler=Scaler(
@@ -159,9 +161,10 @@ def can_encode_instructions_lea_reg64_base_index_disp0(
     dst: str, base: str, scale: ScaleValue, index: str, encoding: Optional[bytes]
 ):
     flow: List[Instruction] = [
-        LeaReg64Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse64(dst),
-            addr=ComputedAddress(
+            src=ComputedAddress(
                 base=Register.parse64(base),
                 disp=Displacement.none(),
                 scaler=Scaler(
@@ -198,9 +201,10 @@ def can_encode_instructions_lea_reg64_base_disp8(
     dst: str, base: str, disp8: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg64Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse64(dst),
-            addr=ComputedAddress(
+            src=ComputedAddress(
                 base=Register.parse64(base),
                 disp=Displacement.auto(disp8),
                 scaler=Scaler.none(),
@@ -231,9 +235,10 @@ def can_encode_instructions_lea_reg64_base_disp32(
     dst: str, base: str, disp32: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg64Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse64(dst),
-            addr=ComputedAddress(
+            src=ComputedAddress(
                 base=Register.parse64(base),
                 disp=Displacement.auto(disp32),
                 scaler=Scaler.none(),
@@ -264,9 +269,10 @@ def can_encode_instructions_lea_reg64_rip_disp32(
     dst: str, disp32: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg64Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse64(dst),
-            addr=RelativeAddress(
+            src=RelativeAddress(
                 disp=Displacement.auto(disp32),
             )
         ),
@@ -292,9 +298,10 @@ def can_encode_instructions_lea_reg64_rip_disp32(
 )
 def can_encode_instructions_lea_reg32_base_disp0(dst: str, base: str, encoding: bytes):
     flow: List[Instruction] = [
-        LeaReg32Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse32(dst),
-            addr=ComputedAddress(
+            src=ComputedAddress(
                 base=Register.parse64(base),
                 disp=Displacement.none(),
                 scaler=Scaler.none(),
@@ -325,9 +332,10 @@ def can_encode_instructions_lea_reg32_base_disp8(
     dst: str, base: str, disp8: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg32Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse32(dst),
-            addr=ComputedAddress(
+            src=ComputedAddress(
                 base=Register.parse64(base),
                 disp=Displacement.auto(disp8),
                 scaler=Scaler.none(),
@@ -358,9 +366,10 @@ def can_encode_instructions_lea_reg32_base_disp32(
     dst: str, base: str, disp32: int, encoding: bytes
 ):
     flow: List[Instruction] = [
-        LeaReg32Mem(
+        LeaInstruction(
+            kind="op+mod+reg",
             dst=Register.parse32(dst),
-            addr=ComputedAddress(
+            src=ComputedAddress(
                 base=Register.parse64(base),
                 disp=Displacement.auto(disp32),
                 scaler=Scaler.none(),

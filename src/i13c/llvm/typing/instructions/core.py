@@ -140,8 +140,14 @@ class Register:
     def low3bits(self) -> int:
         return self.id & 0x07
 
+    def high4bit(self) -> int:
+        return self.id & 0x08
+
     def high_bit(self) -> bool:
         return ((self.id >> 3) & 0x01) == 0x01
+
+    def is_64bit(self) -> bool:
+        return self.width == "64bit"
 
     def __str__(self) -> str:
         if self.width in ("low", "high", "8bit"):
@@ -200,3 +206,15 @@ class RelativeAddress:
 
 
 Address = Union[ComputedAddress, RelativeAddress]
+
+EncodingKind = Kind[
+    "op",
+    "op+imm",
+    "op+reg",
+    "op+reg+imm",
+    "op+mod+reg",
+    "op+mod+ext",
+    "op+mod+reg+imm",
+    "op+mod+ext+imm",
+    "op+rel",
+]

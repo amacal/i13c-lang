@@ -1,25 +1,13 @@
 from dataclasses import dataclass
-from typing import Union
 
-from i13c.llvm.typing.instructions.core import Address, Register
-
-
-@dataclass(kw_only=True)
-class LeaReg32Mem:
-    dst: Register
-    addr: Address
-
-    def native(self) -> str:
-        return f"lea {self.dst}, {self.addr}"
+from i13c.llvm.typing.instructions.core import Address, EncodingKind, Register
 
 
 @dataclass(kw_only=True)
-class LeaReg64Mem:
+class LeaInstruction:
+    kind: EncodingKind
     dst: Register
-    addr: Address
+    src: Address
 
     def native(self) -> str:
-        return f"lea {self.dst}, {self.addr}"
-
-
-LeaInstruction = Union[LeaReg32Mem, LeaReg64Mem]
+        return f"lea {self.dst}, {self.src}"

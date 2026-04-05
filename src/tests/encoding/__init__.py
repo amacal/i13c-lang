@@ -4,7 +4,7 @@ from pytest import mark
 
 
 def parse_value(header: str, value: str) -> Union[str, int]:
-    if header in ("imm8", "imm32", "imm64"):
+    if header in ("imm8", "imm32", "imm64", "scale"):
         return int(value, 16)
 
     if header == "disp8":
