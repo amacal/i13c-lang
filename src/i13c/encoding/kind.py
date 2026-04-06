@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Optional, Protocol, Union
 
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.llvm.typing.instructions import core as llvm
 
 RegisterOrAddress = Union[llvm.Register, llvm.ComputedAddress, llvm.RelativeAddress]
+RegisterOrConstant = Union[llvm.Register, int]
 
 
 @dataclass(kw_only=True)
@@ -54,6 +55,91 @@ class OpCodeEncoding:
     opcode_reg: int
 
 
+@dataclass(kw_only=True)
+class RexEncoding:
+    h: int
+    w: int
+    r: int
+    x: int
+    b: int
+
+    @staticmethod
+    def default() -> RexEncoding:
+        return RexEncoding(
+            h=0x00,
+            w=0b0000,
+            r=0b0000,
+            x=0b0000,
+            b=0b0000,
+        )
+
+    def get_bits(self) -> int:
+        return self.h | self.w | self.r | self.x | self.b
+
+    def is_required(self) -> bool:
+        return self.get_bits() > 0
+
+
+class ModRegToRex(Protocol):
+    rex_w: int
+    rex_r: int
+    modrm_reg: int
+
+
+class ModRmToRex(Protocol):
+    rex_x: int
+    rex_b: int
+
+
+class OpCodeToRex(Protocol):
+    rex_w: int
+    rex_b: int
+
+
+@dataclass(kw_only=True)
+class PrefixEncoding:
+    operand_override: int
+
+
+def encode_prefixes(instruction: llvm.Register) -> PrefixEncoding:
+    return PrefixEncoding(
+        operand_override=0x66 if instruction.is_16bit() else 0x00,
+    )
+
+
+def encode_rex(
+    reg: llvm.Register,
+    /,
+    modrm_reg: Optional[ModRegToRex] = None,
+    modrm_rm: Optional[ModRmToRex] = None,
+    opcode_reg: Optional[OpCodeToRex] = None,
+) -> RexEncoding:
+    rex = RexEncoding.default()
+
+    if reg.is_64bit():
+        rex.w |= 0b1000
+        rex.h |= 0x40
+
+    if reg.is_low8bit() and reg.id in (4, 5, 6, 7):
+        rex.h |= 0x40
+
+    if modrm_reg is not None:
+        rex.r |= modrm_reg.rex_r
+
+    if modrm_rm is not None:
+        rex.x |= modrm_rm.rex_x
+        rex.b |= modrm_rm.rex_b
+
+    if opcode_reg is not None:
+        rex.w |= opcode_reg.rex_w
+        rex.b |= opcode_reg.rex_b
+
+    if rex.get_bits():
+        rex.h |= 0x40
+
+    return rex
+
+
 def encode_opcode_reg(reg: llvm.Register) -> OpCodeEncoding:
     return OpCodeEncoding(
         rex_w=0b1000 if reg.is_64bit() else 0b0000,
@@ -62,11 +148,18 @@ def encode_opcode_reg(reg: llvm.Register) -> OpCodeEncoding:
     )
 
 
-def encode_modrm_reg(reg: llvm.Register) -> ModRegEncoding:
+def encode_modrm_reg(reg: RegisterOrConstant) -> ModRegEncoding:
+    if isinstance(reg, llvm.Register):
+        return ModRegEncoding(
+            rex_w=0b1000 if reg.is_64bit() else 0b0000,
+            rex_r=0b0100 if reg.high_bit() else 0b0000,
+            modrm_reg=reg.low3bits(),
+        )
+
     return ModRegEncoding(
-        rex_w=0b1000 if reg.is_64bit() else 0b0000,
-        rex_r=0b0100 if reg.high_bit() else 0b0000,
-        modrm_reg=reg.low3bits(),
+        rex_w=0b0000,
+        rex_r=0b0000,
+        modrm_reg=reg & 0x07,
     )
 
 
@@ -137,30 +230,14 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
     return encoding
 
 
-def write_rex(
-    bytecode: bytearray,
-    /,
-    force: bool = False,
-    modrm_reg: Optional[ModRegEncoding] = None,
-    modrm_rm: Optional[ModRMEncoding] = None,
-    opcode_reg: Optional[OpCodeEncoding] = None,
-) -> None:
-    bits = 0x00
+def write_prefixes(bytecode: bytearray, prefixes: PrefixEncoding) -> None:
+    if prefixes.operand_override:
+        bytecode.append(prefixes.operand_override)
 
-    # append REX.W and REX.R bits from ModRegEncoding if present
-    if modrm_reg is not None:
-        bits |= modrm_reg.rex_w | modrm_reg.rex_r
 
-    # append REX.X and REX.B bits from ModRMEncoding if present
-    if modrm_rm is not None:
-        bits |= modrm_rm.rex_x | modrm_rm.rex_b
-
-    # append REX.W and REX.B bits from OpCodeEncoding if present
-    if opcode_reg is not None:
-        bits |= opcode_reg.rex_w | opcode_reg.rex_b
-
-    if bits or force:
-        bytecode.append(0x40 | bits)
+def write_rex(bytecode: bytearray, rex: RexEncoding) -> None:
+    if rex.is_required():
+        bytecode.append(rex.get_bits())
 
 
 def write_modrm(
@@ -203,3 +280,16 @@ def write_opcode(
 
     # opcode is blindly encoded as big-endian, because we human provide it this way
     bytecode.extend(opcode_value.to_bytes(opcode_length, byteorder="big", signed=False))
+
+
+def write_immediate(
+    bytecode: bytearray,
+    imm: llvm.Immediate,
+    /,
+    condition: bool = True,
+    signed: bool = False,
+) -> None:
+    if condition:
+        bytecode.extend(
+            imm.value.to_bytes(imm.width // 8, byteorder="little", signed=signed)
+        )

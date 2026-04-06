@@ -146,6 +146,18 @@ class Register:
     def high_bit(self) -> bool:
         return ((self.id >> 3) & 0x01) == 0x01
 
+    def is_low8bit(self) -> bool:
+        return self.width == "low"
+
+    def is_8bit(self) -> bool:
+        return self.width in ("low", "high", "8bit")
+
+    def is_16bit(self) -> bool:
+        return self.width == "16bit"
+
+    def is_32bit(self) -> bool:
+        return self.width == "32bit"
+
     def is_64bit(self) -> bool:
         return self.width == "64bit"
 

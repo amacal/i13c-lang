@@ -27,9 +27,12 @@ def parse_samples(
 ) -> Tuple[Sequence[str], Iterable[Sequence[Union[int, str, Optional[bytes]]]]]:
     rows: List[Sequence[Union[int, str, Optional[bytes]]]] = []
     lines = [line.strip("|\n ") for line in table.splitlines()[2:-1]]
-
     headers = [h.strip().lower() for h in lines[0].split("|")]
-    separator = headers.index("***")
+
+    try:
+        separator = headers.index("***")
+    except ValueError:
+        separator = len(headers)
 
     for line in [line for line in lines[2:-1] if "-" not in line]:
         parts = [p.strip() for p in line.split("|")]
@@ -40,10 +43,11 @@ def parse_samples(
             + [parse_encoding(left[separator - 1])]
         )
 
-        rows.append(
-            [parse_value(headers[i], right[i]) for i in range(separator - 1)]
-            + [parse_encoding(right[separator - 1])]
-        )
+        if separator < len(parts):
+            rows.append(
+                [parse_value(headers[i], right[i]) for i in range(separator - 1)]
+                + [parse_encoding(right[separator - 1])]
+            )
 
     return (headers[:separator], rows)
 

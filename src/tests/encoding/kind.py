@@ -6,6 +6,18 @@ from i13c.llvm.typing.instructions import core as llvm
 from tests.encoding import samples
 
 
+def format_rex(rex: kind.RexEncoding) -> str:
+    data = [
+        rex.h,
+        rex.w,
+        rex.r,
+        rex.x,
+        rex.b,
+    ]
+
+    return bytearray(data).hex(" ")
+
+
 def format_opcode_reg(reg: kind.OpCodeEncoding) -> str:
     data = [
         reg.rex_w,
@@ -40,6 +52,97 @@ def format_modrm_rm(rm: kind.ModRMEncoding) -> str:
     ]
 
     return bytearray(data).hex(" ")
+
+
+@samples(
+    """
+        | --- | -------------- | --- | --- | -------------- |
+        | reg | encoding       | *** | reg | encoding       |
+        | --- | -------------- | --- | --- | -------------- |
+        | rax | 40 08 00 00 00 | *** | r8  | 40 08 00 00 00 |
+        | rcx | 40 08 00 00 00 | *** | r9  | 40 08 00 00 00 |
+        | rdx | 40 08 00 00 00 | *** | r10 | 40 08 00 00 00 |
+        | rbx | 40 08 00 00 00 | *** | r11 | 40 08 00 00 00 |
+        | rsp | 40 08 00 00 00 | *** | r12 | 40 08 00 00 00 |
+        | rbp | 40 08 00 00 00 | *** | r13 | 40 08 00 00 00 |
+        | rsi | 40 08 00 00 00 | *** | r14 | 40 08 00 00 00 |
+        | rdi | 40 08 00 00 00 | *** | r15 | 40 08 00 00 00 |
+        | --- | -------------- | --- | --- | -------------- |
+    """
+)
+def can_encode_rex_reg64(reg: str, encoding: bytes):
+    rex = kind.encode_rex(llvm.Register.parse64(reg))
+
+    assert format_rex(rex) == encoding.hex(" ")
+
+
+@samples(
+    """
+        | --- | -------------- | --- | ---- | -------------- |
+        | reg | encoding       | *** | reg  | encoding       |
+        | --- | -------------- | --- | ---- | -------------- |
+        | eax | 00 00 00 00 00 | *** | r8d  | 00 00 00 00 00 |
+        | ecx | 00 00 00 00 00 | *** | r9d  | 00 00 00 00 00 |
+        | edx | 00 00 00 00 00 | *** | r10d | 00 00 00 00 00 |
+        | ebx | 00 00 00 00 00 | *** | r11d | 00 00 00 00 00 |
+        | esp | 00 00 00 00 00 | *** | r12d | 00 00 00 00 00 |
+        | ebp | 00 00 00 00 00 | *** | r13d | 00 00 00 00 00 |
+        | esi | 00 00 00 00 00 | *** | r14d | 00 00 00 00 00 |
+        | edi | 00 00 00 00 00 | *** | r15d | 00 00 00 00 00 |
+        | --- | -------------- | --- | ---- | -------------- |
+    """
+)
+def can_encode_rex_reg32(reg: str, encoding: bytes):
+    rex = kind.encode_rex(llvm.Register.parse32(reg))
+
+    assert format_rex(rex) == encoding.hex(" ")
+
+
+@samples(
+    """
+        | --- | -------------- | --- | ---- | -------------- |
+        | reg | encoding       | *** | reg  | encoding       |
+        | --- | -------------- | --- | ---- | -------------- |
+        | ax  | 00 00 00 00 00 | *** | r8w  | 00 00 00 00 00 |
+        | cx  | 00 00 00 00 00 | *** | r9w  | 00 00 00 00 00 |
+        | dx  | 00 00 00 00 00 | *** | r10w | 00 00 00 00 00 |
+        | bx  | 00 00 00 00 00 | *** | r11w | 00 00 00 00 00 |
+        | sp  | 00 00 00 00 00 | *** | r12w | 00 00 00 00 00 |
+        | bp  | 00 00 00 00 00 | *** | r13w | 00 00 00 00 00 |
+        | si  | 00 00 00 00 00 | *** | r14w | 00 00 00 00 00 |
+        | di  | 00 00 00 00 00 | *** | r15w | 00 00 00 00 00 |
+        | --- | -------------- | --- | ---- | -------------- |
+    """
+)
+def can_encode_rex_reg16(reg: str, encoding: bytes):
+    rex = kind.encode_rex(llvm.Register.parse16(reg))
+
+    assert format_rex(rex) == encoding.hex(" ")
+
+
+@samples(
+    """
+        | --- | -------------- | --- | ---- | -------------- |
+        | reg | encoding       | *** | reg  | encoding       |
+        | --- | -------------- | --- | ---- | -------------- |
+        | al  | 00 00 00 00 00 | *** | r8b  | 00 00 00 00 00 |
+        | cl  | 00 00 00 00 00 | *** | r9b  | 00 00 00 00 00 |
+        | dl  | 00 00 00 00 00 | *** | r10b | 00 00 00 00 00 |
+        | bl  | 00 00 00 00 00 | *** | r11b | 00 00 00 00 00 |
+        | spl | 40 00 00 00 00 | *** | r12b | 00 00 00 00 00 |
+        | bpl | 40 00 00 00 00 | *** | r13b | 00 00 00 00 00 |
+        | sil | 40 00 00 00 00 | *** | r14b | 00 00 00 00 00 |
+        | dil | 40 00 00 00 00 | *** | r15b | 00 00 00 00 00 |
+        | --- | -------------- | --- | ---- | -------------- |
+        | ah  | 00 00 00 00 00 | *** | ch   | 00 00 00 00 00 |
+        | dh  | 00 00 00 00 00 | *** | bh   | 00 00 00 00 00 |
+        | --- | -------------- | --- | ---- | -------------- |
+    """
+)
+def can_encode_rex_reg8(reg: str, encoding: bytes):
+    rex = kind.encode_rex(llvm.Register.parse8(reg))
+
+    assert format_rex(rex) == encoding.hex(" ")
 
 
 @samples(
@@ -104,7 +207,7 @@ def can_encode_opcode_reg32(reg: str, encoding: bytes):
         | --- | -------- | --- | --- | -------- |
     """
 )
-def can_encode_modrm_reg64(reg: str, encoding: bytes):
+def can_encode_modrm_reg_reg64(reg: str, encoding: bytes):
     reg64 = llvm.Register.parse64(reg)
     modrm_reg = kind.encode_modrm_reg(reg64)
 
@@ -127,9 +230,31 @@ def can_encode_modrm_reg64(reg: str, encoding: bytes):
         | --- | -------- | --- | ---- | -------- |
     """
 )
-def can_encode_modrm_reg32(reg: str, encoding: bytes):
+def can_encode_modrm_reg_reg32(reg: str, encoding: bytes):
     reg32 = llvm.Register.parse32(reg)
     modrm_reg = kind.encode_modrm_reg(reg32)
+
+    assert format_modrm_reg(modrm_reg) == encoding.hex(" ")
+
+
+@samples(
+    """
+        | ---- | -------- |
+        | imm8 | encoding |
+        | ---- | -------- |
+        | 0x00 | 00 00 00 |
+        | 0x01 | 00 00 01 |
+        | 0x02 | 00 00 02 |
+        | 0x03 | 00 00 03 |
+        | 0x04 | 00 00 04 |
+        | 0x05 | 00 00 05 |
+        | 0x06 | 00 00 06 |
+        | 0x07 | 00 00 07 |
+        | ---- | -------- |
+    """
+)
+def can_encode_modrm_reg_constant(imm8: int, encoding: bytes):
+    modrm_reg = kind.encode_modrm_reg(imm8)
 
     assert format_modrm_reg(modrm_reg) == encoding.hex(" ")
 
