@@ -6,6 +6,16 @@ from i13c.llvm.typing.instructions import core as llvm
 from tests.encoding import samples
 
 
+def format_opcode_reg(reg: kind.OpCodeEncoding) -> str:
+    data = [
+        reg.rex_w,
+        reg.rex_b,
+        reg.opcode_reg,
+    ]
+
+    return bytearray(data).hex(" ")
+
+
 def format_modrm_reg(reg: kind.ModRegEncoding) -> str:
     data = [
         reg.rex_w,
@@ -30,6 +40,52 @@ def format_modrm_rm(rm: kind.ModRMEncoding) -> str:
     ]
 
     return bytearray(data).hex(" ")
+
+
+@samples(
+    """
+        | --- | -------- | --- | --- | -------- |
+        | reg | encoding | *** | reg | encoding |
+        | --- | -------- | --- | --- | -------- |
+        | rax | 08 00 00 | *** | r8  | 08 01 00 |
+        | rcx | 08 00 01 | *** | r9  | 08 01 01 |
+        | rdx | 08 00 02 | *** | r10 | 08 01 02 |
+        | rbx | 08 00 03 | *** | r11 | 08 01 03 |
+        | rsp | 08 00 04 | *** | r12 | 08 01 04 |
+        | rbp | 08 00 05 | *** | r13 | 08 01 05 |
+        | rsi | 08 00 06 | *** | r14 | 08 01 06 |
+        | rdi | 08 00 07 | *** | r15 | 08 01 07 |
+        | --- | -------- | --- | --- | -------- |
+    """
+)
+def can_encode_opcode_reg64(reg: str, encoding: bytes):
+    reg64 = llvm.Register.parse64(reg)
+    opcode_reg = kind.encode_opcode_reg(reg64)
+
+    assert format_opcode_reg(opcode_reg) == encoding.hex(" ")
+
+
+@samples(
+    """
+        | --- | -------- | --- | ---- | -------- |
+        | reg | encoding | *** | reg  | encoding |
+        | --- | -------- | --- | ---- | -------- |
+        | eax | 00 00 00 | *** | r8d  | 00 01 00 |
+        | ecx | 00 00 01 | *** | r9d  | 00 01 01 |
+        | edx | 00 00 02 | *** | r10d | 00 01 02 |
+        | ebx | 00 00 03 | *** | r11d | 00 01 03 |
+        | esp | 00 00 04 | *** | r12d | 00 01 04 |
+        | ebp | 00 00 05 | *** | r13d | 00 01 05 |
+        | esi | 00 00 06 | *** | r14d | 00 01 06 |
+        | edi | 00 00 07 | *** | r15d | 00 01 07 |
+        | --- | -------- | --- | ---- | -------- |
+    """
+)
+def can_encode_opcode_reg32(reg: str, encoding: bytes):
+    reg32 = llvm.Register.parse32(reg)
+    opcode_reg = kind.encode_opcode_reg(reg32)
+
+    assert format_opcode_reg(opcode_reg) == encoding.hex(" ")
 
 
 @samples(

@@ -12,6 +12,6 @@ def encode_lea_reg_off(
     modrm_reg = kind.encode_modrm_reg(instruction.dst)
     modrm_rm = kind.encode_modrm_rm(instruction.src)
 
-    kind.write_rex(bytecode, modrm_reg, modrm_rm)
+    kind.write_rex(bytecode, modrm_reg=modrm_reg, modrm_rm=modrm_rm)
     kind.write_opcode(bytecode, 1, 0x8D)
     kind.write_modrm(bytecode, modrm_reg, modrm_rm)

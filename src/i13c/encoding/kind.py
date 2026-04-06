@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional, Union
 
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.llvm.typing.instructions import core as llvm
@@ -45,6 +45,21 @@ class ModRegEncoding:
     rex_w: int
     rex_r: int
     modrm_reg: int
+
+
+@dataclass(kw_only=True)
+class OpCodeEncoding:
+    rex_w: int
+    rex_b: int
+    opcode_reg: int
+
+
+def encode_opcode_reg(reg: llvm.Register) -> OpCodeEncoding:
+    return OpCodeEncoding(
+        rex_w=0b1000 if reg.is_64bit() else 0b0000,
+        rex_b=0b0001 if reg.high_bit() else 0b0000,
+        opcode_reg=reg.low3bits(),
+    )
 
 
 def encode_modrm_reg(reg: llvm.Register) -> ModRegEncoding:
@@ -124,16 +139,28 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
 
 def write_rex(
     bytecode: bytearray,
-    modrm_reg: ModRegEncoding,
-    modrm_rm: ModRMEncoding,
     /,
     force: bool = False,
+    modrm_reg: Optional[ModRegEncoding] = None,
+    modrm_rm: Optional[ModRMEncoding] = None,
+    opcode_reg: Optional[OpCodeEncoding] = None,
 ) -> None:
-    prefix = 0x40
-    bits = modrm_reg.rex_w | modrm_reg.rex_r | modrm_rm.rex_x | modrm_rm.rex_b
+    bits = 0x00
+
+    # append REX.W and REX.R bits from ModRegEncoding if present
+    if modrm_reg is not None:
+        bits |= modrm_reg.rex_w | modrm_reg.rex_r
+
+    # append REX.X and REX.B bits from ModRMEncoding if present
+    if modrm_rm is not None:
+        bits |= modrm_rm.rex_x | modrm_rm.rex_b
+
+    # append REX.W and REX.B bits from OpCodeEncoding if present
+    if opcode_reg is not None:
+        bits |= opcode_reg.rex_w | opcode_reg.rex_b
 
     if bits or force:
-        bytecode.append(prefix | bits)
+        bytecode.append(0x40 | bits)
 
 
 def write_modrm(
@@ -166,7 +193,13 @@ def write_opcode(
     bytecode: bytearray,
     opcode_length: int,
     opcode_value: int,
+    /,
+    opcode_reg: Optional[OpCodeEncoding] = None,
 ) -> None:
+
+    # append opcode register bits to opcode value if present
+    if opcode_reg is not None:
+        opcode_value |= opcode_reg.opcode_reg
 
     # opcode is blindly encoded as big-endian, because we human provide it this way
     bytecode.extend(opcode_value.to_bytes(opcode_length, byteorder="big", signed=False))

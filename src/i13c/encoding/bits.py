@@ -1,5 +1,6 @@
 from typing import Optional, Union
 
+from i13c.encoding import kind
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, Immediate, ModRM, Opcode, Prefixes
 from i13c.llvm.typing.instructions.bits import BSwapReg, ShlRegImm, ShlRegReg
@@ -114,25 +115,7 @@ def encode_bswap(
     instruction: BSwapReg, bytecode: bytearray
 ) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
 
-    # chosen encoding: REX.W + 0F (C8 + rd)
-    # encoded as: [rex] [0F] [opcode]
+    opcode_reg = kind.encode_opcode_reg(instruction.dst)
 
-    opcode = Opcode(
-        hex=0xC8,
-        reg=instruction.dst.id,  # low 3 bits go into opcode
-    )
-
-    rex = REX(
-        w=instruction.dst.width == "64bit",
-        r=False,
-        x=False,
-        b=opcode.rex_b(),
-    )
-
-    bytecode.extend(
-        [
-            *rex.to_bytes(),
-            0x0F,
-            opcode.to_byte(),
-        ]
-    )
+    kind.write_rex(bytecode, opcode_reg=opcode_reg)
+    kind.write_opcode(bytecode, 2, 0x0fc8, opcode_reg=opcode_reg)
