@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Union
 
-from i13c.llvm.typing.instructions.core import Immediate, Register
+from i13c.llvm.typing.instructions.core import Address, Immediate, Register
 
 
 @dataclass(kw_only=True)
@@ -14,7 +14,7 @@ class BSWAP:
 
 @dataclass(kw_only=True)
 class SHL:
-    dst: Register
+    dst: Union[Register, Address]
     src: Union[Immediate, Register]
 
     def native(self) -> str:

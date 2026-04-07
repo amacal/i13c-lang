@@ -6,19 +6,23 @@ from i13c.llvm.typing.instructions.core import Immediate, Register
 
 
 def encode_shl(instruction: SHL, bytecode: bytearray) -> None:
+    # assume no immediate value for now
     immediate: Optional[Immediate] = None
+
+    # only register can be 8-bit, memory operands are always 64-bit
+    is_8bit = isinstance(instruction.dst, Register) and instruction.dst.is_8bit()
 
     # the shift stored in CL has to be handled explicitly
     if isinstance(instruction.src, Register):
-        opcode = 0xD2 if instruction.dst.is_8bit() else 0xD3
+        opcode = 0xD2 if is_8bit else 0xD3
 
     # the same about the immediate value of 1, which has a dedicated encoding
     elif instruction.src.value == 0x01:
-        opcode = 0xD0 if instruction.dst.is_8bit() else 0xD1
+        opcode = 0xD0 if is_8bit else 0xD1
 
     # otherwise fallback to the a bit longer imm8 encoding
     else:
-        opcode = 0xC0 if instruction.dst.is_8bit() else 0xC1
+        opcode = 0xC0 if is_8bit else 0xC1
         immediate = instruction.src
 
     # compute ModRM fields

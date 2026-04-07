@@ -101,26 +101,29 @@ class PrefixEncoding:
     operand_override: int
 
 
-def encode_prefixes(instruction: llvm.Register) -> PrefixEncoding:
+def encode_prefixes(target: Union[llvm.Register, llvm.Address]) -> PrefixEncoding:
     return PrefixEncoding(
-        operand_override=0x66 if instruction.is_16bit() else 0x00,
+        operand_override=(
+            0x66 if isinstance(target, llvm.Register) and target.is_16bit() else 0x00
+        ),
     )
 
 
 def encode_rex(
-    reg: llvm.Register,
+    target: Union[llvm.Register, llvm.Address],
     /,
     modrm_reg: Optional[ModRegToRex] = None,
     modrm_rm: Optional[ModRmToRex] = None,
     opcode_reg: Optional[OpCodeToRex] = None,
 ) -> RexEncoding:
     rex = RexEncoding.default()
+    reg = isinstance(target, llvm.Register)
 
-    if reg.is_64bit():
+    if not reg or target.is_64bit():
         rex.w |= 0b1000
         rex.h |= 0x40
 
-    if reg.is_low8bit() and reg.id in (4, 5, 6, 7):
+    if reg and target.is_low8bit() and target.id in (4, 5, 6, 7):
         rex.h |= 0x40
 
     if modrm_reg is not None:
