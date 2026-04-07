@@ -94,6 +94,24 @@ class Register:
         return Register(id=16, width="8bit")
 
     @staticmethod
+    def auto(name: Optional[str]) -> Register:
+        if name is None:
+            return Register.none()
+
+        for parser in (
+            Register.parse8,
+            Register.parse16,
+            Register.parse32,
+            Register.parse64,
+        ):
+            try:
+                return parser(name)
+            except KeyError:
+                continue
+
+        raise ValueError(f"Register name {name} is not recognized as a valid register")
+
+    @staticmethod
     def reg8(id: int, width: Kind["low", "high", "8bit"]) -> Register:
         return Register.build(width, id)
 
@@ -182,6 +200,14 @@ class Scaler:
     @staticmethod
     def none() -> Scaler:
         return Scaler(index=Register.none(), scale=1)
+
+    @staticmethod
+    def auto(index: Optional[str], scale: Optional[ScaleValue]) -> Scaler:
+        return (
+            Scaler(index=Register.auto(index), scale=scale)
+            if scale is not None
+            else Scaler.none()
+        )
 
     def is_available(self) -> bool:
         return self.index.is_available()

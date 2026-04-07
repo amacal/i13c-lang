@@ -1,8 +1,8 @@
 from i13c.encoding import kind
-from i13c.llvm.typing.instructions.addr import LeaInstruction
+from i13c.llvm.typing.instructions.addr import LEA
 
 
-def encode_lea_reg_off(instruction: LeaInstruction, bytecode: bytearray):
+def encode_lea_reg_off(instruction: LEA, bytecode: bytearray):
     # compute ModRM fields
     modrm_reg = kind.encode_modrm_reg(instruction.dst)
     modrm_rm = kind.encode_modrm_rm(instruction.src)

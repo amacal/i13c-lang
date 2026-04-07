@@ -2,8 +2,15 @@ from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, Uni
 
 from pytest import mark
 
+from i13c.encoding import encode
+from i13c.encoding.core import UnreachableEncodingError
+from i13c.llvm.typing.instructions import Instruction, core
 
-def parse_value(header: str, value: str) -> Union[str, int]:
+
+def parse_value(header: str, value: str) -> Optional[Union[str, int]]:
+    if not value.strip(" -"):
+        return None
+
     if header in ("imm8", "imm32", "imm64", "scale"):
         return int(value, 16)
 
@@ -34,7 +41,7 @@ def parse_samples(
     except ValueError:
         separator = len(headers)
 
-    for line in [line for line in lines[2:-1] if "-" not in line]:
+    for line in [line for line in lines[2:-1] if "---" not in line]:
         parts = [p.strip() for p in line.split("|")]
         left, right = parts[:separator], parts[separator + 1 :]
 
@@ -58,3 +65,30 @@ def samples(table: str):
         return mark.parametrize(",".join(headers), cases)(fn)
 
     return wrapper
+
+
+def parse_address(
+    base: Optional[str],
+    scale: Optional[core.ScaleValue],
+    index: Optional[str],
+    disp32: Optional[int],
+) -> Union[core.ComputedAddress, core.RelativeAddress]:
+
+    if base == "rip" and scale is None and index is None:
+        return core.RelativeAddress(disp=core.Displacement.auto(disp32))
+
+    return core.ComputedAddress(
+        base=core.Register.auto(base),
+        disp=core.Displacement.auto(disp32),
+        scaler=core.Scaler.auto(index, scale),
+    )
+
+
+def encode_instruction(instruction: Instruction, encoding: Optional[bytes]) -> None:
+    try:
+        encoded = encode([instruction]).hex(" ")
+
+        assert encoding is not None
+        assert encoded == encoding.hex(" ")
+    except UnreachableEncodingError:
+        assert encoding is None

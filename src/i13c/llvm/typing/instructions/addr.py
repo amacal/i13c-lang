@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 
-from i13c.llvm.typing.instructions.core import Address, EncodingKind, Register
+from i13c.llvm.typing.instructions.core import Address, Register
 
 
 @dataclass(kw_only=True)
-class LeaInstruction:
-    kind: EncodingKind
+class LEA:
     dst: Register
     src: Address
 

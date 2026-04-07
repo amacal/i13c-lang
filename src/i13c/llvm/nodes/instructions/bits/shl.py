@@ -3,13 +3,7 @@ from typing import Dict, Protocol, Tuple
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
-from i13c.llvm.typing.instructions.bits import (
-    ShlReg8Imm8,
-    ShlReg16Imm8,
-    ShlReg32Imm8,
-    ShlReg64Cl,
-    ShlReg64Imm8,
-)
+from i13c.llvm.typing.instructions.bits import SHL
 from i13c.llvm.typing.instructions.core import Immediate as Imm
 from i13c.llvm.typing.instructions.core import Register as Reg
 from i13c.semantic.typing.entities.instructions import (
@@ -32,9 +26,9 @@ def lower_reg8_imm8(
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
-        ShlReg8Imm8(
+        SHL(
             dst=Reg.parse8(destination.name.decode()),
-            imm=Imm.imm8(source.value),
+            src=Imm.imm8(source.value),
         ),
     )
 
@@ -46,9 +40,9 @@ def lower_reg16_imm8(
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
-        ShlReg16Imm8(
+        SHL(
             dst=Reg.parse16(destination.name.decode()),
-            imm=Imm.imm8(source.value),
+            src=Imm.imm8(source.value),
         ),
     )
 
@@ -60,9 +54,9 @@ def lower_reg32_imm8(
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
-        ShlReg32Imm8(
+        SHL(
             dst=Reg.parse32(destination.name.decode()),
-            imm=Imm.imm8(source.value),
+            src=Imm.imm8(source.value),
         ),
     )
 
@@ -74,9 +68,9 @@ def lower_reg64_imm8(
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
-        ShlReg64Imm8(
+        SHL(
             dst=Reg.parse64(destination.name.decode()),
-            imm=Imm.imm8(source.value),
+            src=Imm.imm8(source.value),
         ),
     )
 
@@ -92,7 +86,10 @@ def lower_reg64_cl(
 
     return (
         InstructionId(value=generator.next()),
-        ShlReg64Cl(dst=Reg.parse64(destination.name.decode())),
+        SHL(
+            dst=Reg.parse64(destination.name.decode()),
+            src=Reg.parse8(source.name.decode()),
+        ),
     )
 
 

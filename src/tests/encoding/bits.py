@@ -3,31 +3,7 @@ from typing import List
 from i13c.encoding import encode
 from i13c.llvm.typing.instructions import Instruction, bits
 from i13c.llvm.typing.instructions.core import Immediate, Register
-from tests.encoding import samples
-
-
-@samples(
-    """
-        | --- | -------- | --- | --- | -------- |
-        | dst | encoding | *** | dst | encoding |
-        | --- | -------- | --- | --- | -------- |
-        | rax | 48 0f c8 | *** | r8  | 49 0f c8 |
-        | rcx | 48 0f c9 | *** | r9  | 49 0f c9 |
-        | rdx | 48 0f ca | *** | r10 | 49 0f ca |
-        | rbx | 48 0f cb | *** | r11 | 49 0f cb |
-        | rsp | 48 0f cc | *** | r12 | 49 0f cc |
-        | rbp | 48 0f cd | *** | r13 | 49 0f cd |
-        | rsi | 48 0f ce | *** | r14 | 49 0f ce |
-        | rdi | 48 0f cf | *** | r15 | 49 0f cf |
-        | --- | -------- | --- | --- | -------- |
-    """
-)
-def can_encode_instructions_bswap_reg64(dst: str, encoding: bytes):
-    flow: List[Instruction] = [
-        bits.ByteSwapReg64(dst=Register.parse64(dst)),
-    ]
-
-    assert encode(flow) == encoding
+from tests.encoding import encode_instruction, samples
 
 
 @samples(
@@ -35,10 +11,10 @@ def can_encode_instructions_bswap_reg64(dst: str, encoding: bytes):
         | --- | -------- | --- | ---- | -------- |
         | dst | encoding | *** | dst  | encoding |
         | --- | -------- | --- | ---- | -------- |
-        | eax | 0f c8    | *** | r8d  | 41 0f c8 |
-        | ecx | 0f c9    | *** | r9d  | 41 0f c9 |
-        | edx | 0f ca    | *** | r10d | 41 0f ca |
-        | ebx | 0f cb    | *** | r11d | 41 0f cb |
+        | rax | 48 0f c8 | *** | r8   | 49 0f c8 |
+        | rcx | 48 0f c9 | *** | r9   | 49 0f c9 |
+        | rdx | 48 0f ca | *** | r10  | 49 0f ca |
+        | rbx | 48 0f cb | *** | r11  | 49 0f cb |
         | esp | 0f cc    | *** | r12d | 41 0f cc |
         | ebp | 0f cd    | *** | r13d | 41 0f cd |
         | esi | 0f ce    | *** | r14d | 41 0f ce |
@@ -46,12 +22,8 @@ def can_encode_instructions_bswap_reg64(dst: str, encoding: bytes):
         | --- | -------- | --- | ---- | -------- |
     """
 )
-def can_encode_instructions_bswap_reg32(dst: str, encoding: bytes):
-    flow: List[Instruction] = [
-        bits.ByteSwapReg32(dst=Register.parse32(dst)),
-    ]
-
-    assert encode(flow) == encoding
+def can_encode_bswap(dst: str, encoding: bytes):
+    encode_instruction(bits.BSWAP(dst=Register.auto(dst)), encoding)
 
 
 @samples(
@@ -81,9 +53,9 @@ def can_encode_instructions_bswap_reg32(dst: str, encoding: bytes):
 )
 def can_encode_instructions_shl_reg64_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        bits.ShlReg64Imm8(
+        bits.SHL(
             dst=Register.parse64(dst),
-            imm=Immediate.imm8(imm8),
+            src=Immediate.imm8(imm8),
         ),
     ]
 
@@ -117,9 +89,9 @@ def can_encode_instructions_shl_reg64_imm8(dst: str, imm8: int, encoding: bytes)
 )
 def can_encode_instructions_shl_reg32_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        bits.ShlReg32Imm8(
+        bits.SHL(
             dst=Register.parse32(dst),
-            imm=Immediate.imm8(imm8),
+            src=Immediate.imm8(imm8),
         ),
     ]
 
@@ -153,9 +125,9 @@ def can_encode_instructions_shl_reg32_imm8(dst: str, imm8: int, encoding: bytes)
 )
 def can_encode_instructions_shl_reg16_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        bits.ShlReg16Imm8(
+        bits.SHL(
             dst=Register.parse16(dst),
-            imm=Immediate.imm8(imm8),
+            src=Immediate.imm8(imm8),
         ),
     ]
 
@@ -195,9 +167,9 @@ def can_encode_instructions_shl_reg16_imm8(dst: str, imm8: int, encoding: bytes)
 )
 def can_encode_instructions_shl_reg8_imm8(dst: str, imm8: int, encoding: bytes):
     flow: List[Instruction] = [
-        bits.ShlReg8Imm8(
+        bits.SHL(
             dst=Register.parse8(dst),
-            imm=Immediate.imm8(imm8),
+            src=Immediate.imm8(imm8),
         ),
     ]
 
@@ -222,8 +194,9 @@ def can_encode_instructions_shl_reg8_imm8(dst: str, imm8: int, encoding: bytes):
 )
 def can_encode_instructions_shl_reg64_cl(dst: str, encoding: bytes):
     flow: List[Instruction] = [
-        bits.ShlReg64Cl(
+        bits.SHL(
             dst=Register.parse64(dst),
+            src=Register.parse8("cl"),
         ),
     ]
 
@@ -248,8 +221,9 @@ def can_encode_instructions_shl_reg64_cl(dst: str, encoding: bytes):
 )
 def can_encode_instructions_shl_reg32_cl(dst: str, encoding: bytes):
     flow: List[Instruction] = [
-        bits.ShlReg32Cl(
+        bits.SHL(
             dst=Register.parse32(dst),
+            src=Register.parse8("cl"),
         ),
     ]
 
@@ -274,8 +248,9 @@ def can_encode_instructions_shl_reg32_cl(dst: str, encoding: bytes):
 )
 def can_encode_instructions_shl_reg16_cl(dst: str, encoding: bytes):
     flow: List[Instruction] = [
-        bits.ShlReg16Cl(
+        bits.SHL(
             dst=Register.parse16(dst),
+            src=Register.parse8("cl"),
         ),
     ]
 
@@ -303,8 +278,9 @@ def can_encode_instructions_shl_reg16_cl(dst: str, encoding: bytes):
 )
 def can_encode_instructions_shl_reg8_cl(dst: str, encoding: bytes):
     flow: List[Instruction] = [
-        bits.ShlReg8Cl(
+        bits.SHL(
             dst=Register.parse8(dst),
+            src=Register.parse8("cl"),
         ),
     ]
 

@@ -3,7 +3,7 @@ from typing import Dict, Protocol, Tuple
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
-from i13c.llvm.typing.instructions.bits import ByteSwapReg32, ByteSwapReg64
+from i13c.llvm.typing.instructions.bits import BSWAP
 from i13c.llvm.typing.instructions.core import Register as Reg
 from i13c.semantic.typing.entities.instructions import (
     Instruction as SemanticInstruction,
@@ -24,7 +24,7 @@ def lower_reg32(
 
     return (
         InstructionId(value=generator.next()),
-        ByteSwapReg32(dst=Reg.parse32(target.name.decode())),
+        BSWAP(dst=Reg.parse32(target.name.decode())),
     )
 
 
@@ -35,7 +35,7 @@ def lower_reg64(
 
     return (
         InstructionId(value=generator.next()),
-        ByteSwapReg64(dst=Reg.parse64(target.name.decode())),
+        BSWAP(dst=Reg.parse64(target.name.decode())),
     )
 
 

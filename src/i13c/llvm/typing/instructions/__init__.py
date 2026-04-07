@@ -6,15 +6,13 @@ from typing import Tuple, Union
 from i13c.llvm.typing.instructions import addr, bits, ctrl, math, move, stack
 
 Instruction = Union[
-    addr.LeaInstruction,
-    bits.BSwapReg,
-    bits.ShlRegImm,
-    bits.ShlRegReg,
+    addr.LEA,
+    bits.BSWAP,
+    bits.SHL,
     ctrl.Call,
     ctrl.Jump,
     ctrl.Label,
     ctrl.Nop,
-    bits.ShlReg64Cl,
     ctrl.Call,
     ctrl.Jump,
     ctrl.Label,

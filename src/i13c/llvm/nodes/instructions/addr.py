@@ -3,7 +3,7 @@ from typing import Dict, Protocol, Tuple
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
-from i13c.llvm.typing.instructions.addr import LeaInstruction
+from i13c.llvm.typing.instructions.addr import LEA
 from i13c.llvm.typing.instructions.core import ComputedAddress, Displacement
 from i13c.llvm.typing.instructions.core import Register as Reg
 from i13c.llvm.typing.instructions.core import Scaler
@@ -27,8 +27,7 @@ def lower_reg32_addr(
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
-        LeaInstruction(
-            kind="op+mod+reg",
+        LEA(
             dst=Reg.parse32(destination.name.decode()),
             src=ComputedAddress(
                 base=Reg.parse64(source.base.name.decode()),
@@ -46,8 +45,7 @@ def lower_reg64_addr(
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
-        LeaInstruction(
-            kind="op+mod+reg",
+        LEA(
             dst=Reg.parse64(destination.name.decode()),
             src=ComputedAddress(
                 base=Reg.parse64(source.base.name.decode()),

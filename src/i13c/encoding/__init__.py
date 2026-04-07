@@ -53,17 +53,9 @@ class Encoder(Protocol):
 
 
 DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
-    llvm.addr.LeaInstruction: addr.encode_lea_reg_off,
-    llvm.bits.ByteSwapReg32: bits.encode_bswap,
-    llvm.bits.ByteSwapReg64: bits.encode_bswap,
-    llvm.bits.ShlReg8Imm8: bits.encode_shl_reg_imm,
-    llvm.bits.ShlReg16Imm8: bits.encode_shl_reg_imm,
-    llvm.bits.ShlReg32Imm8: bits.encode_shl_reg_imm,
-    llvm.bits.ShlReg64Imm8: bits.encode_shl_reg_imm,
-    llvm.bits.ShlReg8Cl: bits.encode_shl_reg_cl,
-    llvm.bits.ShlReg16Cl: bits.encode_shl_reg_cl,
-    llvm.bits.ShlReg32Cl: bits.encode_shl_reg_cl,
-    llvm.bits.ShlReg64Cl: bits.encode_shl_reg_cl,
+    llvm.addr.LEA: addr.encode_lea_reg_off,
+    llvm.bits.BSWAP: bits.encode_bswap,
+    llvm.bits.SHL: bits.encode_shl,
     llvm.ctrl.Call: ctrl.encode_call,
     llvm.ctrl.Jump: ctrl.encode_jump,
     llvm.ctrl.Label: ctrl.encode_label,

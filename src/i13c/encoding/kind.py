@@ -284,12 +284,12 @@ def write_opcode(
 
 def write_immediate(
     bytecode: bytearray,
-    imm: llvm.Immediate,
+    imm: Optional[llvm.Immediate],
     /,
     condition: bool = True,
     signed: bool = False,
 ) -> None:
-    if condition:
+    if condition and imm is not None:
         bytecode.extend(
             imm.value.to_bytes(imm.width // 8, byteorder="little", signed=signed)
         )
