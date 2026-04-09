@@ -8,6 +8,7 @@ from i13c.syntax.lexing import Token as LexingToken
 from i13c.syntax.lexing import Tokens
 from i13c.syntax.parsing.core import (
     FlagAlreadySpecified,
+    InvalidHexLiteral,
     ParsingState,
     UnexpectedEndOfTokens,
     UnexpectedKeyword,
@@ -48,6 +49,9 @@ def parse(
 
     except FlagAlreadySpecified as e:
         diagnostics.append(report_e2003_flag_already_specified(e.token, e.flag))
+
+    except InvalidHexLiteral as e:
+        diagnostics.append(report_e2004_invalid_hex_literal(e.token))
 
     # any diagnostics stops further processing
     if diagnostics:
@@ -113,4 +117,12 @@ def report_e2003_flag_already_specified(ref: SpanLike, flag: bytes) -> Diagnosti
         ref=ref,
         code="E2003",
         message=f"Flag '{flag.decode()}' already specified at offset {ref.offset}",
+    )
+
+
+def report_e2004_invalid_hex_literal(ref: SpanLike) -> Diagnostic:
+    return Diagnostic(
+        ref=ref,
+        code="E2004",
+        message=f"Invalid hex literal at offset {ref.offset}",
     )

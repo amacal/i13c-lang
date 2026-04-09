@@ -9,6 +9,7 @@ from i13c.syntax.parsing.core import (
     UnexpectedKeyword,
     UnexpectedTokenCode,
 )
+from i13c.syntax.parsing.literals import extract_hex
 from i13c.syntax.parsing.types import parse_range
 
 
@@ -189,7 +190,7 @@ def parse_argument(state: ParsingState) -> tree.function.Argument:
     if token.code == Tokens.HEX:
         return tree.function.IntegerLiteral(
             ref=state.span(token),
-            value=tree.literals.Hex(digits=bytes.fromhex(state.extract(token)[2:])),
+            value=extract_hex(state, token),
         )
 
     # an identifier can be only an expression

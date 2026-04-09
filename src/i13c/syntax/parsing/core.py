@@ -33,6 +33,11 @@ class FlagAlreadySpecified(Exception):
         self.flag = flag
 
 
+class InvalidHexLiteral(Exception):
+    def __init__(self, token: LexingToken) -> None:
+        self.token = token
+
+
 
 @dataclass(kw_only=True)
 class ParsingState:

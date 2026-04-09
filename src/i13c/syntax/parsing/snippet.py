@@ -8,6 +8,7 @@ from i13c.syntax.parsing.core import (
     ParsingState,
     UnexpectedKeyword,
 )
+from i13c.syntax.parsing.literals import extract_hex
 from i13c.syntax.parsing.types import parse_range
 
 
@@ -195,7 +196,7 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
     elif token.code == Tokens.HEX:
         return tree.snippet.Immediate(
             ref=state.span(token),
-            value=tree.literals.Hex(digits=bytes.fromhex(state.extract(token)[2:])),
+            value=extract_hex(state, token),
         )
 
     # reference has to provide its identifier
@@ -226,10 +227,10 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
             # determine the sign of the offset
             kind = "forward" if end.code == Tokens.PLUS else "backward"
 
-            # to be converted to an immediate operand
+            # to be converted to an offset operand
             offset = tree.snippet.Offset(
                 kind=kind,
-                value=tree.literals.Hex(digits=bytes.fromhex(state.extract(value)[2:])),
+                value=extract_hex(state, value),
             )
 
             # address has to be closed with a square close bracket
