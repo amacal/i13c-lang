@@ -106,6 +106,27 @@ def can_tokenize_single_bytes():
     assert code.extract(tokens.value[13]) == b""
 
 
+def can_tokenize_dot_operator():
+    text = "0x12.0x20"
+    code = open_text(text)
+
+    tokens = tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, result.Ok)
+    assert len(tokens.value) == 4
+
+    assert tokens.value[0] == Token(code=Tokens.HEX, offset=0, length=4)
+    assert tokens.value[1] == Token(code=Tokens.DOT, offset=4, length=1)
+    assert tokens.value[2] == Token(code=Tokens.HEX, offset=5, length=4)
+    assert tokens.value[3] == Token(code=Tokens.EOF, offset=9, length=0)
+
+    assert code.extract(tokens.value[0]) == b"0x12"
+    assert code.extract(tokens.value[1]) == b"."
+    assert code.extract(tokens.value[2]) == b"0x20"
+    assert code.extract(tokens.value[3]) == b""
+
+
 def can_tokenize_range_operator():
     text = "0x12..0x20"
     code = open_text(text)

@@ -54,6 +54,7 @@ class Tokens:
     EQUALS = 17
     PLUS = 18
     MINUS = 19
+    DOT = 20
     EOF = 255
 
 
@@ -99,6 +100,7 @@ TOKEN_NAMES: Dict[int, str] = {
     Tokens.CURLY_OPEN: "curly-open",
     Tokens.CURLY_CLOSE: "curly-close",
     Tokens.AT: "at",
+    Tokens.DOT: "dot",
     Tokens.COLON: "colon",
     Tokens.TYPE: "type",
     Tokens.EQUALS: "equals",
@@ -189,6 +191,10 @@ class Token:
     @staticmethod
     def reg_token(offset: int, length: int) -> Token:
         return Token(code=Tokens.REG, offset=offset, length=length)
+
+    @staticmethod
+    def dot_token(offset: int) -> Token:
+        return Token(code=Tokens.DOT, offset=offset, length=1)
 
     @staticmethod
     def range_token(offset: int, length: int) -> Token:
@@ -329,13 +335,17 @@ def read_dot(lexer: Lexer, tokens: List[Token]) -> None:
     start_offset = lexer.offset
     lexer.advance(1)  # consume the '.'
 
-    # expect another dot for range
-    lexer.expect(CLASS_DOT)
-    lexer.advance(1)  # consume the second '.'
+    # perhaps it's a single dot token
+    if not lexer.is_in(CLASS_DOT):
+        token = Token.dot_token(offset=start_offset)
+
+    # handle range token with two dots
+    else:
+        lexer.advance(1)  # consume the second '.'
+        token = Token.range_token(offset=start_offset, length=2)
 
     # success
-    length = lexer.offset - start_offset
-    tokens.append(Token.range_token(offset=start_offset, length=length))
+    tokens.append(token)
 
 
 def read_hex(lexer: Lexer, tokens: List[Token]) -> None:
