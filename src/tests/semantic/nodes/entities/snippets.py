@@ -34,7 +34,7 @@ def can_build_a_snippet_with_no_instruction():
     assert isinstance(id, SnippetId)
     assert isinstance(value, Snippet)
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert len(value.instructions) == 0
 
 
@@ -54,7 +54,7 @@ def can_build_a_snippet_with_no_noreturn():
     assert isinstance(id, SnippetId)
     assert isinstance(value, Snippet)
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert value.noreturn is False
 
 
@@ -74,7 +74,7 @@ def can_build_a_snippet_with_noreturn():
     assert isinstance(id, SnippetId)
     assert isinstance(value, Snippet)
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert value.noreturn is True
 
 
@@ -94,7 +94,7 @@ def can_build_a_snippet_with_clobber_list():
     assert isinstance(id, SnippetId)
     assert isinstance(value, Snippet)
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert len(value.clobbers) == 2
 
     assert value.clobbers[0].name == b"rax"
@@ -120,7 +120,7 @@ def can_build_a_snippet_with_mov_instruction():
     assert isinstance(id, SnippetId)
     assert isinstance(value, Snippet)
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert value.noreturn is False
 
     assert len(value.instructions) == 1
@@ -163,11 +163,11 @@ def can_build_a_snippet_with_properly_derived_types():
     assert snippets.size() == 1
     _, value = snippets.peak()
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert len(value.slots) == 2
 
     slot1 = value.slots[0]
-    assert slot1.name.name == b"r1"
+    assert slot1.name.data == b"r1"
     assert slot1.bind.name == b"rax"
     assert slot1.type.name == b"u64"
     assert slot1.type.width == 16
@@ -179,7 +179,7 @@ def can_build_a_snippet_with_properly_derived_types():
     assert slot1.type.range.upper.data.hex(" ") == "ff ff"
 
     slot2 = value.slots[1]
-    assert slot2.name.name == b"r2"
+    assert slot2.name.data == b"r2"
     assert slot2.bind.name == b"rbx"
     assert slot2.type.name == b"u8"
     assert slot2.type.width == 8

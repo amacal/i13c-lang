@@ -30,7 +30,7 @@ def build_expressions(
 
         expressions[expression_id] = Expression(
             ref=expression.ref,
-            ident=Identifier(name=expression.name),
+            ident=Identifier(data=expression.name),
         )
 
     return OneToOne[ExpressionId, Expression].instance(expressions)

@@ -61,7 +61,7 @@ def build_snippets(
 
             slots.append(
                 Slot(
-                    name=Identifier(name=slot.name),
+                    name=Identifier(data=slot.name),
                     bind=binding,
                     type=type,
                 )
@@ -77,7 +77,7 @@ def build_snippets(
 
         snippets[snippet_id] = Snippet(
             ref=snippet.ref,
-            identifier=Identifier(name=snippet.name),
+            identifier=Identifier(data=snippet.name),
             noreturn=snippet.noreturn,
             slots=slots,
             clobbers=clobbers,

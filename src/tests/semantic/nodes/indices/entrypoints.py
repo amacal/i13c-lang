@@ -37,7 +37,7 @@ def can_accept_terminal_function():
     assert isinstance(value.target, FunctionId)
 
     function = semantic.basic.functions.get(value.target)
-    assert function.identifier.name == b"main"
+    assert function.identifier.data == b"main"
 
 
 def can_reject_snippet_with_arguments():

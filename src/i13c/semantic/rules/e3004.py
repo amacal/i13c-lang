@@ -35,12 +35,12 @@ def validate_duplicated_parameter_names(
         seen: Set[bytes] = set()
 
         for slot in snippet.slots:
-            if slot.name.name in seen:
+            if slot.name.data in seen:
                 diagnostics.append(
-                    report_e3004_duplicated_parameter_names(snippet.ref, slot.name.name)
+                    report_e3004_duplicated_parameter_names(snippet.ref, slot.name.data)
                 )
             else:
-                seen.add(slot.name.name)
+                seen.add(slot.name.data)
 
     for function in functions.values():
         seen: Set[bytes] = set()
@@ -48,14 +48,14 @@ def validate_duplicated_parameter_names(
         for pid in function.parameters:
             parameter = parameters.get(pid)
 
-            if parameter.ident.name in seen:
+            if parameter.ident.data in seen:
                 diagnostics.append(
                     report_e3004_duplicated_parameter_names(
-                        function.ref, parameter.ident.name
+                        function.ref, parameter.ident.data
                     )
                 )
             else:
-                seen.add(parameter.ident.name)
+                seen.add(parameter.ident.data)
 
     return diagnostics
 

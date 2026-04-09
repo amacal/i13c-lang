@@ -158,7 +158,7 @@ def match_instruction(
                     )
 
                     # remember immediate as a target
-                    identifier = Identifier(name=operand.target.name)
+                    identifier = Identifier(data=operand.target.name)
                     target = ReferenceToImmediate(target=oid, identifier=identifier)
 
                 # else try to resolve as register
@@ -170,7 +170,7 @@ def match_instruction(
                     )
 
                     # remember register as a target
-                    identifier = Identifier(name=operand.target.name)
+                    identifier = Identifier(data=operand.target.name)
                     target = ReferenceToRegister(target=oid, identifier=identifier)
 
                 # if we could not resolve, mark as such
@@ -254,9 +254,9 @@ def build_resolution_by_instruction(
         # collect immediate slots
         for slot in snippet.slots:
             if slot.bind.via_immediate():
-                immediates[slot.name.name] = slot.type
+                immediates[slot.name.data] = slot.type
             else:
-                registers[slot.name.name] = Register(
+                registers[slot.name.data] = Register(
                     name=slot.bind.name,
                     width=64,
                 )

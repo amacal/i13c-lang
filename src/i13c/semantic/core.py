@@ -6,10 +6,10 @@ Width = Kind[8, 16, 32, 64]
 
 @dataclass(kw_only=True, frozen=True)
 class Identifier:
-    name: bytes
+    data: bytes
 
     def __str__(self) -> str:
-        return self.name.decode()
+        return self.data.decode()
 
 
 @dataclass(kw_only=True, frozen=True)

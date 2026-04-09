@@ -32,6 +32,3 @@ class CallSite:
     id: CallSiteId
     callee: Identifier
     arguments: List[Argument]
-
-    def describe(self) -> str:
-        return f"name={self.callee.name.decode()}/{len(self.arguments)}"

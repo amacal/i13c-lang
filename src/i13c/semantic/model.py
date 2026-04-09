@@ -81,7 +81,7 @@ class SemanticGraph:
 
     def find_function_by_name(self, name: bytes) -> Optional[FunctionId]:
         for fid, function in self.basic.functions.items():
-            if function.identifier.name == name:
+            if function.identifier.data == name:
                 return fid
 
         return None

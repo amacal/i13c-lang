@@ -55,7 +55,7 @@ def build_values(
 
         # default width and ranges for declared type
         range: Range = default_range(statement.type.name)
-        ident = Identifier(name=statement.name)
+        ident = Identifier(data=statement.name)
 
         # override ranges if specified
         if statement.type.range is not None:

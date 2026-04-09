@@ -28,7 +28,4 @@ class Function:
 
     def signature(self) -> str:
         parameters = ", ".join([parameter.identify(2) for parameter in self.parameters])
-        return f"{self.identifier.name.decode()}/{len(self.parameters)} ({parameters})"
-
-    def describe(self) -> str:
-        return f"name={self.identifier.name.decode()}/{len(self.parameters)}"
+        return f"{self.identifier.data.decode()}/{len(self.parameters)} ({parameters})"

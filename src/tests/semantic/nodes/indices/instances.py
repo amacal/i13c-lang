@@ -79,10 +79,10 @@ def can_generate_instance_for_accepted_callsite():
     assert isinstance(value, Instance)
 
     callsite = semantic.basic.callsites.get(id)
-    assert callsite.callee.name == b"exit"
+    assert callsite.callee.data == b"exit"
 
     snippet = semantic.basic.snippets.get(value.target)
-    assert snippet.identifier.name == b"exit"
+    assert snippet.identifier.data == b"exit"
 
     # removed immediate out-of-bounds argument
     assert len(value.bindings) == 0

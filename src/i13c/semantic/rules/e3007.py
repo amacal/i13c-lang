@@ -60,7 +60,7 @@ def validate_called_symbol_resolved(
                 diagnostics.append(
                     report_e3007_no_matching_overload(
                         callsites.get(cid).ref,
-                        callsites.get(cid).callee.name,
+                        callsites.get(cid).callee.data,
                         variants,
                     )
                 )

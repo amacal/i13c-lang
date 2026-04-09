@@ -37,7 +37,7 @@ def validate_called_symbol_terminality(
             diagnostics.append(
                 report_e3010_function_has_wrong_terminality(
                     function.ref,
-                    function.identifier.name,
+                    function.identifier.data,
                 )
             )
 

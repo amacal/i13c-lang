@@ -33,7 +33,7 @@ def can_build_a_function_with_no_statements():
     assert isinstance(id, FunctionId)
     assert isinstance(value, Function)
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert value.noreturn is True
     assert len(value.statements) == 0
 
@@ -54,7 +54,7 @@ def can_build_a_function_with_no_return_statement():
     assert isinstance(id, FunctionId)
     assert isinstance(value, Function)
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert value.noreturn is False
     assert len(value.statements) == 0
 
@@ -75,7 +75,7 @@ def can_build_a_function_with_call_statement():
     assert isinstance(id, FunctionId)
     assert isinstance(value, Function)
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert value.noreturn is False
 
     assert len(value.statements) == 1
@@ -83,7 +83,7 @@ def can_build_a_function_with_call_statement():
 
     callsite = semantic.basic.callsites.get(value.statements[0])
 
-    assert callsite.callee.name == b"foo"
+    assert callsite.callee.data == b"foo"
     assert len(callsite.arguments) == 1
 
 
@@ -104,11 +104,11 @@ def can_build_function_with_properly_derived_types():
     assert functions.size() == 1
     _, value = functions.peak()
 
-    assert value.identifier.name == b"main"
+    assert value.identifier.data == b"main"
     assert len(value.parameters) == 2
 
     param1 = parameters.get(value.parameters[0])
-    assert param1.ident.name == b"r1"
+    assert param1.ident.data == b"r1"
     assert param1.type.name == b"u64"
     assert param1.type.width == 16
 
@@ -119,7 +119,7 @@ def can_build_function_with_properly_derived_types():
     assert param1.type.range.upper.data.hex(" ") == "ff ff"
 
     param2 = parameters.get(value.parameters[1])
-    assert param2.ident.name == b"r2"
+    assert param2.ident.data == b"r2"
     assert param2.type.name == b"u8"
     assert param2.type.width == 8
 

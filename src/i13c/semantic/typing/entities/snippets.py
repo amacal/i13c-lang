@@ -36,7 +36,4 @@ class Snippet:
 
     def signature(self) -> str:
         slots = ", ".join([str(slot) for slot in self.slots])
-        return f"{self.identifier.name.decode()}/{len(self.slots)} ({slots})"
-
-    def describe(self) -> str:
-        return f"name={self.identifier.name.decode()}/{len(self.slots)}"
+        return f"{self.identifier.data.decode()}/{len(self.slots)} ({slots})"

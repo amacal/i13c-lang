@@ -60,7 +60,7 @@ def build_callsites(
         callsites[callsite_id] = CallSite(
             id=callsite_id,
             ref=statement.ref,
-            callee=Identifier(name=statement.name),
+            callee=Identifier(data=statement.name),
             arguments=arguments,
         )
 

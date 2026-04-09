@@ -44,15 +44,15 @@ def validate_duplicated_function_names(
     seen: Set[bytes] = set()
 
     for callable in yield_callables(functions, snippets):
-        if callable.identifier.name in seen:
+        if callable.identifier.data in seen:
             diagnostics.append(
                 report_e3006_duplicated_function_names(
                     callable.ref,
-                    callable.identifier.name,
+                    callable.identifier.data,
                 )
             )
         else:
-            seen.add(callable.identifier.name)
+            seen.add(callable.identifier.data)
 
     return diagnostics
 

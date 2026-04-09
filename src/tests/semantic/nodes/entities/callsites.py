@@ -33,7 +33,7 @@ def can_build_callsite_with_no_arguments():
     assert isinstance(id, CallSiteId)
     assert isinstance(value, CallSite)
 
-    assert value.callee.name == b"foo"
+    assert value.callee.data == b"foo"
     assert len(value.arguments) == 0
 
 
@@ -53,7 +53,7 @@ def can_build_callsite_with_single_argument():
     assert isinstance(id, CallSiteId)
     assert isinstance(value, CallSite)
 
-    assert value.callee.name == b"foo"
+    assert value.callee.data == b"foo"
     assert len(value.arguments) == 1
 
     argument = value.arguments[0]

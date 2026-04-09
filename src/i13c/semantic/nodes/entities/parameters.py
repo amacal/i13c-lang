@@ -48,7 +48,7 @@ def build_parameters(
         parameters[parameter_id] = Parameter(
             ref=parameter.ref,
             type=type,
-            ident=Identifier(name=parameter.name),
+            ident=Identifier(data=parameter.name),
         )
 
     return OneToOne[ParameterId, Parameter].instance(parameters)

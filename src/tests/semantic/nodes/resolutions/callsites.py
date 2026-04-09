@@ -31,7 +31,7 @@ def can_resolve_callsite_calling_snippet():
     assert isinstance(callables.target, SnippetId)
 
     value = semantic.basic.snippets.get(callables.target)
-    assert value.identifier.name == b"foo"
+    assert value.identifier.data == b"foo"
 
 
 def can_resolve_callsite_calling_function():
@@ -59,7 +59,7 @@ def can_resolve_callsite_calling_function():
     assert isinstance(callables.target, FunctionId)
 
     value = semantic.basic.functions.get(callables.target)
-    assert value.identifier.name == b"foo"
+    assert value.identifier.data == b"foo"
 
 
 def can_reject_callsite_due_to_wrong_arity_more_than_expected():
@@ -89,7 +89,7 @@ def can_reject_callsite_due_to_wrong_arity_more_than_expected():
     assert isinstance(callables.target, SnippetId)
 
     value = semantic.basic.snippets.get(callables.target)
-    assert value.identifier.name == b"foo"
+    assert value.identifier.data == b"foo"
 
 
 def can_reject_callsite_due_to_wrong_arity_less_than_expected():
@@ -119,7 +119,7 @@ def can_reject_callsite_due_to_wrong_arity_less_than_expected():
     assert isinstance(callables.target, SnippetId)
 
     value = semantic.basic.snippets.get(callables.target)
-    assert value.identifier.name == b"foo"
+    assert value.identifier.data == b"foo"
 
 
 def can_reject_callsite_due_to_wrong_hex_width():
@@ -149,7 +149,7 @@ def can_reject_callsite_due_to_wrong_hex_width():
     assert isinstance(callables.target, SnippetId)
 
     value = semantic.basic.snippets.get(callables.target)
-    assert value.identifier.name == b"foo"
+    assert value.identifier.data == b"foo"
 
 
 def can_resolve_function_and_snippet_with_same_name():
@@ -180,7 +180,7 @@ def can_resolve_function_and_snippet_with_same_name():
     assert isinstance(accepted.target, SnippetId)
 
     snippet_value = semantic.basic.snippets.get(accepted.target)
-    assert snippet_value.identifier.name == b"foo"
+    assert snippet_value.identifier.data == b"foo"
 
     # function was rejected, due to wrong arity
     rejected = value.rejected[0].callable
@@ -189,7 +189,7 @@ def can_resolve_function_and_snippet_with_same_name():
     assert isinstance(rejected.target, FunctionId)
 
     function_value = semantic.basic.functions.get(rejected.target)
-    assert function_value.identifier.name == b"foo"
+    assert function_value.identifier.data == b"foo"
 
 
 def can_resolve_by_type_u64_max():
@@ -217,7 +217,7 @@ def can_resolve_by_type_u64_max():
     assert isinstance(callables.target, SnippetId)
 
     value = semantic.basic.snippets.get(callables.target)
-    assert value.identifier.name == b"foo"
+    assert value.identifier.data == b"foo"
 
 
 def can_resolve_by_expression_as_arg():
@@ -247,7 +247,7 @@ def can_resolve_by_expression_as_arg():
     assert isinstance(callables.target, FunctionId)
 
     value = semantic.basic.functions.get(callables.target)
-    assert value.identifier.name == b"foo"
+    assert value.identifier.data == b"foo"
 
     assert len(bindings) == 1
 
@@ -278,4 +278,4 @@ def can_reject_by_expression_as_arg():
     assert isinstance(callables.target, FunctionId)
 
     value = semantic.basic.functions.get(callables.target)
-    assert value.identifier.name == b"foo"
+    assert value.identifier.data == b"foo"

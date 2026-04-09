@@ -145,7 +145,7 @@ def rewrite_operand(
 
         # reference name must match bound slot name
         # we need to find binding for this reference
-        if binding.target.name.name != reference.name:
+        if binding.target.name.data != reference.data:
             continue
 
         # register bindings can rewrite to register operands

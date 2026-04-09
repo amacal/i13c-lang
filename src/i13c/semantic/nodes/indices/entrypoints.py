@@ -30,7 +30,7 @@ def build_entrypoints(
     out: Dict[CallableTarget, EntryPoint] = {}
 
     for fid, function in functions.items():
-        if function.identifier.name == EntryPointName:
+        if function.identifier.data == EntryPointName:
             if function.noreturn and not function.parameters:
                 out[fid] = EntryPoint(kind=b"function", target=fid)
 

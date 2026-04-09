@@ -44,7 +44,7 @@ def build_usages_by_expression(
                 # map expression to usage
                 usages[usage_id] = Usage(
                     ref=argument.ref,
-                    ident=Identifier(name=argument.name),
+                    ident=Identifier(data=argument.name),
                 )
 
         if isinstance(statement, tree.function.ValueStatement):
@@ -63,7 +63,7 @@ def build_usages_by_expression(
             # map expression to usage
             usages[usage_id] = Usage(
                 ref=statement.expr.ref,
-                ident=Identifier(name=statement.expr.name),
+                ident=Identifier(data=statement.expr.name),
             )
 
     return (

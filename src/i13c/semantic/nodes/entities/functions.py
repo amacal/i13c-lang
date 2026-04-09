@@ -47,7 +47,7 @@ def build_functions(
 
         functions[function_id] = Function(
             ref=function.ref,
-            identifier=Identifier(name=function.name),
+            identifier=Identifier(data=function.name),
             noreturn=function.noreturn,
             parameters=parameters,
             statements=statements,
