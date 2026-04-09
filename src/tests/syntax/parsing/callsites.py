@@ -1,4 +1,4 @@
-from i13c.syntax.tree import CallStatement, IntegerLiteral
+from i13c.syntax import tree
 from tests.syntax.parsing import parse_program
 
 
@@ -15,10 +15,10 @@ def can_parse_argument_span_without_trailing_whitespace():
     function = program.functions[0]
     statement = function.statements[0]
 
-    assert isinstance(statement, CallStatement)
+    assert isinstance(statement, tree.function.CallStatement)
     argument = statement.arguments[0]
 
-    assert isinstance(argument, IntegerLiteral)
+    assert isinstance(argument, tree.function.IntegerLiteral)
     assert argument.value == bytes([0x01])
     assert code.extract(argument.ref) == b"0x01"
 

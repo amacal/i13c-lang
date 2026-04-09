@@ -2,12 +2,12 @@ from typing import Dict, Iterable, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.syntax import NodeId
-from i13c.syntax.tree import Function
+from i13c.syntax import tree
 
 
 class FunctionListExtractor:
     @staticmethod
-    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[NodeId, Function]]:
+    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[NodeId, tree.function.Function]]:
         return artifacts.syntax_graph().functions.items()
 
     @staticmethod
@@ -22,7 +22,7 @@ class FunctionListExtractor:
         }
 
     @staticmethod
-    def rows(entry: Tuple[NodeId, Function]) -> Dict[str, str]:
+    def rows(entry: Tuple[NodeId, tree.function.Function]) -> Dict[str, str]:
         return {
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",

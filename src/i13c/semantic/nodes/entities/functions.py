@@ -37,9 +37,9 @@ def build_functions(
             sid = graph.statements.get_by_node(statement)
 
             match statement:
-                case tree.CallStatement():
+                case tree.function.CallStatement():
                     statements.append(CallSiteId(value=sid.value))
-                case tree.ValueStatement():
+                case tree.function.ValueStatement():
                     statements.append(ValueId(value=sid.value))
 
         # derive function ID from globally unique node ID

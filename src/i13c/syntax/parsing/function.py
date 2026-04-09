@@ -12,9 +12,9 @@ from i13c.syntax.parsing.core import (
 from i13c.syntax.parsing.types import parse_range
 
 
-def parse_function(state: ParsingState) -> tree.Function:
-    statements: List[tree.Statement] = []
-    parameters: List[tree.Parameter] = []
+def parse_function(state: ParsingState) -> tree.function.Function:
+    statements: List[tree.function.Statement] = []
+    parameters: List[tree.function.Parameter] = []
     noreturn: bool = False
 
     # function name is an identifier
@@ -44,7 +44,7 @@ def parse_function(state: ParsingState) -> tree.Function:
     # expect closed curly brace
     state.expect(Tokens.CURLY_CLOSE)
 
-    return tree.Function(
+    return tree.function.Function(
         ref=state.between(name, end),
         name=state.extract(name),
         noreturn=noreturn,
@@ -53,8 +53,8 @@ def parse_function(state: ParsingState) -> tree.Function:
     )
 
 
-def parse_parameters(state: ParsingState) -> List[tree.Parameter]:
-    parameters: List[tree.Parameter] = []
+def parse_parameters(state: ParsingState) -> List[tree.function.Parameter]:
+    parameters: List[tree.function.Parameter] = []
     parameters.append(parse_parameter(state))
 
     # a comma suggests next parameter
@@ -64,8 +64,8 @@ def parse_parameters(state: ParsingState) -> List[tree.Parameter]:
     return parameters
 
 
-def parse_parameter(state: ParsingState) -> tree.Parameter:
-    range: Optional[tree.Range] = None
+def parse_parameter(state: ParsingState) -> tree.function.Parameter:
+    range: Optional[tree.types.Range] = None
     ident = state.expect(Tokens.IDENT)
 
     # expect ':' followed by type
@@ -75,10 +75,10 @@ def parse_parameter(state: ParsingState) -> tree.Parameter:
     if state.is_in(Tokens.SQUARE_OPEN):
         range = parse_range(state)
 
-    return tree.Parameter(
+    return tree.function.Parameter(
         ref=state.span(ident),
         name=state.extract(ident),
-        type=tree.Type(name=state.extract(type), range=range),
+        type=tree.types.Type(name=state.extract(type), range=range),
     )
 
 
@@ -104,7 +104,7 @@ def parse_function_flags(state: ParsingState) -> bool:
     return terminal
 
 
-def parse_statement(state: ParsingState) -> tree.Statement:
+def parse_statement(state: ParsingState) -> tree.function.Statement:
     token = state.expect(Tokens.IDENT, Tokens.KEYWORD)
 
     if token.code == Tokens.IDENT:
@@ -116,8 +116,8 @@ def parse_statement(state: ParsingState) -> tree.Statement:
     raise UnexpectedTokenCode(token, [Tokens.IDENT, Tokens.KEYWORD], token.code)
 
 
-def parse_callsite(state: ParsingState, ident: LexingToken) -> tree.CallStatement:
-    arguments: List[tree.Argument] = []
+def parse_callsite(state: ParsingState, ident: LexingToken) -> tree.function.CallStatement:
+    arguments: List[tree.function.Argument] = []
 
     # expect opening round bracket
     state.expect(Tokens.ROUND_OPEN)
@@ -132,15 +132,15 @@ def parse_callsite(state: ParsingState, ident: LexingToken) -> tree.CallStatemen
     # expect a semicolon
     state.expect(Tokens.SEMICOLON)
 
-    return tree.CallStatement(
+    return tree.function.CallStatement(
         ref=state.between(ident, end),
         name=state.extract(ident),
         arguments=arguments,
     )
 
 
-def parse_value(state: ParsingState) -> tree.ValueStatement:
-    range: Optional[tree.Range] = None
+def parse_value(state: ParsingState) -> tree.function.ValueStatement:
+    range: Optional[tree.types.Range] = None
     ident = state.expect(Tokens.IDENT)
 
     # expect ':' followed by type
@@ -157,20 +157,20 @@ def parse_value(state: ParsingState) -> tree.ValueStatement:
     # expect a semicolon
     state.expect(Tokens.SEMICOLON)
 
-    return tree.ValueStatement(
+    return tree.function.ValueStatement(
         ref=state.span(ident),
         name=state.extract(ident),
-        type=tree.Type(name=state.extract(type), range=range),
+        type=tree.types.Type(name=state.extract(type), range=range),
         expr=expression,
     )
 
 
-def parse_value_expression(state: ParsingState) -> tree.ValueExpression:
+def parse_value_expression(state: ParsingState) -> tree.function.ValueExpression:
     return parse_argument(state)
 
 
-def parse_arguments(state: ParsingState) -> List[tree.Argument]:
-    arguments: List[tree.Argument] = []
+def parse_arguments(state: ParsingState) -> List[tree.function.Argument]:
+    arguments: List[tree.function.Argument] = []
     arguments.append(parse_argument(state))
 
     # a comma suggests next argument
@@ -180,18 +180,18 @@ def parse_arguments(state: ParsingState) -> List[tree.Argument]:
     return arguments
 
 
-def parse_argument(state: ParsingState) -> tree.Argument:
+def parse_argument(state: ParsingState) -> tree.function.Argument:
     token = state.expect(Tokens.HEX, Tokens.IDENT)
 
     # a hex can be only an integer literal
     if token.code == Tokens.HEX:
-        return tree.IntegerLiteral(
+        return tree.function.IntegerLiteral(
             ref=state.span(token),
             value=bytes.fromhex(state.extract(token)[2:]),
         )
 
     # an identifier can be only an expression
-    return tree.Expression(
+    return tree.function.Expression(
         ref=state.span(token),
         name=state.extract(token),
     )

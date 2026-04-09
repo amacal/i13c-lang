@@ -22,7 +22,7 @@ def build_literals(
     literals: Dict[LiteralId, Literal] = {}
 
     for nid, literal in graph.literals.items():
-        assert isinstance(literal, tree.IntegerLiteral)
+        assert isinstance(literal, tree.function.IntegerLiteral)
 
         # derive literal ID from globally unique node ID
         literal_id = LiteralId(value=nid.value)

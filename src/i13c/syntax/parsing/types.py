@@ -3,7 +3,7 @@ from i13c.syntax.lexing import Tokens
 from i13c.syntax.parsing.core import ParsingState
 
 
-def parse_range(state: ParsingState) -> tree.Range:
+def parse_range(state: ParsingState) -> tree.types.Range:
     # expect opening square bracket
     state.expect(Tokens.SQUARE_OPEN)
     lower = state.expect(Tokens.HEX)
@@ -15,7 +15,7 @@ def parse_range(state: ParsingState) -> tree.Range:
     # expect closing square bracket
     state.expect(Tokens.SQUARE_CLOSE)
 
-    return tree.Range(
+    return tree.types.Range(
         lower=bytes.fromhex(state.extract(lower)[2:]),
         upper=bytes.fromhex(state.extract(upper)[2:]),
     )

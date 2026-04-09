@@ -28,12 +28,12 @@ def build_callsites(
         arguments: List[Argument] = []
 
         # accept only call statements
-        if not isinstance(statement, tree.CallStatement):
+        if not isinstance(statement, tree.function.CallStatement):
             continue
 
         for argument in statement.arguments:
             match argument:
-                case tree.IntegerLiteral() as lit:
+                case tree.function.IntegerLiteral() as lit:
                     # find literal by AST node
                     lid = graph.literals.get_by_node(lit)
 
@@ -43,7 +43,7 @@ def build_callsites(
                             target=LiteralId(value=lid.value),
                         )
                     )
-                case tree.Expression() as expr:
+                case tree.function.Expression() as expr:
                     # find expression by AST node
                     eid = graph.expressions.get_by_node(expr)
 

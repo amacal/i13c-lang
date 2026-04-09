@@ -28,13 +28,13 @@ def build_operands(
 
     for nid, operand in graph.operands.items():
         match operand:
-            case tree.Register() as reg:
+            case tree.snippet.Register() as reg:
                 target = Operand.register(operand.ref, reg.name)
-            case tree.Immediate() as imm:
+            case tree.snippet.Immediate() as imm:
                 target = Operand.immediate(operand.ref, imm.data)
-            case tree.Reference() as ref:
+            case tree.snippet.Reference() as ref:
                 target = Operand.reference(operand.ref, ref.name)
-            case tree.Address() as addr:
+            case tree.snippet.Address() as addr:
                 target = Operand.address(
                     operand.ref,
                     Register.from_name(addr.base.name),

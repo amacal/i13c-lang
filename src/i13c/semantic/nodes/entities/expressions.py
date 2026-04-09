@@ -23,7 +23,7 @@ def build_expressions(
     expressions: Dict[ExpressionId, Expression] = {}
 
     for nid, expression in graph.expressions.items():
-        assert isinstance(expression, tree.Expression)
+        assert isinstance(expression, tree.function.Expression)
 
         # derive expression ID from globally unique node ID
         expression_id = ExpressionId(value=nid.value)

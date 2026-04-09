@@ -1,4 +1,4 @@
-from i13c.syntax.tree import Immediate, Reference, Register
+from i13c.syntax import tree
 from tests.syntax.parsing import parse_instructions
 
 
@@ -20,11 +20,11 @@ def can_parse_instruction_with_operands():
     assert len(instructions[0].operands) == 2
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, Register)
+    assert isinstance(operand1, tree.snippet.Register)
     assert operand1.name == b"rax"
 
     operand2 = instructions[0].operands[1]
-    assert isinstance(operand2, Register)
+    assert isinstance(operand2, tree.snippet.Register)
     assert operand2.name == b"rbx"
 
 
@@ -35,11 +35,11 @@ def can_parse_instruction_with_operands_reference():
     assert len(instructions[0].operands) == 2
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, Register)
+    assert isinstance(operand1, tree.snippet.Register)
     assert operand1.name == b"rax"
 
     operand2 = instructions[0].operands[1]
-    assert isinstance(operand2, Reference)
+    assert isinstance(operand2, tree.snippet.Reference)
     assert operand2.name == b"left"
 
 
@@ -50,11 +50,11 @@ def can_parse_instruction_with_immediate():
     assert len(instructions[0].operands) == 2
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, Register)
+    assert isinstance(operand1, tree.snippet.Register)
     assert operand1.name == b"rax"
 
     operand2 = instructions[0].operands[1]
-    assert isinstance(operand2, Immediate)
+    assert isinstance(operand2, tree.snippet.Immediate)
     assert operand2.data == bytes([0x12, 0x34])
 
 

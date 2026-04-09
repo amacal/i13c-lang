@@ -24,15 +24,15 @@ def parse(
     state = ParsingState(code=code, tokens=tokens, position=0)
     diagnostics: List[Diagnostic] = []
 
-    snippets: List[tree.Snippet] = []
-    functions: List[tree.Function] = []
+    snippets: List[tree.snippet.Snippet] = []
+    functions: List[tree.function.Function] = []
 
     try:
         while not state.is_eof():
             match parse_entity(state):
-                case tree.Snippet() as snippet:
+                case tree.snippet.Snippet() as snippet:
                     snippets.append(snippet)
-                case tree.Function() as function:
+                case tree.function.Function() as function:
                     functions.append(function)
 
     except UnexpectedEndOfTokens as e:
@@ -61,7 +61,9 @@ def parse(
     )
 
 
-def parse_entity(state: ParsingState) -> Union[tree.Snippet, tree.Function]:
+def parse_entity(
+    state: ParsingState,
+) -> Union[tree.snippet.Snippet, tree.function.Function]:
     expected = {b"asm", b"fn"}
     keyword = state.expect(Tokens.KEYWORD)
 

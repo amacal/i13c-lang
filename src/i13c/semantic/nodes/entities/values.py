@@ -28,11 +28,11 @@ def build_values(
         expression: Optional[Expression] = None
 
         # accept only value statements
-        if not isinstance(statement, tree.ValueStatement):
+        if not isinstance(statement, tree.function.ValueStatement):
             continue
 
         match statement.expr:
-            case tree.IntegerLiteral() as lit:
+            case tree.function.IntegerLiteral() as lit:
                 # find literal by AST node
                 lid = graph.literals.get_by_node(lit)
 
@@ -40,7 +40,7 @@ def build_values(
                     kind=b"literal",
                     target=LiteralId(value=lid.value),
                 )
-            case tree.Expression() as expr:
+            case tree.function.Expression() as expr:
                 # find expression by AST node
                 eid = graph.expressions.get_by_node(expr)
 

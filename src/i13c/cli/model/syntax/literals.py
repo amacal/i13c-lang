@@ -2,12 +2,14 @@ from typing import Dict, Iterable, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.syntax import NodeId
-from i13c.syntax.tree import IntegerLiteral, Literal
+from i13c.syntax import tree
 
 
 class LiteralListExtractor:
     @staticmethod
-    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[NodeId, Literal]]:
+    def extract(
+        artifacts: GraphArtifacts,
+    ) -> Iterable[Tuple[NodeId, tree.function.Literal]]:
         return artifacts.syntax_graph().literals.items()
 
     @staticmethod
@@ -19,7 +21,7 @@ class LiteralListExtractor:
         }
 
     @staticmethod
-    def rows(entry: Tuple[NodeId, Literal]) -> Dict[str, str]:
+    def rows(entry: Tuple[NodeId, tree.function.Literal]) -> Dict[str, str]:
         return {
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",
@@ -29,7 +31,9 @@ class LiteralListExtractor:
 
 class LiteralIntegersListExtractor:
     @staticmethod
-    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[NodeId, IntegerLiteral]]:
+    def extract(
+        artifacts: GraphArtifacts,
+    ) -> Iterable[Tuple[NodeId, tree.function.IntegerLiteral]]:
         return artifacts.syntax_graph().literals.items()
 
     @staticmethod
@@ -41,7 +45,7 @@ class LiteralIntegersListExtractor:
         }
 
     @staticmethod
-    def rows(entry: Tuple[NodeId, IntegerLiteral]) -> Dict[str, str]:
+    def rows(entry: Tuple[NodeId, tree.function.IntegerLiteral]) -> Dict[str, str]:
         return {
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",

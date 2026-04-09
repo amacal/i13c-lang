@@ -1,8 +1,8 @@
 from i13c.core.result import Err, Ok
+from i13c.syntax import tree
 from i13c.syntax.lexing import tokenize
 from i13c.syntax.parsing import parse
 from i13c.syntax.source import open_text
-from i13c.syntax.tree import Binding
 from tests.syntax.parsing import parse_snippet
 
 
@@ -24,7 +24,7 @@ def can_parse_snippets_with_single_arg():
     assert slot.name == b"code"
     assert slot.type.name == b"u32"
 
-    assert isinstance(slot.bind, Binding)
+    assert isinstance(slot.bind, tree.snippet.Binding)
     assert slot.bind.name == b"rdi"
 
 
@@ -46,14 +46,14 @@ def can_parse_snippets_with_multiple_args():
     assert slot1.name == b"code"
     assert slot1.type.name == b"u32"
 
-    assert isinstance(slot1.bind, Binding)
+    assert isinstance(slot1.bind, tree.snippet.Binding)
     assert slot1.bind.name == b"rdi"
 
     slot2 = slots[1]
     assert slot2.name == b"id"
     assert slot2.type.name == b"u16"
 
-    assert isinstance(slot2.bind, Binding)
+    assert isinstance(slot2.bind, tree.snippet.Binding)
     assert slot2.bind.name == b"rax"
 
 
@@ -71,7 +71,7 @@ def can_parse_snippets_with_bind_to_immediate():
     assert slot.name == b"code"
     assert slot.type.name == b"u32"
 
-    assert isinstance(slot.bind, Binding)
+    assert isinstance(slot.bind, tree.snippet.Binding)
     assert slot.bind.name == b"imm"
 
 
@@ -131,8 +131,8 @@ def can_parse_snippet_with_ranged_parameter():
     assert slot.name == b"value"
     assert slot.type.name == b"u8"
     assert slot.type.range is not None
-    assert slot.type.range.lower == bytes([0x10])
-    assert slot.type.range.upper == bytes([0x20])
+    assert slot.type.range.lower.hex() == "0x10"
+    assert slot.type.range.upper.hex() == "0x20"
 
 
 def can_handle_snippet_missing_slot_comma():

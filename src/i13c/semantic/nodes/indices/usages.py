@@ -27,10 +27,10 @@ def build_usages_by_expression(
     for _, statement in graph.statements.items():
 
         # for callsites we need to handle arguments
-        if isinstance(statement, tree.CallStatement):
+        if isinstance(statement, tree.function.CallStatement):
             for argument in statement.arguments:
                 # not expression must be literals
-                if not isinstance(argument, tree.Expression):
+                if not isinstance(argument, tree.function.Expression):
                     continue
 
                 # derive parameter ID from globally unique node ID
@@ -47,9 +47,9 @@ def build_usages_by_expression(
                     ident=Identifier(name=argument.name),
                 )
 
-        if isinstance(statement, tree.ValueStatement):
+        if isinstance(statement, tree.function.ValueStatement):
             # not expression must be literals
-            if not isinstance(statement.expr, tree.Expression):
+            if not isinstance(statement.expr, tree.function.Expression):
                 continue
 
             # derive parameter ID from globally unique node ID

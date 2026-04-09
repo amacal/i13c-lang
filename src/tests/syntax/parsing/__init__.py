@@ -1,13 +1,13 @@
 from typing import Tuple
 
 from i13c.core import result
+from i13c.syntax import tree
 from i13c.syntax.lexing import tokenize
 from i13c.syntax.parsing import parse
 from i13c.syntax.source import SourceCode, open_text
-from i13c.syntax.tree import Instruction, Program, Snippet
 
 
-def parse_program(data: str) -> Tuple[SourceCode, Program]:
+def parse_program(data: str) -> Tuple[SourceCode, tree.Program]:
     code = open_text(data)
 
     tokens = tokenize(code)
@@ -18,15 +18,15 @@ def parse_program(data: str) -> Tuple[SourceCode, Program]:
 
     return code, program.value
 
-def parse_snippet(data: str) -> Snippet:
+def parse_snippet(data: str) -> tree.snippet.Snippet:
     _, program = parse_program(data)
-    assert isinstance(program, Program)
+    assert isinstance(program, tree.Program)
 
     assert len(program.snippets) == 1
     return program.snippets[0]
 
 
-def parse_instructions(data: str) -> Tuple[Instruction, ...]:
+def parse_instructions(data: str) -> Tuple[tree.snippet.Instruction, ...]:
     snippet = parse_snippet(data)
 
     assert len(snippet.instructions) >= 1

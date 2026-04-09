@@ -11,10 +11,10 @@ from i13c.syntax.parsing.core import (
 from i13c.syntax.parsing.types import parse_range
 
 
-def parse_snippet(state: ParsingState) -> tree.Snippet:
-    instructions: List[tree.Instruction] = []
-    slots: List[tree.Slot] = []
-    clobbers: List[tree.Register] = []
+def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
+    instructions: List[tree.snippet.Instruction] = []
+    slots: List[tree.snippet.Slot] = []
+    clobbers: List[tree.snippet.Register] = []
     noreturn: bool = False
 
     # snippet name is an identifier
@@ -44,7 +44,7 @@ def parse_snippet(state: ParsingState) -> tree.Snippet:
     # expect closed curly brace
     state.expect(Tokens.CURLY_CLOSE)
 
-    return tree.Snippet(
+    return tree.snippet.Snippet(
         ref=state.between(name, end),
         name=state.extract(name),
         noreturn=noreturn,
@@ -54,8 +54,8 @@ def parse_snippet(state: ParsingState) -> tree.Snippet:
     )
 
 
-def parse_slots(state: ParsingState) -> List[tree.Slot]:
-    parameters: List[tree.Slot] = []
+def parse_slots(state: ParsingState) -> List[tree.snippet.Slot]:
+    parameters: List[tree.snippet.Slot] = []
     parameters.append(parse_slot(state))
 
     # a comma suggests next parameter
@@ -65,8 +65,8 @@ def parse_slots(state: ParsingState) -> List[tree.Slot]:
     return parameters
 
 
-def parse_slot(state: ParsingState) -> tree.Slot:
-    range: Optional[tree.Range] = None
+def parse_slot(state: ParsingState) -> tree.snippet.Slot:
+    range: Optional[tree.types.Range] = None
     ident = state.expect(Tokens.IDENT)
 
     # expect '@' followed by register or immediate
@@ -85,16 +85,18 @@ def parse_slot(state: ParsingState) -> tree.Slot:
     if state.is_in(Tokens.SQUARE_OPEN):
         range = parse_range(state)
 
-    return tree.Slot(
+    return tree.snippet.Slot(
         name=state.extract(ident),
-        bind=tree.Binding(name=state.extract(bind)),
-        type=tree.Type(name=state.extract(type), range=range),
+        bind=tree.snippet.Binding(name=state.extract(bind)),
+        type=tree.types.Type(name=state.extract(type), range=range),
     )
 
 
-def parse_snippet_flags(state: ParsingState) -> Tuple[List[tree.Register], bool]:
+def parse_snippet_flags(
+    state: ParsingState,
+) -> Tuple[List[tree.snippet.Register], bool]:
     keyword: Optional[LexingToken] = None
-    clobbers: Optional[List[tree.Register]] = None
+    clobbers: Optional[List[tree.snippet.Register]] = None
     terminal = False
 
     while not state.is_in(Tokens.CURLY_OPEN):
@@ -122,25 +124,33 @@ def parse_snippet_flags(state: ParsingState) -> Tuple[List[tree.Register], bool]
     return clobbers or [], terminal
 
 
-def parse_clobbers(state: ParsingState) -> List[tree.Register]:
-    clobbers: List[tree.Register] = []
+def parse_clobbers(state: ParsingState) -> List[tree.snippet.Register]:
+    clobbers: List[tree.snippet.Register] = []
 
     # at least one register is expected
     clobber = state.expect(Tokens.REG)
-    clobbers.append(tree.Register(ref=state.span(clobber), name=state.extract(clobber)))
+    clobbers.append(
+        tree.snippet.Register(
+            ref=state.span(clobber),
+            name=state.extract(clobber),
+        )
+    )
 
     # a comma suggests next clobber
     while state.accept(Tokens.COMMA):
         clobber = state.expect(Tokens.REG)
         clobbers.append(
-            tree.Register(ref=state.span(clobber), name=state.extract(clobber))
+            tree.snippet.Register(
+                ref=state.span(clobber),
+                name=state.extract(clobber),
+            )
         )
 
     return clobbers
 
 
-def parse_instruction(state: ParsingState) -> tree.Instruction:
-    operands: List[tree.Operand] = []
+def parse_instruction(state: ParsingState) -> tree.snippet.Instruction:
+    operands: List[tree.snippet.Operand] = []
     token = state.expect(Tokens.IDENT)
 
     # optional operands
@@ -151,9 +161,9 @@ def parse_instruction(state: ParsingState) -> tree.Instruction:
     end = state.expect(Tokens.SEMICOLON)
 
     # build instruction and token reference
-    mnemonic = tree.Mnemonic(name=state.extract(token))
+    mnemonic = tree.snippet.Mnemonic(name=state.extract(token))
 
-    return tree.Instruction(
+    return tree.snippet.Instruction(
         ref=state.between(token, end),
         mnemonic=mnemonic,
         operands=operands,
@@ -163,8 +173,8 @@ def parse_instruction(state: ParsingState) -> tree.Instruction:
 OPERANDS_START = [Tokens.REG, Tokens.HEX, Tokens.AT, Tokens.SQUARE_OPEN]
 
 
-def parse_operands(state: ParsingState) -> List[tree.Operand]:
-    operands: List[tree.Operand] = []
+def parse_operands(state: ParsingState) -> List[tree.snippet.Operand]:
+    operands: List[tree.snippet.Operand] = []
     operands.append(parse_operand(state))
 
     # a comma suggests next operand
@@ -174,16 +184,16 @@ def parse_operands(state: ParsingState) -> List[tree.Operand]:
     return operands
 
 
-def parse_operand(state: ParsingState) -> tree.Operand:
+def parse_operand(state: ParsingState) -> tree.snippet.Operand:
     token = state.expect(*OPERANDS_START)
 
     # register has to provide its name
     if token.code == Tokens.REG:
-        return tree.Register(ref=state.span(token), name=state.extract(token))
+        return tree.snippet.Register(ref=state.span(token), name=state.extract(token))
 
     # immediate has to provide its decimal value
     elif token.code == Tokens.HEX:
-        return tree.Immediate(
+        return tree.snippet.Immediate(
             ref=state.span(token),
             data=bytes.fromhex(state.extract(token)[2:]),
         )
@@ -194,14 +204,14 @@ def parse_operand(state: ParsingState) -> tree.Operand:
         token = state.expect(Tokens.IDENT)
 
         # which has to be extracted
-        return tree.Reference(
+        return tree.snippet.Reference(
             ref=state.span(token),
             name=state.extract(token),
         )
 
     # address operands starts with a square open bracket
     else:
-        offset: Optional[tree.Offset] = None
+        offset: Optional[tree.snippet.Offset] = None
 
         # now we expect a register as the base
         base = state.expect(Tokens.REG)
@@ -217,9 +227,9 @@ def parse_operand(state: ParsingState) -> tree.Operand:
             kind = "forward" if end.code == Tokens.PLUS else "backward"
 
             # to be converted to an immediate operand
-            offset = tree.Offset(
+            offset = tree.snippet.Offset(
                 kind=kind,
-                value=tree.Immediate(
+                value=tree.snippet.Immediate(
                     ref=state.span(value),
                     data=bytes.fromhex(state.extract(value)[2:]),
                 ),
@@ -228,8 +238,8 @@ def parse_operand(state: ParsingState) -> tree.Operand:
             # address has to be closed with a square close bracket
             end = state.expect(Tokens.SQUARE_CLOSE)
 
-        return tree.Address(
+        return tree.snippet.Address(
             ref=state.between(token, end),
-            base=tree.Register(ref=state.span(base), name=state.extract(base)),
+            base=tree.snippet.Register(ref=state.span(base), name=state.extract(base)),
             offset=offset,
         )

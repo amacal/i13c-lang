@@ -47,53 +47,53 @@ class NodesVisitor:
     def on_program(self, program: tree.Program) -> None:
         pass
 
-    def on_snippet(self, snippet: tree.Snippet) -> None:
+    def on_snippet(self, snippet: tree.snippet.Snippet) -> None:
         self.graph.snippets.append(self.next(), snippet)
 
-    def on_instruction(self, instruction: tree.Instruction) -> None:
+    def on_instruction(self, instruction: tree.snippet.Instruction) -> None:
         self.graph.instructions.append(self.next(), instruction)
 
-    def on_function(self, function: tree.Function) -> None:
+    def on_function(self, function: tree.function.Function) -> None:
         self.graph.functions.append(self.next(), function)
 
-    def on_parameter(self, parameter: tree.Parameter) -> None:
+    def on_parameter(self, parameter: tree.function.Parameter) -> None:
         self.graph.parameters.append(self.next(), parameter)
 
-    def on_statement(self, statement: tree.Statement) -> None:
+    def on_statement(self, statement: tree.function.Statement) -> None:
         self.graph.statements.append(self.next(), statement)
 
-    def on_literal(self, literal: tree.Literal) -> None:
+    def on_literal(self, literal: tree.function.Literal) -> None:
         self.graph.literals.append(self.next(), literal)
 
-    def on_expression(self, expression: tree.Expression) -> None:
+    def on_expression(self, expression: tree.function.Expression) -> None:
         self.graph.expressions.append(self.next(), expression)
 
-    def on_operand(self, operand: tree.Operand) -> None:
+    def on_operand(self, operand: tree.snippet.Operand) -> None:
         self.graph.operands.append(self.next(), operand)
 
 
 @dataclass(kw_only=True)
 class SyntaxGraph:
-    snippets: Bidirectional[tree.Snippet]
-    operands: Bidirectional[tree.Operand]
-    instructions: Bidirectional[tree.Instruction]
-    functions: Bidirectional[tree.Function]
-    statements: Bidirectional[tree.Statement]
-    literals: Bidirectional[tree.Literal]
-    expressions: Bidirectional[tree.Expression]
-    parameters: Bidirectional[tree.Parameter]
+    snippets: Bidirectional[tree.snippet.Snippet]
+    operands: Bidirectional[tree.snippet.Operand]
+    instructions: Bidirectional[tree.snippet.Instruction]
+    functions: Bidirectional[tree.function.Function]
+    statements: Bidirectional[tree.function.Statement]
+    literals: Bidirectional[tree.function.Literal]
+    expressions: Bidirectional[tree.function.Expression]
+    parameters: Bidirectional[tree.function.Parameter]
 
     @staticmethod
     def empty() -> SyntaxGraph:
         return SyntaxGraph(
-            snippets=Bidirectional[tree.Snippet].empty(),
-            operands=Bidirectional[tree.Operand].empty(),
-            instructions=Bidirectional[tree.Instruction].empty(),
-            functions=Bidirectional[tree.Function].empty(),
-            statements=Bidirectional[tree.Statement].empty(),
-            literals=Bidirectional[tree.Literal].empty(),
-            expressions=Bidirectional[tree.Expression].empty(),
-            parameters=Bidirectional[tree.Parameter].empty(),
+            snippets=Bidirectional[tree.snippet.Snippet].empty(),
+            operands=Bidirectional[tree.snippet.Operand].empty(),
+            instructions=Bidirectional[tree.snippet.Instruction].empty(),
+            functions=Bidirectional[tree.function.Function].empty(),
+            statements=Bidirectional[tree.function.Statement].empty(),
+            literals=Bidirectional[tree.function.Literal].empty(),
+            expressions=Bidirectional[tree.function.Expression].empty(),
+            parameters=Bidirectional[tree.function.Parameter].empty(),
         )
 
 

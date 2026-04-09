@@ -2,14 +2,14 @@ from typing import Dict, Iterable, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
 from i13c.semantic.syntax import NodeId
-from i13c.syntax.tree import CallStatement, Statement
+from i13c.syntax import tree
 
 
 class StatementListExtractor:
     @staticmethod
     def extract(
         artifacts: GraphArtifacts,
-    ) -> Iterable[Tuple[NodeId, Statement]]:
+    ) -> Iterable[Tuple[NodeId, tree.function.Statement]]:
         return artifacts.syntax_graph().statements.items()
 
     @staticmethod
@@ -21,7 +21,7 @@ class StatementListExtractor:
         }
 
     @staticmethod
-    def rows(entry: Tuple[NodeId, Statement]) -> Dict[str, str]:
+    def rows(entry: Tuple[NodeId, tree.function.Statement]) -> Dict[str, str]:
         return {
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",
@@ -33,9 +33,9 @@ class StatementCallsListExtractor:
     @staticmethod
     def extract(
         artifacts: GraphArtifacts,
-    ) -> Iterable[Tuple[NodeId, CallStatement]]:
+    ) -> Iterable[Tuple[NodeId, tree.function.CallStatement]]:
         for key, value in artifacts.syntax_graph().statements.items():
-            if isinstance(value, CallStatement):
+            if isinstance(value, tree.function.CallStatement):
                 yield key, value
 
     @staticmethod
@@ -48,7 +48,7 @@ class StatementCallsListExtractor:
         }
 
     @staticmethod
-    def rows(entry: Tuple[NodeId, CallStatement]) -> Dict[str, str]:
+    def rows(entry: Tuple[NodeId, tree.function.CallStatement]) -> Dict[str, str]:
         return {
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",

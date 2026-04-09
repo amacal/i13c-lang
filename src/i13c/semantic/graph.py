@@ -10,7 +10,6 @@ from i13c.semantic.model import (
 )
 from i13c.semantic.nodes import configure_nodes
 from i13c.semantic.rules import configure_rules
-from i13c.semantic.syntax import SyntaxGraph
 
 
 def configure_semantic_graph() -> GraphGroup:
@@ -42,7 +41,6 @@ def configure_self() -> GraphNode:
 
 
 def build(
-    syntax: SyntaxGraph,
     entities: Dict[str, Any],
     indices: Dict[str, Any],
     resolutions: Dict[str, Any],
