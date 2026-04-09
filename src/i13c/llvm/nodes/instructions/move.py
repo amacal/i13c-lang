@@ -3,6 +3,15 @@ from typing import Dict, Protocol, Tuple, Type
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.core import (
+    ComputedAddress,
+    Displacement,
+)
+from i13c.llvm.typing.instructions.core import Immediate as Imm
+from i13c.llvm.typing.instructions.core import Register as Reg
+from i13c.llvm.typing.instructions.core import (
+    Scaler,
+)
 from i13c.llvm.typing.instructions.move import (
     MovOffImm,
     MovOffReg,
@@ -31,7 +40,7 @@ def lower_register_immediate(
 ) -> InstructionEntry:
 
     dst = IR_REGISTER_FORWARD_64[destination.name]
-    imm = source.value
+    imm = Imm(data=source.data, width=source.width)
 
     return (
         InstructionId(value=generator.next()),
@@ -60,12 +69,21 @@ def lower_address_immediate(
     source: Immediate,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD_64[destination.base.name]
-    off = destination.offset.value if destination.offset is not None else 0
+    dst = Reg.parse64(destination.base.name.decode())
+    imm = Imm(data=source.data, width=source.width)
+    off = destination.offset if destination.offset is not None else bytes([0x00])
 
     return (
         InstructionId(value=generator.next()),
-        MovOffImm(dst=dst, off=off, imm=source.value),
+        MovOffImm(
+            dst=ComputedAddress(
+                base=dst,
+                disp=Displacement.auto(off),
+                scaler=Scaler.none(),
+                width=64,
+            ),
+            imm=imm,
+        ),
     )
 
 
@@ -75,13 +93,21 @@ def lower_address_register(
     source: Register,
 ) -> InstructionEntry:
 
-    dst = IR_REGISTER_FORWARD_64[destination.base.name]
+    dst = Reg.parse64(destination.base.name.decode())
     src = IR_REGISTER_FORWARD_64[source.name]
-    off = destination.offset.value if destination.offset is not None else 0
+    off = destination.offset if destination.offset is not None else bytes([0x00])
 
     return (
         InstructionId(value=generator.next()),
-        MovOffReg(dst=dst, off=off, src=src),
+        MovOffReg(
+            dst=ComputedAddress(
+                base=dst,
+                disp=Displacement.auto(off),
+                scaler=Scaler.none(),
+                width=64,
+            ),
+            src=src,
+        ),
     )
 
 
@@ -92,12 +118,20 @@ def lower_register_address(
 ) -> InstructionEntry:
 
     dst = IR_REGISTER_FORWARD_64[destination.name]
-    src = IR_REGISTER_FORWARD_64[source.base.name]
-    off = source.offset.value if source.offset is not None else 0
+    src = Reg.parse64(source.base.name.decode())
+    off = source.offset if source.offset is not None else bytes([0x00])
 
     return (
         InstructionId(value=generator.next()),
-        MovRegOff(dst=dst, off=off, src=src),
+        MovRegOff(
+            dst=dst,
+            src=ComputedAddress(
+                base=src,
+                disp=Displacement.auto(off),
+                scaler=Scaler.none(),
+                width=64,
+            ),
+        ),
     )
 
 

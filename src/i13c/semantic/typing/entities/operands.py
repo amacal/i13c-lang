@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 from typing import Optional, Tuple, Union
 
-from i13c.semantic.core import Width, derive_width
+from i13c.semantic.core import Width
 from i13c.syntax.source import Span
 
 # fmt: off
@@ -79,16 +79,14 @@ class Register:
 
 @dataclass(kw_only=True)
 class Immediate:
-    value: int
+    data: bytes
     width: Width
 
     @staticmethod
-    def from_value(value: int) -> Immediate:
-        return Immediate(value=value, width=derive_width(abs(value)))
-
-    @staticmethod
-    def optional(value: Optional[int]) -> Optional[Immediate]:
-        return Immediate.from_value(value) if value is not None else None
+    def from_bytes(data: bytes) -> Immediate:
+        width = len(data) * 8
+        assert width in (8, 16, 32, 64)
+        return Immediate(data=data, width=width)
 
     def symbol(self) -> OperandSymbol:
         if self.width == 8:
@@ -111,10 +109,27 @@ class Reference:
         assert False
 
 
+OffsetKind = Kind["forward", "backward"]
+
+
+@dataclass(kw_only=True)
+class Offset:
+    kind: OffsetKind
+    value: Immediate
+
+    @staticmethod
+    def optional(data: Optional[Tuple[OffsetKind, bytes]]) -> Optional[Offset]:
+        return (
+            Offset(kind=data[0], value=Immediate.from_bytes(data[1]))
+            if data is not None
+            else None
+        )
+
+
 @dataclass(kw_only=True)
 class Address:
     base: Register
-    offset: Optional[Immediate]
+    offset: Optional[Offset]
 
     def symbol(self) -> OperandSymbol:
         return b"addr"
@@ -147,11 +162,11 @@ class Operand:
         )
 
     @staticmethod
-    def immediate(ref: Span, value: int) -> Operand:
+    def immediate(ref: Span, data: bytes) -> Operand:
         return Operand(
             ref=ref,
             kind=b"immediate",
-            target=Immediate.from_value(value),
+            target=Immediate.from_bytes(data),
         )
 
     @staticmethod
@@ -163,7 +178,7 @@ class Operand:
         )
 
     @staticmethod
-    def address(ref: Span, base: Register, offset: Optional[Immediate]) -> Operand:
+    def address(ref: Span, base: Register, offset: Optional[Offset]) -> Operand:
         return Operand(
             ref=ref,
             kind=b"address",

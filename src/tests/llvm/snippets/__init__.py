@@ -9,6 +9,6 @@ def can_lower_multiple_callsites():
     """)
 
     assert instructions == [
-        "mov rax, 0x00000001",
+        "mov rax, 0x01",
         "syscall",
     ]

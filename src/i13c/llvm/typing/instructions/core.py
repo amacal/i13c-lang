@@ -14,74 +14,141 @@ from i13c.llvm.typing.registers import (
 )
 
 ScaleValue = Kind[1, 2, 4, 8]
-ImmediateWidth = Kind[8, 32, 64]
+ImmediateWidth = Kind[8, 16, 32, 64]
 DisplacementWidth = Kind[0, 8, 32]
+DisplacementDirection = Kind["forward", "backward", "none"]
+MemoryWidth = Kind[8, 16, 32, 64]
 RegisterWidth = Kind["low", "high", "8bit", "16bit", "32bit", "64bit"]
 
 
 @dataclass(kw_only=True)
 class Immediate:
-    value: int
+    data: bytes
     width: ImmediateWidth
 
     @staticmethod
-    def imm8(value: int) -> Immediate:
-        return Immediate(value=value, width=8)
+    def imm8(data: bytes) -> Immediate:
+        assert len(data) == 1
+        return Immediate(data=data, width=8)
 
     @staticmethod
-    def imm32(value: int) -> Immediate:
-        return Immediate(value=value, width=32)
+    def imm16(data: bytes) -> Immediate:
+        assert len(data) == 2
+        return Immediate(data=data, width=16)
 
     @staticmethod
-    def imm64(value: int) -> Immediate:
-        return Immediate(value=value, width=64)
+    def imm32(data: bytes) -> Immediate:
+        assert len(data) == 4
+        return Immediate(data=data, width=32)
+
+    @staticmethod
+    def imm64(data: bytes) -> Immediate:
+        assert len(data) == 8
+        return Immediate(data=data, width=64)
+
+    @staticmethod
+    def auto(data: bytes) -> Immediate:
+        width = len(data) * 8
+        assert width in (8, 16, 32, 64)
+        return Immediate(data=data, width=width)
+
+    def is_one(self) -> bool:
+        return int.from_bytes(self.data, byteorder="big", signed=False) == 1
+
+    def sign_bit(self) -> bool:
+        return (self.data[0] & 0x80) == 0x80
 
     def __str__(self) -> str:
-        if self.width == 8:
-            return f"{self.value:#04x}"
+        return f"0x{self.data.hex()}"
 
-        if self.width == 32:
-            return f"{self.value:#010x}"
 
-        return f"{self.value:#018x}"
+class DisplacementImmediate(Protocol):
+    @property
+    def data(self) -> bytes: ...
+
+    @property
+    def width(self) -> ImmediateWidth: ...
 
 
 class DisplacementSource(Protocol):
     @property
-    def value(self) -> int: ...
+    def kind(self) -> Kind["forward", "backward"]: ...
+
+    @property
+    def value(self) -> DisplacementImmediate: ...
 
 
 @dataclass(kw_only=True)
 class Displacement:
-    value: int
+    data: bytes
     width: DisplacementWidth
+    direction: DisplacementDirection
 
     @staticmethod
     def none() -> Displacement:
-        return Displacement(value=0, width=0)
+        return Displacement(data=bytes(), width=0, direction="none")
 
     @staticmethod
-    def auto(source: Union[int, Optional[DisplacementSource]]) -> Displacement:
-        if isinstance(source, int):
-            value = source
-        else:
-            value = source.value if source is not None else 0
+    def auto(source: Union[bytes, Optional[DisplacementSource]]) -> Displacement:
+        if isinstance(source, (bytes, bytearray)):
+            width = len(source) * 8
+            assert width in (8, 32)
 
-        if value == 0:
+            if len(source.strip(bytes([0x00]))) == 0:
+                direction = "none"
+            elif source[0] < 0x80:
+                direction = "forward"
+            else:
+                direction = "backward"
+
+            return Displacement(
+                data=source,
+                width=width,
+                direction=direction,
+            )
+
+        if source is None:
             return Displacement.none()
 
-        if -128 <= value <= 127:
-            return Displacement(value=value, width=8)
+        assert not isinstance(source, (memoryview))
+        assert source.value.width in (8, 32)
 
-        if -(2**31) <= value <= 2**31 - 1:
-            return Displacement(value=value, width=32)
-
-        raise ValueError(
-            f"Displacement value {value} is out of range for 32-bit signed integer"
+        return Displacement(
+            data=source.value.data,
+            width=source.value.width,
+            direction=source.kind,
         )
 
+    def get_width(self) -> DisplacementWidth:
+        if self.width == 0:
+            return 0
+
+        if self.width == 8 and self.data[0] == 0x00:
+            return 0
+
+        if self.width == 8:
+            return 8
+
+        if self.width == 32 and self.data == bytes(4):
+            return 0
+
+        return self.width
+
+    def normalize(self, width: DisplacementWidth) -> bytes:
+        val = int.from_bytes(self.data, byteorder="big", signed=False)
+        hex = val.to_bytes(width // 8, byteorder="big", signed=False)
+
+        return hex
+
+
     def __str__(self) -> str:
-        return f" {'+' if self.value >= 0 else '-'} {abs(self.value):#010x}"
+        match self.direction:
+            case "forward":
+                return f" + 0x{self.data.hex()}"
+            case "backward":
+                return f" - 0x{self.data.hex()}"
+            case "none":
+                return ""
 
 
 @dataclass(kw_only=True)
@@ -179,6 +246,18 @@ class Register:
     def is_64bit(self) -> bool:
         return self.width == "64bit"
 
+    def is_acc(self) -> bool:
+        return self.id == 0
+
+    def get_width(self) -> Kind[8, 16, 32, 64]:
+        if self.width == "64bit":
+            return 64
+        if self.width == "32bit":
+            return 32
+        if self.width == "16bit":
+            return 16
+        return 8
+
     def __str__(self) -> str:
         if self.width in ("low", "high", "8bit"):
             return reg8_to_name(self.id)
@@ -230,6 +309,7 @@ class ComputedAddress:
     base: Register
     disp: Displacement
     scaler: Scaler
+    width: MemoryWidth
 
     def __str__(self) -> str:
         return f"[{self.base}{self.scaler}{self.disp}]"
@@ -238,21 +318,10 @@ class ComputedAddress:
 @dataclass(kw_only=True)
 class RelativeAddress:
     disp: Displacement
+    width: MemoryWidth
 
     def __str__(self) -> str:
         return f"[rip{self.disp}]"
 
 
 Address = Union[ComputedAddress, RelativeAddress]
-
-EncodingKind = Kind[
-    "op",
-    "op+imm",
-    "op+reg",
-    "op+reg+imm",
-    "op+mod+reg",
-    "op+mod+ext",
-    "op+mod+reg+imm",
-    "op+mod+ext+imm",
-    "op+rel",
-]

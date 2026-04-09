@@ -28,8 +28,15 @@ from i13c.llvm.typing.flows import (
     SnapshotFlow,
 )
 from i13c.llvm.typing.instructions import Instruction
+from i13c.llvm.typing.instructions.core import (
+    ComputedAddress,
+    Displacement,
+    Immediate,
+    Register,
+    Scaler,
+)
 from i13c.llvm.typing.instructions.ctrl import Call, Jump, Label, Nop, Return
-from i13c.llvm.typing.instructions.math import AddRegImm, SubRegImm
+from i13c.llvm.typing.instructions.math import SUB, AddRegImm
 from i13c.llvm.typing.instructions.move import MovOffReg, MovRegOff
 from i13c.llvm.typing.intervals import IntervalPressure, RegisterInterval
 from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
@@ -48,7 +55,14 @@ class AbstractConverter(Protocol):
 
 def dispatch_enter_frame(abstract: EnterFrame) -> List[Instruction]:
     if abstract.size > 0:
-        return [SubRegImm(dst=IR_REGISTER_FORWARD_64[b"rsp"], imm=abstract.size)]
+        return [
+            SUB(
+                dst=Register.parse64("rsp"),
+                src=Immediate.imm32(
+                    abstract.size.to_bytes(4, byteorder="little", signed=False)
+                ),
+            )
+        ]
 
     else:
         return []
@@ -56,7 +70,14 @@ def dispatch_enter_frame(abstract: EnterFrame) -> List[Instruction]:
 
 def dispatch_exit_frame(abstract: ExitFrame) -> List[Instruction]:
     if abstract.size > 0:
-        return [AddRegImm(dst=IR_REGISTER_FORWARD_64[b"rsp"], imm=abstract.size)]
+        return [
+            AddRegImm(
+                dst=IR_REGISTER_FORWARD_64[b"rsp"],
+                imm=Immediate.imm32(
+                    abstract.size.to_bytes(4, byteorder="little", signed=False)
+                ),
+            )
+        ]
 
     else:
         return []
@@ -64,14 +85,34 @@ def dispatch_exit_frame(abstract: ExitFrame) -> List[Instruction]:
 
 def dispatch_preserve(abstract: Preserve) -> List[Instruction]:
     return [
-        MovOffReg(dst=IR_REGISTER_FORWARD_64[b"rsp"], src=reg, off=idx * 8)
+        MovOffReg(
+            dst=ComputedAddress(
+                base=Register.parse64("rsp"),
+                scaler=Scaler.none(),
+                width=64,
+                disp=Displacement.auto(
+                    (idx * 8).to_bytes(byteorder="big", signed=False)
+                ),
+            ),
+            src=reg,
+        )
         for idx, reg in abstract.registers.items()
     ]
 
 
 def dispatch_restore(abstract: Restore) -> List[Instruction]:
     return [
-        MovRegOff(dst=reg, src=IR_REGISTER_FORWARD_64[b"rsp"], off=idx * 8)
+        MovRegOff(
+            dst=reg,
+            src=ComputedAddress(
+                base=Register.parse64("rsp"),
+                scaler=Scaler.none(),
+                width=64,
+                disp=Displacement.auto(
+                    (idx * 8).to_bytes(byteorder="big", signed=False)
+                ),
+            ),
+        )
         for idx, reg in abstract.registers.items()
     ]
 

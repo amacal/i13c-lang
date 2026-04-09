@@ -25,6 +25,6 @@ class LiteralListExtractor:
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
             "kind": entry[1].kind.decode(),
-            "hex-value": str(entry[1].target.value),
+            "hex-value": str(entry[1].target),
             "hex-width": str(entry[1].target.width),
         }

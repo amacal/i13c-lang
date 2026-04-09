@@ -45,5 +45,5 @@ class LiteralIntegersListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",
-            "value": str(entry[1].value),
+            "value": f"0x{entry[1].value.hex()}",
         }

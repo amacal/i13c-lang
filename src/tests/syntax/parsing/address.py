@@ -1,4 +1,4 @@
-from i13c.syntax.tree import Address, Immediate
+from i13c.syntax.tree import Address, Offset
 from tests.syntax.parsing import parse_instructions
 
 
@@ -33,8 +33,11 @@ def can_parse_address_with_address_operand_with_positive_offset():
     assert isinstance(operand1, Address)
 
     assert operand1.base.name == b"rax"
-    assert isinstance(operand1.offset, Immediate)
-    assert operand1.offset.value == 0x04
+    assert isinstance(operand1.offset, Offset)
+
+    assert operand1.offset.value.data == bytes([0x04])
+    assert operand1.offset.kind == "forward"
+
 
 
 def can_parse_address_with_address_operand_with_negative_offset():
@@ -51,5 +54,7 @@ def can_parse_address_with_address_operand_with_negative_offset():
     assert isinstance(operand1, Address)
 
     assert operand1.base.name == b"rax"
-    assert isinstance(operand1.offset, Immediate)
-    assert operand1.offset.value == -0x04
+    assert isinstance(operand1.offset, Offset)
+
+    assert operand1.offset.value.data == bytes([0x04])
+    assert operand1.offset.kind == "backward"

@@ -187,7 +187,7 @@ def parse_argument(state: ParsingState) -> tree.Argument:
     if token.code == Tokens.HEX:
         return tree.IntegerLiteral(
             ref=state.span(token),
-            value=int(state.extract(token), 16),
+            value=bytes.fromhex(state.extract(token)[2:]),
         )
 
     # an identifier can be only an expression

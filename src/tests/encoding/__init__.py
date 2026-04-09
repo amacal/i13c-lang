@@ -7,20 +7,15 @@ from i13c.encoding.core import UnreachableEncodingError
 from i13c.llvm.typing.instructions import Instruction, core
 
 
-def parse_value(header: str, value: str) -> Optional[Union[str, int]]:
+def parse_value(header: str, value: str) -> Optional[Union[str, int, bytes]]:
     if not value.strip(" -"):
         return None
 
-    if header in ("imm8", "imm32", "imm64", "scale"):
+    if header in ("scale"):
         return int(value, 16)
 
-    if header == "disp8":
-        x = int(value, 16)
-        return x if x < 0x80 else x - 0x100
-
-    if header == "disp32":
-        x = int(value, 16)
-        return x if x < 0x80000000 else x - 0x100000000
+    if header in ("imm8", "imm32", "imm64", "disp8", "disp32"):
+        return bytes.fromhex(value[2:])
 
     return value
 
@@ -71,16 +66,20 @@ def parse_address(
     base: Optional[str],
     scale: Optional[core.ScaleValue],
     index: Optional[str],
-    disp32: Optional[int],
+    disp32: Optional[bytes],
 ) -> Union[core.ComputedAddress, core.RelativeAddress]:
 
     if base == "rip" and scale is None and index is None:
-        return core.RelativeAddress(disp=core.Displacement.auto(disp32))
+        return core.RelativeAddress(
+            disp=core.Displacement.auto(disp32),
+            width=64,
+        )
 
     return core.ComputedAddress(
         base=core.Register.auto(base),
         disp=core.Displacement.auto(disp32),
         scaler=core.Scaler.auto(index, scale),
+        width=64,
     )
 
 

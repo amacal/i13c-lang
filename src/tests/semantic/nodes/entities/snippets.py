@@ -115,7 +115,7 @@ def can_build_a_snippet_with_mov_instruction():
     assert operands.size() == 2
 
     assert snippets.size() == 1
-    id, value = snippets.pop()
+    id, value = snippets.peak()
 
     assert isinstance(id, SnippetId)
     assert isinstance(value, Snippet)
@@ -144,7 +144,7 @@ def can_build_a_snippet_with_mov_instruction():
 
     assert operand1.kind == b"immediate"
     assert isinstance(operand1.target, Immediate)
-    assert operand1.target.value == 0x1234
+    assert operand1.target.data.hex(" ") == "12 34"
 
 
 def can_build_a_snippet_with_properly_derived_types():
@@ -171,13 +171,21 @@ def can_build_a_snippet_with_properly_derived_types():
     assert slot1.bind.name == b"rax"
     assert slot1.type.name == b"u64"
     assert slot1.type.width == 16
-    assert slot1.type.range.lower == 0x0000
-    assert slot1.type.range.upper == 0xFFFF
+
+    assert slot1.type.range.lower.width == 16
+    assert slot1.type.range.lower.data.hex(" ") == "00 00"
+
+    assert slot1.type.range.upper.width == 16
+    assert slot1.type.range.upper.data.hex(" ") == "ff ff"
 
     slot2 = value.slots[1]
     assert slot2.name.name == b"r2"
     assert slot2.bind.name == b"rbx"
     assert slot2.type.name == b"u8"
     assert slot2.type.width == 8
-    assert slot2.type.range.lower == 0x00
-    assert slot2.type.range.upper == 0x10
+
+    assert slot2.type.range.lower.width == 8
+    assert slot2.type.range.lower.data.hex(" ") == "00"
+
+    assert slot2.type.range.upper.width == 8
+    assert slot2.type.range.upper.data.hex(" ") == "10"

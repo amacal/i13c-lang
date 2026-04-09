@@ -173,7 +173,7 @@ def rewrite_operand(
         assert isinstance(literal.target, Hex)
 
         # construct immediate operand from literal value
-        return Operand.immediate(span, literal.target.value)
+        return Operand.immediate(span, literal.target.data)
 
     # failed
     return None

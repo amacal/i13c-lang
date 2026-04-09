@@ -14,4 +14,4 @@ def can_accept_value_without_whitespace_around_equals():
     assert statement.type.name == b"u32"
 
     assert isinstance(statement.expr, IntegerLiteral)
-    assert statement.expr.value == 0x10
+    assert statement.expr.value == bytes([0x10])

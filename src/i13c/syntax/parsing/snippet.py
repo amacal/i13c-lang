@@ -184,7 +184,8 @@ def parse_operand(state: ParsingState) -> tree.Operand:
     # immediate has to provide its decimal value
     elif token.code == Tokens.HEX:
         return tree.Immediate(
-            ref=state.span(token), value=int(state.extract(token), 16)
+            ref=state.span(token),
+            data=bytes.fromhex(state.extract(token)[2:]),
         )
 
     # reference has to provide its identifier
@@ -193,11 +194,14 @@ def parse_operand(state: ParsingState) -> tree.Operand:
         token = state.expect(Tokens.IDENT)
 
         # which has to be extracted
-        return tree.Reference(ref=state.span(token), name=state.extract(token))
+        return tree.Reference(
+            ref=state.span(token),
+            name=state.extract(token),
+        )
 
     # address operands starts with a square open bracket
     else:
-        offset: Optional[tree.Immediate] = None
+        offset: Optional[tree.Offset] = None
 
         # now we expect a register as the base
         base = state.expect(Tokens.REG)
@@ -210,12 +214,15 @@ def parse_operand(state: ParsingState) -> tree.Operand:
             value = state.expect(Tokens.HEX)
 
             # determine the sign of the offset
-            sign = 1 if end.code == Tokens.PLUS else -1
+            kind = "forward" if end.code == Tokens.PLUS else "backward"
 
             # to be converted to an immediate operand
-            offset = tree.Immediate(
-                ref=state.span(value),
-                value=sign * int(state.extract(value), 16),
+            offset = tree.Offset(
+                kind=kind,
+                value=tree.Immediate(
+                    ref=state.span(value),
+                    data=bytes.fromhex(state.extract(value)[2:]),
+                ),
             )
 
             # address has to be closed with a square close bracket

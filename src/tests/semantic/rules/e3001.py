@@ -88,23 +88,23 @@ def can_reject_invalid_function_type_ranges():
 
 def can_reject_invalid_snippet_ranges_out_of_type_ranges():
     source, program = prepare_program("""
-        asm main(value@rax: u8[0x000..0x200]) { syscall; }
+        asm main(value@rax: u8[0x0000..0x0200]) { syscall; }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == "E3001"
-    assert source.extract(diagnostics[0].ref) == b"main(value@rax: u8[0x000..0x200])"
+    assert source.extract(diagnostics[0].ref) == b"main(value@rax: u8[0x0000..0x0200])"
 
 
 def can_reject_invalid_function_ranges_out_of_type_ranges():
     source, program = prepare_program("""
-        fn main(value: u8[0x000..0x200]) { exit(); }
+        fn main(value: u8[0x0000..0x0200]) { exit(); }
     """)
 
     diagnostics = run_graph(program).rule_by_name("e3001")
 
     assert len(diagnostics) == 1
     assert diagnostics[0].code == "E3001"
-    assert source.extract(diagnostics[0].ref) == b"main(value: u8[0x000..0x200])"
+    assert source.extract(diagnostics[0].ref) == b"main(value: u8[0x0000..0x0200])"

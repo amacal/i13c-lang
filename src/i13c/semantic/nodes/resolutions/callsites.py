@@ -3,7 +3,7 @@ from typing import Dict, Iterable, List, Protocol, Tuple
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.core.result import Err, Ok, Result
-from i13c.semantic.core import Identifier, Type
+from i13c.semantic.core import Hex, Identifier, Type
 from i13c.semantic.typing.entities.callables import Callable
 from i13c.semantic.typing.entities.callsites import Argument, CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
@@ -53,11 +53,12 @@ def match_variable(variable: Variable, type: Type) -> bool:
     if variable.type.width > type.width:
         return False
 
-    # range constraint
-    if not (
-        type.range.lower <= variable.type.range.lower
-        and variable.type.range.upper <= type.range.upper
-    ):
+    # lower bound constraint
+    if Hex.lesser(variable.type.range.lower.data, type.range.lower.data):
+        return False
+
+    # upper bound constraint
+    if Hex.greater(variable.type.range.upper.data, type.range.upper.data):
         return False
 
     # success

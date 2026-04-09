@@ -64,13 +64,13 @@ def can_build_callsite_with_single_argument():
 
     assert value.kind == b"hex"
     assert isinstance(value.target, Hex)
-    assert value.target.value == 0x42
+    assert value.target.data == bytes([0x42])
     assert value.target.width == 8
 
 
 def can_build_callsite_with_multiple_arguments():
     _, program = prepare_program("""
-        fn main() { foo(0x1, 0x2, 0x3); }
+        fn main() { foo(0x01, 0x02, 0x03); }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -93,5 +93,5 @@ def can_build_callsite_with_multiple_arguments():
         assert value.kind == b"hex"
         assert isinstance(value.target, Hex)
 
-        assert value.target.value == expected
+        assert value.target.data.hex(" ") == f"{expected:02x}"
         assert value.target.width == 8

@@ -45,7 +45,7 @@ class OperandListExtractor:
                 else ""
             ),
             "imm_value": (
-                str(entry[1].target.value)
+                str(entry[1].target)
                 if isinstance(entry[1].target, Immediate)
                 else ""
             ),

@@ -33,6 +33,7 @@ def lower_reg32_addr(
                 base=Reg.parse64(source.base.name.decode()),
                 disp=Displacement.auto(source.offset),
                 scaler=Scaler.none(),
+                width=64,
             ),
         ),
     )
@@ -51,6 +52,7 @@ def lower_reg64_addr(
                 base=Reg.parse64(source.base.name.decode()),
                 disp=Displacement.auto(source.offset),
                 scaler=Scaler.none(),
+                width=64,
             ),
         ),
     )

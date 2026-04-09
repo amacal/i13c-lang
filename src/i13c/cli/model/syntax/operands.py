@@ -30,9 +30,7 @@ class OperandListExtractor:
             "reg_name": (
                 entry[1].name.decode() if isinstance(entry[1], Register) else ""
             ),
-            "imm_value": (
-                str(entry[1].value) if isinstance(entry[1], Immediate) else ""
-            ),
+            "imm_value": (str(entry[1]) if isinstance(entry[1], Immediate) else ""),
             "ref_name": (
                 entry[1].name.decode() if isinstance(entry[1], Reference) else ""
             ),

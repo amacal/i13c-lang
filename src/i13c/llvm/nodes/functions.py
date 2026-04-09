@@ -16,6 +16,15 @@ from i13c.llvm.typing.flows import (
     SnapshotFlow,
 )
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.core import (
+    ComputedAddress,
+    Displacement,
+    Immediate,
+)
+from i13c.llvm.typing.instructions.core import Register as Reg
+from i13c.llvm.typing.instructions.core import (
+    Scaler,
+)
 from i13c.llvm.typing.instructions.ctrl import Nop
 from i13c.llvm.typing.instructions.move import MovOffImm, MovOffReg
 from i13c.llvm.typing.instructions.stack import PopOff, PushOff
@@ -278,7 +287,7 @@ def lower_flow_value(
         variable = ctx.graph.indices.variables_by_parameter.get(node)
         register = ctx.registers.get(variable)
 
-        imm = literal.target.value
+        imm = int.from_bytes(literal.target.data, byteorder="little", signed=False)
         dst = register.ref()
 
         iid = FlowId(value=ctx.generator.next())
@@ -402,14 +411,24 @@ def patch_snapshots(
                         bindings[iid] = [(InstructionId(value=generator.next()), Nop())]
 
                     else:
+                        disp32 = (offset * 8).to_bytes(4, byteorder="big", signed=False)
+
                         # append new patched immediate
                         bindings[iid] = [
                             (
                                 InstructionId(value=generator.next()),
                                 MovOffImm(
-                                    dst=name_to_reg64("rsp"),
-                                    imm=instr.imm,
-                                    off=offset * 8,
+                                    imm=Immediate.imm32(
+                                        instr.imm.to_bytes(
+                                            4, byteorder="little", signed=False
+                                        )
+                                    ),
+                                    dst=ComputedAddress(
+                                        base=Reg.parse64("rsp"),
+                                        disp=Displacement.auto(disp32),
+                                        scaler=Scaler.none(),
+                                        width=64,
+                                    ),
                                 ),
                             ),
                         ]
@@ -457,14 +476,20 @@ def patch_snapshots(
                         bindings[iid] = [(InstructionId(value=generator.next()), Nop())]
 
                     else:
+                        disp32 = (offset * 8).to_bytes(4, byteorder="big", signed=False)
+
                         # append new patched binding
                         bindings[iid] = [
                             (
                                 InstructionId(value=generator.next()),
                                 MovOffReg(
-                                    dst=name_to_reg64("rsp"),
                                     src=instr.src,
-                                    off=offset * 8,
+                                    dst=ComputedAddress(
+                                        base=Reg.parse64("rsp"),
+                                        disp=Displacement.auto(disp32),
+                                        scaler=Scaler.none(),
+                                        width=64,
+                                    ),
                                 ),
                             ),
                         ]

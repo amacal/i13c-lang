@@ -9,7 +9,7 @@ from tests.semantic import prepare_program
 def can_resolve_callsite_calling_snippet():
     _, program = prepare_program("""
         asm foo(arg1@rax: u32) { }
-        fn main() { foo(0x42); }
+        fn main() { foo(0x00000042); }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -37,7 +37,7 @@ def can_resolve_callsite_calling_snippet():
 def can_resolve_callsite_calling_function():
     _, program = prepare_program("""
         fn foo(arg1: u32) { }
-        fn main() { foo(0x42); }
+        fn main() { foo(0x00000042); }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -125,7 +125,7 @@ def can_reject_callsite_due_to_wrong_arity_less_than_expected():
 def can_reject_callsite_due_to_wrong_hex_width():
     _, program = prepare_program("""
         asm foo(arg1@rax: u8) { }
-        fn main() { foo(0x842); }
+        fn main() { foo(0x0842); }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -156,7 +156,7 @@ def can_resolve_function_and_snippet_with_same_name():
     _, program = prepare_program("""
         asm foo(arg1@rax: u32) { }
         fn foo() { }
-        fn main() { foo(0x42); }
+        fn main() { foo(0x00000042); }
     """)
 
     semantic = run_graph(program).semantic_graph()

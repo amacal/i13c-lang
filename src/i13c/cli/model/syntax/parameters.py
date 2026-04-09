@@ -28,7 +28,7 @@ class ParameterListExtractor:
             "name": entry[1].name.decode(),
             "type": entry[1].type.name.decode(),
             "range": (
-                f"{entry[1].type.range.lower:#06x}..{entry[1].type.range.upper:#06x}"
+                f"0x{entry[1].type.range.lower.hex()}..0x{entry[1].type.range.upper.hex()}"
                 if entry[1].type.range
                 else ""
             ),

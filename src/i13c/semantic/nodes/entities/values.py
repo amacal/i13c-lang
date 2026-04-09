@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Identifier, Range, Type, default_range, width_from_range
+from i13c.semantic.core import Hex, Identifier, Range, Type, Width, default_range
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
@@ -60,12 +60,12 @@ def build_values(
         # override ranges if specified
         if statement.type.range is not None:
             range = Range(
-                lower=statement.type.range.lower,
-                upper=statement.type.range.upper,
+                lower=Hex.derive(statement.type.range.lower),
+                upper=Hex.derive(statement.type.range.upper),
             )
 
         # derive width from ranges
-        width = width_from_range(range)
+        width: Width = max(range.lower.width, range.upper.width)
 
         # construct slot type with range or default width
         type = Type(

@@ -2,6 +2,7 @@ from i13c.graph.nodes import run as run_graph
 from i13c.semantic.typing.entities.operands import (
     Address,
     Immediate,
+    Offset,
     Operand,
     OperandId,
     Reference,
@@ -55,7 +56,7 @@ def can_detect_an_immediate_operand_one_byte():
     assert value.kind == b"immediate"
     assert isinstance(value.target, Immediate)
 
-    assert value.target.value == 0x42
+    assert value.target.data == bytes([0x42])
     assert value.target.width == 8
 
 
@@ -78,8 +79,8 @@ def can_detect_an_immediate_operand_four_bytes():
     assert value.kind == b"immediate"
     assert isinstance(value.target, Immediate)
 
-    assert value.target.value == 0x1122334455667788
     assert value.target.width == 64
+    assert value.target.data.hex(" ") == "11 22 33 44 55 66 77 88"
 
 
 def can_detect_a_register_operand():
@@ -149,10 +150,11 @@ def can_detect_an_address_operand_with_positive_offset():
     assert isinstance(value.target, Address)
 
     assert value.target.base.name == b"rax"
-    assert isinstance(value.target.offset, Immediate)
+    assert isinstance(value.target.offset, Offset)
 
-    assert value.target.offset.value == 0x10
-    assert value.target.offset.width == 8
+    assert value.target.offset.kind == "forward"
+    assert value.target.offset.value.width == 8
+    assert value.target.offset.value.data.hex(" ") == "10"
 
 
 def can_detect_an_address_operand_with_negative_offset():
@@ -175,10 +177,11 @@ def can_detect_an_address_operand_with_negative_offset():
     assert isinstance(value.target, Address)
 
     assert value.target.base.name == b"rax"
-    assert isinstance(value.target.offset, Immediate)
+    assert isinstance(value.target.offset, Offset)
 
-    assert value.target.offset.value == -0x10
-    assert value.target.offset.width == 8
+    assert value.target.offset.kind == "backward"
+    assert value.target.offset.value.width == 8
+    assert value.target.offset.value.data.hex(" ") == "10"
 
 
 def can_detect_a_reference_operand():

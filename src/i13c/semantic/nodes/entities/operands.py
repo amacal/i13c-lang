@@ -4,7 +4,7 @@ from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.operands import (
-    Immediate,
+    Offset,
     Operand,
     OperandId,
     Register,
@@ -31,15 +31,17 @@ def build_operands(
             case tree.Register() as reg:
                 target = Operand.register(operand.ref, reg.name)
             case tree.Immediate() as imm:
-                target = Operand.immediate(operand.ref, imm.value)
+                target = Operand.immediate(operand.ref, imm.data)
             case tree.Reference() as ref:
                 target = Operand.reference(operand.ref, ref.name)
             case tree.Address() as addr:
                 target = Operand.address(
                     operand.ref,
                     Register.from_name(addr.base.name),
-                    Immediate.optional(
-                        addr.offset.value if addr.offset is not None else None
+                    Offset.optional(
+                        (addr.offset.kind, addr.offset.value.data)
+                        if addr.offset is not None
+                        else None
                     ),
                 )
 

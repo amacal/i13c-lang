@@ -55,7 +55,7 @@ def can_parse_instruction_with_immediate():
 
     operand2 = instructions[0].operands[1]
     assert isinstance(operand2, Immediate)
-    assert operand2.value == 0x1234
+    assert operand2.data == bytes([0x12, 0x34])
 
 
 def can_parse_multiple_instructions():

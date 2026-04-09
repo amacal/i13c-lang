@@ -3,6 +3,7 @@ from typing import Dict, Protocol, Tuple, Type
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.core import Immediate as Imm
 from i13c.llvm.typing.instructions.math import AddRegImm, AddRegReg
 from i13c.llvm.typing.registers import IR_REGISTER_FORWARD_64
 from i13c.semantic.typing.entities.instructions import (
@@ -24,7 +25,7 @@ def lower_register_immediate(
 ) -> InstructionEntry:
 
     dst = IR_REGISTER_FORWARD_64[destination.name]
-    imm = source.value
+    imm = Imm(data=source.data, width=source.width)
 
     return (
         InstructionId(value=generator.next()),

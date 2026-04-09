@@ -28,7 +28,7 @@ def lower_reg8_imm8(
         InstructionId(value=generator.next()),
         SHL(
             dst=Reg.parse8(destination.name.decode()),
-            src=Imm.imm8(source.value),
+            src=Imm.imm8(source.data),
         ),
     )
 
@@ -42,7 +42,7 @@ def lower_reg16_imm8(
         InstructionId(value=generator.next()),
         SHL(
             dst=Reg.parse16(destination.name.decode()),
-            src=Imm.imm8(source.value),
+            src=Imm.imm8(source.data),
         ),
     )
 
@@ -56,7 +56,7 @@ def lower_reg32_imm8(
         InstructionId(value=generator.next()),
         SHL(
             dst=Reg.parse32(destination.name.decode()),
-            src=Imm.imm8(source.value),
+            src=Imm.imm8(source.data),
         ),
     )
 
@@ -70,7 +70,7 @@ def lower_reg64_imm8(
         InstructionId(value=generator.next()),
         SHL(
             dst=Reg.parse64(destination.name.decode()),
-            src=Imm.imm8(source.value),
+            src=Imm.imm8(source.data),
         ),
     )
 

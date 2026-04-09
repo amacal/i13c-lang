@@ -5,14 +5,14 @@ from tests.cli.model import prepare_artifacts
 
 def can_draw_a_table_with_semantic_rules_summary():
     artifacts = prepare_artifacts("""
-        fn main() { foo(0x123); }
+        fn main() { foo(0x0123); }
     """)
 
     draw_list(SemanticListExtractor, artifacts).equals("""
         | --------- | --------- | --------------------------------------------------- |
         | Reference | Rule Code | Rule Message                                        |
         | --------- | --------- | --------------------------------------------------- |
-        | 21:31     | E3008     | Called symbol does not exist: 'foo'                 |
+        | 21:32     | E3008     | Called symbol does not exist: 'foo'                 |
         |           | E3011     | Missing entrypoint function or snippet named 'main' |
         | --------- | --------- | --------------------------------------------------- |
     """)

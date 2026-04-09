@@ -16,6 +16,6 @@ def parse_range(state: ParsingState) -> tree.Range:
     state.expect(Tokens.SQUARE_CLOSE)
 
     return tree.Range(
-        lower=int(state.extract(lower), 16),
-        upper=int(state.extract(upper), 16),
+        lower=bytes.fromhex(state.extract(lower)[2:]),
+        upper=bytes.fromhex(state.extract(upper)[2:]),
     )

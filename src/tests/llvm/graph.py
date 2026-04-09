@@ -19,7 +19,7 @@ def can_raise_exception_if_program_has_semantic_errors():
     with raises(GraphFixtureException) as ex:
         prepare_graph(
             """
-                fn main() { foo(0x123); }
+                fn main() { foo(0x0123); }
             """
         )
 

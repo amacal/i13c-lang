@@ -17,7 +17,7 @@ def encode_shl(instruction: SHL, bytecode: bytearray) -> None:
         opcode = 0xD2 if is_8bit else 0xD3
 
     # the same about the immediate value of 1, which has a dedicated encoding
-    elif instruction.src.value == 0x01:
+    elif instruction.src.is_one():
         opcode = 0xD0 if is_8bit else 0xD1
 
     # otherwise fallback to the a bit longer imm8 encoding
@@ -38,7 +38,7 @@ def encode_shl(instruction: SHL, bytecode: bytearray) -> None:
     kind.write_rex(bytecode, rex)
     kind.write_opcode(bytecode, 1, opcode)
     kind.write_modrm(bytecode, modrm_reg, modrm_rm)
-    kind.write_immediate(bytecode, immediate, condition=immediate is not None, signed=False)
+    kind.write_immediate(bytecode, immediate, condition=immediate is not None)
 
 
 def encode_bswap(instruction: BSWAP, bytecode: bytearray) -> None:

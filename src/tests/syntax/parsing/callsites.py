@@ -19,7 +19,7 @@ def can_parse_argument_span_without_trailing_whitespace():
     argument = statement.arguments[0]
 
     assert isinstance(argument, IntegerLiteral)
-    assert argument.value == 0x01
+    assert argument.value == bytes([0x01])
     assert code.extract(argument.ref) == b"0x01"
 
     assert argument.ref.length == len(b"0x01")

@@ -49,7 +49,7 @@ def can_do_nothing_without_accepted_callsite():
 def can_do_nothing_with_ambiguous_callsite():
     _, program = prepare_program("""
         asm exit(code@imm: u8) { shl rax, @code; }
-        asm exit(code@imm: u64) { shl rax, @code; }
+        asm exit(code@imm: u8) { shl rax, @code; }
         fn main() noreturn { exit(0x42); }
     """)
 
@@ -100,14 +100,14 @@ def can_generate_instance_for_accepted_callsite():
     assert isinstance(operand.target, Immediate)
 
     # its value and width are from callsite
-    assert operand.target.value == 0x42
+    assert operand.target.data == bytes([0x42])
     assert operand.target.width == 8
 
 
 def can_generate_instance_with_callsite_of_multiple_arguments():
     _, program = prepare_program("""
         asm exit(id@rax: u64, code@imm: u8) { shl rax, @code; }
-        fn main() noreturn { exit(0x1234, 0x42); }
+        fn main() noreturn { exit(0x0000000000001234, 0x42); }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -155,7 +155,7 @@ def can_generate_instance_with_reference_used_twice():
 def can_generate_instance_with_two_references():
     _, program = prepare_program("""
         asm exit(id@imm: u64, code@imm: u8) { shl rax, @code; mov rbx, @id; }
-        fn main() noreturn { exit(0x1234, 0x42); }
+        fn main() noreturn { exit(0x0000000000001234, 0x42); }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -193,7 +193,7 @@ def can_generate_instance_even_when_immediate_is_not_used():
 def can_rewrite_register_bound_slot_to_register():
     _, program = prepare_program("""
         asm foo(code@rax: u64) noreturn { mov @code, 0x01; }
-        fn main() noreturn { foo(0x42); }
+        fn main() noreturn { foo(0x0000000000000042); }
     """)
 
     semantic = run_graph(program).semantic_graph()

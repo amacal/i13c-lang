@@ -32,4 +32,4 @@ class Variable:
     ident: Identifier
 
     def __str__(self) -> str:
-        return f"source={self.source.identify(2)}, type={self.type}, ident={self.ident}"
+        return f"source={self.source.identify(1)}, type={self.type}, ident={self.ident}"

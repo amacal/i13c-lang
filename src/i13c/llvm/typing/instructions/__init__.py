@@ -22,7 +22,7 @@ Instruction = Union[
     ctrl.SysCall,
     math.AddRegImm,
     math.AddRegReg,
-    math.SubRegImm,
+    math.SUB,
     move.MovOffImm,
     move.MovOffReg,
     move.MovRegImm,

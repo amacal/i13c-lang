@@ -64,7 +64,7 @@ DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
     llvm.ctrl.SysCall: ctrl.encode_syscall,
     llvm.math.AddRegImm: math.encode_add_reg_imm,
     llvm.math.AddRegReg: math.encode_add_reg_reg,
-    llvm.math.SubRegImm: math.encode_sub_reg_imm,
+    llvm.math.SUB: math.encode_sub_reg_imm,
     llvm.move.MovOffImm: move.encode_mov_off_imm,
     llvm.move.MovOffReg: move.encode_mov_off_reg,
     llvm.move.MovRegImm: move.encode_mov_reg_imm,

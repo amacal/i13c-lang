@@ -1,125 +1,129 @@
-from typing import Optional, Union
+from typing import Optional
 
-from i13c.encoding.core import LabelArtifact, RelocationArtifact
-from i13c.encoding.intel import REX, Immediate, ModRM, Opcode
-from i13c.llvm.typing.instructions.math import (
-    AddRegImm,
-    AddRegReg,
-    SubRegImm,
-)
+from i13c.encoding import kind
+from i13c.llvm.typing.instructions.core import Address, Immediate, Register
+from i13c.llvm.typing.instructions.math import SUB, AddRegImm, AddRegReg
 
+MI = {
+    (8, 8): 0x80,
+    (16, 16): 0x81,
+    (32, 32): 0x81,
+    (64, 32): 0x81,
+    (16, 8): 0x83,
+    (32, 8): 0x83,
+    (64, 8): 0x83,
+}
 
-def encode_sub_reg_imm(
-    instruction: SubRegImm, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+MR = {
+    (8, 8): 0x28,
+    (16, 16): 0x29,
+    (32, 32): 0x29,
+    (64, 64): 0x29,
+}
 
-    # chosen encoding: REX.W + 81 /5 id
-    # encoded as: [rex] [opcode] [modrm] [imm32]
-
-    rex = REX(
-        w=True,
-        r=False,
-        x=False,
-        b=instruction.dst >= 8,
-    )
-
-    opcode = Opcode(
-        hex=0x81,
-        reg=None,
-    )
-
-    modrm = ModRM(
-        mod=0b11,
-        reg=5,
-        rm=instruction.dst & 0x07,
-    )
-
-    imm32 = Immediate(
-        value=instruction.imm,
-        width=4,
-        signed=False,
-    )
-
-    bytecode.extend(
-        [
-            *rex.to_bytes(),
-            opcode.to_byte(),
-            modrm.to_byte(),
-            *imm32.to_bytes(),
-        ]
-    )
+RM = {
+    (8, 8): 0x2A,
+    (16, 16): 0x2B,
+    (32, 32): 0x2B,
+    (64, 64): 0x2B,
+}
 
 
-def encode_add_reg_imm(
-    instruction: AddRegImm, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+def encode_sub_reg_imm(instruction: SUB, bytecode: bytearray) -> None:
+    # assume no immediate value for now
+    immediate: Optional[Immediate] = None
 
-    # chosen encoding: REX.W + 81 /0 id
-    # encoded as: [rex] [opcode] [modrm] [imm32]
+    # reg/rm will be determined
+    reg: kind.RegisterOrConstant
+    rm: Optional[kind.RegisterOrAddress] = None
 
-    rex = REX(
-        w=True,
-        r=False,
-        x=False,
-        b=instruction.dst >= 8,
-    )
+    # handle immediates first
+    if isinstance(instruction.src, Immediate):
+        immediate = instruction.src
+        imm_width = immediate.width
 
-    opcode = Opcode(
-        hex=0x81,
-        reg=None,
-    )
+        if isinstance(instruction.dst, Register):
+            rm_width = instruction.dst.get_width()
+            is_acc = instruction.dst.is_acc()
+            reg = instruction.dst
+        else:
+            rm_width = instruction.dst.width
+            is_acc = False
+            reg = 0x05
 
-    modrm = ModRM(
-        mod=0b11,
-        reg=0,
-        rm=instruction.dst & 0x07,
-    )
+        if is_acc and immediate.width == rm_width and imm_width == 8:
+            opcode = 0x2C
 
-    imm32 = Immediate(
-        value=instruction.imm,
-        width=4,
-        signed=False,
-    )
+        elif is_acc and immediate.width == rm_width and imm_width in (16, 32):
+            opcode = 0x2D
 
-    bytecode.extend(
-        [
-            *rex.to_bytes(),
-            opcode.to_byte(),
-            modrm.to_byte(),
-            *imm32.to_bytes(),
-        ]
-    )
+        elif is_acc and immediate.width == 32 and rm_width == 64:
+            opcode = 0x2D
+
+        else:
+
+            reg, rm = 0x05, instruction.dst
+            opcode = MI[rm_width, imm_width]
+
+    elif isinstance(instruction.src, Register):
+        reg = instruction.src
+
+        if isinstance(instruction.dst, Register):
+            rm_width = instruction.dst.get_width()
+        else:
+            rm_width = instruction.dst.width
+
+        rm = instruction.dst
+        opcode = MR[rm_width, int(reg.width)]
+
+    else:
+
+        assert isinstance(instruction.dst, Register)
+        assert isinstance(instruction.src, Address)
+
+        rm = instruction.src
+        rm_width = instruction.dst.get_width()
+
+        reg = instruction.dst
+        opcode = RM[rm_width, rm_width]
+
+    if rm is None:
+
+        # satisfy type checker
+        assert isinstance(reg, Register)
+
+        # derive prefixes and rex
+        prefixes = kind.encode_prefixes(reg)
+        rex = kind.encode_rex(reg)
+
+        # encode instruction
+        kind.write_prefixes(bytecode, prefixes)
+        kind.write_rex(bytecode, rex)
+        kind.write_opcode(bytecode, 1, opcode)
+        kind.write_immediate(bytecode, immediate, condition=immediate is not None)
+
+    else:
+
+        # compute ModRM fields
+        modrm_reg = kind.encode_modrm_reg(reg)
+        modrm_rm = kind.encode_modrm_rm(rm)
+
+        # derive prefixes and rex
+        prefixes = kind.encode_prefixes(rm)
+        rex = kind.encode_rex(rm, modrm_reg=modrm_reg, modrm_rm=modrm_rm)
+
+        # encode instruction
+        kind.write_prefixes(bytecode, prefixes)
+        kind.write_rex(bytecode, rex)
+        kind.write_opcode(bytecode, 1, opcode)
+        kind.write_modrm(bytecode, modrm_reg, modrm_rm)
+        kind.write_immediate(bytecode, immediate, condition=immediate is not None)
 
 
-def encode_add_reg_reg(
-    instruction: AddRegReg, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+def encode_add_reg_imm(instruction: AddRegImm, bytecode: bytearray):
+    pass
 
-    # chosen encoding: REX.W + 01 /r
-    # encoded as: [rex] [opcode] [modrm]
 
-    rex = REX(
-        w=True,
-        r=instruction.src >= 8,
-        x=False,
-        b=instruction.dst >= 8,
-    )
+def encode_add_reg_reg(instruction: AddRegReg, bytecode: bytearray):
 
-    opcode = Opcode(
-        hex=0x01,
-        reg=None,
-    )
-
-    modrm = ModRM(
-        mod=0b11,
-        reg=instruction.src & 0x07,  # source register
-        rm=instruction.dst & 0x07,  # destination register
-    )
-
-    bytecode.extend(
-        [
-            *rex.to_bytes(),
-            opcode.to_byte(),
-            modrm.to_byte(),
-        ]
-    )
+    pass

@@ -18,7 +18,7 @@ class ModRMEncoding:
     sib_index: int
     sib_base: int
     disp_width: int
-    disp_value: int
+    disp_value: bytes
 
     @staticmethod
     def default() -> ModRMEncoding:
@@ -31,7 +31,7 @@ class ModRMEncoding:
             sib_index=0b000,
             sib_base=0b000,
             disp_width=0,
-            disp_value=0,
+            disp_value=bytes(),
         )
 
     def is_sib_required(self) -> bool:
@@ -101,7 +101,7 @@ class PrefixEncoding:
     operand_override: int
 
 
-def encode_prefixes(target: Union[llvm.Register, llvm.Address]) -> PrefixEncoding:
+def encode_prefixes(target: RegisterOrAddress) -> PrefixEncoding:
     return PrefixEncoding(
         operand_override=(
             0x66 if isinstance(target, llvm.Register) and target.is_16bit() else 0x00
@@ -110,7 +110,7 @@ def encode_prefixes(target: Union[llvm.Register, llvm.Address]) -> PrefixEncodin
 
 
 def encode_rex(
-    target: Union[llvm.Register, llvm.Address],
+    target: RegisterOrAddress,
     /,
     modrm_reg: Optional[ModRegToRex] = None,
     modrm_rm: Optional[ModRmToRex] = None,
@@ -178,7 +178,7 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
         encoding.modrm_mod = 0b00
         encoding.modrm_rm = 0b101
         encoding.disp_width = 4
-        encoding.disp_value = rm.disp.value
+        encoding.disp_value = rm.disp.normalize(32)
 
     else:
         has_base = rm.base.is_available()
@@ -216,19 +216,20 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
             encoding.rex_b = 0b0001 if rm.base.high_bit() else 0b0000
             encoding.disp_width = 0
 
+        # RBP and R13 cannot be used as base register without displacement
         if is_rbp_r13 and encoding.disp_width == 0:
             encoding.modrm_mod = 0b01
             encoding.disp_width = 1
 
-        if encoding.disp_width < rm.disp.width // 8:
-            if rm.disp.width == 8:
+        if encoding.disp_width < rm.disp.get_width() // 8:
+            if rm.disp.get_width() == 8:
                 encoding.modrm_mod = 0b01
                 encoding.disp_width = 1
             else:
                 encoding.modrm_mod = 0b10
                 encoding.disp_width = 4
 
-        encoding.disp_value = rm.disp.value
+        encoding.disp_value = rm.disp.normalize(encoding.disp_width * 8)
 
     return encoding
 
@@ -262,11 +263,7 @@ def write_modrm(
 
     # displacement is determined by ModRM encoding
     if modrm_rm.is_disp_required():
-        bytecode.extend(
-            modrm_rm.disp_value.to_bytes(
-                modrm_rm.disp_width, byteorder="little", signed=True
-            )
-        )
+        bytecode.extend(reversed(modrm_rm.disp_value))
 
 
 def write_opcode(
@@ -290,9 +287,6 @@ def write_immediate(
     imm: Optional[llvm.Immediate],
     /,
     condition: bool = True,
-    signed: bool = False,
 ) -> None:
     if condition and imm is not None:
-        bytecode.extend(
-            imm.value.to_bytes(imm.width // 8, byteorder="little", signed=signed)
-        )
+        bytecode.extend(reversed(imm.data))

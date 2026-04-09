@@ -2,7 +2,6 @@ from typing import Dict
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import derive_width
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
 from i13c.syntax import tree
@@ -31,10 +30,7 @@ def build_literals(
         literals[literal_id] = Literal(
             ref=literal.ref,
             kind=b"hex",
-            target=Hex(
-                value=literal.value,
-                width=derive_width(literal.value),
-            ),
+            target=Hex.derive(literal.value),
         )
 
     return OneToOne[LiteralId, Literal].instance(literals)

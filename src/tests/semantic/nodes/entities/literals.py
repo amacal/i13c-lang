@@ -18,7 +18,7 @@ def can_do_nothing_without_any_literal():
 
 def can_detect_hex_literal():
     _, program = prepare_program("""
-        fn main() { foo(0x476); }
+        fn main() { foo(0x0476); }
     """)
 
     semantic = run_graph(program).semantic_graph()
@@ -35,7 +35,7 @@ def can_detect_hex_literal():
     assert value.kind == b"hex"
     assert isinstance(value.target, Hex)
 
-    assert value.target.value == 0x476
+    assert value.target.data == bytes([0x04, 0x76])
     assert value.target.width == 16
 
 
@@ -58,5 +58,5 @@ def can_detect_two_literals_even_if_identical():
         assert value.kind == b"hex"
         assert isinstance(value.target, Hex)
 
-        assert value.target.value == 0x1A2B
+        assert value.target.data.hex(" ") == "1a 2b"
         assert value.target.width == 16

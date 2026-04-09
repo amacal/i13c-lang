@@ -3,7 +3,7 @@ from typing import Iterator, List, Tuple
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Type, default_range
+from i13c.semantic.core import Hex, Type, default_range
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
@@ -49,14 +49,16 @@ def validate_type_ranges(
     for ref, type in iterate_candidates(snippets, functions, parameters):
         defaults = default_range(type.name)
 
-        if type.range.lower > type.range.upper:
+        if Hex.greater(type.range.lower.data, type.range.upper.data):
             diagnostics.append(
                 report_e3001_invalid_type_ranges(
                     ref, type.range.lower, type.range.upper
                 )
             )
 
-        elif type.range.lower < defaults.lower or type.range.upper > defaults.upper:
+        elif Hex.lesser(type.range.lower.data, defaults.lower.data) or Hex.greater(
+            type.range.upper.data, defaults.upper.data
+        ):
             diagnostics.append(
                 report_e3001_invalid_type_ranges(
                     ref, type.range.lower, type.range.upper
@@ -67,7 +69,7 @@ def validate_type_ranges(
 
 
 def report_e3001_invalid_type_ranges(
-    ref: SpanLike, lower: int, upper: int
+    ref: SpanLike, lower: Hex, upper: Hex
 ) -> Diagnostic:
     return Diagnostic(
         ref=ref,

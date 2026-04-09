@@ -11,7 +11,7 @@ def can_draw_a_table_with_callsite_resolutions():
         """
             fn foo() {}
             fn foo(x: u16) {}
-            fn main() { foo(0x123); }
+            fn main() { foo(0x0123); }
         """
     )
 
@@ -20,7 +20,7 @@ def can_draw_a_table_with_callsite_resolutions():
             | --------- | ----------- | ----------- | --------- | -------- | -------- |
             | Reference | CallSite ID | Callee Name | Arguments | Accepted | Rejected |
             | --------- | ----------- | ----------- | --------- | -------- | -------- |
-            | 79:89     | callsite#5  | foo         | 1         | 1        | 1        |
+            | 79:90     | callsite#5  | foo         | 1         | 1        | 1        |
             | --------- | ----------- | ----------- | --------- | -------- | -------- |
         """
     )
@@ -31,7 +31,7 @@ def can_draw_a_table_with_callsite_resolutions_bindings():
         """
             fn foo() {}
             fn foo(x: u16) {}
-            fn main() { foo(0x123); }
+            fn main() { foo(0x0123); }
         """
     )
 
@@ -40,7 +40,7 @@ def can_draw_a_table_with_callsite_resolutions_bindings():
             | --------- | ----------- | ----------- | ------------- | ------------ |
             | Reference | CallSite ID | Callee Name | Binding Index | Binding Kind |
             | --------- | ----------- | ----------- | ------------- | ------------ |
-            | 79:89     | callsite#5  | foo         | 0             | argument     |
+            | 79:90     | callsite#5  | foo         | 0             | argument     |
             | --------- | ----------- | ----------- | ------------- | ------------ |
         """
     )

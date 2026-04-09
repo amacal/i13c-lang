@@ -111,12 +111,20 @@ def can_build_function_with_properly_derived_types():
     assert param1.ident.name == b"r1"
     assert param1.type.name == b"u64"
     assert param1.type.width == 16
-    assert param1.type.range.lower == 0x0000
-    assert param1.type.range.upper == 0xFFFF
+
+    assert param1.type.range.lower.width == 16
+    assert param1.type.range.lower.data.hex(" ") == "00 00"
+
+    assert param1.type.range.upper.width == 16
+    assert param1.type.range.upper.data.hex(" ") == "ff ff"
 
     param2 = parameters.get(value.parameters[1])
     assert param2.ident.name == b"r2"
     assert param2.type.name == b"u8"
     assert param2.type.width == 8
-    assert param2.type.range.lower == 0x00
-    assert param2.type.range.upper == 0x10
+
+    assert param2.type.range.lower.width == 8
+    assert param2.type.range.lower.data.hex(" ") == "00"
+
+    assert param2.type.range.upper.width == 8
+    assert param2.type.range.upper.data.hex(" ") == "10"

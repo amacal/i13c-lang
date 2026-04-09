@@ -122,7 +122,7 @@ def can_parse_snippets_with_no_return_with_clobbers():
     assert len(instruction.operands) == 0
 
 
-def can_parse_snipper_with_ranged_parameter():
+def can_parse_snippet_with_ranged_parameter():
     snippet = parse_snippet("asm main(value@rdi: u8[0x10..0x20]) { }")
 
     assert len(snippet.slots) == 1
@@ -131,8 +131,8 @@ def can_parse_snipper_with_ranged_parameter():
     assert slot.name == b"value"
     assert slot.type.name == b"u8"
     assert slot.type.range is not None
-    assert slot.type.range.lower == 0x10
-    assert slot.type.range.upper == 0x20
+    assert slot.type.range.lower == bytes([0x10])
+    assert slot.type.range.upper == bytes([0x20])
 
 
 def can_handle_snippet_missing_slot_comma():

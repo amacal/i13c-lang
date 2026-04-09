@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Optional, Protocol, Union
+from typing import List
+from typing import Literal as Kind
+from typing import Optional, Protocol, Union
 
 from i13c.syntax.source import Span
 
@@ -24,8 +26,8 @@ class Type:
 
 @dataclass(kw_only=True, eq=False)
 class Range:
-    lower: int
-    upper: int
+    lower: bytes
+    upper: bytes
 
 
 @dataclass(kw_only=True, eq=False)
@@ -37,7 +39,7 @@ class Register:
 @dataclass(kw_only=True, eq=False)
 class Immediate:
     ref: Span
-    value: int
+    data: bytes
 
 
 @dataclass(kw_only=True, eq=False)
@@ -46,11 +48,20 @@ class Reference:
     name: bytes
 
 
+OffsetKind = Kind["forward", "backward"]
+
+
+@dataclass(kw_only=True, eq=False)
+class Offset:
+    kind: OffsetKind
+    value: Immediate
+
+
 @dataclass(kw_only=True, eq=False)
 class Address:
     ref: Span
     base: Register
-    offset: Optional[Immediate]
+    offset: Optional[Offset]
 
 
 Operand = Union[Register, Immediate, Reference, Address]
@@ -59,7 +70,7 @@ Operand = Union[Register, Immediate, Reference, Address]
 @dataclass(kw_only=True, eq=False)
 class IntegerLiteral:
     ref: Span
-    value: int
+    value: bytes
 
 
 @dataclass(kw_only=True, eq=False)

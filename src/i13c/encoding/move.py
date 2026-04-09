@@ -31,7 +31,7 @@ def encode_mov_reg_imm(
     )
 
     imm64 = Immediate(
-        value=instruction.imm,
+        value=int.from_bytes(instruction.imm.data, byteorder="little"),
         width=8,
         signed=False,
     )
@@ -91,7 +91,7 @@ def encode_mov_off_imm(
     sib = SIB(
         scale=0,
         index=None,
-        base=instruction.dst,
+        base=instruction.dst.base.id,
     )
 
     modrm = ModRM(
@@ -113,13 +113,15 @@ def encode_mov_off_imm(
     )
 
     disp32 = Displacement(
-        value=instruction.off,
+        value=int.from_bytes(
+            instruction.dst.disp.data, byteorder="little", signed=False
+        ),
         width=4,
         signed=True,
     )
 
     imm32 = Immediate(
-        value=instruction.imm & 0xFFFFFFFF,
+        value=int.from_bytes(instruction.imm.data, byteorder="little") & 0xFFFFFFFF,
         width=4,
         signed=False,
     )
@@ -135,22 +137,6 @@ def encode_mov_off_imm(
         ]
     )
 
-    if instruction.imm >= 0x80000000:
-        rex.w = False  # the second move must be a 32-bit zero-extension
-        disp32.value += 4  # the second move is 4 bytes after the first
-        imm32.value = (instruction.imm >> 32) & 0xFFFFFFFF  # high 32 bits
-
-        bytecode.extend(
-            [
-                *rex.to_bytes(),
-                opcode.to_byte(),
-                modrm.to_byte(),
-                *sib.to_bytes(),
-                *disp32.to_bytes(),
-                *imm32.to_bytes(),
-            ]
-        )
-
 
 def encode_mov_off_reg(
     instruction: MovOffReg, bytecode: bytearray
@@ -162,7 +148,7 @@ def encode_mov_off_reg(
     sib = SIB(
         scale=0,
         index=None,
-        base=instruction.dst,
+        base=instruction.dst.base.id,
     )
 
     modrm = ModRM(
@@ -184,7 +170,9 @@ def encode_mov_off_reg(
     )
 
     disp32 = Displacement(
-        value=instruction.off,
+        value=int.from_bytes(
+            instruction.dst.disp.data, byteorder="little", signed=False
+        ),
         width=4,
         signed=True,
     )
@@ -210,7 +198,7 @@ def encode_mov_reg_off(
     sib = SIB(
         scale=0,
         index=None,
-        base=instruction.src,
+        base=instruction.src.base.id,
     )
 
     modrm = ModRM(
@@ -232,7 +220,9 @@ def encode_mov_reg_off(
     )
 
     disp32 = Displacement(
-        value=instruction.off,
+        value=int.from_bytes(
+            instruction.src.disp.data, byteorder="little", signed=False
+        ),
         width=4,
         signed=True,
     )

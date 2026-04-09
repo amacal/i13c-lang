@@ -69,7 +69,7 @@ class ImmediateFlow:
     dst: int
 
     def native(self) -> str:
-        return f"immediate {reg64_to_name(self.dst)}, {self.imm:#010x}"
+        return f"immediate {reg64_to_name(self.dst)}, {self.imm}"
 
 
 @dataclass(kw_only=True)

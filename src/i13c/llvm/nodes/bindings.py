@@ -6,6 +6,13 @@ from i13c.core.mapping import OneToMany, OneToOne
 from i13c.llvm.typing.blocks import BlockInstruction
 from i13c.llvm.typing.flows import BindingFlow, BlockId, FlowId
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
+from i13c.llvm.typing.instructions.core import (
+    ComputedAddress,
+    Displacement,
+    Immediate,
+    Register,
+    Scaler,
+)
 from i13c.llvm.typing.instructions.ctrl import Nop
 from i13c.llvm.typing.instructions.move import MovRegImm, MovRegOff
 from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
@@ -43,7 +50,7 @@ def lower_snippet_bindings(
 
             # extract slot binding
             bind = binding.dst.bind
-            imm = literal.target.value
+            imm = Immediate(data=literal.target.data, width=literal.target.width)
 
             # emit move instruction for binding
             iid = InstructionId(value=generator.next())
@@ -88,7 +95,7 @@ def lower_function_bindings(
             assert isinstance(literal.target, Hex)
 
             # extract literal
-            imm = literal.target.value
+            imm = Immediate(data=literal.target.data, width=literal.target.width)
 
             # emit move instruction for binding
             iid = InstructionId(value=generator.next())
@@ -151,14 +158,20 @@ def patch_bindings(
                         bindings[iid] = [(InstructionId(value=generator.next()), Nop())]
 
                     else:
+                        disp32 = (offset * 8).to_bytes(4, byteorder="big", signed=False)
+
                         # append new patched binding
                         bindings[iid] = [
                             (
                                 InstructionId(value=generator.next()),
                                 MovRegOff(
                                     dst=instr.dst,
-                                    src=name_to_reg64("rsp"),
-                                    off=offset * 8,
+                                    src=ComputedAddress(
+                                        base=Register.parse64("rsp"),
+                                        disp=Displacement.auto(disp32),
+                                        scaler=Scaler.none(),
+                                        width=64,
+                                    ),
                                 ),
                             )
                         ]
