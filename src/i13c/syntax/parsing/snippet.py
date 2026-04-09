@@ -195,7 +195,7 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
     elif token.code == Tokens.HEX:
         return tree.snippet.Immediate(
             ref=state.span(token),
-            data=bytes.fromhex(state.extract(token)[2:]),
+            value=tree.literals.Hex(digits=bytes.fromhex(state.extract(token)[2:])),
         )
 
     # reference has to provide its identifier
@@ -229,10 +229,7 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
             # to be converted to an immediate operand
             offset = tree.snippet.Offset(
                 kind=kind,
-                value=tree.snippet.Immediate(
-                    ref=state.span(value),
-                    data=bytes.fromhex(state.extract(value)[2:]),
-                ),
+                value=tree.literals.Hex(digits=bytes.fromhex(state.extract(value)[2:])),
             )
 
             # address has to be closed with a square close bracket

@@ -30,7 +30,7 @@ def build_literals(
         literals[literal_id] = Literal(
             ref=literal.ref,
             kind=b"hex",
-            target=Hex.derive(literal.value),
+            target=Hex.derive(literal.value.digits),
         )
 
     return OneToOne[LiteralId, Literal].instance(literals)

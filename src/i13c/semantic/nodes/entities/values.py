@@ -60,8 +60,8 @@ def build_values(
         # override ranges if specified
         if statement.type.range is not None:
             range = Range(
-                lower=Hex.derive(statement.type.range.lower),
-                upper=Hex.derive(statement.type.range.upper),
+                lower=Hex.derive(statement.type.range.lower.digits),
+                upper=Hex.derive(statement.type.range.upper.digits),
             )
 
         # derive width from ranges

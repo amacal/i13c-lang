@@ -131,8 +131,8 @@ def can_parse_snippet_with_ranged_parameter():
     assert slot.name == b"value"
     assert slot.type.name == b"u8"
     assert slot.type.range is not None
-    assert slot.type.range.lower.hex() == "0x10"
-    assert slot.type.range.upper.hex() == "0x20"
+    assert slot.type.range.lower.digits.hex() == "10"
+    assert slot.type.range.upper.digits.hex() == "20"
 
 
 def can_handle_snippet_missing_slot_comma():

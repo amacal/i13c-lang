@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from i13c.syntax.tree.literals import Hex
+
 
 @dataclass(kw_only=True, eq=False)
 class Type:
@@ -10,5 +12,5 @@ class Type:
 
 @dataclass(kw_only=True, eq=False)
 class Range:
-    lower: bytes
-    upper: bytes
+    lower: Hex
+    upper: Hex

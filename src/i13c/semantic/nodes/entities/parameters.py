@@ -31,8 +31,8 @@ def build_parameters(
         # override ranges if specified
         if parameter.type.range is not None:
             range = Range(
-                lower=Hex.derive(parameter.type.range.lower),
-                upper=Hex.derive(parameter.type.range.upper),
+                lower=Hex.derive(parameter.type.range.lower.digits),
+                upper=Hex.derive(parameter.type.range.upper.digits),
             )
 
         # derive width from ranges

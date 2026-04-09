@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import List, Protocol
 
 import i13c.syntax.tree.function as function
+import i13c.syntax.tree.literals as literals
 import i13c.syntax.tree.snippet as snippet
 import i13c.syntax.tree.types as types
 

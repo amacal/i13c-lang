@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import List, Protocol, Union
 
+import i13c.syntax.tree.literals as literals
+import i13c.syntax.tree.types as types
 from i13c.syntax.source import Span
-from i13c.syntax.tree import types
 
 
 class Visitor(Protocol):
@@ -16,7 +17,7 @@ class Visitor(Protocol):
 @dataclass(kw_only=True, eq=False)
 class IntegerLiteral:
     ref: Span
-    value: bytes
+    value: literals.Hex
 
 
 @dataclass(kw_only=True, eq=False)

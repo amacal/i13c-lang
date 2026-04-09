@@ -3,8 +3,9 @@ from typing import List
 from typing import Literal as Kind
 from typing import Optional, Protocol, Union
 
+import i13c.syntax.tree.literals as literals
+import i13c.syntax.tree.types as types
 from i13c.syntax.source import Span
-from i13c.syntax.tree import types
 
 
 class Visitor(Protocol):
@@ -22,7 +23,7 @@ class Register:
 @dataclass(kw_only=True, eq=False)
 class Immediate:
     ref: Span
-    data: bytes
+    value: literals.Hex
 
 
 @dataclass(kw_only=True, eq=False)
@@ -37,7 +38,7 @@ OffsetKind = Kind["forward", "backward"]
 @dataclass(kw_only=True, eq=False)
 class Offset:
     kind: OffsetKind
-    value: Immediate
+    value: literals.Hex
 
 
 @dataclass(kw_only=True, eq=False)
@@ -76,7 +77,6 @@ class Instruction:
     def accept(self, visitor: Visitor) -> None:
         visitor.on_instruction(self)
 
-        # avoid entering operands
         for operand in self.operands:
             visitor.on_operand(operand)
 

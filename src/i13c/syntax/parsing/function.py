@@ -116,7 +116,9 @@ def parse_statement(state: ParsingState) -> tree.function.Statement:
     raise UnexpectedTokenCode(token, [Tokens.IDENT, Tokens.KEYWORD], token.code)
 
 
-def parse_callsite(state: ParsingState, ident: LexingToken) -> tree.function.CallStatement:
+def parse_callsite(
+    state: ParsingState, ident: LexingToken
+) -> tree.function.CallStatement:
     arguments: List[tree.function.Argument] = []
 
     # expect opening round bracket
@@ -187,7 +189,7 @@ def parse_argument(state: ParsingState) -> tree.function.Argument:
     if token.code == Tokens.HEX:
         return tree.function.IntegerLiteral(
             ref=state.span(token),
-            value=bytes.fromhex(state.extract(token)[2:]),
+            value=tree.literals.Hex(digits=bytes.fromhex(state.extract(token)[2:])),
         )
 
     # an identifier can be only an expression

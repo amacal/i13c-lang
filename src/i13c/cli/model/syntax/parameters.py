@@ -7,7 +7,9 @@ from i13c.syntax import tree
 
 class ParameterListExtractor:
     @staticmethod
-    def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[NodeId, tree.function.Parameter]]:
+    def extract(
+        artifacts: GraphArtifacts,
+    ) -> Iterable[Tuple[NodeId, tree.function.Parameter]]:
         return artifacts.syntax_graph().parameters.items()
 
     @staticmethod
@@ -28,7 +30,7 @@ class ParameterListExtractor:
             "name": entry[1].name.decode(),
             "type": entry[1].type.name.decode(),
             "range": (
-                f"0x{entry[1].type.range.lower.hex()}..0x{entry[1].type.range.upper.hex()}"
+                f"0x{entry[1].type.range.lower.digits.hex()}..0x{entry[1].type.range.upper.digits.hex()}"
                 if entry[1].type.range
                 else ""
             ),

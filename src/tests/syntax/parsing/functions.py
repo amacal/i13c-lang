@@ -36,7 +36,7 @@ def can_parse_function_with_statements():
 
     argument = statement.arguments[0]
     assert isinstance(argument, tree.function.IntegerLiteral)
-    assert argument.value == bytes([0x01])
+    assert argument.value.digits.hex() == "01"
 
 
 def can_parse_function_with_single_parameter():
@@ -93,7 +93,7 @@ def can_parse_function_with_flags_noreturn():
 
     argument = statement.arguments[0]
     assert isinstance(argument, tree.function.IntegerLiteral)
-    assert argument.value == bytes([0x01])
+    assert argument.value.digits.hex() == "01"
 
 
 def can_parse_function_with_ranged_parameter():
@@ -109,8 +109,8 @@ def can_parse_function_with_ranged_parameter():
     assert parameter.name == b"value"
     assert parameter.type.name == b"u8"
     assert parameter.type.range is not None
-    assert parameter.type.range.lower.hex() == "0x10"
-    assert parameter.type.range.upper.hex() == "0x20"
+    assert parameter.type.range.lower.digits.hex() == "10"
+    assert parameter.type.range.upper.digits.hex() == "20"
 
 
 def can_handle_function_missing_parameter_comma():

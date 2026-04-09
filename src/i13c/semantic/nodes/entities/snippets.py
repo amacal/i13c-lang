@@ -40,8 +40,8 @@ def build_snippets(
             # override ranges if specified
             if slot.type.range is not None:
                 range = Range(
-                    lower=Hex.derive(slot.type.range.lower),
-                    upper=Hex.derive(slot.type.range.upper),
+                    lower=Hex.derive(slot.type.range.lower.digits),
+                    upper=Hex.derive(slot.type.range.upper.digits),
                 )
 
             # derive width from ranges

@@ -55,7 +55,7 @@ def can_parse_instruction_with_immediate():
 
     operand2 = instructions[0].operands[1]
     assert isinstance(operand2, tree.snippet.Immediate)
-    assert operand2.data == bytes([0x12, 0x34])
+    assert operand2.value.digits.hex() == "1234"
 
 
 def can_parse_multiple_instructions():
