@@ -79,7 +79,11 @@ def parse_parameter(state: ParsingState) -> tree.function.Parameter:
     return tree.function.Parameter(
         ref=state.span(ident),
         name=state.extract(ident),
-        type=tree.types.Type(name=state.extract(type), range=range),
+        type=tree.types.Type(
+            ref=state.between(type, type),
+            name=state.extract(type),
+            range=range,
+        ),
     )
 
 
@@ -163,7 +167,11 @@ def parse_value(state: ParsingState) -> tree.function.ValueStatement:
     return tree.function.ValueStatement(
         ref=state.span(ident),
         name=state.extract(ident),
-        type=tree.types.Type(name=state.extract(type), range=range),
+        type=tree.types.Type(
+            ref=state.between(type, type),
+            name=state.extract(type),
+            range=range,
+        ),
         expr=expression,
     )
 

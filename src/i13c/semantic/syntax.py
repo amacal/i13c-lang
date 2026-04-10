@@ -53,6 +53,9 @@ class NodesVisitor:
     def on_instruction(self, instruction: tree.snippet.Instruction) -> None:
         self.graph.instructions.append(self.next(), instruction)
 
+    def on_operand(self, operand: tree.snippet.Operand) -> None:
+        self.graph.operands.append(self.next(), operand)
+
     def on_function(self, function: tree.function.Function) -> None:
         self.graph.functions.append(self.next(), function)
 
@@ -68,32 +71,39 @@ class NodesVisitor:
     def on_expression(self, expression: tree.function.Expression) -> None:
         self.graph.expressions.append(self.next(), expression)
 
-    def on_operand(self, operand: tree.snippet.Operand) -> None:
-        self.graph.operands.append(self.next(), operand)
+    def on_type(self, type: tree.types.Type) -> None:
+        self.graph.types.append(self.next(), type)
+
+    def on_range(self, range: tree.types.Range) -> None:
+        self.graph.ranges.append(self.next(), range)
 
 
 @dataclass(kw_only=True)
 class SyntaxGraph:
     snippets: Bidirectional[tree.snippet.Snippet]
-    operands: Bidirectional[tree.snippet.Operand]
     instructions: Bidirectional[tree.snippet.Instruction]
+    operands: Bidirectional[tree.snippet.Operand]
     functions: Bidirectional[tree.function.Function]
     statements: Bidirectional[tree.function.Statement]
     literals: Bidirectional[tree.function.Literal]
     expressions: Bidirectional[tree.function.Expression]
     parameters: Bidirectional[tree.function.Parameter]
+    types: Bidirectional[tree.types.Type]
+    ranges: Bidirectional[tree.types.Range]
 
     @staticmethod
     def empty() -> SyntaxGraph:
         return SyntaxGraph(
             snippets=Bidirectional[tree.snippet.Snippet].empty(),
-            operands=Bidirectional[tree.snippet.Operand].empty(),
             instructions=Bidirectional[tree.snippet.Instruction].empty(),
+            operands=Bidirectional[tree.snippet.Operand].empty(),
             functions=Bidirectional[tree.function.Function].empty(),
             statements=Bidirectional[tree.function.Statement].empty(),
             literals=Bidirectional[tree.function.Literal].empty(),
             expressions=Bidirectional[tree.function.Expression].empty(),
             parameters=Bidirectional[tree.function.Parameter].empty(),
+            types=Bidirectional[tree.types.Type].empty(),
+            ranges=Bidirectional[tree.types.Range].empty(),
         )
 
 

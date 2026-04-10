@@ -89,7 +89,11 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
     return tree.snippet.Slot(
         name=state.extract(ident),
         bind=tree.snippet.Binding(name=state.extract(bind)),
-        type=tree.types.Type(name=state.extract(type), range=range),
+        type=tree.types.Type(
+            ref=state.between(type, type),
+            name=state.extract(type),
+            range=range,
+        ),
     )
 
 
