@@ -13,17 +13,27 @@ class Visitor(Protocol):
     def on_expression(self, expression: Expression) -> None: ...
     def on_parameter(self, parameter: Parameter) -> None: ...
 
+    # types related
+    def on_type(self, type: types.Type) -> None: ...
+    def on_range(self, range: types.Range) -> None: ...
+
 
 @dataclass(kw_only=True, eq=False)
 class IntegerLiteral:
     ref: Span
     value: literals.Hex
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_literal(self)
+
 
 @dataclass(kw_only=True, eq=False)
 class Expression:
     ref: Span
     name: bytes
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_expression(self)
 
 
 Literal = Union[IntegerLiteral]
@@ -38,6 +48,8 @@ class Parameter:
 
     def accept(self, visitor: Visitor) -> None:
         visitor.on_parameter(self)
+
+        self.type.accept(visitor)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -70,11 +82,11 @@ class ValueStatement:
     def accept(self, visitor: Visitor) -> None:
         visitor.on_statement(self)
 
-        if isinstance(self.expr, IntegerLiteral):
-            visitor.on_literal(self.expr)
+        # first visit the type
+        self.type.accept(visitor)
 
-        if isinstance(self.expr, Expression):
-            visitor.on_expression(self.expr)
+        # then the expression
+        self.expr.accept(visitor)
 
 
 Statement = Union[CallStatement, ValueStatement]

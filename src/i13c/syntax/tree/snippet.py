@@ -13,6 +13,10 @@ class Visitor(Protocol):
     def on_instruction(self, instruction: Instruction) -> None: ...
     def on_operand(self, operand: Operand) -> None: ...
 
+    # types related
+    def on_type(self, type: types.Type) -> None: ...
+    def on_range(self, range: types.Range) -> None: ...
+
 
 @dataclass(kw_only=True, eq=False)
 class Register:
@@ -93,5 +97,8 @@ class Snippet:
     def accept(self, visitor: Visitor) -> None:
         visitor.on_snippet(self)
 
-        for instruction in self.instructions:
-            instruction.accept(visitor)
+        for entry in self.slots:
+            entry.type.accept(visitor)
+
+        for entry in self.instructions:
+            entry.accept(visitor)

@@ -13,6 +13,6 @@ def can_draw_a_table_with_parameters():
         | Reference | Parameter ID | Parameter Name | Parameter Type                              |
         | --------- | ------------ | -------------- | ------------------------------------------- |
         | 17:20     | parameter#2  | abc            | u8[0x01..0x02]                              |
-        | 38:41     | parameter#3  | cde            | u64[0x0000000000000000..0xffffffffffffffff] |
+        | 38:41     | parameter#5  | cde            | u64[0x0000000000000000..0xffffffffffffffff] |
         | --------- | ------------ | -------------- | ------------------------------------------- |
     """)

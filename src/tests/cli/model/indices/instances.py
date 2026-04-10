@@ -13,6 +13,6 @@ def can_draw_a_table_with_instances():
         | --------- | ----------- | ----------- | --------- | -------- | -------- |
         | Reference | Callsite ID | Callee Name | Target    | Bindings | Operands |
         | --------- | ----------- | ----------- | --------- | -------- | -------- |
-        | 55:65     | callsite#3  | exit        | snippet#1 | 1        | 0        |
+        | 55:65     | callsite#4  | exit        | snippet#1 | 1        | 0        |
         | --------- | ----------- | ----------- | --------- | -------- | -------- |
     """)

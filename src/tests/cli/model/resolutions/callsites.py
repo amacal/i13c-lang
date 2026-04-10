@@ -20,7 +20,7 @@ def can_draw_a_table_with_callsite_resolutions():
             | --------- | ----------- | ----------- | --------- | -------- | -------- |
             | Reference | CallSite ID | Callee Name | Arguments | Accepted | Rejected |
             | --------- | ----------- | ----------- | --------- | -------- | -------- |
-            | 79:90     | callsite#5  | foo         | 1         | 1        | 1        |
+            | 79:90     | callsite#6  | foo         | 1         | 1        | 1        |
             | --------- | ----------- | ----------- | --------- | -------- | -------- |
         """
     )
@@ -40,7 +40,7 @@ def can_draw_a_table_with_callsite_resolutions_bindings():
             | --------- | ----------- | ----------- | ------------- | ------------ |
             | Reference | CallSite ID | Callee Name | Binding Index | Binding Kind |
             | --------- | ----------- | ----------- | ------------- | ------------ |
-            | 79:90     | callsite#5  | foo         | 0             | argument     |
+            | 79:90     | callsite#6  | foo         | 0             | argument     |
             | --------- | ----------- | ----------- | ------------- | ------------ |
         """
     )

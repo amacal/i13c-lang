@@ -16,7 +16,7 @@ def can_draw_a_table_with_parameters():
             | Reference | Node ID | Parameter Name | Parameter Type | Parameter Range |
             | --------- | ------- | -------------- | -------------- | --------------- |
             | 21:24     | #2      | abc            | u8             | 0x01..0x02      |
-            | 42:45     | #3      | cde            | u64            |                 |
+            | 42:45     | #5      | cde            | u64            |                 |
             | --------- | ------- | -------------- | -------------- | --------------- |
         """
     )

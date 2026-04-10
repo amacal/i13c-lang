@@ -12,6 +12,6 @@ def can_draw_a_table_with_expressions():
         | --------- | ------------- | --------------- |
         | Reference | Expression ID | Expression Name |
         | --------- | ------------- | --------------- |
-        | 32:35     | expression#4  | abc             |
+        | 32:35     | expression#5  | abc             |
         | --------- | ------------- | --------------- |
     """)

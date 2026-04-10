@@ -13,6 +13,6 @@ def can_draw_a_table_with_parameter_variables():
         | Reference | Source ID   | Source Name | Variable ID |
         | --------- | ----------- | ----------- | ----------- |
         | 17:21     | parameter#2 | arg1        | variable#2  |
-        | 27:31     | parameter#3 | arg2        | variable#3  |
+        | 27:31     | parameter#4 | arg2        | variable#4  |
         | --------- | ----------- | ----------- | ----------- |
     """)

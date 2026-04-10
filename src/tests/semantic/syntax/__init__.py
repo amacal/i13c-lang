@@ -3,15 +3,22 @@ from i13c.semantic.syntax import NodesVisitor
 from tests.semantic import prepare_program
 
 
-def can_visit_all_nodes_in_a_snippet() -> None:
-    _, program = prepare_program("""
-            asm main() { mov rax, 0x1234; }
-        """)
+def parse_syntax_graph(code: str) -> NodesVisitor:
+    _, program = prepare_program(code)
 
     generator = Generator()
     visitor = NodesVisitor(generator)
 
     program.accept(visitor)
+    return visitor
+
+
+def can_visit_all_nodes_in_a_snippet() -> None:
+    visitor = parse_syntax_graph(
+        """
+            asm main() { mov rax, 0x1234; }
+        """
+    )
 
     assert len(list(visitor.graph.snippets.items())) == 1
     assert len(list(visitor.graph.instructions.items())) == 1
@@ -22,14 +29,11 @@ def can_visit_all_nodes_in_a_snippet() -> None:
 
 
 def can_visit_all_nodes_in_a_function() -> None:
-    _, program = prepare_program("""
+    visitor = parse_syntax_graph(
+        """
             fn main() { foo(0x42); }
-        """)
-
-    generator = Generator()
-    visitor = NodesVisitor(generator)
-
-    program.accept(visitor)
+        """
+    )
 
     assert len(list(visitor.graph.functions.items())) == 1
     assert len(list(visitor.graph.statements.items())) == 1

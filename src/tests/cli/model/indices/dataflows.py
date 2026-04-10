@@ -12,9 +12,9 @@ def can_draw_a_table_with_dataflows():
         | --------- | ----------- | ------------- | ---------------- | ----------------- | ------------- | -------------- |
         | Reference | Function ID | Function Name | ControlFlow Node | DataFlow Declares | DataFlow Uses | DataFlow Drops |
         | --------- | ----------- | ------------- | ---------------- | ----------------- | ------------- | -------------- |
-        | 12:36     | function#1  | main          | callsite#4       | 0                 | 1             | 0              |
         | 12:36     | function#1  | main          | callsite#6       | 0                 | 1             | 0              |
-        | 12:36     | function#1  | main          | entry#8          | 2                 | 0             | 0              |
-        | 12:36     | function#1  | main          | exit#9           | 0                 | 0             | 2              |
+        | 12:36     | function#1  | main          | callsite#8       | 0                 | 1             | 0              |
+        | 12:36     | function#1  | main          | entry#10         | 2                 | 0             | 0              |
+        | 12:36     | function#1  | main          | exit#11          | 0                 | 0             | 2              |
         | --------- | ----------- | ------------- | ---------------- | ----------------- | ------------- | -------------- |
     """)
