@@ -1,4 +1,4 @@
-from tests.semantic.nodes.resolutions import prepare_resolutions
+from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
 def can_accept_multi_value_range():
@@ -62,3 +62,13 @@ def can_reject_a_range_with_lower_greater_than_upper():
 
     assert resolution.rejected[0].reason == "lower-greater-than-upper"
     assert source.extract(resolution.rejected[0].ref) == b"0x02..0x01"
+
+
+def can_detect_a_broken_range_rule_e3001():
+    _, rules = prepare_rules(
+        """
+            asm main(v@rax: u8[0x02..0x01]) { mox rax, rbx; }
+        """
+    )
+
+    assert len(rules.get("e3001")) == 1

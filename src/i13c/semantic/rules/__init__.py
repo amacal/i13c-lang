@@ -4,7 +4,6 @@ from typing import Dict, Iterable, List
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.semantic.rules.e3000 import configure_e3000
-from i13c.semantic.rules.e3001 import configure_e3001
 from i13c.semantic.rules.e3002 import configure_e3002
 from i13c.semantic.rules.e3003 import configure_e3003
 from i13c.semantic.rules.e3004 import configure_e3004
@@ -49,7 +48,6 @@ def configure_rules() -> GraphGroup:
     return GraphGroup(
         nodes=[
             configure_e3000(),
-            configure_e3001(),
             configure_e3002(),
             configure_e3003(),
             configure_e3004(),
