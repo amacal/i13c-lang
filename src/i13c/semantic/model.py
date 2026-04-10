@@ -11,6 +11,7 @@ from i13c.semantic.typing.entities.instructions import Instruction, InstructionI
 from i13c.semantic.typing.entities.literals import Literal, LiteralId
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
+from i13c.semantic.typing.entities.ranges import Range, RangeId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.entities.values import Value, ValueId
 from i13c.semantic.typing.indices.callgraphs import CallPair
@@ -37,6 +38,7 @@ class BasicNodes:
     literals: OneToOne[LiteralId, Literal]
     operands: OneToOne[OperandId, Operand]
     parameters: OneToOne[ParameterId, Parameter]
+    ranges: OneToOne[RangeId, Range]
     snippets: OneToOne[SnippetId, Snippet]
     usages: OneToOne[UsageId, Usage]
     values: OneToOne[ValueId, Value]

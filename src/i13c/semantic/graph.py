@@ -57,6 +57,7 @@ def build(
             literals=entities["entities/literals"],
             operands=entities["entities/operands"],
             parameters=entities["entities/parameters"],
+            ranges=entities["entities/ranges"],
             snippets=entities["entities/snippets"],
             usages=entities["entities/usages"],
             values=entities["entities/values"],

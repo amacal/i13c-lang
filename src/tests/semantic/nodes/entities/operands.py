@@ -48,7 +48,7 @@ def can_detect_an_immediate_operand_one_byte():
     operands = semantic.basic.operands
 
     assert operands.size() == 1
-    id, value = operands.pop()
+    id, value = operands.peak()
 
     assert isinstance(id, OperandId)
     assert isinstance(value, Operand)
@@ -71,7 +71,7 @@ def can_detect_an_immediate_operand_four_bytes():
     operands = semantic.basic.operands
 
     assert operands.size() == 1
-    id, value = operands.pop()
+    id, value = operands.peak()
 
     assert isinstance(id, OperandId)
     assert isinstance(value, Operand)
@@ -94,7 +94,7 @@ def can_detect_a_register_operand():
     operands = semantic.basic.operands
 
     assert operands.size() == 1
-    id, value = operands.pop()
+    id, value = operands.peak()
 
     assert isinstance(id, OperandId)
     assert isinstance(value, Operand)
@@ -117,7 +117,7 @@ def can_detect_an_address_operand_without_offset():
     operands = semantic.basic.operands
 
     assert operands.size() == 1
-    id, value = operands.pop()
+    id, value = operands.peak()
 
     assert isinstance(id, OperandId)
     assert isinstance(value, Operand)
@@ -141,7 +141,7 @@ def can_detect_an_address_operand_with_positive_offset():
     operands = semantic.basic.operands
 
     assert operands.size() == 1
-    id, value = operands.pop()
+    id, value = operands.peak()
 
     assert isinstance(id, OperandId)
     assert isinstance(value, Operand)
@@ -168,7 +168,7 @@ def can_detect_an_address_operand_with_negative_offset():
     operands = semantic.basic.operands
 
     assert operands.size() == 1
-    id, value = operands.pop()
+    id, value = operands.peak()
 
     assert isinstance(id, OperandId)
     assert isinstance(value, Operand)
@@ -195,7 +195,7 @@ def can_detect_a_reference_operand():
     operands = semantic.basic.operands
 
     assert operands.size() == 1
-    id, value = operands.pop()
+    id, value = operands.peak()
 
     assert isinstance(id, OperandId)
     assert isinstance(value, Operand)
