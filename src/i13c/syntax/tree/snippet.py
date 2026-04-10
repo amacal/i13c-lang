@@ -12,7 +12,7 @@ class Visitor(Protocol):
     def on_snippet(self, snippet: Snippet) -> None: ...
     def on_instruction(self, instruction: Instruction) -> None: ...
     def on_operand(self, operand: Operand) -> None: ...
-    def on_binding(self, binding: Binding) -> None: ...
+    def on_bind(self, bind: Bind) -> None: ...
 
     # types related
     def on_type(self, type: types.Type) -> None: ...
@@ -69,18 +69,19 @@ Operand = Union[Register, Immediate, Reference, Address]
 
 
 @dataclass(kw_only=True, eq=False)
-class Binding:
+class Bind:
+    ref: Span
     name: bytes
 
     def accept(self, visitor: Visitor) -> None:
-        visitor.on_binding(self)
+        visitor.on_bind(self)
 
 
 @dataclass(kw_only=True, eq=False)
 class Slot:
     name: bytes
     type: types.Type
-    bind: Binding
+    bind: Bind
 
 
 @dataclass(kw_only=True, eq=False)

@@ -3,6 +3,7 @@ from i13c.semantic.nodes.analyses.callables import configure_callables_live
 from i13c.semantic.nodes.analyses.callgraphs import configure_callgraphs_live
 from i13c.semantic.nodes.analyses.controlflows import configure_flowgraphs_live
 from i13c.semantic.nodes.entities.bindings import configure_bindings
+from i13c.semantic.nodes.entities.binds import configure_binds
 from i13c.semantic.nodes.entities.callsites import configure_callsites
 from i13c.semantic.nodes.entities.expressions import configure_expressions
 from i13c.semantic.nodes.entities.functions import configure_functions
@@ -35,6 +36,7 @@ from i13c.semantic.nodes.resolutions.values import configure_resolution_by_value
 def configure_nodes() -> GraphGroup:
     return GraphGroup(
         nodes=[
+            configure_binds(),
             configure_bindings(),
             configure_callables_live(),
             configure_callgraphs_live(),

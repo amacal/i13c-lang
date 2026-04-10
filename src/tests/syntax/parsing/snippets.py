@@ -24,7 +24,7 @@ def can_parse_snippets_with_single_arg():
     assert slot.name == b"code"
     assert slot.type.name == b"u32"
 
-    assert isinstance(slot.bind, tree.snippet.Binding)
+    assert isinstance(slot.bind, tree.snippet.Bind)
     assert slot.bind.name == b"rdi"
 
 
@@ -46,14 +46,14 @@ def can_parse_snippets_with_multiple_args():
     assert slot1.name == b"code"
     assert slot1.type.name == b"u32"
 
-    assert isinstance(slot1.bind, tree.snippet.Binding)
+    assert isinstance(slot1.bind, tree.snippet.Bind)
     assert slot1.bind.name == b"rdi"
 
     slot2 = slots[1]
     assert slot2.name == b"id"
     assert slot2.type.name == b"u16"
 
-    assert isinstance(slot2.bind, tree.snippet.Binding)
+    assert isinstance(slot2.bind, tree.snippet.Bind)
     assert slot2.bind.name == b"rax"
 
 
@@ -71,7 +71,7 @@ def can_parse_snippets_with_bind_to_immediate():
     assert slot.name == b"code"
     assert slot.type.name == b"u32"
 
-    assert isinstance(slot.bind, tree.snippet.Binding)
+    assert isinstance(slot.bind, tree.snippet.Bind)
     assert slot.bind.name == b"imm"
 
 

@@ -51,6 +51,7 @@ def build(
     return SemanticGraph(
         basic=BasicNodes(
             bindings=entities["entities/bindings"],
+            binds=entities["entities/binds"],
             callsites=entities["entities/callsites"],
             expressions=entities["entities/expressions"],
             functions=entities["entities/functions"],
