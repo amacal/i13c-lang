@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
@@ -34,7 +34,7 @@ def configure_range_resolution() -> GraphGroup:
 
     extract = GraphNode(
         builder=build_range_resolution_accepted,
-        constraint=None,
+        constraint=check_range_resolution_accepted,
         produces=("resolutions/ranges/accepted",),
         requires=frozenset(
             {
@@ -66,11 +66,20 @@ def build_range_resolution(
                 )
             )
 
+        elif entry.lower.width != entry.upper.width:
+            resolution.rejected.append(
+                RangeRejection(
+                    ref=entry.ref,
+                    reason="inconsistent-widths",
+                )
+            )
+
         else:
             resolution.accepted.append(
                 RangeAcceptance(
                     ref=entry.ref,
                     id=rid,
+                    width=entry.lower.width,
                     lower=entry.lower,
                     upper=entry.upper,
                 )
@@ -81,21 +90,28 @@ def build_range_resolution(
     return OneToOne[RangeId, RangeResolution].instance(resolutions)
 
 
-def build_range_resolution_accepted(
+def check_range_resolution_accepted(
     rule_e3001: List[Diagnostic],
+    **kwargs: Dict[str, Any],
+) -> bool:
+    return len(rule_e3001) == 0
+
+
+def build_range_resolution_accepted(
     resolutions: OneToOne[RangeId, RangeResolution],
+    **kwargs: Dict[str, Any],
 ) -> OneToOne[RangeId, RangeAcceptance]:
     accepted: Dict[RangeId, RangeAcceptance] = {}
 
-    if not rule_e3001:
-        for id, resolution in resolutions.items():
-            accepted[id] = resolution.accepted[0]
+    for id, resolution in resolutions.items():
+        accepted[id] = resolution.accepted[0]
 
     return OneToOne[RangeId, RangeAcceptance].instance(accepted)
 
 
 def validate_range_resolution_e3001(
-    ranges: OneToOne[RangeId, Range], resolutions: OneToOne[RangeId, RangeResolution]
+    ranges: OneToOne[RangeId, Range],
+    resolutions: OneToOne[RangeId, RangeResolution],
 ) -> List[Diagnostic]:
     diagnostics: List[Diagnostic] = []
 
@@ -110,7 +126,8 @@ def validate_range_resolution_e3001(
 
 
 def report_range_resolution_e3001(
-    entry: Range, rejection: RangeRejection
+    entry: Range,
+    rejection: RangeRejection,
 ) -> Diagnostic:
     return Diagnostic(
         ref=rejection.ref,

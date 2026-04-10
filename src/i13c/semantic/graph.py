@@ -60,6 +60,7 @@ def build(
             parameters=entities["entities/parameters"],
             ranges=entities["entities/ranges"],
             snippets=entities["entities/snippets"],
+            types=entities["entities/types"],
             usages=entities["entities/usages"],
             values=entities["entities/values"],
             variables=entities["entities/variables"],
@@ -87,6 +88,7 @@ def build(
         callable_live=analyses["analyses/callables/live"],
         callgraph_live=analyses["analyses/calls-by-caller/live"],
         resolutions=ResolutionNodes(
-            ranges=resolutions["resolutions/ranges"],
+            ranges=resolutions.get("resolutions/ranges"),
+            types=resolutions.get("resolutions/types"),
         ),
     )

@@ -12,6 +12,7 @@ from i13c.semantic.nodes.entities.operands import configure_operands
 from i13c.semantic.nodes.entities.parameters import configure_parameters
 from i13c.semantic.nodes.entities.ranges import configure_ranges
 from i13c.semantic.nodes.entities.snippets import configure_snippets
+from i13c.semantic.nodes.entities.types import configure_types
 from i13c.semantic.nodes.entities.values import configure_values
 from i13c.semantic.nodes.indices.callgraphs import configure_callgraphs
 from i13c.semantic.nodes.indices.controlflows import configure_flowgraph_by_function
@@ -27,6 +28,7 @@ from i13c.semantic.nodes.resolutions.instructions import (
     configure_resolution_by_instruction,
 )
 from i13c.semantic.nodes.resolutions.ranges import configure_range_resolution
+from i13c.semantic.nodes.resolutions.types import configure_type_resolution
 from i13c.semantic.nodes.resolutions.values import configure_resolution_by_value
 
 
@@ -57,6 +59,8 @@ def configure_nodes() -> GraphGroup:
             configure_resolution_by_value(),
             configure_snippets(),
             configure_terminality_by_function(),
+            configure_type_resolution(),
+            configure_types(),
             configure_usages_by_expression(),
             configure_values(),
             configure_variables_by_parameters(),

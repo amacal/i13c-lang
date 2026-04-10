@@ -48,7 +48,6 @@ class Tokens:
     CURLY_CLOSE = 11
     AT = 12
     COLON = 13
-    TYPE = 14
     SQUARE_OPEN = 15
     SQUARE_CLOSE = 16
     EQUALS = 17
@@ -79,10 +78,6 @@ SET_REGS = {
     b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b",
 }
 
-SET_TYPES = {
-    b"u8", b"u16", b"u32", b"u64",
-}
-
 SET_KEYWORDS = {
     b"asm", b"clobbers", b"noreturn", b"fn", b"imm", b"val",
 }
@@ -102,7 +97,6 @@ TOKEN_NAMES: Dict[int, str] = {
     Tokens.AT: "at",
     Tokens.DOT: "dot",
     Tokens.COLON: "colon",
-    Tokens.TYPE: "type",
     Tokens.EQUALS: "equals",
     Tokens.SQUARE_OPEN: "square-open",
     Tokens.SQUARE_CLOSE: "square-close",
@@ -203,10 +197,6 @@ class Token:
     @staticmethod
     def keyword_token(offset: int, length: int) -> Token:
         return Token(code=Tokens.KEYWORD, offset=offset, length=length)
-
-    @staticmethod
-    def type_token(offset: int, length: int) -> Token:
-        return Token(code=Tokens.TYPE, offset=offset, length=length)
 
     @staticmethod
     def round_open_token(offset: int) -> Token:
@@ -402,10 +392,6 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     # perhaps it's a keyword
     elif lexer.extract(token) in SET_KEYWORDS:
         token = Token.keyword_token(offset=start_offset, length=length)
-
-    # perhaps it's a type
-    elif lexer.extract(token) in SET_TYPES:
-        token = Token.type_token(offset=start_offset, length=length)
 
     tokens.append(token)
 

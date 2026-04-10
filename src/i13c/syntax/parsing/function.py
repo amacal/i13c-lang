@@ -71,7 +71,7 @@ def parse_parameter(state: ParsingState) -> tree.function.Parameter:
 
     # expect ':' followed by type
     state.expect(Tokens.COLON)
-    type = state.expect(Tokens.TYPE)
+    type = state.expect(Tokens.IDENT)
 
     if state.is_in(Tokens.SQUARE_OPEN):
         range = parse_range(state)
@@ -152,7 +152,7 @@ def parse_value(state: ParsingState) -> tree.function.ValueStatement:
 
     # expect ':' followed by type
     state.expect(Tokens.COLON)
-    type = state.expect(Tokens.TYPE)
+    type = state.expect(Tokens.IDENT)
 
     if state.is_in(Tokens.SQUARE_OPEN):
         range = parse_range(state)

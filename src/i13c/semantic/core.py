@@ -138,7 +138,10 @@ def default_range(name: bytes) -> Range:
             upper=Hex(data=bytes([0xFF] * 8), width=64),
         )
 
-    raise ValueError(f"Unknown type name: {name.decode()}")
+    return Range(
+        lower=Hex(data=bytes(), width=8),
+        upper=Hex(data=bytes(), width=8),
+    )
 
 
 # def width_from_range(range: Range) -> Width:

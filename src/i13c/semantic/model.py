@@ -13,6 +13,7 @@ from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.ranges import Range, RangeId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
+from i13c.semantic.typing.entities.types import Type, TypeId
 from i13c.semantic.typing.entities.values import Value, ValueId
 from i13c.semantic.typing.indices.callgraphs import CallPair
 from i13c.semantic.typing.indices.controlflows import FlowGraph, FlowNode
@@ -26,6 +27,7 @@ from i13c.semantic.typing.indices.variables import Variable, VariableId, Variabl
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from i13c.semantic.typing.resolutions.ranges import RangeResolution
+from i13c.semantic.typing.resolutions.types import TypeResolution
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
@@ -41,6 +43,7 @@ class BasicNodes:
     parameters: OneToOne[ParameterId, Parameter]
     ranges: OneToOne[RangeId, Range]
     snippets: OneToOne[SnippetId, Snippet]
+    types: OneToOne[TypeId, Type]
     usages: OneToOne[UsageId, Usage]
     values: OneToOne[ValueId, Value]
     variables: OneToOne[VariableId, Variable]
@@ -48,7 +51,8 @@ class BasicNodes:
 
 @dataclass
 class ResolutionNodes:
-    ranges: OneToOne[RangeId, RangeResolution]
+    ranges: Optional[OneToOne[RangeId, RangeResolution]]
+    types: Optional[OneToOne[TypeId, TypeResolution]]
 
 @dataclass
 class IndexEdges:

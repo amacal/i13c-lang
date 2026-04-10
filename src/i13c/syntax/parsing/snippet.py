@@ -81,7 +81,7 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
 
     # expect ':' followed by type
     state.expect(Tokens.COLON)
-    type = state.expect(Tokens.TYPE)
+    type = state.expect(Tokens.IDENT)
 
     if state.is_in(Tokens.SQUARE_OPEN):
         range = parse_range(state)

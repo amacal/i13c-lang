@@ -6,7 +6,12 @@ from i13c.semantic.core import Hex
 from i13c.semantic.typing.entities.ranges import RangeId
 from i13c.syntax.source import Span
 
-RangeRejectionReason = Kind["lower-greater-than-upper"]
+RangeRejectionReason = Kind[
+    "lower-greater-than-upper",
+    "inconsistent-widths",
+]
+
+RangeWidth = Kind[8, 16, 32, 64]
 
 
 @dataclass(kw_only=True)
@@ -20,6 +25,7 @@ class RangeAcceptance:
     ref: Span
     id: RangeId
 
+    width: RangeWidth
     lower: Hex
     upper: Hex
 
