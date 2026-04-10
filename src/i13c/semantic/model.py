@@ -25,6 +25,7 @@ from i13c.semantic.typing.indices.usages import Usage, UsageId
 from i13c.semantic.typing.indices.variables import Variable, VariableId, VariableSource
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
+from i13c.semantic.typing.resolutions.ranges import RangeResolution
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
@@ -44,6 +45,10 @@ class BasicNodes:
     values: OneToOne[ValueId, Value]
     variables: OneToOne[VariableId, Variable]
 
+
+@dataclass
+class ResolutionNodes:
+    ranges: OneToOne[RangeId, RangeResolution]
 
 @dataclass
 class IndexEdges:
@@ -80,6 +85,7 @@ class SemanticGraph:
     indices: IndexEdges
     callgraph: CallGraph
     live: LiveComponents
+    resolutions: ResolutionNodes
 
     def find_function_by_name(self, name: bytes) -> Optional[FunctionId]:
         for fid, function in self.basic.functions.items():

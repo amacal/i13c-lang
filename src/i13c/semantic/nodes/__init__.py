@@ -26,6 +26,7 @@ from i13c.semantic.nodes.resolutions.callsites import configure_resolution_by_ca
 from i13c.semantic.nodes.resolutions.instructions import (
     configure_resolution_by_instruction,
 )
+from i13c.semantic.nodes.resolutions.ranges import configure_range_resolution
 from i13c.semantic.nodes.resolutions.values import configure_resolution_by_value
 
 
@@ -49,6 +50,7 @@ def configure_nodes() -> GraphGroup:
             configure_literals(),
             configure_operands(),
             configure_parameters(),
+            configure_range_resolution(),
             configure_ranges(),
             configure_resolution_by_callsite(),
             configure_resolution_by_instruction(),

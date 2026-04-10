@@ -6,6 +6,7 @@ from i13c.semantic.model import (
     CallGraph,
     IndexEdges,
     LiveComponents,
+    ResolutionNodes,
     SemanticGraph,
 )
 from i13c.semantic.nodes import configure_nodes
@@ -85,4 +86,7 @@ def build(
         ),
         callable_live=analyses["analyses/callables/live"],
         callgraph_live=analyses["analyses/calls-by-caller/live"],
+        resolutions=ResolutionNodes(
+            ranges=resolutions["resolutions/ranges"],
+        ),
     )
