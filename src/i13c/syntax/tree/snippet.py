@@ -12,6 +12,7 @@ class Visitor(Protocol):
     def on_snippet(self, snippet: Snippet) -> None: ...
     def on_instruction(self, instruction: Instruction) -> None: ...
     def on_operand(self, operand: Operand) -> None: ...
+    def on_binding(self, binding: Binding) -> None: ...
 
     # types related
     def on_type(self, type: types.Type) -> None: ...
@@ -23,17 +24,26 @@ class Register:
     ref: Span
     name: bytes
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_operand(self)
+
 
 @dataclass(kw_only=True, eq=False)
 class Immediate:
     ref: Span
     value: literals.Hex
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_operand(self)
+
 
 @dataclass(kw_only=True, eq=False)
 class Reference:
     ref: Span
     name: bytes
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_operand(self)
 
 
 OffsetKind = Kind["forward", "backward"]
@@ -51,13 +61,19 @@ class Address:
     base: Register
     offset: Optional[Offset]
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_operand(self)
+
 
 Operand = Union[Register, Immediate, Reference, Address]
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, eq=False)
 class Binding:
     name: bytes
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_binding(self)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -81,8 +97,8 @@ class Instruction:
     def accept(self, visitor: Visitor) -> None:
         visitor.on_instruction(self)
 
-        for operand in self.operands:
-            visitor.on_operand(operand)
+        for entry in self.operands:
+            entry.accept(visitor)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -98,6 +114,7 @@ class Snippet:
         visitor.on_snippet(self)
 
         for entry in self.slots:
+            entry.bind.accept(visitor)
             entry.type.accept(visitor)
 
         for entry in self.instructions:
