@@ -44,7 +44,7 @@ def can_accept_u16_with_range():
     assert resolution.accepted[0].name == b"u16"
     assert resolution.accepted[0].range is not None
 
-    assert source.extract(resolution.accepted[0].ref) == b"u16"
+    assert source.extract(resolution.accepted[0].ref) == b"u16[0x0001..0x0001]"
 
 
 def can_reject_an_unknown_type():
@@ -80,7 +80,7 @@ def can_reject_a_ranged_type_with_incompatible_widths():
     assert len(resolution.rejected) == 1
 
     assert resolution.rejected[0].reason == "inconsistent-widths"
-    assert source.extract(resolution.rejected[0].ref) == b"u8"
+    assert source.extract(resolution.rejected[0].ref) == b"u8[0x0001..0x0100]"
 
 
 def can_detect_a_broken_range_rule_e3009():

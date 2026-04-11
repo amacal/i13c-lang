@@ -79,6 +79,7 @@ class Bind:
 
 @dataclass(kw_only=True, eq=False)
 class Slot:
+    ref: Span
     name: bytes
     type: types.Type
     bind: Bind

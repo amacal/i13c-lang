@@ -66,7 +66,6 @@ def parse_parameters(state: ParsingState) -> List[tree.function.Parameter]:
 
 
 def parse_parameter(state: ParsingState) -> tree.function.Parameter:
-    range: Optional[tree.types.Range] = None
     ident = state.expect(Tokens.IDENT)
 
     # expect ':' followed by type
@@ -74,13 +73,15 @@ def parse_parameter(state: ParsingState) -> tree.function.Parameter:
     type = state.expect(Tokens.IDENT)
 
     if state.is_in(Tokens.SQUARE_OPEN):
-        range = parse_range(state)
+        range, end = parse_range(state)
+    else:
+        range, end = None, type
 
     return tree.function.Parameter(
-        ref=state.span(ident),
+        ref=state.between(ident, end),
         name=state.extract(ident),
         type=tree.types.Type(
-            ref=state.between(type, type),
+            ref=state.between(type, end),
             name=state.extract(type),
             range=range,
         ),
@@ -147,7 +148,6 @@ def parse_callsite(
 
 
 def parse_value(state: ParsingState) -> tree.function.ValueStatement:
-    range: Optional[tree.types.Range] = None
     ident = state.expect(Tokens.IDENT)
 
     # expect ':' followed by type
@@ -155,7 +155,9 @@ def parse_value(state: ParsingState) -> tree.function.ValueStatement:
     type = state.expect(Tokens.IDENT)
 
     if state.is_in(Tokens.SQUARE_OPEN):
-        range = parse_range(state)
+        range, end = parse_range(state)
+    else:
+        range, end = None, type
 
     # expect '=' followed by limited expression
     state.expect(Tokens.EQUALS)
@@ -165,10 +167,10 @@ def parse_value(state: ParsingState) -> tree.function.ValueStatement:
     state.expect(Tokens.SEMICOLON)
 
     return tree.function.ValueStatement(
-        ref=state.span(ident),
+        ref=state.between(ident, end),
         name=state.extract(ident),
         type=tree.types.Type(
-            ref=state.between(type, type),
+            ref=state.between(type, end),
             name=state.extract(type),
             range=range,
         ),

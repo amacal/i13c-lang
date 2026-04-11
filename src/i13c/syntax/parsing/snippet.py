@@ -67,7 +67,6 @@ def parse_slots(state: ParsingState) -> List[tree.snippet.Slot]:
 
 
 def parse_slot(state: ParsingState) -> tree.snippet.Slot:
-    range: Optional[tree.types.Range] = None
     ident = state.expect(Tokens.IDENT)
 
     # expect '@' followed by ident (register) or immediate
@@ -84,16 +83,19 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
     type = state.expect(Tokens.IDENT)
 
     if state.is_in(Tokens.SQUARE_OPEN):
-        range = parse_range(state)
+        range, end = parse_range(state)
+    else:
+        range, end = None, type
 
     return tree.snippet.Slot(
+        ref=state.between(ident, end),
         name=state.extract(ident),
         bind=tree.snippet.Bind(
             ref=state.between(bind, bind),
             name=state.extract(bind),
         ),
         type=tree.types.Type(
-            ref=state.between(type, type),
+            ref=state.between(type, end),
             name=state.extract(type),
             range=range,
         ),
