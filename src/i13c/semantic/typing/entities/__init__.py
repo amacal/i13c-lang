@@ -6,6 +6,7 @@ from i13c.semantic.typing.entities.binds import Bind, BindId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
+from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.literals import Literal, LiteralId
 from i13c.semantic.typing.entities.operands import Operand, OperandId
@@ -27,6 +28,7 @@ class EntityNodes:
     callsites: OneToOne[CallSiteId, CallSite]
     expressions: OneToOne[ExpressionId, Expression]
     functions: OneToOne[FunctionId, Function]
+    immediates: OneToOne[ImmediateId, Immediate]
     instructions: OneToOne[InstructionId, Instruction]
     literals: OneToOne[LiteralId, Literal]
     operands: OneToOne[OperandId, Operand]

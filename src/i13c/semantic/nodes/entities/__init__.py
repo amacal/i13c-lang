@@ -6,6 +6,7 @@ from i13c.semantic.nodes.entities.binds import configure_binds
 from i13c.semantic.nodes.entities.callsites import configure_callsites
 from i13c.semantic.nodes.entities.expressions import configure_expressions
 from i13c.semantic.nodes.entities.functions import configure_functions
+from i13c.semantic.nodes.entities.immediates import configure_immediates
 from i13c.semantic.nodes.entities.instructions import configure_instructions
 from i13c.semantic.nodes.entities.literals import configure_literals
 from i13c.semantic.nodes.entities.operands import configure_operands
@@ -27,6 +28,7 @@ def configure_entities() -> GraphGroup:
             configure_callsites(),
             configure_expressions(),
             configure_functions(),
+            configure_immediates(),
             configure_instructions(),
             configure_literals(),
             configure_operands(),
@@ -48,6 +50,7 @@ def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
         callsites=entities["entities/callsites"],
         expressions=entities["entities/expressions"],
         functions=entities["entities/functions"],
+        immediates=entities["entities/immediates"],
         instructions=entities["entities/instructions"],
         literals=entities["entities/literals"],
         operands=entities["entities/operands"],
