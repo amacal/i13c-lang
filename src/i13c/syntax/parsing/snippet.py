@@ -70,9 +70,9 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
     range: Optional[tree.types.Range] = None
     ident = state.expect(Tokens.IDENT)
 
-    # expect '@' followed by register or immediate
+    # expect '@' followed by ident (register) or immediate
     state.expect(Tokens.AT)
-    bind = state.expect(Tokens.REG, Tokens.KEYWORD)
+    bind = state.expect(Tokens.IDENT, Tokens.KEYWORD)
 
     # if it's a keyword, it has to be "imm"
     if bind.code == Tokens.KEYWORD:
@@ -136,7 +136,7 @@ def parse_clobbers(state: ParsingState) -> List[tree.snippet.Register]:
     clobbers: List[tree.snippet.Register] = []
 
     # at least one register is expected
-    clobber = state.expect(Tokens.REG)
+    clobber = state.expect(Tokens.IDENT)
     clobbers.append(
         tree.snippet.Register(
             ref=state.span(clobber),
@@ -146,7 +146,7 @@ def parse_clobbers(state: ParsingState) -> List[tree.snippet.Register]:
 
     # a comma suggests next clobber
     while state.accept(Tokens.COMMA):
-        clobber = state.expect(Tokens.REG)
+        clobber = state.expect(Tokens.IDENT)
         clobbers.append(
             tree.snippet.Register(
                 ref=state.span(clobber),
@@ -178,7 +178,7 @@ def parse_instruction(state: ParsingState) -> tree.snippet.Instruction:
     )
 
 
-OPERANDS_START = [Tokens.REG, Tokens.HEX, Tokens.AT, Tokens.SQUARE_OPEN]
+OPERANDS_START = [Tokens.IDENT, Tokens.HEX, Tokens.AT, Tokens.SQUARE_OPEN]
 
 
 def parse_operands(state: ParsingState) -> List[tree.snippet.Operand]:
@@ -196,7 +196,7 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
     token = state.expect(*OPERANDS_START)
 
     # register has to provide its name
-    if token.code == Tokens.REG:
+    if token.code == Tokens.IDENT:
         return tree.snippet.Register(ref=state.span(token), name=state.extract(token))
 
     # immediate has to provide its decimal value
@@ -222,7 +222,7 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
         offset: Optional[tree.snippet.Offset] = None
 
         # now we expect a register as the base
-        base = state.expect(Tokens.REG)
+        base = state.expect(Tokens.IDENT)
 
         # optionally, an offset can be provided
         end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)

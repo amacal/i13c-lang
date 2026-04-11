@@ -39,7 +39,6 @@ class Tokens:
     COMMA = 2
     HEX = 3
     IDENT = 4
-    REG = 5
     RANGE = 6
     KEYWORD = 7
     ROUND_OPEN = 8
@@ -67,17 +66,6 @@ SEPARATORS = (
     CLASS_PLUS + CLASS_MINUS
 )
 
-SET_REGS = {
-    b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
-    b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
-    b"eax", b"ebx", b"ecx", b"edx", b"esi", b"edi", b"esp", b"ebp",
-    b"r8d", b"r9d", b"r10d", b"r11d", b"r12d", b"r13d", b"r14d", b"r15d",
-    b"ax", b"bx", b"cx", b"dx", b"si", b"di", b"sp", b"bp",
-    b"r8w", b"r9w", b"r10w", b"r11w", b"r12w", b"r13w", b"r14w", b"r15w",
-    b"al", b"bl", b"cl", b"dl", b"sil", b"dil", b"bpl", b"spl",
-    b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b",
-}
-
 SET_KEYWORDS = {
     b"asm", b"clobbers", b"noreturn", b"fn", b"imm", b"val",
 }
@@ -87,7 +75,6 @@ TOKEN_NAMES: Dict[int, str] = {
     Tokens.COMMA: "comma",
     Tokens.HEX: "hex",
     Tokens.IDENT: "identifier",
-    Tokens.REG: "register",
     Tokens.RANGE: "range",
     Tokens.KEYWORD: "keyword",
     Tokens.ROUND_OPEN: "round-open",
@@ -181,10 +168,6 @@ class Token:
     @staticmethod
     def ident_token(offset: int, length: int) -> Token:
         return Token(code=Tokens.IDENT, offset=offset, length=length)
-
-    @staticmethod
-    def reg_token(offset: int, length: int) -> Token:
-        return Token(code=Tokens.REG, offset=offset, length=length)
 
     @staticmethod
     def dot_token(offset: int) -> Token:
@@ -385,12 +368,8 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     length = lexer.offset - start_offset
     token = Token.ident_token(offset=start_offset, length=length)
 
-    # perhaps it's a register
-    if lexer.extract(token) in SET_REGS:
-        token = Token.reg_token(offset=start_offset, length=length)
-
     # perhaps it's a keyword
-    elif lexer.extract(token) in SET_KEYWORDS:
+    if lexer.extract(token) in SET_KEYWORDS:
         token = Token.keyword_token(offset=start_offset, length=length)
 
     tokens.append(token)

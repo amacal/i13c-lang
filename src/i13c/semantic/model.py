@@ -25,6 +25,7 @@ from i13c.semantic.typing.indices.instances import Instance
 from i13c.semantic.typing.indices.terminalities import Terminality
 from i13c.semantic.typing.indices.usages import Usage, UsageId
 from i13c.semantic.typing.indices.variables import Variable, VariableId, VariableSource
+from i13c.semantic.typing.resolutions.binds import BindResolution
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from i13c.semantic.typing.resolutions.ranges import RangeResolution
@@ -53,6 +54,7 @@ class BasicNodes:
 
 @dataclass
 class ResolutionNodes:
+    binds: Optional[OneToOne[BindId, BindResolution]]
     ranges: Optional[OneToOne[RangeId, RangeResolution]]
     types: Optional[OneToOne[TypeId, TypeResolution]]
 

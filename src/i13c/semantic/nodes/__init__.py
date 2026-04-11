@@ -24,6 +24,7 @@ from i13c.semantic.nodes.indices.instances import configure_instance_by_callsite
 from i13c.semantic.nodes.indices.terminalities import configure_terminality_by_function
 from i13c.semantic.nodes.indices.usages import configure_usages_by_expression
 from i13c.semantic.nodes.indices.variables import configure_variables_by_parameters
+from i13c.semantic.nodes.resolutions.binds import configure_bind_resolution
 from i13c.semantic.nodes.resolutions.callsites import configure_resolution_by_callsite
 from i13c.semantic.nodes.resolutions.instructions import (
     configure_resolution_by_instruction,
@@ -38,6 +39,7 @@ def configure_nodes() -> GraphGroup:
         nodes=[
             configure_binds(),
             configure_bindings(),
+            configure_bind_resolution(),
             configure_callables_live(),
             configure_callgraphs_live(),
             configure_callgraphs(),

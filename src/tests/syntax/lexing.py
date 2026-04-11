@@ -214,7 +214,7 @@ def can_tokenize_registers():
     assert len(tokens.value) == 5
 
     assert tokens.value[0] == Token(code=Tokens.IDENT, offset=0, length=3)
-    assert tokens.value[1] == Token(code=Tokens.REG, offset=4, length=3)
+    assert tokens.value[1] == Token(code=Tokens.IDENT, offset=4, length=3)
     assert tokens.value[2] == Token(code=Tokens.COMMA, offset=7, length=1)
     assert tokens.value[3] == Token(code=Tokens.HEX, offset=9, length=6)
     assert tokens.value[4] == Token(code=Tokens.EOF, offset=15, length=0)

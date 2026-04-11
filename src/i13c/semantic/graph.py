@@ -89,6 +89,7 @@ def build(
         callable_live=analyses["analyses/callables/live"],
         callgraph_live=analyses["analyses/calls-by-caller/live"],
         resolutions=ResolutionNodes(
+            binds=resolutions.get("resolutions/binds"),
             ranges=resolutions.get("resolutions/ranges"),
             types=resolutions.get("resolutions/types"),
         ),
