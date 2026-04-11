@@ -92,7 +92,6 @@ class Slot:
         self.type.accept(visitor)
 
 
-
 @dataclass(kw_only=True, eq=False)
 class Mnemonic:
     name: bytes
@@ -112,19 +111,28 @@ class Instruction:
 
 
 @dataclass(kw_only=True, eq=False)
+class Signature:
+    ref: Span
+    slots: List[Slot]
+
+    def accept(self, visitor: Visitor) -> None:
+        for entry in self.slots:
+            entry.accept(visitor)
+
+
+@dataclass(kw_only=True, eq=False)
 class Snippet:
     ref: Span
     name: bytes
     noreturn: bool
-    slots: List[Slot]
+    signature: Signature
     clobbers: List[Register]
     instructions: List[Instruction]
 
     def accept(self, visitor: Visitor) -> None:
         visitor.on_snippet(self)
 
-        for entry in self.slots:
-            entry.accept(visitor)
+        self.signature.accept(visitor)
 
         for entry in self.instructions:
             entry.accept(visitor)

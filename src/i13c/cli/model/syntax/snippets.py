@@ -27,7 +27,7 @@ class SnippetListExtractor:
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",
             "name": str(entry[1].name.decode()),
-            "slots": str(len(entry[1].slots)),
+            "slots": str(len(entry[1].signature.slots)),
             "clbbrs": str(len(entry[1].clobbers)),
             "instrs": str(len(entry[1].instructions)),
         }

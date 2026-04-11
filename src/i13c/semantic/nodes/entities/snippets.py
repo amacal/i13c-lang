@@ -33,7 +33,7 @@ def build_snippets(
             clobbers.append(Register(name=reg.name, width=64))
 
         # collect slots
-        for slot in snippet.slots:
+        for slot in snippet.signature.slots:
             # default width and ranges for declared type
             range: Range = default_range(slot.type.name)
 

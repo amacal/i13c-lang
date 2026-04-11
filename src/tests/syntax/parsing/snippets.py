@@ -17,7 +17,7 @@ def can_parse_snippets_with_single_arg():
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
 
-    slots = snippet.slots
+    slots = snippet.signature.slots
     assert len(slots) == 1
 
     slot = slots[0]
@@ -39,7 +39,7 @@ def can_parse_snippets_with_multiple_args():
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
 
-    slots = snippet.slots
+    slots = snippet.signature.slots
     assert len(slots) == 2
 
     slot1 = slots[0]
@@ -64,7 +64,7 @@ def can_parse_snippets_with_bind_to_immediate():
     assert snippet.noreturn is False
     assert len(snippet.instructions) == 0
 
-    slots = snippet.slots
+    slots = snippet.signature.slots
     assert len(slots) == 1
 
     slot = slots[0]
@@ -125,9 +125,9 @@ def can_parse_snippets_with_no_return_with_clobbers():
 def can_parse_snippet_with_ranged_parameter():
     snippet = parse_snippet("asm main(value@rdi: u8[0x10..0x20]) { }")
 
-    assert len(snippet.slots) == 1
+    assert len(snippet.signature.slots) == 1
 
-    slot = snippet.slots[0]
+    slot = snippet.signature.slots[0]
     assert slot.name == b"value"
     assert slot.type.name == b"u8"
     assert slot.type.range is not None
