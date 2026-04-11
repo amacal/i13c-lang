@@ -50,6 +50,9 @@ class NodesVisitor:
     def on_snippet(self, snippet: tree.snippet.Snippet) -> None:
         self.graph.snippets.append(self.next(), snippet)
 
+    def on_slot(self, slot: tree.snippet.Slot) -> None:
+        self.graph.slots.append(self.next(), slot)
+
     def on_bind(self, bind: tree.snippet.Bind) -> None:
         self.graph.binds.append(self.next(), bind)
 
@@ -84,6 +87,7 @@ class NodesVisitor:
 @dataclass(kw_only=True)
 class SyntaxGraph:
     snippets: Bidirectional[tree.snippet.Snippet]
+    slots: Bidirectional[tree.snippet.Slot]
     binds: Bidirectional[tree.snippet.Bind]
     instructions: Bidirectional[tree.snippet.Instruction]
     operands: Bidirectional[tree.snippet.Operand]
@@ -101,6 +105,7 @@ class SyntaxGraph:
     def empty() -> SyntaxGraph:
         return SyntaxGraph(
             snippets=Bidirectional[tree.snippet.Snippet].empty(),
+            slots=Bidirectional[tree.snippet.Slot].empty(),
             binds=Bidirectional[tree.snippet.Bind].empty(),
             instructions=Bidirectional[tree.snippet.Instruction].empty(),
             operands=Bidirectional[tree.snippet.Operand].empty(),

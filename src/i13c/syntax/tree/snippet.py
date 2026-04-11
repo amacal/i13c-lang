@@ -10,6 +10,7 @@ from i13c.syntax.source import Span
 
 class Visitor(Protocol):
     def on_snippet(self, snippet: Snippet) -> None: ...
+    def on_slot(self, slot: Slot) -> None: ...
     def on_instruction(self, instruction: Instruction) -> None: ...
     def on_operand(self, operand: Operand) -> None: ...
     def on_bind(self, bind: Bind) -> None: ...
@@ -84,6 +85,13 @@ class Slot:
     type: types.Type
     bind: Bind
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_slot(self)
+
+        self.bind.accept(visitor)
+        self.type.accept(visitor)
+
+
 
 @dataclass(kw_only=True, eq=False)
 class Mnemonic:
@@ -116,8 +124,7 @@ class Snippet:
         visitor.on_snippet(self)
 
         for entry in self.slots:
-            entry.bind.accept(visitor)
-            entry.type.accept(visitor)
+            entry.accept(visitor)
 
         for entry in self.instructions:
             entry.accept(visitor)

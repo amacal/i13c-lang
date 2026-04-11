@@ -1,11 +1,11 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_binds_in_a_snippet_signature() -> None:
+def can_visit_slots_in_a_snippet_signature() -> None:
     visitor = parse_syntax_graph(
         """
             asm main(v@rax: u8) { mov rax, 0x1234; }
         """
     )
 
-    assert len(list(visitor.graph.binds.items())) == 1
+    assert len(list(visitor.graph.slots.items())) == 1
