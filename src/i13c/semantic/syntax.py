@@ -68,6 +68,9 @@ class NodesVisitor:
     def on_immediate(self, immediate: tree.snippet.Immediate) -> None:
         self.graph.immediates.append(self.next(), immediate)
 
+    def on_register(self, register: tree.snippet.Register) -> None:
+        self.graph.registers.append(self.next(), register)
+
     def on_function(self, function: tree.function.Function) -> None:
         self.graph.functions.append(self.next(), function)
 
@@ -99,6 +102,7 @@ class SyntaxGraph:
     instructions: Bidirectional[tree.snippet.Instruction]
     operands: Bidirectional[tree.snippet.Operand]
     immediates: Bidirectional[tree.snippet.Immediate]
+    registers: Bidirectional[tree.snippet.Register]
 
     functions: Bidirectional[tree.function.Function]
     statements: Bidirectional[tree.function.Statement]
@@ -119,6 +123,7 @@ class SyntaxGraph:
             instructions=Bidirectional[tree.snippet.Instruction].empty(),
             operands=Bidirectional[tree.snippet.Operand].empty(),
             immediates=Bidirectional[tree.snippet.Immediate].empty(),
+            registers=Bidirectional[tree.snippet.Register].empty(),
             functions=Bidirectional[tree.function.Function].empty(),
             statements=Bidirectional[tree.function.Statement].empty(),
             literals=Bidirectional[tree.function.Literal].empty(),

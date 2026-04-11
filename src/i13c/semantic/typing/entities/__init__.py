@@ -12,6 +12,7 @@ from i13c.semantic.typing.entities.literals import Literal, LiteralId
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.ranges import Range, RangeId
+from i13c.semantic.typing.entities.registers import Register, RegisterId
 from i13c.semantic.typing.entities.signatures import Signature, SignatureId
 from i13c.semantic.typing.entities.slots import Slot, SlotId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
@@ -34,6 +35,7 @@ class EntityNodes:
     operands: OneToOne[OperandId, Operand]
     parameters: OneToOne[ParameterId, Parameter]
     ranges: OneToOne[RangeId, Range]
+    registers: OneToOne[RegisterId, Register]
     signatures: OneToOne[SignatureId, Signature]
     slots: OneToOne[SlotId, Slot]
     snippets: OneToOne[SnippetId, Snippet]
