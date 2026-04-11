@@ -59,7 +59,7 @@ class Register:
         if name in REGISTERS_64:
             return Register(name=name, width=64)
 
-        raise ValueError(f"unknown register: {name!r}")
+        return Register(name=name, width=8)
 
     def symbol(self) -> OperandSymbol:
         if self.width == 8:

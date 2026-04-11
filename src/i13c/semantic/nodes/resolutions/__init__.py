@@ -8,6 +8,7 @@ from i13c.semantic.nodes.resolutions.instructions import (
     configure_resolution_by_instruction,
 )
 from i13c.semantic.nodes.resolutions.ranges import configure_range_resolution
+from i13c.semantic.nodes.resolutions.registers import configure_register_resolution
 from i13c.semantic.nodes.resolutions.signatures import configure_signature_resolution
 from i13c.semantic.nodes.resolutions.slots import configure_slot_resolution
 from i13c.semantic.nodes.resolutions.types import configure_type_resolution
@@ -21,6 +22,7 @@ def configure_resolutions() -> GraphGroup:
             configure_bind_resolution(),
             configure_immediate_resolution(),
             configure_range_resolution(),
+            configure_register_resolution(),
             configure_resolution_by_callsite(),
             configure_resolution_by_instruction(),
             configure_resolution_by_value(),
@@ -36,6 +38,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         binds=resolutions.get("resolutions/binds"),
         immediates=resolutions.get("resolutions/immediates"),
         ranges=resolutions.get("resolutions/ranges"),
+        registers=resolutions.get("resolutions/registers"),
         signatures=resolutions.get("resolutions/signatures"),
         slots=resolutions.get("resolutions/slots"),
         types=resolutions.get("resolutions/types"),
