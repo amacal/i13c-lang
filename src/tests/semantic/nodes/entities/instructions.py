@@ -11,7 +11,7 @@ def can_do_nothing_without_any_instruction():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    instructions = semantic.basic.instructions
+    instructions = semantic.entities.instructions
 
     assert instructions.size() == 0
 
@@ -24,7 +24,7 @@ def can_build_an_instruction_with_no_operands():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    instructions = semantic.basic.instructions
+    instructions = semantic.entities.instructions
 
     assert instructions.size() == 1
     id, value = instructions.pop()
@@ -44,7 +44,7 @@ def can_build_an_instruction_with_multiple_operands():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    instructions = semantic.basic.instructions
+    instructions = semantic.entities.instructions
 
     assert instructions.size() == 1
     id, value = instructions.pop()
@@ -64,7 +64,7 @@ def can_build_an_instruction_with_reference_operand():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    instructions = semantic.basic.instructions
+    instructions = semantic.entities.instructions
 
     assert instructions.size() == 1
     id, value = instructions.pop()

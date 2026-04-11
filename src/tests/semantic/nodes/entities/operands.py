@@ -19,7 +19,7 @@ def can_do_nothing_without_any_instruction():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 0
 
@@ -32,7 +32,7 @@ def can_do_nothing_without_any_operand():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 0
 
@@ -45,7 +45,7 @@ def can_detect_an_immediate_operand_one_byte():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 1
     id, value = operands.peak()
@@ -68,7 +68,7 @@ def can_detect_an_immediate_operand_four_bytes():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 1
     id, value = operands.peak()
@@ -91,7 +91,7 @@ def can_detect_a_register_operand():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 1
     id, value = operands.peak()
@@ -114,7 +114,7 @@ def can_detect_an_address_operand_without_offset():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 1
     id, value = operands.peak()
@@ -138,7 +138,7 @@ def can_detect_an_address_operand_with_positive_offset():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 1
     id, value = operands.peak()
@@ -165,7 +165,7 @@ def can_detect_an_address_operand_with_negative_offset():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 1
     id, value = operands.peak()
@@ -192,7 +192,7 @@ def can_detect_a_reference_operand():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
 
     assert operands.size() == 1
     id, value = operands.peak()

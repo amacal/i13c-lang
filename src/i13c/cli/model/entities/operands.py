@@ -13,7 +13,7 @@ from i13c.semantic.typing.entities.operands import (
 class OperandListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[OperandId, Operand]]:
-        return artifacts.semantic_graph().basic.operands.items()
+        return artifacts.semantic_graph().entities.operands.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

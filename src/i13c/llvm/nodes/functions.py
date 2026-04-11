@@ -186,7 +186,7 @@ def lower_flow_entry(
     instructions: List[BlockInstruction] = [(iid, PrologueFlow(target=fid))]
 
     # generate virtual registers for parameters
-    for idx, pid in enumerate(ctx.graph.basic.functions.get(fid).parameters):
+    for idx, pid in enumerate(ctx.graph.entities.functions.get(fid).parameters):
 
         # get a variable behind the function parameter
         variable = ctx.graph.indices.variables_by_parameter.get(pid)
@@ -281,7 +281,7 @@ def lower_flow_value(
     assert resolution.accepted is not None
 
     if isinstance(resolution.accepted.binding, LiteralId):
-        literal = ctx.graph.basic.literals.get(resolution.accepted.binding)
+        literal = ctx.graph.entities.literals.get(resolution.accepted.binding)
         assert isinstance(literal.target, Hex)
 
         variable = ctx.graph.indices.variables_by_parameter.get(node)

@@ -13,7 +13,7 @@ def can_build_live_flowgraph_without_need_of_pruning():
     assert semantic.live.flowgraph_by_function.size() == 1
     fid, flowgraph = semantic.live.flowgraph_by_function.peak()
 
-    main = semantic.basic.functions.get(fid)
+    main = semantic.entities.functions.get(fid)
     assert len(main.statements) == 1
 
     assert flowgraph.entry in flowgraph.forward
@@ -45,7 +45,7 @@ def can_remove_callsite_after_terminal_call():
     assert semantic.live.flowgraph_by_function.size() == 1
     fid, flowgraph = semantic.live.flowgraph_by_function.peak()
 
-    main = semantic.basic.functions.get(fid)
+    main = semantic.entities.functions.get(fid)
     assert len(main.statements) == 2
 
     assert flowgraph.entry in flowgraph.forward

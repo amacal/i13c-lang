@@ -36,7 +36,7 @@ def can_accept_terminal_function():
 
     assert isinstance(value.target, FunctionId)
 
-    function = semantic.basic.functions.get(value.target)
+    function = semantic.entities.functions.get(value.target)
     assert function.identifier.data == b"main"
 
 

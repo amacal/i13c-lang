@@ -11,7 +11,7 @@ class InstanceListExtractor:
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[CallSiteId, CallSite, Instance]]:
         return (
-            (cid, artifacts.semantic_graph().basic.callsites.get(cid), instance)
+            (cid, artifacts.semantic_graph().entities.callsites.get(cid), instance)
             for cid, instance in artifacts.semantic_graph().indices.instance_by_callsite.items()
         )
 

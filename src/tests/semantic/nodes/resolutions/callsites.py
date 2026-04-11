@@ -30,7 +30,7 @@ def can_resolve_callsite_calling_snippet():
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, SnippetId)
 
-    value = semantic.basic.snippets.get(callables.target)
+    value = semantic.entities.snippets.get(callables.target)
     assert value.identifier.data == b"foo"
 
 
@@ -58,7 +58,7 @@ def can_resolve_callsite_calling_function():
     assert callables.kind == b"function"
     assert isinstance(callables.target, FunctionId)
 
-    value = semantic.basic.functions.get(callables.target)
+    value = semantic.entities.functions.get(callables.target)
     assert value.identifier.data == b"foo"
 
 
@@ -88,7 +88,7 @@ def can_reject_callsite_due_to_wrong_arity_more_than_expected():
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, SnippetId)
 
-    value = semantic.basic.snippets.get(callables.target)
+    value = semantic.entities.snippets.get(callables.target)
     assert value.identifier.data == b"foo"
 
 
@@ -118,7 +118,7 @@ def can_reject_callsite_due_to_wrong_arity_less_than_expected():
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, SnippetId)
 
-    value = semantic.basic.snippets.get(callables.target)
+    value = semantic.entities.snippets.get(callables.target)
     assert value.identifier.data == b"foo"
 
 
@@ -148,7 +148,7 @@ def can_reject_callsite_due_to_wrong_hex_width():
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, SnippetId)
 
-    value = semantic.basic.snippets.get(callables.target)
+    value = semantic.entities.snippets.get(callables.target)
     assert value.identifier.data == b"foo"
 
 
@@ -179,7 +179,7 @@ def can_resolve_function_and_snippet_with_same_name():
     assert accepted.kind == b"snippet"
     assert isinstance(accepted.target, SnippetId)
 
-    snippet_value = semantic.basic.snippets.get(accepted.target)
+    snippet_value = semantic.entities.snippets.get(accepted.target)
     assert snippet_value.identifier.data == b"foo"
 
     # function was rejected, due to wrong arity
@@ -188,7 +188,7 @@ def can_resolve_function_and_snippet_with_same_name():
     assert rejected.kind == b"function"
     assert isinstance(rejected.target, FunctionId)
 
-    function_value = semantic.basic.functions.get(rejected.target)
+    function_value = semantic.entities.functions.get(rejected.target)
     assert function_value.identifier.data == b"foo"
 
 
@@ -216,7 +216,7 @@ def can_resolve_by_type_u64_max():
     assert callables.kind == b"snippet"
     assert isinstance(callables.target, SnippetId)
 
-    value = semantic.basic.snippets.get(callables.target)
+    value = semantic.entities.snippets.get(callables.target)
     assert value.identifier.data == b"foo"
 
 
@@ -246,7 +246,7 @@ def can_resolve_by_expression_as_arg():
     assert callables.kind == b"function"
     assert isinstance(callables.target, FunctionId)
 
-    value = semantic.basic.functions.get(callables.target)
+    value = semantic.entities.functions.get(callables.target)
     assert value.identifier.data == b"foo"
 
     assert len(bindings) == 1
@@ -277,5 +277,5 @@ def can_reject_by_expression_as_arg():
     assert callables.kind == b"function"
     assert isinstance(callables.target, FunctionId)
 
-    value = semantic.basic.functions.get(callables.target)
+    value = semantic.entities.functions.get(callables.target)
     assert value.identifier.data == b"foo"

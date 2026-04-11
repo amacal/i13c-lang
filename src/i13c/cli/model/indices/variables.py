@@ -17,8 +17,8 @@ class ParameterVariablesListExtractor:
         graph = artifacts.semantic_graph()
         index = graph.indices.variables_by_parameter
 
-        parameters = graph.basic.parameters
-        values = graph.basic.values
+        parameters = graph.entities.parameters
+        values = graph.entities.values
 
         def get_parameter(sid: VariableSource) -> Optional[Parameter]:
             return parameters.find(sid) if isinstance(sid, ParameterId) else None

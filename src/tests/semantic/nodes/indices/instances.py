@@ -78,10 +78,10 @@ def can_generate_instance_for_accepted_callsite():
     assert isinstance(id, CallSiteId)
     assert isinstance(value, Instance)
 
-    callsite = semantic.basic.callsites.get(id)
+    callsite = semantic.entities.callsites.get(id)
     assert callsite.callee.data == b"exit"
 
-    snippet = semantic.basic.snippets.get(value.target)
+    snippet = semantic.entities.snippets.get(value.target)
     assert snippet.identifier.data == b"exit"
 
     # removed immediate out-of-bounds argument
@@ -92,7 +92,7 @@ def can_generate_instance_for_accepted_callsite():
     id, operand = next(iter(value.operands.items()))
 
     # previously was a reference to an operand
-    reference = semantic.basic.operands.get(id)
+    reference = semantic.entities.operands.get(id)
     assert reference.kind == b"reference"
 
     # now is an immediate
@@ -213,7 +213,7 @@ def can_rewrite_register_bound_slot_to_register():
     assert len(value.operands) == 1
 
     id, operand = next(iter(value.operands.items()))
-    reference = semantic.basic.operands.get(id)
+    reference = semantic.entities.operands.get(id)
 
     assert reference.kind == b"reference"
     assert operand.kind == b"register"

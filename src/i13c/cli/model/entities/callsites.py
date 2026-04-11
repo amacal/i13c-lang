@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 class CallSiteListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[CallSiteId, CallSite]]:
-        return artifacts.semantic_graph().basic.callsites.items()
+        return artifacts.semantic_graph().entities.callsites.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

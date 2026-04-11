@@ -22,7 +22,7 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
     name = state.expect(Tokens.IDENT)
 
     # expect opening round bracket
-    start = state.expect(Tokens.ROUND_OPEN)
+    state.expect(Tokens.ROUND_OPEN)
 
     # optional snippet parameters
     if not state.is_in(Tokens.ROUND_CLOSE):
@@ -47,11 +47,11 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
 
     return tree.snippet.Snippet(
         ref=state.between(name, end),
-        name=state.extract(name),
         noreturn=noreturn,
         clobbers=clobbers,
         signature=tree.snippet.Signature(
-            ref=state.between(start, end),
+            ref=state.between(name, end),
+            name=state.extract(name),
             slots=slots,
         ),
         instructions=instructions,

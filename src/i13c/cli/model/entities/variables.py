@@ -7,7 +7,7 @@ from i13c.semantic.typing.indices.variables import Variable, VariableId
 class VariableListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[VariableId, Variable]]:
-        return artifacts.semantic_graph().basic.variables.items()
+        return artifacts.semantic_graph().entities.variables.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

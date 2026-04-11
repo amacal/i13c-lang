@@ -10,6 +10,7 @@ from i13c.syntax.source import Span
 
 class Visitor(Protocol):
     def on_snippet(self, snippet: Snippet) -> None: ...
+    def on_signature(self, signature: Signature) -> None: ...
     def on_slot(self, slot: Slot) -> None: ...
     def on_instruction(self, instruction: Instruction) -> None: ...
     def on_operand(self, operand: Operand) -> None: ...
@@ -113,9 +114,12 @@ class Instruction:
 @dataclass(kw_only=True, eq=False)
 class Signature:
     ref: Span
+    name: bytes
     slots: List[Slot]
 
     def accept(self, visitor: Visitor) -> None:
+        visitor.on_signature(self)
+
         for entry in self.slots:
             entry.accept(visitor)
 
@@ -123,7 +127,6 @@ class Signature:
 @dataclass(kw_only=True, eq=False)
 class Snippet:
     ref: Span
-    name: bytes
     noreturn: bool
     signature: Signature
     clobbers: List[Register]

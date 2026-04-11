@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 class ExpressionListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[ExpressionId, Expression]]:
-        return artifacts.semantic_graph().basic.expressions.items()
+        return artifacts.semantic_graph().entities.expressions.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

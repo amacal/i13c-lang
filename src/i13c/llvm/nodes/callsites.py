@@ -33,13 +33,13 @@ def lower_callsite(
     instructions: List[BlockInstruction] = []
 
     # retrieve callsite bindings
-    bindings = graph.basic.bindings.get(node)
+    bindings = graph.entities.bindings.get(node)
 
     if isinstance(bindings.callable.target, SnippetId):
         instance = graph.indices.instance_by_callsite.get(node)
         target = bindings.callable.target
 
-        snippet = graph.basic.snippets.get(target)
+        snippet = graph.entities.snippets.get(target)
         clobbers = [name_to_reg64(reg.name.decode()) for reg in snippet.clobbers]
 
         # append callsite specific bindings

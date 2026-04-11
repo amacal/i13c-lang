@@ -18,7 +18,7 @@ class EntriesListExtractor:
         semantic = artifacts.semantic_graph()
 
         for fid, bid in llvm.functions.entries.items():
-            yield (fid, semantic.basic.functions.get(fid), bid, llvm.nodes.get(bid))
+            yield (fid, semantic.entities.functions.get(fid), bid, llvm.nodes.get(bid))
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -48,7 +48,7 @@ class ExitsListExtractor:
         semantic = artifacts.semantic_graph()
 
         for fid, bid in llvm.functions.exits.items():
-            yield (fid, semantic.basic.functions.get(fid), bid, llvm.nodes.get(bid))
+            yield (fid, semantic.entities.functions.get(fid), bid, llvm.nodes.get(bid))
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -78,7 +78,7 @@ class BlocksListExtractor:
         graph = artifacts.semantic_graph()
 
         for fid, blocks in llvm.functions.blocks.items():
-            yield (fid, graph.basic.functions.get(fid), blocks)
+            yield (fid, graph.entities.functions.get(fid), blocks)
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -106,7 +106,7 @@ class InstructionsInFunctionsListExtractor:
 
         for fid, instr in llvm.functions.instructions.items():
             for instr in instr:
-                yield (fid, artifacts.semantic_graph().basic.functions.get(fid), instr)
+                yield (fid, artifacts.semantic_graph().entities.functions.get(fid), instr)
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -140,7 +140,7 @@ class IntervalsInFunctionsListExtractor:
             for interval in intervals:
                 yield (
                     fid,
-                    artifacts.semantic_graph().basic.functions.get(fid),
+                    artifacts.semantic_graph().entities.functions.get(fid),
                     interval,
                 )
 
@@ -178,7 +178,7 @@ class IntervalPressureInFunctionsListExtractor:
             for entry in pressure:
                 yield (
                     fid,
-                    artifacts.semantic_graph().basic.functions.get(fid),
+                    artifacts.semantic_graph().entities.functions.get(fid),
                     entry,
                 )
 
@@ -216,7 +216,7 @@ class StackFrameInFunctionsListExtractor:
             for idx in range(int(stackframe.size / 8)):
                 yield (
                     fid,
-                    artifacts.semantic_graph().basic.functions.get(fid),
+                    artifacts.semantic_graph().entities.functions.get(fid),
                     idx,
                     stackframe,
                 )

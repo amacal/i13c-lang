@@ -9,7 +9,7 @@ from tests.syntax.parsing import parse_snippet
 def can_parse_snippets_with_single_arg():
     snippet = parse_snippet("asm exit(code@rdi: u32) { syscall; }")
 
-    assert snippet.name == b"exit"
+    assert snippet.signature.name == b"exit"
     assert snippet.noreturn is False
     assert len(snippet.instructions) == 1
 
@@ -31,7 +31,7 @@ def can_parse_snippets_with_single_arg():
 def can_parse_snippets_with_multiple_args():
     snippet = parse_snippet("asm exit(code@rdi: u32, id@rax: u16) { syscall; }")
 
-    assert snippet.name == b"exit"
+    assert snippet.signature.name == b"exit"
     assert snippet.noreturn is False
     assert len(snippet.instructions) == 1
 
@@ -60,7 +60,7 @@ def can_parse_snippets_with_multiple_args():
 def can_parse_snippets_with_bind_to_immediate():
     snippet = parse_snippet("asm exit(code@imm: u32) { }")
 
-    assert snippet.name == b"exit"
+    assert snippet.signature.name == b"exit"
     assert snippet.noreturn is False
     assert len(snippet.instructions) == 0
 
@@ -78,7 +78,7 @@ def can_parse_snippets_with_bind_to_immediate():
 def can_parse_snippets_with_clobbers():
     snippet = parse_snippet("asm aux() clobbers rax, rbx { mov rax, rbx; }")
 
-    assert snippet.name == b"aux"
+    assert snippet.signature.name == b"aux"
     assert snippet.noreturn is False
     assert len(snippet.clobbers) == 2
 
@@ -95,7 +95,7 @@ def can_parse_snippets_with_clobbers():
 def can_parse_snippets_with_no_return():
     snippet = parse_snippet("asm halt() noreturn { syscall; }")
 
-    assert snippet.name == b"halt"
+    assert snippet.signature.name == b"halt"
     assert snippet.noreturn is True
 
     assert len(snippet.instructions) == 1
@@ -108,7 +108,7 @@ def can_parse_snippets_with_no_return():
 def can_parse_snippets_with_no_return_with_clobbers():
     snippet = parse_snippet("asm halt() noreturn clobbers rax { syscall; }")
 
-    assert snippet.name == b"halt"
+    assert snippet.signature.name == b"halt"
     assert snippet.noreturn is True
 
     clobbers = snippet.clobbers

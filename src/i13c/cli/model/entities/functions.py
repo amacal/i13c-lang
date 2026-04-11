@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.functions import Function, FunctionId
 class FunctionListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[FunctionId, Function]]:
-        return artifacts.semantic_graph().basic.functions.items()
+        return artifacts.semantic_graph().entities.functions.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

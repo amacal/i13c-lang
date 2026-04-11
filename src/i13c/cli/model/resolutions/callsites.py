@@ -15,7 +15,7 @@ class CallSiteResolutionListExtractor:
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[CallSiteId, CallSite, CallSiteResolution]]:
         return (
-            (cid, artifacts.semantic_graph().basic.callsites.get(cid), resolution)
+            (cid, artifacts.semantic_graph().entities.callsites.get(cid), resolution)
             for cid, resolution in artifacts.semantic_graph().indices.resolution_by_callsite.items()
         )
 
@@ -52,7 +52,7 @@ class AcceptedCallSiteResolutionListExtractor:
         graph = artifacts.semantic_graph()
 
         return (
-            (cid, graph.basic.callsites.get(cid), idx, acceptance)
+            (cid, graph.entities.callsites.get(cid), idx, acceptance)
             for cid, resolution in graph.indices.resolution_by_callsite.items()
             for idx, acceptance in enumerate(resolution.accepted)
         )
@@ -92,7 +92,7 @@ class BindingsOfCallSiteResolutionListExtractor:
         graph = artifacts.semantic_graph()
 
         return (
-            (cid, graph.basic.callsites.get(cid), resolution, idx, binding)
+            (cid, graph.entities.callsites.get(cid), resolution, idx, binding)
             for cid, resolution in graph.indices.resolution_by_callsite.items()
             for acceptance in resolution.accepted
             for idx, binding in enumerate(acceptance.bindings)

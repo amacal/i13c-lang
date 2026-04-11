@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.values import Value, ValueId
 class ValueListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[ValueId, Value]]:
-        return artifacts.semantic_graph().basic.values.items()
+        return artifacts.semantic_graph().entities.values.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

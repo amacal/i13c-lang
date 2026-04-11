@@ -7,7 +7,7 @@ from i13c.semantic.typing.indices.usages import Usage, UsageId
 class UsageListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[UsageId, Usage]]:
-        return artifacts.semantic_graph().basic.usages.items()
+        return artifacts.semantic_graph().entities.usages.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

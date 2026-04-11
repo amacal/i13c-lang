@@ -11,7 +11,7 @@ class EnvironmentListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[FunctionId, Function, FlowNode, Environment]]:
-        functions = artifacts.semantic_graph().basic.functions
+        functions = artifacts.semantic_graph().entities.functions
         flows = artifacts.semantic_graph().indices.flowgraph_by_function
         environments = artifacts.semantic_graph().indices.environment_by_flownode
 

@@ -17,11 +17,11 @@ def lower_instance(
 
     # values
     rewritten: Dict[OperandId, Operand] = target.operands
-    instrs = graph.basic.snippets.get(target.target).instructions
+    instrs = graph.entities.snippets.get(target.target).instructions
 
     # lower all instructions
     for iid in instrs:
-        instr = graph.basic.instructions.get(iid)
-        out.append(lower_instruction(generator, graph.basic.operands, instr, rewritten))
+        instr = graph.entities.instructions.get(iid)
+        out.append(lower_instruction(generator, graph.entities.operands, instr, rewritten))
 
     return out

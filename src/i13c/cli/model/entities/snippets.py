@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 class SnippetListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[SnippetId, Snippet]]:
-        return artifacts.semantic_graph().basic.snippets.items()
+        return artifacts.semantic_graph().entities.snippets.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

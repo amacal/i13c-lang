@@ -12,7 +12,7 @@ def can_do_nothing_without_any_function():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    functions = semantic.basic.functions
+    functions = semantic.entities.functions
 
     assert functions.size() == 0
 
@@ -25,7 +25,7 @@ def can_build_a_function_with_no_statements():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    functions = semantic.basic.functions
+    functions = semantic.entities.functions
 
     assert functions.size() == 1
     id, value = functions.pop()
@@ -46,7 +46,7 @@ def can_build_a_function_with_no_return_statement():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    functions = semantic.basic.functions
+    functions = semantic.entities.functions
 
     assert functions.size() == 1
     id, value = functions.pop()
@@ -67,7 +67,7 @@ def can_build_a_function_with_call_statement():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    functions = semantic.basic.functions
+    functions = semantic.entities.functions
 
     assert functions.size() == 1
     id, value = functions.peak()
@@ -81,7 +81,7 @@ def can_build_a_function_with_call_statement():
     assert len(value.statements) == 1
     assert isinstance(value.statements[0], CallSiteId)
 
-    callsite = semantic.basic.callsites.get(value.statements[0])
+    callsite = semantic.entities.callsites.get(value.statements[0])
 
     assert callsite.callee.data == b"foo"
     assert len(callsite.arguments) == 1
@@ -98,8 +98,8 @@ def can_build_function_with_properly_derived_types():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    functions = semantic.basic.functions
-    parameters = semantic.basic.parameters
+    functions = semantic.entities.functions
+    parameters = semantic.entities.parameters
 
     assert functions.size() == 1
     _, value = functions.peak()

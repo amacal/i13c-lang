@@ -14,7 +14,7 @@ class ValueResolutionListExtractor:
     ) -> Iterable[Tuple[ValueId, Value, ValueResolution]]:
         graph = artifacts.semantic_graph()
         index = graph.indices.resolution_by_value
-        values = graph.basic.values
+        values = graph.entities.values
 
         return ((vid, values.get(vid), resolution) for vid, resolution in index.items())
 

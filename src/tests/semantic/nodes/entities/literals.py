@@ -11,7 +11,7 @@ def can_do_nothing_without_any_literal():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    literals = semantic.basic.literals
+    literals = semantic.entities.literals
 
     assert literals.size() == 0
 
@@ -24,7 +24,7 @@ def can_detect_hex_literal():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    literals = semantic.basic.literals
+    literals = semantic.entities.literals
 
     assert literals.size() == 1
     id, value = literals.pop()
@@ -47,7 +47,7 @@ def can_detect_two_literals_even_if_identical():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    literals = semantic.basic.literals
+    literals = semantic.entities.literals
 
     assert literals.size() == 2
 

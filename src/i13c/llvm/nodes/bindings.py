@@ -42,7 +42,7 @@ def lower_snippet_bindings(
         if isinstance(binding.src, LiteralId):
 
             # find the literal behind the target
-            literal = graph.basic.literals.get(binding.src)
+            literal = graph.entities.literals.get(binding.src)
 
             # we know all literals are hex for now
             assert literal.kind == b"hex"
@@ -88,7 +88,7 @@ def lower_function_bindings(
         if isinstance(binding.src, LiteralId):
 
             # find the literal behind the target
-            literal = graph.basic.literals.get(binding.src)
+            literal = graph.entities.literals.get(binding.src)
 
             # we know all literals are hex for now
             assert literal.kind == b"hex"

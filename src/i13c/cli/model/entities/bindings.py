@@ -12,9 +12,9 @@ class BindingsListExtractor:
     ) -> Iterable[Tuple[CallSiteId, CallSite, CallSiteBindings, CallSiteBinding]]:
         graph = artifacts.semantic_graph()
 
-        for cid, bindings in graph.basic.bindings.items():
+        for cid, bindings in graph.entities.bindings.items():
             for binding in bindings.entries:
-                yield (cid, graph.basic.callsites.get(cid), bindings, binding)
+                yield (cid, graph.entities.callsites.get(cid), bindings, binding)
 
     @staticmethod
     def headers() -> Dict[str, str]:

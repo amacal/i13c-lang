@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.literals import Literal, LiteralId
 class LiteralListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[LiteralId, Literal]]:
-        return artifacts.semantic_graph().basic.literals.items()
+        return artifacts.semantic_graph().entities.literals.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

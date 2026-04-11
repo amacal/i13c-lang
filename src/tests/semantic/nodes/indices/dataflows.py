@@ -78,8 +78,8 @@ def can_build_dataflow_for_a_function_with_callsite_and_literal():
     assert controlflows.size() == 1
     _, flow = controlflows.pop()
 
-    assert semantic.basic.callsites.size() == 1
-    cid, _ = semantic.basic.callsites.pop()
+    assert semantic.entities.callsites.size() == 1
+    cid, _ = semantic.entities.callsites.pop()
 
     entry = semantic.indices.dataflow_by_flownode.get(flow.entry)
     exit = semantic.indices.dataflow_by_flownode.get(flow.exit)
@@ -111,8 +111,8 @@ def can_build_dataflow_for_a_function_with_callsite_and_identifier():
     assert controlflows.size() == 1
     _, flow = controlflows.pop()
 
-    assert semantic.basic.callsites.size() == 1
-    cid, _ = semantic.basic.callsites.pop()
+    assert semantic.entities.callsites.size() == 1
+    cid, _ = semantic.entities.callsites.pop()
 
     entry = semantic.indices.dataflow_by_flownode.get(flow.entry)
     exit = semantic.indices.dataflow_by_flownode.get(flow.exit)
@@ -144,8 +144,8 @@ def can_build_dataflow_for_a_function_with_callsite_and_unresolved_identifier():
     assert controlflows.size() == 1
     _, flow = controlflows.pop()
 
-    assert semantic.basic.callsites.size() == 1
-    cid, _ = semantic.basic.callsites.pop()
+    assert semantic.entities.callsites.size() == 1
+    cid, _ = semantic.entities.callsites.pop()
 
     entry = semantic.indices.dataflow_by_flownode.get(flow.entry)
     exit = semantic.indices.dataflow_by_flownode.get(flow.exit)

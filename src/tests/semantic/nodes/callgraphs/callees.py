@@ -18,7 +18,7 @@ def can_build_callgraphs_from_single_function():
     target, callers = callgraph.peak()
 
     assert isinstance(target, FunctionId)
-    caller = semantic.basic.functions.get(target)
+    caller = semantic.entities.functions.get(target)
 
     assert caller.identifier.data == b"main"
     assert len(callers) == 0
@@ -38,7 +38,7 @@ def can_build_callgraphs_from_single_snippet():
     target, callers = callgraph.peak()
 
     assert isinstance(target, SnippetId)
-    caller = semantic.basic.snippets.get(target)
+    caller = semantic.entities.snippets.get(target)
 
     assert caller.identifier.data == b"foo"
     assert len(callers) == 0

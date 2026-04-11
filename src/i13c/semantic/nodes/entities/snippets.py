@@ -77,7 +77,7 @@ def build_snippets(
 
         snippets[snippet_id] = Snippet(
             ref=snippet.ref,
-            identifier=Identifier(data=snippet.name),
+            identifier=Identifier(data=snippet.signature.name),
             noreturn=snippet.noreturn,
             slots=slots,
             clobbers=clobbers,

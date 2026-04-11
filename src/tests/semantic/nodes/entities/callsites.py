@@ -12,7 +12,7 @@ def can_do_nothing_without_any_callsite():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    callsites = semantic.basic.callsites
+    callsites = semantic.entities.callsites
 
     assert callsites.size() == 0
 
@@ -25,7 +25,7 @@ def can_build_callsite_with_no_arguments():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    callsites = semantic.basic.callsites
+    callsites = semantic.entities.callsites
 
     assert callsites.size() == 1
     id, value = callsites.pop()
@@ -45,7 +45,7 @@ def can_build_callsite_with_single_argument():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    callsites = semantic.basic.callsites
+    callsites = semantic.entities.callsites
 
     assert callsites.size() == 1
     id, value = callsites.pop()
@@ -60,7 +60,7 @@ def can_build_callsite_with_single_argument():
     assert argument.kind == b"literal"
 
     assert isinstance(argument.target, LiteralId)
-    value = semantic.basic.literals.get(argument.target)
+    value = semantic.entities.literals.get(argument.target)
 
     assert value.kind == b"hex"
     assert isinstance(value.target, Hex)
@@ -76,7 +76,7 @@ def can_build_callsite_with_multiple_arguments():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    callsites = semantic.basic.callsites
+    callsites = semantic.entities.callsites
 
     assert callsites.size() == 1
     _, value = callsites.pop()
@@ -88,7 +88,7 @@ def can_build_callsite_with_multiple_arguments():
         assert argument.kind == b"literal"
         assert isinstance(argument.target, LiteralId)
 
-        value = semantic.basic.literals.get(argument.target)
+        value = semantic.entities.literals.get(argument.target)
 
         assert value.kind == b"hex"
         assert isinstance(value.target, Hex)

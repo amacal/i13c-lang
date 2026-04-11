@@ -11,7 +11,7 @@ class ControlFlowListExtractor:
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[FunctionId, Function, FlowGraph]]:
         return (
-            (fid, artifacts.semantic_graph().basic.functions.get(fid), flowgraph)
+            (fid, artifacts.semantic_graph().entities.functions.get(fid), flowgraph)
             for fid, flowgraph in artifacts.semantic_graph().indices.flowgraph_by_function.items()
         )
 

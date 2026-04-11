@@ -11,7 +11,7 @@ class TerminalityListExtractor:
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[FunctionId, Function, Terminality]]:
         return (
-            (fid, artifacts.semantic_graph().basic.functions.get(fid), terminality)
+            (fid, artifacts.semantic_graph().entities.functions.get(fid), terminality)
             for fid, terminality in artifacts.semantic_graph().indices.terminality_by_function.items()
         )
 

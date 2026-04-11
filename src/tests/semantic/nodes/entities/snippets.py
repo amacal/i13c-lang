@@ -13,7 +13,7 @@ def can_do_nothing_without_any_snippet():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    snippets = semantic.basic.snippets
+    snippets = semantic.entities.snippets
 
     assert snippets.size() == 0
 
@@ -26,7 +26,7 @@ def can_build_a_snippet_with_no_instruction():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    snippets = semantic.basic.snippets
+    snippets = semantic.entities.snippets
 
     assert snippets.size() == 1
     id, value = snippets.pop()
@@ -46,7 +46,7 @@ def can_build_a_snippet_with_no_noreturn():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    snippets = semantic.basic.snippets
+    snippets = semantic.entities.snippets
 
     assert snippets.size() == 1
     id, value = snippets.pop()
@@ -66,7 +66,7 @@ def can_build_a_snippet_with_noreturn():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    snippets = semantic.basic.snippets
+    snippets = semantic.entities.snippets
 
     assert snippets.size() == 1
     id, value = snippets.pop()
@@ -86,7 +86,7 @@ def can_build_a_snippet_with_clobber_list():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    snippets = semantic.basic.snippets
+    snippets = semantic.entities.snippets
 
     assert snippets.size() == 1
     id, value = snippets.pop()
@@ -109,9 +109,9 @@ def can_build_a_snippet_with_mov_instruction():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    snippets = semantic.basic.snippets
+    snippets = semantic.entities.snippets
 
-    operands = semantic.basic.operands
+    operands = semantic.entities.operands
     assert operands.size() == 2
 
     assert snippets.size() == 1
@@ -127,7 +127,7 @@ def can_build_a_snippet_with_mov_instruction():
     iid = value.instructions[0]
 
     assert isinstance(iid, InstructionId)
-    instruction = semantic.basic.instructions.get(iid)
+    instruction = semantic.entities.instructions.get(iid)
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -158,7 +158,7 @@ def can_build_a_snippet_with_properly_derived_types():
     semantic = run_graph(program).semantic_graph()
 
     assert semantic is not None
-    snippets = semantic.basic.snippets
+    snippets = semantic.entities.snippets
 
     assert snippets.size() == 1
     _, value = snippets.peak()

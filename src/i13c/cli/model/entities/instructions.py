@@ -9,7 +9,7 @@ class InstructionListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[InstructionId, Instruction]]:
-        return artifacts.semantic_graph().basic.instructions.items()
+        return artifacts.semantic_graph().entities.instructions.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

@@ -84,8 +84,8 @@ def can_build_flowgraph_for_a_function_with_a_single_statement():
     assert bn1s is not None and len(bn1s) == 1
     assert isinstance(bn1s[0], CallSiteId)
 
-    assert semantic.basic.callsites.get(fn1s[0]).callee.data == b"foo"
-    assert semantic.basic.callsites.get(bn1s[0]).callee.data == b"foo"
+    assert semantic.entities.callsites.get(fn1s[0]).callee.data == b"foo"
+    assert semantic.entities.callsites.get(bn1s[0]).callee.data == b"foo"
 
     fn2s = flow.forward.get(fn1s[0])
     assert fn2s is not None and len(fn2s) == 1
@@ -134,6 +134,6 @@ def can_build_flowgraph_for_a_function_with_multiple_statements_ordered():
     assert last is not None and len(last) == 1
     assert last[0] == flow.exit
 
-    assert semantic.basic.callsites.get(foo).callee.data == b"foo"
-    assert semantic.basic.callsites.get(bar).callee.data == b"bar"
-    assert semantic.basic.callsites.get(baz).callee.data == b"baz"
+    assert semantic.entities.callsites.get(foo).callee.data == b"foo"
+    assert semantic.entities.callsites.get(bar).callee.data == b"bar"
+    assert semantic.entities.callsites.get(baz).callee.data == b"baz"

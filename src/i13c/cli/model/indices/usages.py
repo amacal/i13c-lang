@@ -14,7 +14,7 @@ class UsagesByExpressionListExtractor:
         index = graph.indices.usages_by_expression
 
         return (
-            (eid, graph.basic.expressions.get(eid), uids) for eid, uids in index.items()
+            (eid, graph.entities.expressions.get(eid), uids) for eid, uids in index.items()
         )
 
     @staticmethod

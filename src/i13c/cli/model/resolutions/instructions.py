@@ -11,7 +11,7 @@ class InstructionResolutionListExtractor:
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[InstructionId, Instruction, InstructionResolution]]:
         return (
-            (iid, artifacts.semantic_graph().basic.instructions.get(iid), resolution)
+            (iid, artifacts.semantic_graph().entities.instructions.get(iid), resolution)
             for iid, resolution in artifacts.semantic_graph().indices.resolution_by_instruction.items()
         )
 

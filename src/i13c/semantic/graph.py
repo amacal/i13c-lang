@@ -2,13 +2,13 @@ from typing import Any, Dict
 
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.semantic.model import (
-    BasicNodes,
     CallGraph,
     IndexEdges,
     LiveComponents,
     SemanticGraph,
 )
 from i13c.semantic.nodes import configure_nodes
+from i13c.semantic.nodes.entities import parse_entities
 from i13c.semantic.nodes.resolutions import parse_resolutions
 from i13c.semantic.rules import configure_rules
 
@@ -49,24 +49,7 @@ def build(
     **kwargs: Dict[str, Any],
 ) -> SemanticGraph:
     return SemanticGraph(
-        basic=BasicNodes(
-            bindings=entities["entities/bindings"],
-            binds=entities["entities/binds"],
-            callsites=entities["entities/callsites"],
-            expressions=entities["entities/expressions"],
-            functions=entities["entities/functions"],
-            instructions=entities["entities/instructions"],
-            literals=entities["entities/literals"],
-            operands=entities["entities/operands"],
-            parameters=entities["entities/parameters"],
-            ranges=entities["entities/ranges"],
-            slots=entities["entities/slots"],
-            snippets=entities["entities/snippets"],
-            types=entities["entities/types"],
-            usages=entities["entities/usages"],
-            values=entities["entities/values"],
-            variables=entities["entities/variables"],
-        ),
+        entities=parse_entities(entities),
         indices=IndexEdges(
             dataflow_by_flownode=indices["indices/dataflow-by-flownode"],
             environment_by_flownode=indices["indices/environment-by-flownode"],

@@ -14,7 +14,7 @@ class DataFlowListExtractor:
         return (
             (
                 fid,
-                artifacts.semantic_graph().basic.functions.get(fid),
+                artifacts.semantic_graph().entities.functions.get(fid),
                 flownode,
                 artifacts.semantic_graph().indices.dataflow_by_flownode.get(flownode),
             )

@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 class ParameterListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[ParameterId, Parameter]]:
-        return artifacts.semantic_graph().basic.parameters.items()
+        return artifacts.semantic_graph().entities.parameters.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:
