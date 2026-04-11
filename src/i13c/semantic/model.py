@@ -13,9 +13,9 @@ from i13c.semantic.typing.entities.literals import Literal, LiteralId
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.ranges import Range, RangeId
+from i13c.semantic.typing.entities.slots import Slot, SlotId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.entities.types import Type, TypeId
-from i13c.semantic.typing.entities.slots import Slot, SlotId
 from i13c.semantic.typing.entities.values import Value, ValueId
 from i13c.semantic.typing.indices.callgraphs import CallPair
 from i13c.semantic.typing.indices.controlflows import FlowGraph, FlowNode
@@ -26,11 +26,9 @@ from i13c.semantic.typing.indices.instances import Instance
 from i13c.semantic.typing.indices.terminalities import Terminality
 from i13c.semantic.typing.indices.usages import Usage, UsageId
 from i13c.semantic.typing.indices.variables import Variable, VariableId, VariableSource
-from i13c.semantic.typing.resolutions.binds import BindResolution
+from i13c.semantic.typing.resolutions import ResolutionNodes
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
-from i13c.semantic.typing.resolutions.ranges import RangeResolution
-from i13c.semantic.typing.resolutions.types import TypeResolution
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
@@ -52,13 +50,6 @@ class BasicNodes:
     usages: OneToOne[UsageId, Usage]
     values: OneToOne[ValueId, Value]
     variables: OneToOne[VariableId, Variable]
-
-
-@dataclass
-class ResolutionNodes:
-    binds: Optional[OneToOne[BindId, BindResolution]]
-    ranges: Optional[OneToOne[RangeId, RangeResolution]]
-    types: Optional[OneToOne[TypeId, TypeResolution]]
 
 @dataclass
 class IndexEdges:

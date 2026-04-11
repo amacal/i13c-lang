@@ -20,7 +20,10 @@ def configure_type_resolution() -> GraphGroup:
         constraint=None,
         produces=("resolutions/types",),
         requires=frozenset(
-            {("types", "entities/types"), ("ranges", "resolutions/ranges/accepted")}
+            {
+                ("types", "entities/types"),
+                ("ranges", "resolutions/ranges/accepted"),
+            }
         ),
     )
 
@@ -82,7 +85,6 @@ def build_type_resolution(
                     reason="unknown-type",
                 )
             )
-
 
         elif range and range.width != mapping[entry.name]:
             resolution.rejected.append(
