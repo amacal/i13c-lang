@@ -5,7 +5,6 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.semantic.rules.e3000 import configure_e3000
 from i13c.semantic.rules.e3002 import configure_e3002
-from i13c.semantic.rules.e3003 import configure_e3003
 from i13c.semantic.rules.e3004 import configure_e3004
 from i13c.semantic.rules.e3005 import configure_e3005
 from i13c.semantic.rules.e3006 import configure_e3006
@@ -49,7 +48,6 @@ def configure_rules() -> GraphGroup:
         nodes=[
             configure_e3000(),
             configure_e3002(),
-            configure_e3003(),
             configure_e3004(),
             configure_e3005(),
             configure_e3006(),
