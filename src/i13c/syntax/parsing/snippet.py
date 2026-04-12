@@ -168,7 +168,7 @@ def parse_instruction(state: ParsingState) -> tree.snippet.InstructionOrLabel:
 
     # if instruction starts with a dot, it's a label definition
     if token.code == Tokens.DOT:
-        return parse_label(state)
+        return parse_label(state, token)
 
     # optional operands
     if state.is_in(*OPERANDS_START):
@@ -186,15 +186,15 @@ def parse_instruction(state: ParsingState) -> tree.snippet.InstructionOrLabel:
         operands=operands,
     )
 
-def parse_label(state: ParsingState) -> tree.snippet.Label:
+def parse_label(state: ParsingState, start: LexingToken) -> tree.snippet.Label:
     # the label name is an identifier
     token = state.expect(Tokens.IDENT)
 
     # expect a colon
-    state.expect(Tokens.COLON)
+    end = state.expect(Tokens.COLON)
 
     return tree.snippet.Label(
-        ref=state.between(token, token),
+        ref=state.between(start, end),
         name=state.extract(token),
     )
 

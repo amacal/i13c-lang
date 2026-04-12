@@ -9,7 +9,7 @@ from i13c.semantic.typing.entities.environments import (
     EnvironmentTarget,
 )
 from i13c.semantic.typing.entities.labels import LabelId
-from i13c.semantic.typing.entities.slots import SlotId
+from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.syntax.tree.snippet import Label
 
 
@@ -34,10 +34,9 @@ def build_environments(
         # a list of all the targets
         targets: List[EnvironmentTarget] = []
 
-        # append all slots
-        for slot in entry.signature.slots:
-            nid = graph.slots.get_by_node(slot)
-            targets.append(SlotId(value=nid.value))
+        # append a signature
+        nid = graph.signatures.get_by_node(entry.signature)
+        targets.append(SignatureId(value=nid.value))
 
         # append all labels
         for instr in entry.body:
