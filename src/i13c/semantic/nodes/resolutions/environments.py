@@ -96,6 +96,7 @@ def build_environment_resolution(
                 EnvironmentAcceptance(
                     ref=entry.ref,
                     id=eid,
+                    ctx=entry.ctx,
                     kind=entry.kind,
                     entries=mapping,
                 )

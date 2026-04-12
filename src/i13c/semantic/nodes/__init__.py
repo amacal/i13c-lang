@@ -7,7 +7,10 @@ from i13c.semantic.nodes.indices.callgraphs import configure_callgraphs
 from i13c.semantic.nodes.indices.controlflows import configure_flowgraph_by_function
 from i13c.semantic.nodes.indices.dataflows import configure_dataflow_by_flownode
 from i13c.semantic.nodes.indices.entrypoints import configure_entrypoint_by_callable
-from i13c.semantic.nodes.indices.environments import configure_environment_by_flownode
+from i13c.semantic.nodes.indices.environments import (
+    configure_environment_by_flownode,
+    configure_environments_by_snippets,
+)
 from i13c.semantic.nodes.indices.instances import configure_instance_by_callsite
 from i13c.semantic.nodes.indices.terminalities import configure_terminality_by_function
 from i13c.semantic.nodes.indices.usages import configure_usages_by_expression
@@ -26,6 +29,7 @@ def configure_nodes() -> GraphGroup:
             configure_dataflow_by_flownode(),
             configure_entrypoint_by_callable(),
             configure_environment_by_flownode(),
+            configure_environments_by_snippets(),
             configure_flowgraph_by_function(),
             configure_flowgraphs_live(),
             configure_instance_by_callsite(),

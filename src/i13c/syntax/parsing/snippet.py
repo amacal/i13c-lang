@@ -186,6 +186,7 @@ def parse_instruction(state: ParsingState) -> tree.snippet.InstructionOrLabel:
         operands=operands,
     )
 
+
 def parse_label(state: ParsingState, start: LexingToken) -> tree.snippet.Label:
     # the label name is an identifier
     token = state.expect(Tokens.IDENT)
@@ -218,23 +219,28 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
     # register has to provide its name
     if token.code == Tokens.IDENT:
-        return tree.snippet.Register(ref=state.span(token), name=state.extract(token))
+        return tree.snippet.Register(
+            ref=state.between(token, token),
+            name=state.extract(token),
+        )
 
     # immediate has to provide its decimal value
     elif token.code == Tokens.HEX:
         return tree.snippet.Immediate(
-            ref=state.span(token),
+            ref=state.between(token, token),
             value=extract_hex(state, token),
         )
 
     # reference has to provide its identifier
     elif token.code == Tokens.AT:
+        start = token
+
         # now we expect an identifier
         token = state.expect(Tokens.IDENT)
 
         # which has to be extracted
         return tree.snippet.Reference(
-            ref=state.span(token),
+            ref=state.between(start, token),
             name=state.extract(token),
         )
 

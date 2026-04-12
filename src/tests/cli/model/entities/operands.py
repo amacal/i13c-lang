@@ -16,7 +16,7 @@ def can_draw_a_table_with_operands():
             | Reference | Operand ID | Operand Kind | Register Name | Register Width | Immediate Value | Immediate Width | Reference Name |
             | --------- | ---------- | ------------ | ------------- | -------------- | --------------- | --------------- | -------------- |
             | 42:45     | operand#7  | register     | rax           | 64             |                 |                 |                |
-            | 48:51     | operand#9  | reference    |               |                |                 |                 | abc            |
+            | 47:51     | operand#9  | reference    |               |                |                 |                 | abc            |
             | --------- | ---------- | ------------ | ------------- | -------------- | --------------- | --------------- | -------------- |
         """
     )

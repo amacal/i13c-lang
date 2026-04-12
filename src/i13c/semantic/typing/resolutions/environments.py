@@ -4,6 +4,7 @@ from typing import Literal as Kind
 from typing import Union
 
 from i13c.semantic.typing.entities.environments import EnvironmentId
+from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.slots import SlotAcceptance
 from i13c.syntax.source import Span
@@ -24,6 +25,7 @@ class EnvironmentAcceptance:
     ref: Span
     id: EnvironmentId
 
+    ctx: SnippetId
     kind: EnvironmentKind
     entries: Dict[bytes, EnvironmentTarget]
 
