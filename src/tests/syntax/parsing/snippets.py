@@ -11,9 +11,11 @@ def can_parse_snippets_with_single_arg():
 
     assert snippet.signature.name == b"exit"
     assert snippet.noreturn is False
-    assert len(snippet.instructions) == 1
+    assert len(snippet.body) == 1
 
-    instruction = snippet.instructions[0]
+    instruction = snippet.body[0]
+    assert isinstance(instruction, tree.snippet.Instruction)
+
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
 
@@ -33,9 +35,11 @@ def can_parse_snippets_with_multiple_args():
 
     assert snippet.signature.name == b"exit"
     assert snippet.noreturn is False
-    assert len(snippet.instructions) == 1
+    assert len(snippet.body) == 1
 
-    instruction = snippet.instructions[0]
+    instruction = snippet.body[0]
+    assert isinstance(instruction, tree.snippet.Instruction)
+
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
 
@@ -62,7 +66,7 @@ def can_parse_snippets_with_bind_to_immediate():
 
     assert snippet.signature.name == b"exit"
     assert snippet.noreturn is False
-    assert len(snippet.instructions) == 0
+    assert len(snippet.body) == 0
 
     slots = snippet.signature.slots
     assert len(slots) == 1
@@ -85,8 +89,9 @@ def can_parse_snippets_with_clobbers():
     assert snippet.clobbers[0].name == b"rax"
     assert snippet.clobbers[1].name == b"rbx"
 
-    assert len(snippet.instructions) == 1
-    instruction = snippet.instructions[0]
+    assert len(snippet.body) == 1
+    instruction = snippet.body[0]
+    assert isinstance(instruction, tree.snippet.Instruction)
 
     assert instruction.mnemonic.name == b"mov"
     assert len(instruction.operands) == 2
@@ -98,8 +103,9 @@ def can_parse_snippets_with_no_return():
     assert snippet.signature.name == b"halt"
     assert snippet.noreturn is True
 
-    assert len(snippet.instructions) == 1
-    instruction = snippet.instructions[0]
+    assert len(snippet.body) == 1
+    instruction = snippet.body[0]
+    assert isinstance(instruction, tree.snippet.Instruction)
 
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0
@@ -115,8 +121,9 @@ def can_parse_snippets_with_no_return_with_clobbers():
     assert len(clobbers) == 1
     assert clobbers[0].name == b"rax"
 
-    assert len(snippet.instructions) == 1
-    instruction = snippet.instructions[0]
+    assert len(snippet.body) == 1
+    instruction = snippet.body[0]
+    assert isinstance(instruction, tree.snippet.Instruction)
 
     assert instruction.mnemonic.name == b"syscall"
     assert len(instruction.operands) == 0

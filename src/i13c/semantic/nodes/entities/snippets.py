@@ -7,6 +7,7 @@ from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.instructions import Binding, InstructionId
 from i13c.semantic.typing.entities.operands import Register
 from i13c.semantic.typing.entities.snippets import Slot, Snippet, SnippetId
+from i13c.syntax.tree.snippet import Instruction as Instruct
 
 
 def configure_snippets() -> GraphNode:
@@ -67,10 +68,11 @@ def build_snippets(
                 )
             )
 
-        for instruction in snippet.instructions:
-            # identify instruction ID from globally unique node ID
-            instruction_node = graph.instructions.get_by_node(instruction)
-            instructions.append(InstructionId(value=instruction_node.value))
+        for instruction in snippet.body:
+            if isinstance(instruction, Instruct):
+                # identify instruction ID from globally unique node ID
+                instruction_node = graph.instructions.get_by_node(instruction)
+                instructions.append(InstructionId(value=instruction_node.value))
 
         # derive snippet ID from globally unique node ID
         snippet_id = SnippetId(value=nid.value)

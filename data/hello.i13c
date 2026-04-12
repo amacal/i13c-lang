@@ -10,10 +10,9 @@ asm print_asm(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
     mov [rsp - 0x10], rcx;
     mov rcx, 0x6665646362613938;
     mov [rsp - 0x08], rcx;
-
     mov rcx, 0x10;
-    label .nibble;
 
+  .nibble:
     mov r11, rax;
     and r11, 0x0f;
 

@@ -21,4 +21,4 @@ class Signature:
     slots: List[SlotId]
 
     def __str__(self) -> str:
-        return f"{self.name.decode()}, {len(self.slots)} slots"
+        return f"{self.name.decode()}:{len(self.slots)}"

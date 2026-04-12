@@ -59,6 +59,9 @@ class NodesVisitor:
     def on_bind(self, bind: tree.snippet.Bind) -> None:
         self.graph.binds.append(self.next(), bind)
 
+    def on_label(self, label: tree.snippet.Label) -> None:
+        self.graph.labels.append(self.next(), label)
+
     def on_instruction(self, instruction: tree.snippet.Instruction) -> None:
         self.graph.instructions.append(self.next(), instruction)
 
@@ -70,6 +73,9 @@ class NodesVisitor:
 
     def on_register(self, register: tree.snippet.Register) -> None:
         self.graph.registers.append(self.next(), register)
+
+    def on_reference(self, reference: tree.snippet.Reference) -> None:
+        self.graph.references.append(self.next(), reference)
 
     def on_function(self, function: tree.function.Function) -> None:
         self.graph.functions.append(self.next(), function)
@@ -99,10 +105,12 @@ class SyntaxGraph:
     signatures: Bidirectional[tree.snippet.Signature]
     slots: Bidirectional[tree.snippet.Slot]
     binds: Bidirectional[tree.snippet.Bind]
+    labels: Bidirectional[tree.snippet.Label]
     instructions: Bidirectional[tree.snippet.Instruction]
     operands: Bidirectional[tree.snippet.Operand]
     immediates: Bidirectional[tree.snippet.Immediate]
     registers: Bidirectional[tree.snippet.Register]
+    references: Bidirectional[tree.snippet.Reference]
 
     functions: Bidirectional[tree.function.Function]
     statements: Bidirectional[tree.function.Statement]
@@ -120,10 +128,12 @@ class SyntaxGraph:
             signatures=Bidirectional[tree.snippet.Signature].empty(),
             slots=Bidirectional[tree.snippet.Slot].empty(),
             binds=Bidirectional[tree.snippet.Bind].empty(),
+            labels=Bidirectional[tree.snippet.Label].empty(),
             instructions=Bidirectional[tree.snippet.Instruction].empty(),
             operands=Bidirectional[tree.snippet.Operand].empty(),
             immediates=Bidirectional[tree.snippet.Immediate].empty(),
             registers=Bidirectional[tree.snippet.Register].empty(),
+            references=Bidirectional[tree.snippet.Reference].empty(),
             functions=Bidirectional[tree.function.Function].empty(),
             statements=Bidirectional[tree.function.Statement].empty(),
             literals=Bidirectional[tree.function.Literal].empty(),

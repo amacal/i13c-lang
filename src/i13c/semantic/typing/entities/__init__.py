@@ -4,14 +4,17 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.bindings import CallSiteBindings
 from i13c.semantic.typing.entities.binds import Bind, BindId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
+from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
+from i13c.semantic.typing.entities.labels import Label, LabelId
 from i13c.semantic.typing.entities.literals import Literal, LiteralId
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.ranges import Range, RangeId
+from i13c.semantic.typing.entities.references import Reference, ReferenceId
 from i13c.semantic.typing.entities.registers import Register, RegisterId
 from i13c.semantic.typing.entities.signatures import Signature, SignatureId
 from i13c.semantic.typing.entities.slots import Slot, SlotId
@@ -27,14 +30,17 @@ class EntityNodes:
     bindings: OneToOne[CallSiteId, CallSiteBindings]
     binds: OneToOne[BindId, Bind]
     callsites: OneToOne[CallSiteId, CallSite]
+    environments: OneToOne[EnvironmentId, Environment]
     expressions: OneToOne[ExpressionId, Expression]
     functions: OneToOne[FunctionId, Function]
     immediates: OneToOne[ImmediateId, Immediate]
     instructions: OneToOne[InstructionId, Instruction]
+    labels: OneToOne[LabelId, Label]
     literals: OneToOne[LiteralId, Literal]
     operands: OneToOne[OperandId, Operand]
     parameters: OneToOne[ParameterId, Parameter]
     ranges: OneToOne[RangeId, Range]
+    references: OneToOne[ReferenceId, Reference]
     registers: OneToOne[RegisterId, Register]
     signatures: OneToOne[SignatureId, Signature]
     slots: OneToOne[SlotId, Slot]

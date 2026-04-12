@@ -29,5 +29,5 @@ class SnippetListExtractor:
             "name": str(entry[1].signature.name.decode()),
             "slots": str(len(entry[1].signature.slots)),
             "clbbrs": str(len(entry[1].clobbers)),
-            "instrs": str(len(entry[1].instructions)),
+            "instrs": str(len(entry[1].body)),
         }

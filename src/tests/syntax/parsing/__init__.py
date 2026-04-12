@@ -42,8 +42,10 @@ def parse_snippet(data: str) -> tree.snippet.Snippet:
 def parse_instructions(data: str) -> Tuple[tree.snippet.Instruction, ...]:
     snippet = parse_snippet(data)
 
-    assert len(snippet.instructions) >= 1
-    return tuple(snippet.instructions)
+    assert len(snippet.body) >= 1
+    return tuple(
+        entry for entry in snippet.body if isinstance(entry, tree.snippet.Instruction)
+    )
 
 
 def can_handle_end_of_tokens():

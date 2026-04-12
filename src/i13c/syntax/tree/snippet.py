@@ -13,10 +13,12 @@ class Visitor(Protocol):
     def on_signature(self, signature: Signature) -> None: ...
     def on_slot(self, slot: Slot) -> None: ...
     def on_bind(self, bind: Bind) -> None: ...
+    def on_label(self, label: Label) -> None: ...
     def on_instruction(self, instruction: Instruction) -> None: ...
     def on_operand(self, operand: Operand) -> None: ...
     def on_immediate(self, immediate: Immediate) -> None: ...
     def on_register(self, register: Register) -> None: ...
+    def on_reference(self, reference: Reference) -> None: ...
 
     # types related
     def on_type(self, type: types.Type) -> None: ...
@@ -50,6 +52,7 @@ class Reference:
 
     def accept(self, visitor: Visitor) -> None:
         visitor.on_operand(self)
+        visitor.on_reference(self)
 
 
 OffsetKind = Kind["forward", "backward"]
@@ -116,6 +119,18 @@ class Instruction:
 
 
 @dataclass(kw_only=True, eq=False)
+class Label:
+    ref: Span
+    name: bytes
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.on_label(self)
+
+
+InstructionOrLabel = Union[Instruction, Label]
+
+
+@dataclass(kw_only=True, eq=False)
 class Signature:
     ref: Span
     name: bytes
@@ -134,12 +149,12 @@ class Snippet:
     noreturn: bool
     signature: Signature
     clobbers: List[Register]
-    instructions: List[Instruction]
+    body: List[InstructionOrLabel]
 
     def accept(self, visitor: Visitor) -> None:
         visitor.on_snippet(self)
 
         self.signature.accept(visitor)
 
-        for entry in self.instructions:
+        for entry in self.body:
             entry.accept(visitor)

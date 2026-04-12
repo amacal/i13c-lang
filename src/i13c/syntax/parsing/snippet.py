@@ -13,7 +13,7 @@ from i13c.syntax.parsing.types import parse_range
 
 
 def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
-    instructions: List[tree.snippet.Instruction] = []
+    body: List[tree.snippet.InstructionOrLabel] = []
     slots: List[tree.snippet.Slot] = []
     clobbers: List[tree.snippet.Register] = []
     noreturn: bool = False
@@ -40,7 +40,7 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
 
     # parse instructions until closing curly brace
     while not state.is_in(Tokens.CURLY_CLOSE):
-        instructions.append(parse_instruction(state))
+        body.append(parse_instruction(state))
 
     # expect closed curly brace
     state.expect(Tokens.CURLY_CLOSE)
@@ -54,7 +54,7 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
             name=state.extract(name),
             slots=slots,
         ),
-        instructions=instructions,
+        body=body,
     )
 
 
@@ -162,9 +162,13 @@ def parse_clobbers(state: ParsingState) -> List[tree.snippet.Register]:
     return clobbers
 
 
-def parse_instruction(state: ParsingState) -> tree.snippet.Instruction:
+def parse_instruction(state: ParsingState) -> tree.snippet.InstructionOrLabel:
     operands: List[tree.snippet.Operand] = []
-    token = state.expect(Tokens.IDENT)
+    token = state.expect(Tokens.IDENT, Tokens.DOT)
+
+    # if instruction starts with a dot, it's a label definition
+    if token.code == Tokens.DOT:
+        return parse_label(state)
 
     # optional operands
     if state.is_in(*OPERANDS_START):
@@ -180,6 +184,18 @@ def parse_instruction(state: ParsingState) -> tree.snippet.Instruction:
         ref=state.between(token, end),
         mnemonic=mnemonic,
         operands=operands,
+    )
+
+def parse_label(state: ParsingState) -> tree.snippet.Label:
+    # the label name is an identifier
+    token = state.expect(Tokens.IDENT)
+
+    # expect a colon
+    state.expect(Tokens.COLON)
+
+    return tree.snippet.Label(
+        ref=state.between(token, token),
+        name=state.extract(token),
     )
 
 
