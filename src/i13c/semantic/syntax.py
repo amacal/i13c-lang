@@ -4,6 +4,7 @@ from typing import Dict, Iterable, Tuple, TypeVar
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.syntax import tree
+from i13c.syntax.tree.core import Path
 
 AstNode = TypeVar("AstNode")
 
@@ -44,58 +45,58 @@ class NodesVisitor:
     def next(self) -> NodeId:
         return NodeId(value=self.generator.next())
 
-    def on_program(self, program: tree.Program) -> None:
+    def on_program(self, program: tree.Program, path: Path) -> None:
         pass
 
-    def on_snippet(self, snippet: tree.snippet.Snippet) -> None:
+    def on_snippet(self, snippet: tree.snippet.Snippet, path: Path) -> None:
         self.graph.snippets.append(self.next(), snippet)
 
-    def on_signature(self, signature: tree.snippet.Signature) -> None:
+    def on_signature(self, signature: tree.snippet.Signature, path: Path) -> None:
         self.graph.signatures.append(self.next(), signature)
 
-    def on_slot(self, slot: tree.snippet.Slot) -> None:
+    def on_slot(self, slot: tree.snippet.Slot, path: Path) -> None:
         self.graph.slots.append(self.next(), slot)
 
-    def on_bind(self, bind: tree.snippet.Bind) -> None:
+    def on_bind(self, bind: tree.snippet.Bind, path: Path) -> None:
         self.graph.binds.append(self.next(), bind)
 
-    def on_label(self, label: tree.snippet.Label) -> None:
+    def on_label(self, label: tree.snippet.Label, path: Path) -> None:
         self.graph.labels.append(self.next(), label)
 
-    def on_instruction(self, instruction: tree.snippet.Instruction) -> None:
+    def on_instruction(self, instruction: tree.snippet.Instruction, path: Path) -> None:
         self.graph.instructions.append(self.next(), instruction)
 
-    def on_operand(self, operand: tree.snippet.Operand) -> None:
+    def on_operand(self, operand: tree.snippet.Operand, path: Path) -> None:
         self.graph.operands.append(self.next(), operand)
 
-    def on_immediate(self, immediate: tree.snippet.Immediate) -> None:
+    def on_immediate(self, immediate: tree.snippet.Immediate, path: Path) -> None:
         self.graph.immediates.append(self.next(), immediate)
 
-    def on_register(self, register: tree.snippet.Register) -> None:
+    def on_register(self, register: tree.snippet.Register, path: Path) -> None:
         self.graph.registers.append(self.next(), register)
 
-    def on_reference(self, reference: tree.snippet.Reference) -> None:
+    def on_reference(self, reference: tree.snippet.Reference, path: Path) -> None:
         self.graph.references.append(self.next(), reference)
 
-    def on_function(self, function: tree.function.Function) -> None:
+    def on_function(self, function: tree.function.Function, path: Path) -> None:
         self.graph.functions.append(self.next(), function)
 
-    def on_parameter(self, parameter: tree.function.Parameter) -> None:
+    def on_parameter(self, parameter: tree.function.Parameter, path: Path) -> None:
         self.graph.parameters.append(self.next(), parameter)
 
-    def on_statement(self, statement: tree.function.Statement) -> None:
+    def on_statement(self, statement: tree.function.Statement, path: Path) -> None:
         self.graph.statements.append(self.next(), statement)
 
-    def on_literal(self, literal: tree.function.Literal) -> None:
+    def on_literal(self, literal: tree.function.Literal, path: Path) -> None:
         self.graph.literals.append(self.next(), literal)
 
-    def on_expression(self, expression: tree.function.Expression) -> None:
+    def on_expression(self, expression: tree.function.Expression, path: Path) -> None:
         self.graph.expressions.append(self.next(), expression)
 
-    def on_type(self, type: tree.types.Type) -> None:
+    def on_type(self, type: tree.types.Type, path: Path) -> None:
         self.graph.types.append(self.next(), type)
 
-    def on_range(self, range: tree.types.Range) -> None:
+    def on_range(self, range: tree.types.Range, path: Path) -> None:
         self.graph.ranges.append(self.next(), range)
 
 
@@ -149,7 +150,7 @@ def build_syntax_graph(
     program: tree.Program,
 ) -> SyntaxGraph:
     visitor = NodesVisitor(generator)
-    program.accept(visitor)
+    program.accept(visitor, Path())
 
     return visitor.graph
 

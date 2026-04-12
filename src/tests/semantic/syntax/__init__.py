@@ -1,5 +1,6 @@
 from i13c.core.generator import Generator
 from i13c.semantic.syntax import NodesVisitor
+from i13c.syntax.tree.core import Path
 from tests.semantic import prepare_program
 
 
@@ -9,7 +10,7 @@ def parse_syntax_graph(code: str) -> NodesVisitor:
     generator = Generator()
     visitor = NodesVisitor(generator)
 
-    program.accept(visitor)
+    program.accept(visitor, Path())
     return visitor
 
 
