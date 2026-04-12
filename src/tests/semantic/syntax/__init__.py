@@ -7,10 +7,13 @@ from tests.semantic import prepare_program
 def parse_syntax_graph(code: str) -> NodesVisitor:
     _, program = prepare_program(code)
 
+    path = Path()
     generator = Generator()
     visitor = NodesVisitor(generator)
 
-    program.accept(visitor, Path())
+    program.accept(visitor, path)
+    assert path.is_empty()
+
     return visitor
 
 

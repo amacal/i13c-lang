@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.syntax.source import Span
 
 
@@ -15,6 +16,7 @@ class ReferenceId:
 class Reference:
     ref: Span
     name: bytes
+    ctx: SnippetId
 
     def __str__(self) -> str:
         return f"{self.name.decode()}"

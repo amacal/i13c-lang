@@ -1,5 +1,7 @@
 from contextlib import contextmanager
-from typing import Any, Iterator, List
+from typing import Any, Iterator, List, Type, TypeVar
+
+PathNode = TypeVar("PathNode")
 
 
 class Path:
@@ -21,3 +23,14 @@ class Path:
             yield self
         finally:
             self._count -= 1
+
+    def find(self, type: Type[PathNode]) -> PathNode:
+        for i in range(self._count - 1, -1, -1):
+            node = self._nodes[i]
+            if isinstance(node, type):
+                return node
+
+        raise ValueError(f"Node of type {type} not found in path")
+
+    def is_empty(self) -> bool:
+        return self._count == 0

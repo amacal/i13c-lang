@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Iterable, Tuple, TypeVar
+from typing import Dict, Iterable, Optional, Tuple, TypeVar
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphGroup, GraphNode
@@ -7,6 +7,7 @@ from i13c.syntax import tree
 from i13c.syntax.tree.core import Path
 
 AstNode = TypeVar("AstNode")
+AstCtx = TypeVar("AstCtx")
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -15,20 +16,27 @@ class NodeId:
 
 
 @dataclass(kw_only=True)
-class Bidirectional[AstNode]:
+class Bidirectional[AstNode, AstCtx]:
     node_to_id: Dict[AstNode, NodeId]
     id_to_node: Dict[NodeId, AstNode]
+    id_to_ctx: Dict[NodeId, AstCtx]
 
     @staticmethod
-    def empty() -> Bidirectional[AstNode]:
-        return Bidirectional(node_to_id={}, id_to_node={})
+    def empty() -> Bidirectional[AstNode, AstCtx]:
+        return Bidirectional(node_to_id={}, id_to_node={}, id_to_ctx={})
 
-    def append(self, id: NodeId, node: AstNode) -> None:
+    def append(self, id: NodeId, node: AstNode, /, ctx: Optional[AstCtx] = None) -> None:
         self.node_to_id[node] = id
         self.id_to_node[id] = node
 
+        if ctx is not None:
+            self.id_to_ctx[id] = ctx
+
     def items(self) -> Iterable[Tuple[NodeId, AstNode]]:
         return self.id_to_node.items()
+
+    def get_ctx(self, node_id: NodeId) -> AstCtx:
+        return self.id_to_ctx[node_id]
 
     def get_by_id(self, node_id: NodeId) -> AstNode:
         return self.id_to_node[node_id]
@@ -76,7 +84,7 @@ class NodesVisitor:
         self.graph.registers.append(self.next(), register)
 
     def on_reference(self, reference: tree.snippet.Reference, path: Path) -> None:
-        self.graph.references.append(self.next(), reference)
+        self.graph.references.append(self.next(), reference, ctx=path.find(tree.snippet.Snippet))
 
     def on_function(self, function: tree.function.Function, path: Path) -> None:
         self.graph.functions.append(self.next(), function)
@@ -102,46 +110,46 @@ class NodesVisitor:
 
 @dataclass(kw_only=True)
 class SyntaxGraph:
-    snippets: Bidirectional[tree.snippet.Snippet]
-    signatures: Bidirectional[tree.snippet.Signature]
-    slots: Bidirectional[tree.snippet.Slot]
-    binds: Bidirectional[tree.snippet.Bind]
-    labels: Bidirectional[tree.snippet.Label]
-    instructions: Bidirectional[tree.snippet.Instruction]
-    operands: Bidirectional[tree.snippet.Operand]
-    immediates: Bidirectional[tree.snippet.Immediate]
-    registers: Bidirectional[tree.snippet.Register]
-    references: Bidirectional[tree.snippet.Reference]
+    snippets: Bidirectional[tree.snippet.Snippet, None]
+    signatures: Bidirectional[tree.snippet.Signature, None]
+    slots: Bidirectional[tree.snippet.Slot, None]
+    binds: Bidirectional[tree.snippet.Bind, None]
+    labels: Bidirectional[tree.snippet.Label, None]
+    instructions: Bidirectional[tree.snippet.Instruction, None]
+    operands: Bidirectional[tree.snippet.Operand, None]
+    immediates: Bidirectional[tree.snippet.Immediate, None]
+    registers: Bidirectional[tree.snippet.Register, None]
+    references: Bidirectional[tree.snippet.Reference, tree.snippet.Snippet]
 
-    functions: Bidirectional[tree.function.Function]
-    statements: Bidirectional[tree.function.Statement]
-    literals: Bidirectional[tree.function.Literal]
-    expressions: Bidirectional[tree.function.Expression]
-    parameters: Bidirectional[tree.function.Parameter]
+    functions: Bidirectional[tree.function.Function, None]
+    statements: Bidirectional[tree.function.Statement, None]
+    literals: Bidirectional[tree.function.Literal, None]
+    expressions: Bidirectional[tree.function.Expression, None]
+    parameters: Bidirectional[tree.function.Parameter, None]
 
-    types: Bidirectional[tree.types.Type]
-    ranges: Bidirectional[tree.types.Range]
+    types: Bidirectional[tree.types.Type, None]
+    ranges: Bidirectional[tree.types.Range, None]
 
     @staticmethod
     def empty() -> SyntaxGraph:
         return SyntaxGraph(
-            snippets=Bidirectional[tree.snippet.Snippet].empty(),
-            signatures=Bidirectional[tree.snippet.Signature].empty(),
-            slots=Bidirectional[tree.snippet.Slot].empty(),
-            binds=Bidirectional[tree.snippet.Bind].empty(),
-            labels=Bidirectional[tree.snippet.Label].empty(),
-            instructions=Bidirectional[tree.snippet.Instruction].empty(),
-            operands=Bidirectional[tree.snippet.Operand].empty(),
-            immediates=Bidirectional[tree.snippet.Immediate].empty(),
-            registers=Bidirectional[tree.snippet.Register].empty(),
-            references=Bidirectional[tree.snippet.Reference].empty(),
-            functions=Bidirectional[tree.function.Function].empty(),
-            statements=Bidirectional[tree.function.Statement].empty(),
-            literals=Bidirectional[tree.function.Literal].empty(),
-            expressions=Bidirectional[tree.function.Expression].empty(),
-            parameters=Bidirectional[tree.function.Parameter].empty(),
-            types=Bidirectional[tree.types.Type].empty(),
-            ranges=Bidirectional[tree.types.Range].empty(),
+            snippets=Bidirectional[tree.snippet.Snippet, None].empty(),
+            signatures=Bidirectional[tree.snippet.Signature, None].empty(),
+            slots=Bidirectional[tree.snippet.Slot, None].empty(),
+            binds=Bidirectional[tree.snippet.Bind, None].empty(),
+            labels=Bidirectional[tree.snippet.Label, None].empty(),
+            instructions=Bidirectional[tree.snippet.Instruction, None].empty(),
+            operands=Bidirectional[tree.snippet.Operand, None].empty(),
+            immediates=Bidirectional[tree.snippet.Immediate, None].empty(),
+            registers=Bidirectional[tree.snippet.Register, None].empty(),
+            references=Bidirectional[tree.snippet.Reference, tree.snippet.Snippet].empty(),
+            functions=Bidirectional[tree.function.Function, None].empty(),
+            statements=Bidirectional[tree.function.Statement, None].empty(),
+            literals=Bidirectional[tree.function.Literal, None].empty(),
+            expressions=Bidirectional[tree.function.Expression, None].empty(),
+            parameters=Bidirectional[tree.function.Parameter, None].empty(),
+            types=Bidirectional[tree.types.Type, None].empty(),
+            ranges=Bidirectional[tree.types.Range, None].empty(),
         )
 
 

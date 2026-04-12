@@ -4,6 +4,7 @@ from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.references import Reference, ReferenceId
+from i13c.semantic.typing.entities.snippets import SnippetId
 
 
 def configure_references() -> GraphNode:
@@ -24,9 +25,15 @@ def build_references(
         # derive reference ID from globally unique node ID
         reference_id = ReferenceId(value=id.value)
 
+        # look up for the snippet context of this reference
+        snippet = graph.references.get_ctx(id)
+        nid = graph.snippets.get_by_node(snippet)
+        snippet_id = SnippetId(value=nid.value)
+
         references[reference_id] = Reference(
             ref=entry.ref,
             name=entry.name,
+            ctx=snippet_id,
         )
 
     return OneToOne[ReferenceId, Reference].instance(references)
