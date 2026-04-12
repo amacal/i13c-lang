@@ -5,6 +5,7 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.signatures import Signature, SignatureId
 from i13c.semantic.typing.entities.slots import SlotId
+from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.syntax.tree.snippet import Slot
 
 
@@ -26,6 +27,10 @@ def build_signatures(
         # derive signature ID from globally unique node ID
         signature_id = SignatureId(value=nid.value)
 
+        snippet = graph.signatures.get_ctx(nid)
+        nid = graph.snippets.get_by_node(snippet)
+        snippet_id = SnippetId(value=nid.value)
+
         # reverse mapping to slot ID
         def map_slot(slot: Slot) -> SlotId:
             nid = graph.slots.get_by_node(slot)
@@ -34,6 +39,7 @@ def build_signatures(
         signatures[signature_id] = Signature(
             ref=entry.ref,
             name=entry.name,
+            ctx=snippet_id,
             slots=[map_slot(slot) for slot in entry.slots],
         )
 

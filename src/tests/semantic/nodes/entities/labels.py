@@ -21,4 +21,8 @@ def can_detect_a_label():
     assert entities.labels.size() == 1
     _, value = entities.labels.peak()
 
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peak()
+
     assert value.name == b"me"
+    assert value.ctx == id

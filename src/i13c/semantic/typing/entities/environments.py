@@ -5,6 +5,7 @@ from typing import Union
 
 from i13c.semantic.typing.entities.labels import LabelId
 from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.syntax.source import Span
 
 EnvironmentKind = Kind["snippet"]
@@ -23,8 +24,9 @@ class EnvironmentId:
 class Environment:
     ref: Span
 
+    ctx: SnippetId
     kind: EnvironmentKind
     entries: List[EnvironmentTarget]
 
     def __str__(self) -> str:
-        return f"{self.kind}:{len(self.entries)}"
+        return f"{self.kind}:{len(self.entries)}@{self.ctx.identify(1)}"

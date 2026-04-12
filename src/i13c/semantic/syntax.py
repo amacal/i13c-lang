@@ -25,7 +25,9 @@ class Bidirectional[AstNode, AstCtx]:
     def empty() -> Bidirectional[AstNode, AstCtx]:
         return Bidirectional(node_to_id={}, id_to_node={}, id_to_ctx={})
 
-    def append(self, id: NodeId, node: AstNode, /, ctx: Optional[AstCtx] = None) -> None:
+    def append(
+        self, id: NodeId, node: AstNode, /, ctx: Optional[AstCtx] = None
+    ) -> None:
         self.node_to_id[node] = id
         self.id_to_node[id] = node
 
@@ -60,7 +62,9 @@ class NodesVisitor:
         self.graph.snippets.append(self.next(), snippet)
 
     def on_signature(self, signature: tree.snippet.Signature, path: Path) -> None:
-        self.graph.signatures.append(self.next(), signature)
+        self.graph.signatures.append(
+            self.next(), signature, ctx=path.find(tree.snippet.Snippet)
+        )
 
     def on_slot(self, slot: tree.snippet.Slot, path: Path) -> None:
         self.graph.slots.append(self.next(), slot)
@@ -69,7 +73,9 @@ class NodesVisitor:
         self.graph.binds.append(self.next(), bind)
 
     def on_label(self, label: tree.snippet.Label, path: Path) -> None:
-        self.graph.labels.append(self.next(), label)
+        self.graph.labels.append(
+            self.next(), label, ctx=path.find(tree.snippet.Snippet)
+        )
 
     def on_instruction(self, instruction: tree.snippet.Instruction, path: Path) -> None:
         self.graph.instructions.append(self.next(), instruction)
@@ -84,7 +90,9 @@ class NodesVisitor:
         self.graph.registers.append(self.next(), register)
 
     def on_reference(self, reference: tree.snippet.Reference, path: Path) -> None:
-        self.graph.references.append(self.next(), reference, ctx=path.find(tree.snippet.Snippet))
+        self.graph.references.append(
+            self.next(), reference, ctx=path.find(tree.snippet.Snippet)
+        )
 
     def on_function(self, function: tree.function.Function, path: Path) -> None:
         self.graph.functions.append(self.next(), function)
@@ -111,10 +119,10 @@ class NodesVisitor:
 @dataclass(kw_only=True)
 class SyntaxGraph:
     snippets: Bidirectional[tree.snippet.Snippet, None]
-    signatures: Bidirectional[tree.snippet.Signature, None]
+    signatures: Bidirectional[tree.snippet.Signature, tree.snippet.Snippet]
     slots: Bidirectional[tree.snippet.Slot, None]
     binds: Bidirectional[tree.snippet.Bind, None]
-    labels: Bidirectional[tree.snippet.Label, None]
+    labels: Bidirectional[tree.snippet.Label, tree.snippet.Snippet]
     instructions: Bidirectional[tree.snippet.Instruction, None]
     operands: Bidirectional[tree.snippet.Operand, None]
     immediates: Bidirectional[tree.snippet.Immediate, None]
@@ -134,15 +142,19 @@ class SyntaxGraph:
     def empty() -> SyntaxGraph:
         return SyntaxGraph(
             snippets=Bidirectional[tree.snippet.Snippet, None].empty(),
-            signatures=Bidirectional[tree.snippet.Signature, None].empty(),
+            signatures=Bidirectional[
+                tree.snippet.Signature, tree.snippet.Snippet
+            ].empty(),
             slots=Bidirectional[tree.snippet.Slot, None].empty(),
             binds=Bidirectional[tree.snippet.Bind, None].empty(),
-            labels=Bidirectional[tree.snippet.Label, None].empty(),
+            labels=Bidirectional[tree.snippet.Label, tree.snippet.Snippet].empty(),
             instructions=Bidirectional[tree.snippet.Instruction, None].empty(),
             operands=Bidirectional[tree.snippet.Operand, None].empty(),
             immediates=Bidirectional[tree.snippet.Immediate, None].empty(),
             registers=Bidirectional[tree.snippet.Register, None].empty(),
-            references=Bidirectional[tree.snippet.Reference, tree.snippet.Snippet].empty(),
+            references=Bidirectional[
+                tree.snippet.Reference, tree.snippet.Snippet
+            ].empty(),
             functions=Bidirectional[tree.function.Function, None].empty(),
             statements=Bidirectional[tree.function.Statement, None].empty(),
             literals=Bidirectional[tree.function.Literal, None].empty(),

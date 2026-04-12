@@ -19,4 +19,4 @@ class Reference:
     ctx: SnippetId
 
     def __str__(self) -> str:
-        return f"{self.name.decode()}"
+        return f"{self.name.decode()}@{self.ctx.identify(1)}"

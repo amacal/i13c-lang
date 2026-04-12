@@ -11,7 +11,11 @@ def can_detect_an_environment_from_an_empty_snippet():
     assert entities.environments.size() == 1
     _, value = entities.environments.peak()
 
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peak()
+
     assert value.kind == "snippet"
+    assert value.ctx == id
     assert len(value.entries) == 1
 
 
@@ -25,7 +29,11 @@ def can_detect_an_environment_from_a_snippet_having_a_slot():
     assert entities.environments.size() == 1
     _, value = entities.environments.peak()
 
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peak()
+
     assert value.kind == "snippet"
+    assert value.ctx == id
     assert len(value.entries) == 1
 
 
@@ -39,7 +47,11 @@ def can_detect_an_environment_from_a_snippet_having_labels():
     assert entities.environments.size() == 1
     _, value = entities.environments.peak()
 
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peak()
+
     assert value.kind == "snippet"
+    assert value.ctx == id
     assert len(value.entries) == 2
 
 
@@ -53,5 +65,9 @@ def can_detect_an_environment_from_a_snippet_having_more_labels():
     assert entities.environments.size() == 1
     _, value = entities.environments.peak()
 
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peak()
+
     assert value.kind == "snippet"
+    assert value.ctx == id
     assert len(value.entries) == 3
