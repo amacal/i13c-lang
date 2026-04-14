@@ -8,7 +8,7 @@ from i13c.semantic.typing.entities.operand import Operand, OperandId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
-from i13c.semantic.typing.resolutions.operand import (
+from i13c.semantic.typing.resolutions.operands import (
     OperandAcceptance,
     OperandRejection,
     OperandResolution,

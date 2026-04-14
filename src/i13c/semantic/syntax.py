@@ -94,6 +94,9 @@ class NodesVisitor:
             self.next(), reference, ctx=path.find(tree.snippet.Snippet)
         )
 
+    def on_address(self, address: tree.snippet.Address, path: Path) -> None:
+        self.graph.addresses.append(self.next(), address)
+
     def on_function(self, function: tree.function.Function, path: Path) -> None:
         self.graph.functions.append(self.next(), function)
 
@@ -128,6 +131,7 @@ class SyntaxGraph:
     immediates: Bidirectional[tree.snippet.Immediate, None]
     registers: Bidirectional[tree.snippet.Register, None]
     references: Bidirectional[tree.snippet.Reference, tree.snippet.Snippet]
+    addresses: Bidirectional[tree.snippet.Address, None]
 
     functions: Bidirectional[tree.function.Function, None]
     statements: Bidirectional[tree.function.Statement, None]
@@ -155,6 +159,7 @@ class SyntaxGraph:
             references=Bidirectional[
                 tree.snippet.Reference, tree.snippet.Snippet
             ].empty(),
+            addresses=Bidirectional[tree.snippet.Address, None].empty(),
             functions=Bidirectional[tree.function.Function, None].empty(),
             statements=Bidirectional[tree.function.Statement, None].empty(),
             literals=Bidirectional[tree.function.Literal, None].empty(),

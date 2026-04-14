@@ -17,7 +17,7 @@ from i13c.semantic.typing.resolutions.binds import BindResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
 from i13c.semantic.typing.resolutions.labels import LabelResolution
-from i13c.semantic.typing.resolutions.operand import OperandResolution
+from i13c.semantic.typing.resolutions.operands import OperandResolution
 from i13c.semantic.typing.resolutions.ranges import RangeResolution
 from i13c.semantic.typing.resolutions.references import ReferenceResolution
 from i13c.semantic.typing.resolutions.registers import RegisterResolution

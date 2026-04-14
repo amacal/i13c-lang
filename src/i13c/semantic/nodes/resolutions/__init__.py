@@ -11,7 +11,7 @@ from i13c.semantic.nodes.resolutions.instructions import (
     configure_resolution_by_instruction,
 )
 from i13c.semantic.nodes.resolutions.labels import configure_label_resolution
-from i13c.semantic.nodes.resolutions.operand import configure_operand_resolution
+from i13c.semantic.nodes.resolutions.operands import configure_operand_resolution
 from i13c.semantic.nodes.resolutions.ranges import configure_range_resolution
 from i13c.semantic.nodes.resolutions.references import configure_reference_resolution
 from i13c.semantic.nodes.resolutions.registers import configure_register_resolution
