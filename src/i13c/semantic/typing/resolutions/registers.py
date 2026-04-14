@@ -10,7 +10,7 @@ RegisterRejectionReason = Kind[
 ]
 
 RegisterWidth = Kind[8, 16, 32, 64]
-RegisterKind = Kind["low", "high", "8bit", "16bit", "32bit", "64bit"]
+RegisterKind = Kind["low", "high", "8bit", "16bit", "32bit", "64bit", "rip"]
 
 
 @dataclass(kw_only=True)

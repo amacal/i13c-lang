@@ -11,6 +11,7 @@ from i13c.semantic.nodes.resolutions.instructions import (
     configure_resolution_by_instruction,
 )
 from i13c.semantic.nodes.resolutions.labels import configure_label_resolution
+from i13c.semantic.nodes.resolutions.operand import configure_operand_resolution
 from i13c.semantic.nodes.resolutions.ranges import configure_range_resolution
 from i13c.semantic.nodes.resolutions.references import configure_reference_resolution
 from i13c.semantic.nodes.resolutions.registers import configure_register_resolution
@@ -28,6 +29,7 @@ def configure_resolutions() -> GraphGroup:
             configure_environment_resolution(),
             configure_immediate_resolution(),
             configure_label_resolution(),
+            configure_operand_resolution(),
             configure_range_resolution(),
             configure_reference_resolution(),
             configure_register_resolution(),
@@ -47,6 +49,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         environments=resolutions.get("resolutions/environments"),
         immediates=resolutions.get("resolutions/immediates"),
         labels=resolutions.get("resolutions/labels"),
+        operands=resolutions.get("resolutions/operands"),
         ranges=resolutions.get("resolutions/ranges"),
         references=resolutions.get("resolutions/references"),
         registers=resolutions.get("resolutions/registers"),

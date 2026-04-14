@@ -54,7 +54,7 @@ def can_accept_a_reference_handled_by_a_label():
 def can_reject_unresolved_reference():
     source, resolutions = prepare_resolutions(
         """
-            asm main(x@rax: u8, y@rbx: u8) { mox rax, @z; }
+            asm main(x@rax: u8, y@rbx: u8) { mov rax, @z; }
         """
     )
 
@@ -74,7 +74,7 @@ def can_reject_unresolved_reference():
 def can_detect_a_broken_range_rule_e3020():
     _, rules = prepare_rules(
         """
-            asm main(x@rax: u8, y@rbx: u8) { mox rax, @z; }
+            asm main(x@rax: u8, y@rbx: u8) { mov rax, @z; }
         """
     )
 

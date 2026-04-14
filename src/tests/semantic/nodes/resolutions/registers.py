@@ -139,6 +139,29 @@ def can_accept_a_high_register():
     assert source.extract(resolution.accepted[0].ref) == b"ah"
 
 
+def can_accept_a_rip_register():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main() { mox rip, 0x12; }
+        """
+    )
+
+    assert resolutions.registers is not None
+    assert resolutions.registers.size() == 1
+    id, resolution = resolutions.registers.peak()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 0
+
+    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].width == 64
+
+    assert resolution.accepted[0].name == b"rip"
+    assert resolution.accepted[0].kind == "rip"
+
+    assert source.extract(resolution.accepted[0].ref) == b"rip"
+
+
 def can_reject_an_unknown_register():
     source, resolutions = prepare_resolutions(
         """
