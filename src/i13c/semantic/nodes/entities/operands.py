@@ -31,7 +31,7 @@ def build_operands(
             case tree.snippet.Register() as reg:
                 target = Operand.register(operand.ref, reg.name)
             case tree.snippet.Immediate() as imm:
-                target = Operand.immediate(operand.ref, imm.value.digits)
+                target = Operand.immediate(operand.ref, imm.data.digits)
             case tree.snippet.Reference() as ref:
                 target = Operand.reference(operand.ref, ref.name)
             case tree.snippet.Address() as addr:
@@ -39,7 +39,7 @@ def build_operands(
                     operand.ref,
                     Register.from_name(addr.base.name),
                     Offset.optional(
-                        (addr.offset.kind, addr.offset.value.digits)
+                        (addr.offset.kind, addr.offset.value.data.digits)
                         if addr.offset is not None
                         else None
                     ),

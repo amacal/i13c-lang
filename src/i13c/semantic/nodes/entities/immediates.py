@@ -27,7 +27,7 @@ def build_immediates(
 
         immediates[immediate_id] = Immediate(
             ref=entry.ref,
-            value=Hex.derive(entry.value.digits),
+            value=Hex.derive(entry.data.digits),
         )
 
     return OneToOne[ImmediateId, Immediate].instance(immediates)

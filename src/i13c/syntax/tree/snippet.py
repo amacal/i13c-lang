@@ -40,7 +40,7 @@ class Register:
 @dataclass(kw_only=True, eq=False)
 class Immediate:
     ref: Span
-    value: literals.Hex
+    data: literals.Hex
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_operand(self, path)
@@ -63,7 +63,10 @@ OffsetKind = Kind["forward", "backward"]
 @dataclass(kw_only=True, eq=False)
 class Offset:
     kind: OffsetKind
-    value: literals.Hex
+    value: Immediate
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_immediate(self.value, path)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -75,6 +78,12 @@ class Address:
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_operand(self, path)
         visitor.on_address(self, path)
+
+        with path.push(self) as node:
+            visitor.on_register(self.base, node)
+
+            if self.offset is not None:
+                self.offset.accept(visitor, node)
 
 
 Operand = Union[Register, Immediate, Reference, Address]

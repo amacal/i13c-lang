@@ -35,9 +35,8 @@ def can_parse_address_with_address_operand_with_positive_offset():
     assert operand1.base.name == b"rax"
     assert isinstance(operand1.offset, tree.snippet.Offset)
 
-    assert operand1.offset.value.digits.hex() == "04"
+    assert operand1.offset.value.data.digits.hex() == "04"
     assert operand1.offset.kind == "forward"
-
 
 
 def can_parse_address_with_address_operand_with_negative_offset():
@@ -56,5 +55,5 @@ def can_parse_address_with_address_operand_with_negative_offset():
     assert operand1.base.name == b"rax"
     assert isinstance(operand1.offset, tree.snippet.Offset)
 
-    assert operand1.offset.value.digits.hex() == "04"
+    assert operand1.offset.value.data.digits.hex() == "04"
     assert operand1.offset.kind == "backward"
