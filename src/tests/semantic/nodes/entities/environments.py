@@ -22,7 +22,7 @@ def can_detect_an_environment_from_an_empty_snippet():
 def can_detect_an_environment_from_a_snippet_having_a_slot():
     entities = prepare_entities(
         """
-            asm main(v@rax: u8) { mox rax, rbx; }
+            asm main(v@rax: u8) { mov rax, rbx; }
         """
     )
 
@@ -40,7 +40,7 @@ def can_detect_an_environment_from_a_snippet_having_a_slot():
 def can_detect_an_environment_from_a_snippet_having_labels():
     entities = prepare_entities(
         """
-            asm main() { mox rax, rbx; .me: nop; }
+            asm main() { mov rax, rbx; .me: nop; }
         """
     )
 
@@ -58,7 +58,7 @@ def can_detect_an_environment_from_a_snippet_having_labels():
 def can_detect_an_environment_from_a_snippet_having_more_labels():
     entities = prepare_entities(
         """
-            asm main() { mox rax, rbx; .me: nop; .me: nop; }
+            asm main() { mov rax, rbx; .me: nop; .me: nop; }
         """
     )
 

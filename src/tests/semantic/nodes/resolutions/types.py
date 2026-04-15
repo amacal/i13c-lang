@@ -4,7 +4,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 def can_accept_u8_type_usage():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u8) { mox rax, rbx; }
+            asm main(v@rax: u8) { mov rax, rbx; }
         """
     )
 
@@ -27,7 +27,7 @@ def can_accept_u8_type_usage():
 def can_accept_u16_with_range():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u16[0x0001..0x0001]) { mox rax, rbx; }
+            asm main(v@rax: u16[0x0001..0x0001]) { mov rax, rbx; }
         """
     )
 
@@ -50,7 +50,7 @@ def can_accept_u16_with_range():
 def can_reject_an_unknown_type():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: s17) { mox rax, rbx; }
+            asm main(v@rax: s17) { mov rax, rbx; }
         """
     )
 
@@ -68,7 +68,7 @@ def can_reject_an_unknown_type():
 def can_reject_a_ranged_type_with_incompatible_widths():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u8[0x0001..0x0100]) { mox rax, rbx; }
+            asm main(v@rax: u8[0x0001..0x0100]) { mov rax, rbx; }
         """
     )
 
@@ -86,7 +86,7 @@ def can_reject_a_ranged_type_with_incompatible_widths():
 def can_detect_a_broken_range_rule_e3009():
     _, rules = prepare_rules(
         """
-            asm main(v@rax: s17) { mox rax, rbx; }
+            asm main(v@rax: s17) { mov rax, rbx; }
         """
     )
 

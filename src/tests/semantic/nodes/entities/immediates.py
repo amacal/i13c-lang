@@ -14,7 +14,7 @@ def can_do_nothing_without_any_immediate():
 def can_detect_an_immediate_as_the_operand():
     entities = prepare_entities(
         """
-            asm main() { mox rax, 0x1234; }
+            asm main() { mov rax, 0x1234; }
         """
     )
 

@@ -68,8 +68,6 @@ def build_reference_resolution(
         # find the environment of this reference
         environment = environments.get(entry.ctx)
 
-        print(environment.entries)
-
         if entry.name not in environment.entries:
             resolution.rejected.append(
                 ReferenceRejection(

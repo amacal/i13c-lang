@@ -4,7 +4,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 def can_accept_multi_value_range():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u8[0x01..0x02]) { mox rax, rbx; }
+            asm main(v@rax: u8[0x01..0x02]) { mov rax, rbx; }
         """
     )
 
@@ -30,7 +30,7 @@ def can_accept_multi_value_range():
 def can_accept_single_value_range():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u16[0x0001..0x0001]) { mox rax, rbx; }
+            asm main(v@rax: u16[0x0001..0x0001]) { mov rax, rbx; }
         """
     )
 
@@ -56,7 +56,7 @@ def can_accept_single_value_range():
 def can_reject_a_range_with_lower_greater_than_upper():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u8[0x02..0x01]) { mox rax, rbx; }
+            asm main(v@rax: u8[0x02..0x01]) { mov rax, rbx; }
         """
     )
 
@@ -74,7 +74,7 @@ def can_reject_a_range_with_lower_greater_than_upper():
 def can_reject_a_range_with_inconsistent_widths():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u8[0x01..0x0100]) { mox rax, rbx; }
+            asm main(v@rax: u8[0x01..0x0100]) { mov rax, rbx; }
         """
     )
 
@@ -92,7 +92,7 @@ def can_reject_a_range_with_inconsistent_widths():
 def can_detect_a_broken_range_rule_e3001():
     _, rules = prepare_rules(
         """
-            asm main(v@rax: u8[0x02..0x01]) { mox rax, rbx; }
+            asm main(v@rax: u8[0x02..0x01]) { mov rax, rbx; }
         """
     )
 

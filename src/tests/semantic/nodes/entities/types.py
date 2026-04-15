@@ -14,7 +14,7 @@ def can_do_nothing_without_any_type():
 def can_detect_a_type():
     entities = prepare_entities(
         """
-            asm main(v@rax: u16) { mox rax, rbx; }
+            asm main(v@rax: u16) { mov rax, rbx; }
         """
     )
 
@@ -28,7 +28,7 @@ def can_detect_a_type():
 def can_detect_a_type_with_a_range():
     entities = prepare_entities(
         """
-            asm main(v@rax: u8[0x01..0x02]) { mox rax, rbx; }
+            asm main(v@rax: u8[0x01..0x02]) { mov rax, rbx; }
         """
     )
 

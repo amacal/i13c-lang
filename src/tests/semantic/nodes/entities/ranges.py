@@ -14,7 +14,7 @@ def can_do_nothing_without_any_range():
 def can_detect_a_range():
     entities = prepare_entities(
         """
-            asm main(v@rax: u8[0x01..0x02]) { mox rax, rbx; }
+            asm main(v@rax: u8[0x01..0x02]) { mov rax, rbx; }
         """
     )
 

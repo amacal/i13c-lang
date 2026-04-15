@@ -4,7 +4,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 def can_accept_64bit_register():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox rax, 0x1234; }
+            asm main() { mov rax, 0x1234; }
         """
     )
 
@@ -27,7 +27,7 @@ def can_accept_64bit_register():
 def can_accept_32bit_register():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox eax, 0x1234; }
+            asm main() { mov eax, 0x1234; }
         """
     )
 
@@ -50,7 +50,7 @@ def can_accept_32bit_register():
 def can_accept_16bit_register():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox ax, 0x1234; }
+            asm main() { mov ax, 0x1234; }
         """
     )
 
@@ -73,7 +73,7 @@ def can_accept_16bit_register():
 def can_accept_8bit_register():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox r8b, 0x12; }
+            asm main() { mov r8b, 0x12; }
         """
     )
 
@@ -96,7 +96,7 @@ def can_accept_8bit_register():
 def can_accept_a_low_register():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox al, 0x12; }
+            asm main() { mov al, 0x12; }
         """
     )
 
@@ -119,7 +119,7 @@ def can_accept_a_low_register():
 def can_accept_a_high_register():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox ah, 0x12; }
+            asm main() { mov ah, 0x12; }
         """
     )
 
@@ -142,7 +142,7 @@ def can_accept_a_high_register():
 def can_accept_a_rip_register():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox rip, 0x12; }
+            asm main() { mov rip, 0x12; }
         """
     )
 
@@ -165,7 +165,7 @@ def can_accept_a_rip_register():
 def can_reject_an_unknown_register():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox sip, 0x1234; }
+            asm main() { mov sip, 0x1234; }
         """
     )
 
@@ -183,7 +183,7 @@ def can_reject_an_unknown_register():
 def can_detect_a_broken_range_rule_e3017():
     _, rules = prepare_rules(
         """
-            asm main() { mox sip, 0x1234; }
+            asm main() { mov sip, 0x1234; }
         """
     )
 

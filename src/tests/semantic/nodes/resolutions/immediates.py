@@ -4,7 +4,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions
 def can_accept_valid_immediate():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox rax, 0x1234; }
+            asm main() { mov rax, 0x1234; }
         """
     )
 

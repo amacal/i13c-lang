@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.environments import EnvironmentId
 from i13c.semantic.typing.entities.immediates import ImmediateId
@@ -13,6 +14,7 @@ from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.slots import SlotId
 from i13c.semantic.typing.entities.types import TypeId
+from i13c.semantic.typing.resolutions.addresses import AddressResolution
 from i13c.semantic.typing.resolutions.binds import BindResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
@@ -28,6 +30,7 @@ from i13c.semantic.typing.resolutions.types import TypeResolution
 
 @dataclass
 class ResolutionNodes:
+    addresses: Optional[OneToOne[AddressId, AddressResolution]]
     binds: Optional[OneToOne[BindId, BindResolution]]
     environments: Optional[OneToOne[EnvironmentId, EnvironmentResolution]]
     immediates: Optional[OneToOne[ImmediateId, ImmediateResolution]]

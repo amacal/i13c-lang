@@ -4,7 +4,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 def can_accept_register_bind():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u8) { mox rax, rbx; }
+            asm main(v@rax: u8) { mov rax, rbx; }
         """
     )
 
@@ -25,7 +25,7 @@ def can_accept_register_bind():
 def can_accept_immediate_bind():
     _, resolutions = prepare_resolutions(
         """
-            asm main(v@imm: u16) { mox rax, rbx; }
+            asm main(v@imm: u16) { mov rax, rbx; }
         """
     )
 
@@ -44,7 +44,7 @@ def can_accept_immediate_bind():
 def can_reject_an_unknown_register_bind():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@vax: u16) { mox rax, rbx; }
+            asm main(v@vax: u16) { mov rax, rbx; }
         """
     )
 
@@ -62,7 +62,7 @@ def can_reject_an_unknown_register_bind():
 def can_detect_a_broken_range_rule_e3013():
     _, rules = prepare_rules(
         """
-            asm main(v@vax: u16) { mox rax, rbx; }
+            asm main(v@vax: u16) { mov rax, rbx; }
         """
     )
 

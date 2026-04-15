@@ -14,7 +14,7 @@ def can_do_nothing_without_any_slot():
 def can_detect_a_slot():
     entities = prepare_entities(
         """
-            asm main(v@rax: u16) { mox rax, rbx; }
+            asm main(v@rax: u16) { mov rax, rbx; }
         """
     )
 

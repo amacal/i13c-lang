@@ -43,6 +43,9 @@ class Hex:
     def min(left: Hex, right: Hex) -> Hex:
         return left if Hex.lesser(left.data, right.data) else right
 
+    def highest_bit(self) -> bool:
+        return self.data[0] & 0x80 != 0
+
     def __str__(self) -> str:
         return f"0x{self.data.hex()}"
 

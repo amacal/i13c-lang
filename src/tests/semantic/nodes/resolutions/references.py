@@ -6,7 +6,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 def can_accept_a_reference_handled_by_a_slot():
     source, resolutions = prepare_resolutions(
         """
-            asm main(x@rax: u64) { mox rax, @x; }
+            asm main(x@rax: u64) { mov rax, @x; }
         """
     )
 
@@ -31,7 +31,7 @@ def can_accept_a_reference_handled_by_a_slot():
 def can_accept_a_reference_handled_by_a_label():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox rax, rbx; .me: call @me; }
+            asm main() { mov rax, rbx; .me: call @me; }
         """
     )
 

@@ -25,7 +25,7 @@ def can_accept_a_snippet_environment_without_entries():
 def can_accept_a_snippet_environment_with_a_label():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox rax, rbx; .me: nop; }
+            asm main() { mov rax, rbx; .me: nop; }
         """
     )
 
@@ -46,7 +46,7 @@ def can_accept_a_snippet_environment_with_a_label():
 def can_accept_a_snippet_environment_with_a_slot():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u8) { mox rax, rbx; }
+            asm main(v@rax: u8) { mov rax, rbx; }
         """
     )
 
@@ -67,7 +67,7 @@ def can_accept_a_snippet_environment_with_a_slot():
 def can_reject_duplicate_label_name_usage():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox rax, rbx; .me: nop; .me: nop; }
+            asm main() { mov rax, rbx; .me: nop; .me: nop; }
         """
     )
 
@@ -85,7 +85,7 @@ def can_reject_duplicate_label_name_usage():
 def can_reject_duplicate_slot_name_usage():
     source, resolutions = prepare_resolutions(
         """
-            asm main(me@rax: u8) { mox rax, rbx; .me: nop; }
+            asm main(me@rax: u8) { mov rax, rbx; .me: nop; }
         """
     )
 
@@ -103,7 +103,7 @@ def can_reject_duplicate_slot_name_usage():
 def can_detect_a_broken_range_rule_e3019():
     _, rules = prepare_rules(
         """
-            asm main() { mox rax, rbx; .me: nop; .me: nop; }
+            asm main() { mov rax, rbx; .me: nop; .me: nop; }
         """
     )
 

@@ -14,7 +14,7 @@ def can_do_nothing_without_any_label():
 def can_detect_a_label():
     entities = prepare_entities(
         """
-            asm main() { mox rax, rbx; .me: nop; }
+            asm main() { mov rax, rbx; .me: nop; }
         """
     )
 

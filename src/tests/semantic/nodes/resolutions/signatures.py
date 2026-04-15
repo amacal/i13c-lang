@@ -4,7 +4,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 def can_accept_a_snippet_signature_without_slots():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox rax, rbx; }
+            asm main() { mov rax, rbx; }
         """
     )
 
@@ -25,7 +25,7 @@ def can_accept_a_snippet_signature_without_slots():
 def can_accept_a_snippet_signature_with_a_slot():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u16[0x0001..0x0001]) { mox rax, rbx; }
+            asm main(v@rax: u16[0x0001..0x0001]) { mov rax, rbx; }
         """
     )
 
@@ -54,7 +54,7 @@ def can_accept_a_snippet_signature_with_a_slot():
 def can_reject_duplicate_slot_name_usage():
     source, resolutions = prepare_resolutions(
         """
-            asm main(x@rax: u8, x@rbx: u8) { mox rax, rbx; }
+            asm main(x@rax: u8, x@rbx: u8) { mov rax, rbx; }
         """
     )
 
@@ -72,7 +72,7 @@ def can_reject_duplicate_slot_name_usage():
 def can_reject_duplicated_slot_bind_usage():
     source, resolutions = prepare_resolutions(
         """
-            asm main(x@rax: u8, y@rax: u8) { mox rax, rbx; }
+            asm main(x@rax: u8, y@rax: u8) { mov rax, rbx; }
         """
     )
 
@@ -90,7 +90,7 @@ def can_reject_duplicated_slot_bind_usage():
 def can_detect_a_broken_range_rule_e3003():
     _, rules = prepare_rules(
         """
-            asm main(x@rax: u8, x@rbx: u8) { mox rax, rbx; }
+            asm main(x@rax: u8, x@rbx: u8) { mov rax, rbx; }
         """
     )
 
@@ -100,7 +100,7 @@ def can_detect_a_broken_range_rule_e3003():
 def can_detect_a_broken_range_rule_e3015():
     _, rules = prepare_rules(
         """
-            asm main(x@rax: u8, y@rax: u8) { mox rax, rbx; }
+            asm main(x@rax: u8, y@rax: u8) { mov rax, rbx; }
         """
     )
 

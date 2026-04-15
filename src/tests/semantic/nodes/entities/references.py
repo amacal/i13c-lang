@@ -14,7 +14,7 @@ def can_do_nothing_without_any_reference():
 def can_detect_a_reference():
     entities = prepare_entities(
         """
-            asm main() { mox rax, @me; }
+            asm main() { mov rax, @me; }
         """
     )
 

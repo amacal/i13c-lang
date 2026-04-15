@@ -4,7 +4,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions
 def can_accept_a_label():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { mox rax, rbx; .me: nop; }
+            asm main() { mov rax, rbx; .me: nop; }
         """
     )
 

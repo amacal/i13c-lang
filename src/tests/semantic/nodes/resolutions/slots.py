@@ -4,7 +4,7 @@ from tests.semantic.nodes.resolutions import prepare_resolutions
 def can_accept_valid_slot():
     source, resolutions = prepare_resolutions(
         """
-            asm main(v@rax: u8[0x01..0x02]) { mox rax, rbx; }
+            asm main(v@rax: u8[0x01..0x02]) { mov rax, rbx; }
         """
     )
 

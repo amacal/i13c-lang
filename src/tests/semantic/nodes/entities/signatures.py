@@ -4,7 +4,7 @@ from tests.semantic.nodes.entities import prepare_entities
 def can_detect_a_snippet_signature():
     entities = prepare_entities(
         """
-            asm main(v@rax: u16) { mox rax, rbx; }
+            asm main(v@rax: u16) { mov rax, rbx; }
         """
     )
 
