@@ -1,3 +1,4 @@
+from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
@@ -77,6 +78,32 @@ def can_accept_an_operand_from_a_reference():
     assert isinstance(resolution.accepted[0].target.target, SlotAcceptance)
 
     assert source.extract(resolution.accepted[0].ref) == b"@x"
+
+
+def can_accept_an_operand_from_an_address():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main() { call [rax]; }
+        """
+    )
+
+    assert resolutions.operands is not None
+    assert resolutions.operands.size() == 1
+    id, resolution = resolutions.operands.peak()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 0
+
+    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].kind == "address"
+
+    assert isinstance(resolution.accepted[0].target, AddressAcceptance)
+    assert resolution.accepted[0].target.base.kind == "64bit"
+    assert resolution.accepted[0].target.base.name == b"rax"
+    assert resolution.accepted[0].target.base.width == 64
+    assert resolution.accepted[0].target.offset is None
+
+    assert source.extract(resolution.accepted[0].ref) == b"[rax]"
 
 
 def can_reject_rip_register():

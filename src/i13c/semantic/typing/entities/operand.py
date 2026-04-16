@@ -2,13 +2,14 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 from typing import Union
 
+from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.immediates import ImmediateId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.syntax.source import Span
 
-OperandKind = Kind["register", "immediate", "reference"]
-OperandTarget = Union[RegisterId, ImmediateId, ReferenceId]
+OperandKind = Kind["register", "immediate", "reference", "address"]
+OperandTarget = Union[RegisterId, ImmediateId, ReferenceId, AddressId]
 
 
 @dataclass(kw_only=True, frozen=True)

@@ -3,10 +3,12 @@ from typing import Any, Dict, List
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.immediates import ImmediateId
 from i13c.semantic.typing.entities.operand import Operand, OperandId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.operands import (
     OperandAcceptance,
@@ -28,6 +30,7 @@ def configure_operand_resolution() -> GraphGroup:
                 ("registers", "resolutions/registers/accepted"),
                 ("immediates", "resolutions/immediates/accepted"),
                 ("references", "resolutions/references/accepted"),
+                ("addresses", "resolutions/addresses/accepted"),
             }
         ),
     )
@@ -64,6 +67,7 @@ def build_operand_resolution(
     registers: OneToOne[RegisterId, RegisterAcceptance],
     immediates: OneToOne[ImmediateId, ImmediateAcceptance],
     references: OneToOne[ReferenceId, ReferenceAcceptance],
+    addresses: OneToOne[AddressId, AddressAcceptance],
 ) -> OneToOne[OperandId, OperandResolution]:
     resolutions: Dict[OperandId, OperandResolution] = {}
 
@@ -90,9 +94,13 @@ def build_operand_resolution(
             assert isinstance(entry.target, ImmediateId)
             target = immediates.get(entry.target)
 
-        else:
+        elif entry.kind == "reference":
             assert isinstance(entry.target, ReferenceId)
             target = references.get(entry.target)
+
+        else:
+            assert isinstance(entry.target, AddressId)
+            target = addresses.get(entry.target)
 
         if not resolution.rejected:
             resolution.accepted.append(
