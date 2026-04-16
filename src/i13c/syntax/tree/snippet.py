@@ -33,7 +33,9 @@ class Register:
     name: bytes
 
     def accept(self, visitor: Visitor, path: Path) -> None:
-        visitor.on_operand(self, path)
+        if not path.contains(Address):
+            visitor.on_operand(self, path)
+
         visitor.on_register(self, path)
 
 
@@ -53,7 +55,9 @@ class Reference:
     name: bytes
 
     def accept(self, visitor: Visitor, path: Path) -> None:
-        visitor.on_operand(self, path)
+        if not path.contains(Address):
+            visitor.on_operand(self, path)
+
         visitor.on_reference(self, path)
 
 
@@ -72,7 +76,7 @@ class Offset:
 @dataclass(kw_only=True, eq=False)
 class Address:
     ref: Span
-    base: Register
+    base: Union[Register, Reference]
     offset: Optional[Offset]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
@@ -80,7 +84,7 @@ class Address:
         visitor.on_address(self, path)
 
         with path.push(self) as node:
-            visitor.on_register(self.base, node)
+            self.base.accept(visitor, node)
 
             if self.offset is not None:
                 self.offset.accept(visitor, node)

@@ -98,12 +98,45 @@ def can_accept_an_operand_from_an_address():
     assert resolution.accepted[0].kind == "address"
 
     assert isinstance(resolution.accepted[0].target, AddressAcceptance)
+    assert isinstance(resolution.accepted[0].target.base, RegisterAcceptance)
+
     assert resolution.accepted[0].target.base.kind == "64bit"
     assert resolution.accepted[0].target.base.name == b"rax"
     assert resolution.accepted[0].target.base.width == 64
     assert resolution.accepted[0].target.offset is None
 
     assert source.extract(resolution.accepted[0].ref) == b"[rax]"
+
+
+def can_accept_an_operand_from_an_address_using_a_reference_as_base():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main(x@rax: u16) { call [@x + 0x0f]; }
+        """
+    )
+
+    assert resolutions.operands is not None
+    assert resolutions.operands.size() == 1
+    id, resolution = resolutions.operands.peak()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 0
+
+    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].kind == "address"
+
+    assert isinstance(resolution.accepted[0].target, AddressAcceptance)
+    assert isinstance(resolution.accepted[0].target.base, ReferenceAcceptance)
+
+    assert resolution.accepted[0].target.offset is not None
+    assert resolution.accepted[0].target.base.name == b"x"
+
+    assert isinstance(resolution.accepted[0].target.base.target, SlotAcceptance)
+    assert resolution.accepted[0].target.base.target.name == b"x"
+    assert resolution.accepted[0].target.base.target.bind.mode == "register"
+    assert resolution.accepted[0].target.base.target.bind.target == b"rax"
+
+    assert source.extract(resolution.accepted[0].ref) == b"[@x + 0x0f]"
 
 
 def can_reject_rip_register():

@@ -24,6 +24,14 @@ class Path:
         finally:
             self._count -= 1
 
+    def contains(self, type: Type[PathNode]) -> bool:
+        for i in range(self._count - 1, -1, -1):
+            node = self._nodes[i]
+            if isinstance(node, type):
+                return True
+
+        return False
+
     def find(self, type: Type[PathNode]) -> PathNode:
         for i in range(self._count - 1, -1, -1):
             node = self._nodes[i]

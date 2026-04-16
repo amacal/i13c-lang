@@ -5,7 +5,9 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.addresses import Address, AddressId, Offset
 from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.syntax import tree
 
 
 def configure_addresses() -> GraphNode:
@@ -27,8 +29,12 @@ def build_addresses(
         address_id = AddressId(value=nid.value)
 
         # reverse mapping to base register ID
-        base = graph.registers.get_by_node(entry.base)
-        base_id = RegisterId(value=base.value)
+        if isinstance(entry.base, tree.snippet.Register):
+            base = graph.registers.get_by_node(entry.base)
+            base_id = RegisterId(value=base.value)
+        else:
+            base = graph.references.get_by_node(entry.base)
+            base_id = ReferenceId(value=base.value)
 
         # reverse mapping to immediate ID
         if entry.offset is not None:

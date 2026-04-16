@@ -1,3 +1,4 @@
+from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
@@ -16,10 +17,12 @@ def can_accept_an_offsetless_address():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].base.kind == "64bit"
     assert resolution.accepted[0].base.name == b"rax"
-    assert resolution.accepted[0].base.width == 64
     assert resolution.accepted[0].offset is None
+
+    assert isinstance(resolution.accepted[0].base, RegisterAcceptance)
+    assert resolution.accepted[0].base.kind == "64bit"
+    assert resolution.accepted[0].base.width == 64
 
     assert source.extract(resolution.accepted[0].ref) == b"[rax]"
 
@@ -39,15 +42,17 @@ def can_accept_a_forward_address():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].base.kind == "64bit"
     assert resolution.accepted[0].base.name == b"rax"
-    assert resolution.accepted[0].base.width == 64
 
     assert resolution.accepted[0].offset is not None
     assert resolution.accepted[0].offset.kind == "forward"
 
     assert resolution.accepted[0].offset.value.value.width == 16
     assert resolution.accepted[0].offset.value.value.data.hex() == "0300"
+
+    assert isinstance(resolution.accepted[0].base, RegisterAcceptance)
+    assert resolution.accepted[0].base.kind == "64bit"
+    assert resolution.accepted[0].base.width == 64
 
     assert source.extract(resolution.accepted[0].ref) == b"[rax + 0x0300]"
 
@@ -67,8 +72,10 @@ def can_accept_a_backward_address():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].base.kind == "64bit"
     assert resolution.accepted[0].base.name == b"rax"
+
+    assert isinstance(resolution.accepted[0].base, RegisterAcceptance)
+    assert resolution.accepted[0].base.kind == "64bit"
     assert resolution.accepted[0].base.width == 64
 
     assert resolution.accepted[0].offset is not None

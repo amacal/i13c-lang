@@ -5,6 +5,7 @@ from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import Address, AddressId
 from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.resolutions.addresses import (
     AddressAcceptance,
@@ -13,6 +14,7 @@ from i13c.semantic.typing.resolutions.addresses import (
     OffsetAcceptance,
 )
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
+from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 
 
@@ -26,6 +28,7 @@ def configure_address_resolution() -> GraphGroup:
                 ("addresses", "entities/addresses"),
                 ("registers", "resolutions/registers/accepted"),
                 ("immediates", "resolutions/immediates/accepted"),
+                ("references", "resolutions/references/accepted"),
             }
         ),
     )
@@ -61,6 +64,7 @@ def build_address_resolution(
     addresses: OneToOne[AddressId, Address],
     registers: OneToOne[RegisterId, RegisterAcceptance],
     immediates: OneToOne[ImmediateId, ImmediateAcceptance],
+    references: OneToOne[ReferenceId, ReferenceAcceptance],
 ) -> OneToOne[AddressId, AddressResolution]:
     resolutions: Dict[AddressId, AddressResolution] = {}
 
@@ -71,15 +75,19 @@ def build_address_resolution(
         )
 
         # resolve base register
-        register = registers.get(entry.base)
+        if isinstance(entry.base, RegisterId):
+            register = registers.get(entry.base)
 
-        if register.kind != "64bit":
-            resolution.rejected.append(
-                AddressRejection(
-                    ref=entry.ref,
-                    reason="invalid-register",
+            if register.kind != "64bit":
+                resolution.rejected.append(
+                    AddressRejection(
+                        ref=entry.ref,
+                        reason="invalid-register",
+                    )
                 )
-            )
+
+        else:
+            register = references.get(entry.base)
 
         # resolve offset immediate, if present
         if entry.offset is not None:

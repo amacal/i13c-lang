@@ -233,23 +233,22 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
     # reference has to provide its identifier
     elif token.code == Tokens.AT:
-        start = token
-
-        # now we expect an identifier
-        token = state.expect(Tokens.IDENT)
-
-        # which has to be extracted
-        return tree.snippet.Reference(
-            ref=state.between(start, token),
-            name=state.extract(token),
-        )
+        return parse_reference(state, token)
 
     # address operands starts with a square open bracket
     else:
         offset: Optional[tree.snippet.Offset] = None
 
         # now we expect a register as the base
-        base = state.expect(Tokens.IDENT)
+        base = state.expect(Tokens.IDENT, Tokens.AT)
+
+        if base.code == Tokens.AT:
+            base = parse_reference(state, base)
+        else:
+            base = tree.snippet.Register(
+                ref=state.between(base, base),
+                name=state.extract(base),
+            )
 
         # optionally, an offset can be provided
         end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
@@ -275,6 +274,17 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
         return tree.snippet.Address(
             ref=state.between(token, end),
-            base=tree.snippet.Register(ref=state.span(base), name=state.extract(base)),
+            base=base,
             offset=offset,
         )
+
+
+def parse_reference(state: ParsingState, start: LexingToken) -> tree.snippet.Reference:
+    # now we expect an identifier
+    token = state.expect(Tokens.IDENT)
+
+    # which has to be extracted
+    return tree.snippet.Reference(
+        ref=state.between(start, token),
+        name=state.extract(token),
+    )
