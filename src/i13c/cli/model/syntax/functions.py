@@ -8,7 +8,7 @@ from i13c.syntax import tree
 class FunctionListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[NodeId, tree.function.Function]]:
-        return artifacts.syntax_graph().functions.items()
+        return artifacts.syntax_graph().function.functions.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

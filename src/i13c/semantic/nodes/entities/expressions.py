@@ -22,7 +22,7 @@ def build_expressions(
 ) -> OneToOne[ExpressionId, Expression]:
     expressions: Dict[ExpressionId, Expression] = {}
 
-    for nid, expression in graph.expressions.items():
+    for nid, expression in graph.function.expressions.items():
         assert isinstance(expression, tree.function.Expression)
 
         # derive expression ID from globally unique node ID

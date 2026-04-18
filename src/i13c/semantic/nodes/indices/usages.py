@@ -24,7 +24,7 @@ def build_usages_by_expression(
     usages: Dict[UsageId, Usage] = {}
     mapping: Dict[ExpressionId, List[UsageId]] = {}
 
-    for _, statement in graph.statements.items():
+    for _, statement in graph.function.statements.items():
 
         # for callsites we need to handle arguments
         if isinstance(statement, tree.function.CallStatement):
@@ -34,7 +34,7 @@ def build_usages_by_expression(
                     continue
 
                 # derive parameter ID from globally unique node ID
-                nid = graph.expressions.get_by_node(argument)
+                nid = graph.function.expressions.get_by_node(argument)
                 usage_id = UsageId(value=nid.value)
 
                 # map usage to expression
@@ -53,7 +53,7 @@ def build_usages_by_expression(
                 continue
 
             # derive parameter ID from globally unique node ID
-            nid = graph.expressions.get_by_node(statement.expr)
+            nid = graph.function.expressions.get_by_node(statement.expr)
             usage_id = UsageId(value=nid.value)
 
             # map usage to expression

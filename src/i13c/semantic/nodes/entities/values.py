@@ -24,7 +24,7 @@ def build_values(
 ) -> OneToOne[ValueId, Value]:
     values: Dict[ValueId, Value] = {}
 
-    for nid, statement in graph.statements.items():
+    for nid, statement in graph.function.statements.items():
         expression: Optional[Expression] = None
 
         # accept only value statements
@@ -34,7 +34,7 @@ def build_values(
         match statement.expr:
             case tree.function.IntegerLiteral() as lit:
                 # find literal by AST node
-                lid = graph.literals.get_by_node(lit)
+                lid = graph.function.literals.get_by_node(lit)
 
                 expression = Expression(
                     kind=b"literal",
@@ -42,7 +42,7 @@ def build_values(
                 )
             case tree.function.Expression() as expr:
                 # find expression by AST node
-                eid = graph.expressions.get_by_node(expr)
+                eid = graph.function.expressions.get_by_node(expr)
 
                 expression = Expression(
                     kind=b"expression",

@@ -66,6 +66,10 @@ class NodesVisitor:
             self.graph.snippet.signatures.append(
                 self.next(), signature, ctx=path.find(tree.snippet.Snippet)
             )
+        else:
+            self.graph.function.signatures.append(
+                self.next(), signature, ctx=path.find(tree.function.Function)
+            )
 
     def on_slot(self, slot: tree.snippet.Slot, path: Path) -> None:
         self.graph.snippet.slots.append(self.next(), slot)
@@ -104,19 +108,19 @@ class NodesVisitor:
         self.graph.snippet.addresses.append(self.next(), address)
 
     def on_function(self, function: tree.function.Function, path: Path) -> None:
-        self.graph.functions.append(self.next(), function)
+        self.graph.function.functions.append(self.next(), function)
 
     def on_parameter(self, parameter: tree.function.Parameter, path: Path) -> None:
-        self.graph.parameters.append(self.next(), parameter)
+        self.graph.function.parameters.append(self.next(), parameter)
 
     def on_statement(self, statement: tree.function.Statement, path: Path) -> None:
-        self.graph.statements.append(self.next(), statement)
+        self.graph.function.statements.append(self.next(), statement)
 
     def on_literal(self, literal: tree.function.Literal, path: Path) -> None:
-        self.graph.literals.append(self.next(), literal)
+        self.graph.function.literals.append(self.next(), literal)
 
     def on_expression(self, expression: tree.function.Expression, path: Path) -> None:
-        self.graph.expressions.append(self.next(), expression)
+        self.graph.function.expressions.append(self.next(), expression)
 
     def on_type(self, type: tree.types.Type, path: Path) -> None:
         self.graph.types.append(self.next(), type)
@@ -142,14 +146,19 @@ class Snippet:
 
 
 @dataclass(kw_only=True)
-class SyntaxGraph:
-    snippet: Snippet
-
+class Function:
     functions: Bidirectional[tree.function.Function, None]
+    signatures: Bidirectional[tree.function.Signature, tree.function.Function]
     statements: Bidirectional[tree.function.Statement, None]
     literals: Bidirectional[tree.function.Literal, None]
     expressions: Bidirectional[tree.function.Expression, None]
     parameters: Bidirectional[tree.function.Parameter, None]
+
+
+@dataclass(kw_only=True)
+class SyntaxGraph:
+    snippet: Snippet
+    function: Function
 
     types: Bidirectional[tree.types.Type, None]
     ranges: Bidirectional[tree.types.Range, None]
@@ -175,11 +184,16 @@ class SyntaxGraph:
                 ].empty(),
                 addresses=Bidirectional[tree.snippet.Address, None].empty(),
             ),
-            functions=Bidirectional[tree.function.Function, None].empty(),
-            statements=Bidirectional[tree.function.Statement, None].empty(),
-            literals=Bidirectional[tree.function.Literal, None].empty(),
-            expressions=Bidirectional[tree.function.Expression, None].empty(),
-            parameters=Bidirectional[tree.function.Parameter, None].empty(),
+            function=Function(
+                functions=Bidirectional[tree.function.Function, None].empty(),
+                signatures=Bidirectional[
+                    tree.function.Signature, tree.function.Function
+                ].empty(),
+                statements=Bidirectional[tree.function.Statement, None].empty(),
+                literals=Bidirectional[tree.function.Literal, None].empty(),
+                expressions=Bidirectional[tree.function.Expression, None].empty(),
+                parameters=Bidirectional[tree.function.Parameter, None].empty(),
+            ),
             types=Bidirectional[tree.types.Type, None].empty(),
             ranges=Bidirectional[tree.types.Range, None].empty(),
         )

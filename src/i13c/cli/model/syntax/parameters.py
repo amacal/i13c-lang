@@ -10,7 +10,7 @@ class ParameterListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[NodeId, tree.function.Parameter]]:
-        return artifacts.syntax_graph().parameters.items()
+        return artifacts.syntax_graph().function.parameters.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

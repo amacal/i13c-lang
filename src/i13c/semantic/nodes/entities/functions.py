@@ -25,16 +25,16 @@ def build_functions(
 ) -> OneToOne[FunctionId, Function]:
     functions: Dict[FunctionId, Function] = {}
 
-    for nid, function in graph.functions.items():
+    for nid, function in graph.function.functions.items():
         parameters: List[ParameterId] = []
         statements: List[Statement] = []
 
         for parameter in function.parameters:
-            pid = graph.parameters.get_by_node(parameter)
+            pid = graph.function.parameters.get_by_node(parameter)
             parameters.append(ParameterId(value=pid.value))
 
         for statement in function.statements:
-            sid = graph.statements.get_by_node(statement)
+            sid = graph.function.statements.get_by_node(statement)
 
             match statement:
                 case tree.function.CallStatement():

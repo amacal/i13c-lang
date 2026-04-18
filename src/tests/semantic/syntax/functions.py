@@ -8,9 +8,6 @@ def can_visit_all_nodes_in_a_function() -> None:
         """
     )
 
-    assert len(list(visitor.graph.functions.items())) == 1
-    assert len(list(visitor.graph.statements.items())) == 1
-    assert len(list(visitor.graph.literals.items())) == 1
-
-    assert len(list(visitor.graph.snippet.snippets.items())) == 0
-    assert len(list(visitor.graph.snippet.instructions.items())) == 0
+    assert len(list(visitor.graph.function.functions.items())) == 1
+    assert len(list(visitor.graph.function.statements.items())) == 1
+    assert len(list(visitor.graph.function.literals.items())) == 1

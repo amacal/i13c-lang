@@ -24,7 +24,7 @@ def build_callsites(
 ) -> OneToOne[CallSiteId, CallSite]:
     callsites: Dict[CallSiteId, CallSite] = {}
 
-    for nid, statement in graph.statements.items():
+    for nid, statement in graph.function.statements.items():
         arguments: List[Argument] = []
 
         # accept only call statements
@@ -35,7 +35,7 @@ def build_callsites(
             match argument:
                 case tree.function.IntegerLiteral() as lit:
                     # find literal by AST node
-                    lid = graph.literals.get_by_node(lit)
+                    lid = graph.function.literals.get_by_node(lit)
 
                     arguments.append(
                         Argument(
@@ -45,7 +45,7 @@ def build_callsites(
                     )
                 case tree.function.Expression() as expr:
                     # find expression by AST node
-                    eid = graph.expressions.get_by_node(expr)
+                    eid = graph.function.expressions.get_by_node(expr)
 
                     arguments.append(
                         Argument(

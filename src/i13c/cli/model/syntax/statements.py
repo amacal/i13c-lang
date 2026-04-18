@@ -10,7 +10,7 @@ class StatementListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[NodeId, tree.function.Statement]]:
-        return artifacts.syntax_graph().statements.items()
+        return artifacts.syntax_graph().function.statements.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -34,7 +34,7 @@ class StatementCallsListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[NodeId, tree.function.CallStatement]]:
-        for key, value in artifacts.syntax_graph().statements.items():
+        for key, value in artifacts.syntax_graph().function.statements.items():
             if isinstance(value, tree.function.CallStatement):
                 yield key, value
 

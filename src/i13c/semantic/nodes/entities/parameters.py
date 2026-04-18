@@ -21,7 +21,7 @@ def build_parameters(
 ) -> OneToOne[ParameterId, Parameter]:
     parameters: Dict[ParameterId, Parameter] = {}
 
-    for pid, parameter in graph.parameters.items():
+    for pid, parameter in graph.function.parameters.items():
         # derive parameter ID from globally unique node ID
         parameter_id = ParameterId(value=pid.value)
 

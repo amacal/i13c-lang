@@ -10,7 +10,7 @@ class LiteralListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[NodeId, tree.function.Literal]]:
-        return artifacts.syntax_graph().literals.items()
+        return artifacts.syntax_graph().function.literals.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:
@@ -34,7 +34,7 @@ class LiteralIntegersListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[NodeId, tree.function.IntegerLiteral]]:
-        return artifacts.syntax_graph().literals.items()
+        return artifacts.syntax_graph().function.literals.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

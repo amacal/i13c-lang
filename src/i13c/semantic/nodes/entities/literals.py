@@ -21,7 +21,7 @@ def build_literals(
 ) -> OneToOne[LiteralId, Literal]:
     literals: Dict[LiteralId, Literal] = {}
 
-    for nid, literal in graph.literals.items():
+    for nid, literal in graph.function.literals.items():
         assert isinstance(literal, tree.function.IntegerLiteral)
 
         # derive literal ID from globally unique node ID
