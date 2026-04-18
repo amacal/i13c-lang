@@ -22,6 +22,27 @@ def can_accept_a_snippet_signature_without_slots():
     assert source.extract(resolution.accepted[0].ref) == b"main()"
 
 
+def can_accept_a_function_signature_without_slots():
+    source, resolutions = prepare_resolutions(
+        """
+            fn main() { }
+        """
+    )
+
+    assert resolutions.signatures is not None
+    assert resolutions.signatures.size() == 1
+    id, resolution = resolutions.signatures.peak()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 0
+
+    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].name == b"main"
+    assert len(resolution.accepted[0].slots) == 0
+
+    assert source.extract(resolution.accepted[0].ref) == b"main()"
+
+
 def can_accept_a_snippet_signature_with_a_slot():
     source, resolutions = prepare_resolutions(
         """
@@ -67,10 +88,20 @@ def can_reject_duplicate_slot_name_usage():
     assert source.extract(resolution.rejected[0].ref) == b"x@rbx: u8"
 
 
-def can_detect_a_broken_range_rule_e3003():
+def can_detect_a_broken_range_rule_e3003_in_a_snippet():
     _, rules = prepare_rules(
         """
             asm main(x@rax: u8, x@rbx: u8) { mov rax, rbx; }
+        """
+    )
+
+    assert len(rules.get("e3003")) == 1
+
+
+def can_detect_a_broken_range_rule_e3003_in_a_function():
+    _, rules = prepare_rules(
+        """
+            fn main(x: u8, x: u8) { }
         """
     )
 
