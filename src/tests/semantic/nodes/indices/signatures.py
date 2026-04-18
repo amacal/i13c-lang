@@ -2,7 +2,7 @@ from tests.semantic.nodes.indices import prepare_indices
 
 
 def can_index_signature_by_snippet_name():
-    _, indices = prepare_indices(
+    source, indices = prepare_indices(
         """
             asm main() { }
         """
@@ -16,12 +16,14 @@ def can_index_signature_by_snippet_name():
     assert len(acceptance) == 1
     assert acceptance[0].name == b"main"
 
+    assert source.extract(acceptance[0].ref) == b"main()"
+
 
 def can_index_multiple_signatures_by_snippet_name():
-    _, indices = prepare_indices(
+    source, indices = prepare_indices(
         """
-            asm main() { }
-            asm main() { }
+            asm main(x@rax: u8) { }
+            asm main(y@rbx: u16) { }
         """
     )
 
@@ -35,3 +37,6 @@ def can_index_multiple_signatures_by_snippet_name():
 
     assert acceptance[0].name == b"main"
     assert acceptance[1].name == b"main"
+
+    assert source.extract(acceptance[0].ref) in (b"main(x@rax: u8)", b"main(y@rbx: u16)")
+    assert source.extract(acceptance[1].ref) in (b"main(x@rax: u8)", b"main(y@rbx: u16)")
