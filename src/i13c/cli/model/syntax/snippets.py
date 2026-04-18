@@ -28,6 +28,6 @@ class SnippetListExtractor:
             "id": f"#{entry[0].value}",
             "name": str(entry[1].signature.name.decode()),
             "slots": str(len(entry[1].signature.slots)),
-            "clbbrs": str(len(entry[1].clobbers)),
+            "clbbrs": str(len(entry[1].flags.clobbers or [] if entry[1].flags is not None else [])),
             "instrs": str(len(entry[1].body)),
         }

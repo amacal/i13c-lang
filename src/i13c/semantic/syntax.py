@@ -61,6 +61,9 @@ class NodesVisitor:
     def on_snippet(self, snippet: tree.snippet.Snippet, path: Path) -> None:
         self.graph.snippet.snippets.append(self.next(), snippet)
 
+    def on_flags(self, flags: tree.snippet.Flags, path: Path) -> None:
+        self.graph.snippet.flags.append(self.next(), flags)
+
     def on_signature(self, signature: tree.Signature, path: Path) -> None:
         if isinstance(signature, tree.snippet.Signature):
             self.graph.snippet.signatures.append(
@@ -132,6 +135,7 @@ class NodesVisitor:
 @dataclass(kw_only=True)
 class Snippet:
     snippets: Bidirectional[tree.snippet.Snippet, None]
+    flags: Bidirectional[tree.snippet.Flags, None]
     signatures: Bidirectional[tree.snippet.Signature, tree.snippet.Snippet]
     slots: Bidirectional[tree.snippet.Slot, None]
     binds: Bidirectional[tree.snippet.Bind, tree.snippet.Slot]
@@ -168,6 +172,7 @@ class SyntaxGraph:
         return SyntaxGraph(
             snippet=Snippet(
                 snippets=Bidirectional[tree.snippet.Snippet, None].empty(),
+                flags=Bidirectional[tree.snippet.Flags, None].empty(),
                 signatures=Bidirectional[
                     tree.snippet.Signature, tree.snippet.Snippet
                 ].empty(),

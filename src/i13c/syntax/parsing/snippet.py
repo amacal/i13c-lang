@@ -15,8 +15,7 @@ from i13c.syntax.parsing.types import parse_range
 def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
     body: List[tree.snippet.InstructionOrLabel] = []
     slots: List[tree.snippet.Slot] = []
-    clobbers: List[tree.snippet.Register] = []
-    noreturn: bool = False
+    flags: Optional[tree.snippet.Flags] = None
 
     # snippet name is an identifier
     name = state.expect(Tokens.IDENT)
@@ -33,7 +32,7 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
 
     # optional flags
     if not state.is_in(Tokens.CURLY_OPEN):
-        clobbers, noreturn = parse_snippet_flags(state)
+        flags = parse_flags(state)
 
     # expect opening curly brace
     state.expect(Tokens.CURLY_OPEN)
@@ -47,13 +46,12 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
 
     return tree.snippet.Snippet(
         ref=state.between(name, end),
-        noreturn=noreturn,
-        clobbers=clobbers,
         signature=tree.snippet.Signature(
             ref=state.between(name, end),
             name=state.extract(name),
             slots=slots,
         ),
+        flags=flags,
         body=body,
     )
 
@@ -105,16 +103,23 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
     )
 
 
-def parse_snippet_flags(
+def parse_flags(
     state: ParsingState,
-) -> Tuple[List[tree.snippet.Register], bool]:
+) -> Optional[tree.snippet.Flags]:
     keyword: Optional[LexingToken] = None
+    start: Optional[LexingToken] = None
+    end: Optional[LexingToken] = None
+
     clobbers: Optional[List[tree.snippet.Register]] = None
-    terminal = False
+    noreturn: Optional[bool] = None
 
     while not state.is_in(Tokens.CURLY_OPEN):
         expected = {b"clobbers", b"noreturn"}
         keyword = state.expect(Tokens.KEYWORD)
+
+        # set boundaries
+        start = start or keyword
+        end = keyword
 
         # fail if the keyword is not "noreturn"
         if state.extract(keyword) not in expected:
@@ -125,19 +130,28 @@ def parse_snippet_flags(
             if clobbers is not None:
                 raise FlagAlreadySpecified(keyword, b"clobbers")
             else:
-                clobbers = parse_clobbers(state)
+                clobbers, end = parse_clobbers(state)
 
         # if "noreturn", set terminal flag
         elif state.extract(keyword) == b"noreturn":
-            if terminal:
+            if noreturn:
                 raise FlagAlreadySpecified(keyword, b"noreturn")
             else:
-                terminal = True
+                noreturn = True
 
-    return clobbers or [], terminal
+    if not start or not end:
+        return None
+
+    return tree.snippet.Flags(
+        ref=state.between(start, end),
+        noreturn=noreturn,
+        clobbers=clobbers,
+    )
 
 
-def parse_clobbers(state: ParsingState) -> List[tree.snippet.Register]:
+def parse_clobbers(
+    state: ParsingState,
+) -> Tuple[List[tree.snippet.Register], LexingToken]:
     clobbers: List[tree.snippet.Register] = []
 
     # at least one register is expected
@@ -159,7 +173,7 @@ def parse_clobbers(state: ParsingState) -> List[tree.snippet.Register]:
             )
         )
 
-    return clobbers
+    return clobbers, clobber
 
 
 def parse_instruction(state: ParsingState) -> tree.snippet.InstructionOrLabel:

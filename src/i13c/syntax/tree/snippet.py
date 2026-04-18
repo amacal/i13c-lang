@@ -11,6 +11,7 @@ from i13c.syntax.tree.core import Path
 
 class Visitor(Protocol):
     def on_snippet(self, snippet: Snippet, path: Path) -> None: ...
+    def on_flags(self, flags: Flags, path: Path) -> None: ...
     def on_signature(self, signature: Signature, path: Path) -> None: ...
     def on_slot(self, slot: Slot, path: Path) -> None: ...
     def on_bind(self, bind: Bind, path: Path) -> None: ...
@@ -84,6 +85,7 @@ class Address:
 
 
 OperandTarget = Union[Register, Immediate, Reference, Address]
+
 
 @dataclass(kw_only=True, eq=False)
 class Operand:
@@ -173,11 +175,25 @@ class Signature:
 
 
 @dataclass(kw_only=True, eq=False)
+class Flags:
+    ref: Span
+    noreturn: Optional[bool]
+    clobbers: Optional[List[Register]]
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_flags(self, path)
+
+        with path.push(self) as node:
+            for entry in self.clobbers or []:
+                entry.accept(visitor, node)
+
+
+
+@dataclass(kw_only=True, eq=False)
 class Snippet:
     ref: Span
-    noreturn: bool
     signature: Signature
-    clobbers: List[Register]
+    flags: Optional[Flags]
     body: List[InstructionOrLabel]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
@@ -185,6 +201,9 @@ class Snippet:
 
         with path.push(self) as node:
             self.signature.accept(visitor, node)
+
+            if self.flags is not None:
+                self.flags.accept(visitor, node)
 
             for entry in self.body:
                 entry.accept(visitor, node)
