@@ -15,7 +15,6 @@ class SnippetListExtractor:
             "ref": "Reference",
             "id": "Snippet ID",
             "name": "Snippet Name",
-            "slots": "Slots",
             "clbbrs": "Clobbers",
             "instrs": "Instructions",
         }
@@ -26,7 +25,6 @@ class SnippetListExtractor:
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
             "name": str(entry[1].identifier),
-            "slots": str(len(entry[1].slots)),
             "clbbrs": str(len(entry[1].clobbers)),
             "instrs": str(len(entry[1].instructions)),
         }

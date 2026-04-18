@@ -1,13 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Literal as Kind
-from typing import Union
 
 from i13c.semantic.core import Type
 from i13c.semantic.typing.entities.callables import Callable
 from i13c.semantic.typing.entities.callsites import Argument
 from i13c.semantic.typing.entities.parameters import Parameter
-from i13c.semantic.typing.entities.snippets import Slot
 
 CallSiteRejectionReason = Kind[
     b"arity-mismatch",
@@ -26,13 +24,7 @@ class CallSiteBinding:
     kind: CallSiteBindingKind
     type: Type
     argument: Argument
-    target: Union[Parameter, Slot]
-
-    @staticmethod
-    def slot(type: Type, argument: Argument, target: Slot) -> CallSiteBinding:
-        return CallSiteBinding(
-            kind=b"slot", type=type, argument=argument, target=target
-        )
+    target: Parameter
 
     @staticmethod
     def parameter(type: Type, argument: Argument, target: Parameter) -> CallSiteBinding:

@@ -15,14 +15,13 @@ from i13c.llvm.typing.instructions.core import (
 )
 from i13c.llvm.typing.instructions.ctrl import Nop
 from i13c.llvm.typing.instructions.move import MovRegImm, MovRegOff
-from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
+from i13c.llvm.typing.registers import VirtualRegister
 from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.bindings import CallSiteBindings
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
 from i13c.semantic.typing.entities.parameters import Parameter
-from i13c.semantic.typing.entities.snippets import Slot
 from i13c.semantic.typing.indices.variables import VariableId
 
 
@@ -34,40 +33,40 @@ def lower_snippet_bindings(
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
-    for binding in bindings.entries:
+    # for binding in bindings.entries:
 
-        assert isinstance(binding.dst, Slot)
+    #     assert isinstance(binding.dst, Slot)
 
-        # we know slots may be literals
-        if isinstance(binding.src, LiteralId):
+    #     # we know slots may be literals
+    #     if isinstance(binding.src, LiteralId):
 
-            # find the literal behind the target
-            literal = graph.entities.literals.get(binding.src)
+    #         # find the literal behind the target
+    #         literal = graph.entities.literals.get(binding.src)
 
-            # we know all literals are hex for now
-            assert literal.kind == b"hex"
-            assert isinstance(literal.target, Hex)
+    #         # we know all literals are hex for now
+    #         assert literal.kind == b"hex"
+    #         assert isinstance(literal.target, Hex)
 
-            # extract slot binding
-            bind = binding.dst.bind
-            imm = Immediate(data=literal.target.data, width=literal.target.width)
+    #         # extract slot binding
+    #         bind = binding.dst.bind
+    #         imm = Immediate(data=literal.target.data, width=literal.target.width)
 
-            # emit move instruction for binding
-            iid = InstructionId(value=generator.next())
-            instr = MovRegImm(dst=name_to_reg64(bind.name.decode()), imm=imm)
+    #         # emit move instruction for binding
+    #         iid = InstructionId(value=generator.next())
+    #         instr = MovRegImm(dst=name_to_reg64(bind.name.decode()), imm=imm)
 
-            out.append((iid, instr))
+    #         out.append((iid, instr))
 
-        # or slots may be expressions
-        if isinstance(binding.src, VariableId):
-            src = registers.get(binding.src).ref()
-            dst = name_to_reg64(binding.dst.bind.name.decode())
+    #     # or slots may be expressions
+    #     if isinstance(binding.src, VariableId):
+    #         src = registers.get(binding.src).ref()
+    #         dst = name_to_reg64(binding.dst.bind.name.decode())
 
-            iid = FlowId(value=generator.next())
-            instr = BindingFlow(dst=dst, src=src)
+    #         iid = FlowId(value=generator.next())
+    #         instr = BindingFlow(dst=dst, src=src)
 
-            # emit instruction for virtual move
-            out.append((iid, instr))
+    #         # emit instruction for virtual move
+    #         out.append((iid, instr))
 
     return out
 

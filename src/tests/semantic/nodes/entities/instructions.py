@@ -32,7 +32,9 @@ def can_build_an_instruction_with_no_operands():
     assert isinstance(id, InstructionId)
     assert isinstance(value, Instruction)
 
-    assert value.mnemonic.name == b"nop"
+    id, _ = semantic.entities.mnemonics.peak()
+
+    assert value.mnemonic == id
     assert len(value.operands) == 0
 
 
@@ -52,7 +54,9 @@ def can_build_an_instruction_with_multiple_operands():
     assert isinstance(id, InstructionId)
     assert isinstance(value, Instruction)
 
-    assert value.mnemonic.name == b"mov"
+    id, _ = semantic.entities.mnemonics.peak()
+
+    assert value.mnemonic == id
     assert len(value.operands) == 2
 
 
@@ -72,5 +76,7 @@ def can_build_an_instruction_with_reference_operand():
     assert isinstance(id, InstructionId)
     assert isinstance(value, Instruction)
 
-    assert value.mnemonic.name == b"mov"
+    id, _ = semantic.entities.mnemonics.peak()
+
+    assert value.mnemonic == id
     assert len(value.operands) == 2

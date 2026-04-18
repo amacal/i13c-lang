@@ -1,10 +1,8 @@
-from typing import Dict, Iterable, List, Protocol, Tuple
+from typing import Dict, Protocol
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.core.result import Err, Ok, Result
-from i13c.semantic.core import Hex, Identifier, Type
-from i13c.semantic.typing.entities.callables import Callable
+from i13c.semantic.core import Hex, Type
 from i13c.semantic.typing.entities.callsites import Argument, CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
@@ -14,13 +12,7 @@ from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.indices.controlflows import FlowNode
 from i13c.semantic.typing.indices.environments import Environment
 from i13c.semantic.typing.indices.variables import Variable, VariableId
-from i13c.semantic.typing.resolutions.callsites import (
-    CallSiteAcceptance,
-    CallSiteBinding,
-    CallSiteRejection,
-    CallSiteRejectionReason,
-    CallSiteResolution,
-)
+from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 
 
 def configure_resolution_by_callsite() -> GraphNode:
@@ -77,119 +69,5 @@ def build_resolution_by_callsite(
 ) -> OneToOne[CallSiteId, CallSiteResolution]:
     resolutions: Dict[CallSiteId, CallSiteResolution] = {}
 
-    def match_bindings(
-        environment: Dict[Identifier, VariableId],
-        bindings: Iterable[CallSiteBinding],
-    ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
-        for binding in bindings:
-            match binding.argument:
-                case Argument(kind=b"literal", target=LiteralId() as lit):
-                    if not literals.get(lit).fits(binding.type):
-                        return Err(b"type-mismatch")
-
-                case Argument(kind=b"expression", target=ExpressionId() as eid):
-                    # first extract expression and variable from environment
-                    expression = expressions.get(eid)
-                    variable = environment.get(expression.ident)
-
-                    # check variable existence
-                    if variable is None:
-                        return Err(b"unknown-target")
-
-                    # check type match
-                    if not match_variable(variables.get(variable), type=binding.type):
-                        return Err(b"type-mismatch")
-
-                case _:
-                    return Err(b"type-mismatch")
-
-        return Ok(list(bindings))
-
-    def match_function(
-        callsite: CallSite,
-        function: Function,
-    ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
-        if len(function.parameters) != len(callsite.arguments):
-            return Err(b"arity-mismatch")
-
-        # find actual parameter variables
-        params = [parameters.get(pid) for pid in function.parameters]
-        environment = environments.get(callsite.id)
-
-        # combine as bindings
-        bindings = [
-            CallSiteBinding.parameter(parameter.type, argument, parameter)
-            for argument, parameter in zip(callsite.arguments, params)
-        ]
-
-        return match_bindings(environment.variables, bindings)
-
-    def match_snippet(
-        callsite: CallSite, snippet: Snippet
-    ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
-        if len(snippet.slots) != len(callsite.arguments):
-            return Err(b"arity-mismatch")
-
-        # find environment at callsite
-        environment = environments.get(callsite.id)
-
-        bindings = [
-            CallSiteBinding.slot(slot.type, argument, slot)
-            for argument, slot in zip(callsite.arguments, snippet.slots)
-        ]
-
-        return match_bindings(environment.variables, bindings)
-
-    def match_callable(
-        callsite: CallSite, callable: Callable
-    ) -> Result[List[CallSiteBinding], CallSiteRejectionReason]:
-        match callable:
-            case Callable(kind=b"function", target=FunctionId() as target):
-                return match_function(callsite, functions.get(target))
-            case Callable(kind=b"snippet", target=SnippetId() as target):
-                return match_snippet(callsite, snippets.get(target))
-            case _:
-                return Err(b"unknown-target")
-
-    for cid, callsite in callsites.items():
-        candidates: List[Callable] = []
-
-        for fid, function in functions.items():
-            if function.identifier == callsite.callee:
-                candidates.append(
-                    Callable(
-                        kind=b"function",
-                        target=fid,
-                    )
-                )
-
-        for snid, snippet in snippets.items():
-            if snippet.identifier == callsite.callee:
-                candidates.append(
-                    Callable(
-                        kind=b"snippet",
-                        target=snid,
-                    )
-                )
-
-        reasoned: List[
-            Tuple[Callable, Result[List[CallSiteBinding], CallSiteRejectionReason]]
-        ] = [
-            (candidate, match_callable(callsites.get(cid), candidate))
-            for candidate in candidates
-        ]
-
-        resolutions[cid] = CallSiteResolution(
-            accepted=[
-                CallSiteAcceptance(callable=candidate, bindings=result.value)
-                for candidate, result in reasoned
-                if isinstance(result, Ok)
-            ],
-            rejected=[
-                CallSiteRejection(callable=candidate, reason=result.error)
-                for candidate, result in reasoned
-                if isinstance(result, Err)
-            ],
-        )
 
     return OneToOne[CallSiteId, CallSiteResolution].instance(resolutions)

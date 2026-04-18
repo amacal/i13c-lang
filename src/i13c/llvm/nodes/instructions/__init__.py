@@ -18,12 +18,12 @@ def lower_instruction(
     rewritten: Dict[OperandId, Operand],
 ) -> InstructionEntry:
 
-    if instruction.mnemonic.name in DISPATCH_TABLE:
-        return DISPATCH_TABLE[instruction.mnemonic.name](
-            generator, operands, instruction, rewritten
-        )
+    # if instruction.mnemonic.name in DISPATCH_TABLE:
+    #     return DISPATCH_TABLE[instruction.mnemonic.name](
+    #         generator, operands, instruction, rewritten
+    #     )
 
-    assert False, f"unsupported mnemonic: {instruction.mnemonic.name}"
+    assert False, f"unsupported mnemonic: {instruction.mnemonic}"
 
 
 def lower_instruction_syscall(

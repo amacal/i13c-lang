@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 
-from i13c.semantic.core import Identifier, Type
-from i13c.semantic.typing.entities.instructions import Binding, InstructionId
+from i13c.semantic.core import Identifier
+from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.syntax.source import Span
 
@@ -16,24 +16,9 @@ class SnippetId:
 
 
 @dataclass(kw_only=True)
-class Slot:
-    name: Identifier
-    type: Type
-    bind: Binding
-
-    def __str__(self) -> str:
-        return f"{self.name}@{self.bind}:{self.type}"
-
-
-@dataclass(kw_only=True)
 class Snippet:
     ref: Span
     identifier: Identifier
     noreturn: bool
-    slots: List[Slot]
     clobbers: List[RegisterId]
     instructions: List[InstructionId]
-
-    def signature(self) -> str:
-        slots = ", ".join([str(slot) for slot in self.slots])
-        return f"{self.identifier.data.decode()}/{len(self.slots)} ({slots})"

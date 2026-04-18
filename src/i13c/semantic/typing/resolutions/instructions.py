@@ -4,8 +4,12 @@ from typing import Literal as Kind
 from typing import Optional, Tuple
 
 from i13c.semantic.core import Identifier
-from i13c.semantic.typing.entities.instructions import InstructionId, Mnemonic
+from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.operands import OperandId
+from i13c.semantic.typing.resolutions.mnemonics import (
+    MnemonicAcceptance,
+    MnemonicVariant,
+)
 from i13c.semantic.typing.resolutions.operands import OperandAcceptance
 from i13c.syntax.source import Span
 
@@ -94,7 +98,7 @@ class InstructionAcceptance:
     ref: Span
     id: InstructionId
 
-    mnemonic: Mnemonic
+    mnemonic: MnemonicAcceptance
     variant: MnemonicVariant
     operands: Tuple[OperandAcceptance, ...]
 
@@ -103,6 +107,3 @@ class InstructionAcceptance:
 class InstructionResolution:
     accepted: List[InstructionAcceptance]
     rejected: List[InstructionRejection]
-
-
-MnemonicVariant = Tuple[OperandSpec, ...]

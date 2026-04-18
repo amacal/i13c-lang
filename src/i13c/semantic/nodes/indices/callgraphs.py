@@ -36,21 +36,21 @@ def build_callgraphs(
     by_caller: Dict[CallableTarget, List[CallPair]] = {}
     by_callee: Dict[CallableTarget, List[CallPair]] = {}
 
-    for snid in snippets.keys():
-        by_caller[snid] = []
-        by_callee[snid] = []
+    # for snid in snippets.keys():
+    #     by_caller[snid] = []
+    #     by_callee[snid] = []
 
-    for fid in functions.keys():
-        by_caller[fid] = []
-        by_callee[fid] = []
+    # for fid in functions.keys():
+    #     by_caller[fid] = []
+    #     by_callee[fid] = []
 
-    for fid, function in functions.items():
-        for statement in function.statements:
-            if isinstance(statement, CallSiteId):
-                for accepted in resolutions.get(statement).accepted:
-                    callee = accepted.callable.target
-                    by_caller[fid].append(CallPair.instance(statement, callee))
-                    by_callee[callee].append(CallPair.instance(statement, fid))
+    # for fid, function in functions.items():
+    #     for statement in function.statements:
+    #         if isinstance(statement, CallSiteId):
+    #             for accepted in resolutions.get(statement).accepted:
+    #                 callee = accepted.callable.target
+    #                 by_caller[fid].append(CallPair.instance(statement, callee))
+    #                 by_callee[callee].append(CallPair.instance(statement, fid))
 
     return (
         OneToMany[CallableTarget, CallPair].instance(by_caller),

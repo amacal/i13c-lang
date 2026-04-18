@@ -6,7 +6,6 @@ from i13c.semantic.typing.entities.bindings import CallSiteBinding, CallSiteBind
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
-from i13c.semantic.typing.entities.snippets import Slot
 from i13c.semantic.typing.indices.controlflows import FlowNode
 from i13c.semantic.typing.indices.environments import Environment
 from i13c.semantic.typing.resolutions.callsites import (
@@ -63,9 +62,9 @@ def transform_bindings(
             # don't include bindings via immediate
             # because they were already monomorphized
 
-            if isinstance(binding.target, Slot):
-                if binding.target.bind.via_immediate():
-                    continue
+            # if isinstance(binding.target, Slot):
+            #     if binding.target.bind.via_immediate():
+            #         continue
 
             bindings.append(
                 CallSiteBinding(
