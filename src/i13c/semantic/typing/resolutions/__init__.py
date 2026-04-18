@@ -7,6 +7,7 @@ from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.environments import EnvironmentId
 from i13c.semantic.typing.entities.immediates import ImmediateId
 from i13c.semantic.typing.entities.labels import LabelId
+from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.semantic.typing.entities.operands import OperandId
 from i13c.semantic.typing.entities.ranges import RangeId
 from i13c.semantic.typing.entities.references import ReferenceId
@@ -19,6 +20,7 @@ from i13c.semantic.typing.resolutions.binds import BindResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
 from i13c.semantic.typing.resolutions.labels import LabelResolution
+from i13c.semantic.typing.resolutions.mnemonics import MnemonicResolution
 from i13c.semantic.typing.resolutions.operands import OperandResolution
 from i13c.semantic.typing.resolutions.ranges import RangeResolution
 from i13c.semantic.typing.resolutions.references import ReferenceResolution
@@ -35,6 +37,7 @@ class ResolutionNodes:
     environments: Optional[OneToOne[EnvironmentId, EnvironmentResolution]]
     immediates: Optional[OneToOne[ImmediateId, ImmediateResolution]]
     labels: Optional[OneToOne[LabelId, LabelResolution]]
+    mnemonics: Optional[OneToOne[MnemonicId, MnemonicResolution]]
     operands: Optional[OneToOne[OperandId, OperandResolution]]
     ranges: Optional[OneToOne[RangeId, RangeResolution]]
     references: Optional[OneToOne[ReferenceId, ReferenceResolution]]

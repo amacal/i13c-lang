@@ -14,7 +14,6 @@ class LabelRejection:
 class LabelAcceptance:
     ref: Span
     id: LabelId
-
     name: bytes
 
 
