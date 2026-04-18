@@ -219,24 +219,25 @@ def parse_operands(state: ParsingState) -> List[tree.snippet.Operand]:
 
 def parse_operand(state: ParsingState) -> tree.snippet.Operand:
     token = state.expect(*OPERANDS_START)
+    operand: tree.snippet.OperandTarget
 
     # register has to provide its name
     if token.code == Tokens.IDENT:
-        return tree.snippet.Register(
+        operand = tree.snippet.Register(
             ref=state.between(token, token),
             name=state.extract(token),
         )
 
     # immediate has to provide its decimal value
     elif token.code == Tokens.HEX:
-        return tree.snippet.Immediate(
+        operand = tree.snippet.Immediate(
             ref=state.between(token, token),
             data=extract_hex(state, token),
         )
 
     # reference has to provide its identifier
     elif token.code == Tokens.AT:
-        return parse_reference(state, token)
+        operand = parse_reference(state, token)
 
     # address operands starts with a square open bracket
     else:
@@ -275,11 +276,16 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
             # address has to be closed with a square close bracket
             end = state.expect(Tokens.SQUARE_CLOSE)
 
-        return tree.snippet.Address(
+        operand = tree.snippet.Address(
             ref=state.between(token, end),
             base=base,
             offset=offset,
         )
+
+    return tree.snippet.Operand(
+        ref=operand.ref,
+        target=operand,
+    )
 
 
 def parse_reference(state: ParsingState, start: LexingToken) -> tree.snippet.Reference:

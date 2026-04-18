@@ -34,9 +34,6 @@ class Register:
     name: bytes
 
     def accept(self, visitor: Visitor, path: Path) -> None:
-        if not path.contains(Address):
-            visitor.on_operand(self, path)
-
         visitor.on_register(self, path)
 
 
@@ -46,7 +43,6 @@ class Immediate:
     data: literals.Hex
 
     def accept(self, visitor: Visitor, path: Path) -> None:
-        visitor.on_operand(self, path)
         visitor.on_immediate(self, path)
 
 
@@ -56,9 +52,6 @@ class Reference:
     name: bytes
 
     def accept(self, visitor: Visitor, path: Path) -> None:
-        if not path.contains(Address):
-            visitor.on_operand(self, path)
-
         visitor.on_reference(self, path)
 
 
@@ -81,7 +74,6 @@ class Address:
     offset: Optional[Offset]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
-        visitor.on_operand(self, path)
         visitor.on_address(self, path)
 
         with path.push(self) as node:
@@ -91,7 +83,18 @@ class Address:
                 self.offset.accept(visitor, node)
 
 
-Operand = Union[Register, Immediate, Reference, Address]
+OperandTarget = Union[Register, Immediate, Reference, Address]
+
+@dataclass(kw_only=True, eq=False)
+class Operand:
+    ref: Span
+    target: OperandTarget
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_operand(self, path)
+
+        with path.push(self) as node:
+            self.target.accept(visitor, node)
 
 
 @dataclass(kw_only=True, eq=False)

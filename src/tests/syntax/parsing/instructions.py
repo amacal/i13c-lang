@@ -20,12 +20,12 @@ def can_parse_instruction_with_operands():
     assert len(instructions[0].operands) == 2
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, tree.snippet.Register)
-    assert operand1.name == b"rax"
+    assert isinstance(operand1.target, tree.snippet.Register)
+    assert operand1.target.name == b"rax"
 
     operand2 = instructions[0].operands[1]
-    assert isinstance(operand2, tree.snippet.Register)
-    assert operand2.name == b"rbx"
+    assert isinstance(operand2.target, tree.snippet.Register)
+    assert operand2.target.name == b"rbx"
 
 
 def can_parse_instruction_with_operands_reference():
@@ -35,12 +35,12 @@ def can_parse_instruction_with_operands_reference():
     assert len(instructions[0].operands) == 2
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, tree.snippet.Register)
-    assert operand1.name == b"rax"
+    assert isinstance(operand1.target, tree.snippet.Register)
+    assert operand1.target.name == b"rax"
 
     operand2 = instructions[0].operands[1]
-    assert isinstance(operand2, tree.snippet.Reference)
-    assert operand2.name == b"left"
+    assert isinstance(operand2.target, tree.snippet.Reference)
+    assert operand2.target.name == b"left"
 
 
 def can_parse_instruction_with_immediate():
@@ -50,12 +50,12 @@ def can_parse_instruction_with_immediate():
     assert len(instructions[0].operands) == 2
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, tree.snippet.Register)
-    assert operand1.name == b"rax"
+    assert isinstance(operand1.target, tree.snippet.Register)
+    assert operand1.target.name == b"rax"
 
     operand2 = instructions[0].operands[1]
-    assert isinstance(operand2, tree.snippet.Immediate)
-    assert operand2.data.digits.hex() == "1234"
+    assert isinstance(operand2.target, tree.snippet.Immediate)
+    assert operand2.target.data.digits.hex() == "1234"
 
 
 def can_parse_multiple_instructions():

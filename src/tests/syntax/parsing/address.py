@@ -13,10 +13,10 @@ def can_parse_address_with_address_operand_without_offset():
     assert len(instructions[0].operands) == 1
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, tree.snippet.Address)
+    assert isinstance(operand1.target, tree.snippet.Address)
 
-    assert operand1.base.name == b"rax"
-    assert operand1.offset is None
+    assert operand1.target.base.name == b"rax"
+    assert operand1.target.offset is None
 
 
 def can_parse_address_with_address_operand_with_positive_offset():
@@ -30,13 +30,13 @@ def can_parse_address_with_address_operand_with_positive_offset():
     assert len(instructions[0].operands) == 1
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, tree.snippet.Address)
+    assert isinstance(operand1.target, tree.snippet.Address)
 
-    assert operand1.base.name == b"rax"
-    assert isinstance(operand1.offset, tree.snippet.Offset)
+    assert operand1.target.base.name == b"rax"
+    assert isinstance(operand1.target.offset, tree.snippet.Offset)
 
-    assert operand1.offset.value.data.digits.hex() == "04"
-    assert operand1.offset.kind == "forward"
+    assert operand1.target.offset.value.data.digits.hex() == "04"
+    assert operand1.target.offset.kind == "forward"
 
 
 def can_parse_address_with_address_operand_with_negative_offset():
@@ -50,10 +50,10 @@ def can_parse_address_with_address_operand_with_negative_offset():
     assert len(instructions[0].operands) == 1
 
     operand1 = instructions[0].operands[0]
-    assert isinstance(operand1, tree.snippet.Address)
+    assert isinstance(operand1.target, tree.snippet.Address)
 
-    assert operand1.base.name == b"rax"
-    assert isinstance(operand1.offset, tree.snippet.Offset)
+    assert operand1.target.base.name == b"rax"
+    assert isinstance(operand1.target.offset, tree.snippet.Offset)
 
-    assert operand1.offset.value.data.digits.hex() == "04"
-    assert operand1.offset.kind == "backward"
+    assert operand1.target.offset.value.data.digits.hex() == "04"
+    assert operand1.target.offset.kind == "backward"
