@@ -178,7 +178,10 @@ def parse_instruction(state: ParsingState) -> tree.snippet.InstructionOrLabel:
     end = state.expect(Tokens.SEMICOLON)
 
     # build instruction and token reference
-    mnemonic = tree.snippet.Mnemonic(name=state.extract(token))
+    mnemonic = tree.snippet.Mnemonic(
+        ref=state.between(token, token),
+        name=state.extract(token),
+    )
 
     return tree.snippet.Instruction(
         ref=state.between(token, end),

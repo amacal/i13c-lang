@@ -16,6 +16,7 @@ class Visitor(Protocol):
     def on_bind(self, bind: Bind, path: Path) -> None: ...
     def on_label(self, label: Label, path: Path) -> None: ...
     def on_instruction(self, instruction: Instruction, path: Path) -> None: ...
+    def on_mnemonic(self, mnemonic: Mnemonic, path: Path) -> None: ...
     def on_operand(self, operand: Operand, path: Path) -> None: ...
     def on_immediate(self, immediate: Immediate, path: Path) -> None: ...
     def on_register(self, register: Register, path: Path) -> None: ...
@@ -119,7 +120,11 @@ class Slot:
 
 @dataclass(kw_only=True, eq=False)
 class Mnemonic:
+    ref: Span
     name: bytes
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_mnemonic(self, path)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -132,6 +137,8 @@ class Instruction:
         visitor.on_instruction(self, path)
 
         with path.push(self) as node:
+            self.mnemonic.accept(visitor, node)
+
             for entry in self.operands:
                 entry.accept(visitor, node)
 

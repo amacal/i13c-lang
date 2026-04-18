@@ -12,6 +12,7 @@ from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.labels import Label, LabelId
 from i13c.semantic.typing.entities.literals import Literal, LiteralId
+from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.ranges import Range, RangeId
@@ -39,6 +40,7 @@ class EntityNodes:
     instructions: OneToOne[InstructionId, Instruction]
     labels: OneToOne[LabelId, Label]
     literals: OneToOne[LiteralId, Literal]
+    mnemonics: OneToOne[MnemonicId, Mnemonic]
     operands: OneToOne[OperandId, Operand]
     parameters: OneToOne[ParameterId, Parameter]
     ranges: OneToOne[RangeId, Range]
