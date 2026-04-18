@@ -18,3 +18,14 @@ def can_index_a_bind_by_slot():
     assert acceptance.dst == b"rax"
 
     assert source.extract(acceptance.ref) == b"rax"
+
+
+def can_ignore_binds_in_a_function():
+    _, indices = prepare_indices(
+        """
+            fn main(x: u8) { }
+        """
+    )
+
+    assert indices.binds_by_slots is not None
+    assert indices.binds_by_slots.size() == 0
