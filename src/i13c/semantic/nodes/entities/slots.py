@@ -35,4 +35,18 @@ def build_slots(
             type=type_id,
         )
 
+    for nid, entry in graph.function.parameters.items():
+        # derive slot ID from globally unique node ID
+        slot_id = SlotId(value=nid.value)
+
+        # reverse mapping to type ID
+        nid = graph.types.get_by_node(entry.type)
+        type_id = TypeId(value=nid.value)
+
+        slots[slot_id] = Slot(
+            ref=entry.ref,
+            name=entry.name,
+            type=type_id,
+        )
+
     return OneToOne[SlotId, Slot].instance(slots)

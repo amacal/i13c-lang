@@ -13,7 +13,7 @@ def can_parse_function_without_statements():
     function = program.functions[0]
 
     assert isinstance(function, tree.function.Function)
-    assert function.name == b"main"
+    assert function.signature.name == b"main"
     assert function.noreturn is False
     assert len(function.statements) == 0
 
@@ -25,7 +25,7 @@ def can_parse_function_with_statements():
     function = program.functions[0]
 
     assert isinstance(function, tree.function.Function)
-    assert function.name == b"main"
+    assert function.signature.name == b"main"
     assert function.noreturn is False
     assert len(function.statements) == 1
 
@@ -46,11 +46,11 @@ def can_parse_function_with_single_parameter():
     function = program.functions[0]
 
     assert isinstance(function, tree.function.Function)
-    assert function.name == b"main"
+    assert function.signature.name == b"main"
     assert function.noreturn is False
-    assert len(function.parameters) == 1
+    assert len(function.signature.params) == 1
 
-    parameter = function.parameters[0]
+    parameter = function.signature.params[0]
     assert parameter.name == b"id"
     assert parameter.type.name == b"u16"
 
@@ -62,15 +62,15 @@ def can_parse_function_with_multiple_parameters():
     function = program.functions[0]
 
     assert isinstance(function, tree.function.Function)
-    assert function.name == b"main"
+    assert function.signature.name == b"main"
     assert function.noreturn is False
-    assert len(function.parameters) == 2
+    assert len(function.signature.params) == 2
 
-    parameter1 = function.parameters[0]
+    parameter1 = function.signature.params[0]
     assert parameter1.name == b"code"
     assert parameter1.type.name == b"u32"
 
-    parameter2 = function.parameters[1]
+    parameter2 = function.signature.params[1]
     assert parameter2.name == b"id"
     assert parameter2.type.name == b"u16"
 
@@ -82,7 +82,7 @@ def can_parse_function_with_flags_noreturn():
     function = program.functions[0]
 
     assert isinstance(function, tree.function.Function)
-    assert function.name == b"main"
+    assert function.signature.name == b"main"
     assert function.noreturn is True
     assert len(function.statements) == 1
 
@@ -103,9 +103,9 @@ def can_parse_function_with_ranged_parameter():
     function = program.functions[0]
 
     assert isinstance(function, tree.function.Function)
-    assert len(function.parameters) == 1
+    assert len(function.signature.params) == 1
 
-    parameter = function.parameters[0]
+    parameter = function.signature.params[0]
     assert parameter.name == b"value"
     assert parameter.type.name == b"u8"
     assert parameter.type.range is not None

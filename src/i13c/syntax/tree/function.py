@@ -114,17 +114,15 @@ Statement = Union[CallStatement, ValueStatement]
 @dataclass(kw_only=True, eq=False)
 class Function:
     ref: Span
-    name: bytes
     noreturn: bool
-    parameters: List[Parameter]
+    signature: Signature
     statements: List[Statement]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_function(self, path)
 
         with path.push(self) as node:
-            for parameter in self.parameters:
-                parameter.accept(visitor, node)
+            self.signature.accept(visitor, node)
 
             for statement in self.statements:
                 statement.accept(visitor, node)

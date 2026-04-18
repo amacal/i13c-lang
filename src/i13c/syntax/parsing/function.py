@@ -47,9 +47,12 @@ def parse_function(state: ParsingState) -> tree.function.Function:
 
     return tree.function.Function(
         ref=state.between(name, end),
-        name=state.extract(name),
         noreturn=noreturn,
-        parameters=parameters,
+        signature=tree.function.Signature(
+            ref=state.between(name, end),
+            name=state.extract(name),
+            params=parameters,
+        ),
         statements=statements,
     )
 

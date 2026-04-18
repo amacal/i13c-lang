@@ -29,7 +29,7 @@ def build_functions(
         parameters: List[ParameterId] = []
         statements: List[Statement] = []
 
-        for parameter in function.parameters:
+        for parameter in function.signature.params:
             pid = graph.function.parameters.get_by_node(parameter)
             parameters.append(ParameterId(value=pid.value))
 
@@ -47,7 +47,7 @@ def build_functions(
 
         functions[function_id] = Function(
             ref=function.ref,
-            identifier=Identifier(data=function.name),
+            identifier=Identifier(data=function.signature.name),
             noreturn=function.noreturn,
             parameters=parameters,
             statements=statements,

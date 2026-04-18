@@ -9,3 +9,13 @@ def can_visit_a_signature_in_a_snippet_signature() -> None:
     )
 
     assert len(list(visitor.graph.snippet.signatures.items())) == 1
+
+
+def can_visit_a_signature_in_a_function_signature() -> None:
+    visitor = parse_syntax_graph(
+        """
+            fn main(x: u8, y: u64) { }
+        """
+    )
+
+    assert len(list(visitor.graph.function.signatures.items())) == 1

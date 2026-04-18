@@ -26,8 +26,8 @@ class FunctionListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",
-            "name": str(entry[1].name.decode()),
+            "name": str(entry[1].signature.name.decode()),
             "noreturn": str(entry[1].noreturn).lower(),
-            "params": str(len(entry[1].parameters)),
+            "params": str(len(entry[1].signature.params)),
             "stmts": str(len(entry[1].statements)),
         }
