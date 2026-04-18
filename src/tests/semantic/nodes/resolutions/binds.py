@@ -16,7 +16,8 @@ def can_accept_register_bind():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target == b"rax"
+    assert resolution.accepted[0].src == b"v"
+    assert resolution.accepted[0].dst == b"rax"
     assert resolution.accepted[0].mode == "register"
 
     assert source.extract(resolution.accepted[0].ref) == b"rax"
@@ -37,7 +38,8 @@ def can_accept_immediate_bind():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target == b"imm"
+    assert resolution.accepted[0].src == b"v"
+    assert resolution.accepted[0].dst == b"imm"
     assert resolution.accepted[0].mode == "immediate"
 
 

@@ -3,7 +3,6 @@ from typing import Dict
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.slots import Slot, SlotId
 from i13c.semantic.typing.entities.types import TypeId
 
@@ -26,10 +25,6 @@ def build_slots(
         # derive slot ID from globally unique node ID
         slot_id = SlotId(value=nid.value)
 
-        # reverse mapping to bind ID
-        nid = graph.binds.get_by_node(entry.bind)
-        bind_id = BindId(value=nid.value)
-
         # reverse mapping to type ID
         nid = graph.types.get_by_node(entry.type)
         type_id = TypeId(value=nid.value)
@@ -37,7 +32,6 @@ def build_slots(
         slots[slot_id] = Slot(
             ref=entry.ref,
             name=entry.name,
-            bind=bind_id,
             type=type_id,
         )
 

@@ -22,8 +22,6 @@ def can_accept_a_reference_handled_by_a_slot():
 
     assert isinstance(resolution.accepted[0].target, SlotAcceptance)
     assert resolution.accepted[0].target.name == b"x"
-    assert resolution.accepted[0].target.bind.mode == "register"
-    assert resolution.accepted[0].target.bind.target == b"rax"
 
     assert source.extract(resolution.accepted[0].ref) == b"@x"
 

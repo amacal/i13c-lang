@@ -18,9 +18,6 @@ def can_accept_valid_slot():
     assert resolution.accepted[0].id == id
     assert resolution.accepted[0].name == b"v"
 
-    assert resolution.accepted[0].bind.mode == "register"
-    assert resolution.accepted[0].bind.target == b"rax"
-
     assert resolution.accepted[0].type.name == b"u8"
     assert resolution.accepted[0].type.width == 8
 

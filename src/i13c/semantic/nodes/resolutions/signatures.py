@@ -26,22 +26,10 @@ def configure_signature_resolution() -> GraphGroup:
         ),
     )
 
-    validate_e3003 = GraphNode(
+    validate = GraphNode(
         builder=validate_signature_resolution_e3003,
         constraint=None,
         produces=("rules/e3003",),
-        requires=frozenset(
-            {
-                ("signatures", "entities/signatures"),
-                ("resolutions", "resolutions/signatures"),
-            }
-        ),
-    )
-
-    validate_e3015 = GraphNode(
-        builder=validate_signature_resolution_e3015,
-        constraint=None,
-        produces=("rules/e3015",),
         requires=frozenset(
             {
                 ("signatures", "entities/signatures"),
@@ -57,13 +45,12 @@ def configure_signature_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("rule_e3003", "rules/e3003"),
-                ("rule_e3015", "rules/e3015"),
                 ("resolutions", "resolutions/signatures"),
             }
         ),
     )
 
-    return GraphGroup(nodes=[resolve, validate_e3003, validate_e3015, extract])
+    return GraphGroup(nodes=[resolve, validate, extract])
 
 
 def build_signature_resolution(
@@ -79,7 +66,6 @@ def build_signature_resolution(
         )
 
         names: Set[bytes] = set()
-        registers: Set[bytes] = set()
         accepted: List[SlotAcceptance] = []
 
         for id in entry.slots:
@@ -95,18 +81,6 @@ def build_signature_resolution(
                         reason="duplicated-name",
                     )
                 )
-
-            if slot.bind.mode == "register":
-                if slot.bind.target not in registers:
-                    registers.add(slot.bind.target)
-
-                else:
-                    resolution.rejected.append(
-                        SignatureRejection(
-                            ref=slot.ref,
-                            reason="duplicated-register",
-                        )
-                    )
 
             # the slot survived the checks
             accepted.append(slot)
@@ -128,10 +102,9 @@ def build_signature_resolution(
 
 def check_signature_resolution_accepted(
     rule_e3003: List[Diagnostic],
-    rule_e3015: List[Diagnostic],
     **kwargs: Dict[str, Any],
 ) -> bool:
-    return len(rule_e3003) + len(rule_e3015) == 0
+    return len(rule_e3003) == 0
 
 
 def build_signature_resolution_accepted(
@@ -171,32 +144,4 @@ def report_signature_resolution_e3003(
         ref=rejection.ref,
         code="E3003",
         message=f"Duplicated slot name {entry}.",
-    )
-
-
-def validate_signature_resolution_e3015(
-    signatures: OneToOne[SignatureId, Signature],
-    resolutions: OneToOne[SignatureId, SignatureResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
-
-    for id, resolution in resolutions.items():
-        if len(resolution.accepted) != 1:
-            for rejection in resolution.rejected:
-                if rejection.reason == "duplicated-register":
-                    diagnostics.append(
-                        report_signature_resolution_e3015(signatures.get(id), rejection)
-                    )
-
-    return diagnostics
-
-
-def report_signature_resolution_e3015(
-    entry: Signature,
-    rejection: SignatureRejection,
-) -> Diagnostic:
-    return Diagnostic(
-        ref=rejection.ref,
-        code="E3015",
-        message=f"Duplicated register name {entry}.",
     )

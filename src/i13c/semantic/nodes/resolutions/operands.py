@@ -8,7 +8,9 @@ from i13c.semantic.typing.entities.immediates import ImmediateId
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.slots import SlotId
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
+from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.operands import (
@@ -34,6 +36,7 @@ def configure_operand_resolution() -> GraphGroup:
                 ("immediates", "resolutions/immediates/accepted"),
                 ("references", "resolutions/references/accepted"),
                 ("addresses", "resolutions/addresses/accepted"),
+                ("binds", "indices/binds/slots"),
             }
         ),
     )
@@ -93,8 +96,8 @@ def get_immediate_symbol(target: ImmediateAcceptance) -> OperandSymbol:
         return "imm64"
 
 
-def get_bind_symbol(target: SlotAcceptance) -> OperandSymbol:
-    if target.bind.mode == "register":
+def get_bind_symbol(target: SlotAcceptance, bind: BindAcceptance) -> OperandSymbol:
+    if bind.mode == "register":
         return "reg64"
 
     if target.type.width == 8:
@@ -116,6 +119,7 @@ def build_operand_resolution(
     immediates: OneToOne[ImmediateId, ImmediateAcceptance],
     references: OneToOne[ReferenceId, ReferenceAcceptance],
     addresses: OneToOne[AddressId, AddressAcceptance],
+    binds: OneToOne[SlotId, BindAcceptance],
 ) -> OneToOne[OperandId, OperandResolution]:
     resolutions: Dict[OperandId, OperandResolution] = {}
 
@@ -154,7 +158,9 @@ def build_operand_resolution(
 
             else:
                 assert isinstance(reference.target, SlotAcceptance)
-                symbol = get_bind_symbol(reference.target)
+
+                bind = binds.get(reference.target.id)
+                symbol = get_bind_symbol(reference.target, bind)
 
         else:
             assert isinstance(entry.target, AddressId)

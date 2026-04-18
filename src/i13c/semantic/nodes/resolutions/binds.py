@@ -64,7 +64,7 @@ def build_bind_resolution(
             rejected=[],
         )
 
-        if entry.name not in whitelist:
+        if entry.dst not in whitelist:
             resolution.rejected.append(
                 BindRejection(
                     ref=entry.ref,
@@ -77,8 +77,10 @@ def build_bind_resolution(
                 BindAcceptance(
                     ref=entry.ref,
                     id=bid,
-                    target=entry.name,
-                    mode="immediate" if entry.name == b"imm" else "register",
+                    ctx=entry.ctx,
+                    src=entry.src,
+                    dst=entry.dst,
+                    mode="immediate" if entry.dst == b"imm" else "register",
                 )
             )
 

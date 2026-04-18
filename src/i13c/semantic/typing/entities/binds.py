@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from i13c.semantic.typing.entities.slots import SlotId
 from i13c.syntax.source import Span
 
 
@@ -14,7 +15,10 @@ class BindId:
 @dataclass(kw_only=True)
 class Bind:
     ref: Span
-    name: bytes
+    ctx: SlotId
+
+    src: bytes
+    dst: bytes
 
     def __str__(self) -> str:
-        return self.name.decode()
+        return f"{self.src.decode()}:{self.dst.decode()}"

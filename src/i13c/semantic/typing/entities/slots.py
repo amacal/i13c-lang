@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.syntax.source import Span
 
@@ -17,9 +16,7 @@ class SlotId:
 class Slot:
     ref: Span
     name: bytes
-
-    bind: BindId
     type: TypeId
 
     def __str__(self) -> str:
-        return f"{self.name.decode()}, {self.bind.identify(1)}, {self.type.identify(1)}"
+        return f"{self.name.decode()}, {self.type.identify(1)}"

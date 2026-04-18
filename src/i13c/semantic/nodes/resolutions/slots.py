@@ -70,7 +70,6 @@ def build_slot_resolution(
                 ref=entry.ref,
                 id=sid,
                 name=entry.name,
-                bind=binds.get(slots.get(sid).bind),
                 type=types.get(slots.get(sid).type),
             )
         )

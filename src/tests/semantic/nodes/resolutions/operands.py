@@ -133,8 +133,6 @@ def can_accept_an_operand_from_an_address_using_a_reference_as_base():
 
     assert isinstance(resolution.accepted[0].target.base.target, SlotAcceptance)
     assert resolution.accepted[0].target.base.target.name == b"x"
-    assert resolution.accepted[0].target.base.target.bind.mode == "register"
-    assert resolution.accepted[0].target.base.target.bind.target == b"rax"
 
     assert source.extract(resolution.accepted[0].ref) == b"[@x + 0x0f]"
 
