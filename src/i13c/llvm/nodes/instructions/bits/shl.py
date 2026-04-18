@@ -1,84 +1,75 @@
 from typing import Dict, Protocol, Tuple
 
 from i13c.core.generator import Generator
-from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
 from i13c.llvm.typing.instructions.bits import SHL
-from i13c.llvm.typing.instructions.core import Immediate as Imm
-from i13c.llvm.typing.instructions.core import Register as Reg
-from i13c.semantic.typing.entities.instructions import (
-    Instruction as SemanticInstruction,
-)
-from i13c.semantic.typing.entities.operands import (
-    Immediate,
-    Operand,
-    OperandId,
-    OperandSymbol,
-    OperandTarget,
-    Register,
-)
+from i13c.llvm.typing.instructions.core import Immediate, Register
+from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
+from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
+from i13c.semantic.typing.resolutions.operands import OperandSymbol, OperandTarget
+from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 
 
 def lower_reg8_imm8(
     generator: Generator,
-    destination: Register,
-    source: Immediate,
+    destination: RegisterAcceptance,
+    source: ImmediateAcceptance,
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
         SHL(
-            dst=Reg.parse8(destination.name.decode()),
-            src=Imm.imm8(source.data),
+            dst=Register.parse8(destination.name.decode()),
+            src=Immediate.imm8(source.value.data),
         ),
     )
 
 
 def lower_reg16_imm8(
     generator: Generator,
-    destination: Register,
-    source: Immediate,
+    destination: RegisterAcceptance,
+    source: ImmediateAcceptance,
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
         SHL(
-            dst=Reg.parse16(destination.name.decode()),
-            src=Imm.imm8(source.data),
+            dst=Register.parse16(destination.name.decode()),
+            src=Immediate.imm8(source.value.data),
         ),
     )
 
 
 def lower_reg32_imm8(
     generator: Generator,
-    destination: Register,
-    source: Immediate,
+    destination: RegisterAcceptance,
+    source: ImmediateAcceptance,
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
         SHL(
-            dst=Reg.parse32(destination.name.decode()),
-            src=Imm.imm8(source.data),
+            dst=Register.parse32(destination.name.decode()),
+            src=Immediate.imm8(source.value.data),
         ),
     )
 
 
 def lower_reg64_imm8(
     generator: Generator,
-    destination: Register,
-    source: Immediate,
+    destination: RegisterAcceptance,
+    source: ImmediateAcceptance,
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
         SHL(
-            dst=Reg.parse64(destination.name.decode()),
-            src=Imm.imm8(source.data),
+            dst=Register.parse64(destination.name.decode()),
+            src=Immediate.imm8(source.value.data),
         ),
     )
 
 
 def lower_reg64_cl(
     generator: Generator,
-    destination: Register,
-    source: Register,
+    destination: RegisterAcceptance,
+    source: RegisterAcceptance,
 ) -> InstructionEntry:
 
     # verify that source is indeed cl
@@ -87,8 +78,8 @@ def lower_reg64_cl(
     return (
         InstructionId(value=generator.next()),
         SHL(
-            dst=Reg.parse64(destination.name.decode()),
-            src=Reg.parse8(source.name.decode()),
+            dst=Register.parse64(destination.name.decode()),
+            src=Register.parse8(source.name.decode()),
         ),
     )
 
@@ -103,29 +94,23 @@ class InstructionHandler(Protocol):
 
 
 DISPATCH_TABLE: Dict[Tuple[OperandSymbol, OperandSymbol], InstructionHandler] = {
-    (b"reg8", b"imm8"): lower_reg8_imm8,
-    (b"reg16", b"imm8"): lower_reg16_imm8,
-    (b"reg32", b"imm8"): lower_reg32_imm8,
-    (b"reg64", b"imm8"): lower_reg64_imm8,
-    (b"reg64", b"reg8"): lower_reg64_cl,
+    ("reg8", "imm8"): lower_reg8_imm8,
+    ("reg16", "imm8"): lower_reg16_imm8,
+    ("reg32", "imm8"): lower_reg32_imm8,
+    ("reg64", "imm8"): lower_reg64_imm8,
+    ("reg64", "reg8"): lower_reg64_cl,
 }  # pyright: ignore[reportAssignmentType]
 
 
 def lower_instruction_shl(
     generator: Generator,
-    operands: OneToOne[OperandId, Operand],
-    instruction: SemanticInstruction,
-    rewritten: Dict[OperandId, Operand],
+    instruction: InstructionAcceptance,
 ) -> InstructionEntry:
 
-    # first try out rewritten operands
-    dst = rewritten.get(instruction.operands[0])
-    src = rewritten.get(instruction.operands[1])
-
-    # fallback to original operands if not rewritten
-    dst = dst or operands.get(instruction.operands[0])
-    src = src or operands.get(instruction.operands[1])
+    # find operands
+    dst = instruction.operands[0]
+    src = instruction.operands[1]
 
     # find handler and call it
-    handler = DISPATCH_TABLE[(dst.target.symbol(), src.target.symbol())]
+    handler = DISPATCH_TABLE[(dst.symbol, src.symbol)]
     return handler(generator, dst.target, src.target)

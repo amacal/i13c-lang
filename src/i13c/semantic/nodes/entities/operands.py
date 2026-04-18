@@ -3,12 +3,11 @@ from typing import Dict
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.operands import (
-    Offset,
-    Operand,
-    OperandId,
-    Register,
-)
+from i13c.semantic.typing.entities.addresses import AddressId
+from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.entities.operands import Operand, OperandId
+from i13c.semantic.typing.entities.references import ReferenceId
+from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.syntax import tree
 
 
@@ -26,29 +25,67 @@ def build_operands(
 ) -> OneToOne[OperandId, Operand]:
     operands: Dict[OperandId, Operand] = {}
 
-    for nid, operand in graph.operands.items():
-        match operand:
-            case tree.snippet.Register() as reg:
-                target = Operand.register(operand.ref, reg.name)
-            case tree.snippet.Immediate() as imm:
-                target = Operand.immediate(operand.ref, imm.data.digits)
-            case tree.snippet.Reference() as ref:
-                target = Operand.reference(operand.ref, ref.name)
-            case tree.snippet.Address() as addr:
-                target = Operand.address(
-                    operand.ref,
-                    Register.from_name(addr.base.name),
-                    Offset.optional(
-                        (addr.offset.kind, addr.offset.value.data.digits)
-                        if addr.offset is not None
-                        else None
-                    ),
-                )
+    # try all immediates
+    for oid, node in graph.operands.items():
+        if isinstance(node, tree.snippet.Immediate):
+            nid = graph.immediates.get_by_node(node)
 
-        # derive operand ID from globally unique node ID
-        operand_id = OperandId(value=nid.value)
+            # derive operand ID from globally unique node ID
+            operand_id = OperandId(value=oid.value)
+            immediate_id = ImmediateId(value=nid.value)
 
-        # append to operands map
-        operands[operand_id] = target
+            # append to operands map
+            operands[operand_id] = Operand(
+                ref=node.ref,
+                kind="immediate",
+                target=immediate_id,
+            )
+
+    # try all registers
+    for oid, node in graph.operands.items():
+        if isinstance(node, tree.snippet.Register):
+            nid = graph.registers.get_by_node(node)
+
+            operand_id = OperandId(value=oid.value)
+            register_id = RegisterId(value=nid.value)
+
+            # append to operands map
+            operands[operand_id] = Operand(
+                ref=node.ref,
+                kind="register",
+                target=register_id,
+            )
+
+    # try all references
+    for oid, node in graph.operands.items():
+        if isinstance(node, tree.snippet.Reference):
+            nid = graph.references.get_by_node(node)
+
+            # derive operand ID from globally unique node ID
+            operand_id = OperandId(value=oid.value)
+            reference_id = ReferenceId(value=nid.value)
+
+            # append to operands map
+            operands[operand_id] = Operand(
+                ref=node.ref,
+                kind="reference",
+                target=reference_id,
+            )
+
+    # try all addresses
+    for oid, node in graph.operands.items():
+        if isinstance(node, tree.snippet.Address):
+            nid = graph.addresses.get_by_node(node)
+
+            # derive operand ID from globally unique node ID
+            operand_id = OperandId(value=oid.value)
+            address_id = AddressId(value=nid.value)
+
+            # append to operands map
+            operands[operand_id] = Operand(
+                ref=node.ref,
+                kind="address",
+                target=address_id,
+            )
 
     return OneToOne[OperandId, Operand].instance(operands)

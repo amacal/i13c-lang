@@ -7,7 +7,7 @@ from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.environments import EnvironmentId
 from i13c.semantic.typing.entities.immediates import ImmediateId
 from i13c.semantic.typing.entities.labels import LabelId
-from i13c.semantic.typing.entities.operand import OperandId
+from i13c.semantic.typing.entities.operands import OperandId
 from i13c.semantic.typing.entities.ranges import RangeId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId

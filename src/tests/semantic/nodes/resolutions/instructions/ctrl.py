@@ -1,17 +1,20 @@
-from tests.semantic.nodes.resolutions.instructions import prepare_resolution
+from typing import List
+
+from tests.semantic.nodes.resolutions.instructions import (
+    samples,
+    verify_instruction_resolution,
+)
 
 
-def can_accept_syscall():
-    resolution = prepare_resolution(
-        """
-            asm main() noreturn { syscall; }
-        """
-    )
-
-    assert len(resolution.rejected) == 0
-    assert len(resolution.accepted) == 1
-    acceptance = resolution.accepted[0]
-
-    assert acceptance.mnemonic.name == b"syscall"
-    assert len(acceptance.bindings) == 0
-    assert len(acceptance.variant) == 0
+@samples(
+    """
+        | ----------- | -------- | ------- | -------- |
+        | instruction | mnemonic | variant | status   |
+        | ----------- | -------- | ------- | -------- |
+        | syscall     | syscall  |         | accepted |
+        | syscall rax | syscall  | reg64   | rejected |
+        | ----------- | -------- | ------- | -------- |
+    """
+)
+def can_handle_syscall(instruction: str, mnemonic: str, variant: List[str], status: bool):
+    verify_instruction_resolution(instruction, mnemonic, variant, status)

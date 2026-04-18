@@ -1,71 +1,80 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Literal as Kind
-from typing import Tuple, Union
+from typing import Optional, Tuple
 
-from i13c.semantic.core import Identifier, Width
-from i13c.semantic.typing.entities.instructions import Mnemonic
-from i13c.semantic.typing.entities.operands import (
-    REGISTERS_8,
-    REGISTERS_16,
-    REGISTERS_32,
-    REGISTERS_64,
-    Address,
-    Immediate,
-    OperandId,
-    OperandKind,
-    Register,
-)
+from i13c.semantic.core import Identifier
+from i13c.semantic.typing.entities.instructions import InstructionId, Mnemonic
+from i13c.semantic.typing.entities.operands import OperandId
+from i13c.semantic.typing.resolutions.operands import OperandAcceptance
+from i13c.syntax.source import Span
 
 InstructionRejectionReason = Kind[
-    b"arity-mismatch",
-    b"type-mismatch",
-    b"width-mismatch",
-    b"register-mismatch",
-    b"unresolved",
+    "unknown-mnemonic",
+    "arity-mismatch",
+    "type-mismatch",
+    "width-mismatch",
+    "register-mismatch",
+    "unresolved",
+]
+
+OperandSymbol = Kind[
+    "reg8", "reg16", "reg32", "reg64", "imm8", "imm16", "imm32", "imm64", "addr"
 ]
 
 
 @dataclass(kw_only=True)
 class InstructionRejection:
-    mnemonic: Mnemonic
-    variant: MnemonicVariant
+    ref: Span
     reason: InstructionRejectionReason
 
 
 @dataclass(kw_only=True, frozen=True)
 class OperandSpec:
-    kind: OperandKind
-    width: Tuple[Width, ...]
-    names: Tuple[bytes, ...]
+    symbol: OperandSymbol
+    names: Optional[Tuple[bytes, ...]]
 
     @staticmethod
-    def registers_8bit(*names: bytes) -> "OperandSpec":
-        return OperandSpec(kind=b"register", width=(8,), names=names or REGISTERS_8)
+    def reg8(*names: bytes) -> "OperandSpec":
+        return OperandSpec(symbol="reg8", names=names)
 
     @staticmethod
-    def registers_16bit(*names: bytes) -> "OperandSpec":
-        return OperandSpec(kind=b"register", width=(16,), names=names or REGISTERS_16)
+    def reg16(*names: bytes) -> "OperandSpec":
+        return OperandSpec(symbol="reg16", names=names)
 
     @staticmethod
-    def registers_32bit(*names: bytes) -> "OperandSpec":
-        return OperandSpec(kind=b"register", width=(32,), names=names or REGISTERS_32)
+    def reg32(*names: bytes) -> "OperandSpec":
+        return OperandSpec(symbol="reg32", names=names)
 
     @staticmethod
-    def registers_64bit(*names: bytes) -> "OperandSpec":
-        return OperandSpec(kind=b"register", width=(64,), names=names or REGISTERS_64)
+    def reg64(*names: bytes) -> "OperandSpec":
+        return OperandSpec(symbol="reg64", names=names)
 
     @staticmethod
-    def immediate(*width: Width) -> "OperandSpec":
-        return OperandSpec(kind=b"immediate", width=width, names=())
+    def imm8() -> "OperandSpec":
+        return OperandSpec(symbol="imm8", names=())
 
     @staticmethod
-    def address_64bit() -> "OperandSpec":
-        return OperandSpec(
-            kind=b"address",
-            width=(64,),
-            names=(),
-        )
+    def imm16() -> "OperandSpec":
+        return OperandSpec(symbol="imm16", names=())
+
+    @staticmethod
+    def imm32() -> "OperandSpec":
+        return OperandSpec(symbol="imm32", names=())
+
+    @staticmethod
+    def imm64() -> "OperandSpec":
+        return OperandSpec(symbol="imm64", names=())
+
+    @staticmethod
+    def addr() -> "OperandSpec":
+        return OperandSpec(symbol="addr", names=())
+
+    def __str__(self) -> str:
+        if self.names is None:
+            return self.symbol
+
+        return ":".join(str(name) for name in (self.symbol, *self.names))
 
 
 @dataclass(kw_only=True)
@@ -80,15 +89,14 @@ class ReferenceToRegister:
     identifier: Identifier
 
 
-MnemonicBindingsItem = Union[Register, Immediate, Address, ReferenceToImmediate, ReferenceToRegister]
-MnemonicBindings = List[MnemonicBindingsItem]
-
-
 @dataclass(kw_only=True)
 class InstructionAcceptance:
+    ref: Span
+    id: InstructionId
+
     mnemonic: Mnemonic
     variant: MnemonicVariant
-    bindings: MnemonicBindings
+    operands: Tuple[OperandAcceptance, ...]
 
 
 @dataclass(kw_only=True)

@@ -10,9 +10,14 @@ class InstructionResolutionListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[InstructionId, Instruction, InstructionResolution]]:
+        resolutions = artifacts.semantic_graph().indices.resolution_by_instruction
+        assert (
+            resolutions is not None
+        )
+
         return (
             (iid, artifacts.semantic_graph().entities.instructions.get(iid), resolution)
-            for iid, resolution in artifacts.semantic_graph().indices.resolution_by_instruction.items()
+            for iid, resolution in resolutions.items()
         )
 
     @staticmethod

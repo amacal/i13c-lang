@@ -14,7 +14,7 @@ from i13c.llvm.typing.flows import (
 )
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
 from i13c.llvm.typing.instructions.ctrl import Call, Nop
-from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
+from i13c.llvm.typing.registers import VirtualRegister
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -36,11 +36,12 @@ def lower_callsite(
     bindings = graph.entities.bindings.get(node)
 
     if isinstance(bindings.callable.target, SnippetId):
+        assert graph.indices.instance_by_callsite
         instance = graph.indices.instance_by_callsite.get(node)
         target = bindings.callable.target
 
-        snippet = graph.entities.snippets.get(target)
-        clobbers = [name_to_reg64(reg.name.decode()) for reg in snippet.clobbers]
+        # snippet = graph.entities.snippets.get(target)
+        clobbers = [] #[name_to_reg64(reg.name.decode()) for reg in snippet.clobbers]
 
         # append callsite specific bindings
         instructions.extend(
@@ -53,7 +54,7 @@ def lower_callsite(
         if clobbers:
             # append callsite snippet flow
             iid = FlowId(value=generator.next())
-            instructions.extend([(iid, ClobbersFlow(clobbers=clobbers))])
+            instructions.extend([(iid, ClobbersFlow(clobbers=[]))])
 
     else:
 

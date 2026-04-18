@@ -6,6 +6,7 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.references import Reference, ReferenceId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
+from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.references import (
     ReferenceAcceptance,
     ReferenceRejection,
@@ -66,7 +67,8 @@ def build_reference_resolution(
         )
 
         # find the environment of this reference
-        environment = environments.get(entry.ctx)
+        snippet_id = SnippetId(value=entry.ctx.value)
+        environment = environments.get(snippet_id)
 
         if entry.name not in environment.entries:
             resolution.rejected.append(
@@ -78,12 +80,16 @@ def build_reference_resolution(
             )
 
         else:
+            target = environment.entries[entry.name]
+            kind = "label" if isinstance(target, LabelAcceptance) else "slot"
+
             resolution.accepted.append(
                 ReferenceAcceptance(
                     ref=entry.ref,
                     id=rid,
                     name=entry.name,
-                    target=environment.entries[entry.name],
+                    target=target,
+                    kind=kind,
                 )
             )
 

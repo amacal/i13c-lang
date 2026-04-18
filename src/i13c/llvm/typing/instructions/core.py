@@ -75,7 +75,10 @@ class DisplacementSource(Protocol):
     def kind(self) -> Kind["forward", "backward"]: ...
 
     @property
-    def value(self) -> DisplacementImmediate: ...
+    def data(self) -> bytes: ...
+
+    @property
+    def width(self) -> Kind[8, 16, 32]: ...
 
 
 @dataclass(kw_only=True)
@@ -111,11 +114,11 @@ class Displacement:
             return Displacement.none()
 
         assert not isinstance(source, (memoryview))
-        assert source.value.width in (8, 32)
+        assert source.width in (8, 32)
 
         return Displacement(
-            data=source.value.data,
-            width=source.value.width,
+            data=source.data,
+            width=source.width,
             direction=source.kind,
         )
 

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set
+from typing import Dict, Iterable, List, Optional, Set
 
+from i13c.core.diagnostics import Diagnostic
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities import EntityNodes
 from i13c.semantic.typing.entities.callables import CallableTarget
@@ -29,9 +30,9 @@ class IndexEdges:
     dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
     environment_by_flownode: OneToOne[FlowNode, Environment]
     flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
-    instance_by_callsite: OneToOne[CallSiteId, Instance]
+    instance_by_callsite: Optional[OneToOne[CallSiteId, Instance]]
     resolution_by_callsite: OneToOne[CallSiteId, CallSiteResolution]
-    resolution_by_instruction: OneToOne[InstructionId, InstructionResolution]
+    resolution_by_instruction: Optional[OneToOne[InstructionId, InstructionResolution]]
     resolution_by_value: OneToOne[ValueId, ValueResolution]
     terminality_by_function: OneToOne[FunctionId, Terminality]
     usages_by_expression: OneToMany[ExpressionId, UsageId]
@@ -67,3 +68,17 @@ class SemanticGraph:
                 return fid
 
         return None
+
+@dataclass(kw_only=True)
+class SemanticRules:
+    data: Dict[str, List[Diagnostic]]
+
+    def count(self) -> int:
+        return sum(len(diags) for diags in self.data.values())
+
+    def get(self, name: str) -> List[Diagnostic]:
+        return self.data.get(f"rules/{name}", [])
+
+    def enumerate(self) -> Iterable[Diagnostic]:
+        for diags in self.data.values():
+            yield from diags

@@ -3,7 +3,7 @@ from typing import List
 
 from i13c.semantic.core import Identifier, Type
 from i13c.semantic.typing.entities.instructions import Binding, InstructionId
-from i13c.semantic.typing.entities.operands import Register
+from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.syntax.source import Span
 
 
@@ -31,7 +31,7 @@ class Snippet:
     identifier: Identifier
     noreturn: bool
     slots: List[Slot]
-    clobbers: List[Register]
+    clobbers: List[RegisterId]
     instructions: List[InstructionId]
 
     def signature(self) -> str:

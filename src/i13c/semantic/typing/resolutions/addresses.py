@@ -14,6 +14,7 @@ AddressRejectionReason = Kind[
     "invalid-offset",
 ]
 
+OffsetWidth = Kind[8, 16, 32]
 AddressBase = Union[RegisterAcceptance, ReferenceAcceptance]
 
 
@@ -26,7 +27,12 @@ class AddressRejection:
 @dataclass(kw_only=True)
 class OffsetAcceptance:
     kind: OffsetKind
+    width: OffsetWidth
     value: ImmediateAcceptance
+
+    @property
+    def data(self) -> bytes:
+        return self.value.value.data
 
 
 @dataclass(kw_only=True)

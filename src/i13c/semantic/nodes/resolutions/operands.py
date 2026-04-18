@@ -5,18 +5,21 @@ from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.immediates import ImmediateId
-from i13c.semantic.typing.entities.operand import Operand, OperandId
+from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
+from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.operands import (
     OperandAcceptance,
     OperandRejection,
     OperandResolution,
+    OperandSymbol,
 )
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
+from i13c.semantic.typing.resolutions.slots import SlotAcceptance
 
 
 def configure_operand_resolution() -> GraphGroup:
@@ -26,7 +29,7 @@ def configure_operand_resolution() -> GraphGroup:
         produces=("resolutions/operands",),
         requires=frozenset(
             {
-                ("operands", "entities/operand"),
+                ("operands", "entities/operands"),
                 ("registers", "resolutions/registers/accepted"),
                 ("immediates", "resolutions/immediates/accepted"),
                 ("references", "resolutions/references/accepted"),
@@ -41,7 +44,7 @@ def configure_operand_resolution() -> GraphGroup:
         produces=("rules/e3021",),
         requires=frozenset(
             {
-                ("operands", "entities/operand"),
+                ("operands", "entities/operands"),
                 ("resolutions", "resolutions/operands"),
             }
         ),
@@ -62,6 +65,51 @@ def configure_operand_resolution() -> GraphGroup:
     return GraphGroup(nodes=[resolve, validate, extract])
 
 
+def get_register_symbol(target: RegisterAcceptance) -> OperandSymbol:
+    if target.width == 8:
+        return "reg8"
+
+    elif target.width == 16:
+        return "reg16"
+
+    elif target.width == 32:
+        return "reg32"
+
+    else:
+        return "reg64"
+
+
+def get_immediate_symbol(target: ImmediateAcceptance) -> OperandSymbol:
+    if target.value.width == 8:
+        return "imm8"
+
+    elif target.value.width == 16:
+        return "imm16"
+
+    elif target.value.width == 32:
+        return "imm32"
+
+    else:
+        return "imm64"
+
+
+def get_bind_symbol(target: SlotAcceptance) -> OperandSymbol:
+    if target.bind.mode == "register":
+        return "reg64"
+
+    if target.type.width == 8:
+        return "imm8"
+
+    elif target.type.width == 16:
+        return "imm16"
+
+    elif target.type.width == 32:
+        return "imm32"
+
+    else:
+        return "imm64"
+
+
 def build_operand_resolution(
     operands: OneToOne[OperandId, Operand],
     registers: OneToOne[RegisterId, RegisterAcceptance],
@@ -80,6 +128,7 @@ def build_operand_resolution(
         if entry.kind == "register":
             assert isinstance(entry.target, RegisterId)
             target = registers.get(entry.target)
+            symbol = get_register_symbol(target)
 
             if target.kind == "rip":
                 resolution.rejected.append(
@@ -93,14 +142,24 @@ def build_operand_resolution(
         elif entry.kind == "immediate":
             assert isinstance(entry.target, ImmediateId)
             target = immediates.get(entry.target)
+            symbol = get_immediate_symbol(target)
 
         elif entry.kind == "reference":
             assert isinstance(entry.target, ReferenceId)
-            target = references.get(entry.target)
+            reference = target = references.get(entry.target)
+
+            if reference.kind == "label":
+                assert isinstance(reference.target, LabelAcceptance)
+                symbol = "rel"
+
+            else:
+                assert isinstance(reference.target, SlotAcceptance)
+                symbol = get_bind_symbol(reference.target)
 
         else:
             assert isinstance(entry.target, AddressId)
             target = addresses.get(entry.target)
+            symbol = "addr"
 
         if not resolution.rejected:
             resolution.accepted.append(
@@ -109,6 +168,7 @@ def build_operand_resolution(
                     id=oid,
                     kind=entry.kind,
                     target=target,
+                    symbol=symbol,
                 )
             )
 

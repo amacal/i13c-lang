@@ -1,36 +1,31 @@
 from typing import Dict, Protocol, Tuple
 
 from i13c.core.generator import Generator
-from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
 from i13c.llvm.typing.instructions.addr import LEA
-from i13c.llvm.typing.instructions.core import ComputedAddress, Displacement
-from i13c.llvm.typing.instructions.core import Register as Reg
-from i13c.llvm.typing.instructions.core import Scaler
-from i13c.semantic.typing.entities.instructions import (
-    Instruction as SemanticInstruction,
-)
-from i13c.semantic.typing.entities.operands import (
-    Address,
-    Operand,
-    OperandId,
-    OperandSymbol,
-    OperandTarget,
+from i13c.llvm.typing.instructions.core import (
+    ComputedAddress,
+    Displacement,
     Register,
+    Scaler,
 )
+from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
+from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
+from i13c.semantic.typing.resolutions.operands import OperandSymbol, OperandTarget
+from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 
 
 def lower_reg32_addr(
     generator: Generator,
-    destination: Register,
-    source: Address,
+    destination: RegisterAcceptance,
+    source: AddressAcceptance,
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
         LEA(
-            dst=Reg.parse32(destination.name.decode()),
+            dst=Register.parse32(destination.name.decode()),
             src=ComputedAddress(
-                base=Reg.parse64(source.base.name.decode()),
+                base=Register.parse64(source.base.name.decode()),
                 disp=Displacement.auto(source.offset),
                 scaler=Scaler.none(),
                 width=64,
@@ -41,15 +36,15 @@ def lower_reg32_addr(
 
 def lower_reg64_addr(
     generator: Generator,
-    destination: Register,
-    source: Address,
+    destination: RegisterAcceptance,
+    source: AddressAcceptance,
 ) -> InstructionEntry:
     return (
         InstructionId(value=generator.next()),
         LEA(
-            dst=Reg.parse64(destination.name.decode()),
+            dst=Register.parse64(destination.name.decode()),
             src=ComputedAddress(
-                base=Reg.parse64(source.base.name.decode()),
+                base=Register.parse64(source.base.name.decode()),
                 disp=Displacement.auto(source.offset),
                 scaler=Scaler.none(),
                 width=64,
@@ -68,26 +63,20 @@ class InstructionHandler(Protocol):
 
 
 DISPATCH_TABLE: Dict[Tuple[OperandSymbol, OperandSymbol], InstructionHandler] = {
-    (b"reg32", b"addr"): lower_reg32_addr,
-    (b"reg64", b"addr"): lower_reg64_addr,
+    ("reg32", "addr"): lower_reg32_addr,
+    ("reg64", "addr"): lower_reg64_addr,
 }  # pyright: ignore[reportAssignmentType]
 
 
 def lower_instruction_lea(
     generator: Generator,
-    operands: OneToOne[OperandId, Operand],
-    instruction: SemanticInstruction,
-    rewritten: Dict[OperandId, Operand],
+    instruction: InstructionAcceptance,
 ) -> InstructionEntry:
 
-    # first try out rewritten operands
-    dst = rewritten.get(instruction.operands[0])
-    src = rewritten.get(instruction.operands[1])
-
-    # fallback to original operands if not rewritten
-    dst = dst or operands.get(instruction.operands[0])
-    src = src or operands.get(instruction.operands[1])
+    # find operands
+    dst = instruction.operands[0]
+    src = instruction.operands[1]
 
     # find handler and call it
-    handler = DISPATCH_TABLE[(dst.target.symbol(), src.target.symbol())]
+    handler = DISPATCH_TABLE[(dst.symbol, src.symbol)]
     return handler(generator, dst.target, src.target)

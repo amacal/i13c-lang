@@ -74,6 +74,9 @@ def build_address_resolution(
             rejected=[],
         )
 
+        # assume no offset is available
+        offset = None
+
         # resolve base register
         if isinstance(entry.base, RegisterId):
             register = registers.get(entry.base)
@@ -103,7 +106,7 @@ def build_address_resolution(
                 )
 
             # reject 32-bit immediates with the highest bit set (negative values)
-            if immediate.value.width == 32 and immediate.value.highest_bit():
+            elif immediate.value.width == 32 and immediate.value.highest_bit():
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
@@ -111,13 +114,12 @@ def build_address_resolution(
                     )
                 )
 
-            offset = OffsetAcceptance(
-                kind=entry.offset.kind,
-                value=immediate,
-            )
-
-        else:
-            offset = None
+            else:
+                offset = OffsetAcceptance(
+                    kind=entry.offset.kind,
+                    value=immediate,
+                    width=immediate.value.width,
+                )
 
         if len(resolution.rejected) == 0:
             resolution.accepted.append(

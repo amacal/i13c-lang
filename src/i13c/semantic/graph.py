@@ -1,24 +1,37 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
+from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.semantic.model import (
     CallGraph,
     IndexEdges,
     LiveComponents,
     SemanticGraph,
+    SemanticRules,
 )
 from i13c.semantic.nodes import configure_nodes
 from i13c.semantic.nodes.entities import parse_entities
 from i13c.semantic.nodes.resolutions import parse_resolutions
-from i13c.semantic.rules import configure_rules
+
+
+def configure_e3xxx() -> GraphNode:
+    def build(rules: Dict[str, List[Diagnostic]]) -> SemanticRules:
+        return SemanticRules(data=rules)
+
+    return GraphNode(
+        builder=build,
+        constraint=None,
+        produces=("rules/semantic",),
+        requires=frozenset({("rules", Prefix(value="rules/e3"))}),
+    )
 
 
 def configure_semantic_graph() -> GraphGroup:
     return GraphGroup(
         nodes=[
             configure_nodes(),
-            configure_rules(),
             configure_self(),
+            configure_e3xxx(),
         ]
     )
 
@@ -54,9 +67,9 @@ def build(
             dataflow_by_flownode=indices["indices/dataflow-by-flownode"],
             environment_by_flownode=indices["indices/environment-by-flownode"],
             flowgraph_by_function=indices["indices/flowgraph-by-function"],
-            instance_by_callsite=indices["indices/instance-by-callsite"],
+            instance_by_callsite=indices.get("indices/instance-by-callsite"),
             resolution_by_callsite=resolutions["resolutions/callsites"],
-            resolution_by_instruction=resolutions["resolutions/instructions"],
+            resolution_by_instruction=resolutions.get("resolutions/instructions"),
             resolution_by_value=resolutions["resolutions/values"],
             terminality_by_function=indices["indices/terminality-by-function"],
             usages_by_expression=indices["indices/usages-by-expression"],

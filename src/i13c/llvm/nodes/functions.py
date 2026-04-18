@@ -35,8 +35,7 @@ from i13c.llvm.typing.terminators import (
     JumpTerminator,
     TrapTerminator,
 )
-from i13c.semantic.model import SemanticGraph
-from i13c.semantic.rules import SemanticRules
+from i13c.semantic.model import SemanticGraph, SemanticRules
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import Hex, LiteralId
@@ -56,7 +55,7 @@ from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
 def verify(rules: SemanticRules, **kwargs: Dict[str, Any]) -> bool:
-    return rules.count() == 0
+    return rules.count() == -1
 
 
 def configure_functions() -> GraphNode:

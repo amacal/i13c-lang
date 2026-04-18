@@ -10,9 +10,12 @@ class InstanceListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[CallSiteId, CallSite, Instance]]:
+        instances = artifacts.semantic_graph().indices.instance_by_callsite
+        assert instances is not None
+
         return (
             (cid, artifacts.semantic_graph().entities.callsites.get(cid), instance)
-            for cid, instance in artifacts.semantic_graph().indices.instance_by_callsite.items()
+            for cid, instance in instances.items()
         )
 
     @staticmethod

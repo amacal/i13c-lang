@@ -1,13 +1,7 @@
 from typing import Dict, Iterable, Tuple
 
 from i13c.graph.artifacts import GraphArtifacts
-from i13c.semantic.typing.entities.operands import (
-    Immediate,
-    Operand,
-    OperandId,
-    Reference,
-    Register,
-)
+from i13c.semantic.typing.entities.operands import Operand, OperandId
 
 
 class OperandListExtractor:
@@ -21,11 +15,7 @@ class OperandListExtractor:
             "ref": "Reference",
             "id": "Operand ID",
             "kind": "Operand Kind",
-            "reg_name": "Register Name",
-            "reg_width": "Register Width",
-            "imm_value": "Immediate Value",
-            "imm_width": "Immediate Width",
-            "ref_name": "Reference Name",
+            "target": "Operand Target",
         }
 
     @staticmethod
@@ -33,30 +23,6 @@ class OperandListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
-            "kind": entry[1].kind.decode(),
-            "reg_name": (
-                entry[1].target.name.decode()
-                if isinstance(entry[1].target, Register)
-                else ""
-            ),
-            "reg_width": (
-                str(entry[1].target.width)
-                if isinstance(entry[1].target, Register)
-                else ""
-            ),
-            "imm_value": (
-                str(entry[1].target)
-                if isinstance(entry[1].target, Immediate)
-                else ""
-            ),
-            "imm_width": (
-                str(entry[1].target.width)
-                if isinstance(entry[1].target, Immediate)
-                else ""
-            ),
-            "ref_name": (
-                entry[1].target.name.decode()
-                if isinstance(entry[1].target, Reference)
-                else ""
-            ),
+            "kind": entry[1].kind,
+            "target": entry[1].target.identify(1),
         }

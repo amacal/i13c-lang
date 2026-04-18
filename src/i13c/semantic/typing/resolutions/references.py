@@ -9,6 +9,7 @@ from i13c.semantic.typing.resolutions.slots import SlotAcceptance
 from i13c.syntax.source import Span
 
 ReferenceRejectionReason = Kind["unknown-name"]
+ReferenceKind = Kind["slot", "label"]
 ReferenceTarget = Union[SlotAcceptance, LabelAcceptance]
 
 
@@ -25,6 +26,7 @@ class ReferenceAcceptance:
     id: ReferenceId
 
     name: bytes
+    kind: ReferenceKind
     target: ReferenceTarget
 
 

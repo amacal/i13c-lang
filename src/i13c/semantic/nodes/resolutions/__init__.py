@@ -9,7 +9,7 @@ from i13c.semantic.nodes.resolutions.environments import (
 )
 from i13c.semantic.nodes.resolutions.immediates import configure_immediate_resolution
 from i13c.semantic.nodes.resolutions.instructions import (
-    configure_resolution_by_instruction,
+    configure_instruction_resolution,
 )
 from i13c.semantic.nodes.resolutions.labels import configure_label_resolution
 from i13c.semantic.nodes.resolutions.operands import configure_operand_resolution
@@ -30,13 +30,13 @@ def configure_resolutions() -> GraphGroup:
             configure_bind_resolution(),
             configure_environment_resolution(),
             configure_immediate_resolution(),
+            configure_instruction_resolution(),
             configure_label_resolution(),
             configure_operand_resolution(),
             configure_range_resolution(),
             configure_reference_resolution(),
             configure_register_resolution(),
             configure_resolution_by_callsite(),
-            configure_resolution_by_instruction(),
             configure_resolution_by_value(),
             configure_signature_resolution(),
             configure_slot_resolution(),

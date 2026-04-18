@@ -5,7 +5,7 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Hex, Identifier, Range, Type, Width, default_range
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.instructions import Binding, InstructionId
-from i13c.semantic.typing.entities.operands import Register
+from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.entities.snippets import Slot, Snippet, SnippetId
 from i13c.syntax.tree.snippet import Instruction as Instruct
 
@@ -26,12 +26,12 @@ def build_snippets(
 
     for nid, snippet in graph.snippets.items():
         slots: List[Slot] = []
-        clobbers: List[Register] = []
+        clobbers: List[RegisterId] = []
         instructions: List[InstructionId] = []
 
         # collect clobbers
-        for reg in snippet.clobbers:
-            clobbers.append(Register(name=reg.name, width=64))
+        # for reg in snippet.clobbers:
+        #     clobbers.append(Register(name=reg.name, width=64))
 
         # collect slots
         for slot in snippet.signature.slots:
