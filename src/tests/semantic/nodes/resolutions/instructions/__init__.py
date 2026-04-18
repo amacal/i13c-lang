@@ -56,12 +56,9 @@ def prepare_resolution(code: str) -> InstructionResolution:
     _, program = prepare_program(code)
     semantic = run_graph(program).semantic_graph()
 
-    assert semantic is not None
-    instructions = semantic.indices.resolution_by_instruction
-
-    assert instructions is not None
-    assert instructions.size() == 1
-    _, value = instructions.peak()
+    assert semantic.resolutions.instructions is not None
+    assert semantic.resolutions.instructions.size() == 1
+    _, value = semantic.resolutions.instructions.peak()
 
     return value
 

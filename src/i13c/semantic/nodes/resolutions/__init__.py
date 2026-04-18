@@ -19,6 +19,7 @@ from i13c.semantic.nodes.resolutions.references import configure_reference_resol
 from i13c.semantic.nodes.resolutions.registers import configure_register_resolution
 from i13c.semantic.nodes.resolutions.signatures import configure_signature_resolution
 from i13c.semantic.nodes.resolutions.slots import configure_slot_resolution
+from i13c.semantic.nodes.resolutions.snippets import configure_snippet_resolution
 from i13c.semantic.nodes.resolutions.types import configure_type_resolution
 from i13c.semantic.nodes.resolutions.values import configure_resolution_by_value
 from i13c.semantic.typing.resolutions import ResolutionNodes
@@ -42,6 +43,7 @@ def configure_resolutions() -> GraphGroup:
             configure_resolution_by_value(),
             configure_signature_resolution(),
             configure_slot_resolution(),
+            configure_snippet_resolution(),
             configure_type_resolution(),
         ]
     )
@@ -53,6 +55,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         binds=resolutions.get("resolutions/binds"),
         environments=resolutions.get("resolutions/environments"),
         immediates=resolutions.get("resolutions/immediates"),
+        instructions=resolutions.get("resolutions/instructions"),
         labels=resolutions.get("resolutions/labels"),
         mnemonics=resolutions.get("resolutions/mnemonics"),
         operands=resolutions.get("resolutions/operands"),
@@ -61,5 +64,6 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         registers=resolutions.get("resolutions/registers"),
         signatures=resolutions.get("resolutions/signatures"),
         slots=resolutions.get("resolutions/slots"),
+        snippets=resolutions.get("resolutions/snippets"),
         types=resolutions.get("resolutions/types"),
     )

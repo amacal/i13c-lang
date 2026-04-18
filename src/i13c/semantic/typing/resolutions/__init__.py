@@ -6,6 +6,7 @@ from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.environments import EnvironmentId
 from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.labels import LabelId
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.semantic.typing.entities.operands import OperandId
@@ -14,11 +15,13 @@ from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.slots import SlotId
+from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
 from i13c.semantic.typing.resolutions.binds import BindResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
+from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from i13c.semantic.typing.resolutions.labels import LabelResolution
 from i13c.semantic.typing.resolutions.mnemonics import MnemonicResolution
 from i13c.semantic.typing.resolutions.operands import OperandResolution
@@ -27,6 +30,7 @@ from i13c.semantic.typing.resolutions.references import ReferenceResolution
 from i13c.semantic.typing.resolutions.registers import RegisterResolution
 from i13c.semantic.typing.resolutions.signatures import SignatureResolution
 from i13c.semantic.typing.resolutions.slots import SlotResolution
+from i13c.semantic.typing.resolutions.snippets import SnippetResolution
 from i13c.semantic.typing.resolutions.types import TypeResolution
 
 
@@ -36,6 +40,7 @@ class ResolutionNodes:
     binds: Optional[OneToOne[BindId, BindResolution]]
     environments: Optional[OneToOne[EnvironmentId, EnvironmentResolution]]
     immediates: Optional[OneToOne[ImmediateId, ImmediateResolution]]
+    instructions: Optional[OneToOne[InstructionId, InstructionResolution]]
     labels: Optional[OneToOne[LabelId, LabelResolution]]
     mnemonics: Optional[OneToOne[MnemonicId, MnemonicResolution]]
     operands: Optional[OneToOne[OperandId, OperandResolution]]
@@ -44,4 +49,5 @@ class ResolutionNodes:
     registers: Optional[OneToOne[RegisterId, RegisterResolution]]
     signatures: Optional[OneToOne[SignatureId, SignatureResolution]]
     slots: Optional[OneToOne[SlotId, SlotResolution]]
+    snippets: Optional[OneToOne[SnippetId, SnippetResolution]]
     types: Optional[OneToOne[TypeId, TypeResolution]]

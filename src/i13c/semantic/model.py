@@ -8,7 +8,6 @@ from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.slots import SlotId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.values import ValueId
@@ -25,7 +24,6 @@ from i13c.semantic.typing.resolutions import ResolutionNodes
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
-from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
@@ -41,7 +39,6 @@ class IndexEdges:
     flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
     instance_by_callsite: Optional[OneToOne[CallSiteId, Instance]]
     resolution_by_callsite: OneToOne[CallSiteId, CallSiteResolution]
-    resolution_by_instruction: Optional[OneToOne[InstructionId, InstructionResolution]]
     resolution_by_value: OneToOne[ValueId, ValueResolution]
     terminality_by_function: OneToOne[FunctionId, Terminality]
     usages_by_expression: OneToMany[ExpressionId, UsageId]

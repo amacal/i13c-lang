@@ -67,24 +67,6 @@ def can_reject_duplicate_slot_name_usage():
     assert source.extract(resolution.rejected[0].ref) == b"x@rbx: u8"
 
 
-# def can_reject_duplicated_slot_bind_usage():
-#     source, resolutions = prepare_resolutions(
-#         """
-#             asm main(x@rax: u8, y@rax: u8) { mov rax, rbx; }
-#         """
-#     )
-
-#     assert resolutions.signatures is not None
-#     assert resolutions.signatures.size() == 1
-#     _, resolution = resolutions.signatures.peak()
-
-#     assert len(resolution.accepted) == 0
-#     assert len(resolution.rejected) == 1
-
-#     assert resolution.rejected[0].reason == "duplicated-register"
-#     assert source.extract(resolution.rejected[0].ref) == b"y@rax: u8"
-
-
 def can_detect_a_broken_range_rule_e3003():
     _, rules = prepare_rules(
         """
@@ -93,13 +75,3 @@ def can_detect_a_broken_range_rule_e3003():
     )
 
     assert len(rules.get("e3003")) == 1
-
-
-# def can_detect_a_broken_range_rule_e3015():
-#     _, rules = prepare_rules(
-#         """
-#             asm main(x@rax: u8, y@rax: u8) { mov rax, rbx; }
-#         """
-#     )
-
-#     assert len(rules.get("e3015")) == 1

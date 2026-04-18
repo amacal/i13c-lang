@@ -1,9 +1,12 @@
-from typing import Dict, Optional
+from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
+from i13c.semantic.typing.entities.instructions import InstructionId
+from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
+from i13c.syntax import tree
 
 
 def configure_snippets() -> GraphNode:
@@ -17,72 +20,28 @@ def configure_snippets() -> GraphNode:
 
 def build_snippets(
     graph: SyntaxGraph,
-) -> OneToOne[SnippetId, Optional[Snippet]]:
-    snippets: Dict[SnippetId, Optional[Snippet]] = {}
+) -> OneToOne[SnippetId, Snippet]:
+    snippets: Dict[SnippetId, Snippet] = {}
 
-    for nid, _ in graph.snippets.items():
-        snippet_id = SnippetId(value=nid.value)
-
-        snippets[snippet_id] = None
-    #     slots: List[Slot] = []
-    #     clobbers: List[RegisterId] = []
-    #     instructions: List[InstructionId] = []
-
-        # collect clobbers
-        # for reg in snippet.clobbers:
-        #     clobbers.append(Register(name=reg.name, width=64))
-
-        # collect slots
-        # for _ in snippet.signature.slots:
-            # default width and ranges for declared type
-            # range: Range = default_range(slot.type.name)
-
-            # # override ranges if specified
-            # if slot.type.range is not None:
-            #     range = Range(
-            #         lower=Hex.derive(slot.type.range.lower.digits),
-            #         upper=Hex.derive(slot.type.range.upper.digits),
-            #     )
-
-            # derive width from ranges
-            # width: Width = max(range.lower.width, range.upper.width)
-
-            # # construct slot type with range or default width
-            # type = Type(
-            #     name=slot.type.name,
-            #     width=width,
-            #     range=range,
-            # )
-
-            # if slot.bind.name == b"imm":
-            #     binding = Binding.immediate()
-            # else:
-            #     binding = Binding.register(name=slot.bind.name)
-
-            # slots.append(
-            #     Slot(
-            #         name=Identifier(data=slot.name),
-            #         bind=binding,
-            #         type=type,
-            #     )
-            # )
-
-        # for instruction in snippet.body:
-        #     if isinstance(instruction, Instruct):
-        #         # identify instruction ID from globally unique node ID
-        #         instruction_node = graph.instructions.get_by_node(instruction)
-        #         instructions.append(InstructionId(value=instruction_node.value))
-
+    for nid, node in graph.snippets.items():
         # derive snippet ID from globally unique node ID
-        # snippet_id = SnippetId(value=nid.value)
+        snippet_id = SnippetId(value=nid.value)
+        instructions: List[InstructionId] = []
 
-        # snippets[snippet_id] = Snippet(
-        #     ref=snippet.ref,
-        #     identifier=Identifier(data=snippet.signature.name),
-        #     noreturn=snippet.noreturn,
-        #     slots=slots,
-        #     clobbers=clobbers,
-        #     instructions=instructions,
-        # )
+        # identify signature ID from globally unique node ID
+        nid = graph.signatures.get_by_node(node.signature)
+        signature_id = SignatureId(value=nid.value)
 
-    return OneToOne[SnippetId, Optional[Snippet]].instance(snippets)
+        for instruction in node.body:
+            if isinstance(instruction, tree.snippet.Instruction):
+                # identify instruction ID from globally unique node ID
+                instruction_node = graph.instructions.get_by_node(instruction)
+                instructions.append(InstructionId(value=instruction_node.value))
+
+        snippets[snippet_id] = Snippet(
+            ref=node.ref,
+            signature=signature_id,
+            instructions=instructions,
+        )
+
+    return OneToOne[SnippetId, Snippet].instance(snippets)

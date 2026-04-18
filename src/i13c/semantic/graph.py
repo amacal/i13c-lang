@@ -72,7 +72,6 @@ def build(
             flowgraph_by_function=indices["indices/flowgraph-by-function"],
             instance_by_callsite=indices.get("indices/instance-by-callsite"),
             resolution_by_callsite=resolutions["resolutions/callsites"],
-            resolution_by_instruction=resolutions.get("resolutions/instructions"),
             resolution_by_value=resolutions["resolutions/values"],
             terminality_by_function=indices["indices/terminality-by-function"],
             usages_by_expression=indices["indices/usages-by-expression"],

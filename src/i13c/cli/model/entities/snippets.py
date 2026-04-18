@@ -14,8 +14,7 @@ class SnippetListExtractor:
         return {
             "ref": "Reference",
             "id": "Snippet ID",
-            "name": "Snippet Name",
-            "clbbrs": "Clobbers",
+            "sign": "Signature",
             "instrs": "Instructions",
         }
 
@@ -24,7 +23,6 @@ class SnippetListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
-            "name": str(entry[1].identifier),
-            "clbbrs": str(len(entry[1].clobbers)),
+            "sign": entry[1].signature.identify(1),
             "instrs": str(len(entry[1].instructions)),
         }
