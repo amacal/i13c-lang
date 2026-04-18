@@ -12,6 +12,7 @@ from i13c.semantic.nodes.indices.environments import (
     configure_environments_by_snippets,
 )
 from i13c.semantic.nodes.indices.instances import configure_instance_by_callsite
+from i13c.semantic.nodes.indices.signatures import configure_signatures_by_names
 from i13c.semantic.nodes.indices.terminalities import configure_terminality_by_function
 from i13c.semantic.nodes.indices.usages import configure_usages_by_expression
 from i13c.semantic.nodes.indices.variables import configure_variables_by_parameters
@@ -21,18 +22,19 @@ from i13c.semantic.nodes.resolutions import configure_resolutions
 def configure_nodes() -> GraphGroup:
     return GraphGroup(
         nodes=[
-            configure_entities(),
-            configure_resolutions(),
             configure_callables_live(),
             configure_callgraphs_live(),
             configure_callgraphs(),
             configure_dataflow_by_flownode(),
+            configure_entities(),
             configure_entrypoint_by_callable(),
             configure_environment_by_flownode(),
             configure_environments_by_snippets(),
             configure_flowgraph_by_function(),
             configure_flowgraphs_live(),
             configure_instance_by_callsite(),
+            configure_resolutions(),
+            configure_signatures_by_names(),
             configure_terminality_by_function(),
             configure_usages_by_expression(),
             configure_variables_by_parameters(),

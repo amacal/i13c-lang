@@ -9,6 +9,7 @@ from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.instructions import InstructionId
+from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.indices.callgraphs import CallPair
 from i13c.semantic.typing.indices.controlflows import FlowGraph, FlowNode
@@ -21,12 +22,17 @@ from i13c.semantic.typing.indices.usages import UsageId
 from i13c.semantic.typing.indices.variables import VariableId, VariableSource
 from i13c.semantic.typing.resolutions import ResolutionNodes
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
+from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
+from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
 @dataclass
 class IndexEdges:
+    environments_by_snippets: Optional[OneToOne[SnippetId, EnvironmentAcceptance]]
+    signatures_by_names: Optional[OneToMany[bytes, SignatureAcceptance]]
+
     dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
     environment_by_flownode: OneToOne[FlowNode, Environment]
     flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
@@ -68,6 +74,7 @@ class SemanticGraph:
                 return fid
 
         return None
+
 
 @dataclass(kw_only=True)
 class SemanticRules:

@@ -64,6 +64,8 @@ def build(
     return SemanticGraph(
         entities=parse_entities(entities),
         indices=IndexEdges(
+            environments_by_snippets=indices.get("indices/environments/snippets"),
+            signatures_by_names=indices.get("indices/signatures/names"),
             dataflow_by_flownode=indices["indices/dataflow-by-flownode"],
             environment_by_flownode=indices["indices/environment-by-flownode"],
             flowgraph_by_function=indices["indices/flowgraph-by-function"],
