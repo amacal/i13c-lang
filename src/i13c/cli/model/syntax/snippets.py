@@ -8,7 +8,7 @@ from i13c.syntax import tree
 class SnippetListExtractor:
     @staticmethod
     def extract(artifacts: GraphArtifacts) -> Iterable[Tuple[NodeId, tree.snippet.Snippet]]:
-        return artifacts.syntax_graph().snippets.items()
+        return artifacts.syntax_graph().snippet.snippets.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

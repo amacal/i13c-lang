@@ -10,7 +10,7 @@ class InstructionListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[NodeId, tree.snippet.Instruction]]:
-        return artifacts.syntax_graph().instructions.items()
+        return artifacts.syntax_graph().snippet.instructions.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

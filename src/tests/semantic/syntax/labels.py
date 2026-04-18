@@ -8,4 +8,4 @@ def can_visit_a_label() -> None:
         """
     )
 
-    assert len(list(visitor.graph.labels.items())) == 1
+    assert len(list(visitor.graph.snippet.labels.items())) == 1

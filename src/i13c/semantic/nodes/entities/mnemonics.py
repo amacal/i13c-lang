@@ -20,7 +20,7 @@ def build_mnemonics(
 ) -> OneToOne[MnemonicId, Mnemonic]:
     mnemonics: Dict[MnemonicId, Mnemonic] = {}
 
-    for mid, node in graph.mnemonics.items():
+    for mid, node in graph.snippet.mnemonics.items():
         mnemonic_id = MnemonicId(value=mid.value)
 
         # append to mnemonics map

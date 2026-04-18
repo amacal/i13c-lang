@@ -21,7 +21,7 @@ def build_immediates(
 ) -> OneToOne[ImmediateId, Immediate]:
     immediates: Dict[ImmediateId, Immediate] = {}
 
-    for id, entry in graph.immediates.items():
+    for id, entry in graph.snippet.immediates.items():
         # derive immediate ID from globally unique node ID
         immediate_id = ImmediateId(value=id.value)
 

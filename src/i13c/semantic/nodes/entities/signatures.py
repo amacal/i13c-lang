@@ -22,16 +22,16 @@ def build_signatures(
 ) -> OneToOne[SignatureId, Signature]:
     signatures: Dict[SignatureId, Signature] = {}
 
-    for nid, entry in graph.signatures.items():
+    for nid, entry in graph.snippet.signatures.items():
         # derive signature ID from globally unique node ID
         signature_id = SignatureId(value=nid.value)
 
-        snippet = graph.signatures.get_ctx(nid)
-        nid = graph.snippets.get_by_node(snippet)
+        snippet = graph.snippet.signatures.get_ctx(nid)
+        nid = graph.snippet.snippets.get_by_node(snippet)
 
         # reverse mapping to slot ID
         def map_slot(slot: Slot) -> SlotId:
-            nid = graph.slots.get_by_node(slot)
+            nid = graph.snippet.slots.get_by_node(slot)
             return SlotId(value=nid.value)
 
         signatures[signature_id] = Signature(

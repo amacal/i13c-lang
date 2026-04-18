@@ -9,6 +9,7 @@ from i13c.syntax.tree.core import Path
 
 class Visitor(Protocol):
     def on_function(self, function: Function, path: Path) -> None: ...
+    def on_signature(self, signature: Signature, path: Path) -> None: ...
     def on_statement(self, statement: Statement, path: Path) -> None: ...
     def on_literal(self, literal: Literal, path: Path) -> None: ...
     def on_expression(self, expression: Expression, path: Path) -> None: ...
@@ -91,6 +92,20 @@ class ValueStatement:
 
             # then the expression
             self.expr.accept(visitor, node)
+
+
+@dataclass(kw_only=True, eq=False)
+class Signature:
+    ref: Span
+    name: bytes
+    params: List[Parameter]
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_signature(self, path)
+
+        with path.push(self) as node:
+            for entry in self.params:
+                entry.accept(visitor, node)
 
 
 Statement = Union[CallStatement, ValueStatement]

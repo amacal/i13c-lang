@@ -24,21 +24,21 @@ def build_addresses(
 ) -> OneToOne[AddressId, Address]:
     addresses: Dict[AddressId, Address] = {}
 
-    for nid, entry in graph.addresses.items():
+    for nid, entry in graph.snippet.addresses.items():
         # derive address ID from globally unique node ID
         address_id = AddressId(value=nid.value)
 
         # reverse mapping to base register ID
         if isinstance(entry.base, tree.snippet.Register):
-            base = graph.registers.get_by_node(entry.base)
+            base = graph.snippet.registers.get_by_node(entry.base)
             base_id = RegisterId(value=base.value)
         else:
-            base = graph.references.get_by_node(entry.base)
+            base = graph.snippet.references.get_by_node(entry.base)
             base_id = ReferenceId(value=base.value)
 
         # reverse mapping to immediate ID
         if entry.offset is not None:
-            offset = graph.immediates.get_by_node(entry.offset.value)
+            offset = graph.snippet.immediates.get_by_node(entry.offset.value)
             offset_id = ImmediateId(value=offset.value)
 
             offset = Offset(

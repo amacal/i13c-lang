@@ -8,4 +8,4 @@ def can_visit_immediates_in_an_operand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.immediates.items())) == 1
+    assert len(list(visitor.graph.snippet.immediates.items())) == 1

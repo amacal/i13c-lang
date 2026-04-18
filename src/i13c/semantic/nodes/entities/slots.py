@@ -21,7 +21,7 @@ def build_slots(
 ) -> OneToOne[SlotId, Slot]:
     slots: Dict[SlotId, Slot] = {}
 
-    for nid, entry in graph.slots.items():
+    for nid, entry in graph.snippet.slots.items():
         # derive slot ID from globally unique node ID
         slot_id = SlotId(value=nid.value)
 

@@ -8,4 +8,4 @@ def can_visit_mnemonics_in_an_instruction() -> None:
         """
     )
 
-    assert len(list(visitor.graph.mnemonics.items())) == 1
+    assert len(list(visitor.graph.snippet.mnemonics.items())) == 1

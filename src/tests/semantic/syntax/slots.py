@@ -8,4 +8,4 @@ def can_visit_slots_in_a_snippet_signature() -> None:
         """
     )
 
-    assert len(list(visitor.graph.slots.items())) == 1
+    assert len(list(visitor.graph.snippet.slots.items())) == 1

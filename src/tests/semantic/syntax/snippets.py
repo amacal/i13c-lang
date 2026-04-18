@@ -8,8 +8,8 @@ def can_visit_all_nodes_in_a_snippet() -> None:
         """
     )
 
-    assert len(list(visitor.graph.snippets.items())) == 1
-    assert len(list(visitor.graph.instructions.items())) == 1
+    assert len(list(visitor.graph.snippet.snippets.items())) == 1
+    assert len(list(visitor.graph.snippet.instructions.items())) == 1
 
     assert len(list(visitor.graph.functions.items())) == 0
     assert len(list(visitor.graph.statements.items())) == 0

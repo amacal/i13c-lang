@@ -22,19 +22,19 @@ def build_instructions(
 ) -> OneToOne[InstructionId, Instruction]:
     instructions: Dict[InstructionId, Instruction] = {}
 
-    for nid, instruction in graph.instructions.items():
+    for nid, instruction in graph.snippet.instructions.items():
         operands: List[OperandId] = []
 
         # collect operand IDs from reverse mapping
         for operand in instruction.operands:
-            oid = graph.operands.get_by_node(operand)
+            oid = graph.snippet.operands.get_by_node(operand)
             operands.append(OperandId(value=oid.value))
 
         # derive instruction ID from globally unique node ID
         instruction_id = InstructionId(value=nid.value)
 
         # derive mnemonic ID from globally unique node ID
-        oid = graph.mnemonics.get_by_node(instruction.mnemonic)
+        oid = graph.snippet.mnemonics.get_by_node(instruction.mnemonic)
         mnemonic_id = MnemonicId(value=oid.value)
 
         # append to instructions map

@@ -2,7 +2,7 @@
 # pyright: reportUnusedImport=false
 
 from dataclasses import dataclass
-from typing import List, Protocol
+from typing import List, Protocol, Union
 
 import i13c.syntax.tree.function as function
 import i13c.syntax.tree.literals as literals
@@ -10,13 +10,14 @@ import i13c.syntax.tree.snippet as snippet
 import i13c.syntax.tree.types as types
 from i13c.syntax.tree.core import Path
 
+Signature = Union[function.Signature, snippet.Signature]
 
 class Visitor(Protocol):
     def on_program(self, program: Program, path: Path) -> None: ...
 
     # snippet related
     def on_snippet(self, snippet: snippet.Snippet, path: Path) -> None: ...
-    def on_signature(self, signature: snippet.Signature, path: Path) -> None: ...
+    def on_signature(self, signature: Signature, path: Path) -> None: ...
     def on_slot(self, slot: snippet.Slot, path: Path) -> None: ...
     def on_bind(self, bind: snippet.Bind, path: Path) -> None: ...
     def on_label(self, label: snippet.Label, path: Path) -> None: ...

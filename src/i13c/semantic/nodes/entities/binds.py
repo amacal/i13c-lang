@@ -21,10 +21,10 @@ def build_binds(
 ) -> OneToOne[BindId, Bind]:
     binds: Dict[BindId, Bind] = {}
 
-    for nid, entry in graph.binds.items():
+    for nid, entry in graph.snippet.binds.items():
         # find the parent slot
-        slot = graph.binds.get_ctx(nid)
-        ctx = graph.slots.get_by_node(slot)
+        slot = graph.snippet.binds.get_ctx(nid)
+        ctx = graph.snippet.slots.get_by_node(slot)
         slot_id = SlotId(value=ctx.value)
 
         # derive bind ID from globally unique node ID

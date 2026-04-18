@@ -8,7 +8,7 @@ def can_visit_a_base_address() -> None:
         """
     )
 
-    assert len(list(visitor.graph.addresses.items())) == 1
+    assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
 def can_visit_a_rip_address() -> None:
@@ -18,4 +18,4 @@ def can_visit_a_rip_address() -> None:
         """
     )
 
-    assert len(list(visitor.graph.addresses.items())) == 1
+    assert len(list(visitor.graph.snippet.addresses.items())) == 1

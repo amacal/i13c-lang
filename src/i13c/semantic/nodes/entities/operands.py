@@ -26,9 +26,9 @@ def build_operands(
     operands: Dict[OperandId, Operand] = {}
 
     # try all immediates
-    for oid, node in graph.operands.items():
+    for oid, node in graph.snippet.operands.items():
         if isinstance(node.target, tree.snippet.Immediate):
-            nid = graph.immediates.get_by_node(node.target)
+            nid = graph.snippet.immediates.get_by_node(node.target)
 
             # derive operand ID from globally unique node ID
             operand_id = OperandId(value=oid.value)
@@ -42,9 +42,9 @@ def build_operands(
             )
 
     # try all registers
-    for oid, node in graph.operands.items():
+    for oid, node in graph.snippet.operands.items():
         if isinstance(node.target, tree.snippet.Register):
-            nid = graph.registers.get_by_node(node.target)
+            nid = graph.snippet.registers.get_by_node(node.target)
 
             operand_id = OperandId(value=oid.value)
             register_id = RegisterId(value=nid.value)
@@ -57,9 +57,9 @@ def build_operands(
             )
 
     # try all references
-    for oid, node in graph.operands.items():
+    for oid, node in graph.snippet.operands.items():
         if isinstance(node.target, tree.snippet.Reference):
-            nid = graph.references.get_by_node(node.target)
+            nid = graph.snippet.references.get_by_node(node.target)
 
             # derive operand ID from globally unique node ID
             operand_id = OperandId(value=oid.value)
@@ -73,9 +73,9 @@ def build_operands(
             )
 
     # try all addresses
-    for oid, node in graph.operands.items():
+    for oid, node in graph.snippet.operands.items():
         if isinstance(node.target, tree.snippet.Address):
-            nid = graph.addresses.get_by_node(node.target)
+            nid = graph.snippet.addresses.get_by_node(node.target)
 
             # derive operand ID from globally unique node ID
             operand_id = OperandId(value=oid.value)

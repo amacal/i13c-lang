@@ -8,7 +8,7 @@ def can_visit_a_register_operand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.operands.items())) == 1
+    assert len(list(visitor.graph.snippet.operands.items())) == 1
 
 
 def can_visit_an_immediate_operand() -> None:
@@ -18,7 +18,7 @@ def can_visit_an_immediate_operand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.operands.items())) == 1
+    assert len(list(visitor.graph.snippet.operands.items())) == 1
 
 
 def can_visit_a_reference_operand() -> None:
@@ -28,7 +28,7 @@ def can_visit_a_reference_operand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.operands.items())) == 1
+    assert len(list(visitor.graph.snippet.operands.items())) == 1
 
 
 def can_visit_a_base_operand() -> None:
@@ -38,7 +38,7 @@ def can_visit_a_base_operand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.operands.items())) == 1
+    assert len(list(visitor.graph.snippet.operands.items())) == 1
 
 
 def can_visit_a_rip_operand() -> None:
@@ -48,4 +48,4 @@ def can_visit_a_rip_operand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.operands.items())) == 1
+    assert len(list(visitor.graph.snippet.operands.items())) == 1

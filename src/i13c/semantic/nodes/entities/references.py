@@ -21,13 +21,13 @@ def build_references(
 ) -> OneToOne[ReferenceId, Reference]:
     references: Dict[ReferenceId, Reference] = {}
 
-    for id, entry in graph.references.items():
+    for id, entry in graph.snippet.references.items():
         # derive reference ID from globally unique node ID
         reference_id = ReferenceId(value=id.value)
 
         # look up for the snippet context of this reference
-        snippet = graph.references.get_ctx(id)
-        nid = graph.snippets.get_by_node(snippet)
+        snippet = graph.snippet.references.get_ctx(id)
+        nid = graph.snippet.snippets.get_by_node(snippet)
         snippet_id = SnippetId(value=nid.value)
 
         references[reference_id] = Reference(

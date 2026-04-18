@@ -8,4 +8,4 @@ def can_visit_binds_in_a_snippet_signature() -> None:
         """
     )
 
-    assert len(list(visitor.graph.binds.items())) == 1
+    assert len(list(visitor.graph.snippet.binds.items())) == 1

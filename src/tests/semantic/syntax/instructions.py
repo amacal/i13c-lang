@@ -8,7 +8,7 @@ def can_visit_an_instruction_without_any_opperand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.instructions.items())) == 1
+    assert len(list(visitor.graph.snippet.instructions.items())) == 1
 
 
 def can_visit_an_instruction_with_some_operands() -> None:
@@ -18,4 +18,4 @@ def can_visit_an_instruction_with_some_operands() -> None:
         """
     )
 
-    assert len(list(visitor.graph.instructions.items())) == 1
+    assert len(list(visitor.graph.snippet.instructions.items())) == 1

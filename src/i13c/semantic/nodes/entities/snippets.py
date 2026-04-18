@@ -23,19 +23,19 @@ def build_snippets(
 ) -> OneToOne[SnippetId, Snippet]:
     snippets: Dict[SnippetId, Snippet] = {}
 
-    for nid, node in graph.snippets.items():
+    for nid, node in graph.snippet.snippets.items():
         # derive snippet ID from globally unique node ID
         snippet_id = SnippetId(value=nid.value)
         instructions: List[InstructionId] = []
 
         # identify signature ID from globally unique node ID
-        nid = graph.signatures.get_by_node(node.signature)
+        nid = graph.snippet.signatures.get_by_node(node.signature)
         signature_id = SignatureId(value=nid.value)
 
         for instruction in node.body:
             if isinstance(instruction, tree.snippet.Instruction):
                 # identify instruction ID from globally unique node ID
-                instruction_node = graph.instructions.get_by_node(instruction)
+                instruction_node = graph.snippet.instructions.get_by_node(instruction)
                 instructions.append(InstructionId(value=instruction_node.value))
 
         snippets[snippet_id] = Snippet(

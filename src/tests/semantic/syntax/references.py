@@ -8,4 +8,4 @@ def can_visit_references_in_an_operand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.references.items())) == 1
+    assert len(list(visitor.graph.snippet.references.items())) == 1

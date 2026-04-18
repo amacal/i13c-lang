@@ -21,12 +21,12 @@ def build_labels(
 ) -> OneToOne[LabelId, Label]:
     labels: Dict[LabelId, Label] = {}
 
-    for id, entry in graph.labels.items():
+    for id, entry in graph.snippet.labels.items():
         # derive label ID from globally unique node ID
         label_id = LabelId(value=id.value)
 
-        snippet = graph.labels.get_ctx(id)
-        nid = graph.snippets.get_by_node(snippet)
+        snippet = graph.snippet.labels.get_ctx(id)
+        nid = graph.snippet.snippets.get_by_node(snippet)
         snippet_id = SnippetId(value=nid.value)
 
         labels[label_id] = Label(

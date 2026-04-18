@@ -20,7 +20,7 @@ def build_registers(
 ) -> OneToOne[RegisterId, Register]:
     registers: Dict[RegisterId, Register] = {}
 
-    for id, entry in graph.registers.items():
+    for id, entry in graph.snippet.registers.items():
         # derive register ID from globally unique node ID
         register_id = RegisterId(value=id.value)
 

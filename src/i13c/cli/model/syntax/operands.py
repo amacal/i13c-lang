@@ -10,7 +10,7 @@ class OperandListExtractor:
     def extract(
         artifacts: GraphArtifacts,
     ) -> Iterable[Tuple[NodeId, tree.snippet.Operand]]:
-        return artifacts.syntax_graph().operands.items()
+        return artifacts.syntax_graph().snippet.operands.items()
 
     @staticmethod
     def headers() -> Dict[str, str]:

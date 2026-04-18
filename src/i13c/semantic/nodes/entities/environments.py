@@ -23,7 +23,7 @@ def build_environments(
 ) -> OneToOne[EnvironmentId, Environment]:
     environments: Dict[EnvironmentId, Environment] = {}
 
-    for id, entry in graph.snippets.items():
+    for id, entry in graph.snippet.snippets.items():
         # derive environment ID from globally unique node ID
         environment_id = EnvironmentId(value=id.value)
 
@@ -39,13 +39,13 @@ def build_environments(
         )
 
     # append signatures to the environments of their snippet contexts
-    for id, entry in graph.signatures.items():
+    for id, entry in graph.snippet.signatures.items():
         # derive signature ID from globally unique node ID
         signature_id = SignatureId(value=id.value)
 
         # look up for the snippet context of this signature
-        snippet = graph.signatures.get_ctx(id)
-        nid = graph.snippets.get_by_node(snippet)
+        snippet = graph.snippet.signatures.get_ctx(id)
+        nid = graph.snippet.snippets.get_by_node(snippet)
         snippet_id = SnippetId(value=nid.value)
 
         # append this signature to the environment of the snippet context
@@ -53,13 +53,13 @@ def build_environments(
         environments[environment_id].entries.append(signature_id)
 
     # append labels to the environments of their snippet contexts
-    for id, entry in graph.labels.items():
+    for id, entry in graph.snippet.labels.items():
         # derive label ID from globally unique node ID
         label_id = LabelId(value=id.value)
 
         # look up for the snippet context of this label
-        snippet = graph.labels.get_ctx(id)
-        nid = graph.snippets.get_by_node(snippet)
+        snippet = graph.snippet.labels.get_ctx(id)
+        nid = graph.snippet.snippets.get_by_node(snippet)
         snippet_id = SnippetId(value=nid.value)
 
         # append this label to the environment of the snippet context

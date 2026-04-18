@@ -8,7 +8,7 @@ def can_visit_registers_in_an_operand() -> None:
         """
     )
 
-    assert len(list(visitor.graph.registers.items())) == 1
+    assert len(list(visitor.graph.snippet.registers.items())) == 1
 
 
 def can_visit_registers_in_an_base_of_an_address() -> None:
@@ -18,4 +18,4 @@ def can_visit_registers_in_an_base_of_an_address() -> None:
         """
     )
 
-    assert len(list(visitor.graph.registers.items())) == 1
+    assert len(list(visitor.graph.snippet.registers.items())) == 1
