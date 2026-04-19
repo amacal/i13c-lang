@@ -17,7 +17,7 @@ def can_accept_a_snippet_signature_without_slots():
 
     assert resolution.accepted[0].id == id
     assert resolution.accepted[0].name == b"main"
-    assert len(resolution.accepted[0].slots) == 0
+    assert len(resolution.accepted[0].parameters) == 0
 
     assert source.extract(resolution.accepted[0].ref) == b"main()"
 
@@ -38,7 +38,7 @@ def can_accept_a_function_signature_without_slots():
 
     assert resolution.accepted[0].id == id
     assert resolution.accepted[0].name == b"main"
-    assert len(resolution.accepted[0].slots) == 0
+    assert len(resolution.accepted[0].parameters) == 0
 
     assert source.extract(resolution.accepted[0].ref) == b"main()"
 
@@ -60,9 +60,9 @@ def can_accept_a_snippet_signature_with_a_slot():
     assert resolution.accepted[0].id == id
 
     assert resolution.accepted[0].name == b"main"
-    assert len(resolution.accepted[0].slots) == 1
+    assert len(resolution.accepted[0].parameters) == 1
 
-    assert resolution.accepted[0].slots[0].name == b"v"
+    assert resolution.accepted[0].parameters[0].name == b"v"
 
     assert (
         source.extract(resolution.accepted[0].ref)

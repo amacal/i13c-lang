@@ -76,7 +76,7 @@ def build_environment_resolution(
             targets: Sequence[EnvironmentTarget]
 
             if isinstance(item, SignatureId):
-                targets = signatures.get(item).slots
+                targets = signatures.get(item).parameters
             else:
                 targets = [labels.get(item)]
 

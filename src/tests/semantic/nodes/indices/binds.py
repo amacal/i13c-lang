@@ -8,10 +8,10 @@ def can_index_a_bind_by_slot():
         """
     )
 
-    assert indices.binds_by_slots is not None
-    assert indices.binds_by_slots.size() == 1
+    assert indices.binds_by_parameters is not None
+    assert indices.binds_by_parameters.size() == 1
 
-    _, acceptance = indices.binds_by_slots.peak()
+    _, acceptance = indices.binds_by_parameters.peak()
 
     assert acceptance.mode == "register"
     assert acceptance.src == b"v"
@@ -27,5 +27,5 @@ def can_ignore_binds_in_a_function():
         """
     )
 
-    assert indices.binds_by_slots is not None
-    assert indices.binds_by_slots.size() == 0
+    assert indices.binds_by_parameters is not None
+    assert indices.binds_by_parameters.size() == 0

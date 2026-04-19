@@ -12,7 +12,7 @@ def can_detect_a_snippet_signature():
     _, value = entities.signatures.peak()
 
     assert value.name == b"main"
-    assert len(value.slots) == 1
+    assert len(value.parameters) == 1
 
 
 def can_detect_a_function_signature():
@@ -26,4 +26,4 @@ def can_detect_a_function_signature():
     _, value = entities.signatures.peak()
 
     assert value.name == b"main"
-    assert len(value.slots) == 2
+    assert len(value.parameters) == 2

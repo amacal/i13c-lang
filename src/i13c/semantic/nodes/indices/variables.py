@@ -38,39 +38,39 @@ def build_variables_by_parameters(
     variables: Dict[VariableId, Variable] = {}
     by_parameter: Dict[VariableSource, VariableId] = {}
 
-    for _, function in functions.items():
-        for pid in function.parameters:
-            # for now we reuse parameter IDs
-            vid = VariableId(value=pid.value)
-            parameter = parameters.get(pid)
+    # for _, function in functions.items():
+    #     for pid in function.parameters:
+    #         # for now we reuse parameter IDs
+    #         vid = VariableId(value=pid.value)
+    #         parameter = parameters.get(pid)
 
-            # add to the source-to-variable mapping
-            by_parameter[pid] = vid
+    #         # add to the source-to-variable mapping
+    #         by_parameter[pid] = vid
 
-            # create the variable
-            variables[vid] = Variable(
-                ref=parameter.ref,
-                source=pid,
-                type=parameter.type,
-                kind=b"parameter",
-                ident=parameter.ident,
-            )
+    #         # create the variable
+    #         variables[vid] = Variable(
+    #             ref=parameter.ref,
+    #             source=pid,
+    #             type=parameter.type,
+    #             kind=b"parameter",
+    #             ident=parameter.ident,
+    #         )
 
-    for _, value in values.items():
-        # for now we reuse value IDs
-        vid = VariableId(value=value.id.value)
+    # for _, value in values.items():
+    #     # for now we reuse value IDs
+    #     vid = VariableId(value=value.id.value)
 
-        # add to the source-to-variable mapping
-        by_parameter[value.id] = vid
+    #     # add to the source-to-variable mapping
+    #     by_parameter[value.id] = vid
 
-        # add to the mapping
-        variables[vid] = Variable(
-            ref=value.ref,
-            source=value.id,
-            type=value.type,
-            kind=b"value",
-            ident=value.ident,
-        )
+    #     # add to the mapping
+    #     variables[vid] = Variable(
+    #         ref=value.ref,
+    #         source=value.id,
+    #         type=value.type,
+    #         kind=b"value",
+    #         ident=value.ident,
+    #     )
 
     return (
         OneToOne[VariableId, Variable].instance(variables),

@@ -12,11 +12,11 @@ from i13c.semantic.typing.entities.labels import LabelId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.semantic.typing.entities.operands import OperandId
+from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.ranges import RangeId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.slots import SlotId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
@@ -29,11 +29,11 @@ from i13c.semantic.typing.resolutions.labels import LabelResolution
 from i13c.semantic.typing.resolutions.literals import LiteralResolution
 from i13c.semantic.typing.resolutions.mnemonics import MnemonicResolution
 from i13c.semantic.typing.resolutions.operands import OperandResolution
+from i13c.semantic.typing.resolutions.parameters import ParameterResolution
 from i13c.semantic.typing.resolutions.ranges import RangeResolution
 from i13c.semantic.typing.resolutions.references import ReferenceResolution
 from i13c.semantic.typing.resolutions.registers import RegisterResolution
 from i13c.semantic.typing.resolutions.signatures import SignatureResolution
-from i13c.semantic.typing.resolutions.slots import SlotResolution
 from i13c.semantic.typing.resolutions.snippets import SnippetResolution
 from i13c.semantic.typing.resolutions.types import TypeResolution
 
@@ -54,6 +54,6 @@ class ResolutionNodes:
     references: Optional[OneToOne[ReferenceId, ReferenceResolution]]
     registers: Optional[OneToOne[RegisterId, RegisterResolution]]
     signatures: Optional[OneToOne[SignatureId, SignatureResolution]]
-    slots: Optional[OneToOne[SlotId, SlotResolution]]
+    parameters: Optional[OneToOne[ParameterId, ParameterResolution]]
     snippets: Optional[OneToOne[SnippetId, SnippetResolution]]
     types: Optional[OneToOne[TypeId, TypeResolution]]

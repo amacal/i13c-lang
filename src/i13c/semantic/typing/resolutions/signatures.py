@@ -3,7 +3,7 @@ from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.resolutions.slots import SlotAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.syntax.source import Span
 
 SignatureRejectionReason = Kind[
@@ -24,7 +24,7 @@ class SignatureAcceptance:
     id: SignatureId
 
     name: bytes
-    slots: List[SlotAcceptance]
+    parameters: List[ParameterAcceptance]
 
 
 @dataclass(kw_only=True)

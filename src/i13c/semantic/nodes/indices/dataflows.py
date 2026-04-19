@@ -42,53 +42,53 @@ def build_dataflows(
     # found dataflows for each flow node
     dataflows: Dict[FlowNode, DataFlow] = {}
 
-    # process each function
-    for fid, function in functions.items():
-        flowgraph = controlflows.get(fid)
+    # # process each function
+    # for fid, function in functions.items():
+    #     flowgraph = controlflows.get(fid)
 
-        # each node produces a dataflow
-        for node in flowgraph.nodes():
-            dataflows[node] = DataFlow(
-                declares=[],
-                uses=[],
-                drops=[],
-            )
+    #     # each node produces a dataflow
+    #     for node in flowgraph.nodes():
+    #         dataflows[node] = DataFlow(
+    #             declares=[],
+    #             uses=[],
+    #             drops=[],
+    #         )
 
-        # each parameter declares/drops a variable
-        for pid in function.parameters:
-            vid = variables.get(pid)
-            dataflows[flowgraph.entry].declares.append(vid)
-            dataflows[flowgraph.exit].drops.append(vid)
+    #     # each parameter declares/drops a variable
+    #     for pid in function.parameters:
+    #         vid = variables.get(pid)
+    #         dataflows[flowgraph.entry].declares.append(vid)
+    #         dataflows[flowgraph.exit].drops.append(vid)
 
-        # each callsite may read a variable
-        for node in flowgraph.nodes():
+    #     # each callsite may read a variable
+    #     for node in flowgraph.nodes():
 
-            # handle callsites by looking up their arguments
-            if isinstance(node, CallSiteId):
-                callsite = callsites.get(node)
+    #         # handle callsites by looking up their arguments
+    #         if isinstance(node, CallSiteId):
+    #             callsite = callsites.get(node)
 
-                for argument in callsite.arguments:
-                    if argument.kind == b"expression":
-                        assert isinstance(argument.target, ExpressionId)
+    #             for argument in callsite.arguments:
+    #                 if argument.kind == b"expression":
+    #                     assert isinstance(argument.target, ExpressionId)
 
-                        # find usages of this expression
-                        usage_ids = usages.get(argument.target)
-                        dataflows[node].uses.extend(usage_ids)
+    #                     # find usages of this expression
+    #                     usage_ids = usages.get(argument.target)
+    #                     dataflows[node].uses.extend(usage_ids)
 
-            # handle values by looking up their expressions
-            if isinstance(node, ValueId):
-                value = values.get(node)
+    #         # handle values by looking up their expressions
+    #         if isinstance(node, ValueId):
+    #             value = values.get(node)
 
-                if value.expr.kind == b"expression":
-                    assert isinstance(value.expr.target, ExpressionId)
+    #             if value.expr.kind == b"expression":
+    #                 assert isinstance(value.expr.target, ExpressionId)
 
-                    # find usages of this expression
-                    usage_ids = usages.get(value.expr.target)
-                    dataflows[node].uses.extend(usage_ids)
+    #                 # find usages of this expression
+    #                 usage_ids = usages.get(value.expr.target)
+    #                 dataflows[node].uses.extend(usage_ids)
 
-                # independently of the expression, this value also declares a variable
-                vid = variables.get(node)
-                dataflows[node].declares.append(vid)
-                dataflows[flowgraph.exit].drops.append(vid)
+    #             # independently of the expression, this value also declares a variable
+    #             vid = variables.get(node)
+    #             dataflows[node].declares.append(vid)
+    #             dataflows[flowgraph.exit].drops.append(vid)
 
     return OneToOne[FlowNode, DataFlow].instance(dataflows)

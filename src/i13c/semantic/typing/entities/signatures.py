@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from i13c.semantic.typing.entities.slots import SlotId
+from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.syntax.source import Span
 
 
@@ -17,7 +17,7 @@ class SignatureId:
 class Signature:
     ref: Span
     name: bytes
-    slots: List[SlotId]
+    parameters: List[ParameterId]
 
     def __str__(self) -> str:
-        return f"{self.name.decode()}:{len(self.slots)}"
+        return f"{self.name.decode()}:{len(self.parameters)}"

@@ -1,5 +1,5 @@
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
-from i13c.semantic.typing.resolutions.slots import SlotAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
@@ -20,7 +20,7 @@ def can_accept_a_reference_handled_by_a_slot():
     assert resolution.accepted[0].id == id
     assert resolution.accepted[0].name == b"x"
 
-    assert isinstance(resolution.accepted[0].target, SlotAcceptance)
+    assert isinstance(resolution.accepted[0].target, ParameterAcceptance)
     assert resolution.accepted[0].target.name == b"x"
 
     assert source.extract(resolution.accepted[0].ref) == b"@x"

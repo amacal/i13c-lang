@@ -6,9 +6,9 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.immediates import ImmediateId
 from i13c.semantic.typing.entities.operands import Operand, OperandId
+from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
-from i13c.semantic.typing.entities.slots import SlotId
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
@@ -19,9 +19,9 @@ from i13c.semantic.typing.resolutions.operands import (
     OperandResolution,
     OperandSymbol,
 )
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
-from i13c.semantic.typing.resolutions.slots import SlotAcceptance
 
 
 def configure_operand_resolution() -> GraphGroup:
@@ -36,7 +36,7 @@ def configure_operand_resolution() -> GraphGroup:
                 ("immediates", "resolutions/immediates/accepted"),
                 ("references", "resolutions/references/accepted"),
                 ("addresses", "resolutions/addresses/accepted"),
-                ("binds", "indices/binds/slots"),
+                ("binds", "indices/binds/parameters"),
             }
         ),
     )
@@ -96,7 +96,7 @@ def get_immediate_symbol(target: ImmediateAcceptance) -> OperandSymbol:
         return "imm64"
 
 
-def get_bind_symbol(target: SlotAcceptance, bind: BindAcceptance) -> OperandSymbol:
+def get_bind_symbol(target: ParameterAcceptance, bind: BindAcceptance) -> OperandSymbol:
     if bind.mode == "register":
         return "reg64"
 
@@ -119,7 +119,7 @@ def build_operand_resolution(
     immediates: OneToOne[ImmediateId, ImmediateAcceptance],
     references: OneToOne[ReferenceId, ReferenceAcceptance],
     addresses: OneToOne[AddressId, AddressAcceptance],
-    binds: OneToOne[SlotId, BindAcceptance],
+    binds: OneToOne[ParameterId, BindAcceptance],
 ) -> OneToOne[OperandId, OperandResolution]:
     resolutions: Dict[OperandId, OperandResolution] = {}
 
@@ -157,7 +157,7 @@ def build_operand_resolution(
                 symbol = "rel"
 
             else:
-                assert isinstance(reference.target, SlotAcceptance)
+                assert isinstance(reference.target, ParameterAcceptance)
 
                 bind = binds.get(reference.target.id)
                 symbol = get_bind_symbol(reference.target, bind)

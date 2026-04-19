@@ -2,9 +2,9 @@ from typing import Dict
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Hex, Identifier, Range, Type, Width, default_range
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
+from i13c.semantic.typing.entities.types import TypeId
 
 
 def configure_parameters() -> GraphNode:
@@ -21,34 +21,32 @@ def build_parameters(
 ) -> OneToOne[ParameterId, Parameter]:
     parameters: Dict[ParameterId, Parameter] = {}
 
-    for pid, parameter in graph.function.parameters.items():
+    for nid, entry in graph.snippet.slots.items():
         # derive parameter ID from globally unique node ID
-        parameter_id = ParameterId(value=pid.value)
+        parameter_id = ParameterId(value=nid.value)
 
-        # default width and ranges for declared type
-        range: Range = default_range(parameter.type.name)
-
-        # override ranges if specified
-        if parameter.type.range is not None:
-            range = Range(
-                lower=Hex.derive(parameter.type.range.lower.digits),
-                upper=Hex.derive(parameter.type.range.upper.digits),
-            )
-
-        # derive width from ranges
-        width: Width = max(range.lower.width, range.upper.width)
-
-        # construct slot type with range or default width
-        type = Type(
-            name=parameter.type.name,
-            width=width,
-            range=range,
-        )
+        # reverse mapping to type ID
+        nid = graph.types.get_by_node(entry.type)
+        type_id = TypeId(value=nid.value)
 
         parameters[parameter_id] = Parameter(
-            ref=parameter.ref,
-            type=type,
-            ident=Identifier(data=parameter.name),
+            ref=entry.ref,
+            name=entry.name,
+            type=type_id,
+        )
+
+    for nid, entry in graph.function.parameters.items():
+        # derive parameter ID from globally unique node ID
+        parameter_id = ParameterId(value=nid.value)
+
+        # reverse mapping to type ID
+        nid = graph.types.get_by_node(entry.type)
+        type_id = TypeId(value=nid.value)
+
+        parameters[parameter_id] = Parameter(
+            ref=entry.ref,
+            name=entry.name,
+            type=type_id,
         )
 
     return OneToOne[ParameterId, Parameter].instance(parameters)

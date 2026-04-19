@@ -20,7 +20,6 @@ from i13c.semantic.nodes.entities.ranges import configure_ranges
 from i13c.semantic.nodes.entities.references import configure_references
 from i13c.semantic.nodes.entities.registers import configure_registers
 from i13c.semantic.nodes.entities.signatures import configure_signatures
-from i13c.semantic.nodes.entities.slots import configure_slots
 from i13c.semantic.nodes.entities.snippets import configure_snippets
 from i13c.semantic.nodes.entities.types import configure_types
 from i13c.semantic.nodes.entities.values import configure_values
@@ -49,7 +48,6 @@ def configure_entities() -> GraphGroup:
             configure_references(),
             configure_registers(),
             configure_snippets(),
-            configure_slots(),
             configure_signatures(),
             configure_types(),
             configure_values(),
@@ -78,7 +76,6 @@ def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
         references=entities["entities/references"],
         registers=entities["entities/registers"],
         signatures=entities["entities/signatures"],
-        slots=entities["entities/slots"],
         snippets=entities["entities/snippets"],
         types=entities["entities/types"],
         usages=entities["entities/usages"],

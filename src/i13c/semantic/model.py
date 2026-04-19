@@ -8,7 +8,7 @@ from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.slots import SlotId
+from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.indices.callgraphs import CallPair
@@ -30,7 +30,7 @@ from i13c.semantic.typing.resolutions.values import ValueResolution
 
 @dataclass
 class IndexEdges:
-    binds_by_slots: Optional[OneToOne[SlotId, BindAcceptance]]
+    binds_by_parameters: Optional[OneToOne[ParameterId, BindAcceptance]]
     environments_by_snippets: Optional[OneToOne[SnippetId, EnvironmentAcceptance]]
     signatures_by_names: Optional[OneToMany[bytes, SignatureAcceptance]]
 

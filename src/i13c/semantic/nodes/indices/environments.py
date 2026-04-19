@@ -68,13 +68,13 @@ def collect_entry(
     node: FlowNode,
 ) -> Dict[Identifier, VariableId]:
     # get the dataflow at the node
-    dataflow = dataflows.get(node)
+    # dataflow = dataflows.get(node)
     available: Dict[Identifier, VariableId] = {}
 
     # collect declared variables
-    for vid in dataflow.declares:
-        variable = variables.get(vid)
-        available[variable.ident] = vid
+    # for vid in dataflow.declares:
+    #     variable = variables.get(vid)
+    #     available[variable.ident] = vid
 
     # return the available variables
     return available

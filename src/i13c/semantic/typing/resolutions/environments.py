@@ -6,11 +6,11 @@ from typing import Union
 from i13c.semantic.typing.entities.environments import EnvironmentId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
-from i13c.semantic.typing.resolutions.slots import SlotAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.syntax.source import Span
 
 EnvironmentKind = Kind["snippet"]
-EnvironmentTarget = Union[SlotAcceptance, LabelAcceptance]
+EnvironmentTarget = Union[ParameterAcceptance, LabelAcceptance]
 EnvironmentRejectionReason = Kind["duplicated-name"]
 
 

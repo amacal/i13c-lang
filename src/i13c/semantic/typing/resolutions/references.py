@@ -5,12 +5,12 @@ from typing import Union
 
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
-from i13c.semantic.typing.resolutions.slots import SlotAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.syntax.source import Span
 
 ReferenceRejectionReason = Kind["unknown-name"]
-ReferenceKind = Kind["slot", "label"]
-ReferenceTarget = Union[SlotAcceptance, LabelAcceptance]
+ReferenceKind = Kind["parameter", "label"]
+ReferenceTarget = Union[ParameterAcceptance, LabelAcceptance]
 
 
 @dataclass(kw_only=True)

@@ -4,7 +4,7 @@ from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.binds import Bind, BindId
-from i13c.semantic.typing.entities.slots import SlotId
+from i13c.semantic.typing.entities.parameters import ParameterId
 
 
 def configure_binds() -> GraphNode:
@@ -25,14 +25,14 @@ def build_binds(
         # find the parent slot
         slot = graph.snippet.binds.get_ctx(nid)
         ctx = graph.snippet.slots.get_by_node(slot)
-        slot_id = SlotId(value=ctx.value)
+        param_id = ParameterId(value=ctx.value)
 
         # derive bind ID from globally unique node ID
         bind_id = BindId(value=nid.value)
 
         binds[bind_id] = Bind(
             ref=entry.ref,
-            ctx=slot_id,
+            ctx=param_id,
             src=slot.name,
             dst=entry.name,
         )

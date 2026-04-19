@@ -37,7 +37,10 @@ class DuplicateArtifactError(Exception):
     def __init__(self, artifact: str, producers: List[GraphNode]) -> None:
         self.artifact = artifact
         self.producers = producers
-        super().__init__(f"artifact {artifact} has multiple producers")
+
+        super().__init__(
+            f"artifact {artifact} has multiple producers: {producers[0].builder}, {producers[1].builder}"
+        )
 
 
 class InvalidDatasetArityError(Exception):
@@ -185,9 +188,9 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
             dataset = node.builder(**args)
 
             if not isinstance(dataset, tuple):
-               dataset = (dataset,)
+                dataset = (dataset,)
             else:
-               dataset = tuple(dataset) # type: ignore
+                dataset = tuple(dataset)  # type: ignore
 
             if len(dataset) != len(node.produces):
                 raise InvalidDatasetArityError(

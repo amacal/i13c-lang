@@ -1,26 +1,26 @@
 from dataclasses import dataclass
 from typing import List
 
-from i13c.semantic.typing.entities.slots import SlotId
+from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.resolutions.types import TypeAcceptance
 from i13c.syntax.source import Span
 
 
 @dataclass(kw_only=True)
-class SlotRejection:
+class ParameterRejection:
     ref: Span
 
 
 @dataclass(kw_only=True)
-class SlotAcceptance:
+class ParameterAcceptance:
     ref: Span
-    id: SlotId
+    id: ParameterId
 
     name: bytes
     type: TypeAcceptance
 
 
 @dataclass(kw_only=True)
-class SlotResolution:
-    accepted: List[SlotAcceptance]
-    rejected: List[SlotRejection]
+class ParameterResolution:
+    accepted: List[ParameterAcceptance]
+    rejected: List[ParameterRejection]

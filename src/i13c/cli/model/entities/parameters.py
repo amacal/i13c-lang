@@ -14,7 +14,6 @@ class ParameterListExtractor:
         return {
             "ref": "Reference",
             "id": "Parameter ID",
-            "name": "Parameter Name",
             "type": "Parameter Type",
         }
 
@@ -23,6 +22,5 @@ class ParameterListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
-            "name": str(entry[1].ident),
-            "type": str(entry[1].type),
+            "type": entry[1].type.identify(1),
         }

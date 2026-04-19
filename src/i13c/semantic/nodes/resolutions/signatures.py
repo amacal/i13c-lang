@@ -3,14 +3,14 @@ from typing import Any, Dict, List, Set
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.signatures import Signature, SignatureId
-from i13c.semantic.typing.entities.slots import SlotId
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import (
     SignatureAcceptance,
     SignatureRejection,
     SignatureResolution,
 )
-from i13c.semantic.typing.resolutions.slots import SlotAcceptance
 
 
 def configure_signature_resolution() -> GraphGroup:
@@ -21,7 +21,7 @@ def configure_signature_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("signatures", "entities/signatures"),
-                ("slots", "resolutions/slots/accepted"),
+                ("parameters", "resolutions/parameters/accepted"),
             }
         ),
     )
@@ -55,7 +55,7 @@ def configure_signature_resolution() -> GraphGroup:
 
 def build_signature_resolution(
     signatures: OneToOne[SignatureId, Signature],
-    slots: OneToOne[SlotId, SlotAcceptance],
+    parameters: OneToOne[ParameterId, ParameterAcceptance],
 ) -> OneToOne[SignatureId, SignatureResolution]:
     resolutions: Dict[SignatureId, SignatureResolution] = {}
 
@@ -66,24 +66,24 @@ def build_signature_resolution(
         )
 
         names: Set[bytes] = set()
-        accepted: List[SlotAcceptance] = []
+        accepted: List[ParameterAcceptance] = []
 
-        for id in entry.slots:
-            slot = slots.get(id)
+        for id in entry.parameters:
+            parameter = parameters.get(id)
 
-            if slot.name not in names:
-                names.add(slot.name)
+            if parameter.name not in names:
+                names.add(parameter.name)
 
             else:
                 resolution.rejected.append(
                     SignatureRejection(
-                        ref=slot.ref,
+                        ref=parameter.ref,
                         reason="duplicated-name",
                     )
                 )
 
-            # the slot survived the checks
-            accepted.append(slot)
+            # the parameter survived the checks
+            accepted.append(parameter)
 
         if len(resolution.rejected) == 0:
             resolution.accepted.append(
@@ -91,7 +91,7 @@ def build_signature_resolution(
                     ref=entry.ref,
                     id=sid,
                     name=entry.name,
-                    slots=accepted,
+                    parameters=accepted,
                 )
             )
 
@@ -143,5 +143,5 @@ def report_signature_resolution_e3003(
     return Diagnostic(
         ref=rejection.ref,
         code="E3003",
-        message=f"Duplicated slot name {entry}.",
+        message=f"Duplicated parameter name {entry}.",
     )

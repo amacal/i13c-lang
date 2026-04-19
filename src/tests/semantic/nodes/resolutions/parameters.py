@@ -1,16 +1,16 @@
 from tests.semantic.nodes.resolutions import prepare_resolutions
 
 
-def can_accept_valid_slot():
+def can_accept_valid_parameter_in_a_snippet():
     source, resolutions = prepare_resolutions(
         """
             asm main(v@rax: u8[0x01..0x02]) { mov rax, rbx; }
         """
     )
 
-    assert resolutions.slots is not None
-    assert resolutions.slots.size() == 1
-    id, resolution = resolutions.slots.peak()
+    assert resolutions.parameters is not None
+    assert resolutions.parameters.size() == 1
+    id, resolution = resolutions.parameters.peak()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -33,16 +33,16 @@ def can_accept_valid_slot():
     assert source.extract(resolution.accepted[0].ref) == b"v@rax: u8[0x01..0x02]"
 
 
-def can_accept_valid_slot_in_a_function():
+def can_accept_valid_parameter_in_a_function():
     source, resolutions = prepare_resolutions(
         """
             fn main(v: u8[0x01..0x02]) { }
         """
     )
 
-    assert resolutions.slots is not None
-    assert resolutions.slots.size() == 1
-    id, resolution = resolutions.slots.peak()
+    assert resolutions.parameters is not None
+    assert resolutions.parameters.size() == 1
+    id, resolution = resolutions.parameters.peak()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

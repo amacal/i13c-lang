@@ -1,8 +1,8 @@
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
-from i13c.semantic.typing.resolutions.slots import SlotAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
@@ -75,7 +75,7 @@ def can_accept_an_operand_from_a_reference():
 
     assert isinstance(resolution.accepted[0].target, ReferenceAcceptance)
     assert resolution.accepted[0].target.name == b"x"
-    assert isinstance(resolution.accepted[0].target.target, SlotAcceptance)
+    assert isinstance(resolution.accepted[0].target.target, ParameterAcceptance)
 
     assert source.extract(resolution.accepted[0].ref) == b"@x"
 
@@ -131,7 +131,7 @@ def can_accept_an_operand_from_an_address_using_a_reference_as_base():
     assert resolution.accepted[0].target.offset is not None
     assert resolution.accepted[0].target.base.name == b"x"
 
-    assert isinstance(resolution.accepted[0].target.base.target, SlotAcceptance)
+    assert isinstance(resolution.accepted[0].target.base.target, ParameterAcceptance)
     assert resolution.accepted[0].target.base.target.name == b"x"
 
     assert source.extract(resolution.accepted[0].ref) == b"[@x + 0x0f]"

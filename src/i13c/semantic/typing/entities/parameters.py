@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from i13c.semantic.core import Identifier, Type
+from i13c.semantic.typing.entities.types import TypeId
 from i13c.syntax.source import Span
 
 
@@ -15,8 +15,8 @@ class ParameterId:
 @dataclass(kw_only=True)
 class Parameter:
     ref: Span
-    type: Type
-    ident: Identifier
+    name: bytes
+    type: TypeId
 
     def __str__(self) -> str:
-        return f"{self.ident}:{self.type}"
+        return f"{self.name.decode()}, {self.type.identify(1)}"

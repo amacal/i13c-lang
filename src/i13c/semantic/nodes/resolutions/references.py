@@ -81,7 +81,7 @@ def build_reference_resolution(
 
         else:
             target = environment.entries[entry.name]
-            kind = "label" if isinstance(target, LabelAcceptance) else "slot"
+            kind = "label" if isinstance(target, LabelAcceptance) else "parameter"
 
             resolution.accepted.append(
                 ReferenceAcceptance(

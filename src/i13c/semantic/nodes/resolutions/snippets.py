@@ -5,8 +5,8 @@ from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.instructions import InstructionId
+from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.slots import SlotId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
@@ -30,7 +30,7 @@ def configure_snippet_resolution() -> GraphGroup:
                 ("signatures", "resolutions/signatures/accepted"),
                 ("instructions", "resolutions/instructions/accepted"),
                 ("flags", "resolutions/flags/accepted"),
-                ("binds", "indices/binds/slots"),
+                ("binds", "indices/binds/parameters"),
             }
         ),
     )
@@ -67,7 +67,7 @@ def build_snippet_resolution(
     signatures: OneToOne[SignatureId, SignatureAcceptance],
     instructions: OneToOne[InstructionId, InstructionAcceptance],
     flags: OneToOne[FlagsId, FlagsAcceptance],
-    binds: OneToOne[SlotId, BindAcceptance],
+    binds: OneToOne[ParameterId, BindAcceptance],
 ) -> OneToOne[SnippetId, SnippetResolution]:
     resolutions: Dict[SnippetId, SnippetResolution] = {}
 
@@ -80,8 +80,8 @@ def build_snippet_resolution(
         names: Set[bytes] = set()
         signature = signatures.get(entry.signature)
 
-        for slot in signature.slots:
-            if bind := binds.get(slot.id):
+        for parameter in signature.parameters:
+            if bind := binds.get(parameter.id):
                 if bind.dst in names:
                     resolution.rejected.append(
                         SnippetRejection(

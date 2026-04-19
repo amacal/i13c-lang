@@ -48,8 +48,7 @@ class ParameterVariablesListExtractor:
             return entity.ref if entity else None
 
         def into_name() -> Optional[str]:
-            entity = entry[2] or entry[3]
-            return str(entity.ident) if entity else None
+            return None
 
         return {
             "ref": str(into_source()),
