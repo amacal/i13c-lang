@@ -201,7 +201,7 @@ def parse_argument(state: ParsingState) -> tree.function.Argument:
 
     # a hex can be only an integer literal
     if token.code == Tokens.HEX:
-        return tree.function.IntegerLiteral(
+        return tree.function.Literal(
             ref=state.span(token),
             value=extract_hex(state, token),
         )

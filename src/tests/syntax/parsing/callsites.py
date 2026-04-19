@@ -18,7 +18,7 @@ def can_parse_argument_span_without_trailing_whitespace():
     assert isinstance(statement, tree.function.CallStatement)
     argument = statement.arguments[0]
 
-    assert isinstance(argument, tree.function.IntegerLiteral)
+    assert isinstance(argument, tree.function.Literal)
     assert argument.value.digits.hex() == "01"
     assert code.extract(argument.ref) == b"0x01"
 

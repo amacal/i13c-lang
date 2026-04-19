@@ -33,7 +33,7 @@ class LiteralIntegersListExtractor:
     @staticmethod
     def extract(
         artifacts: GraphArtifacts,
-    ) -> Iterable[Tuple[NodeId, tree.function.IntegerLiteral]]:
+    ) -> Iterable[Tuple[NodeId, tree.function.Literal]]:
         return artifacts.syntax_graph().function.literals.items()
 
     @staticmethod
@@ -45,7 +45,7 @@ class LiteralIntegersListExtractor:
         }
 
     @staticmethod
-    def rows(entry: Tuple[NodeId, tree.function.IntegerLiteral]) -> Dict[str, str]:
+    def rows(entry: Tuple[NodeId, tree.function.Literal]) -> Dict[str, str]:
         return {
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",

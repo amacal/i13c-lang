@@ -14,7 +14,6 @@ class LiteralListExtractor:
         return {
             "ref": "Reference",
             "id": "Literal ID",
-            "kind": "Literal Kind",
             "hex-value": "Hex Value",
             "hex-width": "Hex Width",
         }
@@ -24,7 +23,6 @@ class LiteralListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
-            "kind": entry[1].kind.decode(),
             "hex-value": str(entry[1].target),
             "hex-width": str(entry[1].target.width),
         }

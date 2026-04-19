@@ -9,6 +9,7 @@ from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.immediates import ImmediateId
 from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.labels import LabelId
+from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.semantic.typing.entities.operands import OperandId
 from i13c.semantic.typing.entities.ranges import RangeId
@@ -25,6 +26,7 @@ from i13c.semantic.typing.resolutions.flags import FlagsResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from i13c.semantic.typing.resolutions.labels import LabelResolution
+from i13c.semantic.typing.resolutions.literals import LiteralResolution
 from i13c.semantic.typing.resolutions.mnemonics import MnemonicResolution
 from i13c.semantic.typing.resolutions.operands import OperandResolution
 from i13c.semantic.typing.resolutions.ranges import RangeResolution
@@ -45,6 +47,7 @@ class ResolutionNodes:
     immediates: Optional[OneToOne[ImmediateId, ImmediateResolution]]
     instructions: Optional[OneToOne[InstructionId, InstructionResolution]]
     labels: Optional[OneToOne[LabelId, LabelResolution]]
+    literals: Optional[OneToOne[LiteralId, LiteralResolution]]
     mnemonics: Optional[OneToOne[MnemonicId, MnemonicResolution]]
     operands: Optional[OneToOne[OperandId, OperandResolution]]
     ranges: Optional[OneToOne[RangeId, RangeResolution]]

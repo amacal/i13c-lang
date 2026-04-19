@@ -13,7 +13,7 @@ def can_accept_value_without_whitespace_around_equals():
     assert statement.name == b"value"
     assert statement.type.name == b"u32"
 
-    assert isinstance(statement.expr, tree.function.IntegerLiteral)
+    assert isinstance(statement.expr, tree.function.Literal)
     assert statement.expr.value.digits.hex() == "10"
 
 
@@ -28,5 +28,5 @@ def can_accept_value_with_whitespace_around_equals():
     assert statement.name == b"value"
     assert statement.type.name == b"u32"
 
-    assert isinstance(statement.expr, tree.function.IntegerLiteral)
+    assert isinstance(statement.expr, tree.function.Literal)
     assert statement.expr.value.digits.hex() == "10"

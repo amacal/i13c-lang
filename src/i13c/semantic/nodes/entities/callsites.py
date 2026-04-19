@@ -33,7 +33,7 @@ def build_callsites(
 
         for argument in statement.arguments:
             match argument:
-                case tree.function.IntegerLiteral() as lit:
+                case tree.function.Literal() as lit:
                     # find literal by AST node
                     lid = graph.function.literals.get_by_node(lit)
 

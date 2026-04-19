@@ -21,7 +21,7 @@ class Visitor(Protocol):
 
 
 @dataclass(kw_only=True, eq=False)
-class IntegerLiteral:
+class Literal:
     ref: Span
     value: literals.Hex
 
@@ -38,7 +38,6 @@ class Expression:
         visitor.on_expression(self, path)
 
 
-Literal = Union[IntegerLiteral]
 Argument = Union[Literal, Expression]
 
 
@@ -66,7 +65,7 @@ class CallStatement:
 
         with path.push(self) as node:
             for argument in self.arguments:
-                if isinstance(argument, IntegerLiteral):
+                if isinstance(argument, Literal):
                     visitor.on_literal(argument, node)
 
                 if isinstance(argument, Expression):

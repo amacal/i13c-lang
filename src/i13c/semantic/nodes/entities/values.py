@@ -32,7 +32,7 @@ def build_values(
             continue
 
         match statement.expr:
-            case tree.function.IntegerLiteral() as lit:
+            case tree.function.Literal() as lit:
                 # find literal by AST node
                 lid = graph.function.literals.get_by_node(lit)
 

@@ -62,7 +62,6 @@ def can_build_callsite_with_single_argument():
     assert isinstance(argument.target, LiteralId)
     value = semantic.entities.literals.get(argument.target)
 
-    assert value.kind == b"hex"
     assert isinstance(value.target, Hex)
     assert value.target.data == bytes([0x42])
     assert value.target.width == 8
@@ -90,7 +89,6 @@ def can_build_callsite_with_multiple_arguments():
 
         value = semantic.entities.literals.get(argument.target)
 
-        assert value.kind == b"hex"
         assert isinstance(value.target, Hex)
 
         assert value.target.data.hex(" ") == f"{expected:02x}"

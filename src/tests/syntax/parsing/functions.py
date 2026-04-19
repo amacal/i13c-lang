@@ -35,7 +35,7 @@ def can_parse_function_with_statements():
     assert len(statement.arguments) == 1
 
     argument = statement.arguments[0]
-    assert isinstance(argument, tree.function.IntegerLiteral)
+    assert isinstance(argument, tree.function.Literal)
     assert argument.value.digits.hex() == "01"
 
 
@@ -92,7 +92,7 @@ def can_parse_function_with_flags_noreturn():
     assert len(statement.arguments) == 1
 
     argument = statement.arguments[0]
-    assert isinstance(argument, tree.function.IntegerLiteral)
+    assert isinstance(argument, tree.function.Literal)
     assert argument.value.digits.hex() == "01"
 
 

@@ -90,7 +90,6 @@ def lower_function_bindings(
             literal = graph.entities.literals.get(binding.src)
 
             # we know all literals are hex for now
-            assert literal.kind == b"hex"
             assert isinstance(literal.target, Hex)
 
             # extract literal

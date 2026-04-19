@@ -22,14 +22,13 @@ def build_literals(
     literals: Dict[LiteralId, Literal] = {}
 
     for nid, literal in graph.function.literals.items():
-        assert isinstance(literal, tree.function.IntegerLiteral)
+        assert isinstance(literal, tree.function.Literal)
 
         # derive literal ID from globally unique node ID
         literal_id = LiteralId(value=nid.value)
 
         literals[literal_id] = Literal(
             ref=literal.ref,
-            kind=b"hex",
             target=Hex.derive(literal.value.digits),
         )
 
