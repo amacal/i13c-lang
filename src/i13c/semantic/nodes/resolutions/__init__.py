@@ -7,6 +7,7 @@ from i13c.semantic.nodes.resolutions.callsites import configure_resolution_by_ca
 from i13c.semantic.nodes.resolutions.environments import (
     configure_environment_resolution,
 )
+from i13c.semantic.nodes.resolutions.flags import configure_flags_resolution
 from i13c.semantic.nodes.resolutions.immediates import configure_immediate_resolution
 from i13c.semantic.nodes.resolutions.instructions import (
     configure_instruction_resolution,
@@ -31,6 +32,7 @@ def configure_resolutions() -> GraphGroup:
             configure_address_resolution(),
             configure_bind_resolution(),
             configure_environment_resolution(),
+            configure_flags_resolution(),
             configure_immediate_resolution(),
             configure_instruction_resolution(),
             configure_label_resolution(),
@@ -54,6 +56,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         addresses=resolutions.get("resolutions/addresses"),
         binds=resolutions.get("resolutions/binds"),
         environments=resolutions.get("resolutions/environments"),
+        flags=resolutions.get("resolutions/flags"),
         immediates=resolutions.get("resolutions/immediates"),
         instructions=resolutions.get("resolutions/instructions"),
         labels=resolutions.get("resolutions/labels"),

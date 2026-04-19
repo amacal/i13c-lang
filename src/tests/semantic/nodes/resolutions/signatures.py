@@ -88,7 +88,7 @@ def can_reject_duplicate_slot_name_usage():
     assert source.extract(resolution.rejected[0].ref) == b"x@rbx: u8"
 
 
-def can_detect_a_broken_range_rule_e3003_in_a_snippet():
+def can_detect_a_duplicate_slot_name_in_a_snippet():
     _, rules = prepare_rules(
         """
             asm main(x@rax: u8, x@rbx: u8) { mov rax, rbx; }
@@ -98,7 +98,7 @@ def can_detect_a_broken_range_rule_e3003_in_a_snippet():
     assert len(rules.get("e3003")) == 1
 
 
-def can_detect_a_broken_range_rule_e3003_in_a_function():
+def can_detect_a_duplicate_slot_name_in_a_function():
     _, rules = prepare_rules(
         """
             fn main(x: u8, x: u8) { }
