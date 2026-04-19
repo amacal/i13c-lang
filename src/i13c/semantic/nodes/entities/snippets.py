@@ -3,6 +3,7 @@ from typing import Dict, List
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
+from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
@@ -32,6 +33,13 @@ def build_snippets(
         nid = graph.snippet.signatures.get_by_node(node.signature)
         signature_id = SignatureId(value=nid.value)
 
+        # identify flags ID from globally unique node ID
+        if node.flags is not None:
+            nid = graph.snippet.flags.get_by_node(node.flags)
+            flags_id = FlagsId(value=nid.value)
+        else:
+            flags_id = None
+
         for instruction in node.body:
             if isinstance(instruction, tree.snippet.Instruction):
                 # identify instruction ID from globally unique node ID
@@ -40,6 +48,7 @@ def build_snippets(
 
         snippets[snippet_id] = Snippet(
             ref=node.ref,
+            flags=flags_id,
             signature=signature_id,
             instructions=instructions,
         )

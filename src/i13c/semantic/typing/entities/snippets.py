@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
+from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.syntax.source import Span
@@ -18,6 +19,5 @@ class SnippetId:
 class Snippet:
     ref: Span
     signature: SignatureId
-    # noreturn: bool
-    # clobbers: List[RegisterId]
+    flags: Optional[FlagsId]
     instructions: List[InstructionId]

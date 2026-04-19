@@ -3,11 +3,13 @@ from typing import Any, Dict, List, Set
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.slots import SlotId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
+from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.snippets import (
@@ -27,6 +29,7 @@ def configure_snippet_resolution() -> GraphGroup:
                 ("snippets", "entities/snippets"),
                 ("signatures", "resolutions/signatures/accepted"),
                 ("instructions", "resolutions/instructions/accepted"),
+                ("flags", "resolutions/flags/accepted"),
                 ("binds", "indices/binds/slots"),
             }
         ),
@@ -63,6 +66,7 @@ def build_snippet_resolution(
     snippets: OneToOne[SnippetId, Snippet],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
     instructions: OneToOne[InstructionId, InstructionAcceptance],
+    flags: OneToOne[FlagsId, FlagsAcceptance],
     binds: OneToOne[SlotId, BindAcceptance],
 ) -> OneToOne[SnippetId, SnippetResolution]:
     resolutions: Dict[SnippetId, SnippetResolution] = {}
@@ -89,11 +93,17 @@ def build_snippet_resolution(
                 else:
                     names.add(bind.dst)
 
+        if entry.flags is not None:
+            found_flags = flags.get(entry.flags)
+        else:
+            found_flags = None
+
         if len(resolution.rejected) == 0:
             resolution.accepted.append(
                 SnippetAcceptance(
                     ref=entry.ref,
                     id=sid,
+                    flags=found_flags,
                     signature=signature,
                     instructions=[instructions.get(id) for id in entry.instructions],
                 )

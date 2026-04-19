@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Literal as Kind
+from typing import Optional
 
 from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
@@ -22,6 +24,7 @@ class SnippetAcceptance:
     id: SnippetId
 
     signature: SignatureAcceptance
+    flags: Optional[FlagsAcceptance]
     instructions: List[InstructionAcceptance]
 
 
