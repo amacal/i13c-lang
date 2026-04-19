@@ -14,7 +14,6 @@ class ExpressionListExtractor:
         return {
             "ref": "Reference",
             "id": "Expression ID",
-            "name": "Expression Name",
         }
 
     @staticmethod
@@ -22,5 +21,4 @@ class ExpressionListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
-            "name": str(entry[1].ident),
         }

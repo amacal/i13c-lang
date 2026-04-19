@@ -162,7 +162,6 @@ class Function:
     expressions: Bidirectional[tree.function.Expression, None]
     parameters: Bidirectional[tree.function.Parameter, None]
 
-
 @dataclass(kw_only=True)
 class SyntaxGraph:
     snippet: Snippet

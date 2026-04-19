@@ -23,7 +23,6 @@ class ValueResolutionListExtractor:
         return {
             "ref": "Reference",
             "id": "Value ID",
-            "name": "Value Name",
             "type": "Value Type",
             "accepted": "Accepted",
             "rejected": "Rejected",
@@ -36,7 +35,6 @@ class ValueResolutionListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
-            "name": str(entry[1].ident),
             "type": str(entry[1].type),
             "accepted": (
                 str(entry[2].accepted.binding.identify(1)) if entry[2].accepted else ""

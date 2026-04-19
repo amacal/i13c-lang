@@ -22,7 +22,6 @@ class UsagesByExpressionListExtractor:
         return {
             "ref": "Reference",
             "eid": "Expression ID",
-            "name": "Expression Name",
             "uids": "Usage IDs",
         }
 
@@ -31,6 +30,5 @@ class UsagesByExpressionListExtractor:
         return {
             "ref": str(entry[1].ref),
             "eid": entry[0].identify(1),
-            "name": str(entry[1].ident),
             "uids": " ".join(uid.identify(1) for uid in entry[2]),
         }

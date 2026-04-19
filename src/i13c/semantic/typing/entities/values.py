@@ -1,14 +1,12 @@
 from dataclasses import dataclass
-from typing import Literal as Kind
-from typing import Union
+from typing import Optional, Union
 
-from i13c.semantic.core import Identifier, Type
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
+from i13c.semantic.typing.entities.types import TypeId
 from i13c.syntax.source import Span
 
-ExpressionKind = Kind[b"literal", b"expression"]
-ExpressionTarget = Union[LiteralId, ExpressionId]
+ValueTarget = Union[LiteralId, ExpressionId]
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -20,18 +18,10 @@ class ValueId:
 
 
 @dataclass(kw_only=True)
-class Expression:
-    kind: ExpressionKind
-    target: ExpressionTarget
-
-
-@dataclass(kw_only=True)
 class Value:
     ref: Span
-    id: ValueId
-    type: Type
-    ident: Identifier
-    expr: Expression
 
-    def __str__(self) -> str:
-        return f"{self.ident}:{self.type},  expr={self.expr.target.identify(1)}"
+    name: bytes
+    type: TypeId
+
+    target: Optional[ValueTarget]

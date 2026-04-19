@@ -14,9 +14,6 @@ class ValueListExtractor:
         return {
             "ref": "Reference",
             "id": "Value ID",
-            "name": "Value Name",
-            "kind": "Expression Kind",
-            "target": "Expression Target",
         }
 
     @staticmethod
@@ -24,7 +21,4 @@ class ValueListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
-            "name": str(entry[1].ident),
-            "kind": entry[1].expr.kind.decode(),
-            "target": entry[1].expr.target.identify(1),
         }

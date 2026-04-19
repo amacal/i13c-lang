@@ -1,12 +1,12 @@
-from typing import Dict, Optional
+from typing import Dict
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Hex, Identifier, Range, Type, Width, default_range
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
-from i13c.semantic.typing.entities.values import Expression, Value, ValueId
+from i13c.semantic.typing.entities.types import TypeId
+from i13c.semantic.typing.entities.values import Value, ValueId, ValueTarget
 from i13c.syntax import tree
 
 
@@ -25,61 +25,34 @@ def build_values(
     values: Dict[ValueId, Value] = {}
 
     for nid, statement in graph.function.statements.items():
-        expression: Optional[Expression] = None
 
         # accept only value statements
         if not isinstance(statement, tree.function.ValueStatement):
             continue
 
-        match statement.expr:
-            case tree.function.Literal() as lit:
-                # find literal by AST node
-                lid = graph.function.literals.get_by_node(lit)
-
-                expression = Expression(
-                    kind=b"literal",
-                    target=LiteralId(value=lid.value),
-                )
-            case tree.function.Expression() as expr:
-                # find expression by AST node
-                eid = graph.function.expressions.get_by_node(expr)
-
-                expression = Expression(
-                    kind=b"expression",
-                    target=ExpressionId(value=eid.value),
-                )
-
         # derive value ID from globally unique node ID
         value_id = ValueId(value=nid.value)
-        assert expression is not None
 
-        # default width and ranges for declared type
-        range: Range = default_range(statement.type.name)
-        ident = Identifier(data=statement.name)
+        # derive type from value statement
+        nid = graph.types.get_by_node(statement.type)
+        type_id = TypeId(value=nid.value)
 
-        # override ranges if specified
-        if statement.type.range is not None:
-            range = Range(
-                lower=Hex.derive(statement.type.range.lower.digits),
-                upper=Hex.derive(statement.type.range.upper.digits),
-            )
+        # find literal by AST node
+        if isinstance(statement.expr, tree.function.Literal):
+            nid = graph.function.literals.get_by_node(statement.expr)
+            target: ValueTarget = LiteralId(value=nid.value)
 
-        # derive width from ranges
-        width: Width = max(range.lower.width, range.upper.width)
+        # find expression by AST node
+        else:
+            nid = graph.function.expressions.get_by_node(statement.expr)
+            target = ExpressionId(value=nid.value)
 
-        # construct slot type with range or default width
-        type = Type(
-            name=statement.type.name,
-            width=width,
-            range=range,
-        )
 
         values[value_id] = Value(
-            id=value_id,
             ref=statement.ref,
-            expr=expression,
-            ident=ident,
-            type=type,
+            name=statement.name,
+            target=target,
+            type=type_id,
         )
 
     return OneToOne[ValueId, Value].instance(values)

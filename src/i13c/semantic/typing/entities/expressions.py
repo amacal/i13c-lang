@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from i13c.semantic.core import Identifier
 from i13c.syntax.source import Span
 
 
@@ -15,7 +14,4 @@ class ExpressionId:
 @dataclass(kw_only=True)
 class Expression:
     ref: Span
-    ident: Identifier
-
-    def __str__(self) -> str:
-        return f"ident={self.ident}"
+    name: bytes
