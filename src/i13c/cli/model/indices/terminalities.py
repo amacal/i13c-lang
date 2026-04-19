@@ -20,8 +20,6 @@ class TerminalityListExtractor:
         return {
             "ref": "Reference",
             "id": "Function ID",
-            "name": "Function Name",
-            "fnotret": "Function NoReturn",
             "tnoret": "Terminality NoReturn",
         }
 
@@ -30,7 +28,5 @@ class TerminalityListExtractor:
         return {
             "ref": str(entry[1].ref),
             "id": entry[0].identify(1),
-            "name": str(entry[1].identifier),
-            "fnotret": str(entry[1].noreturn).lower(),
             "tnoret": str(entry[2].noreturn).lower(),
         }

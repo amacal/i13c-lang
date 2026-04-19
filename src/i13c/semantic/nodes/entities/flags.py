@@ -22,6 +22,7 @@ def build_flags(
 ) -> OneToOne[FlagsId, Flags]:
     flags: Dict[FlagsId, Flags] = {}
 
+    # first collect all snippet flags
     for nid, entry in graph.snippet.flags.items():
         # derive flags ID from globally unique node ID
         flags_id = FlagsId(value=nid.value)
@@ -39,6 +40,17 @@ def build_flags(
                 if entry.clobbers is not None
                 else None
             ),
+        )
+
+    # then collect all regular function flags
+    for nid, entry in graph.function.flags.items():
+        # derive flags ID from globally unique node ID
+        flags_id = FlagsId(value=nid.value)
+
+        flags[flags_id] = Flags(
+            ref=entry.ref,
+            noreturn=entry.noreturn,
+            clobbers=None,
         )
 
     return OneToOne[FlagsId, Flags].instance(flags)

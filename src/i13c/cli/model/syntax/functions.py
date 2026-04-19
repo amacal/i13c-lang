@@ -27,7 +27,7 @@ class FunctionListExtractor:
             "ref": str(entry[1].ref),
             "id": f"#{entry[0].value}",
             "name": str(entry[1].signature.name.decode()),
-            "noreturn": str(entry[1].noreturn).lower(),
+            "noreturn": str(entry[1].flags.noreturn if entry[1].flags is not None else False),
             "params": str(len(entry[1].signature.params)),
             "stmts": str(len(entry[1].statements)),
         }

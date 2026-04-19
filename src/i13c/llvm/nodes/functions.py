@@ -184,18 +184,18 @@ def lower_flow_entry(
     iid = FlowId(value=ctx.generator.next())
     instructions: List[BlockInstruction] = [(iid, PrologueFlow(target=fid))]
 
-    # generate virtual registers for parameters
-    for idx, pid in enumerate(ctx.graph.entities.functions.get(fid).parameters):
+    # # generate virtual registers for parameters
+    # for idx, pid in enumerate(ctx.graph.entities.functions.get(fid).parameters):
 
-        # get a variable behind the function parameter
-        variable = ctx.graph.indices.variables_by_parameter.get(pid)
+    #     # get a variable behind the function parameter
+    #     variable = ctx.graph.indices.variables_by_parameter.get(pid)
 
-        # generate virtual move flow between physical and virtual register
-        iid = FlowId(value=ctx.generator.next())
-        instr = SnapshotFlow(dst=ctx.registers.get(variable).ref(), src=idx)
+    #     # generate virtual move flow between physical and virtual register
+    #     iid = FlowId(value=ctx.generator.next())
+    #     instr = SnapshotFlow(dst=ctx.registers.get(variable).ref(), src=idx)
 
-        # append it
-        instructions.append((iid, instr))
+    #     # append it
+    #     instructions.append((iid, instr))
 
     # register entry block
     ctx.entries[fid] = mapping[node]

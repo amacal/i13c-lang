@@ -2,11 +2,11 @@ from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Identifier
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.functions import Function, FunctionId, Statement
-from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.syntax import tree
 
@@ -25,15 +25,23 @@ def build_functions(
 ) -> OneToOne[FunctionId, Function]:
     functions: Dict[FunctionId, Function] = {}
 
-    for nid, function in graph.function.functions.items():
-        parameters: List[ParameterId] = []
+    for nid, node in graph.function.functions.items():
+        # derive function ID from globally unique node ID
+        function_id = FunctionId(value=nid.value)
         statements: List[Statement] = []
 
-        for parameter in function.signature.params:
-            pid = graph.function.parameters.get_by_node(parameter)
-            parameters.append(ParameterId(value=pid.value))
+        # identify signature ID from globally unique node ID
+        nid = graph.function.signatures.get_by_node(node.signature)
+        signature_id = SignatureId(value=nid.value)
 
-        for statement in function.statements:
+        # identify flags ID from globally unique node ID
+        if node.flags is not None:
+            nid = graph.function.flags.get_by_node(node.flags)
+            flags_id = FlagsId(value=nid.value)
+        else:
+            flags_id = None
+
+        for statement in node.statements:
             sid = graph.function.statements.get_by_node(statement)
 
             match statement:
@@ -42,14 +50,11 @@ def build_functions(
                 case tree.function.ValueStatement():
                     statements.append(ValueId(value=sid.value))
 
-        # derive function ID from globally unique node ID
-        function_id = FunctionId(value=nid.value)
 
         functions[function_id] = Function(
-            ref=function.ref,
-            identifier=Identifier(data=function.signature.name),
-            noreturn=function.noreturn,
-            parameters=parameters,
+            ref=node.ref,
+            signature=signature_id,
+            flags=flags_id,
             statements=statements,
         )
 

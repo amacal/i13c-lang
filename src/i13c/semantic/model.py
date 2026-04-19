@@ -69,9 +69,10 @@ class SemanticGraph:
     resolutions: ResolutionNodes
 
     def find_function_by_name(self, name: bytes) -> Optional[FunctionId]:
-        for fid, function in self.entities.functions.items():
-            if function.identifier.data == name:
-                return fid
+        for _, _ in self.entities.functions.items():
+            pass
+            # if function.identifier.data == name:
+            #     return fid
 
         return None
 

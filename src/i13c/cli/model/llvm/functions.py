@@ -24,7 +24,6 @@ class EntriesListExtractor:
     def headers() -> Dict[str, str]:
         return {
             "fid": "Function ID",
-            "name": "Function Name",
             "bid": "Block ID",
             "terminator": "Terminator",
         }
@@ -33,7 +32,6 @@ class EntriesListExtractor:
     def rows(entry: Tuple[FunctionId, Function, BlockId, Block]) -> Dict[str, str]:
         return {
             "fid": entry[0].identify(1),
-            "name": str(entry[1].identifier),
             "bid": entry[2].identify(1),
             "terminator": str(entry[3].terminator),
         }
@@ -54,7 +52,6 @@ class ExitsListExtractor:
     def headers() -> Dict[str, str]:
         return {
             "fid": "Function ID",
-            "name": "Function Name",
             "bid": "Block ID",
             "terminator": "Terminator",
         }
@@ -63,7 +60,6 @@ class ExitsListExtractor:
     def rows(entry: Tuple[FunctionId, Function, BlockId, Block]) -> Dict[str, str]:
         return {
             "fid": entry[0].identify(1),
-            "name": str(entry[1].identifier),
             "bid": entry[2].identify(1),
             "terminator": str(entry[3].terminator),
         }
@@ -84,7 +80,6 @@ class BlocksListExtractor:
     def headers() -> Dict[str, str]:
         return {
             "fid": "Function ID",
-            "name": "Function Name",
             "bids": "Block IDs",
         }
 
@@ -92,7 +87,6 @@ class BlocksListExtractor:
     def rows(entry: Tuple[FunctionId, Function, List[BlockId]]) -> Dict[str, str]:
         return {
             "fid": entry[0].identify(1),
-            "name": str(entry[1].identifier),
             "bids": " ".join(bid.identify(1) for bid in entry[2]),
         }
 
@@ -112,7 +106,6 @@ class InstructionsInFunctionsListExtractor:
     def headers() -> Dict[str, str]:
         return {
             "fid": "Function ID",
-            "name": "Function Name",
             "bid": "Block ID",
             "idx": "Instruction Index",
             "instr": "Instruction",
@@ -122,7 +115,6 @@ class InstructionsInFunctionsListExtractor:
     def rows(entry: Tuple[FunctionId, Function, InstructionPosition]) -> Dict[str, str]:
         return {
             "fid": entry[0].identify(1),
-            "name": str(entry[1].identifier),
             "bid": entry[2].block.identify(1),
             "idx": str(entry[2].index),
             "instr": entry[2].target.identify(1),
@@ -148,7 +140,6 @@ class IntervalsInFunctionsListExtractor:
     def headers() -> Dict[str, str]:
         return {
             "fid": "Function ID",
-            "name": "Function Name",
             "reg": "Virtual Register",
             "start": "Interval Start",
             "end": "Interval End",
@@ -159,7 +150,6 @@ class IntervalsInFunctionsListExtractor:
     def rows(entry: Tuple[FunctionId, Function, RegisterInterval]) -> Dict[str, str]:
         return {
             "fid": entry[0].identify(1),
-            "name": str(entry[1].identifier),
             "reg": reg64_to_name(entry[2].vreg),
             "start": str(entry[2].start),
             "end": str(entry[2].end),
@@ -186,7 +176,6 @@ class IntervalPressureInFunctionsListExtractor:
     def headers() -> Dict[str, str]:
         return {
             "fid": "Function ID",
-            "name": "Function Name",
             "idx": "Interval Index",
             "pressure": "Interval Pressure",
             "registers": "Interval Registers",
@@ -196,7 +185,6 @@ class IntervalPressureInFunctionsListExtractor:
     def rows(entry: Tuple[FunctionId, Function, IntervalPressure]) -> Dict[str, str]:
         return {
             "fid": entry[0].identify(1),
-            "name": str(entry[1].identifier),
             "idx": str(entry[2].index),
             "pressure": str(entry[2].pressure),
             "registers": " ".join(
@@ -225,7 +213,6 @@ class StackFrameInFunctionsListExtractor:
     def headers() -> Dict[str, str]:
         return {
             "fid": "Function ID",
-            "name": "Function Name",
             "size": "Stack Frame Size",
             "idx": "Stack Frame Slot",
             "regs": "Registers",
@@ -235,7 +222,6 @@ class StackFrameInFunctionsListExtractor:
     def rows(entry: Tuple[FunctionId, Function, int, StackFrame]) -> Dict[str, str]:
         return {
             "fid": entry[0].identify(1),
-            "name": str(entry[1].identifier),
             "size": str(entry[3].size),
             "idx": str(entry[2]),
             "regs": " ".join(

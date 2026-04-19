@@ -21,6 +21,7 @@ def build_parameters(
 ) -> OneToOne[ParameterId, Parameter]:
     parameters: Dict[ParameterId, Parameter] = {}
 
+    # first collect all snippet slots as parameters
     for nid, entry in graph.snippet.slots.items():
         # derive parameter ID from globally unique node ID
         parameter_id = ParameterId(value=nid.value)
@@ -35,6 +36,7 @@ def build_parameters(
             type=type_id,
         )
 
+    # then collect all regular function parameters
     for nid, entry in graph.function.parameters.items():
         # derive parameter ID from globally unique node ID
         parameter_id = ParameterId(value=nid.value)

@@ -16,7 +16,7 @@ from i13c.syntax.parsing.types import parse_range
 def parse_function(state: ParsingState) -> tree.function.Function:
     statements: List[tree.function.Statement] = []
     parameters: List[tree.function.Parameter] = []
-    noreturn: bool = False
+    flags: Optional[tree.function.Flags] = None
 
     # function name is an identifier
     name = state.expect(Tokens.IDENT)
@@ -33,7 +33,7 @@ def parse_function(state: ParsingState) -> tree.function.Function:
 
     # optional flags
     if not state.is_in(Tokens.CURLY_OPEN):
-        noreturn = parse_function_flags(state)
+        flags = parse_function_flags(state)
 
     # expect opening curly brace
     state.expect(Tokens.CURLY_OPEN)
@@ -47,12 +47,12 @@ def parse_function(state: ParsingState) -> tree.function.Function:
 
     return tree.function.Function(
         ref=state.between(name, end),
-        noreturn=noreturn,
         signature=tree.function.Signature(
             ref=state.between(name, end),
             name=state.extract(name),
             params=parameters,
         ),
+        flags=flags,
         statements=statements,
     )
 
@@ -91,13 +91,20 @@ def parse_parameter(state: ParsingState) -> tree.function.Parameter:
     )
 
 
-def parse_function_flags(state: ParsingState) -> bool:
+def parse_function_flags(state: ParsingState) -> Optional[tree.function.Flags]:
     keyword: Optional[LexingToken] = None
-    terminal = False
+    noreturn: Optional[bool] = None
+
+    start: Optional[LexingToken] = None
+    end: Optional[LexingToken] = None
 
     while not state.is_in(Tokens.CURLY_OPEN):
         expected = {b"noreturn"}
         keyword = state.expect(Tokens.KEYWORD)
+
+        # set boundaries
+        start = start or keyword
+        end = keyword
 
         # fail if the keyword is not "noreturn"
         if state.extract(keyword) not in expected:
@@ -105,12 +112,18 @@ def parse_function_flags(state: ParsingState) -> bool:
 
         # if "noreturn", set terminal flag
         elif state.extract(keyword) == b"noreturn":
-            if terminal:
+            if noreturn is not None:
                 raise FlagAlreadySpecified(keyword, b"noreturn")
             else:
-                terminal = True
+                noreturn = True
 
-    return terminal
+    if not start or not end:
+        return None
+
+    return tree.function.Flags(
+        ref=state.between(start, end),
+        noreturn=noreturn,
+    )
 
 
 def parse_statement(state: ParsingState) -> tree.function.Statement:

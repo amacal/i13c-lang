@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Protocol, Union
+from typing import List, Optional, Protocol, Union
 
 import i13c.syntax.tree.literals as literals
 import i13c.syntax.tree.types as types
@@ -9,6 +9,7 @@ from i13c.syntax.tree.core import Path
 
 class Visitor(Protocol):
     def on_function(self, function: Function, path: Path) -> None: ...
+    def on_flags(self, flags: Flags, path: Path) -> None: ...
     def on_signature(self, signature: Signature, path: Path) -> None: ...
     def on_statement(self, statement: Statement, path: Path) -> None: ...
     def on_literal(self, literal: Literal, path: Path) -> None: ...
@@ -111,10 +112,19 @@ Statement = Union[CallStatement, ValueStatement]
 
 
 @dataclass(kw_only=True, eq=False)
+class Flags:
+    ref: Span
+    noreturn: Optional[bool]
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_flags(self, path)
+
+
+@dataclass(kw_only=True, eq=False)
 class Function:
     ref: Span
-    noreturn: bool
     signature: Signature
+    flags: Optional[Flags]
     statements: List[Statement]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
@@ -122,6 +132,9 @@ class Function:
 
         with path.push(self) as node:
             self.signature.accept(visitor, node)
+
+            if self.flags is not None:
+                self.flags.accept(visitor, node)
 
             for statement in self.statements:
                 statement.accept(visitor, node)

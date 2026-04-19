@@ -10,7 +10,7 @@ import i13c.syntax.tree.snippet as snippet
 import i13c.syntax.tree.types as types
 from i13c.syntax.tree.core import Path
 
-Flags = Union[snippet.Flags]
+Flags = Union[snippet.Flags, function.Flags]
 Signature = Union[function.Signature, snippet.Signature]
 
 class Visitor(Protocol):

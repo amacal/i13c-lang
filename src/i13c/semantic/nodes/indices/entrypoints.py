@@ -5,7 +5,7 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
-from i13c.semantic.typing.indices.entrypoints import EntryPoint, EntryPointName
+from i13c.semantic.typing.indices.entrypoints import EntryPoint
 
 
 def configure_entrypoint_by_callable() -> GraphNode:
@@ -29,9 +29,9 @@ def build_entrypoints(
 
     out: Dict[CallableTarget, EntryPoint] = {}
 
-    for fid, function in functions.items():
-        if function.identifier.data == EntryPointName:
-            if function.noreturn and not function.parameters:
-                out[fid] = EntryPoint(kind=b"function", target=fid)
+    # for fid, function in functions.items():
+    #     if function.identifier.data == EntryPointName:
+    #         if function.noreturn and not function.parameters:
+    #             out[fid] = EntryPoint(kind=b"function", target=fid)
 
     return OneToOne[CallableTarget, EntryPoint].instance(out)

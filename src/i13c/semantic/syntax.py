@@ -61,8 +61,11 @@ class NodesVisitor:
     def on_snippet(self, snippet: tree.snippet.Snippet, path: Path) -> None:
         self.graph.snippet.snippets.append(self.next(), snippet)
 
-    def on_flags(self, flags: tree.snippet.Flags, path: Path) -> None:
-        self.graph.snippet.flags.append(self.next(), flags)
+    def on_flags(self, flags: tree.Flags, path: Path) -> None:
+        if isinstance(flags, tree.snippet.Flags):
+            self.graph.snippet.flags.append(self.next(), flags)
+        else:
+            self.graph.function.flags.append(self.next(), flags)
 
     def on_signature(self, signature: tree.Signature, path: Path) -> None:
         if isinstance(signature, tree.snippet.Signature):
@@ -152,6 +155,7 @@ class Snippet:
 @dataclass(kw_only=True)
 class Function:
     functions: Bidirectional[tree.function.Function, None]
+    flags: Bidirectional[tree.function.Flags, None]
     signatures: Bidirectional[tree.function.Signature, tree.function.Function]
     statements: Bidirectional[tree.function.Statement, None]
     literals: Bidirectional[tree.function.Literal, None]
@@ -191,6 +195,7 @@ class SyntaxGraph:
             ),
             function=Function(
                 functions=Bidirectional[tree.function.Function, None].empty(),
+                flags=Bidirectional[tree.function.Flags, None].empty(),
                 signatures=Bidirectional[
                     tree.function.Signature, tree.function.Function
                 ].empty(),

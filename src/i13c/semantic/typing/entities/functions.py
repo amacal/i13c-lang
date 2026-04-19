@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Optional, Union
 
-from i13c.semantic.core import Identifier
 from i13c.semantic.typing.entities.callsites import CallSiteId
-from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.flags import FlagsId
+from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.syntax.source import Span
 
@@ -21,11 +21,6 @@ class FunctionId:
 @dataclass(kw_only=True)
 class Function:
     ref: Span
-    identifier: Identifier
-    noreturn: bool
-    parameters: List[ParameterId]
+    signature: SignatureId
+    flags: Optional[FlagsId]
     statements: List[Statement]
-
-    def signature(self) -> str:
-        parameters = ", ".join([parameter.identify(2) for parameter in self.parameters])
-        return f"{self.identifier.data.decode()}/{len(self.parameters)} ({parameters})"
