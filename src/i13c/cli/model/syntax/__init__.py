@@ -11,10 +11,6 @@ from i13c.cli.model.syntax.literals import (
 from i13c.cli.model.syntax.operands import OperandListExtractor
 from i13c.cli.model.syntax.parameters import ParameterListExtractor
 from i13c.cli.model.syntax.snippets import SnippetListExtractor
-from i13c.cli.model.syntax.statements import (
-    StatementCallsListExtractor,
-    StatementListExtractor,
-)
 
 SYNTAX: Dict[str, AbstractListExtractor[Any]] = {
     "syntax/expressions": ExpressionListExtractor,
@@ -25,6 +21,4 @@ SYNTAX: Dict[str, AbstractListExtractor[Any]] = {
     "syntax/operands": OperandListExtractor,
     "syntax/parameters": ParameterListExtractor,
     "syntax/snippets": SnippetListExtractor,
-    "syntax/statements": StatementListExtractor,
-    "syntax/statements/calls": StatementCallsListExtractor,
 }

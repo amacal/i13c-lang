@@ -24,36 +24,15 @@ def build_usages_by_expression(
     usages: Dict[UsageId, Usage] = {}
     mapping: Dict[ExpressionId, List[UsageId]] = {}
 
-    for _, statement in graph.function.statements.items():
+    for _, statement in graph.function.callsites.items():
 
-        # for callsites we need to handle arguments
-        if isinstance(statement, tree.function.CallStatement):
-            for argument in statement.arguments:
-                # not expression must be literals
-                if not isinstance(argument, tree.function.Expression):
-                    continue
-
-                # derive parameter ID from globally unique node ID
-                nid = graph.function.expressions.get_by_node(argument)
-                usage_id = UsageId(value=nid.value)
-
-                # map usage to expression
-                expression_id = ExpressionId(value=nid.value)
-                mapping[expression_id] = [usage_id]
-
-                # map expression to usage
-                usages[usage_id] = Usage(
-                    ref=argument.ref,
-                    ident=Identifier(data=argument.name),
-                )
-
-        if isinstance(statement, tree.function.ValueStatement):
+        for argument in statement.arguments:
             # not expression must be literals
-            if not isinstance(statement.expr, tree.function.Expression):
+            if not isinstance(argument, tree.function.Expression):
                 continue
 
             # derive parameter ID from globally unique node ID
-            nid = graph.function.expressions.get_by_node(statement.expr)
+            nid = graph.function.expressions.get_by_node(argument)
             usage_id = UsageId(value=nid.value)
 
             # map usage to expression
@@ -62,9 +41,28 @@ def build_usages_by_expression(
 
             # map expression to usage
             usages[usage_id] = Usage(
-                ref=statement.expr.ref,
-                ident=Identifier(data=statement.expr.name),
+                ref=argument.ref,
+                ident=Identifier(data=argument.name),
             )
+
+    for _, statement in graph.function.values.items():
+        # not expression must be literals
+        if not isinstance(statement.expr, tree.function.Expression):
+            continue
+
+        # derive parameter ID from globally unique node ID
+        nid = graph.function.expressions.get_by_node(statement.expr)
+        usage_id = UsageId(value=nid.value)
+
+        # map usage to expression
+        expression_id = ExpressionId(value=nid.value)
+        mapping[expression_id] = [usage_id]
+
+        # map expression to usage
+        usages[usage_id] = Usage(
+            ref=statement.expr.ref,
+            ident=Identifier(data=statement.expr.name),
+        )
 
     return (
         OneToOne[UsageId, Usage].instance(usages),

@@ -119,8 +119,11 @@ class NodesVisitor:
     def on_parameter(self, parameter: tree.function.Parameter, path: Path) -> None:
         self.graph.function.parameters.append(self.next(), parameter)
 
-    def on_statement(self, statement: tree.function.Statement, path: Path) -> None:
-        self.graph.function.statements.append(self.next(), statement)
+    def on_callsite(self, callsite: tree.function.CallStatement, path: Path) -> None:
+        self.graph.function.callsites.append(self.next(), callsite)
+
+    def on_value(self, value: tree.function.ValueStatement, path: Path) -> None:
+        self.graph.function.values.append(self.next(), value)
 
     def on_literal(self, literal: tree.function.Literal, path: Path) -> None:
         self.graph.function.literals.append(self.next(), literal)
@@ -157,7 +160,8 @@ class Function:
     functions: Bidirectional[tree.function.Function, None]
     flags: Bidirectional[tree.function.Flags, None]
     signatures: Bidirectional[tree.function.Signature, tree.function.Function]
-    statements: Bidirectional[tree.function.Statement, None]
+    callsites: Bidirectional[tree.function.CallStatement, None]
+    values: Bidirectional[tree.function.ValueStatement, None]
     literals: Bidirectional[tree.function.Literal, None]
     expressions: Bidirectional[tree.function.Expression, None]
     parameters: Bidirectional[tree.function.Parameter, None]
@@ -198,7 +202,8 @@ class SyntaxGraph:
                 signatures=Bidirectional[
                     tree.function.Signature, tree.function.Function
                 ].empty(),
-                statements=Bidirectional[tree.function.Statement, None].empty(),
+                callsites=Bidirectional[tree.function.CallStatement, None].empty(),
+                values=Bidirectional[tree.function.ValueStatement, None].empty(),
                 literals=Bidirectional[tree.function.Literal, None].empty(),
                 expressions=Bidirectional[tree.function.Expression, None].empty(),
                 parameters=Bidirectional[tree.function.Parameter, None].empty(),

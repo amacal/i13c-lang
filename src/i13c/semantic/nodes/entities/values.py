@@ -24,11 +24,7 @@ def build_values(
 ) -> OneToOne[ValueId, Value]:
     values: Dict[ValueId, Value] = {}
 
-    for nid, statement in graph.function.statements.items():
-
-        # accept only value statements
-        if not isinstance(statement, tree.function.ValueStatement):
-            continue
+    for nid, statement in graph.function.values.items():
 
         # derive value ID from globally unique node ID
         value_id = ValueId(value=nid.value)

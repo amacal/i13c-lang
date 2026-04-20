@@ -24,12 +24,8 @@ def build_callsites(
 ) -> OneToOne[CallSiteId, CallSite]:
     callsites: Dict[CallSiteId, CallSite] = {}
 
-    for nid, statement in graph.function.statements.items():
+    for nid, statement in graph.function.callsites.items():
         arguments: List[Argument] = []
-
-        # accept only call statements
-        if not isinstance(statement, tree.function.CallStatement):
-            continue
 
         for argument in statement.arguments:
             match argument:

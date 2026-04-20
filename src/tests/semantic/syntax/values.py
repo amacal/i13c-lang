@@ -8,4 +8,4 @@ def can_visit_value_declaration_with_initialization() -> None:
         """
     )
 
-    assert len(list(visitor.graph.function.statements.items())) == 1
+    assert len(list(visitor.graph.function.values.items())) == 1

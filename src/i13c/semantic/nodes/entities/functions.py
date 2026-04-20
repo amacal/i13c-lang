@@ -42,13 +42,12 @@ def build_functions(
             flags_id = None
 
         for statement in node.statements:
-            sid = graph.function.statements.get_by_node(statement)
-
-            match statement:
-                case tree.function.CallStatement():
-                    statements.append(CallSiteId(value=sid.value))
-                case tree.function.ValueStatement():
-                    statements.append(ValueId(value=sid.value))
+            if isinstance(statement, tree.function.CallStatement):
+                nid = graph.function.callsites.get_by_node(statement)
+                statements.append(CallSiteId(value=nid.value))
+            else:
+                nid = graph.function.values.get_by_node(statement)
+                statements.append(ValueId(value=nid.value))
 
 
         functions[function_id] = Function(
