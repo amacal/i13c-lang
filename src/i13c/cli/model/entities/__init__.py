@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from i13c.cli.model.abstract import AbstractListExtractor
-from i13c.cli.model.entities.bindings import BindingsListExtractor
 from i13c.cli.model.entities.callsites import CallSiteListExtractor
 from i13c.cli.model.entities.expressions import ExpressionListExtractor
 from i13c.cli.model.entities.functions import FunctionListExtractor
@@ -15,7 +14,6 @@ from i13c.cli.model.entities.values import ValueListExtractor
 from i13c.cli.model.entities.variables import VariableListExtractor
 
 ENTITIES: Dict[str, AbstractListExtractor[Any]] = {
-    "entities/bindings": BindingsListExtractor,
     "entities/callsites": CallSiteListExtractor,
     "entities/expressions": ExpressionListExtractor,
     "entities/functions": FunctionListExtractor,

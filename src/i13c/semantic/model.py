@@ -22,7 +22,6 @@ from i13c.semantic.typing.indices.usages import UsageId
 from i13c.semantic.typing.indices.variables import VariableId, VariableSource
 from i13c.semantic.typing.resolutions import ResolutionNodes
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
-from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueResolution
@@ -38,7 +37,6 @@ class IndexEdges:
     environment_by_flownode: OneToOne[FlowNode, Environment]
     flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
     instance_by_callsite: Optional[OneToOne[CallSiteId, Instance]]
-    resolution_by_callsite: OneToOne[CallSiteId, CallSiteResolution]
     resolution_by_value: OneToOne[ValueId, ValueResolution]
     terminality_by_function: OneToOne[FunctionId, Terminality]
     usages_by_expression: OneToMany[ExpressionId, UsageId]
@@ -53,14 +51,14 @@ class LiveComponents:
 
 @dataclass
 class CallGraph:
-    calls_by_caller: OneToMany[CallableTarget, CallPair]
-    calls_by_callee: OneToMany[CallableTarget, CallPair]
+    calls_by_caller: Optional[OneToMany[CallableTarget, CallPair]]
+    calls_by_callee: Optional[OneToMany[CallableTarget, CallPair]]
 
 
 @dataclass(kw_only=True)
 class SemanticGraph:
-    callgraph_live: Dict[CallableTarget, List[CallPair]]
-    callable_live: Set[CallableTarget]
+    callgraph_live: Optional[Dict[CallableTarget, List[CallPair]]]
+    callable_live: Optional[Set[CallableTarget]]
 
     entities: EntityNodes
     indices: IndexEdges

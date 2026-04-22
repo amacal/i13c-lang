@@ -3,7 +3,7 @@ from typing import Any, Dict
 from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.resolutions.addresses import configure_address_resolution
 from i13c.semantic.nodes.resolutions.binds import configure_bind_resolution
-from i13c.semantic.nodes.resolutions.callsites import configure_resolution_by_callsite
+from i13c.semantic.nodes.resolutions.callsites import configure_callsite_resolution
 from i13c.semantic.nodes.resolutions.cflows import configure_control_flow_resolution
 from i13c.semantic.nodes.resolutions.environments import (
     configure_environment_resolution,
@@ -33,6 +33,7 @@ def configure_resolutions() -> GraphGroup:
         nodes=[
             configure_address_resolution(),
             configure_bind_resolution(),
+            configure_callsite_resolution(),
             configure_control_flow_resolution(),
             configure_environment_resolution(),
             configure_flags_resolution(),
@@ -45,7 +46,6 @@ def configure_resolutions() -> GraphGroup:
             configure_range_resolution(),
             configure_reference_resolution(),
             configure_register_resolution(),
-            configure_resolution_by_callsite(),
             configure_resolution_by_value(),
             configure_signature_resolution(),
             configure_parameter_resolution(),
@@ -59,6 +59,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
     return ResolutionNodes(
         addresses=resolutions.get("resolutions/addresses"),
         binds=resolutions.get("resolutions/binds"),
+        callsites=resolutions.get("resolutions/callsites"),
         cflows=resolutions.get("resolutions/cflows"),
         environments=resolutions.get("resolutions/environments"),
         flags=resolutions.get("resolutions/flags"),

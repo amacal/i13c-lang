@@ -18,6 +18,3 @@ class Signature:
     ref: Span
     name: bytes
     parameters: List[ParameterId]
-
-    def __str__(self) -> str:
-        return f"{self.name.decode()}:{len(self.parameters)}"

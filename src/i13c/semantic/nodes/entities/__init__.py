@@ -60,7 +60,6 @@ def configure_entities() -> GraphGroup:
 def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
     return EntityNodes(
         addresses=entities["entities/addresses"],
-        bindings=entities["entities/bindings"],
         binds=entities["entities/binds"],
         callsites=entities["entities/callsites"],
         cflows=entities["entities/cflows"],

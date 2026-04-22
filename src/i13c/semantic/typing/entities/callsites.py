@@ -1,15 +1,12 @@
 from dataclasses import dataclass
-from typing import List
-from typing import Literal as Kind
-from typing import Union
+from typing import Callable, List, Protocol, TypeVar, Union
 
-from i13c.semantic.core import Identifier
+from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.syntax.source import Span
 
-ArgumentKind = Kind[b"literal", b"expression"]
-ArgumentTarget = Union[LiteralId, ExpressionId]
+CallSiteTarget = Union[LiteralId, ExpressionId]
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -20,15 +17,22 @@ class CallSiteId:
         return "#".join(("callsite", f"{self.value:<{length}}"))
 
 
-@dataclass(kw_only=True)
-class Argument:
-    kind: ArgumentKind
-    target: ArgumentTarget
+class CallSiteContextBound(Protocol):
+    pass
+
+
+CallSiteContext = TypeVar("CallSiteContext", bound=CallSiteContextBound)
 
 
 @dataclass(kw_only=True)
 class CallSite:
     ref: Span
-    id: CallSiteId
-    callee: Identifier
-    arguments: List[Argument]
+    ctx: NodeId
+
+    callee: bytes
+    arguments: List[CallSiteTarget]
+
+    def get_context(
+        self, factory: Callable[[NodeId], CallSiteContext]
+    ) -> CallSiteContext:
+        return factory(self.ctx)

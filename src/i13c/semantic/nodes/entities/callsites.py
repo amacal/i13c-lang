@@ -2,9 +2,8 @@ from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Identifier
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.callsites import Argument, CallSite, CallSiteId
+from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId, CallSiteTarget
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.syntax import tree
@@ -25,38 +24,29 @@ def build_callsites(
     callsites: Dict[CallSiteId, CallSite] = {}
 
     for nid, statement in graph.function.callsites.items():
-        arguments: List[Argument] = []
-
-        for argument in statement.arguments:
-            match argument:
-                case tree.function.Literal() as lit:
-                    # find literal by AST node
-                    lid = graph.function.literals.get_by_node(lit)
-
-                    arguments.append(
-                        Argument(
-                            kind=b"literal",
-                            target=LiteralId(value=lid.value),
-                        )
-                    )
-                case tree.function.Expression() as expr:
-                    # find expression by AST node
-                    eid = graph.function.expressions.get_by_node(expr)
-
-                    arguments.append(
-                        Argument(
-                            kind=b"expression",
-                            target=ExpressionId(value=eid.value),
-                        )
-                    )
-
         # derive callsite ID from globally unique node ID
         callsite_id = CallSiteId(value=nid.value)
+        arguments: List[CallSiteTarget] = []
+
+        # derive function ID from globally unique node ID
+        nid = graph.function.callsites.get_ctx(nid)
+        ctx = graph.function.functions.get_by_node(nid)
+
+        for argument in statement.arguments:
+            if isinstance(argument, tree.function.Literal):
+                # derive literal ID from globally unique node ID
+                lid = graph.function.literals.get_by_node(argument)
+                arguments.append(LiteralId(value=lid.value))
+
+            else:
+                # derive expression ID from globally unique node ID
+                eid = graph.function.expressions.get_by_node(argument)
+                arguments.append(ExpressionId(value=eid.value))
 
         callsites[callsite_id] = CallSite(
-            id=callsite_id,
             ref=statement.ref,
-            callee=Identifier(data=statement.name),
+            ctx=ctx,
+            callee=statement.name,
             arguments=arguments,
         )
 

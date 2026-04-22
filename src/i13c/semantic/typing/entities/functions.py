@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
+from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -13,6 +14,10 @@ Statement = Union[CallSiteId, ValueId]
 @dataclass(kw_only=True, frozen=True)
 class FunctionId:
     value: int
+
+    @staticmethod
+    def from_context(nid: NodeId) -> FunctionId:
+        return FunctionId(value=nid.value)
 
     def identify(self, length: int) -> str:
         return "#".join(("function", f"{self.value:<{length}}"))

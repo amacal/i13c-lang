@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import Address, AddressId
-from i13c.semantic.typing.entities.bindings import CallSiteBindings
 from i13c.semantic.typing.entities.binds import Bind, BindId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.cflows import ControlFlows
@@ -31,7 +30,6 @@ from i13c.semantic.typing.indices.variables import Variable, VariableId
 @dataclass
 class EntityNodes:
     addresses: OneToOne[AddressId, Address]
-    bindings: OneToOne[CallSiteId, CallSiteBindings]
     binds: OneToOne[BindId, Bind]
     callsites: OneToOne[CallSiteId, CallSite]
     cflows: OneToOne[FunctionId, ControlFlows]

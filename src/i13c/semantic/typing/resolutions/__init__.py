@@ -22,6 +22,7 @@ from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
 from i13c.semantic.typing.resolutions.binds import BindResolution
+from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.cflows import ControlFlowResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
 from i13c.semantic.typing.resolutions.flags import FlagsResolution
@@ -44,6 +45,7 @@ from i13c.semantic.typing.resolutions.types import TypeResolution
 class ResolutionNodes:
     addresses: Optional[OneToOne[AddressId, AddressResolution]]
     binds: Optional[OneToOne[BindId, BindResolution]]
+    callsites: Optional[OneToOne[FunctionId, CallSiteResolution]]
     cflows: Optional[OneToOne[FunctionId, ControlFlowResolution]]
     environments: Optional[OneToOne[EnvironmentId, EnvironmentResolution]]
     flags: Optional[OneToOne[FlagsId, FlagsResolution]]

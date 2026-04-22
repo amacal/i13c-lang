@@ -15,6 +15,9 @@ class GraphArtifacts:
         return self.data["syntax/graph"]
 
     def semantic_graph(self) -> SemanticGraph:
+        for x in self.rules().enumerate():
+            print(x.code, x.message)
+
         return self.data["semantic/graph"]
 
     def rules(self) -> SemanticRules:

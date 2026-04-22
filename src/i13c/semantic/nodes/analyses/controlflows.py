@@ -19,7 +19,7 @@ def configure_flowgraphs_live() -> GraphNode:
         requires=frozenset(
             {
                 ("flowgraph_by_function", "indices/flowgraph-by-function"),
-                ("resolutions", "resolutions/callsites"),
+                ("resolutions", "entities/callsites"),
                 ("snippets", "entities/snippets"),
                 ("terminalities", "indices/terminality-by-function"),
             }
@@ -38,63 +38,63 @@ def prune_flowgraph(
     for node in flowgraph.backward.keys():
         backward[node] = []
 
-    for node, successors in flowgraph.forward.items():
-        if isinstance(node, CallSiteId):
-            # node is a callsite
-            resolution = resolutions.get(node)
-            acceptable = False
+    # for node, successors in flowgraph.forward.items():
+    #     if isinstance(node, CallSiteId):
+    #         # node is a callsite
+    #         resolution = resolutions.get(node)
+    #         acceptable = False
 
-            # no accepted callables, all successors are pruned
-            if not resolution.accepted:
-                successors = []
+    #         # no accepted callables, all successors are pruned
+    #         if not resolution.accepted:
+    #             successors = []
 
-            # check if any accepted callable is not noreturn
-            for accepted in resolution.accepted:
-                if accepted.callable.target not in noreturn:
-                    acceptable = True
-                    break
+    #         # check if any accepted callable is not noreturn
+    #         for accepted in resolution.accepted:
+    #             if accepted.callable.target not in noreturn:
+    #                 acceptable = True
+    #                 break
 
-            # all accepted callables are noreturn, prune successors
-            if not acceptable:
-                successors = []
+    #         # all accepted callables are noreturn, prune successors
+    #         if not acceptable:
+    #             successors = []
 
-        # register successors
-        forward[node] = list(successors)
+    #     # register successors
+    #     forward[node] = list(successors)
 
-        # register backwards edges
-        for successor in successors:
-            backward[successor].append(node)
+    #     # register backwards edges
+    #     for successor in successors:
+    #         backward[successor].append(node)
 
-    queue: List[FlowNode] = [flowgraph.entry]
-    visited: Set[FlowNode] = set()
+    # queue: List[FlowNode] = [flowgraph.entry]
+    # visited: Set[FlowNode] = set()
 
-    while queue:
-        node = queue.pop()
-        if node in visited:
-            continue
+    # while queue:
+    #     node = queue.pop()
+    #     if node in visited:
+    #         continue
 
-        visited.add(node)
+    #     visited.add(node)
 
-        for successor in forward.get(node, []):
-            if successor not in visited:
-                queue.append(successor)
+    #     for successor in forward.get(node, []):
+    #         if successor not in visited:
+    #             queue.append(successor)
 
-    # prune forward edges to visited nodes only
-    forward = {
-        node: [s for s in successors if s in visited]
-        for node, successors in forward.items()
-        if node in visited
-    }
+    # # prune forward edges to visited nodes only
+    # forward = {
+    #     node: [s for s in successors if s in visited]
+    #     for node, successors in forward.items()
+    #     if node in visited
+    # }
 
-    # prune backward edges to visited nodes only
-    backward = {
-        node: [p for p in predecessors if p in visited]
-        for node, predecessors in backward.items()
-        if node in visited
-    }
+    # # prune backward edges to visited nodes only
+    # backward = {
+    #     node: [p for p in predecessors if p in visited]
+    #     for node, predecessors in backward.items()
+    #     if node in visited
+    # }
 
-    # let's be sure entry is still there
-    assert flowgraph.entry in forward
+    # # let's be sure entry is still there
+    # assert flowgraph.entry in forward
 
     return FlowGraph(
         entry=flowgraph.entry,

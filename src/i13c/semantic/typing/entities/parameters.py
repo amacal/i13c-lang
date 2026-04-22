@@ -17,6 +17,3 @@ class Parameter:
     ref: Span
     name: bytes
     type: TypeId
-
-    def __str__(self) -> str:
-        return f"{self.name.decode()}, {self.type.identify(1)}"

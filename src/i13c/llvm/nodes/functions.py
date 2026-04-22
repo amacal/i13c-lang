@@ -140,6 +140,8 @@ def lower_active_functions(
 ]:
     ctx = Context.empty(graph, generator, values, registers)
 
+    assert graph.callable_live is not None
+
     # lower all live callables
     for fid in graph.callable_live:
         if isinstance(fid, FunctionId):

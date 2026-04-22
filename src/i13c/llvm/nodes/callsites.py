@@ -3,8 +3,6 @@ from typing import Dict, List
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.llvm.nodes.bindings import lower_function_bindings, lower_snippet_bindings
-from i13c.llvm.nodes.instances import lower_instance
 from i13c.llvm.typing.blocks import BlockInstruction
 from i13c.llvm.typing.flows import (
     BlockId,
@@ -18,7 +16,6 @@ from i13c.llvm.typing.registers import VirtualRegister
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.indices.variables import VariableId
 
 
@@ -32,43 +29,43 @@ def lower_callsite(
     # prepare instructions
     instructions: List[BlockInstruction] = []
 
-    # retrieve callsite bindings
-    bindings = graph.entities.bindings.get(node)
+    # # retrieve callsite bindings
+    # bindings = graph.entities.bindings.get(node)
 
-    if isinstance(bindings.callable.target, SnippetId):
-        assert graph.indices.instance_by_callsite
-        instance = graph.indices.instance_by_callsite.get(node)
-        target = bindings.callable.target
+    # if isinstance(bindings.callable.target, SnippetId):
+    #     assert graph.indices.instance_by_callsite
+    #     instance = graph.indices.instance_by_callsite.get(node)
+    #     target = bindings.callable.target
 
-        # snippet = graph.entities.snippets.get(target)
-        clobbers = [] #[name_to_reg64(reg.name.decode()) for reg in snippet.clobbers]
+    #     # snippet = graph.entities.snippets.get(target)
+    #     clobbers = [] #[name_to_reg64(reg.name.decode()) for reg in snippet.clobbers]
 
-        # append callsite specific bindings
-        instructions.extend(
-            lower_snippet_bindings(graph, generator, bindings, registers)
-        )
+    #     # append callsite specific bindings
+    #     instructions.extend(
+    #         lower_snippet_bindings(graph, generator, bindings, registers)
+    #     )
 
-        # append emitted instructions
-        instructions.extend(lower_instance(graph, generator, instance))
+    #     # append emitted instructions
+    #     instructions.extend(lower_instance(graph, generator, instance))
 
-        if clobbers:
-            # append callsite snippet flow
-            iid = FlowId(value=generator.next())
-            instructions.extend([(iid, ClobbersFlow(clobbers=[]))])
+    #     if clobbers:
+    #         # append callsite snippet flow
+    #         iid = FlowId(value=generator.next())
+    #         instructions.extend([(iid, ClobbersFlow(clobbers=[]))])
 
-    else:
+    # else:
 
-        # extract successfully resolved target
-        target = bindings.callable.target
+    #     # extract successfully resolved target
+    #     target = bindings.callable.target
 
-        # append callsite specific bindings
-        instructions.extend(
-            lower_function_bindings(graph, generator, bindings, registers)
-        )
+    #     # append callsite specific bindings
+    #     instructions.extend(
+    #         lower_function_bindings(graph, generator, bindings, registers)
+    #     )
 
-        # append callsite call instructions
-        iid = FlowId(value=generator.next())
-        instructions.extend([(iid, CallFlow(target=target))])
+    #     # append callsite call instructions
+    #     iid = FlowId(value=generator.next())
+    #     instructions.extend([(iid, CallFlow(target=target))])
 
     # callsite instructions
     return instructions

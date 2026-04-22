@@ -1,73 +1,212 @@
-from typing import Dict, Protocol
+from typing import Any, Dict, List, Optional, Union
 
-from i13c.core.graph import GraphNode
-from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Hex, Type
-from i13c.semantic.typing.entities.callsites import Argument, CallSite, CallSiteId
-from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
-from i13c.semantic.typing.entities.functions import Function, FunctionId
-from i13c.semantic.typing.entities.literals import Literal, LiteralId
-from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
-from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
-from i13c.semantic.typing.indices.controlflows import FlowNode
-from i13c.semantic.typing.indices.environments import Environment
-from i13c.semantic.typing.indices.variables import Variable, VariableId
-from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
+from i13c.core.diagnostics import Diagnostic
+from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.mapping import OneToMany, OneToOne
+from i13c.semantic.nodes.entities.expressions import Expression, ExpressionId
+from i13c.semantic.nodes.entities.literals import LiteralId
+from i13c.semantic.nodes.entities.types import TypeId
+from i13c.semantic.nodes.resolutions.literals import LiteralAcceptance
+from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
+from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.values import Value, ValueId
+from i13c.semantic.typing.resolutions.callsites import (
+    CallSiteAcceptance,
+    CallSiteRejection,
+    CallSiteRejectionReason,
+    CallSiteResolution,
+)
+from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
+from i13c.semantic.typing.resolutions.types import TypeAcceptance
 
 
-def configure_resolution_by_callsite() -> GraphNode:
-    return GraphNode(
-        builder=build_resolution_by_callsite,
+def configure_callsite_resolution() -> GraphGroup:
+    resolve = GraphNode(
+        builder=build_callsite_resolution,
         constraint=None,
         produces=("resolutions/callsites",),
         requires=frozenset(
             {
-                ("functions", "entities/functions"),
-                ("snippets", "entities/snippets"),
                 ("callsites", "entities/callsites"),
-                ("literals", "entities/literals"),
-                ("parameters", "entities/parameters"),
-                ("variables", "entities/variables"),
                 ("expressions", "entities/expressions"),
-                ("environments", "indices/environment-by-flownode"),
+                ("values", "entities/values"),
+                ("cflows", "resolutions/cflows/accepted"),
+                ("literals", "resolutions/literals/accepted"),
+                ("signatures", "indices/signatures/names"),
+                ("parameters", "resolutions/parameters/accepted"),
+                ("types", "resolutions/types/accepted"),
             }
         ),
     )
 
+    validate = GraphNode(
+        builder=validate_callsite_resolution_e3006,
+        constraint=None,
+        produces=("rules/e3006",),
+        requires=frozenset(
+            {
+                ("callsites", "entities/callsites"),
+                ("resolutions", "resolutions/callsites"),
+            }
+        ),
+    )
 
-class BindingLike(Protocol):
-    type: Type
-    argument: Argument
+    extract = GraphNode(
+        builder=build_callsite_resolution_accepted,
+        constraint=check_callsite_resolution_accepted,
+        produces=("resolutions/callsites/accepted",),
+        requires=frozenset(
+            {
+                ("rule_e3006", "rules/e3006"),
+                ("resolutions", "resolutions/callsites"),
+            }
+        ),
+    )
+
+    return GraphGroup(nodes=[resolve, validate, extract])
 
 
-def match_variable(variable: Variable, type: Type) -> bool:
-    # width constraint
-    if variable.type.width > type.width:
-        return False
-
-    # lower bound constraint
-    if Hex.lesser(variable.type.range.lower.data, type.range.lower.data):
-        return False
-
-    # upper bound constraint
-    if Hex.greater(variable.type.range.upper.data, type.range.upper.data):
-        return False
-
-    # success
-    return True
-
-
-def build_resolution_by_callsite(
-    functions: OneToOne[FunctionId, Function],
-    snippets: OneToOne[SnippetId, Snippet],
+def build_callsite_resolution(
     callsites: OneToOne[CallSiteId, CallSite],
-    literals: OneToOne[LiteralId, Literal],
-    parameters: OneToOne[ParameterId, Parameter],
-    variables: OneToOne[VariableId, Variable],
     expressions: OneToOne[ExpressionId, Expression],
-    environments: OneToOne[FlowNode, Environment],
+    values: OneToOne[ValueId, Value],
+    cflows: OneToOne[FunctionId, ControlFlowAcceptance],
+    literals: OneToOne[LiteralId, LiteralAcceptance],
+    signatures: OneToMany[bytes, SignatureAcceptance],
+    parameters: OneToOne[ParameterId, ParameterAcceptance],
+    types: OneToOne[TypeId, TypeAcceptance],
 ) -> OneToOne[CallSiteId, CallSiteResolution]:
     resolutions: Dict[CallSiteId, CallSiteResolution] = {}
 
+    for sid, entry in callsites.items():
+        resolution = CallSiteResolution(
+            accepted=[],
+            rejected=[],
+        )
+
+        function_id = entry.get_context(FunctionId.from_context)
+        environment = cflows.get(function_id).environments[sid]
+        rejected: Optional[CallSiteRejectionReason] = "unknown-target"
+
+        if found := signatures.find(entry.callee):
+            for signature in found:
+                rejected = None
+
+                if len(signature.parameters) != len(entry.arguments):
+                    rejected = "arity-mismatch"
+                    break
+
+                for parameter, argument in zip(signature.parameters, entry.arguments):
+                    target: Optional[Union[LiteralId, ParameterId, ValueId]] = None
+                    sender: Optional[Union[LiteralAcceptance, TypeAcceptance, TypeId]] = None
+
+                    if isinstance(argument, LiteralId):
+                        target = argument
+                    else:
+                        expr = expressions.get(argument)
+                        target = environment.get(expr.name)
+
+                    if isinstance(target, LiteralId):
+                        sender = literals.get(target)
+
+                    elif isinstance(target, ParameterId):
+                        sender = parameters.get(target).type
+
+                    elif isinstance(target, ValueId):
+                        sender = values.get(target).type
+
+                    if sender is None:
+                        rejected = "type-mismatch"
+                        continue
+
+                    if isinstance(sender, TypeId):
+                        sender = types.get(sender)
+
+                    if isinstance(sender, LiteralAcceptance):
+                        if not parameter.type.accepts(sender):
+                            rejected = "type-mismatch"
+                            break
+
+                    else:
+                        if not parameter.type.accepts(sender):
+                            rejected = "type-mismatch"
+                            break
+
+                if rejected is None:
+                    resolution.accepted.append(
+                        CallSiteAcceptance(
+                            ref=entry.ref,
+                            id=sid,
+                            target=signature,
+                        )
+                    )
+
+            if rejected is not None:
+                resolution.rejected.append(
+                    CallSiteRejection(
+                        ref=entry.ref,
+                        reason=rejected,
+                    )
+                )
+
+        if not resolution.accepted and not resolution.rejected:
+            resolution.rejected.append(
+                CallSiteRejection(
+                    ref=entry.ref,
+                    reason="unknown-target",
+                )
+            )
+
+
+        resolutions[sid] = resolution
 
     return OneToOne[CallSiteId, CallSiteResolution].instance(resolutions)
+
+
+def check_callsite_resolution_accepted(
+    rule_e3006: List[Diagnostic],
+    **kwargs: Dict[str, Any],
+) -> bool:
+    return len(rule_e3006) == 0
+
+
+def build_callsite_resolution_accepted(
+    resolutions: OneToOne[CallSiteId, CallSiteResolution],
+    **kwargs: Dict[str, Any],
+) -> OneToOne[CallSiteId, CallSiteAcceptance]:
+    accepted: Dict[CallSiteId, CallSiteAcceptance] = {}
+
+    for id, resolution in resolutions.items():
+        accepted[id] = resolution.accepted[0]
+
+    return OneToOne[CallSiteId, CallSiteAcceptance].instance(accepted)
+
+
+def validate_callsite_resolution_e3006(
+    callsites: OneToOne[CallSiteId, CallSite],
+    resolutions: OneToOne[CallSiteId, CallSiteResolution],
+) -> List[Diagnostic]:
+    diagnostics: List[Diagnostic] = []
+
+    for id, resolution in resolutions.items():
+        if len(resolution.accepted) != 1:
+            for rejection in resolution.rejected:
+                diagnostics.append(
+                    report_callsite_resolution_e3006(callsites.get(id), rejection)
+                )
+
+    return diagnostics
+
+
+def report_callsite_resolution_e3006(
+    entry: CallSite,
+    rejection: CallSiteRejection,
+) -> Diagnostic:
+    return Diagnostic(
+        ref=rejection.ref,
+        code="E3006",
+        message=f"Unresolvable callsite {entry}, reason: {rejection.reason}.",
+    )

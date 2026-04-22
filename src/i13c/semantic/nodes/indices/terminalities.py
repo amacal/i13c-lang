@@ -20,7 +20,7 @@ def configure_terminality_by_function() -> GraphNode:
                 ("snippets", "entities/snippets"),
                 ("functions", "entities/functions"),
                 ("flowgraphs", "indices/flowgraph-by-function"),
-                ("resolutions", "resolutions/callsites"),
+                ("resolutions", "entities/callsites"),
             }
         ),
     )

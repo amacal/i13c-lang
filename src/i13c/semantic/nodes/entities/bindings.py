@@ -36,13 +36,13 @@ def build_bindings(
 
     bindings: Dict[CallSiteId, CallSiteBindings] = {}
 
-    for cid, resolution in resolutions.items():
-        for acceptance in resolution.accepted:
-            environment = environments.get(cid)
-            bindings[cid] = CallSiteBindings(
-                callable=acceptance.callable,
-                entries=transform_bindings(expressions, acceptance, environment),
-            )
+    # for cid, resolution in resolutions.items():
+    #     for acceptance in resolution.accepted:
+    #         environment = environments.get(cid)
+    #         bindings[cid] = CallSiteBindings(
+    #             callable=acceptance.callable,
+    #             entries=transform_bindings(expressions, acceptance, environment),
+    #         )
 
     return OneToOne[CallSiteId, CallSiteBindings](data=bindings)
 
