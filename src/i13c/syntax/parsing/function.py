@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from i13c.syntax import tree
 from i13c.syntax.lexing import Token as LexingToken
@@ -177,10 +177,10 @@ def parse_value(state: ParsingState) -> tree.function.AssignStatement:
 
     # expect '=' followed by limited expression
     state.expect(Tokens.EQUALS)
-    expression = parse_value_expression(state)
+    expression, final = parse_value_expression(state)
 
     # expect a semicolon
-    final = state.expect(Tokens.SEMICOLON)
+    state.expect(Tokens.SEMICOLON)
 
     return tree.function.AssignStatement(
         ref=state.between(ident, final),
@@ -197,33 +197,36 @@ def parse_value(state: ParsingState) -> tree.function.AssignStatement:
     )
 
 
-def parse_value_expression(state: ParsingState) -> tree.function.ValueExpression:
+def parse_value_expression(state: ParsingState) -> Tuple[tree.function.ValueExpression, LexingToken]:
     return parse_argument(state)
 
 
 def parse_arguments(state: ParsingState) -> List[tree.function.Argument]:
     arguments: List[tree.function.Argument] = []
-    arguments.append(parse_argument(state))
+    arguments.append(parse_argument(state)[0])
 
     # a comma suggests next argument
     while state.accept(Tokens.COMMA):
-        arguments.append(parse_argument(state))
+        arguments.append(parse_argument(state)[0])
 
     return arguments
 
 
-def parse_argument(state: ParsingState) -> tree.function.Argument:
+def parse_argument(state: ParsingState) -> Tuple[tree.function.Argument, LexingToken]:
     token = state.expect(Tokens.HEX, Tokens.IDENT)
 
     # a hex can be only an integer literal
     if token.code == Tokens.HEX:
-        return tree.function.Literal(
+        expression = tree.function.Literal(
             ref=state.span(token),
             value=extract_hex(state, token),
         )
 
     # an identifier can be only an expression
-    return tree.function.Expression(
-        ref=state.span(token),
-        name=state.extract(token),
-    )
+    else:
+        expression = tree.function.Expression(
+            ref=state.span(token),
+            name=state.extract(token),
+        )
+
+    return expression, token
