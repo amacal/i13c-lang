@@ -163,7 +163,7 @@ def parse_callsite(
     )
 
 
-def parse_value(state: ParsingState) -> tree.function.ValueStatement:
+def parse_value(state: ParsingState) -> tree.function.AssignStatement:
     ident = state.expect(Tokens.IDENT)
 
     # expect ':' followed by type
@@ -180,17 +180,20 @@ def parse_value(state: ParsingState) -> tree.function.ValueStatement:
     expression = parse_value_expression(state)
 
     # expect a semicolon
-    state.expect(Tokens.SEMICOLON)
+    final = state.expect(Tokens.SEMICOLON)
 
-    return tree.function.ValueStatement(
-        ref=state.between(ident, end),
-        name=state.extract(ident),
-        type=tree.types.Type(
-            ref=state.between(type, end),
-            name=state.extract(type),
-            range=range,
+    return tree.function.AssignStatement(
+        ref=state.between(ident, final),
+        expression=expression,
+        destination=tree.function.Value(
+            ref=state.between(ident, end),
+            name=state.extract(ident),
+            type=tree.types.Type(
+                ref=state.between(type, end),
+                name=state.extract(type),
+                range=range,
+            ),
         ),
-        expr=expression,
     )
 
 

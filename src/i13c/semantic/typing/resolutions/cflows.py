@@ -16,6 +16,7 @@ ControlFlowRejectionReason = Kind["unknown",]
 ControlFlowEntry = Dict[bytes, ControlFlowTarget]
 ControlFlowEnvironment = Dict[ControlFlowMember, ControlFlowEntry]
 
+
 @dataclass(kw_only=True)
 class ControlFlowRejection:
     ref: Span

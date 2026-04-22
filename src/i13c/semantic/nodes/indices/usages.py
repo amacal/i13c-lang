@@ -45,13 +45,13 @@ def build_usages_by_expression(
                 ident=Identifier(data=argument.name),
             )
 
-    for _, statement in graph.function.values.items():
+    for _, statement in graph.function.assigns.items():
         # not expression must be literals
-        if not isinstance(statement.expr, tree.function.Expression):
+        if not isinstance(statement.expression, tree.function.Expression):
             continue
 
         # derive parameter ID from globally unique node ID
-        nid = graph.function.expressions.get_by_node(statement.expr)
+        nid = graph.function.expressions.get_by_node(statement.expression)
         usage_id = UsageId(value=nid.value)
 
         # map usage to expression
@@ -60,8 +60,8 @@ def build_usages_by_expression(
 
         # map expression to usage
         usages[usage_id] = Usage(
-            ref=statement.expr.ref,
-            ident=Identifier(data=statement.expr.name),
+            ref=statement.expression.ref,
+            ident=Identifier(data=statement.expression.name),
         )
 
     return (

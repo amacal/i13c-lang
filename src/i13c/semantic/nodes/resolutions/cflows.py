@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.cflows import (
     ControlFlows,
     FlowEntry,
@@ -11,7 +12,7 @@ from i13c.semantic.typing.entities.cflows import (
 )
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.values import Value, ValueId
+from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.cflows import (
     ControlFlowAcceptance,
     ControlFlowEntry,
@@ -29,8 +30,8 @@ def configure_control_flow_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("cflows", "entities/cflows"),
-                ("values", "entities/values"),
                 ("functions", "entities/functions"),
+                ("assigns", "resolutions/assigns/accepted"),
                 ("signatures", "resolutions/signatures/accepted"),
             }
         ),
@@ -65,8 +66,8 @@ def configure_control_flow_resolution() -> GraphGroup:
 
 def build_control_flow_resolution(
     cflows: OneToOne[FunctionId, ControlFlows],
-    values: OneToOne[ValueId, Value],
     functions: OneToOne[FunctionId, Function],
+    assigns: OneToOne[AssignId, AssignAcceptance],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
 ) -> OneToOne[FunctionId, ControlFlowResolution]:
     resolutions: Dict[FunctionId, ControlFlowResolution] = {}
@@ -100,10 +101,10 @@ def build_control_flow_resolution(
             # previous entries have to be copied to the new node
             environments[node.target] = next.copy()
 
-            # value declaration causes new entry in the environment
-            if isinstance(node.target, ValueId):
-                value = values.get(node.target)
-                next[value.name] = node.target
+            # assignment causes new entry in the environment
+            if isinstance(node.target, AssignId):
+                assign = assigns.get(node.target)
+                next[assign.name] = assign.destination
 
         environments[fexit] = next.copy()
 

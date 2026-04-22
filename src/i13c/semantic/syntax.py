@@ -124,7 +124,12 @@ class NodesVisitor:
             self.next(), callsite, ctx=path.find(tree.function.Function)
         )
 
-    def on_value(self, value: tree.function.ValueStatement, path: Path) -> None:
+    def on_assign(self, assign: tree.function.AssignStatement, path: Path) -> None:
+        self.graph.function.assigns.append(
+            self.next(), assign, ctx=path.find(tree.function.Function)
+        )
+
+    def on_value(self, value: tree.function.Value, path: Path) -> None:
         self.graph.function.values.append(self.next(), value)
 
     def on_literal(self, literal: tree.function.Literal, path: Path) -> None:
@@ -163,7 +168,8 @@ class Function:
     flags: Bidirectional[tree.function.Flags, None]
     signatures: Bidirectional[tree.function.Signature, tree.function.Function]
     callsites: Bidirectional[tree.function.CallStatement, tree.function.Function]
-    values: Bidirectional[tree.function.ValueStatement, None]
+    assigns: Bidirectional[tree.function.AssignStatement, tree.function.Function]
+    values: Bidirectional[tree.function.Value, None]
     literals: Bidirectional[tree.function.Literal, None]
     expressions: Bidirectional[tree.function.Expression, None]
     parameters: Bidirectional[tree.function.Parameter, None]
@@ -208,7 +214,10 @@ class SyntaxGraph:
                 callsites=Bidirectional[
                     tree.function.CallStatement, tree.function.Function
                 ].empty(),
-                values=Bidirectional[tree.function.ValueStatement, None].empty(),
+                assigns=Bidirectional[
+                    tree.function.AssignStatement, tree.function.Function
+                ].empty(),
+                values=Bidirectional[tree.function.Value, None].empty(),
                 literals=Bidirectional[tree.function.Literal, None].empty(),
                 expressions=Bidirectional[tree.function.Expression, None].empty(),
                 parameters=Bidirectional[tree.function.Parameter, None].empty(),

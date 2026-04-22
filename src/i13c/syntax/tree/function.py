@@ -12,7 +12,8 @@ class Visitor(Protocol):
     def on_flags(self, flags: Flags, path: Path) -> None: ...
     def on_signature(self, signature: Signature, path: Path) -> None: ...
     def on_callsite(self, callsite: CallStatement, path: Path) -> None: ...
-    def on_value(self, value: ValueStatement, path: Path) -> None: ...
+    def on_assign(self, assign: AssignStatement, path: Path) -> None: ...
+    def on_value(self, value: Value, path: Path) -> None: ...
     def on_literal(self, literal: Literal, path: Path) -> None: ...
     def on_expression(self, expression: Expression, path: Path) -> None: ...
     def on_parameter(self, parameter: Parameter, path: Path) -> None: ...
@@ -78,21 +79,33 @@ ValueExpression = Union[Literal, Expression]
 
 
 @dataclass(kw_only=True, eq=False)
-class ValueStatement:
+class Value:
     ref: Span
     name: bytes
     type: types.Type
-    expr: ValueExpression
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_value(self, path)
 
         with path.push(self) as node:
-            # first visit the type
             self.type.accept(visitor, node)
 
+
+@dataclass(kw_only=True, eq=False)
+class AssignStatement:
+    ref: Span
+    destination: Value
+    expression: ValueExpression
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_assign(self, path)
+
+        with path.push(self) as node:
+            # first visit the destination
+            self.destination.accept(visitor, node)
+
             # then the expression
-            self.expr.accept(visitor, node)
+            self.expression.accept(visitor, node)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -109,7 +122,7 @@ class Signature:
                 entry.accept(visitor, node)
 
 
-Statement = Union[CallStatement, ValueStatement]
+Statement = Union[CallStatement, AssignStatement]
 
 
 @dataclass(kw_only=True, eq=False)

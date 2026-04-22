@@ -46,7 +46,7 @@ def build_functions(
                 nid = graph.function.callsites.get_by_node(statement)
                 statements.append(CallSiteId(value=nid.value))
             else:
-                nid = graph.function.values.get_by_node(statement)
+                nid = graph.function.assigns.get_by_node(statement)
                 statements.append(ValueId(value=nid.value))
 
 

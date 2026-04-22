@@ -3,11 +3,8 @@ from typing import Dict
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.expressions import ExpressionId
-from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.types import TypeId
-from i13c.semantic.typing.entities.values import Value, ValueId, ValueTarget
-from i13c.syntax import tree
+from i13c.semantic.typing.entities.values import Value, ValueId
 
 
 def configure_values() -> GraphNode:
@@ -24,30 +21,17 @@ def build_values(
 ) -> OneToOne[ValueId, Value]:
     values: Dict[ValueId, Value] = {}
 
-    for nid, statement in graph.function.values.items():
-
+    for nid, value in graph.function.values.items():
         # derive value ID from globally unique node ID
         value_id = ValueId(value=nid.value)
 
-        # derive type from value statement
-        nid = graph.types.get_by_node(statement.type)
+        # derive type ID from value statement
+        nid = graph.types.get_by_node(value.type)
         type_id = TypeId(value=nid.value)
 
-        # find literal by AST node
-        if isinstance(statement.expr, tree.function.Literal):
-            nid = graph.function.literals.get_by_node(statement.expr)
-            target: ValueTarget = LiteralId(value=nid.value)
-
-        # find expression by AST node
-        else:
-            nid = graph.function.expressions.get_by_node(statement.expr)
-            target = ExpressionId(value=nid.value)
-
-
         values[value_id] = Value(
-            ref=statement.ref,
-            name=statement.name,
-            target=target,
+            ref=value.ref,
+            name=value.name,
             type=type_id,
         )
 

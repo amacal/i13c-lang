@@ -27,11 +27,6 @@ def can_detect_a_value_declaration_with_literal_initialization():
     assert value.name == b"x"
     assert value.type == id
 
-    assert entities.literals.size() == 1
-    id, _ = entities.literals.peak()
-
-    assert value.target == id
-
 
 def can_detect_a_value_declaration_with_expression_initialization():
     entities = prepare_entities(
@@ -48,8 +43,3 @@ def can_detect_a_value_declaration_with_expression_initialization():
 
     assert value.name == b"x"
     assert value.type == id
-
-    assert entities.expressions.size() == 1
-    id, _ = entities.expressions.peak()
-
-    assert value.target == id
