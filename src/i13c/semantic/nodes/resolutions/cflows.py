@@ -93,7 +93,7 @@ def build_control_flow_resolution(
         }
 
         for param in signature.parameters:
-            next[param.name] = param.id
+            next[param.name] = param
 
         for node in entry.nodes[1:-1]:
             assert isinstance(node, FlowNode)
@@ -104,7 +104,7 @@ def build_control_flow_resolution(
             # assignment causes new entry in the environment
             if isinstance(node.target, AssignId):
                 assign = assigns.get(node.target)
-                next[assign.name] = assign.destination
+                next[assign.destination.name] = assign.destination
 
         environments[fexit] = next.copy()
 

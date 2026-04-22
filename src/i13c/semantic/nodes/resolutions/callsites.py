@@ -5,12 +5,9 @@ from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.nodes.entities.expressions import Expression, ExpressionId
 from i13c.semantic.nodes.entities.literals import LiteralId
-from i13c.semantic.nodes.entities.types import TypeId
 from i13c.semantic.nodes.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.parameters import ParameterId
-from i13c.semantic.typing.entities.values import Value, ValueId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
     CallSiteRejection,
@@ -20,7 +17,7 @@ from i13c.semantic.typing.resolutions.callsites import (
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
-from i13c.semantic.typing.resolutions.types import TypeAcceptance
+from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
 def configure_callsite_resolution() -> GraphGroup:
@@ -32,12 +29,9 @@ def configure_callsite_resolution() -> GraphGroup:
             {
                 ("callsites", "entities/callsites"),
                 ("expressions", "entities/expressions"),
-                ("values", "entities/values"),
                 ("cflows", "resolutions/cflows/accepted"),
                 ("literals", "resolutions/literals/accepted"),
                 ("signatures", "indices/signatures/names"),
-                ("parameters", "resolutions/parameters/accepted"),
-                ("types", "resolutions/types/accepted"),
             }
         ),
     )
@@ -72,12 +66,9 @@ def configure_callsite_resolution() -> GraphGroup:
 def build_callsite_resolution(
     callsites: OneToOne[CallSiteId, CallSite],
     expressions: OneToOne[ExpressionId, Expression],
-    values: OneToOne[ValueId, Value],
     cflows: OneToOne[FunctionId, ControlFlowAcceptance],
     literals: OneToOne[LiteralId, LiteralAcceptance],
     signatures: OneToMany[bytes, SignatureAcceptance],
-    parameters: OneToOne[ParameterId, ParameterAcceptance],
-    types: OneToOne[TypeId, TypeAcceptance],
 ) -> OneToOne[CallSiteId, CallSiteResolution]:
     resolutions: Dict[CallSiteId, CallSiteResolution] = {}
 
@@ -100,38 +91,27 @@ def build_callsite_resolution(
                     break
 
                 for parameter, argument in zip(signature.parameters, entry.arguments):
-                    target: Optional[Union[LiteralId, ParameterId, ValueId]] = None
-                    sender: Optional[Union[LiteralAcceptance, TypeAcceptance, TypeId]] = None
+                    target: Optional[Union[LiteralAcceptance, ParameterAcceptance, ValueAcceptance]]
 
                     if isinstance(argument, LiteralId):
-                        target = argument
+                        target = literals.get(argument)
                     else:
                         expr = expressions.get(argument)
                         target = environment.get(expr.name)
 
-                    if isinstance(target, LiteralId):
-                        sender = literals.get(target)
+                    # if a symbol is not in the environment
+                    if target is None:
+                        rejected = "unknown-target"
+                        break
 
-                    elif isinstance(target, ParameterId):
-                        sender = parameters.get(target).type
-
-                    elif isinstance(target, ValueId):
-                        sender = values.get(target).type
-
-                    if sender is None:
-                        rejected = "type-mismatch"
-                        continue
-
-                    if isinstance(sender, TypeId):
-                        sender = types.get(sender)
-
-                    if isinstance(sender, LiteralAcceptance):
-                        if not parameter.type.accepts(sender):
+                    if isinstance(target, LiteralAcceptance):
+                        if not parameter.type.accepts(target):
                             rejected = "type-mismatch"
                             break
 
+                    # parameter and value have a type field
                     else:
-                        if not parameter.type.accepts(sender):
+                        if not parameter.type.accepts(target.type):
                             rejected = "type-mismatch"
                             break
 

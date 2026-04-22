@@ -21,6 +21,7 @@ from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.types import TypeId
+from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
 from i13c.semantic.typing.resolutions.assigns import AssignResolution
 from i13c.semantic.typing.resolutions.binds import BindResolution
@@ -41,6 +42,7 @@ from i13c.semantic.typing.resolutions.registers import RegisterResolution
 from i13c.semantic.typing.resolutions.signatures import SignatureResolution
 from i13c.semantic.typing.resolutions.snippets import SnippetResolution
 from i13c.semantic.typing.resolutions.types import TypeResolution
+from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
 @dataclass
@@ -65,3 +67,4 @@ class ResolutionNodes:
     parameters: Optional[OneToOne[ParameterId, ParameterResolution]]
     snippets: Optional[OneToOne[SnippetId, SnippetResolution]]
     types: Optional[OneToOne[TypeId, TypeResolution]]
+    values: Optional[OneToOne[ValueId, ValueResolution]]

@@ -1,25 +1,30 @@
 from dataclasses import dataclass
+from typing import List
 from typing import Literal as Kind
-from typing import Optional, Union
 
-from i13c.semantic.typing.entities.literals import LiteralId
-from i13c.semantic.typing.indices.variables import VariableId
+from i13c.semantic.typing.entities.values import ValueId
+from i13c.semantic.typing.resolutions.types import TypeAcceptance
+from i13c.syntax.source import Span
 
-ValueRejectionReason = Kind[b"type-mismatch", b"unbound"]
-ValueBinding = Union[LiteralId, VariableId]
+ValueRejectionReason = Kind["unknown"]
 
 
 @dataclass(kw_only=True)
 class ValueAcceptance:
-    binding: ValueBinding
+    ref: Span
+    id: ValueId
+
+    name: bytes
+    type: TypeAcceptance
 
 
 @dataclass(kw_only=True)
 class ValueRejection:
+    ref: Span
     reason: ValueRejectionReason
 
 
 @dataclass(kw_only=True)
 class ValueResolution:
-    accepted: Optional[ValueAcceptance]
-    rejected: Optional[ValueRejection]
+    accepted: List[ValueAcceptance]
+    rejected: List[ValueRejection]

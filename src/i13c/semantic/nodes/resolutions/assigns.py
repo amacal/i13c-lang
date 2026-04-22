@@ -4,13 +4,12 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
-from i13c.semantic.typing.entities.types import TypeId
-from i13c.semantic.typing.entities.values import Value, ValueId
+from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.assigns import (
     AssignAcceptance,
     AssignResolution,
 )
-from i13c.semantic.typing.resolutions.types import TypeAcceptance
+from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
 def configure_assign_resolution() -> GraphGroup:
@@ -21,8 +20,7 @@ def configure_assign_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("assigns", "entities/assigns"),
-                ("values", "entities/values"),
-                ("types", "resolutions/types/accepted"),
+                ("values", "resolutions/values/accepted"),
             }
         ),
     )
@@ -56,8 +54,7 @@ def configure_assign_resolution() -> GraphGroup:
 
 def build_assign_resolution(
     assigns: OneToOne[AssignId, Assign],
-    values: OneToOne[ValueId, Value],
-    types: OneToOne[TypeId, TypeAcceptance],
+    values: OneToOne[ValueId, ValueAcceptance],
 ) -> OneToOne[AssignId, AssignResolution]:
     resolutions: Dict[AssignId, AssignResolution] = {}
 
@@ -67,16 +64,11 @@ def build_assign_resolution(
             rejected=[],
         )
 
-        value = values.get(entry.destination)
-        type = types.get(value.type)
-
         resolution.accepted.append(
             AssignAcceptance(
                 ref=entry.ref,
                 id=aid,
-                name=value.name,
-                type=type,
-                destination=entry.destination,
+                destination=values.get(entry.destination),
                 expression=entry.expression,
             )
         )

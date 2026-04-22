@@ -5,12 +5,12 @@ from typing import Union
 
 from i13c.semantic.typing.entities.cflows import FlowEntry, FlowExit, FlowTarget
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.parameters import ParameterId
-from i13c.semantic.typing.entities.values import ValueId
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span
 
 ControlFlowMember = Union[FlowEntry, FlowExit, FlowTarget]
-ControlFlowTarget = Union[ParameterId, ValueId]
+ControlFlowTarget = Union[ParameterAcceptance, ValueAcceptance]
 
 ControlFlowRejectionReason = Kind["unknown",]
 ControlFlowEntry = Dict[bytes, ControlFlowTarget]

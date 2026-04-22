@@ -25,7 +25,7 @@ from i13c.semantic.nodes.resolutions.registers import configure_register_resolut
 from i13c.semantic.nodes.resolutions.signatures import configure_signature_resolution
 from i13c.semantic.nodes.resolutions.snippets import configure_snippet_resolution
 from i13c.semantic.nodes.resolutions.types import configure_type_resolution
-from i13c.semantic.nodes.resolutions.values import configure_resolution_by_value
+from i13c.semantic.nodes.resolutions.values import configure_value_resolution
 from i13c.semantic.typing.resolutions import ResolutionNodes
 
 
@@ -48,7 +48,7 @@ def configure_resolutions() -> GraphGroup:
             configure_range_resolution(),
             configure_reference_resolution(),
             configure_register_resolution(),
-            configure_resolution_by_value(),
+            configure_value_resolution(),
             configure_signature_resolution(),
             configure_parameter_resolution(),
             configure_snippet_resolution(),
@@ -79,4 +79,5 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         parameters=resolutions.get("resolutions/parameters"),
         snippets=resolutions.get("resolutions/snippets"),
         types=resolutions.get("resolutions/types"),
+        values=resolutions.get("resolutions/values"),
     )

@@ -38,7 +38,6 @@ from i13c.llvm.typing.terminators import (
 from i13c.semantic.model import SemanticGraph, SemanticRules
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.literals import Hex, LiteralId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.indices.controlflows import (
     FlowEntry,
@@ -281,31 +280,31 @@ def lower_flow_value(
     resolution = ctx.values.get(node)
     assert resolution.accepted is not None
 
-    if isinstance(resolution.accepted.binding, LiteralId):
-        literal = ctx.graph.entities.literals.get(resolution.accepted.binding)
-        assert isinstance(literal.target, Hex)
+    # if isinstance(resolution.accepted.binding, LiteralId):
+    #     literal = ctx.graph.entities.literals.get(resolution.accepted.binding)
+    #     assert isinstance(literal.target, Hex)
 
-        variable = ctx.graph.indices.variables_by_parameter.get(node)
-        register = ctx.registers.get(variable)
+    #     variable = ctx.graph.indices.variables_by_parameter.get(node)
+    #     register = ctx.registers.get(variable)
 
-        imm = int.from_bytes(literal.target.data, byteorder="little", signed=False)
-        dst = register.ref()
+    #     imm = int.from_bytes(literal.target.data, byteorder="little", signed=False)
+    #     dst = register.ref()
 
-        iid = FlowId(value=ctx.generator.next())
-        instr = ImmediateFlow(imm=imm, dst=dst)
+    #     iid = FlowId(value=ctx.generator.next())
+    #     instr = ImmediateFlow(imm=imm, dst=dst)
 
-        instructions.append((iid, instr))
+    #     instructions.append((iid, instr))
 
-    if isinstance(resolution.accepted.binding, VariableId):
-        variable = ctx.graph.indices.variables_by_parameter.get(node)
+    # if isinstance(resolution.accepted.binding, VariableId):
+    #     variable = ctx.graph.indices.variables_by_parameter.get(node)
 
-        src = ctx.registers.get(resolution.accepted.binding).ref()
-        dst = ctx.registers.get(variable).ref()
+    #     src = ctx.registers.get(resolution.accepted.binding).ref()
+    #     dst = ctx.registers.get(variable).ref()
 
-        iid = FlowId(value=ctx.generator.next())
-        instr = MoveFlow(src=src, dst=dst)
+    #     iid = FlowId(value=ctx.generator.next())
+    #     instr = MoveFlow(src=src, dst=dst)
 
-        instructions.append((iid, instr))
+    #     instructions.append((iid, instr))
 
     return FlowNodeContext(
         block=Block(origin=node, terminator=terminator),
