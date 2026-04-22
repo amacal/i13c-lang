@@ -11,6 +11,7 @@ class Visitor(Protocol):
     def on_function(self, function: Function, path: Path) -> None: ...
     def on_flags(self, flags: Flags, path: Path) -> None: ...
     def on_signature(self, signature: Signature, path: Path) -> None: ...
+    def on_statement(self, statement: Statement, path: Path) -> None: ...
     def on_callsite(self, callsite: CallStatement, path: Path) -> None: ...
     def on_assign(self, assign: AssignStatement, path: Path) -> None: ...
     def on_value(self, value: Value, path: Path) -> None: ...
@@ -122,7 +123,18 @@ class Signature:
                 entry.accept(visitor, node)
 
 
-Statement = Union[CallStatement, AssignStatement]
+StatementTarget = Union[CallStatement, AssignStatement]
+
+@dataclass(kw_only=True, eq=False)
+class Statement:
+    ref: Span
+    target: StatementTarget
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_statement(self, path)
+
+        with path.push(self) as node:
+            self.target.accept(visitor, node)
 
 
 @dataclass(kw_only=True, eq=False)

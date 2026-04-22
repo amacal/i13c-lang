@@ -12,6 +12,7 @@ from i13c.semantic.typing.entities.cflows import (
 )
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.entities.statements import Statement, StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.cflows import (
     ControlFlowAcceptance,
@@ -31,6 +32,7 @@ def configure_control_flow_resolution() -> GraphGroup:
             {
                 ("cflows", "entities/cflows"),
                 ("functions", "entities/functions"),
+                ("statements", "entities/statements"),
                 ("assigns", "resolutions/assigns/accepted"),
                 ("signatures", "resolutions/signatures/accepted"),
             }
@@ -67,6 +69,7 @@ def configure_control_flow_resolution() -> GraphGroup:
 def build_control_flow_resolution(
     cflows: OneToOne[FunctionId, ControlFlows],
     functions: OneToOne[FunctionId, Function],
+    statements: OneToOne[StatementId, Statement],
     assigns: OneToOne[AssignId, AssignAcceptance],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
 ) -> OneToOne[FunctionId, ControlFlowResolution]:
@@ -100,10 +103,11 @@ def build_control_flow_resolution(
 
             # previous entries have to be copied to the new node
             environments[node.target] = next.copy()
+            statement = statements.get(node.target)
 
             # assignment causes new entry in the environment
-            if isinstance(node.target, AssignId):
-                assign = assigns.get(node.target)
+            if isinstance(statement.target, AssignId):
+                assign = assigns.get(statement.target)
                 next[assign.destination.name] = assign.destination
 
         environments[fexit] = next.copy()

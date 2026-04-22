@@ -70,11 +70,15 @@ class NodesVisitor:
     def on_signature(self, signature: tree.Signature, path: Path) -> None:
         if isinstance(signature, tree.snippet.Signature):
             self.graph.snippet.signatures.append(
-                self.next(), signature, ctx=path.find(tree.snippet.Snippet)
+                self.next(),
+                signature,
+                ctx=path.find(tree.snippet.Snippet),
             )
         else:
             self.graph.function.signatures.append(
-                self.next(), signature, ctx=path.find(tree.function.Function)
+                self.next(),
+                signature,
+                ctx=path.find(tree.function.Function),
             )
 
     def on_slot(self, slot: tree.snippet.Slot, path: Path) -> None:
@@ -82,12 +86,16 @@ class NodesVisitor:
 
     def on_bind(self, bind: tree.snippet.Bind, path: Path) -> None:
         self.graph.snippet.binds.append(
-            self.next(), bind, ctx=path.find(tree.snippet.Slot)
+            self.next(),
+            bind,
+            ctx=path.find(tree.snippet.Slot),
         )
 
     def on_label(self, label: tree.snippet.Label, path: Path) -> None:
         self.graph.snippet.labels.append(
-            self.next(), label, ctx=path.find(tree.snippet.Snippet)
+            self.next(),
+            label,
+            ctx=path.find(tree.snippet.Snippet),
         )
 
     def on_instruction(self, instruction: tree.snippet.Instruction, path: Path) -> None:
@@ -107,7 +115,9 @@ class NodesVisitor:
 
     def on_reference(self, reference: tree.snippet.Reference, path: Path) -> None:
         self.graph.snippet.references.append(
-            self.next(), reference, ctx=path.find(tree.snippet.Snippet)
+            self.next(),
+            reference,
+            ctx=path.find(tree.snippet.Snippet),
         )
 
     def on_address(self, address: tree.snippet.Address, path: Path) -> None:
@@ -119,14 +129,25 @@ class NodesVisitor:
     def on_parameter(self, parameter: tree.function.Parameter, path: Path) -> None:
         self.graph.function.parameters.append(self.next(), parameter)
 
+    def on_statement(self, statement: tree.function.Statement, path: Path) -> None:
+        self.graph.function.statements.append(
+            self.next(),
+            statement,
+            ctx=path.find(tree.function.Function),
+        )
+
     def on_callsite(self, callsite: tree.function.CallStatement, path: Path) -> None:
         self.graph.function.callsites.append(
-            self.next(), callsite, ctx=path.find(tree.function.Function)
+            self.next(),
+            callsite,
+            ctx=path.find(tree.function.Statement),
         )
 
     def on_assign(self, assign: tree.function.AssignStatement, path: Path) -> None:
         self.graph.function.assigns.append(
-            self.next(), assign, ctx=path.find(tree.function.Function)
+            self.next(),
+            assign,
+            ctx=path.find(tree.function.Statement),
         )
 
     def on_value(self, value: tree.function.Value, path: Path) -> None:
@@ -136,7 +157,11 @@ class NodesVisitor:
         self.graph.function.literals.append(self.next(), literal)
 
     def on_expression(self, expression: tree.function.Expression, path: Path) -> None:
-        self.graph.function.expressions.append(self.next(), expression)
+        self.graph.function.expressions.append(
+            self.next(),
+            expression,
+            ctx=path.find(tree.function.Statement),
+        )
 
     def on_type(self, type: tree.types.Type, path: Path) -> None:
         self.graph.types.append(self.next(), type)
@@ -167,11 +192,12 @@ class Function:
     functions: Bidirectional[tree.function.Function, None]
     flags: Bidirectional[tree.function.Flags, None]
     signatures: Bidirectional[tree.function.Signature, tree.function.Function]
-    callsites: Bidirectional[tree.function.CallStatement, tree.function.Function]
-    assigns: Bidirectional[tree.function.AssignStatement, tree.function.Function]
+    statements: Bidirectional[tree.function.Statement, tree.function.Function]
+    callsites: Bidirectional[tree.function.CallStatement, tree.function.Statement]
+    assigns: Bidirectional[tree.function.AssignStatement, tree.function.Statement]
     values: Bidirectional[tree.function.Value, None]
     literals: Bidirectional[tree.function.Literal, None]
-    expressions: Bidirectional[tree.function.Expression, None]
+    expressions: Bidirectional[tree.function.Expression, tree.function.Statement]
     parameters: Bidirectional[tree.function.Parameter, None]
 
 
@@ -211,15 +237,20 @@ class SyntaxGraph:
                 signatures=Bidirectional[
                     tree.function.Signature, tree.function.Function
                 ].empty(),
+                statements=Bidirectional[
+                    tree.function.Statement, tree.function.Function
+                ].empty(),
                 callsites=Bidirectional[
-                    tree.function.CallStatement, tree.function.Function
+                    tree.function.CallStatement, tree.function.Statement
                 ].empty(),
                 assigns=Bidirectional[
-                    tree.function.AssignStatement, tree.function.Function
+                    tree.function.AssignStatement, tree.function.Statement
                 ].empty(),
                 values=Bidirectional[tree.function.Value, None].empty(),
                 literals=Bidirectional[tree.function.Literal, None].empty(),
-                expressions=Bidirectional[tree.function.Expression, None].empty(),
+                expressions=Bidirectional[
+                    tree.function.Expression, tree.function.Statement
+                ].empty(),
                 parameters=Bidirectional[tree.function.Parameter, None].empty(),
             ),
             types=Bidirectional[tree.types.Type, None].empty(),

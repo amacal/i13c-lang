@@ -6,6 +6,7 @@ from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.environments import EnvironmentId
+from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.immediates import ImmediateId
@@ -28,6 +29,7 @@ from i13c.semantic.typing.resolutions.binds import BindResolution
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.cflows import ControlFlowResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
+from i13c.semantic.typing.resolutions.expressions import ExpressionResolution
 from i13c.semantic.typing.resolutions.flags import FlagsResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
@@ -53,6 +55,7 @@ class ResolutionNodes:
     callsites: Optional[OneToOne[FunctionId, CallSiteResolution]]
     cflows: Optional[OneToOne[FunctionId, ControlFlowResolution]]
     environments: Optional[OneToOne[EnvironmentId, EnvironmentResolution]]
+    expressions: Optional[OneToOne[ExpressionId, ExpressionResolution]]
     flags: Optional[OneToOne[FlagsId, FlagsResolution]]
     immediates: Optional[OneToOne[ImmediateId, ImmediateResolution]]
     instructions: Optional[OneToOne[InstructionId, InstructionResolution]]

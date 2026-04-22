@@ -128,14 +128,21 @@ def parse_function_flags(state: ParsingState) -> Optional[tree.function.Flags]:
 
 def parse_statement(state: ParsingState) -> tree.function.Statement:
     token = state.expect(Tokens.IDENT, Tokens.KEYWORD)
+    target: Optional[tree.function.StatementTarget] = None
 
     if token.code == Tokens.IDENT:
-        return parse_callsite(state, token)
+        target = parse_callsite(state, token)
 
-    if state.extract(token) == b"val":
-        return parse_value(state)
+    elif state.extract(token) == b"val":
+        target = parse_value(state)
 
-    raise UnexpectedTokenCode(token, [Tokens.IDENT, Tokens.KEYWORD], token.code)
+    if target is None:
+        raise UnexpectedTokenCode(token, [Tokens.IDENT, Tokens.KEYWORD], token.code)
+
+    return tree.function.Statement(
+        ref=target.ref,
+        target=target,
+    )
 
 
 def parse_callsite(

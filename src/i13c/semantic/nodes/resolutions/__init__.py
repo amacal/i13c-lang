@@ -9,6 +9,7 @@ from i13c.semantic.nodes.resolutions.cflows import configure_control_flow_resolu
 from i13c.semantic.nodes.resolutions.environments import (
     configure_environment_resolution,
 )
+from i13c.semantic.nodes.resolutions.expressions import configure_expression_resolution
 from i13c.semantic.nodes.resolutions.flags import configure_flags_resolution
 from i13c.semantic.nodes.resolutions.immediates import configure_immediate_resolution
 from i13c.semantic.nodes.resolutions.instructions import (
@@ -38,6 +39,7 @@ def configure_resolutions() -> GraphGroup:
             configure_callsite_resolution(),
             configure_control_flow_resolution(),
             configure_environment_resolution(),
+            configure_expression_resolution(),
             configure_flags_resolution(),
             configure_immediate_resolution(),
             configure_instruction_resolution(),
@@ -45,14 +47,14 @@ def configure_resolutions() -> GraphGroup:
             configure_literal_resolution(),
             configure_mnemonic_resolution(),
             configure_operand_resolution(),
+            configure_parameter_resolution(),
             configure_range_resolution(),
             configure_reference_resolution(),
             configure_register_resolution(),
-            configure_value_resolution(),
             configure_signature_resolution(),
-            configure_parameter_resolution(),
             configure_snippet_resolution(),
             configure_type_resolution(),
+            configure_value_resolution(),
         ]
     )
 
@@ -65,6 +67,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         callsites=resolutions.get("resolutions/callsites"),
         cflows=resolutions.get("resolutions/cflows"),
         environments=resolutions.get("resolutions/environments"),
+        expressions=resolutions.get("resolutions/expressions"),
         flags=resolutions.get("resolutions/flags"),
         immediates=resolutions.get("resolutions/immediates"),
         instructions=resolutions.get("resolutions/instructions"),

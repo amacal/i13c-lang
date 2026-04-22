@@ -4,8 +4,6 @@ from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.cflows import (
     ControlFlows,
     FlowEntry,
@@ -14,7 +12,7 @@ from i13c.semantic.typing.entities.cflows import (
     FlowNode,
 )
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.syntax import tree
+from i13c.semantic.typing.entities.statements import StatementId
 
 
 def configure_control_flows() -> GraphNode:
@@ -47,13 +45,8 @@ def build_values(
 
         prev: int = 0
         for stmt in node.statements:
-            if isinstance(stmt, tree.function.CallStatement):
-                nid = graph.function.callsites.get_by_node(stmt)
-                target = CallSiteId(value=nid.value)
-
-            else:
-                nid = graph.function.assigns.get_by_node(stmt)
-                target = AssignId(value=nid.value)
+            nid = graph.function.statements.get_by_node(stmt)
+            target = StatementId(value=nid.value)
 
             flow = FlowNode(target=target)
             forward[prev] = [len(nodes)]

@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
-from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.syntax.source import Span
 
 
@@ -30,7 +29,7 @@ class FlowNode:
         return self.target.identify(length)
 
 
-FlowTarget = Union[CallSiteId, AssignId]
+FlowTarget = Union[StatementId]
 FlowMember = Union[FlowEntry, FlowExit, FlowNode]
 
 @dataclass(kw_only=True)

@@ -27,12 +27,19 @@ CallSiteContext = TypeVar("CallSiteContext", bound=CallSiteContextBound)
 @dataclass(kw_only=True)
 class CallSite:
     ref: Span
-    ctx: NodeId
+
+    function: NodeId
+    statement: NodeId
 
     callee: bytes
     arguments: List[CallSiteTarget]
 
-    def get_context(
+    def get_function(
         self, factory: Callable[[NodeId], CallSiteContext]
     ) -> CallSiteContext:
-        return factory(self.ctx)
+        return factory(self.function)
+
+    def get_statement(
+        self, factory: Callable[[NodeId], CallSiteContext]
+    ) -> CallSiteContext:
+        return factory(self.statement)

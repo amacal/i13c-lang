@@ -23,16 +23,21 @@ def build_callsites(
 ) -> OneToOne[CallSiteId, CallSite]:
     callsites: Dict[CallSiteId, CallSite] = {}
 
-    for nid, statement in graph.function.callsites.items():
+    for nid, callsite in graph.function.callsites.items():
+
         # derive callsite ID from globally unique node ID
         callsite_id = CallSiteId(value=nid.value)
         arguments: List[CallSiteTarget] = []
 
         # derive function ID from globally unique node ID
-        nid = graph.function.callsites.get_ctx(nid)
-        ctx = graph.function.functions.get_by_node(nid)
+        stmt = graph.function.callsites.get_ctx(nid)
+        stmt_nid = graph.function.statements.get_by_node(stmt)
 
-        for argument in statement.arguments:
+        # derive statement ID from globally unique node ID
+        fn = graph.function.statements.get_ctx(stmt_nid)
+        fn_nid = graph.function.functions.get_by_node(fn)
+
+        for argument in callsite.arguments:
             if isinstance(argument, tree.function.Literal):
                 # derive literal ID from globally unique node ID
                 lid = graph.function.literals.get_by_node(argument)
@@ -44,9 +49,10 @@ def build_callsites(
                 arguments.append(ExpressionId(value=eid.value))
 
         callsites[callsite_id] = CallSite(
-            ref=statement.ref,
-            ctx=ctx,
-            callee=statement.name,
+            ref=callsite.ref,
+            function=fn_nid,
+            statement=stmt_nid,
+            callee=callsite.name,
             arguments=arguments,
         )
 

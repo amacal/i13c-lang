@@ -8,6 +8,7 @@ from i13c.semantic.nodes.entities.literals import LiteralId
 from i13c.semantic.nodes.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
     CallSiteRejection,
@@ -78,8 +79,10 @@ def build_callsite_resolution(
             rejected=[],
         )
 
-        function_id = entry.get_context(FunctionId.from_context)
-        environment = cflows.get(function_id).environments[sid]
+        function_id = entry.get_function(FunctionId.from_context)
+        stmt_id = entry.get_statement(StatementId.from_context)
+
+        environment = cflows.get(function_id).environments[stmt_id]
         rejected: Optional[CallSiteRejectionReason] = "unknown-target"
 
         if found := signatures.find(entry.callee):

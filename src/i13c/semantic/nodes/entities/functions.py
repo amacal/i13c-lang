@@ -42,11 +42,13 @@ def build_functions(
             flags_id = None
 
         for statement in node.statements:
-            if isinstance(statement, tree.function.CallStatement):
-                nid = graph.function.callsites.get_by_node(statement)
+            inside = statement.target
+
+            if isinstance(inside, tree.function.CallStatement):
+                nid = graph.function.callsites.get_by_node(inside)
                 statements.append(CallSiteId(value=nid.value))
             else:
-                nid = graph.function.assigns.get_by_node(statement)
+                nid = graph.function.assigns.get_by_node(inside)
                 statements.append(ValueId(value=nid.value))
 
 
