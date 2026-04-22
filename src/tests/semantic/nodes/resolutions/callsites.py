@@ -1,4 +1,4 @@
-from tests.semantic.nodes.resolutions import prepare_resolutions
+from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
 def can_accept_an_empty_function():
@@ -405,3 +405,33 @@ def can_reject_a_call_with_unmatched_3rd_argument():
 
     assert resolution.rejected[0].reason == "type-mismatch"
     assert source.extract(resolution.rejected[0].ref) == b"foo(a, b, c)"
+
+
+def can_reject_a_call_with_unresolved_symbol():
+    source, resolutions = prepare_resolutions(
+        """
+            fn foo(x: u8) { }
+            fn main() { foo(bar); }
+        """
+    )
+
+    assert resolutions.callsites is not None
+    assert resolutions.callsites.size() == 1
+    _, resolution = resolutions.callsites.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "unknown-target"
+    assert source.extract(resolution.rejected[0].ref) == b"foo(bar)"
+
+
+def can_detect_a_broken_range_rule_e3006():
+    _, rules = prepare_rules(
+        """
+            fn foo(x: u8[0x01..0x02]) { }
+            fn main() { foo(0x03); }
+        """
+    )
+
+    assert len(rules.get("e3006")) == 1
