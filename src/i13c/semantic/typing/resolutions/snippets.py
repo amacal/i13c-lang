@@ -4,6 +4,7 @@ from typing import Literal as Kind
 from typing import Optional
 
 from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
 from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
@@ -15,6 +16,7 @@ SnippetRejectionReason = Kind["duplicated-binds",]
 @dataclass(kw_only=True)
 class SnippetRejection:
     ref: Span
+    id: SnippetId
     reason: SnippetRejectionReason
 
 
@@ -24,6 +26,7 @@ class SnippetAcceptance:
     id: SnippetId
 
     signature: SignatureAcceptance
+    binding: Optional[BindingAcceptance]
     flags: Optional[FlagsAcceptance]
     instructions: List[InstructionAcceptance]
 

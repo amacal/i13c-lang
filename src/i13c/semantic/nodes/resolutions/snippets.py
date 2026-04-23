@@ -1,14 +1,13 @@
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.instructions import InstructionId
-from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
-from i13c.semantic.typing.resolutions.binds import BindAcceptance
+from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
 from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
@@ -30,7 +29,7 @@ def configure_snippet_resolution() -> GraphGroup:
                 ("signatures", "resolutions/signatures/accepted"),
                 ("instructions", "resolutions/instructions/accepted"),
                 ("flags", "resolutions/flags/accepted"),
-                ("binds", "indices/binds/parameters"),
+                ("bindings", "resolutions/bindings/accepted"),
             }
         ),
     )
@@ -41,7 +40,6 @@ def configure_snippet_resolution() -> GraphGroup:
         produces=("rules/e3015",),
         requires=frozenset(
             {
-                ("snippets", "entities/snippets"),
                 ("resolutions", "resolutions/snippets"),
             }
         ),
@@ -67,7 +65,7 @@ def build_snippet_resolution(
     signatures: OneToOne[SignatureId, SignatureAcceptance],
     instructions: OneToOne[InstructionId, InstructionAcceptance],
     flags: OneToOne[FlagsId, FlagsAcceptance],
-    binds: OneToOne[ParameterId, BindAcceptance],
+    bindings: OneToOne[SignatureId, BindingAcceptance],
 ) -> OneToOne[SnippetId, SnippetResolution]:
     resolutions: Dict[SnippetId, SnippetResolution] = {}
 
@@ -77,21 +75,8 @@ def build_snippet_resolution(
             rejected=[],
         )
 
-        names: Set[bytes] = set()
         signature = signatures.get(entry.signature)
-
-        for parameter in signature.parameters:
-            if bind := binds.get(parameter.id):
-                if bind.dst in names:
-                    resolution.rejected.append(
-                        SnippetRejection(
-                            ref=bind.ref,
-                            reason="duplicated-binds",
-                        )
-                    )
-
-                else:
-                    names.add(bind.dst)
+        binding = bindings.get(entry.signature)
 
         if entry.flags is not None:
             found_flags = flags.get(entry.flags)
@@ -103,6 +88,7 @@ def build_snippet_resolution(
                 SnippetAcceptance(
                     ref=entry.ref,
                     id=sid,
+                    binding=binding,
                     flags=found_flags,
                     signature=signature,
                     instructions=[instructions.get(id) for id in entry.instructions],
@@ -134,7 +120,6 @@ def build_snippet_resolution_accepted(
 
 
 def validate_snippet_resolution_e3015(
-    snippets: OneToOne[SnippetId, Snippet],
     resolutions: OneToOne[SnippetId, SnippetResolution],
 ) -> List[Diagnostic]:
     diagnostics: List[Diagnostic] = []
@@ -143,18 +128,17 @@ def validate_snippet_resolution_e3015(
         if len(resolution.accepted) != 1:
             for rejection in resolution.rejected:
                 diagnostics.append(
-                    report_snippet_resolution_e3015(snippets.get(id), rejection)
+                    report_snippet_resolution_e3015(rejection)
                 )
 
     return diagnostics
 
 
 def report_snippet_resolution_e3015(
-    entry: Snippet,
     rejection: SnippetRejection,
 ) -> Diagnostic:
     return Diagnostic(
         ref=rejection.ref,
         code="E3015",
-        message=f"Duplicated slot binding {entry}.",
+        message=f"Unresolved snippet {rejection.id}, reason: {rejection.reason}.",
     )

@@ -8,7 +8,6 @@ from i13c.syntax.source import Span
 
 SignatureRejectionReason = Kind[
     "duplicated-name",
-    "duplicated-register",
 ]
 
 
