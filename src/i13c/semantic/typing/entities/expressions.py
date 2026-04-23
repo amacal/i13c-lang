@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, Protocol, TypeVar
+from typing import Callable, TypeVar
 
 from i13c.semantic.syntax import NodeId
 from i13c.syntax.source import Span
@@ -13,11 +13,7 @@ class ExpressionId:
         return "#".join(("expression", f"{self.value:<{length}}"))
 
 
-class ExpressionContextBound(Protocol):
-    pass
-
-
-ExpressionContext = TypeVar("ExpressionContext", bound=ExpressionContextBound)
+ExpressionContext = TypeVar("ExpressionContext")
 
 
 @dataclass(kw_only=True)

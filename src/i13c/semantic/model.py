@@ -10,6 +10,7 @@ from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.indices.callgraphs import CallPair
 from i13c.semantic.typing.indices.controlflows import FlowGraph, FlowNode
 from i13c.semantic.typing.indices.dataflows import DataFlow
@@ -19,6 +20,7 @@ from i13c.semantic.typing.indices.instances import Instance
 from i13c.semantic.typing.indices.terminalities import Terminality
 from i13c.semantic.typing.indices.usages import UsageId
 from i13c.semantic.typing.indices.variables import VariableId, VariableSource
+from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.semantic.typing.resolutions import ResolutionNodes
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
@@ -30,6 +32,7 @@ class IndexEdges:
     binds_by_parameters: Optional[OneToOne[ParameterId, BindAcceptance]]
     environments_by_snippets: Optional[OneToOne[SnippetId, EnvironmentAcceptance]]
     signatures_by_names: Optional[OneToMany[bytes, SignatureAcceptance]]
+    values_by_statements: Optional[OneToMany[StatementId, ValueAcceptance]]
 
     dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
     environment_by_flownode: OneToOne[FlowNode, Environment]

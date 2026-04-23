@@ -18,6 +18,7 @@ from i13c.semantic.nodes.indices.terminalities import configure_terminality_by_f
 from i13c.semantic.nodes.indices.usages import configure_usages_by_expression
 from i13c.semantic.nodes.indices.variables import configure_variables_by_parameters
 from i13c.semantic.nodes.resolutions import configure_resolutions
+from i13c.semantic.nodes.indices.values import configure_values_by_statements
 
 
 def configure_nodes() -> GraphGroup:
@@ -37,6 +38,7 @@ def configure_nodes() -> GraphGroup:
             configure_instance_by_callsite(),
             configure_resolutions(),
             configure_signatures_by_names(),
+            configure_values_by_statements(),
             configure_terminality_by_function(),
             configure_usages_by_expression(),
             configure_variables_by_parameters(),

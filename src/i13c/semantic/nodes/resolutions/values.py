@@ -68,6 +68,7 @@ def build_value_resolution(
             ValueAcceptance(
                 ref=entry.ref,
                 id=vid,
+                stmt=entry.stmt,
                 name=entry.name,
                 type=types.get(entry.type),
             )
