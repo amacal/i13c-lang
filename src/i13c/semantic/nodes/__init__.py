@@ -16,9 +16,9 @@ from i13c.semantic.nodes.indices.instances import configure_instance_by_callsite
 from i13c.semantic.nodes.indices.signatures import configure_signatures_by_names
 from i13c.semantic.nodes.indices.terminalities import configure_terminality_by_function
 from i13c.semantic.nodes.indices.usages import configure_usages_by_expression
+from i13c.semantic.nodes.indices.values import configure_values_by_statements
 from i13c.semantic.nodes.indices.variables import configure_variables_by_parameters
 from i13c.semantic.nodes.resolutions import configure_resolutions
-from i13c.semantic.nodes.indices.values import configure_values_by_statements
 
 
 def configure_nodes() -> GraphGroup:

@@ -2,8 +2,7 @@ from typing import Any, Dict, List
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
-from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.assigns import AssignId
+from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities.cflows import (
     ControlFlows,
     FlowEntry,
@@ -12,8 +11,7 @@ from i13c.semantic.typing.entities.cflows import (
 )
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.statements import Statement, StatementId
-from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.cflows import (
     ControlFlowAcceptance,
     ControlFlowEntry,
@@ -21,6 +19,7 @@ from i13c.semantic.typing.resolutions.cflows import (
     ControlFlowResolution,
 )
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
+from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
 def configure_control_flow_resolution() -> GraphGroup:
@@ -32,8 +31,7 @@ def configure_control_flow_resolution() -> GraphGroup:
             {
                 ("cflows", "entities/cflows"),
                 ("functions", "entities/functions"),
-                ("statements", "entities/statements"),
-                ("assigns", "resolutions/assigns/accepted"),
+                ("values", "indices/values/statements"),
                 ("signatures", "resolutions/signatures/accepted"),
             }
         ),
@@ -69,8 +67,7 @@ def configure_control_flow_resolution() -> GraphGroup:
 def build_control_flow_resolution(
     cflows: OneToOne[FunctionId, ControlFlows],
     functions: OneToOne[FunctionId, Function],
-    statements: OneToOne[StatementId, Statement],
-    assigns: OneToOne[AssignId, AssignAcceptance],
+    values: OneToMany[StatementId, ValueAcceptance],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
 ) -> OneToOne[FunctionId, ControlFlowResolution]:
     resolutions: Dict[FunctionId, ControlFlowResolution] = {}
@@ -103,12 +100,10 @@ def build_control_flow_resolution(
 
             # previous entries have to be copied to the new node
             environments[node.target] = next.copy()
-            statement = statements.get(node.target)
 
             # assignment causes new entry in the environment
-            if isinstance(statement.target, AssignId):
-                assign = assigns.get(statement.target)
-                next[assign.destination.name] = assign.destination
+            for value in values.find(node.target):
+                next[value.name] = value
 
         environments[fexit] = next.copy()
 

@@ -20,11 +20,11 @@ from i13c.semantic.typing.indices.instances import Instance
 from i13c.semantic.typing.indices.terminalities import Terminality
 from i13c.semantic.typing.indices.usages import UsageId
 from i13c.semantic.typing.indices.variables import VariableId, VariableSource
-from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.semantic.typing.resolutions import ResolutionNodes
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
+from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
 @dataclass
