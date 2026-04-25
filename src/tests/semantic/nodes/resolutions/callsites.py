@@ -1,3 +1,6 @@
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
@@ -28,8 +31,10 @@ def can_accept_an_empty_resolved_call():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target.name == b"foo"
-    assert len(resolution.accepted[0].target.parameters) == 0
+    assert len(resolution.accepted[0].arguments) == 0
+
+    assert resolution.accepted[0].signature.name == b"foo"
+    assert len(resolution.accepted[0].signature.parameters) == 0
 
     assert source.extract(resolution.accepted[0].ref) == b"foo()"
 
@@ -50,10 +55,16 @@ def can_accept_a_call_with_literal():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target.name == b"foo"
+    assert resolution.accepted[0].signature.name == b"foo"
 
-    assert len(resolution.accepted[0].target.parameters) == 1
-    assert resolution.accepted[0].target.parameters[0].name == b"x"
+    assert len(resolution.accepted[0].signature.parameters) == 1
+    assert resolution.accepted[0].signature.parameters[0].name == b"x"
+
+    assert len(resolution.accepted[0].arguments) == 1
+    assert isinstance(resolution.accepted[0].arguments[0], LiteralAcceptance)
+
+    assert resolution.accepted[0].arguments[0].target.width == 8
+    assert resolution.accepted[0].arguments[0].target.data.hex() == "42"
 
     assert source.extract(resolution.accepted[0].ref) == b"foo(0x42)"
 
@@ -74,10 +85,16 @@ def can_accept_a_call_with_literal_ranged():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target.name == b"foo"
+    assert resolution.accepted[0].signature.name == b"foo"
 
-    assert len(resolution.accepted[0].target.parameters) == 1
-    assert resolution.accepted[0].target.parameters[0].name == b"x"
+    assert len(resolution.accepted[0].signature.parameters) == 1
+    assert resolution.accepted[0].signature.parameters[0].name == b"x"
+
+    assert len(resolution.accepted[0].arguments) == 1
+    assert isinstance(resolution.accepted[0].arguments[0], LiteralAcceptance)
+
+    assert resolution.accepted[0].arguments[0].target.width == 8
+    assert resolution.accepted[0].arguments[0].target.data.hex() == "01"
 
     assert source.extract(resolution.accepted[0].ref) == b"foo(0x01)"
 
@@ -98,10 +115,17 @@ def can_accept_a_call_with_parameter():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target.name == b"foo"
+    assert resolution.accepted[0].signature.name == b"foo"
 
-    assert len(resolution.accepted[0].target.parameters) == 1
-    assert resolution.accepted[0].target.parameters[0].name == b"x"
+    assert len(resolution.accepted[0].signature.parameters) == 1
+    assert resolution.accepted[0].signature.parameters[0].name == b"x"
+
+    assert len(resolution.accepted[0].arguments) == 1
+    assert isinstance(resolution.accepted[0].arguments[0], ParameterAcceptance)
+
+    assert resolution.accepted[0].arguments[0].name == b"y"
+    assert resolution.accepted[0].arguments[0].type.width == 8
+    assert resolution.accepted[0].arguments[0].type.name == b"u8"
 
     assert source.extract(resolution.accepted[0].ref) == b"foo(y)"
 
@@ -122,10 +146,20 @@ def can_accept_a_call_with_parameter_ranged():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target.name == b"foo"
+    assert resolution.accepted[0].signature.name == b"foo"
 
-    assert len(resolution.accepted[0].target.parameters) == 1
-    assert resolution.accepted[0].target.parameters[0].name == b"x"
+    assert len(resolution.accepted[0].signature.parameters) == 1
+    assert resolution.accepted[0].signature.parameters[0].name == b"x"
+
+    assert len(resolution.accepted[0].signature.parameters) == 1
+    assert resolution.accepted[0].signature.parameters[0].name == b"x"
+
+    assert len(resolution.accepted[0].arguments) == 1
+    assert isinstance(resolution.accepted[0].arguments[0], ParameterAcceptance)
+
+    assert resolution.accepted[0].arguments[0].name == b"y"
+    assert resolution.accepted[0].arguments[0].type.width == 8
+    assert resolution.accepted[0].arguments[0].type.name == b"u8"
 
     assert source.extract(resolution.accepted[0].ref) == b"foo(y)"
 
@@ -146,10 +180,20 @@ def can_accept_a_call_with_expression():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target.name == b"foo"
+    assert resolution.accepted[0].signature.name == b"foo"
 
-    assert len(resolution.accepted[0].target.parameters) == 1
-    assert resolution.accepted[0].target.parameters[0].name == b"x"
+    assert len(resolution.accepted[0].signature.parameters) == 1
+    assert resolution.accepted[0].signature.parameters[0].name == b"x"
+
+    assert len(resolution.accepted[0].signature.parameters) == 1
+    assert resolution.accepted[0].signature.parameters[0].name == b"x"
+
+    assert len(resolution.accepted[0].arguments) == 1
+    assert isinstance(resolution.accepted[0].arguments[0], ValueAcceptance)
+
+    assert resolution.accepted[0].arguments[0].name == b"y"
+    assert resolution.accepted[0].arguments[0].type.width == 8
+    assert resolution.accepted[0].arguments[0].type.name == b"u8"
 
     assert source.extract(resolution.accepted[0].ref) == b"foo(y)"
 
@@ -170,12 +214,28 @@ def can_accept_a_call_with_multiple_arguments():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].target.name == b"foo"
+    assert resolution.accepted[0].signature.name == b"foo"
 
-    assert len(resolution.accepted[0].target.parameters) == 3
-    assert resolution.accepted[0].target.parameters[0].name == b"x"
-    assert resolution.accepted[0].target.parameters[1].name == b"y"
-    assert resolution.accepted[0].target.parameters[2].name == b"z"
+    assert len(resolution.accepted[0].signature.parameters) == 3
+    assert resolution.accepted[0].signature.parameters[0].name == b"x"
+    assert resolution.accepted[0].signature.parameters[1].name == b"y"
+    assert resolution.accepted[0].signature.parameters[2].name == b"z"
+
+    assert len(resolution.accepted[0].arguments) == 3
+
+    assert isinstance(resolution.accepted[0].arguments[0], LiteralAcceptance)
+    assert resolution.accepted[0].arguments[0].target.data.hex() == "01"
+    assert resolution.accepted[0].arguments[0].target.width == 8
+
+    assert isinstance(resolution.accepted[0].arguments[1], ValueAcceptance)
+    assert resolution.accepted[0].arguments[1].name == b"a"
+    assert resolution.accepted[0].arguments[1].type.width == 16
+    assert resolution.accepted[0].arguments[1].type.name == b"u16"
+
+    assert isinstance(resolution.accepted[0].arguments[2], ParameterAcceptance)
+    assert resolution.accepted[0].arguments[2].name == b"b"
+    assert resolution.accepted[0].arguments[2].type.width == 32
+    assert resolution.accepted[0].arguments[2].type.name == b"u32"
 
     assert source.extract(resolution.accepted[0].ref) == b"foo(0x01, a, b)"
 

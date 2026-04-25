@@ -71,7 +71,7 @@ def verify_instruction_resolution(
 ):
     resolution = prepare_resolution(
         f"""
-            asm main() {{ {instruction}; }}
+            asm main() {{ .x: {instruction}; }}
         """
     )
 

@@ -30,6 +30,9 @@ class BindAcceptance:
     dst: bytes
     mode: BindMode
 
+    def is_immediate(self) -> bool:
+        return self.mode == "immediate"
+
 
 @dataclass(kw_only=True)
 class BindResolution:

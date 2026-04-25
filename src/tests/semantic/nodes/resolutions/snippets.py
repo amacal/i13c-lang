@@ -22,7 +22,6 @@ def can_accept_a_snippet():
     id, _ = resolutions.signatures.peak()
 
     assert resolution.accepted[0].signature.id == id
-    assert resolution.accepted[0].binding is not None
     assert resolution.accepted[0].binding.owner == id
 
     assert resolutions.instructions is not None
@@ -53,8 +52,6 @@ def can_accept_a_snippet_with_parameters():
     id, _ = resolutions.signatures.peak()
 
     assert resolution.accepted[0].signature.id == id
-    assert resolution.accepted[0].binding is not None
-
     assert resolution.accepted[0].binding.owner == id
     assert len(resolution.accepted[0].binding.binds) == 1
 

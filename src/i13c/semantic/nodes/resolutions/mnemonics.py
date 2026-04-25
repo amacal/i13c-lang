@@ -24,6 +24,11 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
         (MnemonicOperandSpec.reg32(),),
         (MnemonicOperandSpec.reg64(),),
     ],
+    b"jmp": [
+        (MnemonicOperandSpec.addr(),),
+        (MnemonicOperandSpec.reg64(),),
+        (MnemonicOperandSpec.rel(),),
+    ],
     b"lea": [
         (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr()),
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr()),
@@ -44,6 +49,7 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
         (MnemonicOperandSpec.addr(), MnemonicOperandSpec.imm32()),
         (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg64()),
     ],
+    b"nop": [()],
     b"shl": [
         (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.imm8()),
         (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.imm8()),

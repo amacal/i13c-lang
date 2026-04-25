@@ -3,9 +3,7 @@ from typing import List
 from typing import Literal as Kind
 from typing import Optional, Tuple
 
-from i13c.semantic.core import Identifier
 from i13c.semantic.typing.entities.instructions import InstructionId
-from i13c.semantic.typing.entities.operands import OperandId
 from i13c.semantic.typing.resolutions.mnemonics import (
     MnemonicAcceptance,
     MnemonicVariant,
@@ -14,12 +12,11 @@ from i13c.semantic.typing.resolutions.operands import OperandAcceptance
 from i13c.syntax.source import Span
 
 InstructionRejectionReason = Kind[
-    "unknown-mnemonic",
     "arity-mismatch",
     "type-mismatch",
     "width-mismatch",
     "register-mismatch",
-    "unresolved",
+    "variant-mismatch",
 ]
 
 OperandSymbol = Kind[
@@ -79,18 +76,6 @@ class OperandSpec:
             return self.symbol
 
         return ":".join(str(name) for name in (self.symbol, *self.names))
-
-
-@dataclass(kw_only=True)
-class ReferenceToImmediate:
-    target: OperandId
-    identifier: Identifier
-
-
-@dataclass(kw_only=True)
-class ReferenceToRegister:
-    target: OperandId
-    identifier: Identifier
 
 
 @dataclass(kw_only=True)

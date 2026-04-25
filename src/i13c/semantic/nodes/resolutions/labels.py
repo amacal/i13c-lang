@@ -58,6 +58,7 @@ def build_label_resolution(
                 ref=entry.ref,
                 id=lid,
                 name=entry.name,
+                target=entry.target,
             )
         )
 

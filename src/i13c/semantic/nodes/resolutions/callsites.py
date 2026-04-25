@@ -11,6 +11,7 @@ from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
+    CallSiteArgument,
     CallSiteRejection,
     CallSiteRejectionReason,
     CallSiteResolution,
@@ -88,13 +89,16 @@ def build_callsite_resolution(
         if found := signatures.find(entry.callee):
             for signature in found:
                 rejected = None
+                arguments: List[CallSiteArgument] = []
 
                 if len(signature.parameters) != len(entry.arguments):
                     rejected = "arity-mismatch"
                     break
 
                 for parameter, argument in zip(signature.parameters, entry.arguments):
-                    target: Optional[Union[LiteralAcceptance, ParameterAcceptance, ValueAcceptance]]
+                    target: Optional[
+                        Union[LiteralAcceptance, ParameterAcceptance, ValueAcceptance]
+                    ]
 
                     if isinstance(argument, LiteralId):
                         target = literals.get(argument)
@@ -106,6 +110,9 @@ def build_callsite_resolution(
                     if target is None:
                         rejected = "unknown-target"
                         break
+
+                    else:
+                        arguments.append(target)
 
                     if isinstance(target, LiteralAcceptance):
                         if not parameter.type.accepts(target):
@@ -123,7 +130,8 @@ def build_callsite_resolution(
                         CallSiteAcceptance(
                             ref=entry.ref,
                             id=sid,
-                            target=signature,
+                            signature=signature,
+                            arguments=arguments,
                         )
                     )
 
@@ -142,7 +150,6 @@ def build_callsite_resolution(
                     reason="unknown-target",
                 )
             )
-
 
         resolutions[sid] = resolution
 

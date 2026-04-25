@@ -109,6 +109,14 @@ def build_instruction_resolution(
                     )
                 )
 
+        if not resolution.accepted:
+            resolution.rejected.append(
+                InstructionRejection(
+                    ref=entry.ref,
+                    reason="variant-mismatch",
+                )
+            )
+
         resolutions[iid] = resolution
 
     return OneToOne[InstructionId, InstructionResolution].instance(resolutions)

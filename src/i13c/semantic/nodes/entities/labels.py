@@ -3,8 +3,14 @@ from typing import Dict
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.labels import Label, LabelId
-from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.instructions import InstructionId
+from i13c.semantic.typing.entities.labels import (
+    EndOfSnippet,
+    Label,
+    LabelId,
+    LabelTarget,
+)
+from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 
 
 def configure_labels() -> GraphNode:
@@ -12,12 +18,18 @@ def configure_labels() -> GraphNode:
         builder=build_labels,
         constraint=None,
         produces=("entities/labels",),
-        requires=frozenset({("graph", "syntax/graph")}),
+        requires=frozenset(
+            {
+                ("graph", "syntax/graph"),
+                ("snippets", "entities/snippets"),
+            }
+        ),
     )
 
 
 def build_labels(
     graph: SyntaxGraph,
+    snippets: OneToOne[SnippetId, Snippet],
 ) -> OneToOne[LabelId, Label]:
     labels: Dict[LabelId, Label] = {}
 
@@ -26,13 +38,25 @@ def build_labels(
         label_id = LabelId(value=id.value)
 
         snippet = graph.snippet.labels.get_ctx(id)
-        nid = graph.snippet.snippets.get_by_node(snippet)
-        snippet_id = SnippetId(value=nid.value)
+        snipept_nid = graph.snippet.snippets.get_by_node(snippet)
+        snippet_id = SnippetId(value=snipept_nid.value)
+
+        found: bool = False
+        instruction: LabelTarget = EndOfSnippet()
+
+        for iid in snippets.get(snippet_id).body:
+            if iid == label_id:
+                found = True
+
+            elif found and isinstance(iid, InstructionId):
+                instruction = iid
+                break
 
         labels[label_id] = Label(
             ref=entry.ref,
             name=entry.name,
-            ctx=snippet_id,
+            snippet=snipept_nid,
+            target=instruction,
         )
 
     return OneToOne[LabelId, Label].instance(labels)

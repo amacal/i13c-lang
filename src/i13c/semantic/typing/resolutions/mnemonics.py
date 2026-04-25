@@ -6,12 +6,19 @@ from typing import Optional, Tuple
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.syntax.source import Span
 
-MnemonicRejectionReason = Kind[
-    "unknown-mnemonic",
-]
+MnemonicRejectionReason = Kind["unknown-mnemonic",]
 
 MnemonicOperandSymbol = Kind[
-    "reg8", "reg16", "reg32", "reg64", "imm8", "imm16", "imm32", "imm64", "addr"
+    "reg8",
+    "reg16",
+    "reg32",
+    "reg64",
+    "imm8",
+    "imm16",
+    "imm32",
+    "imm64",
+    "addr",
+    "rel",
 ]
 
 
@@ -61,6 +68,10 @@ class MnemonicOperandSpec:
     @staticmethod
     def addr() -> MnemonicOperandSpec:
         return MnemonicOperandSpec(symbol="addr", names=())
+
+    @staticmethod
+    def rel() -> MnemonicOperandSpec:
+        return MnemonicOperandSpec(symbol="rel", names=())
 
     def __str__(self) -> str:
         if self.names is None:

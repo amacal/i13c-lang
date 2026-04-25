@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from i13c.semantic.typing.entities.labels import LabelId
+from i13c.semantic.typing.entities.labels import LabelId, LabelTarget
 from i13c.syntax.source import Span
 
 
@@ -14,7 +14,9 @@ class LabelRejection:
 class LabelAcceptance:
     ref: Span
     id: LabelId
+
     name: bytes
+    target: LabelTarget
 
 
 @dataclass(kw_only=True)

@@ -1,9 +1,13 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Literal as Kind
+from typing import Union
 
 from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
+from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span
 
 CallSiteRejectionReason = Kind[
@@ -11,6 +15,13 @@ CallSiteRejectionReason = Kind[
     "type-mismatch",
     "unknown-target",
 ]
+
+CallSiteArgument = Union[
+    LiteralAcceptance,
+    ParameterAcceptance,
+    ValueAcceptance,
+]
+
 
 @dataclass(kw_only=True)
 class CallSiteRejection:
@@ -22,7 +33,9 @@ class CallSiteRejection:
 class CallSiteAcceptance:
     ref: Span
     id: CallSiteId
-    target: SignatureAcceptance
+
+    signature: SignatureAcceptance
+    arguments: List[CallSiteArgument]
 
 
 @dataclass(kw_only=True)

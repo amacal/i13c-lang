@@ -1,7 +1,9 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import Address, AddressId
+from i13c.semantic.typing.entities.asmlets import Asmlet, AsmletId
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
 from i13c.semantic.typing.entities.binds import Bind, BindId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
@@ -32,6 +34,7 @@ from i13c.semantic.typing.indices.variables import Variable, VariableId
 @dataclass
 class EntityNodes:
     addresses: OneToOne[AddressId, Address]
+    asmlets: Optional[OneToOne[AsmletId, Asmlet]]
     assigns: OneToOne[AssignId, Assign]
     binds: OneToOne[BindId, Bind]
     callsites: OneToOne[CallSiteId, CallSite]

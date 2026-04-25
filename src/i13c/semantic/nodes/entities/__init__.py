@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.entities.addresses import configure_addresses
+from i13c.semantic.nodes.entities.asmlets import configure_asmlets
 from i13c.semantic.nodes.entities.assigns import configure_assigns
 from i13c.semantic.nodes.entities.bindings import configure_bindings
 from i13c.semantic.nodes.entities.binds import configure_binds
@@ -34,6 +35,7 @@ def configure_entities() -> GraphGroup:
         nodes=[
             configure_addresses(),
             configure_assigns(),
+            configure_asmlets(),
             configure_bindings(),
             configure_binds(),
             configure_callsites(),
@@ -65,6 +67,7 @@ def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
     return EntityNodes(
         addresses=entities["entities/addresses"],
         assigns=entities["entities/assigns"],
+        asmlets=entities.get("entities/asmlets"),
         binds=entities["entities/binds"],
         callsites=entities["entities/callsites"],
         cflows=entities["entities/cflows"],

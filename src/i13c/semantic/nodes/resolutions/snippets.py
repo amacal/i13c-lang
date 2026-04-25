@@ -91,7 +91,11 @@ def build_snippet_resolution(
                     binding=binding,
                     flags=found_flags,
                     signature=signature,
-                    instructions=[instructions.get(id) for id in entry.instructions],
+                    instructions=[
+                        instructions.get(id)
+                        for id in entry.body
+                        if isinstance(id, InstructionId)
+                    ],
                 )
             )
 
@@ -124,12 +128,10 @@ def validate_snippet_resolution_e3015(
 ) -> List[Diagnostic]:
     diagnostics: List[Diagnostic] = []
 
-    for id, resolution in resolutions.items():
+    for _, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
             for rejection in resolution.rejected:
-                diagnostics.append(
-                    report_snippet_resolution_e3015(rejection)
-                )
+                diagnostics.append(report_snippet_resolution_e3015(rejection))
 
     return diagnostics
 
@@ -140,5 +142,5 @@ def report_snippet_resolution_e3015(
     return Diagnostic(
         ref=rejection.ref,
         code="E3015",
-        message=f"Unresolved snippet {rejection.id}, reason: {rejection.reason}.",
+        message=f"Unresolved snippet {rejection.id}, reason: unknown.",
     )
