@@ -49,7 +49,7 @@ def build_asmlets(
     callsites: OneToMany[SignatureId, CallSiteAcceptance],
     snippets: OneToOne[SnippetId, SnippetAcceptance],
 ) -> OneToOne[AsmletId, Asmlet]:
-    assigns: Dict[AsmletId, Asmlet] = {}
+    asmlets: Dict[AsmletId, Asmlet] = {}
 
     for sid, snippet in snippets.items():
         removed: List[bytes] = []
@@ -107,7 +107,7 @@ def build_asmlets(
             # generate new identifier for the asmlet
             aid = AsmletId(value=generator.next())
 
-            assigns[aid] = Asmlet(
+            asmlets[aid] = Asmlet(
                 ref=snippet.ref,
                 id=aid,
                 source=sid,
@@ -119,7 +119,7 @@ def build_asmlets(
                 instructions=instructions,
             )
 
-    return OneToOne[AsmletId, Asmlet].instance(assigns)
+    return OneToOne[AsmletId, Asmlet].instance(asmlets)
 
 
 def register_converter(
