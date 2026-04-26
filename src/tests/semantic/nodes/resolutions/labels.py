@@ -1,3 +1,4 @@
+from i13c.semantic.typing.entities.instructions import InstructionId
 from tests.semantic.nodes.resolutions import prepare_resolutions
 
 
@@ -17,5 +18,8 @@ def can_accept_a_label():
 
     assert resolution.accepted[0].id == id
     assert resolution.accepted[0].name == b"me"
+
+    assert resolution.accepted[0].index == 1
+    assert isinstance(resolution.accepted[0].target, InstructionId)
 
     assert source.extract(resolution.accepted[0].ref) == b".me:"

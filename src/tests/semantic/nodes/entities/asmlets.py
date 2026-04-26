@@ -2,6 +2,7 @@ from i13c.semantic.typing.entities.asmlets import (
     AsmletOperandAddress,
     AsmletOperandImmediate,
     AsmletOperandRegister,
+    AsmletOperandRelocation,
 )
 from tests.semantic.nodes.entities import prepare_entities
 
@@ -146,6 +147,66 @@ def can_substitute_a_snippet_with_a_base_register_parameter():
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
     assert instr.operands[1].target.base.name == b"rcx"
     assert instr.operands[1].target.displacement is None
+
+
+def can_substitute_a_snippet_with_a_label_relocation_forward():
+    entities = prepare_entities(
+        """
+            asm bar() { jmp @me; .me: nop; }
+            fn main() { bar(); }
+        """
+    )
+
+    assert entities.asmlets is not None
+    assert entities.asmlets.size() == 1
+    _, asmlet = entities.asmlets.peak()
+
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peak()
+
+    assert asmlet.source == id
+    assert len(asmlet.binding) == 0
+    assert len(asmlet.parameters) == 0
+
+    assert len(asmlet.instructions) == 2
+    instr = asmlet.instructions[0]
+
+    assert instr.mnemonic == b"jmp"
+    assert len(instr.operands) == 1
+
+    assert instr.operands[0].symbol == "rel"
+    assert isinstance(instr.operands[0].target, AsmletOperandRelocation)
+    assert instr.operands[0].target.offset == 1
+
+
+def can_substitute_a_snippet_with_a_label_relocation_backward():
+    entities = prepare_entities(
+        """
+            asm bar() { .me: nop; jmp @me; }
+            fn main() { bar(); }
+        """
+    )
+
+    assert entities.asmlets is not None
+    assert entities.asmlets.size() == 1
+    _, asmlet = entities.asmlets.peak()
+
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peak()
+
+    assert asmlet.source == id
+    assert len(asmlet.binding) == 0
+    assert len(asmlet.parameters) == 0
+
+    assert len(asmlet.instructions) == 2
+    instr = asmlet.instructions[1]
+
+    assert instr.mnemonic == b"jmp"
+    assert len(instr.operands) == 1
+
+    assert instr.operands[0].symbol == "rel"
+    assert isinstance(instr.operands[0].target, AsmletOperandRelocation)
+    assert instr.operands[0].target.offset == -1
 
 
 def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement():

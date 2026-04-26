@@ -15,6 +15,7 @@ class LabelAcceptance:
     ref: Span
     id: LabelId
 
+    index: int
     name: bytes
     target: LabelTarget
 

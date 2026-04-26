@@ -37,9 +37,14 @@ def build_instructions(
         oid = graph.snippet.mnemonics.get_by_node(instruction.mnemonic)
         mnemonic_id = MnemonicId(value=oid.value)
 
+        # derive snippet ID from globally unique node ID
+        snippet = graph.snippet.instructions.get_ctx(nid)
+        snipept_nid = graph.snippet.snippets.get_by_node(snippet)
+
         # append to instructions map
         instructions[instruction_id] = Instruction(
             ref=instruction.ref,
+            snippet=snipept_nid,
             mnemonic=mnemonic_id,
             operands=operands,
         )

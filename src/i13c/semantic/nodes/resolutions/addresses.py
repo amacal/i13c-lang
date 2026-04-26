@@ -14,6 +14,7 @@ from i13c.semantic.typing.resolutions.addresses import (
     OffsetAcceptance,
 )
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 
@@ -75,7 +76,7 @@ def build_address_resolution(
         )
 
         # assume no offset is available
-        offset = None
+        offset, register = None, None
 
         # resolve base register
         if isinstance(entry.base, RegisterId):
@@ -90,7 +91,18 @@ def build_address_resolution(
                 )
 
         else:
-            register = references.get(entry.base)
+            reference = references.get(entry.base)
+
+            if not isinstance(reference.target, ParameterAcceptance):
+                resolution.rejected.append(
+                    AddressRejection(
+                        ref=entry.ref,
+                        reason="invalid-register",
+                    )
+                )
+
+            else:
+                register = reference.target
 
         # resolve offset immediate, if present
         if entry.offset is not None:
@@ -122,6 +134,8 @@ def build_address_resolution(
                 )
 
         if len(resolution.rejected) == 0:
+            assert register is not None
+
             resolution.accepted.append(
                 AddressAcceptance(
                     ref=entry.ref,

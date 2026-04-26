@@ -82,6 +82,7 @@ class OperandSpec:
 class InstructionAcceptance:
     ref: Span
     id: InstructionId
+    index: int
 
     mnemonic: MnemonicAcceptance
     variant: MnemonicVariant

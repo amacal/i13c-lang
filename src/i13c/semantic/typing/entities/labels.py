@@ -36,6 +36,7 @@ SnippetContext = TypeVar("SnippetContext", bound=SnippetContextBound)
 class Label:
     ref: Span
     name: bytes
+    index: int
 
     snippet: NodeId
     target: LabelTarget

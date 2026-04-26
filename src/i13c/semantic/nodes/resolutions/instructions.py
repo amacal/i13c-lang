@@ -6,6 +6,7 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.semantic.typing.entities.operands import OperandId
+from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.resolutions.instructions import (
     InstructionAcceptance,
     InstructionRejection,
@@ -23,6 +24,7 @@ def configure_instruction_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("instructions", "entities/instructions"),
+                ("snippets", "entities/snippets"),
                 ("mnemonics", "resolutions/mnemonics/accepted"),
                 ("operands", "resolutions/operands/accepted"),
             }
@@ -58,6 +60,7 @@ def configure_instruction_resolution() -> GraphGroup:
 
 def build_instruction_resolution(
     instructions: OneToOne[InstructionId, Instruction],
+    snippets: OneToOne[SnippetId, Snippet],
     mnemonics: OneToOne[MnemonicId, MnemonicAcceptance],
     operands: OneToOne[OperandId, OperandAcceptance],
 ) -> OneToOne[InstructionId, InstructionResolution]:
@@ -99,10 +102,25 @@ def build_instruction_resolution(
                     collected.append(accepted)
 
             if len(variant) == len(collected):
+
+                index, idx = -1, -1
+                snippet_id = entry.get_snippet(SnippetId.from_context)
+
+                for id in snippets.get(snippet_id).body:
+                    if isinstance(id, InstructionId):
+                        idx += 1
+
+                        if iid == id:
+                            index = idx
+                            break
+
+                assert index >= 0
+
                 resolution.accepted.append(
                     InstructionAcceptance(
                         ref=entry.ref,
                         id=iid,
+                        index=index,
                         mnemonic=mnemonic,
                         operands=tuple(collected),
                         variant=variant,

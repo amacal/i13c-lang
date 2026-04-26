@@ -1,3 +1,4 @@
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
@@ -87,6 +88,32 @@ def can_accept_a_backward_address():
     assert source.extract(resolution.accepted[0].ref) == b"[rax - 0x0300]"
 
 
+def can_accept_a_param_as_the_base():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main(v@rax: u64) { call [@v]; }
+        """
+    )
+
+    assert resolutions.addresses is not None
+    assert resolutions.addresses.size() == 1
+    id, resolution = resolutions.addresses.peak()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 0
+
+    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].base.name == b"v"
+    assert resolution.accepted[0].offset is None
+
+    assert isinstance(resolution.accepted[0].base, ParameterAcceptance)
+    assert resolution.accepted[0].base.name == b"v"
+    assert resolution.accepted[0].base.type.width == 64
+    assert resolution.accepted[0].base.type.name == b"u64"
+
+    assert source.extract(resolution.accepted[0].ref) == b"[@v]"
+
+
 def can_reject_rip_register():
     source, resolutions = prepare_resolutions(
         """
@@ -103,6 +130,24 @@ def can_reject_rip_register():
 
     assert resolution.rejected[0].reason == "invalid-register"
     assert source.extract(resolution.rejected[0].ref) == b"[rip]"
+
+
+def can_reject_label_as_the_address_base():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main() { .me: call [@me]; }
+        """
+    )
+
+    assert resolutions.addresses is not None
+    assert resolutions.addresses.size() == 1
+    _, resolution = resolutions.addresses.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "invalid-register"
+    assert source.extract(resolution.rejected[0].ref) == b"[@me]"
 
 
 def can_reject_non_64bit_register():

@@ -2,7 +2,6 @@ from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
-from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
@@ -72,11 +71,10 @@ def can_accept_an_operand_from_a_reference():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].kind == "reference"
+    assert resolution.accepted[0].kind == "parameter"
 
-    assert isinstance(resolution.accepted[0].target, ReferenceAcceptance)
+    assert isinstance(resolution.accepted[0].target, ParameterAcceptance)
     assert resolution.accepted[0].target.name == b"x"
-    assert isinstance(resolution.accepted[0].target.target, ParameterAcceptance)
 
     assert source.extract(resolution.accepted[0].ref) == b"@x"
 
@@ -96,13 +94,10 @@ def can_accept_an_operand_from_a_label():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert resolution.accepted[0].kind == "reference"
+    assert resolution.accepted[0].kind == "relocation"
 
-    assert isinstance(resolution.accepted[0].target, ReferenceAcceptance)
+    assert isinstance(resolution.accepted[0].target, LabelAcceptance)
     assert resolution.accepted[0].target.name == b"x"
-
-    assert isinstance(resolution.accepted[0].target.target, LabelAcceptance)
-    assert resolution.accepted[0].target.target.name == b"x"
     assert resolution.accepted[0].symbol == "rel"
 
     assert source.extract(resolution.accepted[0].ref) == b"@x"
@@ -155,13 +150,12 @@ def can_accept_an_operand_from_an_address_using_a_reference_as_base():
     assert resolution.accepted[0].kind == "address"
 
     assert isinstance(resolution.accepted[0].target, AddressAcceptance)
-    assert isinstance(resolution.accepted[0].target.base, ReferenceAcceptance)
+    assert isinstance(resolution.accepted[0].target.base, ParameterAcceptance)
 
     assert resolution.accepted[0].target.offset is not None
     assert resolution.accepted[0].target.base.name == b"x"
 
-    assert isinstance(resolution.accepted[0].target.base.target, ParameterAcceptance)
-    assert resolution.accepted[0].target.base.target.name == b"x"
+    assert resolution.accepted[0].target.base.name == b"x"
     assert resolution.accepted[0].symbol == "addr"
 
     assert source.extract(resolution.accepted[0].ref) == b"[@x + 0x0f]"

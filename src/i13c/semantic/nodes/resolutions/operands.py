@@ -133,6 +133,7 @@ def build_operand_resolution(
             assert isinstance(entry.target, RegisterId)
             target = registers.get(entry.target)
             symbol = get_register_symbol(target)
+            kind = "register"
 
             if target.kind == "rip":
                 resolution.rejected.append(
@@ -147,6 +148,7 @@ def build_operand_resolution(
             assert isinstance(entry.target, ImmediateId)
             target = immediates.get(entry.target)
             symbol = get_immediate_symbol(target)
+            kind = "immediate"
 
         elif entry.kind == "reference":
             assert isinstance(entry.target, ReferenceId)
@@ -154,10 +156,12 @@ def build_operand_resolution(
 
             if reference.kind == "label":
                 assert isinstance(reference.target, LabelAcceptance)
-                symbol = "rel"
+                symbol, kind = "rel", "relocation"
+                target = reference.target
 
             else:
                 assert isinstance(reference.target, ParameterAcceptance)
+                kind, target = "parameter", reference.target
 
                 bind = binds.get(reference.target.id)
                 symbol = get_bind_symbol(reference.target, bind)
@@ -165,14 +169,14 @@ def build_operand_resolution(
         else:
             assert isinstance(entry.target, AddressId)
             target = addresses.get(entry.target)
-            symbol = "addr"
+            symbol, kind = "addr", "address"
 
         if not resolution.rejected:
             resolution.accepted.append(
                 OperandAcceptance(
                     ref=entry.ref,
                     id=oid,
-                    kind=entry.kind,
+                    kind=kind,
                     target=target,
                     symbol=symbol,
                 )

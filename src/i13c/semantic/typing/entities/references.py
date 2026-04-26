@@ -24,6 +24,3 @@ class Reference:
     ref: Span
     name: bytes
     ctx: ReferenceContext
-
-    def __str__(self) -> str:
-        return f"{self.name.decode()}@{self.ctx.identify(1)}"

@@ -21,10 +21,10 @@ from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
+from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.operands import OperandAcceptance, OperandTarget
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
-from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from i13c.semantic.typing.resolutions.snippets import SnippetAcceptance
 
@@ -65,7 +65,9 @@ def build_asmlets(
         for callsite in callsites.find(snippet.signature.id):
             keys: List[Tuple[bytes, Hex]] = []
 
-            for idx, (bind, argument) in enumerate(zip(snippet.binding.binds, callsite.arguments)):
+            for idx, (bind, argument) in enumerate(
+                zip(snippet.binding.binds, callsite.arguments)
+            ):
                 if not positions[idx]:
                     assert isinstance(argument, LiteralAcceptance)
                     keys.append((bind.src, argument.target))
@@ -121,6 +123,7 @@ def build_asmlets(
 
 
 def register_converter(
+    ctx: InstructionAcceptance,
     src: RegisterAcceptance,
     binds: Dict[bytes, Union[bytes, Hex]],
 ) -> AsmletOperandRegister:
@@ -134,32 +137,39 @@ def immediate_converter(
     return AsmletOperandImmediate(value=src.value)
 
 
-def reference_converter(
-    src: ReferenceAcceptance,
+def label_converter(
+    ctx: InstructionAcceptance,
+    src: LabelAcceptance,
+    binds: Dict[bytes, Union[bytes, Hex]],
+) -> AsmletOperandRelocation:
+
+    print(src.index, ctx.index)
+    return AsmletOperandRelocation(offset=src.index - ctx.index)
+
+
+def parameter_converter(
+    ctx: InstructionAcceptance,
+    src: ParameterAcceptance,
     binds: Dict[bytes, Union[bytes, Hex]],
 ) -> Union[
     AsmletOperandRegister,
     AsmletOperandImmediate,
-    AsmletOperandRelocation,
 ]:
 
-    # target can be resolved as a parameter
-    if isinstance(src.target, ParameterAcceptance):
-        value = binds[src.target.name]
+    # the parameter resolved to a value via binds
+    value = binds[src.name]
 
-        # either directly to an immediate value
-        if isinstance(value, Hex):
-            return AsmletOperandImmediate(value=value)
+    # either directly to an immediate value
+    if isinstance(value, Hex):
+        return AsmletOperandImmediate(value=value)
 
-        # or to a register that can be used as an operand
-        else:
-            return AsmletOperandRegister(name=value)
-
+    # or to a register that can be used as an operand
     else:
-        return AsmletOperandRelocation(offset=-1)
+        return AsmletOperandRegister(name=value)
 
 
 def address_converter(
+    ctx: InstructionAcceptance,
     src: AddressAcceptance,
     binds: Dict[bytes, Union[bytes, Hex]],
 ) -> AsmletOperandAddress:
@@ -189,27 +199,30 @@ def address_converter(
 class OperandConverter(Protocol):
     def __call__(
         self,
+        ctx: InstructionAcceptance,
         src: OperandTarget,
         binds: Dict[bytes, Union[bytes, Hex]],
     ) -> AsmletOperandTarget: ...
 
 
 DISPATCH_TABLE: Dict[Type[OperandTarget], OperandConverter] = {
-    RegisterAcceptance: register_converter,
-    ImmediateAcceptance: immediate_converter,
-    ReferenceAcceptance: reference_converter,
     AddressAcceptance: address_converter,
+    ImmediateAcceptance: immediate_converter,
+    LabelAcceptance: label_converter,
+    ParameterAcceptance: parameter_converter,
+    RegisterAcceptance: register_converter,
 }  # pyright: ignore[reportAssignmentType]
 
 
 def rewrite_operand(
+    ctx: InstructionAcceptance,
     src: OperandAcceptance,
     binds: Dict[bytes, Union[bytes, Hex]],
 ) -> AsmletOperand:
     return AsmletOperand(
         ref=src.ref,
         symbol=src.symbol,
-        target=DISPATCH_TABLE[type(src.target)](src.target, binds),
+        target=DISPATCH_TABLE[type(src.target)](ctx, src.target, binds),
     )
 
 
@@ -221,5 +234,5 @@ def rewrite_instruction(
         ref=src.ref,
         id=src.id,
         mnemonic=src.mnemonic.name,
-        operands=[rewrite_operand(op, binds) for op in src.operands],
+        operands=[rewrite_operand(src, op, binds) for op in src.operands],
     )

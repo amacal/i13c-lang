@@ -99,7 +99,11 @@ class NodesVisitor:
         )
 
     def on_instruction(self, instruction: tree.snippet.Instruction, path: Path) -> None:
-        self.graph.snippet.instructions.append(self.next(), instruction)
+        self.graph.snippet.instructions.append(
+            self.next(),
+            instruction,
+            ctx=path.find(tree.snippet.Snippet),
+        )
 
     def on_mnemonic(self, mnemonic: tree.snippet.Mnemonic, path: Path) -> None:
         self.graph.snippet.mnemonics.append(self.next(), mnemonic)
@@ -182,7 +186,7 @@ class Snippet:
     slots: Bidirectional[tree.snippet.Slot, None]
     binds: Bidirectional[tree.snippet.Bind, tree.snippet.Slot]
     labels: Bidirectional[tree.snippet.Label, tree.snippet.Snippet]
-    instructions: Bidirectional[tree.snippet.Instruction, None]
+    instructions: Bidirectional[tree.snippet.Instruction, tree.snippet.Snippet]
     mnemonics: Bidirectional[tree.snippet.Mnemonic, None]
     operands: Bidirectional[tree.snippet.Operand, None]
     immediates: Bidirectional[tree.snippet.Immediate, None]
@@ -225,7 +229,9 @@ class SyntaxGraph:
                 slots=Bidirectional[tree.snippet.Slot, None].empty(),
                 binds=Bidirectional[tree.snippet.Bind, tree.snippet.Slot].empty(),
                 labels=Bidirectional[tree.snippet.Label, tree.snippet.Snippet].empty(),
-                instructions=Bidirectional[tree.snippet.Instruction, None].empty(),
+                instructions=Bidirectional[
+                    tree.snippet.Instruction, tree.snippet.Snippet
+                ].empty(),
                 mnemonics=Bidirectional[tree.snippet.Mnemonic, None].empty(),
                 operands=Bidirectional[tree.snippet.Operand, None].empty(),
                 immediates=Bidirectional[tree.snippet.Immediate, None].empty(),

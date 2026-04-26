@@ -12,7 +12,11 @@ def configure_label_resolution() -> GraphGroup:
         builder=build_label_resolution,
         constraint=None,
         produces=("resolutions/labels",),
-        requires=frozenset({("labels", "entities/labels")}),
+        requires=frozenset(
+            {
+                ("labels", "entities/labels"),
+            }
+        ),
     )
 
     validate = GraphNode(
@@ -57,6 +61,7 @@ def build_label_resolution(
             LabelAcceptance(
                 ref=entry.ref,
                 id=lid,
+                index=entry.index,
                 name=entry.name,
                 target=entry.target,
             )

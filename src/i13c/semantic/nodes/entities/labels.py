@@ -41,14 +41,17 @@ def build_labels(
         snipept_nid = graph.snippet.snippets.get_by_node(snippet)
         snippet_id = SnippetId(value=snipept_nid.value)
 
-        found: bool = False
+        index, idx = -1, 0
         instruction: LabelTarget = EndOfSnippet()
 
         for iid in snippets.get(snippet_id).body:
-            if iid == label_id:
-                found = True
+            if isinstance(iid, InstructionId):
+                idx += 1
 
-            elif found and isinstance(iid, InstructionId):
+            if iid == label_id:
+                index = idx
+
+            elif index >= 0 and isinstance(iid, InstructionId):
                 instruction = iid
                 break
 
@@ -57,6 +60,7 @@ def build_labels(
             name=entry.name,
             snippet=snipept_nid,
             target=instruction,
+            index=index,
         )
 
     return OneToOne[LabelId, Label].instance(labels)

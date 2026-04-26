@@ -5,7 +5,7 @@ from typing import Optional, Union
 
 from i13c.semantic.typing.entities.addresses import AddressId, OffsetKind
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
-from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from i13c.syntax.source import Span
 
@@ -15,7 +15,7 @@ AddressRejectionReason = Kind[
 ]
 
 OffsetWidth = Kind[8, 16, 32]
-AddressBase = Union[RegisterAcceptance, ReferenceAcceptance]
+AddressBase = Union[RegisterAcceptance, ParameterAcceptance]
 
 
 @dataclass(kw_only=True)
