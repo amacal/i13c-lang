@@ -9,6 +9,7 @@ from i13c.semantic.typing.entities.binds import Bind, BindId
 from i13c.semantic.typing.entities.calls import Call, CallId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.cflows import ControlFlows
+from i13c.semantic.typing.entities.cgraphs import CallGraph
 from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.flags import Flags, FlagsId
@@ -41,6 +42,7 @@ class EntityNodes:
     calls: OneToOne[CallId, Call]
     callsites: OneToOne[CallSiteId, CallSite]
     cflows: OneToOne[FunctionId, ControlFlows]
+    cgraphs: Optional[OneToOne[SignatureId, CallGraph]]
     environments: OneToOne[EnvironmentId, Environment]
     expressions: OneToOne[ExpressionId, Expression]
     flags: OneToOne[FlagsId, Flags]

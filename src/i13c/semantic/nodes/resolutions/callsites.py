@@ -3,11 +3,10 @@ from typing import Any, Dict, List, Optional, Union
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.nodes.entities.expressions import Expression, ExpressionId
-from i13c.semantic.nodes.entities.literals import LiteralId
-from i13c.semantic.nodes.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
+from i13c.semantic.typing.entities.functions import Function, FunctionId
+from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
@@ -17,6 +16,7 @@ from i13c.semantic.typing.resolutions.callsites import (
     CallSiteResolution,
 )
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
@@ -30,6 +30,7 @@ def configure_callsite_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("callsites", "entities/callsites"),
+                ("functions", "entities/functions"),
                 ("expressions", "entities/expressions"),
                 ("cflows", "resolutions/cflows/accepted"),
                 ("literals", "resolutions/literals/accepted"),
@@ -67,6 +68,7 @@ def configure_callsite_resolution() -> GraphGroup:
 
 def build_callsite_resolution(
     callsites: OneToOne[CallSiteId, CallSite],
+    functions: OneToOne[FunctionId, Function],
     expressions: OneToOne[ExpressionId, Expression],
     cflows: OneToOne[FunctionId, ControlFlowAcceptance],
     literals: OneToOne[LiteralId, LiteralAcceptance],
@@ -130,6 +132,7 @@ def build_callsite_resolution(
                         CallSiteAcceptance(
                             ref=entry.ref,
                             id=sid,
+                            ctx=functions.get(function_id).signature,
                             signature=signature,
                             arguments=arguments,
                         )

@@ -17,16 +17,19 @@ from i13c.semantic.typing.entities.statements import StatementId
 
 def configure_control_flows() -> GraphNode:
     return GraphNode(
-        builder=build_values,
+        builder=build_control_flows,
         constraint=None,
         produces=("entities/cflows",),
         requires=frozenset(
-            {("generator", "core/generator"), ("graph", "syntax/graph")}
+            {
+                ("generator", "core/generator"),
+                ("graph", "syntax/graph"),
+            }
         ),
     )
 
 
-def build_values(
+def build_control_flows(
     generator: Generator,
     graph: SyntaxGraph,
 ) -> OneToOne[FunctionId, ControlFlows]:

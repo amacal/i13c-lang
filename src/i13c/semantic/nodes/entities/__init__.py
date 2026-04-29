@@ -9,6 +9,7 @@ from i13c.semantic.nodes.entities.binds import configure_binds
 from i13c.semantic.nodes.entities.calls import configure_calls
 from i13c.semantic.nodes.entities.callsites import configure_callsites
 from i13c.semantic.nodes.entities.cflows import configure_control_flows
+from i13c.semantic.nodes.entities.cgraphs import configure_call_graphs
 from i13c.semantic.nodes.entities.environments import configure_environments
 from i13c.semantic.nodes.entities.expressions import configure_expressions
 from i13c.semantic.nodes.entities.flags import configure_flags
@@ -41,6 +42,7 @@ def configure_entities() -> GraphGroup:
             configure_binds(),
             configure_calls(),
             configure_callsites(),
+            configure_call_graphs(),
             configure_control_flows(),
             configure_environments(),
             configure_expressions(),
@@ -74,6 +76,7 @@ def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
         calls=entities["entities/calls"],
         callsites=entities["entities/callsites"],
         cflows=entities["entities/cflows"],
+        cgraphs=entities.get("entities/cgraphs"),
         environments=entities["entities/environments"],
         expressions=entities["entities/expressions"],
         flags=entities["entities/flags"],
