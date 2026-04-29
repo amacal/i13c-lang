@@ -45,6 +45,9 @@ def can_substitute_a_snippet_without_any_parameters():
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
 
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
+
     assert asmlet.source == id
     assert len(asmlet.binding) == 0
     assert len(asmlet.parameters) == 0
@@ -75,6 +78,9 @@ def can_substitute_a_snippet_with_a_register_parameter():
     assert entities.asmlets is not None
     assert entities.asmlets.size() == 1
     _, asmlet = entities.asmlets.peak()
+
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
 
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
@@ -121,6 +127,9 @@ def can_substitute_a_snippet_with_a_base_register_parameter():
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
 
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
+
     assert asmlet.source == id
     assert len(asmlet.binding) == 1
 
@@ -164,6 +173,9 @@ def can_substitute_a_snippet_with_a_label_relocation_forward():
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
 
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
+
     assert asmlet.source == id
     assert len(asmlet.binding) == 0
     assert len(asmlet.parameters) == 0
@@ -194,6 +206,9 @@ def can_substitute_a_snippet_with_a_label_relocation_backward():
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
 
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
+
     assert asmlet.source == id
     assert len(asmlet.binding) == 0
     assert len(asmlet.parameters) == 0
@@ -223,6 +238,9 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement():
 
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
+
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
 
     assert asmlet.source == id
     assert len(asmlet.binding) == 1
@@ -266,6 +284,9 @@ def can_substitute_only_once_the_same_signatured_called_twice():
     assert entities.asmlets is not None
     assert entities.asmlets.size() == 1
 
+    _, asmlet = entities.asmlets.peak()
+    assert len(asmlet.callsites) == 2
+
 
 def can_substitute_only_once_the_same_signatured_called_twice_via_register():
     entities = prepare_entities(
@@ -277,6 +298,9 @@ def can_substitute_only_once_the_same_signatured_called_twice_via_register():
 
     assert entities.asmlets is not None
     assert entities.asmlets.size() == 1
+
+    _, asmlet = entities.asmlets.peak()
+    assert len(asmlet.callsites) == 2
 
 
 def can_substitute_a_snippet_with_a_immediate_parameter():
@@ -297,6 +321,12 @@ def can_substitute_a_snippet_with_a_immediate_parameter():
     assert asmlet.source == id
     assert len(asmlet.binding) == 0
     assert len(asmlet.parameters) == 0
+    assert len(asmlet.callsites) == 1
+
+    assert len(asmlet.keys) == 1
+    assert b"v" in asmlet.keys
+    assert asmlet.keys[b"v"].width == 16
+    assert asmlet.keys[b"v"].data.hex() == "0001"
 
     assert len(asmlet.instructions) == 1
     instr = asmlet.instructions[0]
@@ -345,6 +375,12 @@ def can_substitute_a_snippet_with_a_immediate_parameter_twice():
         assert asmlet.source == id
         assert len(asmlet.binding) == 0
         assert len(asmlet.parameters) == 0
+        assert len(asmlet.callsites) ==  1
+
+        assert len(asmlet.keys) == 1
+        assert b"v" in asmlet.keys
+        assert asmlet.keys[b"v"].width == 16
+        assert asmlet.keys[b"v"].data.hex() == f"000{idx}"
 
         assert len(asmlet.instructions) == 1
         instr = asmlet.instructions[0]

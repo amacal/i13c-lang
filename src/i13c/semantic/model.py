@@ -4,11 +4,13 @@ from typing import Dict, Iterable, List, Optional, Set
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities import EntityNodes
+from i13c.semantic.typing.entities.asmlets import Asmlet
 from i13c.semantic.typing.entities.callables import CallableTarget
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.indices.callgraphs import CallPair
@@ -22,6 +24,7 @@ from i13c.semantic.typing.indices.usages import UsageId
 from i13c.semantic.typing.indices.variables import VariableId, VariableSource
 from i13c.semantic.typing.resolutions import ResolutionNodes
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
+from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
@@ -33,6 +36,8 @@ class IndexEdges:
     environments_by_snippets: Optional[OneToOne[SnippetId, EnvironmentAcceptance]]
     signatures_by_names: Optional[OneToMany[bytes, SignatureAcceptance]]
     values_by_statements: Optional[OneToMany[StatementId, ValueAcceptance]]
+    callsites_by_signatures: Optional[OneToMany[SignatureId, CallSiteAcceptance]]
+    asmlets_by_signatures: Optional[OneToMany[SignatureId, Asmlet]]
 
     dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
     environment_by_flownode: OneToOne[FlowNode, Environment]

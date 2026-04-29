@@ -68,6 +68,8 @@ def build(
             environments_by_snippets=indices.get("indices/environments/snippets"),
             signatures_by_names=indices.get("indices/signatures/names"),
             values_by_statements=indices.get("indices/values/statements"),
+            callsites_by_signatures=indices.get("indices/callsites/signatures"),
+            asmlets_by_signatures=indices.get("indices/asmlets/signatures"),
             dataflow_by_flownode=indices["indices/dataflow-by-flownode"],
             environment_by_flownode=indices["indices/environment-by-flownode"],
             flowgraph_by_function=indices["indices/flowgraph-by-function"],

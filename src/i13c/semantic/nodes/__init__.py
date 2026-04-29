@@ -3,6 +3,7 @@ from i13c.semantic.nodes.analyses.callables import configure_callables_live
 from i13c.semantic.nodes.analyses.callgraphs import configure_callgraphs_live
 from i13c.semantic.nodes.analyses.controlflows import configure_flowgraphs_live
 from i13c.semantic.nodes.entities import configure_entities
+from i13c.semantic.nodes.indices.asmlets import configure_asmlets_by_signatures
 from i13c.semantic.nodes.indices.binds import configure_binds_by_parameters
 from i13c.semantic.nodes.indices.callgraphs import configure_callgraphs
 from i13c.semantic.nodes.indices.callsites import configure_callsites_by_signatures
@@ -25,6 +26,7 @@ from i13c.semantic.nodes.resolutions import configure_resolutions
 def configure_nodes() -> GraphGroup:
     return GraphGroup(
         nodes=[
+            configure_asmlets_by_signatures(),
             configure_binds_by_parameters(),
             configure_callsites_by_signatures(),
             configure_callables_live(),
