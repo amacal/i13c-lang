@@ -3,10 +3,10 @@ from typing import Union
 
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.calls import CallId
 from i13c.syntax.source import Span
 
-StatementTarget = Union[AssignId, CallSiteId]
+StatementTarget = Union[AssignId, CallId]
 
 
 @dataclass(kw_only=True, frozen=True)

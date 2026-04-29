@@ -6,6 +6,7 @@ from i13c.semantic.nodes.entities.asmlets import configure_asmlets
 from i13c.semantic.nodes.entities.assigns import configure_assigns
 from i13c.semantic.nodes.entities.bindings import configure_bindings
 from i13c.semantic.nodes.entities.binds import configure_binds
+from i13c.semantic.nodes.entities.calls import configure_calls
 from i13c.semantic.nodes.entities.callsites import configure_callsites
 from i13c.semantic.nodes.entities.cflows import configure_control_flows
 from i13c.semantic.nodes.entities.environments import configure_environments
@@ -38,6 +39,7 @@ def configure_entities() -> GraphGroup:
             configure_asmlets(),
             configure_bindings(),
             configure_binds(),
+            configure_calls(),
             configure_callsites(),
             configure_control_flows(),
             configure_environments(),
@@ -69,6 +71,7 @@ def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
         assigns=entities["entities/assigns"],
         asmlets=entities.get("entities/asmlets"),
         binds=entities["entities/binds"],
+        calls=entities["entities/calls"],
         callsites=entities["entities/callsites"],
         cflows=entities["entities/cflows"],
         environments=entities["entities/environments"],

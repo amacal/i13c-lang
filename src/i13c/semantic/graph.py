@@ -48,7 +48,6 @@ def configure_self() -> GraphNode:
                 ("entities", Prefix(value="entities/")),
                 ("indices", Prefix(value="indices/")),
                 ("resolutions", Prefix(value="resolutions/")),
-                ("analyses", Prefix(value="analyses/")),
             }
         ),
     )
@@ -58,7 +57,6 @@ def build(
     entities: Dict[str, Any],
     indices: Dict[str, Any],
     resolutions: Dict[str, Any],
-    analyses: Dict[str, Any],
     **kwargs: Dict[str, Any],
 ) -> SemanticGraph:
     return SemanticGraph(
@@ -84,9 +82,6 @@ def build(
         ),
         live=LiveComponents(
             entrypoints=indices["indices/entrypoints-by-callable"],
-            flowgraph_by_function=analyses["analyses/flowgraph-by-function/live"],
         ),
-        callable_live=analyses.get("analyses/callables/live"),
-        callgraph_live=analyses.get("analyses/calls-by-caller/live"),
         resolutions=parse_resolutions(resolutions),
     )

@@ -140,7 +140,14 @@ class NodesVisitor:
             ctx=path.find(tree.function.Function),
         )
 
-    def on_callsite(self, callsite: tree.function.CallStatement, path: Path) -> None:
+    def on_call(self, call: tree.function.CallStatement, path: Path) -> None:
+        self.graph.function.calls.append(
+            self.next(),
+            call,
+            ctx=path.find(tree.function.Statement),
+        )
+
+    def on_callsite(self, callsite: tree.function.CallSite, path: Path) -> None:
         self.graph.function.callsites.append(
             self.next(),
             callsite,
@@ -201,7 +208,8 @@ class Function:
     flags: Bidirectional[tree.function.Flags, None]
     signatures: Bidirectional[tree.function.Signature, tree.function.Function]
     statements: Bidirectional[tree.function.Statement, tree.function.Function]
-    callsites: Bidirectional[tree.function.CallStatement, tree.function.Statement]
+    calls: Bidirectional[tree.function.CallStatement, tree.function.Statement]
+    callsites: Bidirectional[tree.function.CallSite, tree.function.Statement]
     assigns: Bidirectional[tree.function.AssignStatement, tree.function.Statement]
     values: Bidirectional[tree.function.Value, tree.function.Statement]
     literals: Bidirectional[tree.function.Literal, None]
@@ -250,8 +258,11 @@ class SyntaxGraph:
                 statements=Bidirectional[
                     tree.function.Statement, tree.function.Function
                 ].empty(),
-                callsites=Bidirectional[
+                calls=Bidirectional[
                     tree.function.CallStatement, tree.function.Statement
+                ].empty(),
+                callsites=Bidirectional[
+                    tree.function.CallSite, tree.function.Statement
                 ].empty(),
                 assigns=Bidirectional[
                     tree.function.AssignStatement, tree.function.Statement

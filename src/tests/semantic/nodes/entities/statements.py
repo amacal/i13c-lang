@@ -37,7 +37,7 @@ def can_detect_a_statement_on_callsite():
     assert entities.statements.size() == 1
     _, value = entities.statements.peak()
 
-    assert entities.callsites.size() == 1
-    id, _ = entities.callsites.peak()
+    assert entities.calls.size() == 1
+    id, _ = entities.calls.peak()
 
     assert value.target == id

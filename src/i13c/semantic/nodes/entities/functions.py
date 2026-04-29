@@ -3,11 +3,11 @@ from typing import Dict, List
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.assigns import AssignId
+from i13c.semantic.typing.entities.calls import CallId
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.functions import Function, FunctionId, Statement
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.values import ValueId
 from i13c.syntax import tree
 
 
@@ -45,12 +45,11 @@ def build_functions(
             inside = statement.target
 
             if isinstance(inside, tree.function.CallStatement):
-                nid = graph.function.callsites.get_by_node(inside)
-                statements.append(CallSiteId(value=nid.value))
+                nid = graph.function.calls.get_by_node(inside)
+                statements.append(CallId(value=nid.value))
             else:
                 nid = graph.function.assigns.get_by_node(inside)
-                statements.append(ValueId(value=nid.value))
-
+                statements.append(AssignId(value=nid.value))
 
         functions[function_id] = Function(
             ref=node.ref,

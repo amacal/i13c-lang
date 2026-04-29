@@ -6,6 +6,7 @@ from i13c.semantic.typing.entities.addresses import Address, AddressId
 from i13c.semantic.typing.entities.asmlets import Asmlet, AsmletId
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
 from i13c.semantic.typing.entities.binds import Bind, BindId
+from i13c.semantic.typing.entities.calls import Call, CallId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.cflows import ControlFlows
 from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
@@ -37,6 +38,7 @@ class EntityNodes:
     asmlets: Optional[OneToOne[AsmletId, Asmlet]]
     assigns: OneToOne[AssignId, Assign]
     binds: OneToOne[BindId, Bind]
+    calls: OneToOne[CallId, Call]
     callsites: OneToOne[CallSiteId, CallSite]
     cflows: OneToOne[FunctionId, ControlFlows]
     environments: OneToOne[EnvironmentId, Environment]

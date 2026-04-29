@@ -139,18 +139,18 @@ def lower_active_functions(
 ]:
     ctx = Context.empty(graph, generator, values, registers)
 
-    assert graph.callable_live is not None
+    # assert graph.callable_live is not None
 
-    # lower all live callables
-    for fid in graph.callable_live:
-        if isinstance(fid, FunctionId):
-            # find flowgraph and generate blocks
-            flowgraph = graph.live.flowgraph_by_function.get(fid)
-            block = lower_function_flow(ctx, fid, flowgraph)
+    # # lower all live callables
+    # for fid in graph.callable_live:
+    #     if isinstance(fid, FunctionId):
+    #         # find flowgraph and generate blocks
+    #         flowgraph = graph.live.flowgraph_by_function.get(fid)
+    #         block = lower_function_flow(ctx, fid, flowgraph)
 
-            # returned block may be an entrypoint
-            if graph.live.entrypoints.contains(fid):
-                ctx.entrypoint = block
+    #         # returned block may be an entrypoint
+    #         if graph.live.entrypoints.contains(fid):
+    #             ctx.entrypoint = block
 
     # entry has to be found
     assert ctx.entrypoint is not None
@@ -238,19 +238,19 @@ def lower_flow_callsite(
 ) -> FlowNodeContext:
 
     # obtain successors
-    successors = flow.forward.get(node, [])
-    assert len(successors) in (0, 1)
+    # successors = flow.forward.get(node, [])
+    # assert len(successors) in (0, 1)
 
-    # create jump or trap
-    terminator = (
-        JumpTerminator(target=mapping[successors[0]])
-        if len(successors) == 1
-        else TrapTerminator()
-    )
+    # # create jump or trap
+    # terminator = (
+    #     JumpTerminator(target=mapping[successors[0]])
+    #     if len(successors) == 1
+    #     else TrapTerminator()
+    # )
 
     # lower callsite block
     return FlowNodeContext(
-        block=Block(origin=node, terminator=terminator),
+        block=Block(origin=node, terminator=TrapTerminator()),
         instructions=lower_callsite(ctx.generator, ctx.graph, node, ctx.registers),
     )
 
@@ -264,21 +264,21 @@ def lower_flow_value(
 ) -> FlowNodeContext:
 
     # obtain successors
-    successors = flow.forward.get(node, [])
-    assert len(successors) in (0, 1)
+    # successors = flow.forward.get(node, [])
+    # assert len(successors) in (0, 1)
 
-    # create jump or trap
-    terminator = (
-        JumpTerminator(target=mapping[successors[0]])
-        if len(successors) == 1
-        else TrapTerminator()
-    )
+    # # create jump or trap
+    # terminator = (
+    #     JumpTerminator(target=mapping[successors[0]])
+    #     if len(successors) == 1
+    #     else TrapTerminator()
+    # )
 
-    # prepare instructions
-    instructions: List[BlockInstruction] = []
+    # # prepare instructions
+    # instructions: List[BlockInstruction] = []
 
-    resolution = ctx.values.get(node)
-    assert resolution.accepted is not None
+    # resolution = ctx.values.get(node)
+    # assert resolution.accepted is not None
 
     # if isinstance(resolution.accepted.binding, LiteralId):
     #     literal = ctx.graph.entities.literals.get(resolution.accepted.binding)
@@ -307,8 +307,8 @@ def lower_flow_value(
     #     instructions.append((iid, instr))
 
     return FlowNodeContext(
-        block=Block(origin=node, terminator=terminator),
-        instructions=instructions,
+        block=Block(origin=node, terminator=TrapTerminator()),
+        instructions=[],
     )
 
 

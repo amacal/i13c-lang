@@ -165,8 +165,11 @@ def parse_callsite(
 
     return tree.function.CallStatement(
         ref=state.between(ident, end),
-        name=state.extract(ident),
-        arguments=arguments,
+        target=tree.function.CallSite(
+            ref=state.between(ident, end),
+            name=state.extract(ident),
+            arguments=arguments,
+        ),
     )
 
 
@@ -204,7 +207,9 @@ def parse_value(state: ParsingState) -> tree.function.AssignStatement:
     )
 
 
-def parse_value_expression(state: ParsingState) -> Tuple[tree.function.ValueExpression, LexingToken]:
+def parse_value_expression(
+    state: ParsingState,
+) -> Tuple[tree.function.ValueExpression, LexingToken]:
     return parse_argument(state)
 
 

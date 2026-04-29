@@ -4,7 +4,7 @@ from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.calls import CallId
 from i13c.semantic.typing.entities.statements import Statement, StatementId
 from i13c.syntax import tree
 
@@ -34,8 +34,8 @@ def build_statements(
 
         # derive callsite ID from call statement
         else:
-            nid = graph.function.callsites.get_by_node(statement.target)
-            target = CallSiteId(value=nid.value)
+            nid = graph.function.calls.get_by_node(statement.target)
+            target = CallId(value=nid.value)
 
         statements[statement_id] = Statement(
             ref=statement.ref,

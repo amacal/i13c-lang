@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional, Set
+from typing import Dict, Iterable, List, Optional
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.mapping import OneToMany, OneToOne
@@ -51,7 +51,6 @@ class IndexEdges:
 @dataclass
 class LiveComponents:
     entrypoints: OneToOne[CallableTarget, EntryPoint]
-    flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
 
 
 @dataclass
@@ -62,9 +61,6 @@ class CallGraph:
 
 @dataclass(kw_only=True)
 class SemanticGraph:
-    callgraph_live: Optional[Dict[CallableTarget, List[CallPair]]]
-    callable_live: Optional[Set[CallableTarget]]
-
     entities: EntityNodes
     indices: IndexEdges
     callgraph: CallGraph

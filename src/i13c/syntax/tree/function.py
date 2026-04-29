@@ -12,7 +12,8 @@ class Visitor(Protocol):
     def on_flags(self, flags: Flags, path: Path) -> None: ...
     def on_signature(self, signature: Signature, path: Path) -> None: ...
     def on_statement(self, statement: Statement, path: Path) -> None: ...
-    def on_callsite(self, callsite: CallStatement, path: Path) -> None: ...
+    def on_call(self, call: CallStatement, path: Path) -> None: ...
+    def on_callsite(self, callsite: CallSite, path: Path) -> None: ...
     def on_assign(self, assign: AssignStatement, path: Path) -> None: ...
     def on_value(self, value: Value, path: Path) -> None: ...
     def on_literal(self, literal: Literal, path: Path) -> None: ...
@@ -59,7 +60,7 @@ class Parameter:
 
 
 @dataclass(kw_only=True, eq=False)
-class CallStatement:
+class CallSite:
     ref: Span
     name: bytes
     arguments: List[Argument]
@@ -74,6 +75,18 @@ class CallStatement:
 
                 if isinstance(argument, Expression):
                     visitor.on_expression(argument, node)
+
+
+@dataclass(kw_only=True, eq=False)
+class CallStatement:
+    ref: Span
+    target: CallSite
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_call(self, path)
+
+        with path.push(self) as node:
+            self.target.accept(visitor, node)
 
 
 ValueExpression = Union[Literal, Expression]
@@ -124,6 +137,7 @@ class Signature:
 
 
 StatementTarget = Union[CallStatement, AssignStatement]
+
 
 @dataclass(kw_only=True, eq=False)
 class Statement:
