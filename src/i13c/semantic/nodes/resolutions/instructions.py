@@ -87,6 +87,8 @@ def build_instruction_resolution(
                     )
                 )
 
+                continue
+
             for spec, op in zip(variant, entry.operands):
                 accepted = operands.get(op)
 

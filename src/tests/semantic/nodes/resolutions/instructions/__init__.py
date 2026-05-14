@@ -26,6 +26,7 @@ def parse_samples(
     rows: List[Sequence[Optional[Union[str, bool, List[str]]]]] = []
     lines = [line.strip("|\n ") for line in table.splitlines()[2:-1]]
     headers = [h.strip().lower() for h in lines[0].split("|")]
+    print(headers)
 
     try:
         separator = headers.index("***")
@@ -35,6 +36,7 @@ def parse_samples(
     for line in [line for line in lines[2:-1] if "---" not in line]:
         parts = [p.strip() for p in line.split("|")]
         left, right = parts[:separator], parts[separator + 1 :]
+        print(left, right)
 
         rows.append([parse_value(headers[i], left[i]) for i in range(separator)])
 
@@ -68,6 +70,7 @@ def verify_instruction_resolution(
     mnemonic: str,
     variant: List[str],
     status: bool,
+    reason: Optional[str],
 ):
     resolution = prepare_resolution(
         f"""
@@ -86,3 +89,6 @@ def verify_instruction_resolution(
 
         if variant:
             assert list(map(str, acceptance.variant)) == variant
+
+    if reason:
+        assert any(str(d.reason) == reason for d in resolution.rejected), f"Expected reason: {reason}"
