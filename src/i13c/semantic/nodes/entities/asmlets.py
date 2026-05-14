@@ -133,6 +133,7 @@ def register_converter(
 
 
 def immediate_converter(
+    ctx: InstructionAcceptance,
     src: ImmediateAcceptance,
     binds: Dict[bytes, Union[bytes, Hex]],
 ) -> AsmletOperandImmediate:
@@ -144,8 +145,6 @@ def label_converter(
     src: LabelAcceptance,
     binds: Dict[bytes, Union[bytes, Hex]],
 ) -> AsmletOperandRelocation:
-
-    print(src.index, ctx.index)
     return AsmletOperandRelocation(offset=src.index - ctx.index)
 
 

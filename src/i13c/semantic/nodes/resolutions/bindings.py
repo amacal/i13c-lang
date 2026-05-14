@@ -71,7 +71,7 @@ def build_binding_resolution(
         # only snippets may have binds
         for parameter in entry.parameters:
             if bind := binds.find(parameter.id):
-                if bind.dst in names:
+                if bind.mode == "register" and bind.dst in names:
                     resolution.rejected.append(
                         BindingRejection(
                             ref=bind.ref,

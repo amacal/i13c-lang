@@ -486,11 +486,85 @@ def can_reject_a_call_with_unresolved_symbol():
     assert source.extract(resolution.rejected[0].ref) == b"foo(bar)"
 
 
+def can_accept_matching_overload_after_arity_mismatch():
+    source, resolutions = prepare_resolutions(
+        """
+            fn foo(x: u8) { }
+            fn foo(x: u8, y: u8) { }
+            fn main() { foo(0x01, 0x02); }
+        """
+    )
+
+    assert resolutions.callsites is not None
+    assert resolutions.callsites.size() == 1
+
+    _, resolution = resolutions.callsites.peak()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 1
+
+    assert len(resolution.accepted[0].signature.parameters) == 2
+    assert source.extract(resolution.accepted[0].ref) == b"foo(0x01, 0x02)"
+
+
+def can_accept_one_overload_without_recording_later_rejection():
+    resolutions_source, resolutions = prepare_resolutions(
+        """
+            fn foo(x: u8) { }
+            fn foo(x: u16, y: u16) { }
+            fn main() { foo(0x01); }
+        """
+    )
+
+    assert resolutions.callsites is not None
+    assert resolutions.callsites.size() == 1
+
+    _, resolution = resolutions.callsites.peak()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 1
+
+    assert len(resolution.accepted[0].signature.parameters) == 1
+    assert resolutions_source.extract(resolution.accepted[0].ref) == b"foo(0x01)"
+
+
+def can_reject_ambiguous_callsite():
+    resolutions_source, resolutions = prepare_resolutions(
+        """
+            fn foo(x: u8) { }
+            fn foo(y: u8) { }
+            fn main() { foo(0x01); }
+        """
+    )
+
+    assert resolutions.callsites is not None
+    assert resolutions.callsites.size() == 1
+
+    _, resolution = resolutions.callsites.peak()
+
+    assert len(resolution.accepted) == 2
+    assert len(resolution.rejected) == 1
+
+    assert resolutions_source.extract(resolution.rejected[0].ref) == b"foo(0x01)"
+
+
 def can_detect_a_broken_range_rule_e3006():
     _, rules = prepare_rules(
         """
             fn foo(x: u8[0x01..0x02]) { }
             fn main() { foo(0x03); }
+        """
+    )
+
+    assert len(rules.get("e3006")) == 1
+
+
+def can_detect_ambiguous_callsite_rule_e3006():
+    _, rules = prepare_rules(
+        """
+            fn foo(x: u8) { }
+            fn foo(y: u8) { }
+            fn main() { foo(0x01); }
         """
     )
 

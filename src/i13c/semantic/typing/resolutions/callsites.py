@@ -16,6 +16,7 @@ CallSiteRejectionReason = Kind[
     "arity-mismatch",
     "type-mismatch",
     "unknown-target",
+    "ambiguous-target",
 ]
 
 CallSiteArgument = Union[

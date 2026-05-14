@@ -94,8 +94,14 @@ def build_callsite_resolution(
                 arguments: List[CallSiteArgument] = []
 
                 if len(signature.parameters) != len(entry.arguments):
-                    rejected = "arity-mismatch"
-                    break
+                    resolution.rejected.append(
+                        CallSiteRejection(
+                            ref=entry.ref,
+                            reason="arity-mismatch",
+                        )
+                    )
+
+                    continue
 
                 for parameter, argument in zip(signature.parameters, entry.arguments):
                     target: Optional[
@@ -122,10 +128,9 @@ def build_callsite_resolution(
                             break
 
                     # parameter and value have a type field
-                    else:
-                        if not parameter.type.accepts(target.type):
-                            rejected = "type-mismatch"
-                            break
+                    elif not parameter.type.accepts(target.type):
+                        rejected = "type-mismatch"
+                        break
 
                 if rejected is None:
                     resolution.accepted.append(
@@ -152,6 +157,14 @@ def build_callsite_resolution(
                 CallSiteRejection(
                     ref=entry.ref,
                     reason="unknown-target",
+                )
+            )
+
+        if len(resolution.accepted) > 1:
+            resolution.rejected.append(
+                CallSiteRejection(
+                    ref=entry.ref,
+                    reason="ambiguous-target",
                 )
             )
 

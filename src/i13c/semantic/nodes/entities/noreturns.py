@@ -122,7 +122,6 @@ def is_path_noreturn(
 
         # if we encounter a flow exit, the path is returning
         if isinstance(node, FlowExit):
-            print(f"path is returning, encountered flow exit at node {node}")
             return False
 
         if isinstance(node, FlowEntry):
