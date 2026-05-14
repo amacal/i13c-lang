@@ -17,7 +17,6 @@ from i13c.llvm.typing.intervals import IntervalPressure, RegisterInterval
 from i13c.llvm.typing.registers import VirtualRegister
 from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.indices.variables import VariableId
 
 
 @dataclass(kw_only=True)
@@ -68,7 +67,7 @@ class LowLevelGraph:
 
     forward: OneToMany[BlockId, BlockId]
     backward: OneToMany[BlockId, BlockId]
-    registers: OneToOne[VariableId, VirtualRegister]
+    registers: OneToOne[None, VirtualRegister]
 
     functions: FunctionsNode
     patches: PatchesNode

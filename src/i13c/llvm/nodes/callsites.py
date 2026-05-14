@@ -16,14 +16,13 @@ from i13c.llvm.typing.registers import VirtualRegister
 from i13c.semantic.model import SemanticGraph
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.indices.variables import VariableId
 
 
 def lower_callsite(
     generator: Generator,
     graph: SemanticGraph,
     node: CallSiteId,
-    registers: OneToOne[VariableId, VirtualRegister],
+    registers: OneToOne[None, VirtualRegister],
 ) -> List[BlockInstruction]:
 
     # prepare instructions

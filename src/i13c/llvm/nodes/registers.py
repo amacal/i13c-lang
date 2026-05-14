@@ -4,7 +4,6 @@ from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.registers import VirtualRegister
-from i13c.semantic.typing.indices.variables import Variable, VariableId
 
 
 def configure_registers() -> GraphNode:
@@ -15,7 +14,6 @@ def configure_registers() -> GraphNode:
         requires=frozenset(
             {
                 ("generator", "core/generator"),
-                ("variables", "entities/variables"),
             }
         ),
     )
@@ -23,11 +21,7 @@ def configure_registers() -> GraphNode:
 
 def build_registers(
     generator: Generator,
-    variables: OneToOne[VariableId, Variable],
-) -> OneToOne[VariableId, VirtualRegister]:
-    registers: Dict[VariableId, VirtualRegister] = {}
+) -> OneToOne[None, VirtualRegister]:
+    registers: Dict[None, VirtualRegister] = {}
 
-    for vid in variables.keys():
-        registers[vid] = VirtualRegister(id=generator.next())
-
-    return OneToOne[VariableId, VirtualRegister](data=registers)
+    return OneToOne[None, VirtualRegister](data=registers)

@@ -9,27 +9,22 @@ from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
 from i13c.llvm.typing.instructions.core import (
     ComputedAddress,
     Displacement,
-    Immediate,
     Register,
     Scaler,
 )
 from i13c.llvm.typing.instructions.ctrl import Nop
-from i13c.llvm.typing.instructions.move import MovRegImm, MovRegOff
+from i13c.llvm.typing.instructions.move import MovRegOff
 from i13c.llvm.typing.registers import VirtualRegister
 from i13c.llvm.typing.stacks import StackFrame
 from i13c.semantic.model import SemanticGraph
-from i13c.semantic.typing.entities.bindings import CallSiteBindings
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.literals import Hex, LiteralId
-from i13c.semantic.typing.entities.parameters import Parameter
-from i13c.semantic.typing.indices.variables import VariableId
 
 
 def lower_snippet_bindings(
     graph: SemanticGraph,
     generator: Generator,
-    bindings: CallSiteBindings,
-    registers: OneToOne[VariableId, VirtualRegister],
+    bindings: None,
+    registers: OneToOne[None, VirtualRegister],
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
@@ -74,42 +69,42 @@ def lower_snippet_bindings(
 def lower_function_bindings(
     graph: SemanticGraph,
     generator: Generator,
-    bindings: CallSiteBindings,
-    registers: OneToOne[VariableId, VirtualRegister],
+    bindings: None,
+    registers: OneToOne[None, VirtualRegister],
 ) -> List[BlockInstruction]:
     out: List[BlockInstruction] = []
 
-    for idx, binding in enumerate(bindings.entries):
+    # for idx, binding in enumerate(bindings.entries):
 
-        assert isinstance(binding.dst, Parameter)
+    #     assert isinstance(binding.dst, Parameter)
 
-        # we know parameters may be literals
-        if isinstance(binding.src, LiteralId):
+    #     # we know parameters may be literals
+    #     if isinstance(binding.src, LiteralId):
 
-            # find the literal behind the target
-            literal = graph.entities.literals.get(binding.src)
+    #         # find the literal behind the target
+    #         literal = graph.entities.literals.get(binding.src)
 
-            # we know all literals are hex for now
-            assert isinstance(literal.target, Hex)
+    #         # we know all literals are hex for now
+    #         assert isinstance(literal.target, Hex)
 
-            # extract literal
-            imm = Immediate(data=literal.target.data, width=literal.target.width)
+    #         # extract literal
+    #         imm = Immediate(data=literal.target.data, width=literal.target.width)
 
-            # emit move instruction for binding
-            iid = InstructionId(value=generator.next())
-            instr = MovRegImm(dst=idx, imm=imm)
+    #         # emit move instruction for binding
+    #         iid = InstructionId(value=generator.next())
+    #         instr = MovRegImm(dst=idx, imm=imm)
 
-            out.append((iid, instr))
+    #         out.append((iid, instr))
 
-        # or parameters may be expressions
-        if isinstance(binding.src, VariableId):
+    #     # or parameters may be expressions
+    #     if isinstance(binding.src, VariableId):
 
-            # emit move instruction for binding
-            iid = FlowId(value=generator.next())
-            instr = BindingFlow(dst=idx, src=registers.get(binding.src).ref())
+    #         # emit move instruction for binding
+    #         iid = FlowId(value=generator.next())
+    #         instr = BindingFlow(dst=idx, src=registers.get(binding.src).ref())
 
-            # emit instruction for virtual move
-            out.append((iid, instr))
+    #         # emit instruction for virtual move
+    #         out.append((iid, instr))
 
     return out
 

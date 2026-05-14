@@ -35,7 +35,6 @@ from i13c.llvm.typing.blocks import BlockInstruction, BlockInstructionId, Regist
 from i13c.llvm.typing.flows import BlockId
 from i13c.llvm.typing.instructions import Instruction
 from i13c.llvm.typing.registers import VirtualRegister
-from i13c.semantic.typing.indices.variables import VariableId
 
 
 def configure_llvm_graph() -> GraphGroup:
@@ -94,7 +93,7 @@ def build(
     patches: Dict[str, Any],
     iregs: Dict[str, OneToOne[BlockInstructionId, Registers]],
     bregs: Dict[str, OneToOne[BlockId, Registers]],
-    registers: OneToOne[VariableId, VirtualRegister],
+    registers: OneToOne[None, VirtualRegister],
 ) -> LowLevelGraph:
     return LowLevelGraph(
         entry=entrypoint,

@@ -22,11 +22,6 @@ from i13c.cli.model.llvm.patches import (
     PatchesOfSnapshotsListExtractor,
     PatchesOfStackFramesListExtractor,
 )
-from i13c.cli.model.llvm.registers import (
-    BlockRegistersListExtractor,
-    InstructionRegistersListExtractor,
-    VirtualRegistersListExtractor,
-)
 
 LLVM: Dict[str, AbstractListExtractor[Any]] = {
     "llvm/blocks": BlockListExtractor,
@@ -38,9 +33,6 @@ LLVM: Dict[str, AbstractListExtractor[Any]] = {
     "llvm/functions/intervals/pressure": IntervalPressureInFunctionsListExtractor,
     "llvm/functions/stackframes": StackFrameInFunctionsListExtractor,
     "llvm/functions/instructions": InstructionsInFunctionsListExtractor,
-    "llvm/registers": VirtualRegistersListExtractor,
-    "llvm/registers/instructions": InstructionRegistersListExtractor,
-    "llvm/registers/blocks": BlockRegistersListExtractor,
     "llvm/patches/stackframes": PatchesOfStackFramesListExtractor,
     "llvm/patches/bindings": PatchesOfBindingsListExtractor,
     "llvm/patches/callsites": PatchesOfCallsitesListExtractor,

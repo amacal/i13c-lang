@@ -12,7 +12,6 @@ from i13c.llvm.typing.flows import (
     FlowId,
     ImmediateFlow,
     MoveFlow,
-    PrologueFlow,
     SnapshotFlow,
 )
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
@@ -30,22 +29,11 @@ from i13c.llvm.typing.instructions.move import MovOffImm, MovOffReg
 from i13c.llvm.typing.instructions.stack import PopOff, PushOff
 from i13c.llvm.typing.registers import VirtualRegister, name_to_reg64
 from i13c.llvm.typing.stacks import StackFrame
-from i13c.llvm.typing.terminators import (
-    ExitTerminator,
-    JumpTerminator,
-    TrapTerminator,
-)
+from i13c.llvm.typing.terminators import ExitTerminator, TrapTerminator
 from i13c.semantic.model import SemanticGraph, SemanticRules
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.values import ValueId
-from i13c.semantic.typing.indices.controlflows import (
-    FlowEntry,
-    FlowExit,
-    FlowGraph,
-    FlowNode,
-)
-from i13c.semantic.typing.indices.variables import VariableId
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
 # the goal of this module is to convert all active functions into blocks with instructions;
@@ -91,7 +79,7 @@ class Context:
     blocks: Dict[BlockId, Block]
     instructions: Dict[BlockId, List[BlockInstruction]]
 
-    registers: OneToOne[VariableId, VirtualRegister]
+    registers: OneToOne[None, VirtualRegister]
     values: OneToOne[ValueId, ValueResolution]
 
     forward: Dict[BlockId, List[BlockId]]
@@ -105,7 +93,7 @@ class Context:
         graph: SemanticGraph,
         generator: Generator,
         values: OneToOne[ValueId, ValueResolution],
-        registers: OneToOne[VariableId, VirtualRegister],
+        registers: OneToOne[None, VirtualRegister],
     ) -> Context:
         return Context(
             graph=graph,
@@ -125,7 +113,7 @@ class Context:
 def lower_active_functions(
     generator: Generator,
     graph: SemanticGraph,
-    registers: OneToOne[VariableId, VirtualRegister],
+    registers: OneToOne[None, VirtualRegister],
     values: OneToOne[ValueId, ValueResolution],
     **kwargs: Dict[str, Any],
 ) -> Tuple[
@@ -170,50 +158,50 @@ def lower_active_functions(
 def lower_flow_entry(
     ctx: Context,
     fid: FunctionId,
-    flow: FlowGraph,
-    mapping: Dict[FlowNode, BlockId],
-    node: FlowEntry,
+    flow: None,
+    mapping: Dict[None, BlockId],
+    node: None,
 ) -> FlowNodeContext:
-    # obtain successors
-    successors = flow.forward.get(node, [])
-    assert len(successors) == 1
+    # # obtain successors
+    # # successors = flow.forward.get(node, [])
+    # # assert len(successors) == 1
 
-    # create jump terminator to successor
-    terminator = JumpTerminator(target=mapping[successors[0]])
+    # # create jump terminator to successor
+    # terminator = JumpTerminator(target=mapping[successors[0]])
 
-    # prepare entry instructions
-    iid = FlowId(value=ctx.generator.next())
-    instructions: List[BlockInstruction] = [(iid, PrologueFlow(target=fid))]
+    # # prepare entry instructions
+    # iid = FlowId(value=ctx.generator.next())
+    # instructions: List[BlockInstruction] = [(iid, PrologueFlow(target=fid))]
 
-    # # generate virtual registers for parameters
-    # for idx, pid in enumerate(ctx.graph.entities.functions.get(fid).parameters):
+    # # # generate virtual registers for parameters
+    # # for idx, pid in enumerate(ctx.graph.entities.functions.get(fid).parameters):
 
-    #     # get a variable behind the function parameter
-    #     variable = ctx.graph.indices.variables_by_parameter.get(pid)
+    # #     # get a variable behind the function parameter
+    # #     variable = ctx.graph.indices.variables_by_parameter.get(pid)
 
-    #     # generate virtual move flow between physical and virtual register
-    #     iid = FlowId(value=ctx.generator.next())
-    #     instr = SnapshotFlow(dst=ctx.registers.get(variable).ref(), src=idx)
+    # #     # generate virtual move flow between physical and virtual register
+    # #     iid = FlowId(value=ctx.generator.next())
+    # #     instr = SnapshotFlow(dst=ctx.registers.get(variable).ref(), src=idx)
 
-    #     # append it
-    #     instructions.append((iid, instr))
+    # #     # append it
+    # #     instructions.append((iid, instr))
 
-    # register entry block
-    ctx.entries[fid] = mapping[node]
+    # # register entry block
+    # ctx.entries[fid] = mapping[node]
 
     # create empty block with jump
     return FlowNodeContext(
-        block=Block(origin=fid, terminator=terminator),
-        instructions=instructions,
+        block=Block(origin=fid, terminator=TrapTerminator()),
+        instructions=[],
     )
 
 
 def lower_flow_exit(
     ctx: Context,
     fid: FunctionId,
-    flow: FlowGraph,
-    mapping: Dict[FlowNode, BlockId],
-    node: FlowExit,
+    flow: None,
+    mapping: Dict[None, BlockId],
+    node: None,
 ) -> FlowNodeContext:
     # register exit block
     ctx.exits[fid] = mapping[node]
@@ -232,9 +220,9 @@ def lower_flow_exit(
 def lower_flow_callsite(
     ctx: Context,
     fid: FunctionId,
-    flow: FlowGraph,
-    mapping: Dict[FlowNode, BlockId],
-    node: CallSiteId,
+    flow: None,
+    mapping: Dict[None, BlockId],
+    node: None,
 ) -> FlowNodeContext:
 
     # obtain successors
@@ -250,17 +238,19 @@ def lower_flow_callsite(
 
     # lower callsite block
     return FlowNodeContext(
-        block=Block(origin=node, terminator=TrapTerminator()),
-        instructions=lower_callsite(ctx.generator, ctx.graph, node, ctx.registers),
+        block=Block(origin=ValueId(value=0), terminator=TrapTerminator()),
+        instructions=lower_callsite(
+            ctx.generator, ctx.graph, CallSiteId(value=0), ctx.registers
+        ),
     )
 
 
 def lower_flow_value(
     ctx: Context,
     fid: FunctionId,
-    flow: FlowGraph,
-    mapping: Dict[FlowNode, BlockId],
-    node: ValueId,
+    flow: None,
+    mapping: Dict[None, BlockId],
+    node: None,
 ) -> FlowNodeContext:
 
     # obtain successors
@@ -307,7 +297,7 @@ def lower_flow_value(
     #     instructions.append((iid, instr))
 
     return FlowNodeContext(
-        block=Block(origin=node, terminator=TrapTerminator()),
+        block=Block(origin=ValueId(value=0), terminator=TrapTerminator()),
         instructions=[],
     )
 
@@ -323,15 +313,15 @@ class FlowNodeLowerer(Protocol):
         self,
         ctx: Context,
         fid: FunctionId,
-        flow: FlowGraph,
-        mapping: Dict[FlowNode, BlockId],
-        node: FlowNode,
+        flow: None,
+        mapping: Dict[None, BlockId],
+        node: None,
     ) -> FlowNodeContext: ...
 
 
-DISPATCH_TABLE: Dict[Type[FlowNode], FlowNodeLowerer] = {
-    FlowEntry: lower_flow_entry,
-    FlowExit: lower_flow_exit,
+DISPATCH_TABLE: Dict[Type[None], FlowNodeLowerer] = {
+    # FlowEntry: lower_flow_entry,
+    # FlowExit: lower_flow_exit,
     CallSiteId: lower_flow_callsite,
     ValueId: lower_flow_value,
 }  # pyright: ignore[reportAssignmentType]
@@ -340,33 +330,33 @@ DISPATCH_TABLE: Dict[Type[FlowNode], FlowNodeLowerer] = {
 def lower_function_flow(
     ctx: Context,
     fid: FunctionId,
-    flow: FlowGraph,
+    flow: None,
 ) -> BlockId:
-    mapping: Dict[FlowNode, BlockId] = {}
+    # mapping: Dict[None, BlockId] = {}
 
-    # assign ID to each FlowNode
-    for node in flow.nodes():
-        mapping[node] = BlockId(value=ctx.generator.next())
-        ctx.forward[mapping[node]] = []
-        ctx.backward[mapping[node]] = []
+    # # assign ID to each FlowNode
+    # for node in flow.nodes():
+    #     mapping[node] = BlockId(value=ctx.generator.next())
+    #     ctx.forward[mapping[node]] = []
+    #     ctx.backward[mapping[node]] = []
 
-    # lower each FlowNode
-    for node in flow.nodes():
-        output = DISPATCH_TABLE[type(node)](ctx, fid, flow, mapping, node)
+    # # lower each FlowNode
+    # for node in flow.nodes():
+    #     output = DISPATCH_TABLE[type(node)](ctx, fid, flow, mapping, node)
 
-        # register block, instructions and registers
-        ctx.blocks[mapping[node]] = output.block
-        ctx.instructions[mapping[node]] = output.instructions
+    #     # register block, instructions and registers
+    #     ctx.blocks[mapping[node]] = output.block
+    #     ctx.instructions[mapping[node]] = output.instructions
 
-    # wire forward edges
-    for node, successors in flow.forward.items():
-        ctx.forward[mapping[node]].extend([mapping[next] for next in successors])
+    # # wire forward edges
+    # for node, successors in flow.forward.items():
+    #     ctx.forward[mapping[node]].extend([mapping[next] for next in successors])
 
-    # wire backward edges
-    for node, predecessors in flow.backward.items():
-        ctx.backward[mapping[node]].extend([mapping[prev] for prev in predecessors])
+    # # wire backward edges
+    # for node, predecessors in flow.backward.items():
+    #     ctx.backward[mapping[node]].extend([mapping[prev] for prev in predecessors])
 
-    return mapping[flow.entry]
+    return BlockId(value=ctx.generator.next())
 
 
 def configure_snapshot_patching() -> GraphNode:

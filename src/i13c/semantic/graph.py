@@ -2,13 +2,7 @@ from typing import Any, Dict, List
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
-from i13c.semantic.model import (
-    CallGraph,
-    IndexEdges,
-    LiveComponents,
-    SemanticGraph,
-    SemanticRules,
-)
+from i13c.semantic.model import IndexEdges, SemanticGraph, SemanticRules
 from i13c.semantic.nodes import configure_nodes
 from i13c.semantic.nodes.entities import parse_entities
 from i13c.semantic.nodes.resolutions import parse_resolutions
@@ -68,19 +62,6 @@ def build(
             values_by_statements=indices.get("indices/values/statements"),
             callsites_by_signatures=indices.get("indices/callsites/signatures"),
             asmlets_by_signatures=indices.get("indices/asmlets/signatures"),
-            dataflow_by_flownode=indices["indices/dataflow-by-flownode"],
-            environment_by_flownode=indices["indices/environment-by-flownode"],
-            flowgraph_by_function=indices["indices/flowgraph-by-function"],
-            instance_by_callsite=indices.get("indices/instance-by-callsite"),
-            usages_by_expression=indices["indices/usages-by-expression"],
-            variables_by_parameter=indices["indices/variables-by-source"],
-        ),
-        callgraph=CallGraph(
-            calls_by_caller=indices.get("indices/calls-by-caller"),
-            calls_by_callee=indices.get("indices/calls-by-callee"),
-        ),
-        live=LiveComponents(
-            entrypoints=indices["indices/entrypoints-by-callable"],
         ),
         resolutions=parse_resolutions(resolutions),
     )

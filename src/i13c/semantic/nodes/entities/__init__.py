@@ -4,7 +4,6 @@ from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.entities.addresses import configure_addresses
 from i13c.semantic.nodes.entities.asmlets import configure_asmlets
 from i13c.semantic.nodes.entities.assigns import configure_assigns
-from i13c.semantic.nodes.entities.bindings import configure_bindings
 from i13c.semantic.nodes.entities.binds import configure_binds
 from i13c.semantic.nodes.entities.calls import configure_calls
 from i13c.semantic.nodes.entities.callsites import configure_callsites
@@ -40,7 +39,6 @@ def configure_entities() -> GraphGroup:
             configure_addresses(),
             configure_assigns(),
             configure_asmlets(),
-            configure_bindings(),
             configure_binds(),
             configure_calls(),
             configure_callsites(),
@@ -101,7 +99,5 @@ def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
         snippets=entities["entities/snippets"],
         statements=entities["entities/statements"],
         types=entities["entities/types"],
-        usages=entities["entities/usages"],
         values=entities["entities/values"],
-        variables=entities["entities/variables"],
     )

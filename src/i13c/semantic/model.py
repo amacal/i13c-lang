@@ -5,22 +5,11 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities import EntityNodes
 from i13c.semantic.typing.entities.asmlets import Asmlet
-from i13c.semantic.typing.entities.callables import CallableTarget
-from i13c.semantic.typing.entities.callsites import CallSiteId
-from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.statements import StatementId
-from i13c.semantic.typing.indices.callgraphs import CallPair
-from i13c.semantic.typing.indices.controlflows import FlowGraph, FlowNode
-from i13c.semantic.typing.indices.dataflows import DataFlow
-from i13c.semantic.typing.indices.entrypoints import EntryPoint
-from i13c.semantic.typing.indices.environments import Environment
-from i13c.semantic.typing.indices.instances import Instance
-from i13c.semantic.typing.indices.usages import UsageId
-from i13c.semantic.typing.indices.variables import VariableId, VariableSource
 from i13c.semantic.typing.resolutions import ResolutionNodes
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
@@ -38,31 +27,11 @@ class IndexEdges:
     callsites_by_signatures: Optional[OneToMany[SignatureId, CallSiteAcceptance]]
     asmlets_by_signatures: Optional[OneToMany[SignatureId, Asmlet]]
 
-    dataflow_by_flownode: OneToOne[FlowNode, DataFlow]
-    environment_by_flownode: OneToOne[FlowNode, Environment]
-    flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
-    instance_by_callsite: Optional[OneToOne[CallSiteId, Instance]]
-    usages_by_expression: OneToMany[ExpressionId, UsageId]
-    variables_by_parameter: OneToOne[VariableSource, VariableId]
-
-
-@dataclass
-class LiveComponents:
-    entrypoints: OneToOne[CallableTarget, EntryPoint]
-
-
-@dataclass
-class CallGraph:
-    calls_by_caller: Optional[OneToMany[CallableTarget, CallPair]]
-    calls_by_callee: Optional[OneToMany[CallableTarget, CallPair]]
-
 
 @dataclass(kw_only=True)
 class SemanticGraph:
     entities: EntityNodes
     indices: IndexEdges
-    callgraph: CallGraph
-    live: LiveComponents
     resolutions: ResolutionNodes
 
     def find_function_by_name(self, name: bytes) -> Optional[FunctionId]:
