@@ -132,7 +132,8 @@ def build_callsite_resolution(
                         CallSiteAcceptance(
                             ref=entry.ref,
                             id=sid,
-                            ctx=functions.get(function_id).signature,
+                            sig=functions.get(function_id).signature,
+                            stmt=stmt_id,
                             signature=signature,
                             arguments=arguments,
                         )

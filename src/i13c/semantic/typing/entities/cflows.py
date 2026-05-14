@@ -36,6 +36,9 @@ FlowMember = Union[FlowEntry, FlowExit, FlowNode]
 class ControlFlows:
     ref: Span
 
+    entry: int
+    exit: int
+
     target: FunctionId
     nodes: List[FlowMember]
 

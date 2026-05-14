@@ -5,6 +5,7 @@ from typing import Union
 
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
@@ -34,7 +35,9 @@ class CallSiteRejection:
 class CallSiteAcceptance:
     ref: Span
     id: CallSiteId
-    ctx: SignatureId
+
+    sig: SignatureId
+    stmt: StatementId
 
     signature: SignatureAcceptance
     arguments: List[CallSiteArgument]

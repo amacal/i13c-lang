@@ -19,7 +19,6 @@ from i13c.semantic.typing.indices.dataflows import DataFlow
 from i13c.semantic.typing.indices.entrypoints import EntryPoint
 from i13c.semantic.typing.indices.environments import Environment
 from i13c.semantic.typing.indices.instances import Instance
-from i13c.semantic.typing.indices.terminalities import Terminality
 from i13c.semantic.typing.indices.usages import UsageId
 from i13c.semantic.typing.indices.variables import VariableId, VariableSource
 from i13c.semantic.typing.resolutions import ResolutionNodes
@@ -43,7 +42,6 @@ class IndexEdges:
     environment_by_flownode: OneToOne[FlowNode, Environment]
     flowgraph_by_function: OneToOne[FunctionId, FlowGraph]
     instance_by_callsite: Optional[OneToOne[CallSiteId, Instance]]
-    terminality_by_function: OneToOne[FunctionId, Terminality]
     usages_by_expression: OneToMany[ExpressionId, UsageId]
     variables_by_parameter: OneToOne[VariableSource, VariableId]
 

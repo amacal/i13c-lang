@@ -2,8 +2,13 @@ from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.entities import configure_entities
 from i13c.semantic.nodes.indices.asmlets import configure_asmlets_by_signatures
 from i13c.semantic.nodes.indices.binds import configure_binds_by_parameters
-from i13c.semantic.nodes.indices.callsites import configure_callsites_by_signatures
+from i13c.semantic.nodes.indices.callsites import (
+    configure_callsites_by_signatures,
+    configure_callsites_by_statements,
+)
+from i13c.semantic.nodes.indices.cflows import configure_control_flows_by_signatures
 from i13c.semantic.nodes.indices.controlflows import configure_flowgraph_by_function
+from i13c.semantic.nodes.indices.cpaths import configure_control_paths_by_signatures
 from i13c.semantic.nodes.indices.dataflows import configure_dataflow_by_flownode
 from i13c.semantic.nodes.indices.entrypoints import configure_entrypoint_by_callable
 from i13c.semantic.nodes.indices.environments import (
@@ -12,7 +17,6 @@ from i13c.semantic.nodes.indices.environments import (
 )
 from i13c.semantic.nodes.indices.instances import configure_instance_by_callsite
 from i13c.semantic.nodes.indices.signatures import configure_signatures_by_names
-from i13c.semantic.nodes.indices.terminalities import configure_terminality_by_function
 from i13c.semantic.nodes.indices.usages import configure_usages_by_expression
 from i13c.semantic.nodes.indices.values import configure_values_by_statements
 from i13c.semantic.nodes.indices.variables import configure_variables_by_parameters
@@ -25,6 +29,9 @@ def configure_nodes() -> GraphGroup:
             configure_asmlets_by_signatures(),
             configure_binds_by_parameters(),
             configure_callsites_by_signatures(),
+            configure_callsites_by_statements(),
+            configure_control_flows_by_signatures(),
+            configure_control_paths_by_signatures(),
             configure_dataflow_by_flownode(),
             configure_entities(),
             configure_entrypoint_by_callable(),
@@ -34,9 +41,8 @@ def configure_nodes() -> GraphGroup:
             configure_instance_by_callsite(),
             configure_resolutions(),
             configure_signatures_by_names(),
-            configure_values_by_statements(),
-            configure_terminality_by_function(),
             configure_usages_by_expression(),
+            configure_values_by_statements(),
             configure_variables_by_parameters(),
         ]
     )

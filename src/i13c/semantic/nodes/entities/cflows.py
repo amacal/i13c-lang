@@ -73,6 +73,8 @@ def build_control_flows(
 
         cflows[function_id] = ControlFlows(
             ref=node.ref,
+            entry=0,
+            exit=len(nodes) - 1,
             target=function_id,
             nodes=nodes,
             forward=forward,

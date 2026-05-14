@@ -33,7 +33,7 @@ def build_call_graphs(
         backward: List[SignatureAcceptance] = []
 
         for entry in entries:
-            backward.append(signatures.get(entry.ctx))
+            backward.append(signatures.get(entry.sig))
 
         cgraphs[sid] = CallGraph(
             target=signatures.get(sid),

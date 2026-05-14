@@ -7,6 +7,7 @@ from i13c.semantic.typing.entities.cflows import (
     ControlFlows,
     FlowEntry,
     FlowExit,
+    FlowMember,
     FlowNode,
 )
 from i13c.semantic.typing.entities.functions import Function, FunctionId
@@ -78,11 +79,11 @@ def build_control_flow_resolution(
             rejected=[],
         )
 
-        assert isinstance(entry.nodes[0], FlowEntry)
-        fentry: FlowEntry = entry.nodes[0]
+        fentry: FlowMember = entry.nodes[entry.entry]
+        assert isinstance(fentry, FlowEntry)
 
-        assert isinstance(entry.nodes[-1], FlowExit)
-        fexit: FlowExit = entry.nodes[-1]
+        fexit: FlowMember = entry.nodes[entry.exit]
+        assert isinstance(fexit, FlowExit)
 
         function = functions.get(fid)
         signature = signatures.get(function.signature)
@@ -110,7 +111,9 @@ def build_control_flow_resolution(
         resolution.accepted.append(
             ControlFlowAcceptance(
                 ref=entry.ref,
-                id=fid,
+                source=entry,
+                function=fid,
+                signature=function.signature,
                 entry=fentry,
                 exit=fexit,
                 environments=environments,

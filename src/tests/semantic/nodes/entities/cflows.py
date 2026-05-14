@@ -3,11 +3,9 @@ from tests.semantic.nodes.entities import prepare_entities
 
 
 def can_detect_cflow_in_empty_function():
-    entities = prepare_entities(
-        """
-            fn main() { }
-        """
-    )
+    entities = prepare_entities("""
+        fn main() { }
+    """)
 
     assert entities.cflows.size() == 1
     _, cflows = entities.cflows.peak()
@@ -29,11 +27,9 @@ def can_detect_cflow_in_empty_function():
 
 
 def can_detect_cflow_with_a_callsite():
-    entities = prepare_entities(
-        """
-            fn main() { foo(0x42); }
-        """
-    )
+    entities = prepare_entities("""
+        fn main() { foo(0x42); }
+    """)
 
     assert entities.cflows.size() == 1
     _, cflows = entities.cflows.peak()

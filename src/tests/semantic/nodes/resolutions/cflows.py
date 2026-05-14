@@ -15,7 +15,7 @@ def can_accept_an_empty_function():
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
 
-    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].function == id
     assert len(resolution.accepted[0].environments) == 2
 
     entry = resolution.accepted[0].entry
@@ -41,7 +41,7 @@ def can_accept_an_empty_function_with_parameters():
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
 
-    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].function == id
     assert len(resolution.accepted[0].environments) == 2
 
     entry = resolution.accepted[0].entry
@@ -72,7 +72,7 @@ def can_accept_a_function_with_declared_value():
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
 
-    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].function == id
     assert len(resolution.accepted[0].environments) == 3
 
     entry = resolution.accepted[0].entry
@@ -103,7 +103,7 @@ def can_accept_a_function_with_parameters_and_values():
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
 
-    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].function == id
     assert len(resolution.accepted[0].environments) == 4
 
     entry = resolution.accepted[0].entry

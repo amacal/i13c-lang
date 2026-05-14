@@ -5,6 +5,7 @@ from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
+from i13c.semantic.typing.resolutions.statements import StatementId
 
 
 def configure_callsites_by_signatures() -> GraphNode:
@@ -34,3 +35,32 @@ def build_callsites_by_signatures(
             data.append(entry)
 
     return OneToMany[SignatureId, CallSiteAcceptance].instance(index)
+
+
+def configure_callsites_by_statements() -> GraphNode:
+    return GraphNode(
+        builder=build_callsites_by_statements,
+        constraint=None,
+        produces=("indices/callsites/statements",),
+        requires=frozenset(
+            {
+                ("callsites", "resolutions/callsites/accepted"),
+            }
+        ),
+    )
+
+
+def build_callsites_by_statements(
+    callsites: OneToOne[CallSiteId, CallSiteAcceptance],
+) -> OneToMany[StatementId, CallSiteAcceptance]:
+    index: Dict[StatementId, List[CallSiteAcceptance]] = {}
+
+    for _, entry in callsites.items():
+        data = index.get(entry.stmt)
+
+        if data is None:
+            index[entry.stmt] = [entry]
+        else:
+            data.append(entry)
+
+    return OneToMany[StatementId, CallSiteAcceptance].instance(index)
