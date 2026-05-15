@@ -29,16 +29,18 @@ def can_handle_bswap(
 
 
 @samples("""
-    | --------------- | -------- | ----------- | -------- | ---------------- |
-    | instruction     | mnemonic | variant     | status   | reason           |
-    | --------------- | -------- | ----------- | -------- | ---------------- |
-    | shl rax, 0x01   | shl      | reg64, imm8 | accepted | -                |
-    | shl eax, 0x01   | shl      | reg32, imm8 | accepted | -                |
-    | shl ax, 0x01    | shl      | reg16, imm8 | accepted | -                |
-    | shl al, 0x01    | shl      | reg8, imm8  | accepted | -                |
-    | shl [rax], 0x01 | shl      | addr, imm8  | rejected | variant-mismatch |
-    | shl rax         | shl      | reg64       | rejected | arity-mismatch   |
-    | --------------- | -------- | ----------- | -------- | ---------------- |
+    | --------------- | -------- | -------------- | -------- | ----------------- |
+    | instruction     | mnemonic | variant        | status   | reason            |
+    | --------------- | -------- | -------------- | -------- | ----------------- |
+    | shl rax, 0x01   | shl      | reg64, imm8    | accepted | -                 |
+    | shl eax, 0x01   | shl      | reg32, imm8    | accepted | -                 |
+    | shl ax, 0x01    | shl      | reg16, imm8    | accepted | -                 |
+    | shl al, 0x01    | shl      | reg8, imm8     | accepted | -                 |
+    | shl rax, cl     | shl      | reg64, reg8:cl | accepted | -                 |
+    | shl [rax], 0x01 | shl      | addr, imm8     | rejected | variant-mismatch  |
+    | shl rax         | shl      | reg64          | rejected | arity-mismatch    |
+    | shl rax, al     | shl      | reg64, reg8:al | rejected | register-mismatch |
+    | --------------- | -------- | -------------- | -------- | ----------------- |
 """)
 def can_handle_shl(
     instruction: str,

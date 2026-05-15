@@ -5,6 +5,7 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.binds import BindId
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.environments import EnvironmentId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.flags import FlagsId
@@ -54,7 +55,7 @@ class ResolutionNodes:
     addresses: Optional[OneToOne[AddressId, AddressResolution]]
     bindings: Optional[OneToOne[SignatureId, BindingResolution]]
     binds: Optional[OneToOne[BindId, BindResolution]]
-    callsites: Optional[OneToOne[FunctionId, CallSiteResolution]]
+    callsites: Optional[OneToOne[CallSiteId, CallSiteResolution]]
     cflows: Optional[OneToOne[FunctionId, ControlFlowResolution]]
     environments: Optional[OneToOne[EnvironmentId, EnvironmentResolution]]
     expressions: Optional[OneToOne[ExpressionId, ExpressionResolution]]

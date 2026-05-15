@@ -50,7 +50,6 @@ class EntityNodes:
     registers: OneToOne[RegisterId, Register]
     signatures: OneToOne[SignatureId, Signature]
     statements: OneToOne[StatementId, Statement]
-    parameters: OneToOne[ParameterId, Parameter]
     snippets: OneToOne[SnippetId, Snippet]
     types: OneToOne[TypeId, Type]
     values: OneToOne[ValueId, Value]

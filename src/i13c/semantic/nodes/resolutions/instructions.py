@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
@@ -10,10 +10,12 @@ from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.resolutions.instructions import (
     InstructionAcceptance,
     InstructionRejection,
+    InstructionRejectionReason,
     InstructionResolution,
 )
 from i13c.semantic.typing.resolutions.mnemonics import MnemonicAcceptance
 from i13c.semantic.typing.resolutions.operands import OperandAcceptance
+from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 
 
 def configure_instruction_resolution() -> GraphGroup:
@@ -91,12 +93,23 @@ def build_instruction_resolution(
 
             for spec, op in zip(variant, entry.operands):
                 accepted = operands.get(op)
+                reason: Optional[InstructionRejectionReason] = None
 
                 if accepted.symbol != spec.symbol:
+                    reason = "variant-mismatch"
+
+                if spec.names and not reason:
+                    if not isinstance(accepted.target, RegisterAcceptance):
+                        reason = "register-mismatch"
+
+                    elif accepted.target.name not in spec.names:
+                        reason = "register-mismatch"
+
+                if reason is not None:
                     resolution.rejected.append(
                         InstructionRejection(
                             ref=entry.ref,
-                            reason="width-mismatch",
+                            reason=reason,
                         )
                     )
 

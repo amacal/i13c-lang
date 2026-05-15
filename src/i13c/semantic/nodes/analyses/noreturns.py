@@ -70,15 +70,9 @@ def build_noreturns(
                 signature = signatures.get(sig)
                 outcome = True if isinstance(noreturn, NoReturn) else False
 
-                path = (
-                    [noreturn.signature]
-                    if isinstance(noreturn, NoReturn) and not noreturn.path
-                    else []
-                )
-
                 noreturns[sig] = NoReturn(
                     signature=signature,
-                    path=[signature] + path if isinstance(noreturn, NoReturn) else [],
+                    path=[noreturn.signature] + noreturn.path if isinstance(noreturn, NoReturn) else [],
                     outcome=outcome,
                 )
 

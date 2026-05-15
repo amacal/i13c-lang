@@ -77,7 +77,9 @@ class MnemonicOperandSpec:
         if self.names is None:
             return self.symbol
 
-        return ":".join(str(name) for name in (self.symbol, *self.names))
+        return ":".join(
+            str(name) for name in (self.symbol, *[name.decode() for name in self.names])
+        )
 
 
 @dataclass(kw_only=True)

@@ -101,6 +101,15 @@ def build_address_resolution(
                     )
                 )
 
+            # reject base bound to immediate values
+            elif reference.target.bind == "literal":
+                resolution.rejected.append(
+                    AddressRejection(
+                        ref=entry.ref,
+                        reason="invalid-register",
+                    )
+                )
+
             else:
                 register = reference.target
 

@@ -119,8 +119,10 @@ def build_callsite_resolution(
                         rejected = "unknown-target"
                         break
 
-                    else:
-                        arguments.append(target)
+                    if parameter.bind == "literal":
+                        if not isinstance(argument, LiteralId):
+                            rejected = "not-literal"
+                            break
 
                     if isinstance(target, LiteralAcceptance):
                         if not parameter.type.accepts(target):
@@ -131,6 +133,8 @@ def build_callsite_resolution(
                     elif not parameter.type.accepts(target.type):
                         rejected = "type-mismatch"
                         break
+
+                    arguments.append(target)
 
                 if rejected is None:
                     resolution.accepted.append(

@@ -29,7 +29,7 @@ def configure_immediate_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("immediates", "entities/immediates"),
-                ("resolutions", "resolutions/parameters"),
+                ("resolutions", "resolutions/immediates"),
             }
         ),
     )

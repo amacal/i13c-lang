@@ -4,11 +4,9 @@ from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
 def can_accept_an_offsetless_address():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { call [rax]; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { call [rax]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -29,11 +27,9 @@ def can_accept_an_offsetless_address():
 
 
 def can_accept_a_forward_address():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { call [rax + 0x0300]; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { call [rax + 0x0300]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -59,11 +55,9 @@ def can_accept_a_forward_address():
 
 
 def can_accept_a_backward_address():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { call [rax - 0x0300]; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { call [rax - 0x0300]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -88,12 +82,10 @@ def can_accept_a_backward_address():
     assert source.extract(resolution.accepted[0].ref) == b"[rax - 0x0300]"
 
 
-def can_accept_a_param_as_the_base():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main(v@rax: u64) { call [@v]; }
-        """
-    )
+def can_accept_register_bound_param_as_the_base():
+    source, resolutions = prepare_resolutions("""
+        asm main(v@rax: u64) { call [@v]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -114,12 +106,26 @@ def can_accept_a_param_as_the_base():
     assert source.extract(resolution.accepted[0].ref) == b"[@v]"
 
 
+def can_reject_immediate_bound_param_as_the_base():
+    source, resolutions = prepare_resolutions("""
+        asm main(v@imm: u64) { call [@v]; }
+    """)
+
+    assert resolutions.addresses is not None
+    assert resolutions.addresses.size() == 1
+    _, resolution = resolutions.addresses.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "invalid-register"
+    assert source.extract(resolution.rejected[0].ref) == b"[@v]"
+
+
 def can_reject_rip_register():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { call [rip]; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { call [rip]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -133,11 +139,9 @@ def can_reject_rip_register():
 
 
 def can_reject_label_as_the_address_base():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { .me: call [@me]; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { .me: call [@me]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -151,11 +155,9 @@ def can_reject_label_as_the_address_base():
 
 
 def can_reject_non_64bit_register():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { call [eax]; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { call [eax]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -169,11 +171,9 @@ def can_reject_non_64bit_register():
 
 
 def can_reject_forward_offset_not_eligible_for_displacement():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { call [rax + 0x80000000]; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { call [rax + 0x80000000]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -187,11 +187,9 @@ def can_reject_forward_offset_not_eligible_for_displacement():
 
 
 def can_reject_backward_offset_not_eligible_for_displacement():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { call [rax - 0x80000000]; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { call [rax - 0x80000000]; }
+    """)
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
@@ -205,10 +203,8 @@ def can_reject_backward_offset_not_eligible_for_displacement():
 
 
 def can_detect_a_broken_range_rule_e3022():
-    _, rules = prepare_rules(
-        """
-            asm main() { call [rip]; }
-        """
-    )
+    _, rules = prepare_rules("""
+        asm main() { call [rip]; }
+    """)
 
     assert len(rules.get("e3022")) == 1

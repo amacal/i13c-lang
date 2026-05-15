@@ -29,7 +29,7 @@ def configure_literal_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("literals", "entities/literals"),
-                ("resolutions", "resolutions/parameters"),
+                ("resolutions", "resolutions/literals"),
             }
         ),
     )

@@ -24,19 +24,17 @@ def parse_samples(
     table: str,
 ) -> Tuple[Sequence[str], Iterable[Sequence[Optional[Union[str, bool, List[str]]]]]]:
     rows: List[Sequence[Optional[Union[str, bool, List[str]]]]] = []
-    lines = [line.strip("|\n ") for line in table.splitlines()[2:-1]]
+    lines = [line.strip("|\n ") for line in table.strip().splitlines()[1:-1]]
     headers = [h.strip().lower() for h in lines[0].split("|")]
-    print(headers)
 
     try:
         separator = headers.index("***")
     except ValueError:
         separator = len(headers)
 
-    for line in [line for line in lines[2:-1] if "---" not in line]:
+    for line in [line for line in lines[2:] if "---" not in line]:
         parts = [p.strip() for p in line.split("|")]
         left, right = parts[:separator], parts[separator + 1 :]
-        print(left, right)
 
         rows.append([parse_value(headers[i], left[i]) for i in range(separator)])
 

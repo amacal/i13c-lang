@@ -3,12 +3,12 @@ from typing import Any, Dict, List
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.parameters import (
     ParameterAcceptance,
+    ParameterBind,
     ParameterResolution,
 )
 from i13c.semantic.typing.resolutions.types import TypeAcceptance
@@ -23,7 +23,7 @@ def configure_parameter_resolution() -> GraphGroup:
             {
                 ("parameters", "entities/parameters"),
                 ("types", "resolutions/types/accepted"),
-                ("binds", "resolutions/binds/accepted"),
+                ("binds", "indices/binds/parameters"),
             }
         ),
     )
@@ -58,7 +58,7 @@ def configure_parameter_resolution() -> GraphGroup:
 def build_parameter_resolution(
     parameters: OneToOne[ParameterId, Parameter],
     types: OneToOne[TypeId, TypeAcceptance],
-    binds: OneToOne[BindId, BindAcceptance],
+    binds: OneToOne[ParameterId, BindAcceptance],
 ) -> OneToOne[ParameterId, ParameterResolution]:
     resolutions: Dict[ParameterId, ParameterResolution] = {}
 
@@ -68,12 +68,18 @@ def build_parameter_resolution(
             rejected=[],
         )
 
+        bind_type: ParameterBind = "value"
+
+        if bind := binds.find(pid):
+            bind_type = "literal" if bind.is_immediate() else "value"
+
         resolution.accepted.append(
             ParameterAcceptance(
                 ref=entry.ref,
                 id=pid,
                 name=entry.name,
-                type=types.get(parameters.get(pid).type),
+                type=types.get(entry.type),
+                bind=bind_type,
             )
         )
 
@@ -110,7 +116,9 @@ def validate_parameter_resolution_e3014(
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
             for _ in resolution.rejected:
-                diagnostics.append(report_parameter_resolution_e3014(parameters.get(id)))
+                diagnostics.append(
+                    report_parameter_resolution_e3014(parameters.get(id))
+                )
 
     return diagnostics
 

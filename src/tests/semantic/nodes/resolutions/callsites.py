@@ -548,6 +548,26 @@ def can_reject_ambiguous_callsite():
     assert resolutions_source.extract(resolution.rejected[0].ref) == b"foo(0x01)"
 
 
+def can_reject_a_call_to_immediate_bound_snippet_with_non_literal_argument():
+    source, resolutions = prepare_resolutions(
+        """
+            asm bar(v@imm: u16) { }
+            fn main(x: u16) { bar(x); }
+        """
+    )
+
+    assert resolutions.callsites is not None
+    assert resolutions.callsites.size() == 1
+
+    _, resolution = resolutions.callsites.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "not-literal"
+    assert source.extract(resolution.rejected[0].ref) == b"bar(x)"
+
+
 def can_detect_a_broken_range_rule_e3006():
     _, rules = prepare_rules(
         """

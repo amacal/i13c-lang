@@ -65,10 +65,9 @@ def can_detect_a_function_noreturn_true_when_called_noreturn_callsite():
     for entry in analyses.noreturns.values():
         if entry.signature.name == b"main":
             assert entry.outcome is True
-            assert len(entry.path) == 2
+            assert len(entry.path) == 1
 
-            assert entry.path[0].name == b"main"
-            assert entry.path[1].name == b"exit"
+            assert entry.path[0].name == b"exit"
 
 
 def can_detect_a_function_noreturn_false_when_called_return_callsite():
@@ -99,10 +98,9 @@ def can_detect_a_function_noreturn_true_due_to_first_callsite():
     for entry in analyses.noreturns.values():
         if entry.signature.name == b"main":
             assert entry.outcome is True
-            assert len(entry.path) == 2
+            assert len(entry.path) == 1
 
-            assert entry.path[0].name == b"main"
-            assert entry.path[1].name == b"foo"
+            assert entry.path[0].name == b"foo"
 
 
 def can_detect_a_function_noreturn_true_due_to_second_callsite():
@@ -118,10 +116,9 @@ def can_detect_a_function_noreturn_true_due_to_second_callsite():
     for entry in analyses.noreturns.values():
         if entry.signature.name == b"main":
             assert entry.outcome is True
-            assert len(entry.path) == 2
+            assert len(entry.path) == 1
 
-            assert entry.path[0].name == b"main"
-            assert entry.path[1].name == b"bar"
+            assert entry.path[0].name == b"bar"
 
 
 def can_detect_a_function_noreturn_true_forward():
@@ -137,9 +134,27 @@ def can_detect_a_function_noreturn_true_forward():
     for entry in analyses.noreturns.values():
         if entry.signature.name == b"main":
             assert entry.outcome is True
+            assert len(entry.path) == 1
+
+            assert entry.path[0].name == b"bar"
+
+
+def can_detect_a_function_noreturn_true_long_path():
+    _, analyses = prepare_analyses("""
+        fn main() { foo(); }
+        fn foo() { bar(); }
+        asm bar() noreturn { }
+    """)
+
+    assert analyses.noreturns is not None
+    assert analyses.noreturns.size() == 3
+
+    for entry in analyses.noreturns.values():
+        if entry.signature.name == b"main":
+            assert entry.outcome is True
             assert len(entry.path) == 2
 
-            assert entry.path[0].name == b"main"
+            assert entry.path[0].name == b"foo"
             assert entry.path[1].name == b"bar"
 
 
