@@ -4,7 +4,7 @@ from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.cflows import (
+from i13c.semantic.typing.analyses.cflows import (
     ControlFlows,
     FlowEntry,
     FlowExit,
@@ -19,7 +19,7 @@ def configure_control_flows() -> GraphNode:
     return GraphNode(
         builder=build_control_flows,
         constraint=None,
-        produces=("entities/cflows",),
+        produces=("analyses/cflows",),
         requires=frozenset(
             {
                 ("generator", "core/generator"),

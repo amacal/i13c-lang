@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.cflows import FunctionId
+from i13c.semantic.typing.analyses.cflows import FunctionId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance

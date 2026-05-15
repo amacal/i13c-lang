@@ -1,16 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import Address, AddressId
-from i13c.semantic.typing.entities.asmlets import Asmlet, AsmletId
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
 from i13c.semantic.typing.entities.binds import Bind, BindId
 from i13c.semantic.typing.entities.calls import Call, CallId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
-from i13c.semantic.typing.entities.cflows import ControlFlows
-from i13c.semantic.typing.entities.cgraphs import CallGraph
-from i13c.semantic.typing.entities.cpaths import ControlPaths
 from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.flags import Flags, FlagsId
@@ -20,7 +15,6 @@ from i13c.semantic.typing.entities.instructions import Instruction, InstructionI
 from i13c.semantic.typing.entities.labels import Label, LabelId
 from i13c.semantic.typing.entities.literals import Literal, LiteralId
 from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
-from i13c.semantic.typing.entities.noreturns import NoReturn
 from i13c.semantic.typing.entities.operands import Operand, OperandId
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.ranges import Range, RangeId
@@ -36,14 +30,10 @@ from i13c.semantic.typing.entities.values import Value, ValueId
 @dataclass
 class EntityNodes:
     addresses: OneToOne[AddressId, Address]
-    asmlets: Optional[OneToOne[AsmletId, Asmlet]]
     assigns: OneToOne[AssignId, Assign]
     binds: OneToOne[BindId, Bind]
     calls: OneToOne[CallId, Call]
     callsites: OneToOne[CallSiteId, CallSite]
-    cflows: OneToOne[FunctionId, ControlFlows]
-    cgraphs: Optional[OneToOne[SignatureId, CallGraph]]
-    cpaths: Optional[OneToOne[FunctionId, ControlPaths]]
     environments: OneToOne[EnvironmentId, Environment]
     expressions: OneToOne[ExpressionId, Expression]
     flags: OneToOne[FlagsId, Flags]
@@ -53,7 +43,6 @@ class EntityNodes:
     labels: OneToOne[LabelId, Label]
     literals: OneToOne[LiteralId, Literal]
     mnemonics: OneToOne[MnemonicId, Mnemonic]
-    noreturns: Optional[OneToOne[SignatureId, NoReturn]]
     operands: OneToOne[OperandId, Operand]
     parameters: OneToOne[ParameterId, Parameter]
     ranges: OneToOne[RangeId, Range]

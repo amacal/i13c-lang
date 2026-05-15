@@ -2,10 +2,10 @@ from typing import Dict, List, Literal, Union
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.typing.entities.cflows import FlowEntry, FlowExit, FlowMember
-from i13c.semantic.typing.entities.cpaths import ControlPaths
+from i13c.semantic.typing.analyses.cflows import FlowEntry, FlowExit, FlowMember
+from i13c.semantic.typing.analyses.cpaths import ControlPaths
+from i13c.semantic.typing.analyses.noreturns import NoReturn
 from i13c.semantic.typing.entities.flags import FlagsId
-from i13c.semantic.typing.entities.noreturns import NoReturn
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.entities.statements import StatementId
@@ -18,7 +18,7 @@ def configure_noreturns() -> GraphNode:
     return GraphNode(
         builder=build_noreturns,
         constraint=None,
-        produces=("entities/noreturns",),
+        produces=("analyses/noreturns",),
         requires=frozenset(
             {
                 ("flags", "resolutions/flags/accepted"),

@@ -1,40 +1,40 @@
-from i13c.semantic.typing.entities.asmlets import (
+from i13c.semantic.typing.analyses.asmlets import (
     AsmletOperandAddress,
     AsmletOperandImmediate,
     AsmletOperandRegister,
     AsmletOperandRelocation,
 )
-from tests.semantic.nodes.entities import prepare_entities
+from tests.semantic.nodes.analyses import prepare_analyses
 
 
 def can_do_nothing_without_any_snippet():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         fn main() { }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 0
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 0
 
 
 def can_do_nothing_without_any_callsite():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         asm bar() { mov rax, rbx; }
         fn main() { }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 0
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 0
 
 
 def can_substitute_a_snippet_without_any_parameters():
-    entities = prepare_entities("""
+    entities, analyses = prepare_analyses("""
         asm bar() { mov rax, rbx; }
         fn main() { bar(); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
-    _, asmlet = entities.asmlets.peak()
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peak()
 
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
@@ -62,14 +62,14 @@ def can_substitute_a_snippet_without_any_parameters():
 
 
 def can_substitute_a_snippet_with_a_register_parameter():
-    entities = prepare_entities("""
+    entities, analyses = prepare_analyses("""
         asm bar(v@rcx: u8) { mov rax, @v; }
         fn main() { bar(0x01); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
-    _, asmlet = entities.asmlets.peak()
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peak()
 
     assert len(asmlet.keys) == 0
     assert len(asmlet.callsites) == 1
@@ -105,14 +105,14 @@ def can_substitute_a_snippet_with_a_register_parameter():
 
 
 def can_substitute_a_snippet_with_a_base_register_parameter():
-    entities = prepare_entities("""
+    entities, analyses = prepare_analyses("""
         asm bar(v@rcx: u8) { mov rax, [@v]; }
         fn main() { bar(0x01); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
-    _, asmlet = entities.asmlets.peak()
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peak()
 
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
@@ -149,14 +149,14 @@ def can_substitute_a_snippet_with_a_base_register_parameter():
 
 
 def can_substitute_a_snippet_with_a_label_relocation_forward():
-    entities = prepare_entities("""
+    entities, analyses = prepare_analyses("""
         asm bar() { jmp @me; .me: nop; }
         fn main() { bar(); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
-    _, asmlet = entities.asmlets.peak()
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peak()
 
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
@@ -180,14 +180,14 @@ def can_substitute_a_snippet_with_a_label_relocation_forward():
 
 
 def can_substitute_a_snippet_with_a_label_relocation_backward():
-    entities = prepare_entities("""
+    entities, analyses = prepare_analyses("""
         asm bar() { .me: nop; jmp @me; }
         fn main() { bar(); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
-    _, asmlet = entities.asmlets.peak()
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peak()
 
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
@@ -211,14 +211,14 @@ def can_substitute_a_snippet_with_a_label_relocation_backward():
 
 
 def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement():
-    entities = prepare_entities("""
+    entities, analyses = prepare_analyses("""
         asm bar(v@rcx: u8) { mov rax, [@v + 0x10]; }
         fn main() { bar(0x01); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
-    _, asmlet = entities.asmlets.peak()
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peak()
 
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
@@ -258,40 +258,40 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement():
 
 
 def can_substitute_only_once_the_same_signatured_called_twice():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         asm bar() { mov rax, rbx; }
         fn main() { bar(); bar(); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
 
-    _, asmlet = entities.asmlets.peak()
+    _, asmlet = analyses.asmlets.peak()
     assert len(asmlet.callsites) == 2
 
 
 def can_substitute_only_once_the_same_signatured_called_twice_via_register():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         asm bar(abc@rbx: u8) { mov rax, @abc; }
         fn main() { bar(0x01); bar(0x02); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
 
-    _, asmlet = entities.asmlets.peak()
+    _, asmlet = analyses.asmlets.peak()
     assert len(asmlet.callsites) == 2
 
 
 def can_substitute_a_snippet_with_a_immediate_parameter():
-    entities = prepare_entities("""
+    entities, analyses = prepare_analyses("""
         asm bar(v@imm: u16) { mov rax, @v; }
         fn main() { bar(0x0001); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
-    _, asmlet = entities.asmlets.peak()
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peak()
 
     assert entities.snippets.size() == 1
     id, _ = entities.snippets.peak()
@@ -324,25 +324,25 @@ def can_substitute_a_snippet_with_a_immediate_parameter():
 
 
 def can_substitute_a_snippet_with_a_immediate_parameter_once():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         asm bar(v@imm: u16) { mov rax, @v; }
         fn main() { bar(0x0001); bar(0x0001); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
 
 
 def can_substitute_a_snippet_with_a_immediate_parameter_twice():
-    entities = prepare_entities("""
+    entities, analyses = prepare_analyses("""
         asm bar(v@imm: u16) { mov rax, @v; }
         fn main() { bar(0x0000); bar(0x0001); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 2
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 2
 
-    for idx, asmlet in enumerate(entities.asmlets.values()):
+    for idx, asmlet in enumerate(analyses.asmlets.values()):
         assert entities.snippets.size() == 1
         id, _ = entities.snippets.peak()
 
@@ -374,15 +374,15 @@ def can_substitute_a_snippet_with_a_immediate_parameter_twice():
 
 
 def can_substitute_a_snippet_with_a_direct_immediate_operand():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         asm bar() { mov rax, 0x0001; }
         fn main() { bar(); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
 
-    _, asmlet = entities.asmlets.peak()
+    _, asmlet = analyses.asmlets.peak()
     assert len(asmlet.instructions) == 1
 
     instr = asmlet.instructions[0]
@@ -400,15 +400,15 @@ def can_substitute_a_snippet_with_a_direct_immediate_operand():
 
 
 def can_substitute_a_snippet_with_two_immediate_parameters():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         asm bar(x@imm: u8, y@imm: u16) { mov rax, @x; mov rax, @y; }
         fn main() { bar(0x01, 0x0002); }
     """)
 
-    assert entities.asmlets is not None
-    assert entities.asmlets.size() == 1
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
 
-    _, asmlet = entities.asmlets.peak()
+    _, asmlet = analyses.asmlets.peak()
 
     assert len(asmlet.binding) == 0
     assert len(asmlet.parameters) == 0

@@ -1,14 +1,14 @@
-from tests.semantic.nodes.entities import prepare_entities
+from tests.semantic.nodes.analyses import prepare_analyses
 
 
 def can_detect_cpath_in_empty_function():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         fn main() { }
     """)
 
-    assert entities.cpaths is not None
-    assert entities.cpaths.size() == 1
-    _, cpaths = entities.cpaths.peak()
+    assert analyses.cpaths is not None
+    assert analyses.cpaths.size() == 1
+    _, cpaths = analyses.cpaths.peak()
 
     assert len(cpaths.paths) == 1
     assert cpaths.paths[0][0] == cpaths.flows.source.entry
@@ -16,13 +16,13 @@ def can_detect_cpath_in_empty_function():
 
 
 def can_detect_cflow_with_one_callsite():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         fn main() { foo(0x42); }
     """)
 
-    assert entities.cpaths is not None
-    assert entities.cpaths.size() == 1
-    _, cpaths = entities.cpaths.peak()
+    assert analyses.cpaths is not None
+    assert analyses.cpaths.size() == 1
+    _, cpaths = analyses.cpaths.peak()
 
     assert len(cpaths.paths) == 1
     assert len(cpaths.paths[0]) == 3
@@ -37,14 +37,14 @@ def can_detect_cflow_with_one_callsite():
 
 
 def can_detect_cpath_with_two_callsites():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         fn main() { foo(0x42); bar(0x69); }
     """)
 
-    assert entities.cpaths is not None
-    assert entities.cpaths.size() == 1
+    assert analyses.cpaths is not None
+    assert analyses.cpaths.size() == 1
 
-    _, cpaths = entities.cpaths.peak()
+    _, cpaths = analyses.cpaths.peak()
 
     assert len(cpaths.paths) == 1
     assert len(cpaths.paths[0]) == 4

@@ -4,6 +4,7 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.semantic.model import IndexEdges, SemanticGraph, SemanticRules
 from i13c.semantic.nodes import configure_nodes
+from i13c.semantic.nodes.analyses import parse_analyses
 from i13c.semantic.nodes.entities import parse_entities
 from i13c.semantic.nodes.resolutions import parse_resolutions
 
@@ -39,6 +40,7 @@ def configure_self() -> GraphNode:
             {
                 ("syntax", "syntax/graph"),
                 ("rules", "rules/semantic"),
+                ("analyses", Prefix(value="analyses/")),
                 ("entities", Prefix(value="entities/")),
                 ("indices", Prefix(value="indices/")),
                 ("resolutions", Prefix(value="resolutions/")),
@@ -51,10 +53,12 @@ def build(
     entities: Dict[str, Any],
     indices: Dict[str, Any],
     resolutions: Dict[str, Any],
+    analyses: Dict[str, Any],
     **kwargs: Dict[str, Any],
 ) -> SemanticGraph:
     return SemanticGraph(
         entities=parse_entities(entities),
+        analyses=parse_analyses(analyses),
         indices=IndexEdges(
             binds_by_parameters=indices.get("indices/binds/parameters"),
             environments_by_snippets=indices.get("indices/environments/snippets"),

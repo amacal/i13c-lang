@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.cpaths import ControlPaths
+from i13c.semantic.typing.analyses.cpaths import ControlPaths
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
 
@@ -11,7 +11,7 @@ def configure_control_paths() -> GraphNode:
     return GraphNode(
         builder=build_control_paths,
         constraint=None,
-        produces=("entities/cpaths",),
+        produces=("analyses/cpaths",),
         requires=frozenset({("cflows", "resolutions/cflows/accepted")}),
     )
 

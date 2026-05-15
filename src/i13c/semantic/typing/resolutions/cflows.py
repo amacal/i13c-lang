@@ -3,7 +3,7 @@ from typing import Dict, List
 from typing import Literal as Kind
 from typing import Union
 
-from i13c.semantic.typing.entities.cflows import (
+from i13c.semantic.typing.analyses.cflows import (
     ControlFlows,
     FlowEntry,
     FlowExit,

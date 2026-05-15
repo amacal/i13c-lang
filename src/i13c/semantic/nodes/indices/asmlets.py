@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.typing.entities.asmlets import Asmlet, AsmletId
+from i13c.semantic.typing.analyses.asmlets import Asmlet, AsmletId
 from i13c.semantic.typing.entities.signatures import SignatureId
 
 
@@ -13,7 +13,7 @@ def configure_asmlets_by_signatures() -> GraphNode:
         produces=("indices/asmlets/signatures",),
         requires=frozenset(
             {
-                ("asmlets", "entities/asmlets"),
+                ("asmlets", "analyses/asmlets"),
             }
         ),
     )

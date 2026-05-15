@@ -1,4 +1,5 @@
 from i13c.core.graph import GraphGroup
+from i13c.semantic.nodes.analyses import configure_analyses
 from i13c.semantic.nodes.entities import configure_entities
 from i13c.semantic.nodes.indices.asmlets import configure_asmlets_by_signatures
 from i13c.semantic.nodes.indices.binds import configure_binds_by_parameters
@@ -24,6 +25,7 @@ def configure_nodes() -> GraphGroup:
             configure_control_flows_by_signatures(),
             configure_control_paths_by_signatures(),
             configure_entities(),
+            configure_analyses(),
             configure_environments_by_snippets(),
             configure_resolutions(),
             configure_signatures_by_names(),

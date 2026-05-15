@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.typing.entities.cflows import (
+from i13c.semantic.typing.analyses.cflows import (
     ControlFlows,
     FlowEntry,
     FlowExit,
@@ -30,7 +30,7 @@ def configure_control_flow_resolution() -> GraphGroup:
         produces=("resolutions/cflows",),
         requires=frozenset(
             {
-                ("cflows", "entities/cflows"),
+                ("cflows", "analyses/cflows"),
                 ("functions", "entities/functions"),
                 ("values", "indices/values/statements"),
                 ("signatures", "resolutions/signatures/accepted"),
@@ -44,7 +44,7 @@ def configure_control_flow_resolution() -> GraphGroup:
         produces=("rules/e3005",),
         requires=frozenset(
             {
-                ("cflows", "entities/cflows"),
+                ("cflows", "analyses/cflows"),
                 ("resolutions", "resolutions/cflows"),
             }
         ),

@@ -1,14 +1,14 @@
-from i13c.semantic.typing.entities.cflows import FlowEntry, FlowExit, FlowNode
-from tests.semantic.nodes.entities import prepare_entities
+from i13c.semantic.typing.analyses.cflows import FlowEntry, FlowExit, FlowNode
+from tests.semantic.nodes.analyses import prepare_analyses
 
 
 def can_detect_cflow_in_empty_function():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         fn main() { }
     """)
 
-    assert entities.cflows.size() == 1
-    _, cflows = entities.cflows.peak()
+    assert analyses.cflows.size() == 1
+    _, cflows = analyses.cflows.peak()
 
     assert len(cflows.nodes) == 2
     assert len(cflows.forward) == 1
@@ -27,12 +27,12 @@ def can_detect_cflow_in_empty_function():
 
 
 def can_detect_cflow_with_a_callsite():
-    entities = prepare_entities("""
+    _, analyses = prepare_analyses("""
         fn main() { foo(0x42); }
     """)
 
-    assert entities.cflows.size() == 1
-    _, cflows = entities.cflows.peak()
+    assert analyses.cflows.size() == 1
+    _, cflows = analyses.cflows.peak()
 
     assert len(cflows.nodes) == 3
     assert len(cflows.forward) == 2

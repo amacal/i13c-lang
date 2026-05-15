@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.typing.entities.cgraphs import CallGraph
+from i13c.semantic.typing.analyses.cgraphs import CallGraph
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
@@ -12,7 +12,7 @@ def configure_call_graphs() -> GraphNode:
     return GraphNode(
         builder=build_call_graphs,
         constraint=None,
-        produces=("entities/cgraphs",),
+        produces=("analyses/cgraphs",),
         requires=frozenset(
             {
                 ("signatures", "resolutions/signatures/accepted"),

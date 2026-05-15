@@ -3,8 +3,9 @@ from typing import Dict, Iterable, List, Optional
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.mapping import OneToMany, OneToOne
+from i13c.semantic.typing.analyses import AnalysisNodes
+from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.entities import EntityNodes
-from i13c.semantic.typing.entities.asmlets import Asmlet
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -30,6 +31,7 @@ class IndexEdges:
 
 @dataclass(kw_only=True)
 class SemanticGraph:
+    analyses: AnalysisNodes
     entities: EntityNodes
     indices: IndexEdges
     resolutions: ResolutionNodes
@@ -37,8 +39,6 @@ class SemanticGraph:
     def find_function_by_name(self, name: bytes) -> Optional[FunctionId]:
         for _, _ in self.entities.functions.items():
             pass
-            # if function.identifier.data == name:
-            #     return fid
 
         return None
 

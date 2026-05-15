@@ -2,14 +2,10 @@ from typing import Any, Dict
 
 from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.entities.addresses import configure_addresses
-from i13c.semantic.nodes.entities.asmlets import configure_asmlets
 from i13c.semantic.nodes.entities.assigns import configure_assigns
 from i13c.semantic.nodes.entities.binds import configure_binds
 from i13c.semantic.nodes.entities.calls import configure_calls
 from i13c.semantic.nodes.entities.callsites import configure_callsites
-from i13c.semantic.nodes.entities.cflows import configure_control_flows
-from i13c.semantic.nodes.entities.cgraphs import configure_call_graphs
-from i13c.semantic.nodes.entities.cpaths import configure_control_paths
 from i13c.semantic.nodes.entities.environments import configure_environments
 from i13c.semantic.nodes.entities.expressions import configure_expressions
 from i13c.semantic.nodes.entities.flags import configure_flags
@@ -19,7 +15,6 @@ from i13c.semantic.nodes.entities.instructions import configure_instructions
 from i13c.semantic.nodes.entities.labels import configure_labels
 from i13c.semantic.nodes.entities.literals import configure_literals
 from i13c.semantic.nodes.entities.mnemonics import configure_mnemonics
-from i13c.semantic.nodes.entities.noreturns import configure_noreturns
 from i13c.semantic.nodes.entities.operands import configure_operands
 from i13c.semantic.nodes.entities.parameters import configure_parameters
 from i13c.semantic.nodes.entities.ranges import configure_ranges
@@ -38,13 +33,9 @@ def configure_entities() -> GraphGroup:
         nodes=[
             configure_addresses(),
             configure_assigns(),
-            configure_asmlets(),
             configure_binds(),
             configure_calls(),
             configure_callsites(),
-            configure_call_graphs(),
-            configure_control_flows(),
-            configure_control_paths(),
             configure_environments(),
             configure_expressions(),
             configure_flags(),
@@ -54,7 +45,6 @@ def configure_entities() -> GraphGroup:
             configure_labels(),
             configure_literals(),
             configure_mnemonics(),
-            configure_noreturns(),
             configure_operands(),
             configure_parameters(),
             configure_ranges(),
@@ -73,13 +63,9 @@ def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
     return EntityNodes(
         addresses=entities["entities/addresses"],
         assigns=entities["entities/assigns"],
-        asmlets=entities.get("entities/asmlets"),
         binds=entities["entities/binds"],
         calls=entities["entities/calls"],
         callsites=entities["entities/callsites"],
-        cflows=entities["entities/cflows"],
-        cpaths=entities.get("entities/cpaths"),
-        cgraphs=entities.get("entities/cgraphs"),
         environments=entities["entities/environments"],
         expressions=entities["entities/expressions"],
         flags=entities["entities/flags"],
@@ -89,7 +75,6 @@ def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
         labels=entities["entities/labels"],
         literals=entities["entities/literals"],
         mnemonics=entities["entities/mnemonics"],
-        noreturns=entities.get("entities/noreturns"),
         operands=entities["entities/operands"],
         parameters=entities["entities/parameters"],
         ranges=entities["entities/ranges"],
