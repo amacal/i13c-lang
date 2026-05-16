@@ -6,7 +6,7 @@ from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from i13c.syntax.source import Span
 
-FlagsRejectionReason = Kind["duplicated-register",]
+FlagsRejectionReason = Kind["duplicated-register"]
 
 
 @dataclass(kw_only=True)

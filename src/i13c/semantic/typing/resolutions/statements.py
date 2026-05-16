@@ -5,11 +5,11 @@ from typing import Union
 
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
-from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
+from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.syntax.source import Span
 
 StatementRejectionReason = Kind["unknown"]
-StatementTarget = Union[AssignAcceptance, CallSiteAcceptance]
+StatementTarget = Union[AssignAcceptance, CallAcceptance]
 
 
 @dataclass(kw_only=True)
@@ -17,8 +17,7 @@ class StatementAcceptance:
     ref: Span
     id: StatementId
 
-    name: bytes
-    type: StatementTarget
+    target: StatementTarget
 
 
 @dataclass(kw_only=True)

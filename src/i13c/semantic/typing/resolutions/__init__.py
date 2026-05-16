@@ -23,6 +23,7 @@ from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
@@ -35,6 +36,7 @@ from i13c.semantic.typing.resolutions.cflows import ControlFlowResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
 from i13c.semantic.typing.resolutions.expressions import ExpressionResolution
 from i13c.semantic.typing.resolutions.flags import FlagsResolution
+from i13c.semantic.typing.resolutions.functions import FunctionResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from i13c.semantic.typing.resolutions.labels import LabelResolution
@@ -47,6 +49,7 @@ from i13c.semantic.typing.resolutions.references import ReferenceResolution
 from i13c.semantic.typing.resolutions.registers import RegisterResolution
 from i13c.semantic.typing.resolutions.signatures import SignatureResolution
 from i13c.semantic.typing.resolutions.snippets import SnippetResolution
+from i13c.semantic.typing.resolutions.statements import StatementResolution
 from i13c.semantic.typing.resolutions.types import TypeResolution
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
@@ -63,6 +66,7 @@ class ResolutionNodes:
     environments: Optional[OneToOne[EnvironmentId, EnvironmentResolution]]
     expressions: Optional[OneToOne[ExpressionId, ExpressionResolution]]
     flags: Optional[OneToOne[FlagsId, FlagsResolution]]
+    functions: Optional[OneToOne[FunctionId, FunctionResolution]]
     immediates: Optional[OneToOne[ImmediateId, ImmediateResolution]]
     instructions: Optional[OneToOne[InstructionId, InstructionResolution]]
     labels: Optional[OneToOne[LabelId, LabelResolution]]
@@ -73,6 +77,7 @@ class ResolutionNodes:
     references: Optional[OneToOne[ReferenceId, ReferenceResolution]]
     registers: Optional[OneToOne[RegisterId, RegisterResolution]]
     signatures: Optional[OneToOne[SignatureId, SignatureResolution]]
+    statements: Optional[OneToOne[StatementId, StatementResolution]]
     parameters: Optional[OneToOne[ParameterId, ParameterResolution]]
     snippets: Optional[OneToOne[SnippetId, SnippetResolution]]
     types: Optional[OneToOne[TypeId, TypeResolution]]

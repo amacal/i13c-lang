@@ -13,6 +13,7 @@ from i13c.semantic.nodes.resolutions.environments import (
 )
 from i13c.semantic.nodes.resolutions.expressions import configure_expression_resolution
 from i13c.semantic.nodes.resolutions.flags import configure_flags_resolution
+from i13c.semantic.nodes.resolutions.functions import configure_function_resolution
 from i13c.semantic.nodes.resolutions.immediates import configure_immediate_resolution
 from i13c.semantic.nodes.resolutions.instructions import (
     configure_instruction_resolution,
@@ -27,6 +28,7 @@ from i13c.semantic.nodes.resolutions.references import configure_reference_resol
 from i13c.semantic.nodes.resolutions.registers import configure_register_resolution
 from i13c.semantic.nodes.resolutions.signatures import configure_signature_resolution
 from i13c.semantic.nodes.resolutions.snippets import configure_snippet_resolution
+from i13c.semantic.nodes.resolutions.statements import configure_statement_resolution
 from i13c.semantic.nodes.resolutions.types import configure_type_resolution
 from i13c.semantic.nodes.resolutions.values import configure_value_resolution
 from i13c.semantic.typing.resolutions import ResolutionNodes
@@ -45,6 +47,7 @@ def configure_resolutions() -> GraphGroup:
             configure_environment_resolution(),
             configure_expression_resolution(),
             configure_flags_resolution(),
+            configure_function_resolution(),
             configure_immediate_resolution(),
             configure_instruction_resolution(),
             configure_label_resolution(),
@@ -57,6 +60,7 @@ def configure_resolutions() -> GraphGroup:
             configure_register_resolution(),
             configure_signature_resolution(),
             configure_snippet_resolution(),
+            configure_statement_resolution(),
             configure_type_resolution(),
             configure_value_resolution(),
         ]
@@ -75,6 +79,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         environments=resolutions.get("resolutions/environments"),
         expressions=resolutions.get("resolutions/expressions"),
         flags=resolutions.get("resolutions/flags"),
+        functions=resolutions.get("resolutions/functions"),
         immediates=resolutions.get("resolutions/immediates"),
         instructions=resolutions.get("resolutions/instructions"),
         labels=resolutions.get("resolutions/labels"),
@@ -85,6 +90,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         references=resolutions.get("resolutions/references"),
         registers=resolutions.get("resolutions/registers"),
         signatures=resolutions.get("resolutions/signatures"),
+        statements=resolutions.get("resolutions/statements"),
         parameters=resolutions.get("resolutions/parameters"),
         snippets=resolutions.get("resolutions/snippets"),
         types=resolutions.get("resolutions/types"),
