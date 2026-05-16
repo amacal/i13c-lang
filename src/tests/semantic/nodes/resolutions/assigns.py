@@ -1,3 +1,6 @@
+from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions
 
 
@@ -21,11 +24,10 @@ def can_accept_valid_assign_from_literal():
     assert resolution.accepted[0].destination.type.width == 16
     assert resolution.accepted[0].destination.type.range is None
 
-    assert resolutions.literals is not None
-    assert resolutions.literals.size() == 1
-    id, _ = resolutions.literals.peak()
+    assert isinstance(resolution.accepted[0].expression, LiteralAcceptance)
+    assert resolution.accepted[0].expression.target.data.hex() == "1234"
+    assert resolution.accepted[0].expression.target.width == 16
 
-    assert resolution.accepted[0].expression == id
     assert source.extract(resolution.accepted[0].ref) == b"x: u16 = 0x1234"
 
 
@@ -48,5 +50,15 @@ def can_accept_valid_assign_from_parameter():
 
     assert resolution.accepted[0].destination.type.width == 16
     assert resolution.accepted[0].destination.type.range is None
+
+    assert isinstance(resolution.accepted[0].expression, ExpressionAcceptance)
+    assert resolution.accepted[0].expression.name == b"v"
+
+    assert b"v" in resolution.accepted[0].expression.environment
+    entry = resolution.accepted[0].expression.environment[b"v"]
+
+    assert isinstance(entry, ParameterAcceptance)
+    assert entry.type.name == b"u16"
+    assert entry.type.width == 16
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u16 = v"

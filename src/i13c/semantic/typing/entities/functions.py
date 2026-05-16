@@ -1,14 +1,11 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.calls import CallId
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.syntax.source import Span
-
-Statement = Union[CallId, AssignId]
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -28,4 +25,4 @@ class Function:
     ref: Span
     signature: SignatureId
     flags: Optional[FlagsId]
-    statements: List[Statement]
+    statements: List[StatementId]

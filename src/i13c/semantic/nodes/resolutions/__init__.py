@@ -5,6 +5,7 @@ from i13c.semantic.nodes.resolutions.addresses import configure_address_resoluti
 from i13c.semantic.nodes.resolutions.assigns import configure_assign_resolution
 from i13c.semantic.nodes.resolutions.bindings import configure_binding_resolution
 from i13c.semantic.nodes.resolutions.binds import configure_bind_resolution
+from i13c.semantic.nodes.resolutions.calls import configure_call_resolution
 from i13c.semantic.nodes.resolutions.callsites import configure_callsite_resolution
 from i13c.semantic.nodes.resolutions.cflows import configure_control_flow_resolution
 from i13c.semantic.nodes.resolutions.environments import (
@@ -38,6 +39,7 @@ def configure_resolutions() -> GraphGroup:
             configure_assign_resolution(),
             configure_bind_resolution(),
             configure_binding_resolution(),
+            configure_call_resolution(),
             configure_callsite_resolution(),
             configure_control_flow_resolution(),
             configure_environment_resolution(),
@@ -67,6 +69,7 @@ def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
         addresses=resolutions.get("resolutions/addresses"),
         bindings=resolutions.get("resolutions/bindings"),
         binds=resolutions.get("resolutions/binds"),
+        calls=resolutions.get("resolutions/calls"),
         callsites=resolutions.get("resolutions/callsites"),
         cflows=resolutions.get("resolutions/cflows"),
         environments=resolutions.get("resolutions/environments"),

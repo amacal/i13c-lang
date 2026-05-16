@@ -4,11 +4,12 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
+from i13c.semantic.typing.entities.expressions import ExpressionId
+from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.values import ValueId
-from i13c.semantic.typing.resolutions.assigns import (
-    AssignAcceptance,
-    AssignResolution,
-)
+from i13c.semantic.typing.resolutions.assigns import AssignAcceptance, AssignResolution
+from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
@@ -21,6 +22,8 @@ def configure_assign_resolution() -> GraphGroup:
             {
                 ("assigns", "entities/assigns"),
                 ("values", "resolutions/values/accepted"),
+                ("literals", "resolutions/literals/accepted"),
+                ("expressions", "resolutions/expressions/accepted"),
             }
         ),
     )
@@ -55,6 +58,8 @@ def configure_assign_resolution() -> GraphGroup:
 def build_assign_resolution(
     assigns: OneToOne[AssignId, Assign],
     values: OneToOne[ValueId, ValueAcceptance],
+    literals: OneToOne[LiteralId, LiteralAcceptance],
+    expressions: OneToOne[ExpressionId, ExpressionAcceptance],
 ) -> OneToOne[AssignId, AssignResolution]:
     resolutions: Dict[AssignId, AssignResolution] = {}
 
@@ -64,12 +69,18 @@ def build_assign_resolution(
             rejected=[],
         )
 
+        if isinstance(entry.expression, LiteralId):
+            expression = literals.get(entry.expression)
+
+        else:
+            expression = expressions.get(entry.expression)
+
         resolution.accepted.append(
             AssignAcceptance(
                 ref=entry.ref,
                 id=aid,
                 destination=values.get(entry.destination),
-                expression=entry.expression,
+                expression=expression,
             )
         )
 
