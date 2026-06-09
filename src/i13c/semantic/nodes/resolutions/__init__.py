@@ -31,7 +31,7 @@ from i13c.semantic.nodes.resolutions.snippets import configure_snippet_resolutio
 from i13c.semantic.nodes.resolutions.statements import configure_statement_resolution
 from i13c.semantic.nodes.resolutions.types import configure_type_resolution
 from i13c.semantic.nodes.resolutions.values import configure_value_resolution
-from i13c.semantic.typing.resolutions import ResolutionNodes
+from i13c.semantic.typing.resolutions.core import ResolutionNodes
 
 
 def configure_resolutions() -> GraphGroup:

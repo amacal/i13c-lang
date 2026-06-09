@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from i13c.graph.nodes import run as run_graph
-from i13c.semantic.typing.analyses import AnalysisNodes
+from i13c.semantic.typing.analyses.core import AnalysisNodes
 from i13c.semantic.typing.entities import EntityNodes
 from tests.semantic import prepare_program
 

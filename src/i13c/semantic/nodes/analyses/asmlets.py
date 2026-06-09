@@ -114,7 +114,7 @@ def build_asmlets(
                 source=sid,
                 flags=snippet.flags,
                 keys=dict(keys),
-                signature=snippet.signature.id,
+                signature=snippet.signature,
                 name=snippet.signature.name,
                 callsites=index[frozenset(keys)],
                 binding=binds,
@@ -252,6 +252,7 @@ class ListExtractor:
     def headers() -> Dict[str, str]:
         return {
             "ref": "Ref",
+            "id": "ID",
             "src": "Source",
             "sig": "Signature",
             "name": "Name",
@@ -265,10 +266,11 @@ class ListExtractor:
     def rows(key: AsmletId, entry: Asmlet) -> Dict[str, str]:
         return {
             "ref": str(entry.ref),
+            "id": key.identify(1),
             "src": entry.source.identify(1),
-            "sig": entry.signature.identify(1),
+            "sig": entry.signature.id.identify(1),
             "name": entry.name.decode(),
-            "keys": ", ".join(key.decode() for key in entry.keys.keys()),
+            "keys": ", ".join(f"{key.decode()}:{value}" for key, value in entry.keys.items()),
             "parameters": ", ".join(str(param) for param in entry.parameters),
             "callsites": str(len(entry.callsites)),
             "instructions": str(len(entry.instructions)),

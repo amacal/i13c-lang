@@ -25,10 +25,10 @@ def build_asmlets_by_signatures(
     index: Dict[SignatureId, List[Asmlet]] = {}
 
     for _, entry in asmlets.items():
-        data = index.get(entry.signature)
+        data = index.get(entry.signature.id)
 
         if data is None:
-            index[entry.signature] = [entry]
+            index[entry.signature.id] = [entry]
         else:
             data.append(entry)
 

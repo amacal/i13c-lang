@@ -18,9 +18,11 @@ class ValueAcceptance:
     id: ValueId
 
     stmt: NodeId
-
     name: bytes
     type: TypeAcceptance
+
+    def __str__(self) -> str:
+        return f"{self.name.decode()}:{self.type}"
 
     def get_statement(self, factory: Callable[[NodeId], ValueContext]) -> ValueContext:
         return factory(self.stmt)

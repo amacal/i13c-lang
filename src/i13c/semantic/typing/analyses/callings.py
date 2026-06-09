@@ -1,17 +1,17 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 from i13c.semantic.typing.analyses.asmlets import Asmlet
-from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
+from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.resolutions.callsites import (
+    CallSiteAcceptance,
+    CallSiteArgument,
+)
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
 
-
-@dataclass(kw_only=True, frozen=True)
-class CallingId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("calling", f"{self.value:<{length}}"))
+CallingTarget = Union[Asmlet, CallSiteAcceptance]
 
 
 @dataclass(kw_only=True)
@@ -23,8 +23,9 @@ class CallingBinding:
 @dataclass(kw_only=True)
 class Calling:
     ref: Span
-    id: CallingId
+    callsite: CallSiteId
 
-    target: Asmlet
-    bindings: List[CallingBinding]
-    callsites: List[CallSiteAcceptance]
+    target: CallingTarget
+    signature: SignatureAcceptance
+    arguments: List[CallSiteArgument]
+    parameters: List[ParameterAcceptance]

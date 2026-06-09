@@ -3,10 +3,10 @@ from typing import Any, Dict, Iterable, List, Tuple
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.entities.calls import Call, CallId
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.calls import CallAcceptance, CallResolution
-from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 
 
 def configure_call_resolution() -> GraphGroup:
@@ -17,7 +17,7 @@ def configure_call_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("calls", "entities/calls"),
-                ("callsites", "resolutions/callsites/accepted"),
+                ("callings", "analyses/callings"),
             }
         ),
         views=GraphViews(list=ListAllExtractor),
@@ -53,7 +53,7 @@ def configure_call_resolution() -> GraphGroup:
 
 def build_call_resolution(
     calls: OneToOne[CallId, Call],
-    callsites: OneToOne[CallSiteId, CallSiteAcceptance],
+    callings: OneToOne[CallSiteId, Calling],
 ) -> OneToOne[CallId, CallResolution]:
     resolutions: Dict[CallId, CallResolution] = {}
 
@@ -69,7 +69,7 @@ def build_call_resolution(
             CallAcceptance(
                 ref=entry.ref,
                 id=cid,
-                target=callsites.get(entry.target),
+                target=callings.get(entry.target),
             )
         )
 
@@ -159,6 +159,7 @@ class ListAcceptedExtractor:
         return {
             "ref": "Ref",
             "id": "ID",
+            "target": "Target",
             "name": "Name",
             "args": "Arguments",
             "params": "Parameters",
@@ -169,9 +170,10 @@ class ListAcceptedExtractor:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
-            "name": entry.target.signature.name.decode(),
+            "target": entry.target.target.id.identify(1),
+            "name": entry.target.target.signature.name.decode(),
             "args": ", ".join([str(arg) for arg in entry.target.arguments]),
             "params": ", ".join(
-                [param.name.decode() for param in entry.target.signature.parameters]
+                [param.name.decode() for param in entry.target.parameters]
             ),
         }

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List
 from typing import Literal as Kind
 
+from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.entities.calls import CallId
-from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.syntax.source import Span
 
 CallRejectionReason = Kind["unknown"]
@@ -13,7 +13,7 @@ CallRejectionReason = Kind["unknown"]
 class CallAcceptance:
     ref: Span
     id: CallId
-    target: CallSiteAcceptance
+    target: Calling
 
 
 @dataclass(kw_only=True)
