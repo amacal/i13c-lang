@@ -1,7 +1,7 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
@@ -37,6 +37,7 @@ def configure_callsite_resolution() -> GraphGroup:
                 ("signatures", "indices/signatures/names"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -61,9 +62,18 @@ def configure_callsite_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/callsites"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
-    return GraphGroup(nodes=[resolve, validate, extract])
+    reject = GraphNode(
+        builder=build_callsite_resolution_rejected,
+        constraint=None,
+        produces=("resolutions/callsites/rejected",),
+        requires=frozenset({("resolutions", "resolutions/callsites")}),
+        views=GraphViews(list=ListRejectedExtractor),
+    )
+
+    return GraphGroup(nodes=[resolve, validate, extract, reject])
 
 
 def build_callsite_resolution(
@@ -78,6 +88,8 @@ def build_callsite_resolution(
 
     for sid, entry in callsites.items():
         resolution = CallSiteResolution(
+            ref=entry.ref,
+            id=sid,
             accepted=[],
             rejected=[],
         )
@@ -97,6 +109,8 @@ def build_callsite_resolution(
                     resolution.rejected.append(
                         CallSiteRejection(
                             ref=entry.ref,
+                            id=sid,
+                            target=entry,
                             reason="arity-mismatch",
                         )
                     )
@@ -152,6 +166,8 @@ def build_callsite_resolution(
                 resolution.rejected.append(
                     CallSiteRejection(
                         ref=entry.ref,
+                        id=sid,
+                        target=entry,
                         reason=rejected,
                     )
                 )
@@ -160,6 +176,8 @@ def build_callsite_resolution(
             resolution.rejected.append(
                 CallSiteRejection(
                     ref=entry.ref,
+                    id=sid,
+                    target=entry,
                     reason="unknown-target",
                 )
             )
@@ -168,6 +186,8 @@ def build_callsite_resolution(
             resolution.rejected.append(
                 CallSiteRejection(
                     ref=entry.ref,
+                    id=sid,
+                    target=entry,
                     reason="ambiguous-target",
                 )
             )
@@ -196,6 +216,18 @@ def build_callsite_resolution_accepted(
     return OneToOne[CallSiteId, CallSiteAcceptance].instance(accepted)
 
 
+def build_callsite_resolution_rejected(
+    resolutions: OneToOne[CallSiteId, CallSiteResolution],
+    **kwargs: Dict[str, Any],
+) -> OneToMany[CallSiteId, CallSiteRejection]:
+    rejected: Dict[CallSiteId, List[CallSiteRejection]] = {}
+
+    for id, resolution in resolutions.items():
+        rejected[id] = resolution.rejected
+
+    return OneToMany[CallSiteId, CallSiteRejection].instance(rejected)
+
+
 def validate_callsite_resolution_e3006(
     callsites: OneToOne[CallSiteId, CallSite],
     resolutions: OneToOne[CallSiteId, CallSiteResolution],
@@ -221,3 +253,89 @@ def report_callsite_resolution_e3006(
         code="E3006",
         message=f"Unresolvable callsite {entry}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[CallSiteId, CallSiteResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[CallSiteId, CallSiteResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: CallSiteId, entry: CallSiteResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListRejectedExtractor:
+    def __init__(self, data: OneToMany[CallSiteId, CallSiteRejection]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[CallSiteId, CallSiteRejection]]:
+        for key, entries in self.data.items():
+            for entry in entries:
+                yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "callee": "Callee",
+            "reason": "Reason",
+        }
+
+    @staticmethod
+    def rows(key: CallSiteId, entry: CallSiteRejection) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "callee": entry.target.callee.decode(),
+            "reason": entry.reason,
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[CallSiteId, CallSiteAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[CallSiteId, CallSiteAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "args": "Arguments",
+            "params": "Parameters",
+        }
+
+    @staticmethod
+    def rows(key: CallSiteId, entry: CallSiteAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.signature.name.decode(),
+            "args": ", ".join([str(arg) for arg in entry.arguments]),
+            "params": ", ".join(
+                [param.name.decode() for param in entry.signature.parameters]
+            ),
+        }

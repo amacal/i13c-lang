@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.instructions import InstructionId
@@ -32,6 +32,7 @@ def configure_snippet_resolution() -> GraphGroup:
                 ("bindings", "resolutions/bindings/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -55,6 +56,7 @@ def configure_snippet_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/snippets"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -71,6 +73,8 @@ def build_snippet_resolution(
 
     for sid, entry in snippets.items():
         resolution = SnippetResolution(
+            ref=entry.ref,
+            id=sid,
             accepted=[],
             rejected=[],
         )
@@ -144,3 +148,69 @@ def report_snippet_resolution_e3015(
         code="E3015",
         message=f"Unresolved snippet {rejection.id}, reason: unknown.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[SnippetId, SnippetResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[SnippetId, SnippetResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: SnippetId, entry: SnippetResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[SnippetId, SnippetAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[SnippetId, SnippetAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "params": "Parameters",
+            "noreturn": "Noreturn",
+            "clobbers": "Clobbers",
+            "statements": "Statements",
+        }
+
+    @staticmethod
+    def rows(key: SnippetId, entry: SnippetAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.signature.name.decode(),
+            "params": ", ".join(
+                [str(param) for param in entry.signature.parameters]
+            ),
+            "noreturn": str(entry.flags.noreturn) if entry.flags else "False",
+            "clobbers": (
+                ", ".join([clobber.name.decode() for clobber in entry.flags.clobbers])
+                if entry.flags
+                else ""
+            ),
+            "statements": str(len(entry.instructions)),
+        }

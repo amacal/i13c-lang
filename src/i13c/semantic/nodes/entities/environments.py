@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
@@ -15,6 +15,7 @@ def configure_environments() -> GraphNode:
         constraint=None,
         produces=("entities/environments",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -67,3 +68,30 @@ def build_environments(
         environments[environment_id].entries.append(label_id)
 
     return OneToOne[EnvironmentId, Environment].instance(environments)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[EnvironmentId, Environment]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[EnvironmentId, Environment]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "snippet": "Snippet",
+            "entries": "Entries",
+        }
+
+    @staticmethod
+    def rows(key: EnvironmentId, entry: Environment) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "snippet": entry.ctx.identify(1),
+            "entries": str(len(entry.entries)),
+        }

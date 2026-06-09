@@ -1,6 +1,6 @@
-from typing import Dict, List
+from typing import Dict, Iterable, List, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.flags import FlagsId
@@ -15,6 +15,7 @@ def configure_functions() -> GraphNode:
         constraint=None,
         produces=("entities/functions",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -51,3 +52,32 @@ def build_functions(
         )
 
     return OneToOne[FunctionId, Function].instance(functions)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[FunctionId, Function]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FunctionId, Function]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "sig": "Signature",
+            "flags": "Flags",
+            "stmts": "Statements",
+        }
+
+    @staticmethod
+    def rows(key: FunctionId, entry: Function) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "sig": entry.signature.identify(1),
+            "flags": entry.flags.identify(1) if entry.flags else "",
+            "stmts": str(len(entry.statements)),
+        }

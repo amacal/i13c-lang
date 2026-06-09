@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.analyses.cflows import (
     ControlFlows,
@@ -36,6 +36,7 @@ def configure_control_flow_resolution() -> GraphGroup:
                 ("signatures", "resolutions/signatures/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -60,6 +61,7 @@ def configure_control_flow_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/cflows"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -74,7 +76,13 @@ def build_control_flow_resolution(
     resolutions: Dict[FunctionId, ControlFlowResolution] = {}
 
     for fid, entry in cflows.items():
+        function = functions.get(fid)
+        signature = signatures.get(function.signature)
+
         resolution = ControlFlowResolution(
+            ref=entry.ref,
+            function=fid,
+            signature=function.signature,
             accepted=[],
             rejected=[],
         )
@@ -84,9 +92,6 @@ def build_control_flow_resolution(
 
         fexit: FlowMember = entry.nodes[entry.exit]
         assert isinstance(fexit, FlowExit)
-
-        function = functions.get(fid)
-        signature = signatures.get(function.signature)
 
         next: ControlFlowEntry = {}
         environments: ControlFlowEnvironment = {
@@ -166,3 +171,59 @@ def report_control_flow_resolution_e3005(entry: ControlFlows) -> Diagnostic:
         code="E3005",
         message=f"Invalid control flow {entry}, reason: unknown.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[FunctionId, ControlFlowResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FunctionId, ControlFlowResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "fn": "Function",
+            "sig": "Signature",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: FunctionId, entry: ControlFlowResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "fn": key.identify(1),
+            "sig": entry.signature.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[FunctionId, ControlFlowAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FunctionId, ControlFlowAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "fn": "Function",
+            "sig": "Signature",
+            "envs": "Environments",
+        }
+
+    @staticmethod
+    def rows(key: FunctionId, entry: ControlFlowAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "fn": key.identify(1),
+            "sig": entry.signature.identify(1),
+            "envs": str(len(entry.environments)),
+        }

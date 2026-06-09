@@ -12,6 +12,7 @@ ParameterBind = Kind["literal", "value"]
 @dataclass(kw_only=True)
 class ParameterRejection:
     ref: Span
+    id: ParameterId
 
 
 @dataclass(kw_only=True)
@@ -23,8 +24,14 @@ class ParameterAcceptance:
     type: TypeAcceptance
     bind: ParameterBind
 
+    def __str__(self) -> str:
+        return f"{self.bind}({self.name.decode()}:{self.type})"
+
 
 @dataclass(kw_only=True)
 class ParameterResolution:
+    ref: Span
+    id: ParameterId
+
     accepted: List[ParameterAcceptance]
     rejected: List[ParameterRejection]

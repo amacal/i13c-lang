@@ -21,10 +21,14 @@ class ExpressionAcceptance:
 @dataclass(kw_only=True)
 class ExpressionRejection:
     ref: Span
+    id: ExpressionId
     reason: ExpressionRejectionReason
 
 
 @dataclass(kw_only=True)
 class ExpressionResolution:
+    ref: Span
+    id: ExpressionId
+
     accepted: List[ExpressionAcceptance]
     rejected: List[ExpressionRejection]

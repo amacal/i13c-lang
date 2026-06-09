@@ -3,6 +3,7 @@ from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
 
 FunctionRejectionReason = Kind["invalid-noreturn"]
@@ -11,6 +12,7 @@ FunctionRejectionReason = Kind["invalid-noreturn"]
 @dataclass(kw_only=True)
 class FunctionRejection:
     ref: Span
+    id: FunctionId
     reason: FunctionRejectionReason
 
 
@@ -19,9 +21,13 @@ class FunctionAcceptance:
     ref: Span
     id: FunctionId
 
+    signature: SignatureAcceptance
 
 
 @dataclass(kw_only=True)
 class FunctionResolution:
+    ref: Span
+    id: FunctionId
+
     accepted: List[FunctionAcceptance]
     rejected: List[FunctionRejection]

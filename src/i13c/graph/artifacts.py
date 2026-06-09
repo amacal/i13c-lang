@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from i13c.core.diagnostics import Diagnostic
+from i13c.core.graph import AbstractListExtractor, GraphViews
 from i13c.llvm.graph import LowLevelGraph
 from i13c.semantic.model import SemanticGraph, SemanticRules
 from i13c.semantic.syntax import SyntaxGraph
@@ -10,6 +11,7 @@ from i13c.semantic.syntax import SyntaxGraph
 @dataclass(kw_only=True)
 class GraphArtifacts:
     data: Dict[str, Any]
+    views: Dict[str, GraphViews]
 
     def syntax_graph(self) -> SyntaxGraph:
         return self.data["syntax/graph"]
@@ -28,3 +30,11 @@ class GraphArtifacts:
 
     def llvm_graph(self) -> LowLevelGraph:
         return self.data["llvm/graph"]
+
+    def list_view(self, name: str) -> Optional[AbstractListExtractor[Any, Any]]:
+        if view := self.views.get(name):
+            if list := view.list:
+                if data := self.data.get(name):
+                    return list(data)
+
+        return None

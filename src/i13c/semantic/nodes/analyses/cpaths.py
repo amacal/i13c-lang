@@ -1,6 +1,6 @@
-from typing import Dict, List
+from typing import Dict, Iterable, List, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.cpaths import ControlPaths
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -12,7 +12,12 @@ def configure_control_paths() -> GraphNode:
         builder=build_control_paths,
         constraint=None,
         produces=("analyses/cpaths",),
-        requires=frozenset({("cflows", "resolutions/cflows/accepted")}),
+        requires=frozenset(
+            {
+                ("cflows", "resolutions/cflows/accepted"),
+            }
+        ),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -53,3 +58,28 @@ def analyze_flows(flows: ControlFlowAcceptance) -> List[List[int]]:
                 break
 
     return paths
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[FunctionId, ControlPaths]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FunctionId, ControlPaths]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "fn": "Function",
+            "paths": "Paths",
+        }
+
+    @staticmethod
+    def rows(key: FunctionId, entry: ControlPaths) -> Dict[str, str]:
+        return {
+            "ref": str(entry.flows.ref),
+            "fn": key.identify(1),
+            "paths": str(len(entry.paths)),
+        }

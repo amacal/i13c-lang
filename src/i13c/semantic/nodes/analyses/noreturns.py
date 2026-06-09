@@ -1,6 +1,6 @@
-from typing import Dict, List, Literal, Union
+from typing import Dict, Iterable, List, Literal, Tuple, Union
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.analyses.cflows import FlowEntry, FlowExit, FlowMember
 from i13c.semantic.typing.analyses.cpaths import ControlPaths
@@ -28,6 +28,7 @@ def configure_noreturns() -> GraphNode:
                 ("callsites", "indices/callsites/statements"),
             }
         ),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -134,3 +135,32 @@ def is_path_noreturn(
 
     # all paths are returning, so we can report the path as returning
     return False
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[SignatureId, NoReturn]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[SignatureId, NoReturn]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "fn": "Function",
+            "name": "Name",
+            "path": "Path",
+            "outcome": "Outcome",
+        }
+
+    @staticmethod
+    def rows(key: SignatureId, entry: NoReturn) -> Dict[str, str]:
+        return {
+            "ref": str(entry.signature.ref),
+            "fn": key.identify(1),
+            "name": entry.signature.name.decode(),
+            "path": ", ".join([sig.name.decode() for sig in entry.path]),
+            "outcome": "NoReturn" if entry.outcome else "Return",
+        }

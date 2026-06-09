@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.addresses import Address, AddressId, Offset
@@ -16,6 +16,7 @@ def configure_addresses() -> GraphNode:
         constraint=None,
         produces=("entities/addresses",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -56,3 +57,32 @@ def build_addresses(
         )
 
     return OneToOne[AddressId, Address].instance(addresses)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[AddressId, Address]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[AddressId, Address]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "base": "Base",
+            "okind": "Offset Kind",
+            "ovalue": "Offset Value",
+        }
+
+    @staticmethod
+    def rows(key: AddressId, entry: Address) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "base": entry.base.identify(1),
+            "okind": str(entry.offset.kind) if entry.offset else "",
+            "ovalue": entry.offset.value.identify(1) if entry.offset else "",
+        }

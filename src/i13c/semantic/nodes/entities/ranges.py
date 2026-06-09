@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Hex
 from i13c.semantic.syntax import SyntaxGraph
@@ -13,6 +13,7 @@ def configure_ranges() -> GraphNode:
         constraint=None,
         produces=("entities/ranges",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -32,3 +33,34 @@ def build_ranges(
         )
 
     return OneToOne[RangeId, Range].instance(ranges)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[RangeId, Range]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[RangeId, Range]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "lwidth": "Lower Width",
+            "lvalue": "Lower Value",
+            "uwidth": "Upper Width",
+            "uvalue": "Upper Value",
+        }
+
+    @staticmethod
+    def rows(key: RangeId, entry: Range) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "lwidth": str(entry.lower.width),
+            "lvalue": str(entry.lower),
+            "uwidth": str(entry.upper.width),
+            "uvalue": str(entry.upper),
+        }

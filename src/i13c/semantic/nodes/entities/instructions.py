@@ -1,11 +1,12 @@
-from typing import Dict, List
+from typing import Dict, Iterable, List, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.semantic.typing.entities.operands import OperandId
+from i13c.semantic.typing.entities.snippets import SnippetId
 
 
 def configure_instructions() -> GraphNode:
@@ -14,6 +15,7 @@ def configure_instructions() -> GraphNode:
         constraint=None,
         produces=("entities/instructions",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -50,3 +52,32 @@ def build_instructions(
         )
 
     return OneToOne[InstructionId, Instruction].instance(instructions)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[InstructionId, Instruction]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[InstructionId, Instruction]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "mnemonic": "Mnemonic",
+            "operands": "Operands",
+            "snippet": "Snippet",
+        }
+
+    @staticmethod
+    def rows(key: InstructionId, entry: Instruction) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "mnemonic": entry.mnemonic.identify(1),
+            "operands": str(len(entry.operands)),
+            "snippet": entry.get_snippet(SnippetId.from_context).identify(1),
+        }

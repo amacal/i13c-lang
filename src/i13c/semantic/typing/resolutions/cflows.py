@@ -26,6 +26,8 @@ ControlFlowEnvironment = Dict[ControlFlowMember, ControlFlowEntry]
 @dataclass(kw_only=True)
 class ControlFlowRejection:
     ref: Span
+    function: FunctionId
+    signature: SignatureId
     reason: ControlFlowRejectionReason
 
 
@@ -43,5 +45,9 @@ class ControlFlowAcceptance:
 
 @dataclass(kw_only=True)
 class ControlFlowResolution:
+    ref: Span
+    function: FunctionId
+    signature: SignatureId
+
     accepted: List[ControlFlowAcceptance]
     rejected: List[ControlFlowRejection]

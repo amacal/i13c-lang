@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
 from i13c.semantic.typing.entities.types import TypeId
@@ -26,6 +26,7 @@ def configure_parameter_resolution() -> GraphGroup:
                 ("binds", "indices/binds/parameters"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -50,6 +51,7 @@ def configure_parameter_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/parameters"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -64,6 +66,8 @@ def build_parameter_resolution(
 
     for pid, entry in parameters.items():
         resolution = ParameterResolution(
+            ref=entry.ref,
+            id=pid,
             accepted=[],
             rejected=[],
         )
@@ -129,3 +133,61 @@ def report_parameter_resolution_e3014(entry: Parameter) -> Diagnostic:
         code="E3014",
         message=f"Invalid parameter {entry}, reason: unknown.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[ParameterId, ParameterResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ParameterId, ParameterResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: ParameterId, entry: ParameterResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[ParameterId, ParameterAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ParameterId, ParameterAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "type": "Type",
+            "width": "Width",
+            "bind": "Bind",
+        }
+
+    @staticmethod
+    def rows(key: ParameterId, entry: ParameterAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.name.decode(),
+            "type": entry.type.name.decode(),
+            "width": str(entry.type.width),
+            "bind": entry.bind,
+        }

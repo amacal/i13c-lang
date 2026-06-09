@@ -84,6 +84,15 @@ class Address:
                 self.offset.accept(visitor, node)
 
 
+@dataclass(kw_only=True, eq=False)
+class Label:
+    ref: Span
+    name: bytes
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_label(self, path)
+
+
 OperandTarget = Union[Register, Immediate, Reference, Address]
 
 
@@ -146,15 +155,6 @@ class Instruction:
 
             for entry in self.operands:
                 entry.accept(visitor, node)
-
-
-@dataclass(kw_only=True, eq=False)
-class Label:
-    ref: Span
-    name: bytes
-
-    def accept(self, visitor: Visitor, path: Path) -> None:
-        visitor.on_label(self, path)
 
 
 InstructionOrLabel = Union[Instruction, Label]

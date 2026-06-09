@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, Protocol, TypeVar, Union
+from typing import Callable, TypeVar, Union
 
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.instructions import InstructionId
@@ -8,7 +8,8 @@ from i13c.syntax.source import Span
 
 @dataclass(kw_only=True, frozen=True)
 class EndOfSnippet:
-    pass
+    def identify(self, length: int) -> str:
+        return "end-of-snippet"
 
 
 LabelTarget = Union[
@@ -25,11 +26,7 @@ class LabelId:
         return "#".join(("label", f"{self.value:<{length}}"))
 
 
-class SnippetContextBound(Protocol):
-    pass
-
-
-SnippetContext = TypeVar("SnippetContext", bound=SnippetContextBound)
+SnippetIdLike = TypeVar("SnippetIdLike")
 
 
 @dataclass(kw_only=True)
@@ -42,6 +39,6 @@ class Label:
     target: LabelTarget
 
     def get_snippet(
-        self, factory: Callable[[NodeId], SnippetContext]
-    ) -> SnippetContext:
+        self, factory: Callable[[NodeId], SnippetIdLike]
+    ) -> SnippetIdLike:
         return factory(self.snippet)

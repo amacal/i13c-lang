@@ -14,6 +14,8 @@ from typing import (
     Union,
 )
 
+from i13c.core.extractors import AbstractListExtractor
+
 
 class CyclicDependencyError(Exception):
     def __init__(self) -> None:
@@ -66,15 +68,21 @@ GraphConstraint = Optional[Callable[..., bool]]
 Requirement = FrozenSet[Tuple[str, Union[str, Prefix]]]
 
 
-@dataclass(kw_only=True, frozen=True)
+@dataclass(kw_only=True)
+class GraphViews:
+    list: Optional[Callable[..., AbstractListExtractor[Any, Any]]]
+
+
+@dataclass(kw_only=True, eq=False)
 class GraphNode:
     builder: GraphBuilder
     constraint: GraphConstraint
     produces: Tuple[str, ...]
     requires: Requirement
+    views: Optional[GraphViews] = None
 
 
-@dataclass(kw_only=True, frozen=True)
+@dataclass(kw_only=True, eq=False)
 class GraphGroup:
     nodes: List[Union[GraphNode, GraphGroup]]
 
@@ -148,8 +156,10 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
     return out
 
 
-def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
+def evaluate(nodes: List[GraphNode], initial: Dict[str, Any], targets: Set[str] = set()) -> Tuple[Dict[str, GraphViews], Dict[str, Any]]:
     artifacts: Dict[str, Any] = {}
+    views: Dict[str, GraphViews] = {}
+
     logger: Logger = getLogger("dag")
 
     def seed(value: Any) -> Callable[[], Any]:
@@ -179,6 +189,9 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
         for target in node.produces:
             logger.info(f"producing {target} ...")
 
+        if node.views is not None:
+            views[node.produces[0]] = node.views
+
         # prepare arguments
         args = {name: expand(req) for name, req in node.requires}
         ready = all(arg is not None for arg in args.values())
@@ -202,4 +215,7 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any]) -> Dict[str, Any]:
             for idx, producer in enumerate(node.produces):
                 artifacts[producer] = dataset[idx]
 
-    return artifacts
+        if targets and all(target in artifacts for target in targets):
+            break
+
+    return views, artifacts

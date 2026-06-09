@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import Address, AddressId
 from i13c.semantic.typing.entities.immediates import ImmediateId
@@ -32,6 +32,7 @@ def configure_address_resolution() -> GraphGroup:
                 ("references", "resolutions/references/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate_e3022 = GraphNode(
@@ -56,6 +57,7 @@ def configure_address_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/addresses"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate_e3022, extract])
@@ -71,6 +73,8 @@ def build_address_resolution(
 
     for aid, entry in addresses.items():
         resolution = AddressResolution(
+            ref=entry.ref,
+            id=aid,
             accepted=[],
             rejected=[],
         )
@@ -86,6 +90,7 @@ def build_address_resolution(
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
+                        id=aid,
                         reason="invalid-register",
                     )
                 )
@@ -97,6 +102,7 @@ def build_address_resolution(
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
+                        id=aid,
                         reason="invalid-register",
                     )
                 )
@@ -106,6 +112,7 @@ def build_address_resolution(
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
+                        id=aid,
                         reason="invalid-register",
                     )
                 )
@@ -122,6 +129,7 @@ def build_address_resolution(
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
+                        id=aid,
                         reason="invalid-offset",
                     )
                 )
@@ -131,6 +139,7 @@ def build_address_resolution(
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
+                        id=aid,
                         reason="invalid-offset",
                     )
                 )
@@ -203,3 +212,61 @@ def report_address_resolution_e3022(
         code="E3022",
         message=f"Address resolution failed {str(entry)}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[AddressId, AddressResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[AddressId, AddressResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: AddressId, entry: AddressResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[AddressId, AddressAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[AddressId, AddressAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "base": "Base",
+            "okind": "Offset Kind",
+            "owidth": "Offset Width",
+            "ovalue": "Offset Value",
+        }
+
+    @staticmethod
+    def rows(key: AddressId, entry: AddressAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "base": entry.base.name.decode() if isinstance(entry.base, RegisterAcceptance) else entry.base.name.decode(),
+            "okind": entry.offset.kind if entry.offset else "",
+            "owidth": str(entry.offset.value.value.width) if entry.offset else "",
+            "ovalue": str(entry.offset.value.value) if entry.offset else "",
+        }

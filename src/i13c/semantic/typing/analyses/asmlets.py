@@ -34,6 +34,7 @@ class Asmlet:
 
     binding: List[BindAcceptance]
     parameters: List[ParameterAcceptance]
+
     flags: Optional[FlagsAcceptance]
     instructions: List[AsmletInstruction]
     callsites: List[CallSiteAcceptance]

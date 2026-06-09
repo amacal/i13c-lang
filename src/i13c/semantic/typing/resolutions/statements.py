@@ -23,10 +23,14 @@ class StatementAcceptance:
 @dataclass(kw_only=True)
 class StatementRejection:
     ref: Span
+    id: StatementId
     reason: StatementRejectionReason
 
 
 @dataclass(kw_only=True)
 class StatementResolution:
+    ref: Span
+    id: StatementId
+
     accepted: List[StatementAcceptance]
     rejected: List[StatementRejection]

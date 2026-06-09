@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Callable, TypeVar
 
+from i13c.semantic.syntax import NodeId
 from i13c.syntax.source import Span
 
 
@@ -12,15 +13,16 @@ class ReferenceId:
         return "#".join(("reference", f"{self.value:<{length}}"))
 
 
-class ReferenceContext(Protocol):
-    @property
-    def value(self) -> int: ...
-
-    def identify(self, length: int) -> str: ...
+SnippetIdLike = TypeVar("SnippetIdLike")
 
 
 @dataclass(kw_only=True)
 class Reference:
     ref: Span
     name: bytes
-    ctx: ReferenceContext
+    snippet: NodeId
+
+    def get_snippet(
+        self, factory: Callable[[NodeId], SnippetIdLike]
+    ) -> SnippetIdLike:
+        return factory(self.snippet)

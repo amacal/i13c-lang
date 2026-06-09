@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.references import Reference, ReferenceId
@@ -13,6 +13,7 @@ def configure_references() -> GraphNode:
         constraint=None,
         produces=("entities/references",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -27,13 +28,39 @@ def build_references(
 
         # look up for the snippet context of this reference
         snippet = graph.snippet.references.get_ctx(id)
-        nid = graph.snippet.snippets.get_by_node(snippet)
-        snippet_id = SnippetId(value=nid.value)
+        snid = graph.snippet.snippets.get_by_node(snippet)
 
         references[reference_id] = Reference(
             ref=entry.ref,
             name=entry.name,
-            ctx=snippet_id,
+            snippet=snid,
         )
 
     return OneToOne[ReferenceId, Reference].instance(references)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[ReferenceId, Reference]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ReferenceId, Reference]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "snippet": "Snippet",
+        }
+
+    @staticmethod
+    def rows(key: ReferenceId, entry: Reference) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.name.decode(),
+            "snippet": entry.get_snippet(SnippetId.from_context).identify(1),
+        }

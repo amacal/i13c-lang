@@ -3,7 +3,7 @@ from typing import List
 from typing import Literal as Kind
 from typing import Union
 
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
@@ -30,6 +30,8 @@ CallSiteArgument = Union[
 @dataclass(kw_only=True)
 class CallSiteRejection:
     ref: Span
+    id: CallSiteId
+    target: CallSite
     reason: CallSiteRejectionReason
 
 
@@ -47,5 +49,8 @@ class CallSiteAcceptance:
 
 @dataclass(kw_only=True)
 class CallSiteResolution:
+    ref: Span
+    id: CallSiteId
+
     accepted: List[CallSiteAcceptance]
     rejected: List[CallSiteRejection]

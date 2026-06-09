@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
 from i13c.semantic.typing.resolutions.immediates import (
@@ -20,6 +20,7 @@ def configure_immediate_resolution() -> GraphGroup:
                 ("immediates", "entities/immediates"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -44,6 +45,7 @@ def configure_immediate_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/immediates"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -56,6 +58,8 @@ def build_immediate_resolution(
 
     for iid, entry in immediates.items():
         resolution = ImmediateResolution(
+            ref=entry.ref,
+            id=iid,
             accepted=[],
             rejected=[],
         )
@@ -114,3 +118,57 @@ def report_immediate_resolution_e3016(entry: Immediate) -> Diagnostic:
         code="E3016",
         message=f"Invalid immediate {entry}, reason: unknown.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[ImmediateId, ImmediateResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ImmediateId, ImmediateResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: ImmediateId, entry: ImmediateResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[ImmediateId, ImmediateAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ImmediateId, ImmediateAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "width": "Width",
+            "value": "Value",
+        }
+
+    @staticmethod
+    def rows(key: ImmediateId, entry: ImmediateAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "width": str(entry.value.width),
+            "value": str(entry.value),
+        }

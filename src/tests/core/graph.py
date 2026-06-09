@@ -23,7 +23,7 @@ def can_evaluate_one_node_without_dependencies():
         requires=frozenset(),
     )
 
-    artifacts = evaluate([node], initial={})
+    _, artifacts = evaluate([node], initial={})
 
     assert len(artifacts) == 1
     assert artifacts["abc"] == 42
@@ -47,7 +47,7 @@ def can_evaluate_multiple_nodes_with_dependencies():
         requires=frozenset({("x", "abc")}),
     )
 
-    artifacts = evaluate([node1, node2], initial={})
+    _, artifacts = evaluate([node1, node2], initial={})
 
     assert len(artifacts) == 2
     assert artifacts["abc"] == 42
@@ -65,7 +65,7 @@ def can_produce_multiple_artifacts():
         requires=frozenset(),
     )
 
-    artifacts = evaluate([node], initial={})
+    _, artifacts = evaluate([node], initial={})
 
     assert len(artifacts) == 2
     assert artifacts["abc"] == 42
@@ -97,7 +97,7 @@ def can_consume_multiple_artifacts():
         requires=frozenset({("x", "abc"), ("y", "cde")}),
     )
 
-    artifacts = evaluate([node1, node2, node3], initial={})
+    _, artifacts = evaluate([node1, node2, node3], initial={})
 
     assert len(artifacts) == 3
     assert artifacts["abc"] == 42
@@ -116,7 +116,7 @@ def can_use_initial_artifacts():
         requires=frozenset({("x", "x")}),
     )
 
-    artifacts = evaluate([node], initial={"x": 41})
+    _, artifacts = evaluate([node], initial={"x": 41})
 
     assert len(artifacts) == 2
     assert artifacts["x"] == 41
@@ -142,7 +142,7 @@ def can_evaluate_group():
     )
 
     group: GraphGroup = GraphGroup(nodes=[node1, node2])
-    artifacts = evaluate(group.flatten(), initial={})
+    _, artifacts = evaluate(group.flatten(), initial={})
 
     assert len(artifacts) == 2
     assert artifacts["abc"] == 42
@@ -179,7 +179,7 @@ def can_consume_prefix_from_single_multi_producer():
         ),
     )
 
-    artifacts = evaluate([producer, consumer], initial={})
+    _, artifacts = evaluate([producer, consumer], initial={})
 
     assert artifacts["entities/a"] == 1
     assert artifacts["entities/b"] == 2
@@ -196,7 +196,7 @@ def can_evaluate_without_mutating_input_nodes_list():
     )
 
     nodes = [node]
-    artifacts = evaluate(nodes, initial={"x": 41})
+    _, artifacts = evaluate(nodes, initial={"x": 41})
 
     assert artifacts["x"] == 41
     assert artifacts["abc"] == 42

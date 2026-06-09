@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import AbstractListExtractor, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Hex
 from i13c.semantic.syntax import SyntaxGraph
@@ -13,6 +13,7 @@ def configure_immediates() -> GraphNode:
         constraint=None,
         produces=("entities/immediates",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=list_immediates),
     )
 
 
@@ -31,3 +32,36 @@ def build_immediates(
         )
 
     return OneToOne[ImmediateId, Immediate].instance(immediates)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[ImmediateId, Immediate]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ImmediateId, Immediate]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "width": "Width",
+            "value": "Value",
+        }
+
+    @staticmethod
+    def rows(key: ImmediateId, entry: Immediate) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "width": str(entry.value.width),
+            "value": str(entry.value),
+        }
+
+
+def list_immediates(
+    data: OneToOne[ImmediateId, Immediate],
+) -> AbstractListExtractor[ImmediateId, Immediate]:
+    return ListExtractor(data)

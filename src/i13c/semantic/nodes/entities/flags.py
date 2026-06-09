@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.flags import Flags, FlagsId
@@ -14,6 +14,7 @@ def configure_flags() -> GraphNode:
         constraint=None,
         produces=("entities/flags",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -54,3 +55,30 @@ def build_flags(
         )
 
     return OneToOne[FlagsId, Flags].instance(flags)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[FlagsId, Flags]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FlagsId, Flags]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "noreturn": "NoReturn",
+            "clobbers": "Clobbers",
+        }
+
+    @staticmethod
+    def rows(key: FlagsId, entry: Flags) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "noreturn": str(entry.noreturn) if entry.noreturn is not None else "",
+            "clobbers": str(len(entry.clobbers)) if entry.clobbers else "0",
+        }

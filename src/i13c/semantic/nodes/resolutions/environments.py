@@ -1,7 +1,7 @@
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
 from i13c.semantic.typing.entities.labels import LabelId
@@ -28,6 +28,7 @@ def configure_environment_resolution() -> GraphGroup:
                 ("signatures", "resolutions/signatures/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -52,6 +53,7 @@ def configure_environment_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/environments"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -66,6 +68,8 @@ def build_environment_resolution(
 
     for eid, entry in environments.items():
         resolution = EnvironmentResolution(
+            ref=entry.ref,
+            id=eid,
             accepted=[],
             rejected=[],
         )
@@ -87,6 +91,7 @@ def build_environment_resolution(
                     resolution.rejected.append(
                         EnvironmentRejection(
                             ref=target.ref,
+                            id=eid,
                             reason="duplicated-name",
                         )
                     )
@@ -150,3 +155,55 @@ def report_environment_resolution_e3019(
         code="E3019",
         message=f"Invalid environment {entry}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[EnvironmentId, EnvironmentResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[EnvironmentId, EnvironmentResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: EnvironmentId, entry: EnvironmentResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[EnvironmentId, EnvironmentAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[EnvironmentId, EnvironmentAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "entries": "Entries",
+        }
+
+    @staticmethod
+    def rows(key: EnvironmentId, entry: EnvironmentAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "entries": ", ".join(key.decode() for key in entry.entries.keys()),
+        }

@@ -25,4 +25,4 @@ def can_detect_a_reference():
     id, _ = entities.snippets.peak()
 
     assert value.name == b"me"
-    assert value.ctx == id
+    assert value.snippet.value == id.value

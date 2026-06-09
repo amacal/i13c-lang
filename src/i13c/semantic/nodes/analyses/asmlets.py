@@ -1,7 +1,7 @@
-from typing import Dict, FrozenSet, List, Protocol, Tuple, Type, Union
+from typing import Dict, FrozenSet, Iterable, List, Protocol, Tuple, Type, Union
 
 from i13c.core.generator import Generator
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.asmlets import (
@@ -41,6 +41,7 @@ def configure_asmlets() -> GraphNode:
                 ("snippets", "resolutions/snippets/accepted"),
             }
         ),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -237,3 +238,38 @@ def rewrite_instruction(
         mnemonic=src.mnemonic.name,
         operands=[rewrite_operand(src, op, binds) for op in src.operands],
     )
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[AsmletId, Asmlet]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[AsmletId, Asmlet]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "src": "Source",
+            "sig": "Signature",
+            "name": "Name",
+            "keys": "Keys",
+            "parameters": "Parameters",
+            "callsites": "Callsites",
+            "instructions": "Instructions",
+        }
+
+    @staticmethod
+    def rows(key: AsmletId, entry: Asmlet) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "src": entry.source.identify(1),
+            "sig": entry.signature.identify(1),
+            "name": entry.name.decode(),
+            "keys": ", ".join(key.decode() for key in entry.keys.keys()),
+            "parameters": ", ".join(str(param) for param in entry.parameters),
+            "callsites": str(len(entry.callsites)),
+            "instructions": str(len(entry.instructions)),
+        }

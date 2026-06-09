@@ -3,7 +3,7 @@ from typing import List
 from typing import Literal as Kind
 from typing import Optional, Tuple
 
-from i13c.semantic.typing.entities.instructions import InstructionId
+from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.resolutions.mnemonics import (
     MnemonicAcceptance,
     MnemonicVariant,
@@ -27,6 +27,13 @@ OperandSymbol = Kind[
 @dataclass(kw_only=True)
 class InstructionRejection:
     ref: Span
+    id: InstructionId
+
+    target: Instruction
+    mnemonic: MnemonicAcceptance
+    variant: Optional[MnemonicVariant]
+    operands: Optional[Tuple[OperandAcceptance, ...]]
+
     reason: InstructionRejectionReason
 
 
@@ -82,8 +89,8 @@ class OperandSpec:
 class InstructionAcceptance:
     ref: Span
     id: InstructionId
-    index: int
 
+    index: int
     mnemonic: MnemonicAcceptance
     variant: MnemonicVariant
     operands: Tuple[OperandAcceptance, ...]
@@ -91,5 +98,8 @@ class InstructionAcceptance:
 
 @dataclass(kw_only=True)
 class InstructionResolution:
+    ref: Span
+    id: InstructionId
+
     accepted: List[InstructionAcceptance]
     rejected: List[InstructionRejection]

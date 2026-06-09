@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.calls import CallId
@@ -27,6 +27,7 @@ def configure_statement_resolution() -> GraphGroup:
                 ("calls", "resolutions/calls/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -51,6 +52,7 @@ def configure_statement_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/statements"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -65,6 +67,8 @@ def build_statements_resolution(
 
     for fid, entry in statements.items():
         resolution = StatementResolution(
+            ref=entry.ref,
+            id=fid,
             accepted=[],
             rejected=[],
         )
@@ -131,3 +135,55 @@ def report_statements_resolution_e3026(
         code="E3026",
         message=f"Statement rejected {entry}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[StatementId, StatementResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[StatementId, StatementResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: StatementId, entry: StatementResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[StatementId, StatementAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[StatementId, StatementAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "target": "Target",
+        }
+
+    @staticmethod
+    def rows(key: StatementId, entry: StatementAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "target": entry.target.id.identify(1),
+        }

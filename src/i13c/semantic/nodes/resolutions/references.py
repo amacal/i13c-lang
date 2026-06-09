@@ -1,12 +1,13 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.references import Reference, ReferenceId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import (
     ReferenceAcceptance,
     ReferenceRejection,
@@ -25,6 +26,7 @@ def configure_reference_resolution() -> GraphGroup:
                 ("environments", "indices/environments/snippets"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate_e3020 = GraphNode(
@@ -49,6 +51,7 @@ def configure_reference_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/references"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate_e3020, extract])
@@ -62,34 +65,33 @@ def build_reference_resolution(
 
     for rid, entry in references.items():
         resolution = ReferenceResolution(
+            ref=entry.ref,
+            id=rid,
             accepted=[],
             rejected=[],
         )
 
         # find the environment of this reference
-        snippet_id = SnippetId(value=entry.ctx.value)
+        snippet_id = entry.get_snippet(SnippetId.from_context)
         environment = environments.get(snippet_id)
 
         if entry.name not in environment.entries:
             resolution.rejected.append(
                 ReferenceRejection(
                     ref=entry.ref,
+                    id=rid,
                     name=entry.name,
                     reason="unknown-name",
                 )
             )
 
         else:
-            target = environment.entries[entry.name]
-            kind = "label" if isinstance(target, LabelAcceptance) else "parameter"
-
             resolution.accepted.append(
                 ReferenceAcceptance(
                     ref=entry.ref,
                     id=rid,
                     name=entry.name,
-                    target=target,
-                    kind=kind,
+                    target=environment.entries[entry.name],
                 )
             )
 
@@ -142,3 +144,79 @@ def report_reference_resolution_e3020(
         code="E3020",
         message=f"Reference resolution failed {entry.name.decode()}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[ReferenceId, ReferenceResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ReferenceId, ReferenceResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: ReferenceId, entry: ReferenceResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[ReferenceId, ReferenceAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ReferenceId, ReferenceAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "ptype": "Parameter Type",
+            "pbind": "Parameter Bind",
+            "lidx": "Label Index",
+            "ltarget": "Label Target",
+        }
+
+    @staticmethod
+    def rows(key: ReferenceId, entry: ReferenceAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.name.decode(),
+            "ptype": (
+                str(entry.target.type.name)
+                if isinstance(entry.target, ParameterAcceptance)
+                else ""
+            ),
+            "pbind": (
+                str(entry.target.bind)
+                if isinstance(entry.target, ParameterAcceptance)
+                else ""
+            ),
+            "lidx": (
+                str(entry.target.index)
+                if isinstance(entry.target, LabelAcceptance)
+                else ""
+            ),
+            "ltarget": (
+                entry.target.target.identify(1)
+                if isinstance(entry.target, LabelAcceptance)
+                else ""
+            ),
+        }

@@ -1,7 +1,7 @@
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, Iterable, List, Set, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.flags import Flags, FlagsId
 from i13c.semantic.typing.entities.registers import RegisterId
@@ -24,6 +24,7 @@ def configure_flags_resolution() -> GraphGroup:
                 ("registers", "resolutions/registers/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -48,6 +49,7 @@ def configure_flags_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/flags"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -61,6 +63,8 @@ def build_flags_resolution(
 
     for fid, entry in flags.items():
         resolution = FlagsResolution(
+            ref=entry.ref,
+            id=fid,
             accepted=[],
             rejected=[],
         )
@@ -78,6 +82,7 @@ def build_flags_resolution(
                 resolution.rejected.append(
                     FlagsRejection(
                         ref=register.ref,
+                        id=fid,
                         reason="duplicated-register",
                     )
                 )
@@ -145,3 +150,57 @@ def report_flags_resolution_e3002(
         code="E3002",
         message=f"Duplicated register name {entry}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[FlagsId, FlagsResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FlagsId, FlagsResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: FlagsId, entry: FlagsResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[FlagsId, FlagsAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FlagsId, FlagsAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "noreturn": "NoReturn",
+            "clobbers": "Clobbers",
+        }
+
+    @staticmethod
+    def rows(key: FlagsId, entry: FlagsAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "noreturn": str(entry.noreturn),
+            "clobbers": ", ".join([clobber.name.decode() for clobber in entry.clobbers]),
+        }

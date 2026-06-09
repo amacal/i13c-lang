@@ -1,6 +1,6 @@
-from typing import Dict, List
+from typing import Dict, Iterable, List, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.analyses.cgraphs import CallGraph
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -19,6 +19,7 @@ def configure_call_graphs() -> GraphNode:
                 ("callsites", "indices/callsites/signatures"),
             }
         ),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -56,3 +57,32 @@ def build_call_graphs(
             cgraphs[entry.id].forward.append(cgraph.target)
 
     return OneToOne[SignatureId, CallGraph].instance(cgraphs)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[SignatureId, CallGraph]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[SignatureId, CallGraph]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "fn": "Function",
+            "name": "Name",
+            "forward": "Forward",
+            "backward": "Backward",
+        }
+
+    @staticmethod
+    def rows(key: SignatureId, entry: CallGraph) -> Dict[str, str]:
+        return {
+            "ref": str(entry.target.ref),
+            "fn": key.identify(1),
+            "name": entry.target.name.decode(),
+            "forward": str(len(entry.forward)),
+            "backward": str(len(entry.backward)),
+        }

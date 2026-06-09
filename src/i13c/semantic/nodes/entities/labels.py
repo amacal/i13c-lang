@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import AbstractListExtractor, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.instructions import InstructionId
@@ -24,6 +24,7 @@ def configure_labels() -> GraphNode:
                 ("snippets", "entities/snippets"),
             }
         ),
+        views=GraphViews(list=list_labels),
     )
 
 
@@ -64,3 +65,40 @@ def build_labels(
         )
 
     return OneToOne[LabelId, Label].instance(labels)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[LabelId, Label]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[LabelId, Label]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "idx": "Index",
+            "name": "Name",
+            "target": "Target",
+            "snippet": "Snippet",
+        }
+
+    @staticmethod
+    def rows(key: LabelId, entry: Label) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "idx": str(entry.index),
+            "name": entry.name.decode(),
+            "target": entry.target.identify(1),
+            "snippet": entry.get_snippet(SnippetId.from_context).identify(1),
+        }
+
+
+def list_labels(
+    data: OneToOne[LabelId, Label],
+) -> AbstractListExtractor[LabelId, Label]:
+    return ListExtractor(data)

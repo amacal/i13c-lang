@@ -85,6 +85,8 @@ TOKEN_NAMES: Dict[int, str] = {
     Tokens.DOT: "dot",
     Tokens.COLON: "colon",
     Tokens.EQUALS: "equals",
+    Tokens.PLUS: "plus",
+    Tokens.MINUS: "minus",
     Tokens.SQUARE_OPEN: "square-open",
     Tokens.SQUARE_CLOSE: "square-close",
     Tokens.EOF: "end-of-file",

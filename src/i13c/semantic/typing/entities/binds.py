@@ -19,6 +19,3 @@ class Bind:
 
     src: bytes
     dst: bytes
-
-    def __str__(self) -> str:
-        return f"{self.src.decode()}:{self.dst.decode()}"

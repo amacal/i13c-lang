@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.cflows import FunctionId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
@@ -24,6 +24,7 @@ def configure_expression_resolution() -> GraphGroup:
                 ("cflows", "resolutions/cflows/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -48,6 +49,7 @@ def configure_expression_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/expressions"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -61,6 +63,8 @@ def build_expression_resolution(
 
     for eid, entry in expressions.items():
         resolution = ExpressionResolution(
+            ref=entry.ref,
+            id=eid,
             accepted=[],
             rejected=[],
         )
@@ -128,3 +132,57 @@ def report_expression_resolution_e3010(entry: Expression) -> Diagnostic:
         code="E3010",
         message=f"Invalid expression {entry}, reason: unknown.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[ExpressionId, ExpressionResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ExpressionId, ExpressionResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: ExpressionId, entry: ExpressionResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[ExpressionId, ExpressionAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ExpressionId, ExpressionAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "env": "Environment",
+        }
+
+    @staticmethod
+    def rows(key: ExpressionId, entry: ExpressionAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.name.decode(),
+            "env": ", ".join(key.decode() for key in entry.environment.keys()),
+        }

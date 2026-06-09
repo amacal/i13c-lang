@@ -21,6 +21,8 @@ AddressBase = Union[RegisterAcceptance, ParameterAcceptance]
 @dataclass(kw_only=True)
 class AddressRejection:
     ref: Span
+    id: AddressId
+
     reason: AddressRejectionReason
 
 
@@ -43,8 +45,22 @@ class AddressAcceptance:
     base: AddressBase
     offset: Optional[OffsetAcceptance]
 
+    def __str__(self) -> str:
+        output = self.base.name.decode()
+
+        if self.offset is not None:
+            if self.offset.kind == "forward":
+                output += f" + {self.offset.value.value}"
+            else:
+                output += f" - {self.offset.value.value}"
+
+        return f"[{output}]"
+
 
 @dataclass(kw_only=True)
 class AddressResolution:
+    ref: Span
+    id: AddressId
+
     accepted: List[AddressAcceptance]
     rejected: List[AddressRejection]

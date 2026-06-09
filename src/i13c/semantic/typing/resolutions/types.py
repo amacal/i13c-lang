@@ -20,6 +20,7 @@ TypeWidth = Kind[8, 16, 32, 64]
 @dataclass(kw_only=True)
 class TypeRejection:
     ref: Span
+    id: TypeId
     reason: TypeRejectionReason
 
 
@@ -31,6 +32,9 @@ class TypeAcceptance:
     name: bytes
     width: TypeWidth
     range: Optional[RangeAcceptance]
+
+    def __str__(self) -> str:
+        return f"{self.name.decode()}"
 
     def accepts(self, value: Union[LiteralAcceptance, TypeAcceptance]) -> bool:
         if isinstance(value, LiteralAcceptance):
@@ -63,5 +67,8 @@ class TypeAcceptance:
 
 @dataclass(kw_only=True)
 class TypeResolution:
+    ref: Span
+    id: TypeId
+
     accepted: List[TypeAcceptance]
     rejected: List[TypeRejection]

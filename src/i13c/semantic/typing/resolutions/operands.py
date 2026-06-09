@@ -39,6 +39,7 @@ OperandSymbol = Kind[
 @dataclass(kw_only=True)
 class OperandRejection:
     ref: Span
+    id: OperandId
 
     kind: OperandKind
     reason: OperandRejectionReason
@@ -56,5 +57,8 @@ class OperandAcceptance:
 
 @dataclass(kw_only=True)
 class OperandResolution:
+    ref: Span
+    id: OperandId
+
     accepted: List[OperandAcceptance]
     rejected: List[OperandRejection]

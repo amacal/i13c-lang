@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.calls import Call, CallId
@@ -13,6 +13,7 @@ def configure_calls() -> GraphNode:
         constraint=None,
         produces=("entities/calls",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -36,3 +37,28 @@ def build_calls(
         )
 
     return OneToOne[CallId, Call].instance(calls)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[CallId, Call]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[CallId, Call]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "target": "Target",
+        }
+
+    @staticmethod
+    def rows(key: CallId, entry: Call) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "target": entry.target.identify(1),
+        }

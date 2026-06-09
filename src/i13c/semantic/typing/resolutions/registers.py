@@ -16,6 +16,8 @@ RegisterKind = Kind["low", "high", "8bit", "16bit", "32bit", "64bit", "rip"]
 @dataclass(kw_only=True)
 class RegisterRejection:
     ref: Span
+    id: RegisterId
+
     reason: RegisterRejectionReason
 
 
@@ -28,8 +30,14 @@ class RegisterAcceptance:
     kind: RegisterKind
     width: RegisterWidth
 
+    def __str__(self) -> str:
+        return self.name.decode()
+
 
 @dataclass(kw_only=True)
 class RegisterResolution:
+    ref: Span
+    id: RegisterId
+
     accepted: List[RegisterAcceptance]
     rejected: List[RegisterRejection]

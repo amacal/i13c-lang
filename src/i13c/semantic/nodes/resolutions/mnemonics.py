@@ -1,8 +1,8 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
-from i13c.core.mapping import OneToOne
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
+from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
 from i13c.semantic.typing.resolutions.mnemonics import (
     MnemonicAcceptance,
@@ -20,6 +20,23 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg64()),
         (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm32()),
     ],
+    b"and": [
+        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
+        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm16()),
+        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm32()),
+        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg64()),
+        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr()),
+        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm8()),
+        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm16()),
+        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm32()),
+        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.reg32()),
+        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr()),
+        (MnemonicOperandSpec.addr(), MnemonicOperandSpec.imm8()),
+        (MnemonicOperandSpec.addr(), MnemonicOperandSpec.imm16()),
+        (MnemonicOperandSpec.addr(), MnemonicOperandSpec.imm32()),
+        (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg64()),
+        (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg32()),
+    ],
     b"bswap": [
         (MnemonicOperandSpec.reg32(),),
         (MnemonicOperandSpec.reg64(),),
@@ -33,12 +50,18 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
         (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr()),
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr()),
     ],
+    b"loop": [
+        (MnemonicOperandSpec.rel(),),
+    ],
     b"mov": [
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm16()),
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm32()),
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm64()),
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg64()),
+        (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.addr()),
+        (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.addr()),
+        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr()),
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr()),
         (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm8()),
         (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm16()),
@@ -47,10 +70,20 @@ INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
         (MnemonicOperandSpec.addr(), MnemonicOperandSpec.imm8()),
         (MnemonicOperandSpec.addr(), MnemonicOperandSpec.imm16()),
         (MnemonicOperandSpec.addr(), MnemonicOperandSpec.imm32()),
+        (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg8()),
+        (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg16()),
+        (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg32()),
         (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg64()),
     ],
     b"nop": [()],
     b"shl": [
+        (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.imm8()),
+        (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.imm8()),
+        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm8()),
+        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
+        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg8(b"cl")),
+    ],
+    b"shr": [
         (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.imm8()),
         (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.imm8()),
         (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm8()),
@@ -67,6 +100,7 @@ def configure_mnemonic_resolution() -> GraphGroup:
         constraint=None,
         produces=("resolutions/mnemonics",),
         requires=frozenset({("mnemonics", "entities/mnemonics")}),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -91,9 +125,18 @@ def configure_mnemonic_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/mnemonics"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
-    return GraphGroup(nodes=[resolve, validate, extract])
+    reject = GraphNode(
+        builder=build_mnemonic_resolution_rejected,
+        constraint=None,
+        produces=("resolutions/mnemonics/rejected",),
+        requires=frozenset({("resolutions", "resolutions/mnemonics")}),
+        views=GraphViews(list=ListRejectedExtractor),
+    )
+
+    return GraphGroup(nodes=[resolve, validate, extract, reject])
 
 
 def build_mnemonic_resolution(
@@ -103,6 +146,8 @@ def build_mnemonic_resolution(
 
     for mid, entry in mnemonics.items():
         resolution = MnemonicResolution(
+            ref=entry.ref,
+            id=mid,
             accepted=[],
             rejected=[],
         )
@@ -111,6 +156,8 @@ def build_mnemonic_resolution(
             resolution.rejected.append(
                 MnemonicRejection(
                     ref=entry.ref,
+                    id=mid,
+                    target=entry,
                     reason="unknown-mnemonic",
                 )
             )
@@ -149,6 +196,18 @@ def build_mnemonic_resolution_accepted(
     return OneToOne[MnemonicId, MnemonicAcceptance].instance(accepted)
 
 
+def build_mnemonic_resolution_rejected(
+    resolutions: OneToOne[MnemonicId, MnemonicResolution],
+    **kwargs: Dict[str, Any],
+) -> OneToMany[MnemonicId, MnemonicRejection]:
+    rejected: Dict[MnemonicId, List[MnemonicRejection]] = {}
+
+    for id, resolution in resolutions.items():
+        rejected[id] = resolution.rejected
+
+    return OneToMany[MnemonicId, MnemonicRejection].instance(rejected)
+
+
 def validate_mnemonic_resolution_e3024(
     mnemonics: OneToOne[MnemonicId, Mnemonic],
     resolutions: OneToOne[MnemonicId, MnemonicResolution],
@@ -173,3 +232,85 @@ def report_mnemonic_resolution_e3024(
         code="E3024",
         message=f"Invalid mnemonic {entry.name.decode()}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[MnemonicId, MnemonicResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[MnemonicId, MnemonicResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: MnemonicId, entry: MnemonicResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListRejectedExtractor:
+    def __init__(self, data: OneToMany[MnemonicId, MnemonicRejection]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[MnemonicId, MnemonicRejection]]:
+        for key, entries in self.data.items():
+            for entry in entries:
+                yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "reason": "Reason",
+        }
+
+    @staticmethod
+    def rows(key: MnemonicId, entry: MnemonicRejection) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.target.name.decode(),
+            "reason": entry.reason,
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[MnemonicId, MnemonicAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[MnemonicId, MnemonicAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "variants": "Variants",
+        }
+
+    @staticmethod
+    def rows(key: MnemonicId, entry: MnemonicAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.name.decode(),
+            "variants": str(len(entry.variants)),
+        }

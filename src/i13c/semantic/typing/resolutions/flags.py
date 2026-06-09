@@ -12,6 +12,7 @@ FlagsRejectionReason = Kind["duplicated-register"]
 @dataclass(kw_only=True)
 class FlagsRejection:
     ref: Span
+    id: FlagsId
     reason: FlagsRejectionReason
 
 
@@ -26,5 +27,8 @@ class FlagsAcceptance:
 
 @dataclass(kw_only=True)
 class FlagsResolution:
+    ref: Span
+    id: FlagsId
+
     accepted: List[FlagsAcceptance]
     rejected: List[FlagsRejection]

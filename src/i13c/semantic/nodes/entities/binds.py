@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.binds import Bind, BindId
@@ -13,6 +13,7 @@ def configure_binds() -> GraphNode:
         constraint=None,
         produces=("entities/binds",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -38,3 +39,32 @@ def build_binds(
         )
 
     return OneToOne[BindId, Bind].instance(binds)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[BindId, Bind]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[BindId, Bind]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "ctx": "Context",
+            "src": "Source",
+            "dst": "Destination",
+        }
+
+    @staticmethod
+    def rows(key: BindId, entry: Bind) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "ctx": entry.ctx.identify(1),
+            "src": entry.src.decode(),
+            "dst": entry.dst.decode(),
+        }

@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
@@ -30,6 +30,7 @@ def configure_function_resolution() -> GraphGroup:
                 ("statements", "resolutions/statements/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -54,6 +55,7 @@ def configure_function_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/functions"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -69,14 +71,17 @@ def build_functions_resolution(
 
     for fid, entry in functions.items():
         resolution = FunctionResolution(
+            ref=entry.ref,
+            id=fid,
             accepted=[],
             rejected=[],
         )
 
         resolution.accepted.append(
             FunctionAcceptance(
-                id=fid,
                 ref=entry.ref,
+                id=fid,
+                signature=signatures.get(entry.signature),
             )
         )
 
@@ -129,3 +134,57 @@ def report_functions_resolution_e3026(
         code="E3026",
         message=f"Function rejected {entry}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[FunctionId, FunctionResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FunctionId, FunctionResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: FunctionId, entry: FunctionResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[FunctionId, FunctionAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[FunctionId, FunctionAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "params": "Parameters",
+        }
+
+    @staticmethod
+    def rows(key: FunctionId, entry: FunctionAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.signature.name.decode(),
+            "params": ", ".join([str(param) for param in entry.signature.parameters]),
+        }

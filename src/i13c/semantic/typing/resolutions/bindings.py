@@ -12,6 +12,7 @@ BindingRejectionReason = Kind["duplicated-binds",]
 @dataclass(kw_only=True)
 class BindingRejection:
     ref: Span
+    owner: SignatureId
     reason: BindingRejectionReason
 
 
@@ -24,5 +25,8 @@ class BindingAcceptance:
 
 @dataclass(kw_only=True)
 class BindingResolution:
+    ref: Span
+    owner: SignatureId
+
     accepted: List[BindingAcceptance]
     rejected: List[BindingRejection]

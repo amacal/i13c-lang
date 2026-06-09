@@ -255,26 +255,44 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
     # address operands starts with a square open bracket
     else:
-        offset: Optional[tree.snippet.Offset] = None
+        operand = parse_address(state, token)
 
-        # now we expect a register as the base
-        base = state.expect(Tokens.IDENT, Tokens.AT)
+    return tree.snippet.Operand(
+        ref=operand.ref,
+        target=operand,
+    )
 
-        if base.code == Tokens.AT:
-            base = parse_reference(state, base)
-        else:
-            base = tree.snippet.Register(
-                ref=state.between(base, base),
-                name=state.extract(base),
-            )
 
-        # optionally, an offset can be provided
-        end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
+def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Address:
+    offset: Optional[tree.snippet.Offset] = None
 
-        if end.code == Tokens.PLUS or end.code == Tokens.MINUS:
-            # if there's a plus or minus, we expect an immediate offset
+    # now we expect a register as the base
+    base = state.expect(Tokens.IDENT, Tokens.AT)
+
+    if base.code == Tokens.AT:
+        base = parse_reference(state, base)
+    else:
+        base = tree.snippet.Register(
+            ref=state.between(base, base),
+            name=state.extract(base),
+        )
+
+    # optionally, an offset or an index can be provided
+    end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
+
+    while end.code != Tokens.SQUARE_CLOSE:
+        # if there's a plus or minus, we expect an immediate offset
+        if end.code == Tokens.MINUS:
             value = state.expect(Tokens.HEX)
+        else:
+            value = state.expect(Tokens.HEX, Tokens.IDENT)
 
+        # if we found an index
+        if value.code == Tokens.IDENT:
+            # index can be closed or followed by an offset
+            end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
+
+        else:
             # determine the sign of the offset
             kind = "forward" if end.code == Tokens.PLUS else "backward"
 
@@ -290,15 +308,10 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
             # address has to be closed with a square close bracket
             end = state.expect(Tokens.SQUARE_CLOSE)
 
-        operand = tree.snippet.Address(
-            ref=state.between(token, end),
-            base=base,
-            offset=offset,
-        )
-
-    return tree.snippet.Operand(
-        ref=operand.ref,
-        target=operand,
+    return tree.snippet.Address(
+        ref=state.between(token, end),
+        base=base,
+        offset=offset,
     )
 
 
@@ -308,6 +321,16 @@ def parse_reference(state: ParsingState, start: LexingToken) -> tree.snippet.Ref
 
     # which has to be extracted
     return tree.snippet.Reference(
+        ref=state.between(start, token),
+        name=state.extract(token),
+    )
+
+
+def parse_label_operand(state: ParsingState, start: LexingToken) -> tree.snippet.Label:
+    # the label name is an identifier
+    token = state.expect(Tokens.IDENT)
+
+    return tree.snippet.Label(
         ref=state.between(start, token),
         name=state.extract(token),
     )

@@ -13,16 +13,20 @@ CallRejectionReason = Kind["unknown"]
 class CallAcceptance:
     ref: Span
     id: CallId
-
     target: CallSiteAcceptance
 
 
 @dataclass(kw_only=True)
 class CallRejection:
+    ref: Span
+    id: CallId
     reason: CallRejectionReason
 
 
 @dataclass(kw_only=True)
 class CallResolution:
+    ref: Span
+    id: CallId
+
     accepted: List[CallAcceptance]
     rejected: List[CallRejection]

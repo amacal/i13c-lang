@@ -29,10 +29,14 @@ class ValueAcceptance:
 @dataclass(kw_only=True)
 class ValueRejection:
     ref: Span
+    id: ValueId
     reason: ValueRejectionReason
 
 
 @dataclass(kw_only=True)
 class ValueResolution:
+    ref: Span
+    id: ValueId
+
     accepted: List[ValueAcceptance]
     rejected: List[ValueRejection]

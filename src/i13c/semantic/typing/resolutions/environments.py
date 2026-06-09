@@ -17,6 +17,7 @@ EnvironmentRejectionReason = Kind["duplicated-name"]
 @dataclass(kw_only=True)
 class EnvironmentRejection:
     ref: Span
+    id: EnvironmentId
     reason: EnvironmentRejectionReason
 
 
@@ -32,5 +33,8 @@ class EnvironmentAcceptance:
 
 @dataclass(kw_only=True)
 class EnvironmentResolution:
+    ref: Span
+    id: EnvironmentId
+
     accepted: List[EnvironmentAcceptance]
     rejected: List[EnvironmentRejection]

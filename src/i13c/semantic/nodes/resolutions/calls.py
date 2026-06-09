@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.calls import Call, CallId
 from i13c.semantic.typing.entities.callsites import CallSiteId
@@ -20,6 +20,7 @@ def configure_call_resolution() -> GraphGroup:
                 ("callsites", "resolutions/callsites/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -44,6 +45,7 @@ def configure_call_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/calls"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -57,6 +59,8 @@ def build_call_resolution(
 
     for cid, entry in calls.items():
         resolution = CallResolution(
+            ref=entry.ref,
+            id=cid,
             accepted=[],
             rejected=[],
         )
@@ -113,3 +117,61 @@ def report_call_resolution_e3025(entry: Call) -> Diagnostic:
         code="E3025",
         message=f"Invalid call {entry}, reason: unknown.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[CallId, CallResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[CallId, CallResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: CallId, entry: CallResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[CallId, CallAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[CallId, CallAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "args": "Arguments",
+            "params": "Parameters",
+        }
+
+    @staticmethod
+    def rows(key: CallId, entry: CallAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.target.signature.name.decode(),
+            "args": ", ".join([str(arg) for arg in entry.target.arguments]),
+            "params": ", ".join(
+                [param.name.decode() for param in entry.target.signature.parameters]
+            ),
+        }

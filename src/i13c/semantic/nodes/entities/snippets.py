@@ -1,6 +1,6 @@
-from typing import Dict, List
+from typing import Dict, Iterable, List, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.flags import FlagsId
@@ -21,6 +21,7 @@ def configure_snippets() -> GraphNode:
         constraint=None,
         produces=("entities/snippets",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -64,3 +65,32 @@ def build_snippets(
         )
 
     return OneToOne[SnippetId, Snippet].instance(snippets)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[SnippetId, Snippet]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[SnippetId, Snippet]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "sig": "Signature",
+            "flags": "Flags",
+            "body": "Body",
+        }
+
+    @staticmethod
+    def rows(key: SnippetId, entry: Snippet) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "sig": entry.signature.identify(1),
+            "flags": entry.flags.identify(1) if entry.flags is not None else "",
+            "body": str(len(entry.body)),
+        }

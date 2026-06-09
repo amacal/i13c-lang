@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.ranges import RangeId
 from i13c.semantic.typing.entities.types import Type, TypeId
@@ -25,6 +25,7 @@ def configure_type_resolution() -> GraphGroup:
                 ("ranges", "resolutions/ranges/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -49,6 +50,7 @@ def configure_type_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/types"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -69,6 +71,8 @@ def build_type_resolution(
 
     for tid, entry in types.items():
         resolution = TypeResolution(
+            ref=entry.ref,
+            id=tid,
             accepted=[],
             rejected=[],
         )
@@ -82,6 +86,7 @@ def build_type_resolution(
             resolution.rejected.append(
                 TypeRejection(
                     ref=entry.ref,
+                    id=tid,
                     reason="unknown-type",
                 )
             )
@@ -90,6 +95,7 @@ def build_type_resolution(
             resolution.rejected.append(
                 TypeRejection(
                     ref=entry.ref,
+                    id=tid,
                     reason="inconsistent-widths",
                 )
             )
@@ -151,3 +157,57 @@ def report_type_resolution_e3009(entry: Type, rejection: TypeRejection) -> Diagn
         code="E3009",
         message=f"Invalid type {entry}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[TypeId, TypeResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[TypeId, TypeResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: TypeId, entry: TypeResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[TypeId, TypeAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[TypeId, TypeAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "width": "Width",
+        }
+
+    @staticmethod
+    def rows(key: TypeId, entry: TypeAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.name.decode(),
+            "width": str(entry.width),
+        }

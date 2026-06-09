@@ -12,6 +12,7 @@ SignatureRejectionReason = Kind["duplicated-name",]
 @dataclass(kw_only=True)
 class SignatureRejection:
     ref: Span
+    id: SignatureId
     reason: SignatureRejectionReason
 
 
@@ -26,5 +27,8 @@ class SignatureAcceptance:
 
 @dataclass(kw_only=True)
 class SignatureResolution:
+    ref: Span
+    id: SignatureId
+
     accepted: List[SignatureAcceptance]
     rejected: List[SignatureRejection]

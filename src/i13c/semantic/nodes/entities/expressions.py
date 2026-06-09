@@ -1,9 +1,11 @@
-from typing import Dict
+from typing import Dict, Iterable, Tuple
 
-from i13c.core.graph import GraphNode
+from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
+from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.statements import StatementId
 
 
 def configure_expressions() -> GraphNode:
@@ -12,6 +14,7 @@ def configure_expressions() -> GraphNode:
         constraint=None,
         produces=("entities/expressions",),
         requires=frozenset({("graph", "syntax/graph")}),
+        views=GraphViews(list=ListExtractor),
     )
 
 
@@ -40,3 +43,32 @@ def build_expressions(
         )
 
     return OneToOne[ExpressionId, Expression].instance(expressions)
+
+
+class ListExtractor:
+    def __init__(self, data: OneToOne[ExpressionId, Expression]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[ExpressionId, Expression]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "fn": "Function",
+            "stmt": "Statement",
+        }
+
+    @staticmethod
+    def rows(key: ExpressionId, entry: Expression) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.name.decode(),
+            "fn": entry.get_function(FunctionId.from_context).identify(1),
+            "stmt": entry.get_statement(StatementId.from_context).identify(1),
+        }

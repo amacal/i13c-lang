@@ -28,5 +28,8 @@ class SnippetAcceptance:
 
 @dataclass(kw_only=True)
 class SnippetResolution:
+    ref: Span
+    id: SnippetId
+
     accepted: List[SnippetAcceptance]
     rejected: List[SnippetRejection]

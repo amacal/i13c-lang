@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.immediates import ImmediateId
@@ -39,6 +39,7 @@ def configure_operand_resolution() -> GraphGroup:
                 ("binds", "indices/binds/parameters"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -63,6 +64,7 @@ def configure_operand_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/operands"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -125,6 +127,8 @@ def build_operand_resolution(
 
     for oid, entry in operands.items():
         resolution = OperandResolution(
+            ref=entry.ref,
+            id=oid,
             accepted=[],
             rejected=[],
         )
@@ -139,6 +143,7 @@ def build_operand_resolution(
                 resolution.rejected.append(
                     OperandRejection(
                         ref=entry.ref,
+                        id=oid,
                         kind=entry.kind,
                         reason="unsupported-register",
                     )
@@ -154,15 +159,12 @@ def build_operand_resolution(
             assert isinstance(entry.target, ReferenceId)
             reference = target = references.get(entry.target)
 
-            if reference.kind == "label":
-                assert isinstance(reference.target, LabelAcceptance)
+            if isinstance(reference.target, LabelAcceptance):
                 symbol, kind = "rel", "relocation"
                 target = reference.target
 
             else:
-                assert isinstance(reference.target, ParameterAcceptance)
                 kind, target = "parameter", reference.target
-
                 bind = binds.get(reference.target.id)
                 symbol = get_bind_symbol(reference.target, bind)
 
@@ -230,3 +232,59 @@ def report_operand_resolution_e3021(
         code="E3021",
         message=f"Invalid operand {entry.kind}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[OperandId, OperandResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[OperandId, OperandResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: OperandId, entry: OperandResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[OperandId, OperandAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[OperandId, OperandAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "kind": "Kind",
+            "symbol": "Symbol",
+            "target": "Target",
+        }
+
+    @staticmethod
+    def rows(key: OperandId, entry: OperandAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "kind": entry.kind,
+            "symbol": entry.symbol,
+            "target": str(entry.target),
+        }

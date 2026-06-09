@@ -9,13 +9,14 @@ from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.syntax.source import Span
 
 ReferenceRejectionReason = Kind["unknown-name"]
-ReferenceKind = Kind["parameter", "label"]
 ReferenceTarget = Union[ParameterAcceptance, LabelAcceptance]
 
 
 @dataclass(kw_only=True)
 class ReferenceRejection:
     ref: Span
+    id: ReferenceId
+
     name: bytes
     reason: ReferenceRejectionReason
 
@@ -26,11 +27,13 @@ class ReferenceAcceptance:
     id: ReferenceId
 
     name: bytes
-    kind: ReferenceKind
     target: ReferenceTarget
 
 
 @dataclass(kw_only=True)
 class ReferenceResolution:
+    ref: Span
+    id: ReferenceId
+
     accepted: List[ReferenceAcceptance]
     rejected: List[ReferenceRejection]

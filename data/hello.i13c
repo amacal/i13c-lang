@@ -20,7 +20,7 @@ asm print_asm(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
     mov [rsp + rcx - 0x30], r11b;
     shr rax, 0x04;
 
-    loop .nibble;
+    loop @nibble;
     mov [rsp - 0x10], 0x0a;
 
     mov rdi, 0x01;
@@ -35,6 +35,6 @@ fn print(value: u64) {
 }
 
 fn main() noreturn {
-  print(0x01020304);
+  print(0x0000000001020304);
   exit(0x00);
 }

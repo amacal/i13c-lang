@@ -3,7 +3,7 @@ from typing import List
 from typing import Literal as Kind
 from typing import Optional, Tuple
 
-from i13c.semantic.typing.entities.mnemonics import MnemonicId
+from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
 from i13c.syntax.source import Span
 
 MnemonicRejectionReason = Kind["unknown-mnemonic",]
@@ -25,6 +25,9 @@ MnemonicOperandSymbol = Kind[
 @dataclass(kw_only=True)
 class MnemonicRejection:
     ref: Span
+    id: MnemonicId
+
+    target: Mnemonic
     reason: MnemonicRejectionReason
 
 
@@ -93,6 +96,9 @@ class MnemonicAcceptance:
 
 @dataclass(kw_only=True)
 class MnemonicResolution:
+    ref: Span
+    id: MnemonicId
+
     accepted: List[MnemonicAcceptance]
     rejected: List[MnemonicRejection]
 

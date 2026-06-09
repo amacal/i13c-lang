@@ -1,7 +1,7 @@
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, Iterable, List, Set, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -25,6 +25,7 @@ def configure_binding_resolution() -> GraphGroup:
                 ("binds", "indices/binds/parameters"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -48,6 +49,7 @@ def configure_binding_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/bindings"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -61,6 +63,8 @@ def build_binding_resolution(
 
     for sid, entry in signatures.items():
         resolution = BindingResolution(
+            ref=entry.ref,
+            owner=sid,
             accepted=[],
             rejected=[],
         )
@@ -75,6 +79,7 @@ def build_binding_resolution(
                     resolution.rejected.append(
                         BindingRejection(
                             ref=bind.ref,
+                            owner=sid,
                             reason="duplicated-binds",
                         )
                     )
@@ -137,3 +142,55 @@ def report_binding_resolution_e3011(
         code="E3011",
         message=f"Duplicated binding {rejection}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[SignatureId, BindingResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[SignatureId, BindingResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "sig": "Signature",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: SignatureId, entry: BindingResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "sig": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[SignatureId, BindingAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[SignatureId, BindingAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "sig": "Signature",
+            "binds": "Binds",
+        }
+
+    @staticmethod
+    def rows(key: SignatureId, entry: BindingAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "sig": key.identify(1),
+            "binds": str(len(entry.binds)),
+        }

@@ -1,7 +1,7 @@
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, Iterable, List, Set, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.registers import Register, RegisterId
 from i13c.semantic.typing.resolutions.registers import (
@@ -23,6 +23,7 @@ def configure_register_resolution() -> GraphGroup:
                 ("registers", "entities/registers"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -47,6 +48,7 @@ def configure_register_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/registers"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -87,6 +89,8 @@ def build_register_resolution(
 
     for rid, entry in registers.items():
         resolution = RegisterResolution(
+            ref=entry.ref,
+            id=rid,
             accepted=[],
             rejected=[],
         )
@@ -95,6 +99,7 @@ def build_register_resolution(
             resolution.rejected.append(
                 RegisterRejection(
                     ref=entry.ref,
+                    id=rid,
                     reason="unknown-register",
                 )
             )
@@ -159,3 +164,59 @@ def report_register_resolution_e3017(
         code="E3017",
         message=f"Invalid register {entry}, reason: {rejection.reason}.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[RegisterId, RegisterResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[RegisterId, RegisterResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: RegisterId, entry: RegisterResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[RegisterId, RegisterAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[RegisterId, RegisterAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "name": "Name",
+            "kind": "Kind",
+            "width": "Width",
+        }
+
+    @staticmethod
+    def rows(key: RegisterId, entry: RegisterAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "name": entry.name.decode(),
+            "kind": entry.kind,
+            "width": str(entry.width),
+        }

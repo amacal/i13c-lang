@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.literals import Literal, LiteralId
 from i13c.semantic.typing.resolutions.literals import (
@@ -20,6 +20,7 @@ def configure_literal_resolution() -> GraphGroup:
                 ("literals", "entities/literals"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -44,6 +45,7 @@ def configure_literal_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/literals"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
     return GraphGroup(nodes=[resolve, validate, extract])
@@ -56,6 +58,8 @@ def build_literal_resolution(
 
     for lid, entry in literals.items():
         resolution = LiteralResolution(
+            ref=entry.ref,
+            id=lid,
             accepted=[],
             rejected=[],
         )
@@ -112,3 +116,57 @@ def report_literal_resolution_e3004(entry: Literal) -> Diagnostic:
         code="E3004",
         message=f"Invalid literal {entry}, reason: unknown.",
     )
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[LiteralId, LiteralResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[LiteralId, LiteralResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: LiteralId, entry: LiteralResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[LiteralId, LiteralAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[LiteralId, LiteralAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "width": "Width",
+            "value": "Value",
+        }
+
+    @staticmethod
+    def rows(key: LiteralId, entry: LiteralAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "width": str(entry.target.width),
+            "value": str(entry.target),
+        }

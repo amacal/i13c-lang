@@ -1,8 +1,8 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from i13c.core.diagnostics import Diagnostic
-from i13c.core.graph import GraphGroup, GraphNode
-from i13c.core.mapping import OneToOne
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
+from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.semantic.typing.entities.operands import OperandId
@@ -31,6 +31,7 @@ def configure_instruction_resolution() -> GraphGroup:
                 ("operands", "resolutions/operands/accepted"),
             }
         ),
+        views=GraphViews(list=ListAllExtractor),
     )
 
     validate = GraphNode(
@@ -55,9 +56,18 @@ def configure_instruction_resolution() -> GraphGroup:
                 ("resolutions", "resolutions/instructions"),
             }
         ),
+        views=GraphViews(list=ListAcceptedExtractor),
     )
 
-    return GraphGroup(nodes=[resolve, validate, extract])
+    reject = GraphNode(
+        builder=build_instruction_resolution_rejected,
+        constraint=None,
+        produces=("resolutions/instructions/rejected",),
+        requires=frozenset({("resolutions", "resolutions/instructions")}),
+        views=GraphViews(list=ListRejectedExtractor),
+    )
+
+    return GraphGroup(nodes=[resolve, validate, extract, reject])
 
 
 def build_instruction_resolution(
@@ -70,6 +80,8 @@ def build_instruction_resolution(
 
     for iid, entry in instructions.items():
         resolution = InstructionResolution(
+            ref=entry.ref,
+            id=iid,
             accepted=[],
             rejected=[],
         )
@@ -85,6 +97,11 @@ def build_instruction_resolution(
                 resolution.rejected.append(
                     InstructionRejection(
                         ref=entry.ref,
+                        id=iid,
+                        target=entry,
+                        mnemonic=mnemonic,
+                        variant=variant,
+                        operands=None,
                         reason="arity-mismatch",
                     )
                 )
@@ -109,6 +126,11 @@ def build_instruction_resolution(
                     resolution.rejected.append(
                         InstructionRejection(
                             ref=entry.ref,
+                            id=iid,
+                            target=entry,
+                            mnemonic=mnemonic,
+                            variant=variant,
+                            operands=tuple(collected),
                             reason=reason,
                         )
                     )
@@ -146,6 +168,11 @@ def build_instruction_resolution(
             resolution.rejected.append(
                 InstructionRejection(
                     ref=entry.ref,
+                    id=iid,
+                    target=entry,
+                    mnemonic=mnemonic,
+                    variant=None,
+                    operands=None,
                     reason="variant-mismatch",
                 )
             )
@@ -174,6 +201,18 @@ def build_instruction_resolution_accepted(
     return OneToOne[InstructionId, InstructionAcceptance].instance(accepted)
 
 
+def build_instruction_resolution_rejected(
+    resolutions: OneToOne[InstructionId, InstructionResolution],
+    **kwargs: Dict[str, Any],
+) -> OneToMany[InstructionId, InstructionRejection]:
+    rejected: Dict[InstructionId, List[InstructionRejection]] = {}
+
+    for id, resolution in resolutions.items():
+        rejected[id] = resolution.rejected
+
+    return OneToMany[InstructionId, InstructionRejection].instance(rejected)
+
+
 def validate_instruction_resolution_e3023(
     instructions: OneToOne[InstructionId, Instruction],
     resolutions: OneToOne[InstructionId, InstructionResolution],
@@ -198,3 +237,94 @@ def report_instruction_resolution_e3023(
         code="E3023",
         message=f"Invalid instruction {str(entry)}, reason: {rejection.reason}.",
     )
+
+
+
+class ListAllExtractor:
+    def __init__(self, data: OneToOne[InstructionId, InstructionResolution]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[InstructionId, InstructionResolution]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+        }
+
+    @staticmethod
+    def rows(key: InstructionId, entry: InstructionResolution) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "accepted": str(len(entry.accepted)),
+            "rejected": str(len(entry.rejected)),
+        }
+
+
+class ListRejectedExtractor:
+    def __init__(self, data: OneToMany[InstructionId, InstructionRejection]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[InstructionId, InstructionRejection]]:
+        for key, entries in self.data.items():
+            for entry in entries:
+                yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "mnemonic": "Mnemonic",
+            "variant": "Variant",
+            "operands": "Operands",
+            "reason": "Reason",
+        }
+
+    @staticmethod
+    def rows(key: InstructionId, entry: InstructionRejection) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "mnemonic": entry.mnemonic.name.decode(),
+            "variant": ", ".join(spec.symbol for spec in entry.variant) if entry.variant else "",
+            "operands": ", ".join(str(op.target) for op in entry.operands) if entry.operands else "",
+            "reason": entry.reason,
+        }
+
+
+class ListAcceptedExtractor:
+    def __init__(self, data: OneToOne[InstructionId, InstructionAcceptance]):
+        self.data = data
+
+    def extract(self) -> Iterable[Tuple[InstructionId, InstructionAcceptance]]:
+        for key, entry in self.data.items():
+            yield key, entry
+
+    @staticmethod
+    def headers() -> Dict[str, str]:
+        return {
+            "ref": "Ref",
+            "id": "ID",
+            "idx": "Index",
+            "mnemonic": "Mnemonic",
+            "variant": "Variant",
+            "operands": "Operands",
+        }
+
+    @staticmethod
+    def rows(key: InstructionId, entry: InstructionAcceptance) -> Dict[str, str]:
+        return {
+            "ref": str(entry.ref),
+            "id": key.identify(1),
+            "idx": str(entry.index),
+            "mnemonic": entry.mnemonic.name.decode(),
+            "variant": ", ".join(spec.symbol for spec in entry.variant),
+            "operands": ", ".join(str(op.target) for op in entry.operands),
+        }
