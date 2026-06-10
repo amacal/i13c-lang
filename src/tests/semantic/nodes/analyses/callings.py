@@ -108,7 +108,7 @@ def can_resolve_callsite_to_asmlet_reduced():
     assert len(calling.arguments) == 0
 
 
-def can_resolve_callsite_to_asmlet_reduced_twiced():
+def can_resolve_callsite_to_asmlet_reduced_twice():
     _, analyses = prepare_analyses("""
         asm foo(x@imm: u8) { }
         fn main() { foo(0x42); foo(0x17); }

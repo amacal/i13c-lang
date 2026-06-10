@@ -84,7 +84,7 @@ def build_asmlets(
             # copy all binds except those that are immediate
             binds = [bind for bind in snippet.binding.binds if bind.src not in removed]
 
-            # copy all paramaters except those that are immediate
+            # copy all parameters except those that are immediate
             parameters = [
                 param
                 for param in snippet.signature.parameters

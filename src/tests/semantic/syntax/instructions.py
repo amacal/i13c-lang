@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_an_instruction_without_any_opperand() -> None:
+def can_visit_an_instruction_without_any_operand() -> None:
     visitor = parse_syntax_graph(
         """
             asm main() { nop; }
