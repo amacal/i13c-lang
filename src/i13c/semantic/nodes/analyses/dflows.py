@@ -42,70 +42,91 @@ def build_data_flows(
         dflow = DataFlows(
             ref=entry.ref,
             target=fid,
-            nodes=[],
+            entry=entry.entry,
+            exit=entry.exit,
+            values=[],
             forward={},
             backward={},
+            nodes=entry.nodes,
+            defs={},
+            uses={},
         )
 
         for idx, node in enumerate(entry.nodes):
             if idx == entry.entry:
-                handle_entry(dflow, functions.get(fid))
+                handle_entry(dflow, idx, functions.get(fid))
 
-            if isinstance(node, FlowNode):
-                handle_node(dflow, statements.get(node.target))
+            elif isinstance(node, FlowNode):
+                handle_node(dflow, idx, statements.get(node.target))
+
+            else:
+                dflow.defs[idx] = []
+                dflow.uses[idx] = []
 
         dflows[fid] = dflow
 
     return OneToOne[FunctionId, DataFlows].instance(dflows)
 
 
-def handle_entry(dflow: DataFlows, target: FunctionAcceptance):
+def handle_entry(dflow: DataFlows, nid: int, target: FunctionAcceptance):
+    dflow.defs[nid] = []
+    dflow.uses[nid] = []
+
     for param in target.signature.parameters:
-        idx = len(dflow.nodes)
-        dflow.nodes.append(param)
+        idx = len(dflow.values)
+        dflow.values.append(param)
+        dflow.defs[nid].append(idx)
         dflow.forward[idx] = []
         dflow.backward[idx] = []
 
 
-def handle_node(dflow: DataFlows, stmt: StatementAcceptance):
+def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
     if isinstance(stmt.target, CallAcceptance):
-        idx = len(dflow.nodes)
-        dflow.nodes.append(stmt.target.target)
+        idx = len(dflow.values)
+        dflow.values.append(stmt.target.target)
+        dflow.defs[nid] = []
+        dflow.uses[nid] = []
         dflow.forward[idx] = []
         dflow.backward[idx] = []
 
         for arg in stmt.target.target.arguments:
             if isinstance(arg, ParameterAcceptance):
-                for nix, node in enumerate(dflow.nodes):
+                for nix, node in enumerate(dflow.values):
                     if isinstance(node, ParameterAcceptance):
                         if node.id == arg.id:
                             dflow.forward[nix].append(idx)
                             dflow.backward[idx].append(nix)
+                            dflow.uses[nid].append(nix)
 
             elif isinstance(arg, ValueAcceptance):
-                for nix, node in enumerate(dflow.nodes):
+                for nix, node in enumerate(dflow.values):
                     if isinstance(node, ValueAcceptance):
                         if node.id == arg.id:
                             dflow.forward[nix].append(idx)
                             dflow.backward[idx].append(nix)
+                            dflow.uses[nid].append(nix)
 
     if isinstance(stmt.target, AssignAcceptance):
-        idx = len(dflow.nodes)
-        dflow.nodes.append(stmt.target.destination)
+        idx = len(dflow.values)
+        dflow.values.append(stmt.target.destination)
+        dflow.defs[nid] = [idx]
+        dflow.uses[nid] = []
         dflow.forward[idx] = []
         dflow.backward[idx] = []
 
         if isinstance(stmt.target.expression, ExpressionAcceptance):
-            for nix, node in enumerate(dflow.nodes):
+            for nix, node in enumerate(dflow.values):
                 if isinstance(node, ParameterAcceptance):
                     if node.id == stmt.target.expression.target.id:
                         dflow.forward[nix].append(idx)
                         dflow.backward[idx].append(nix)
+                        dflow.uses[nid].append(nix)
 
                 elif isinstance(node, ValueAcceptance):
                     if node.id == stmt.target.expression.target.id:
                         dflow.forward[nix].append(idx)
                         dflow.backward[idx].append(nix)
+                        dflow.uses[nid].append(nix)
 
 
 class ListExtractor:
@@ -121,9 +142,12 @@ class ListExtractor:
         return {
             "ref": "Ref",
             "fn": "Function",
-            "nodes": "Nodes",
+            "values": "values",
             "forward": "Forward",
             "backward": "Backward",
+            "nodes": "Nodes",
+            "defs": "Defs",
+            "uses": "Uses",
         }
 
     @staticmethod
@@ -131,7 +155,10 @@ class ListExtractor:
         return {
             "ref": str(entry.ref),
             "fn": key.identify(1),
-            "nodes": str(len(entry.nodes)),
+            "values": str(len(entry.values)),
             "forward": str(len(entry.forward)),
             "backward": str(len(entry.backward)),
+            "nodes": str(len(entry.nodes)),
+            "defs": str(len(entry.defs)),
+            "uses": str(len(entry.uses)),
         }
