@@ -3,7 +3,7 @@ from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.expressions import ExpressionId
-from i13c.semantic.typing.resolutions.cflows import ControlFlowEntry
+from i13c.semantic.typing.resolutions.cflows import ControlFlowEntry, ControlFlowTarget
 from i13c.syntax.source import Span
 
 ExpressionRejectionReason = Kind["unresolved"]
@@ -15,6 +15,7 @@ class ExpressionAcceptance:
     id: ExpressionId
 
     name: bytes
+    target: ControlFlowTarget
     environment: ControlFlowEntry
 
 
@@ -22,6 +23,8 @@ class ExpressionAcceptance:
 class ExpressionRejection:
     ref: Span
     id: ExpressionId
+
+    name: bytes
     reason: ExpressionRejectionReason
 
 

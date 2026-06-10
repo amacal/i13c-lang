@@ -7,6 +7,7 @@ def can_detect_cflow_in_empty_function():
         fn main() { }
     """)
 
+    assert analyses.cflows is not None
     assert analyses.cflows.size() == 1
     _, cflows = analyses.cflows.peak()
 
@@ -31,6 +32,7 @@ def can_detect_cflow_with_a_callsite():
         fn main() { foo(0x42); }
     """)
 
+    assert analyses.cflows is not None
     assert analyses.cflows.size() == 1
     _, cflows = analyses.cflows.peak()
 

@@ -99,6 +99,8 @@ class ListExtractor:
             "ref": "Ref",
             "fn": "Function",
             "nodes": "Nodes",
+            "forward": "Forward",
+            "backward": "Backward",
         }
 
     @staticmethod
@@ -107,4 +109,6 @@ class ListExtractor:
             "ref": str(entry.ref),
             "fn": key.identify(1),
             "nodes": str(len(entry.nodes)),
+            "forward": str(len(entry.forward)),
+            "backward": str(len(entry.backward)),
         }

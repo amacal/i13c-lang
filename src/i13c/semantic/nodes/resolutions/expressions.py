@@ -9,6 +9,7 @@ from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
 from i13c.semantic.typing.resolutions.expressions import (
     ExpressionAcceptance,
+    ExpressionRejection,
     ExpressionResolution,
 )
 
@@ -77,14 +78,26 @@ def build_expression_resolution(
         control_flow: ControlFlowAcceptance = cflows.get(function_id)
         environment = control_flow.environments[statement_id]
 
-        resolution.accepted.append(
-            ExpressionAcceptance(
-                ref=entry.ref,
-                id=eid,
-                name=entry.name,
-                environment=environment,
+        if entry.name not in environment:
+            resolution.rejected.append(
+                ExpressionRejection(
+                    ref=entry.ref,
+                    id=eid,
+                    name=entry.name,
+                    reason="unresolved",
+                )
             )
-        )
+
+        if not resolution.rejected:
+            resolution.accepted.append(
+                ExpressionAcceptance(
+                    ref=entry.ref,
+                    id=eid,
+                    name=entry.name,
+                    target=environment[entry.name],
+                    environment=environment,
+                )
+            )
 
         resolutions[eid] = resolution
 
