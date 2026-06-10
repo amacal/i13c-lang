@@ -6,7 +6,6 @@ from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
-from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.operands import OperandSymbol
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
@@ -35,7 +34,7 @@ class Asmlet:
     binding: List[BindAcceptance]
     parameters: List[ParameterAcceptance]
 
-    flags: Optional[FlagsAcceptance]
+    noreturn: bool
     instructions: List[AsmletInstruction]
     callsites: List[CallSiteAcceptance]
 

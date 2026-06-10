@@ -3,11 +3,11 @@ from typing import Any, Dict, Iterable, List, Tuple
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.flags import FlagsId
+from i13c.semantic.typing.analyses.cflows import ControlFlows
+from i13c.semantic.typing.analyses.noreturns import NoReturn
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.statements import StatementId
-from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.functions import (
     FunctionAcceptance,
     FunctionRejection,
@@ -26,7 +26,8 @@ def configure_function_resolution() -> GraphGroup:
             {
                 ("functions", "entities/functions"),
                 ("signatures", "resolutions/signatures/accepted"),
-                ("flags", "resolutions/flags/accepted"),
+                ("noreturns", "analyses/noreturns"),
+                ("cflows", "analyses/cflows"),
                 ("statements", "resolutions/statements/accepted"),
             }
         ),
@@ -64,7 +65,8 @@ def configure_function_resolution() -> GraphGroup:
 def build_functions_resolution(
     functions: OneToOne[FunctionId, Function],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
-    flags: OneToOne[FlagsId, FlagsAcceptance],
+    noreturns: OneToOne[SignatureId, NoReturn],
+    cflows: OneToOne[FunctionId, ControlFlows],
     statements: OneToOne[StatementId, StatementAcceptance],
 ) -> OneToOne[FunctionId, FunctionResolution]:
     resolutions: Dict[FunctionId, FunctionResolution] = {}
@@ -81,7 +83,9 @@ def build_functions_resolution(
             FunctionAcceptance(
                 ref=entry.ref,
                 id=fid,
+                cflow=cflows.get(fid),
                 signature=signatures.get(entry.signature),
+                noreturn=noreturns.get(entry.signature).outcome,
             )
         )
 
@@ -186,5 +190,6 @@ class ListAcceptedExtractor:
             "ref": str(entry.ref),
             "id": key.identify(1),
             "name": entry.signature.name.decode(),
+            "noreturn": str(entry.noreturn),
             "params": ", ".join([str(param) for param in entry.signature.parameters]),
         }

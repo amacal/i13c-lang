@@ -1,5 +1,5 @@
 from i13c.core.graph import GraphGroup
-from i13c.semantic.nodes.analyses import configure_analyses
+from i13c.semantic.nodes.analyses.core import configure_analyses
 from i13c.semantic.nodes.entities import configure_entities
 from i13c.semantic.nodes.indices.asmlets import configure_asmlets_by_signatures
 from i13c.semantic.nodes.indices.binds import configure_binds_by_parameters

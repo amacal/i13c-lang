@@ -4,7 +4,7 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.semantic.model import IndexEdges, SemanticGraph, SemanticRules
 from i13c.semantic.nodes import configure_nodes
-from i13c.semantic.nodes.analyses import parse_analyses
+from i13c.semantic.nodes.analyses.core import parse_analyses
 from i13c.semantic.nodes.entities import parse_entities
 from i13c.semantic.nodes.resolutions import parse_resolutions
 

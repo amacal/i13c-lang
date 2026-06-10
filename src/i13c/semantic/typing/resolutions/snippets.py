@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
-from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
+from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
 
@@ -22,8 +22,10 @@ class SnippetAcceptance:
 
     binding: BindingAcceptance
     signature: SignatureAcceptance
-    flags: Optional[FlagsAcceptance]
     instructions: List[InstructionAcceptance]
+
+    noreturn: bool
+    clobbers: List[RegisterAcceptance]
 
 
 @dataclass(kw_only=True)

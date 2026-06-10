@@ -34,11 +34,15 @@ test-syntax:
 asm:
 	@ndisasm -b 64 -k0,120 a.out
 
+.PHONY: dump
+dump:
+	@find ./src -type f -name '*.py' -print0 \
+	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump
+
 .PHONY: dump-llvm
 dump-llvm:
 	@find ./src/i13c/llvm -type f -name '*.py' -print0 \
 	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump
-
 
 .PHONY: dump-semantic
 dump-semantic:

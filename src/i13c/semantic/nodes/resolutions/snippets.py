@@ -3,6 +3,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.analyses.noreturns import NoReturn
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -10,6 +11,7 @@ from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
 from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
+from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.snippets import (
     SnippetAcceptance,
@@ -28,6 +30,7 @@ def configure_snippet_resolution() -> GraphGroup:
                 ("snippets", "entities/snippets"),
                 ("signatures", "resolutions/signatures/accepted"),
                 ("instructions", "resolutions/instructions/accepted"),
+                ("noreturns", "analyses/noreturns"),
                 ("flags", "resolutions/flags/accepted"),
                 ("bindings", "resolutions/bindings/accepted"),
             }
@@ -66,6 +69,7 @@ def build_snippet_resolution(
     snippets: OneToOne[SnippetId, Snippet],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
     instructions: OneToOne[InstructionId, InstructionAcceptance],
+    noreturns: OneToOne[SignatureId, NoReturn],
     flags: OneToOne[FlagsId, FlagsAcceptance],
     bindings: OneToOne[SignatureId, BindingAcceptance],
 ) -> OneToOne[SnippetId, SnippetResolution]:
@@ -82,10 +86,14 @@ def build_snippet_resolution(
         signature = signatures.get(entry.signature)
         binding = bindings.get(entry.signature)
 
+        noreturn: bool = False
+        clobbers: List[RegisterAcceptance] = []
+
         if entry.flags is not None:
-            found_flags = flags.get(entry.flags)
-        else:
-            found_flags = None
+            clobbers = flags.get(entry.flags).clobbers
+
+        if found := noreturns.get(entry.signature):
+            noreturn = found.outcome
 
         if len(resolution.rejected) == 0:
             resolution.accepted.append(
@@ -93,7 +101,8 @@ def build_snippet_resolution(
                     ref=entry.ref,
                     id=sid,
                     binding=binding,
-                    flags=found_flags,
+                    noreturn=noreturn,
+                    clobbers=clobbers,
                     signature=signature,
                     instructions=[
                         instructions.get(id)
@@ -206,11 +215,9 @@ class ListAcceptedExtractor:
             "params": ", ".join(
                 [str(param) for param in entry.signature.parameters]
             ),
-            "noreturn": str(entry.flags.noreturn) if entry.flags else "False",
-            "clobbers": (
-                ", ".join([clobber.name.decode() for clobber in entry.flags.clobbers])
-                if entry.flags
-                else ""
-            ),
+            "noreturn": str(entry.noreturn),
+            "clobbers":
+                ", ".join([clobber.name.decode() for clobber in entry.clobbers])
+            ,
             "statements": str(len(entry.instructions)),
         }

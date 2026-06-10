@@ -112,7 +112,7 @@ def build_asmlets(
                 ref=snippet.ref,
                 id=aid,
                 source=sid,
-                flags=snippet.flags,
+                noreturn=snippet.noreturn,
                 keys=dict(keys),
                 signature=snippet.signature,
                 name=snippet.signature.name,

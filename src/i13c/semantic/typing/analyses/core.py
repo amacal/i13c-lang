@@ -7,6 +7,7 @@ from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.analyses.cflows import ControlFlows
 from i13c.semantic.typing.analyses.cgraphs import CallGraph
 from i13c.semantic.typing.analyses.cpaths import ControlPaths
+from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.analyses.noreturns import NoReturn
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -20,4 +21,5 @@ class AnalysisNodes:
     cflows: OneToOne[FunctionId, ControlFlows]
     cgraphs: Optional[OneToOne[SignatureId, CallGraph]]
     cpaths: Optional[OneToOne[FunctionId, ControlPaths]]
+    entrypoints: Optional[OneToOne[SignatureId, Entrypoint]]
     noreturns: Optional[OneToOne[SignatureId, NoReturn]]
