@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, List, Union
 
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.statements import StatementId
@@ -29,8 +28,8 @@ class FlowNode:
         return self.target.identify(length)
 
 
-FlowTarget = Union[StatementId]
-FlowMember = Union[FlowEntry, FlowExit, FlowNode]
+FlowTarget = StatementId
+FlowMember = FlowEntry | FlowExit | FlowNode
 
 @dataclass(kw_only=True)
 class ControlFlows:
@@ -40,7 +39,7 @@ class ControlFlows:
     exit: int
 
     target: FunctionId
-    nodes: List[FlowMember]
+    nodes: list[FlowMember]
 
-    forward: Dict[int, List[int]]
-    backward: Dict[int, List[int]]
+    forward: dict[int, list[int]]
+    backward: dict[int, list[int]]

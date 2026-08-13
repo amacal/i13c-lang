@@ -1,11 +1,8 @@
-from typing import List, Set, Union
-
 from i13c.core import result
 from i13c.core.diagnostics import Diagnostic
 from i13c.syntax import tree
-from i13c.syntax.lexing import TOKEN_NAMES
+from i13c.syntax.lexing import TOKEN_NAMES, Tokens
 from i13c.syntax.lexing import Token as LexingToken
-from i13c.syntax.lexing import Tokens
 from i13c.syntax.parsing.core import (
     FlagAlreadySpecified,
     InvalidHexLiteral,
@@ -20,13 +17,13 @@ from i13c.syntax.source import SourceCode, Span, SpanLike
 
 
 def parse(
-    code: SourceCode, tokens: List[LexingToken]
-) -> result.Result[tree.Program, List[Diagnostic]]:
+    code: SourceCode, tokens: list[LexingToken]
+) -> result.Result[tree.Program, list[Diagnostic]]:
     state = ParsingState(code=code, tokens=tokens, position=0)
-    diagnostics: List[Diagnostic] = []
+    diagnostics: list[Diagnostic] = []
 
-    snippets: List[tree.snippet.Snippet] = []
-    functions: List[tree.function.Function] = []
+    snippets: list[tree.snippet.Snippet] = []
+    functions: list[tree.function.Function] = []
 
     try:
         while not state.is_eof():
@@ -67,7 +64,7 @@ def parse(
 
 def parse_entity(
     state: ParsingState,
-) -> Union[tree.snippet.Snippet, tree.function.Function]:
+) -> tree.snippet.Snippet | tree.function.Function:
     expected = {b"asm", b"fn"}
     keyword = state.expect(Tokens.KEYWORD)
 
@@ -90,7 +87,7 @@ def report_e2000_unexpected_end_of_tokens(offset: int) -> Diagnostic:
 
 
 def report_e2001_unexpected_token(
-    ref: SpanLike, expected: List[int], found: int
+    ref: SpanLike, expected: list[int], found: int
 ) -> Diagnostic:
     found_name = TOKEN_NAMES[found]
     expected_names = [TOKEN_NAMES[token] for token in expected]
@@ -103,7 +100,7 @@ def report_e2001_unexpected_token(
 
 
 def report_e2002_unexpected_keyword(
-    ref: SpanLike, expected: Union[List[bytes], Set[bytes]], found: bytes
+    ref: SpanLike, expected: list[bytes] | set[bytes], found: bytes
 ) -> Diagnostic:
     return Diagnostic(
         ref=ref,

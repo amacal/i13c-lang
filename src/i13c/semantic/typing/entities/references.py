@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 from i13c.semantic.syntax import NodeId
 from i13c.syntax.source import Span

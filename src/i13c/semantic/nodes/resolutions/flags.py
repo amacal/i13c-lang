@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Set, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -59,7 +60,7 @@ def build_flags_resolution(
     flags: OneToOne[FlagsId, Flags],
     registers: OneToOne[RegisterId, RegisterAcceptance],
 ) -> OneToOne[FlagsId, FlagsResolution]:
-    resolutions: Dict[FlagsId, FlagsResolution] = {}
+    resolutions: dict[FlagsId, FlagsResolution] = {}
 
     for fid, entry in flags.items():
         resolution = FlagsResolution(
@@ -69,8 +70,8 @@ def build_flags_resolution(
             rejected=[],
         )
 
-        names: Set[bytes] = set()
-        accepted: List[RegisterAcceptance] = []
+        names: set[bytes] = set()
+        accepted: list[RegisterAcceptance] = []
 
         for id in entry.clobbers or []:
             register = registers.get(id)
@@ -106,17 +107,17 @@ def build_flags_resolution(
 
 
 def check_flags_resolution_accepted(
-    rule_e3002: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3002: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3002) == 0
 
 
 def build_flags_resolution_accepted(
     resolutions: OneToOne[FlagsId, FlagsResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[FlagsId, FlagsAcceptance]:
-    accepted: Dict[FlagsId, FlagsAcceptance] = {}
+    accepted: dict[FlagsId, FlagsAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -127,8 +128,8 @@ def build_flags_resolution_accepted(
 def validate_flags_resolution_e3002(
     flags: OneToOne[FlagsId, Flags],
     resolutions: OneToOne[FlagsId, FlagsResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -156,12 +157,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[FlagsId, FlagsResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FlagsId, FlagsResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FlagsId, FlagsResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -170,7 +170,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: FlagsId, entry: FlagsResolution) -> Dict[str, str]:
+    def rows(key: FlagsId, entry: FlagsResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -183,12 +183,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[FlagsId, FlagsAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FlagsId, FlagsAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FlagsId, FlagsAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -197,7 +196,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: FlagsId, entry: FlagsAcceptance) -> Dict[str, str]:
+    def rows(key: FlagsId, entry: FlagsAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

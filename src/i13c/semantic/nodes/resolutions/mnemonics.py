@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -12,7 +13,7 @@ from i13c.semantic.typing.resolutions.mnemonics import (
     MnemonicVariant,
 )
 
-INSTRUCTIONS_TABLE: Dict[bytes, List[MnemonicVariant]] = {
+INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
     b"add": [
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm16()),
@@ -142,7 +143,7 @@ def configure_mnemonic_resolution() -> GraphGroup:
 def build_mnemonic_resolution(
     mnemonics: OneToOne[MnemonicId, Mnemonic],
 ) -> OneToOne[MnemonicId, MnemonicResolution]:
-    resolutions: Dict[MnemonicId, MnemonicResolution] = {}
+    resolutions: dict[MnemonicId, MnemonicResolution] = {}
 
     for mid, entry in mnemonics.items():
         resolution = MnemonicResolution(
@@ -178,17 +179,17 @@ def build_mnemonic_resolution(
 
 
 def check_mnemonic_resolution_accepted(
-    rule_e3024: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3024: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3024) == 0
 
 
 def build_mnemonic_resolution_accepted(
     resolutions: OneToOne[MnemonicId, MnemonicResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[MnemonicId, MnemonicAcceptance]:
-    accepted: Dict[MnemonicId, MnemonicAcceptance] = {}
+    accepted: dict[MnemonicId, MnemonicAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -198,9 +199,9 @@ def build_mnemonic_resolution_accepted(
 
 def build_mnemonic_resolution_rejected(
     resolutions: OneToOne[MnemonicId, MnemonicResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToMany[MnemonicId, MnemonicRejection]:
-    rejected: Dict[MnemonicId, List[MnemonicRejection]] = {}
+    rejected: dict[MnemonicId, list[MnemonicRejection]] = {}
 
     for id, resolution in resolutions.items():
         rejected[id] = resolution.rejected
@@ -211,8 +212,8 @@ def build_mnemonic_resolution_rejected(
 def validate_mnemonic_resolution_e3024(
     mnemonics: OneToOne[MnemonicId, Mnemonic],
     resolutions: OneToOne[MnemonicId, MnemonicResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -238,12 +239,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[MnemonicId, MnemonicResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[MnemonicId, MnemonicResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[MnemonicId, MnemonicResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -252,7 +252,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: MnemonicId, entry: MnemonicResolution) -> Dict[str, str]:
+    def rows(key: MnemonicId, entry: MnemonicResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -265,13 +265,13 @@ class ListRejectedExtractor:
     def __init__(self, data: OneToMany[MnemonicId, MnemonicRejection]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[MnemonicId, MnemonicRejection]]:
+    def extract(self) -> Iterable[tuple[MnemonicId, MnemonicRejection]]:
         for key, entries in self.data.items():
             for entry in entries:
                 yield key, entry
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -280,7 +280,7 @@ class ListRejectedExtractor:
         }
 
     @staticmethod
-    def rows(key: MnemonicId, entry: MnemonicRejection) -> Dict[str, str]:
+    def rows(key: MnemonicId, entry: MnemonicRejection) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -293,12 +293,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[MnemonicId, MnemonicAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[MnemonicId, MnemonicAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[MnemonicId, MnemonicAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -307,7 +306,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: MnemonicId, entry: MnemonicAcceptance) -> Dict[str, str]:
+    def rows(key: MnemonicId, entry: MnemonicAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -76,7 +77,7 @@ def build_instruction_resolution(
     mnemonics: OneToOne[MnemonicId, MnemonicAcceptance],
     operands: OneToOne[OperandId, OperandAcceptance],
 ) -> OneToOne[InstructionId, InstructionResolution]:
-    resolutions: Dict[InstructionId, InstructionResolution] = {}
+    resolutions: dict[InstructionId, InstructionResolution] = {}
 
     for iid, entry in instructions.items():
         resolution = InstructionResolution(
@@ -91,7 +92,7 @@ def build_instruction_resolution(
 
         # to iterate over all its variants
         for variant in mnemonic.variants:
-            collected: List[OperandAcceptance] = []
+            collected: list[OperandAcceptance] = []
 
             if len(variant) != len(entry.operands):
                 resolution.rejected.append(
@@ -110,16 +111,13 @@ def build_instruction_resolution(
 
             for spec, op in zip(variant, entry.operands):
                 accepted = operands.get(op)
-                reason: Optional[InstructionRejectionReason] = None
+                reason: InstructionRejectionReason | None = None
 
                 if accepted.symbol != spec.symbol:
                     reason = "variant-mismatch"
 
-                if spec.names and not reason:
-                    if not isinstance(accepted.target, RegisterAcceptance):
-                        reason = "register-mismatch"
-
-                    elif accepted.target.name not in spec.names:
+                if spec.names and not reason: # noqa: SIM102
+                    if not isinstance(accepted.target, RegisterAcceptance) or accepted.target.name not in spec.names:
                         reason = "register-mismatch"
 
                 if reason is not None:
@@ -183,17 +181,17 @@ def build_instruction_resolution(
 
 
 def check_instruction_resolution_accepted(
-    rule_e3023: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3023: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3023) == 0
 
 
 def build_instruction_resolution_accepted(
     resolutions: OneToOne[InstructionId, InstructionResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[InstructionId, InstructionAcceptance]:
-    accepted: Dict[InstructionId, InstructionAcceptance] = {}
+    accepted: dict[InstructionId, InstructionAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -203,9 +201,9 @@ def build_instruction_resolution_accepted(
 
 def build_instruction_resolution_rejected(
     resolutions: OneToOne[InstructionId, InstructionResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToMany[InstructionId, InstructionRejection]:
-    rejected: Dict[InstructionId, List[InstructionRejection]] = {}
+    rejected: dict[InstructionId, list[InstructionRejection]] = {}
 
     for id, resolution in resolutions.items():
         rejected[id] = resolution.rejected
@@ -216,8 +214,8 @@ def build_instruction_resolution_rejected(
 def validate_instruction_resolution_e3023(
     instructions: OneToOne[InstructionId, Instruction],
     resolutions: OneToOne[InstructionId, InstructionResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -235,7 +233,7 @@ def report_instruction_resolution_e3023(
     return Diagnostic(
         ref=rejection.ref,
         code="E3023",
-        message=f"Invalid instruction {str(entry)}, reason: {rejection.reason}.",
+        message=f"Invalid instruction {entry!s}, reason: {rejection.reason}.",
     )
 
 
@@ -244,12 +242,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[InstructionId, InstructionResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[InstructionId, InstructionResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[InstructionId, InstructionResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -258,7 +255,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: InstructionId, entry: InstructionResolution) -> Dict[str, str]:
+    def rows(key: InstructionId, entry: InstructionResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -271,13 +268,13 @@ class ListRejectedExtractor:
     def __init__(self, data: OneToMany[InstructionId, InstructionRejection]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[InstructionId, InstructionRejection]]:
+    def extract(self) -> Iterable[tuple[InstructionId, InstructionRejection]]:
         for key, entries in self.data.items():
             for entry in entries:
                 yield key, entry
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -288,7 +285,7 @@ class ListRejectedExtractor:
         }
 
     @staticmethod
-    def rows(key: InstructionId, entry: InstructionRejection) -> Dict[str, str]:
+    def rows(key: InstructionId, entry: InstructionRejection) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -303,12 +300,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[InstructionId, InstructionAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[InstructionId, InstructionAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[InstructionId, InstructionAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -319,7 +315,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: InstructionId, entry: InstructionAcceptance) -> Dict[str, str]:
+    def rows(key: InstructionId, entry: InstructionAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

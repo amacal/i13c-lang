@@ -1,17 +1,14 @@
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
-from typing import Dict, Generic, Iterable, List, Optional, Tuple, TypeVar
-
-SemanticId = TypeVar("SemanticId")
-SemanticNode = TypeVar("SemanticNode")
 
 
 @dataclass(kw_only=True)
-class OneToOne(Generic[SemanticId, SemanticNode]):
-    data: Dict[SemanticId, SemanticNode]
+class OneToOne[SemanticId, SemanticNode]:
+    data: dict[SemanticId, SemanticNode]
 
     @staticmethod
     def instance(
-        data: Dict[SemanticId, SemanticNode],
+        data: dict[SemanticId, SemanticNode],
     ) -> OneToOne[SemanticId, SemanticNode]:
         return OneToOne(data=data)
 
@@ -21,16 +18,19 @@ class OneToOne(Generic[SemanticId, SemanticNode]):
     def contains(self, key: SemanticId) -> bool:
         return key in self.data
 
-    def pop(self) -> Tuple[SemanticId, SemanticNode]:
+    def __iter__(self) -> Iterator[SemanticId]:
+        return iter(self.data)
+
+    def pop(self) -> tuple[SemanticId, SemanticNode]:
         return self.data.popitem()
 
-    def peak(self) -> Tuple[SemanticId, SemanticNode]:
+    def peak(self) -> tuple[SemanticId, SemanticNode]:
         return next(iter(self.data.items()))
 
     def get(self, key: SemanticId) -> SemanticNode:
         return self.data[key]
 
-    def find(self, key: SemanticId) -> Optional[SemanticNode]:
+    def find(self, key: SemanticId) -> SemanticNode | None:
         return self.data.get(key)
 
     def keys(self) -> Iterable[SemanticId]:
@@ -39,17 +39,17 @@ class OneToOne(Generic[SemanticId, SemanticNode]):
     def values(self) -> Iterable[SemanticNode]:
         return self.data.values()
 
-    def items(self) -> Iterable[Tuple[SemanticId, SemanticNode]]:
+    def items(self) -> Iterable[tuple[SemanticId, SemanticNode]]:
         return self.data.items()
 
 
 @dataclass(kw_only=True)
 class OneToMany[SemanticId, SemanticNode]:
-    data: Dict[SemanticId, List[SemanticNode]]
+    data: dict[SemanticId, list[SemanticNode]]
 
     @staticmethod
     def instance(
-        data: Dict[SemanticId, List[SemanticNode]],
+        data: dict[SemanticId, list[SemanticNode]],
     ) -> OneToMany[SemanticId, SemanticNode]:
         return OneToMany(data=data)
 
@@ -59,20 +59,20 @@ class OneToMany[SemanticId, SemanticNode]:
     def keys(self) -> Iterable[SemanticId]:
         return self.data.keys()
 
-    def pop(self) -> Tuple[SemanticId, List[SemanticNode]]:
+    def pop(self) -> tuple[SemanticId, list[SemanticNode]]:
         return self.data.popitem()
 
-    def peak(self) -> Tuple[SemanticId, List[SemanticNode]]:
+    def peak(self) -> tuple[SemanticId, list[SemanticNode]]:
         return next(iter(self.data.items()))
 
-    def get(self, key: SemanticId) -> List[SemanticNode]:
+    def get(self, key: SemanticId) -> list[SemanticNode]:
         return self.data[key]
 
-    def find(self, key: SemanticId) -> List[SemanticNode]:
+    def find(self, key: SemanticId) -> list[SemanticNode]:
         return self.data.get(key, [])
 
-    def values(self) -> Iterable[List[SemanticNode]]:
+    def values(self) -> Iterable[list[SemanticNode]]:
         return self.data.values()
 
-    def items(self) -> Iterable[Tuple[SemanticId, List[SemanticNode]]]:
+    def items(self) -> Iterable[tuple[SemanticId, list[SemanticNode]]]:
         return self.data.items()

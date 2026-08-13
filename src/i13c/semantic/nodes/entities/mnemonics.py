@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -19,7 +19,7 @@ def configure_mnemonics() -> GraphNode:
 def build_mnemonics(
     graph: SyntaxGraph,
 ) -> OneToOne[MnemonicId, Mnemonic]:
-    mnemonics: Dict[MnemonicId, Mnemonic] = {}
+    mnemonics: dict[MnemonicId, Mnemonic] = {}
 
     for mid, node in graph.snippet.mnemonics.items():
         mnemonic_id = MnemonicId(value=mid.value)
@@ -36,12 +36,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[MnemonicId, Mnemonic]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[MnemonicId, Mnemonic]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[MnemonicId, Mnemonic]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -49,7 +48,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: MnemonicId, entry: Mnemonic) -> Dict[str, str]:
+    def rows(key: MnemonicId, entry: Mnemonic) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

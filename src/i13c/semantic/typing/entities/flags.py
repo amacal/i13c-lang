@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Optional
 
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.syntax.source import Span
@@ -16,8 +15,8 @@ class FlagsId:
 @dataclass(kw_only=True)
 class Flags:
     ref: Span
-    noreturn: Optional[bool]
-    clobbers: Optional[List[RegisterId]]
+    noreturn: bool | None
+    clobbers: list[RegisterId] | None
 
     def __str__(self) -> str:
         return f"{self.noreturn}/clobbers={len(self.clobbers or [])}"

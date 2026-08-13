@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
 from i13c.core.mapping import OneToMany, OneToOne
@@ -86,13 +86,13 @@ def configure_self() -> GraphNode:
 
 def build(
     entrypoint: BlockId,
-    blocks: Dict[str, Any],
+    blocks: dict[str, Any],
     flows: OneToMany[BlockId, BlockInstruction],
     instructions: OneToMany[BlockId, Instruction],
-    functions: Dict[str, Any],
-    patches: Dict[str, Any],
-    iregs: Dict[str, OneToOne[BlockInstructionId, Registers]],
-    bregs: Dict[str, OneToOne[BlockId, Registers]],
+    functions: dict[str, Any],
+    patches: dict[str, Any],
+    iregs: dict[str, OneToOne[BlockInstructionId, Registers]],
+    bregs: dict[str, OneToOne[BlockId, Registers]],
     registers: OneToOne[None, VirtualRegister],
 ) -> LowLevelGraph:
     return LowLevelGraph(

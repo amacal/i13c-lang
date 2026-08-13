@@ -1,4 +1,3 @@
-from typing import Optional
 
 from i13c.encoding import kind
 from i13c.encoding.core import UnreachableEncodingError
@@ -395,7 +394,7 @@ def can_encode_modrm_rm_m64_base_only(base: str, encoding: bytes):
     """
 )
 def can_encode_modrm_rm_m64_index_only(
-    scale: llvm.ScaleValue, index: str, encoding: Optional[bytes]
+    scale: llvm.ScaleValue, index: str, encoding: bytes | None
 ):
     addr = llvm.ComputedAddress(
         base=llvm.Register.none(),
@@ -434,7 +433,7 @@ def can_encode_modrm_rm_m64_all(
     index: str,
     base: str,
     disp32: bytes,
-    encoding: Optional[bytes],
+    encoding: bytes | None,
 ):
     addr = llvm.ComputedAddress(
         base=llvm.Register.parse64(base),

@@ -1,4 +1,5 @@
-from typing import Dict, FrozenSet, Iterable, List, Protocol, Tuple, Type, Union
+from collections.abc import Iterable
+from typing import Protocol
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode, GraphViews
@@ -50,12 +51,12 @@ def build_asmlets(
     callsites: OneToMany[SignatureId, CallSiteAcceptance],
     snippets: OneToOne[SnippetId, SnippetAcceptance],
 ) -> OneToOne[AsmletId, Asmlet]:
-    asmlets: Dict[AsmletId, Asmlet] = {}
+    asmlets: dict[AsmletId, Asmlet] = {}
 
     for sid, snippet in snippets.items():
-        removed: List[bytes] = []
-        positions: List[bool] = [False] * len(snippet.binding.binds)
-        index: Dict[FrozenSet[Tuple[bytes, Hex]], List[CallSiteAcceptance]] = {}
+        removed: list[bytes] = []
+        positions: list[bool] = [False] * len(snippet.binding.binds)
+        index: dict[frozenset[tuple[bytes, Hex]], list[CallSiteAcceptance]] = {}
 
         for idx, bind in enumerate(snippet.binding.binds):
             if bind.is_immediate():
@@ -64,7 +65,7 @@ def build_asmlets(
                 positions[idx] = True
 
         for callsite in callsites.find(snippet.signature.id):
-            keys: List[Tuple[bytes, Hex]] = []
+            keys: list[tuple[bytes, Hex]] = []
 
             for idx, (bind, argument) in enumerate(
                 zip(snippet.binding.binds, callsite.arguments)
@@ -92,7 +93,7 @@ def build_asmlets(
             ]
 
             # mapping of parameter name to bind source for all register parameters
-            mapping: Dict[bytes, Union[bytes, Hex]] = {
+            mapping: dict[bytes, bytes | Hex] = {
                 bind.src: bind.dst for bind in binds
             }
 
@@ -128,7 +129,7 @@ def build_asmlets(
 def register_converter(
     ctx: InstructionAcceptance,
     src: RegisterAcceptance,
-    binds: Dict[bytes, Union[bytes, Hex]],
+    binds: dict[bytes, bytes | Hex],
 ) -> AsmletOperandRegister:
     return AsmletOperandRegister(name=src.name)
 
@@ -136,7 +137,7 @@ def register_converter(
 def immediate_converter(
     ctx: InstructionAcceptance,
     src: ImmediateAcceptance,
-    binds: Dict[bytes, Union[bytes, Hex]],
+    binds: dict[bytes, bytes | Hex],
 ) -> AsmletOperandImmediate:
     return AsmletOperandImmediate(value=src.value)
 
@@ -144,7 +145,7 @@ def immediate_converter(
 def label_converter(
     ctx: InstructionAcceptance,
     src: LabelAcceptance,
-    binds: Dict[bytes, Union[bytes, Hex]],
+    binds: dict[bytes, bytes | Hex],
 ) -> AsmletOperandRelocation:
     return AsmletOperandRelocation(offset=src.index - ctx.index)
 
@@ -152,11 +153,8 @@ def label_converter(
 def parameter_converter(
     ctx: InstructionAcceptance,
     src: ParameterAcceptance,
-    binds: Dict[bytes, Union[bytes, Hex]],
-) -> Union[
-    AsmletOperandRegister,
-    AsmletOperandImmediate,
-]:
+    binds: dict[bytes, bytes | Hex],
+) -> AsmletOperandRegister | AsmletOperandImmediate:
 
     # the parameter resolved to a value via binds
     value = binds[src.name]
@@ -173,7 +171,7 @@ def parameter_converter(
 def address_converter(
     ctx: InstructionAcceptance,
     src: AddressAcceptance,
-    binds: Dict[bytes, Union[bytes, Hex]],
+    binds: dict[bytes, bytes | Hex],
 ) -> AsmletOperandAddress:
 
     # the base of an address can only be a register
@@ -203,11 +201,11 @@ class OperandConverter(Protocol):
         self,
         ctx: InstructionAcceptance,
         src: OperandTarget,
-        binds: Dict[bytes, Union[bytes, Hex]],
+        binds: dict[bytes, bytes | Hex],
     ) -> AsmletOperandTarget: ...
 
 
-DISPATCH_TABLE: Dict[Type[OperandTarget], OperandConverter] = {
+DISPATCH_TABLE: dict[type[OperandTarget], OperandConverter] = {
     AddressAcceptance: address_converter,
     ImmediateAcceptance: immediate_converter,
     LabelAcceptance: label_converter,
@@ -219,7 +217,7 @@ DISPATCH_TABLE: Dict[Type[OperandTarget], OperandConverter] = {
 def rewrite_operand(
     ctx: InstructionAcceptance,
     src: OperandAcceptance,
-    binds: Dict[bytes, Union[bytes, Hex]],
+    binds: dict[bytes, bytes | Hex],
 ) -> AsmletOperand:
     return AsmletOperand(
         ref=src.ref,
@@ -230,7 +228,7 @@ def rewrite_operand(
 
 def rewrite_instruction(
     src: InstructionAcceptance,
-    binds: Dict[bytes, Union[bytes, Hex]],
+    binds: dict[bytes, bytes | Hex],
 ) -> AsmletInstruction:
     return AsmletInstruction(
         ref=src.ref,
@@ -244,12 +242,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[AsmletId, Asmlet]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[AsmletId, Asmlet]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[AsmletId, Asmlet]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -263,7 +260,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: AsmletId, entry: Asmlet) -> Dict[str, str]:
+    def rows(key: AsmletId, entry: Asmlet) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

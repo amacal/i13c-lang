@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.analyses.asmlets import configure_asmlets
@@ -27,7 +27,7 @@ def configure_analyses() -> GraphGroup:
     )
 
 
-def parse_analyses(analyses: Dict[str, Any]) -> AnalysisNodes:
+def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
     return AnalysisNodes(
         asmlets=analyses.get("analyses/asmlets"),
         callings=analyses.get("analyses/callings"),

@@ -1,4 +1,5 @@
-from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, Union
+from collections.abc import Callable, Iterable, Sequence
+from typing import Any
 
 from pytest import mark
 
@@ -7,7 +8,7 @@ from i13c.encoding.core import UnreachableEncodingError
 from i13c.llvm.typing.instructions import Instruction, core
 
 
-def parse_value(header: str, value: str) -> Optional[Union[str, int, bytes]]:
+def parse_value(header: str, value: str) -> str | int | bytes | None:
     if not value.strip(" -"):
         return None
 
@@ -20,14 +21,14 @@ def parse_value(header: str, value: str) -> Optional[Union[str, int, bytes]]:
     return value
 
 
-def parse_encoding(value: str) -> Optional[bytes]:
+def parse_encoding(value: str) -> bytes | None:
     return bytes.fromhex(value) if "!" not in value else None
 
 
 def parse_samples(
     table: str,
-) -> Tuple[Sequence[str], Iterable[Sequence[Union[int, str, Optional[bytes]]]]]:
-    rows: List[Sequence[Union[int, str, Optional[bytes]]]] = []
+) -> tuple[Sequence[str], Iterable[Sequence[int | str | bytes | None]]]:
+    rows: list[Sequence[int | str | bytes | None]] = []
     lines = [line.strip("|\n ") for line in table.splitlines()[2:-1]]
     headers = [h.strip().lower() for h in lines[0].split("|")]
 
@@ -63,11 +64,11 @@ def samples(table: str):
 
 
 def parse_address(
-    base: Optional[str],
-    scale: Optional[core.ScaleValue],
-    index: Optional[str],
-    disp32: Optional[bytes],
-) -> Union[core.ComputedAddress, core.RelativeAddress]:
+    base: str | None,
+    scale: core.ScaleValue | None,
+    index: str | None,
+    disp32: bytes | None,
+) -> core.ComputedAddress | core.RelativeAddress:
 
     if base == "rip" and scale is None and index is None:
         return core.RelativeAddress(
@@ -83,7 +84,7 @@ def parse_address(
     )
 
 
-def encode_instruction(instruction: Instruction, encoding: Optional[bytes]) -> None:
+def encode_instruction(instruction: Instruction, encoding: bytes | None) -> None:
     try:
         encoded = encode([instruction]).hex(" ")
 

@@ -1,4 +1,3 @@
-from typing import Dict
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
@@ -22,6 +21,6 @@ def configure_registers() -> GraphNode:
 def build_registers(
     generator: Generator,
 ) -> OneToOne[None, VirtualRegister]:
-    registers: Dict[None, VirtualRegister] = {}
+    registers: dict[None, VirtualRegister] = {}
 
     return OneToOne[None, VirtualRegister](data=registers)

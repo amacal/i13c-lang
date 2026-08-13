@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -21,7 +21,7 @@ def configure_expressions() -> GraphNode:
 def build_expressions(
     graph: SyntaxGraph,
 ) -> OneToOne[ExpressionId, Expression]:
-    expressions: Dict[ExpressionId, Expression] = {}
+    expressions: dict[ExpressionId, Expression] = {}
 
     for nid, expression in graph.function.expressions.items():
         # derive expression ID from globally unique node ID
@@ -49,12 +49,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[ExpressionId, Expression]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ExpressionId, Expression]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ExpressionId, Expression]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -64,7 +63,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: ExpressionId, entry: Expression) -> Dict[str, str]:
+    def rows(key: ExpressionId, entry: Expression) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.binds import BindId
@@ -36,5 +35,5 @@ class BindAcceptance:
 
 @dataclass(kw_only=True)
 class BindResolution:
-    accepted: List[BindAcceptance]
-    rejected: List[BindRejection]
+    accepted: list[BindAcceptance]
+    rejected: list[BindRejection]

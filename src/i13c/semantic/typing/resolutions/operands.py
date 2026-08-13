@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
-from typing import Union
 
 from i13c.semantic.typing.entities.operands import OperandId
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
@@ -14,13 +12,13 @@ from i13c.syntax.source import Span
 OperandRejectionReason = Kind["unsupported-register"]
 OperandKind = Kind["register", "immediate", "parameter", "relocation", "address"]
 
-OperandTarget = Union[
-    RegisterAcceptance,
-    ImmediateAcceptance,
-    ParameterAcceptance,
-    LabelAcceptance,
-    AddressAcceptance,
-]
+OperandTarget = (
+    RegisterAcceptance
+    | ImmediateAcceptance
+    | ParameterAcceptance
+    | LabelAcceptance
+    | AddressAcceptance
+)
 
 OperandSymbol = Kind[
     "reg8",
@@ -60,5 +58,5 @@ class OperandResolution:
     ref: Span
     id: OperandId
 
-    accepted: List[OperandAcceptance]
-    rejected: List[OperandRejection]
+    accepted: list[OperandAcceptance]
+    rejected: list[OperandRejection]

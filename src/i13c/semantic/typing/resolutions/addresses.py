@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
-from typing import Optional, Union
 
 from i13c.semantic.typing.entities.addresses import AddressId, OffsetKind
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
@@ -15,7 +13,7 @@ AddressRejectionReason = Kind[
 ]
 
 OffsetWidth = Kind[8, 16, 32]
-AddressBase = Union[RegisterAcceptance, ParameterAcceptance]
+AddressBase = RegisterAcceptance | ParameterAcceptance
 
 
 @dataclass(kw_only=True)
@@ -43,7 +41,7 @@ class AddressAcceptance:
     id: AddressId
 
     base: AddressBase
-    offset: Optional[OffsetAcceptance]
+    offset: OffsetAcceptance | None
 
     def __str__(self) -> str:
         output = self.base.name.decode()
@@ -62,5 +60,5 @@ class AddressResolution:
     ref: Span
     id: AddressId
 
-    accepted: List[AddressAcceptance]
-    rejected: List[AddressRejection]
+    accepted: list[AddressAcceptance]
+    rejected: list[AddressRejection]

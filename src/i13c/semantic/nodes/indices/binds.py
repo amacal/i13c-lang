@@ -1,4 +1,3 @@
-from typing import Dict
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
@@ -23,9 +22,9 @@ def configure_binds_by_parameters() -> GraphNode:
 def build_binds_by_parameters(
     binds: OneToOne[BindId, BindAcceptance],
 ) -> OneToOne[ParameterId, BindAcceptance]:
-    index: Dict[ParameterId, BindAcceptance] = {}
+    index: dict[ParameterId, BindAcceptance] = {}
 
-    for _, entry in binds.items():
+    for entry in binds.values():
         index[entry.ctx] = entry
 
     return OneToOne[ParameterId, BindAcceptance].instance(index)

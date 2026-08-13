@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
@@ -24,9 +23,9 @@ def configure_callsites_by_signatures() -> GraphNode:
 def build_callsites_by_signatures(
     callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ) -> OneToMany[SignatureId, CallSiteAcceptance]:
-    index: Dict[SignatureId, List[CallSiteAcceptance]] = {}
+    index: dict[SignatureId, list[CallSiteAcceptance]] = {}
 
-    for _, entry in callsites.items():
+    for entry in callsites.values():
         data = index.get(entry.signature.id)
 
         if data is None:
@@ -53,9 +52,9 @@ def configure_callsites_by_statements() -> GraphNode:
 def build_callsites_by_statements(
     callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ) -> OneToMany[StatementId, CallSiteAcceptance]:
-    index: Dict[StatementId, List[CallSiteAcceptance]] = {}
+    index: dict[StatementId, list[CallSiteAcceptance]] = {}
 
-    for _, entry in callsites.items():
+    for entry in callsites.values():
         data = index.get(entry.stmt)
 
         if data is None:

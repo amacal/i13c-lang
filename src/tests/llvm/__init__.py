@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.result import Err, Ok
 from i13c.graph.nodes import run as run_graph
@@ -11,13 +9,13 @@ from i13c.syntax.source import open_text
 
 
 class FixtureException(Exception):
-    def __init__(self, diagnostics: List[Diagnostic]) -> None:
+    def __init__(self, diagnostics: list[Diagnostic]) -> None:
         self.diagnostics = diagnostics
         super().__init__(diagnostics[0])
 
 
 class GraphFixtureException(Exception):
-    def __init__(self, diagnostics: List[Diagnostic]) -> None:
+    def __init__(self, diagnostics: list[Diagnostic]) -> None:
         self.diagnostics = diagnostics
         super().__init__(f"LLVM Graph cannot be created: {diagnostics[0].message}")
 
@@ -27,22 +25,22 @@ class MissingMainInFixture(Exception):
         super().__init__("main function is missing in fixture")
 
 
-def prepare_graph(code: str) -> Tuple[SemanticGraph, LowLevelGraph]:
+def prepare_graph(code: str) -> tuple[SemanticGraph, LowLevelGraph]:
     source = open_text(code)
 
     match tokenize(source):
         case Err(diagnostics):
             raise FixtureException(diagnostics)
         case Ok(tokens):
-            tokens = tokens
+            tokenized = tokens
 
-    match parse(source, tokens):
+    match parse(source, tokenized):
         case Err(diagnostics):
             raise FixtureException(diagnostics)
         case Ok(program):
-            program = program
+            compiled = program
 
-    artifacts = run_graph(program)
+    artifacts = run_graph(compiled)
 
     if artifacts.rules().count() > 0:
         raise GraphFixtureException(list(artifacts.rules().enumerate()))
@@ -50,7 +48,7 @@ def prepare_graph(code: str) -> Tuple[SemanticGraph, LowLevelGraph]:
     return artifacts.semantic_graph(), artifacts.llvm_graph()
 
 
-def prepare_main(code: str) -> List[str]:
+def prepare_main(code: str) -> list[str]:
     semantic, llvm = prepare_graph(code)
 
     # if main is found return all instructions in main

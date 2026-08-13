@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
@@ -22,9 +21,9 @@ def configure_asmlets_by_signatures() -> GraphNode:
 def build_asmlets_by_signatures(
     asmlets: OneToOne[AsmletId, Asmlet],
 ) -> OneToMany[SignatureId, Asmlet]:
-    index: Dict[SignatureId, List[Asmlet]] = {}
+    index: dict[SignatureId, list[Asmlet]] = {}
 
-    for _, entry in asmlets.items():
+    for entry in asmlets.values():
         data = index.get(entry.signature.id)
 
         if data is None:

@@ -1,4 +1,4 @@
-from typing import Dict, Protocol
+from typing import Protocol
 
 from i13c.core.generator import Generator
 from i13c.core.mapping import OneToOne
@@ -15,7 +15,7 @@ def lower_instruction(
     generator: Generator,
     operands: OneToOne[OperandId, Operand],
     instruction: SemanticInstruction,
-    rewritten: Dict[OperandId, Operand],
+    rewritten: dict[OperandId, Operand],
 ) -> InstructionEntry:
 
     # if instruction.mnemonic.name in DISPATCH_TABLE:
@@ -30,7 +30,7 @@ def lower_instruction_syscall(
     generator: Generator,
     operands: OneToOne[OperandId, Operand],
     instruction: SemanticInstruction,
-    rewritten: Dict[OperandId, Operand],
+    rewritten: dict[OperandId, Operand],
 ) -> InstructionEntry:
 
     # syscall has no operands, so we can ignore them
@@ -43,11 +43,11 @@ class InstructionHandler(Protocol):
         generator: Generator,
         operands: OneToOne[OperandId, Operand],
         instruction: SemanticInstruction,
-        rewritten: Dict[OperandId, Operand],
+        rewritten: dict[OperandId, Operand],
     ) -> InstructionEntry: ...
 
 
-DISPATCH_TABLE: Dict[bytes, InstructionHandler] = {
+DISPATCH_TABLE: dict[bytes, InstructionHandler] = {
     b"add": math.lower_instruction_add,
     b"bswap": bits.lower_instruction_bswap,
     b"lea": addr.lower_instruction_lea,

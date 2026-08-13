@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Union
 
 from i13c.llvm.typing.flows import BlockId
 
@@ -24,4 +23,4 @@ class ExitTerminator:
         return "Exit"
 
 
-Terminator = Union[JumpTerminator, TrapTerminator, ExitTerminator]
+Terminator = JumpTerminator | TrapTerminator | ExitTerminator

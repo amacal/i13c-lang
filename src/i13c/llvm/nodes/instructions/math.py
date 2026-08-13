@@ -1,4 +1,4 @@
-from typing import Dict, Protocol, Tuple
+from typing import Protocol
 
 from i13c.core.generator import Generator
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
@@ -50,7 +50,7 @@ class InstructionHandler(Protocol):
     ) -> InstructionEntry: ...
 
 
-DISPATCH_TABLE: Dict[Tuple[OperandSymbol, OperandSymbol], InstructionHandler] = {
+DISPATCH_TABLE: dict[tuple[OperandSymbol, OperandSymbol], InstructionHandler] = {
     ("reg64", "imm32"): lower_register_immediate,
     ("reg64", "reg64"): lower_register_register,
 }  # pyright: ignore[reportAssignmentType]

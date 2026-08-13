@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -61,7 +62,7 @@ def build_reference_resolution(
     references: OneToOne[ReferenceId, Reference],
     environments: OneToOne[SnippetId, EnvironmentAcceptance],
 ) -> OneToOne[ReferenceId, ReferenceResolution]:
-    resolutions: Dict[ReferenceId, ReferenceResolution] = {}
+    resolutions: dict[ReferenceId, ReferenceResolution] = {}
 
     for rid, entry in references.items():
         resolution = ReferenceResolution(
@@ -101,17 +102,17 @@ def build_reference_resolution(
 
 
 def check_reference_resolution_accepted(
-    rule_e3020: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3020: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3020) == 0
 
 
 def build_reference_resolution_accepted(
     resolutions: OneToOne[ReferenceId, ReferenceResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[ReferenceId, ReferenceAcceptance]:
-    accepted: Dict[ReferenceId, ReferenceAcceptance] = {}
+    accepted: dict[ReferenceId, ReferenceAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -122,8 +123,8 @@ def build_reference_resolution_accepted(
 def validate_reference_resolution_e3020(
     references: OneToOne[ReferenceId, Reference],
     resolutions: OneToOne[ReferenceId, ReferenceResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -150,12 +151,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[ReferenceId, ReferenceResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ReferenceId, ReferenceResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ReferenceId, ReferenceResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -164,7 +164,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: ReferenceId, entry: ReferenceResolution) -> Dict[str, str]:
+    def rows(key: ReferenceId, entry: ReferenceResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -177,12 +177,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[ReferenceId, ReferenceAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ReferenceId, ReferenceAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ReferenceId, ReferenceAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -194,7 +193,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: ReferenceId, entry: ReferenceAcceptance) -> Dict[str, str]:
+    def rows(key: ReferenceId, entry: ReferenceAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

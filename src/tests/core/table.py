@@ -1,11 +1,10 @@
-from typing import Dict, List
 
 from i13c.core.table import draw_table
 
 
 def can_draw_empty_table():
     headers = {"name": "Name", "age": "Age"}
-    rows: List[Dict[str, str]] = []
+    rows: list[dict[str, str]] = []
 
     draw_table(headers, rows).equals(
         """

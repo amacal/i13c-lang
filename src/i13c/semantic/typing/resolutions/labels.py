@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from i13c.semantic.typing.entities.labels import LabelId, LabelTarget
 from i13c.syntax.source import Span
@@ -29,5 +28,5 @@ class LabelResolution:
     ref: Span
     id: LabelId
 
-    accepted: List[LabelAcceptance]
-    rejected: List[LabelRejection]
+    accepted: list[LabelAcceptance]
+    rejected: list[LabelRejection]

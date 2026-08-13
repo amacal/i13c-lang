@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.syntax.source import Span
@@ -17,4 +16,4 @@ class SignatureId:
 class Signature:
     ref: Span
     name: bytes
-    parameters: List[ParameterId]
+    parameters: list[ParameterId]

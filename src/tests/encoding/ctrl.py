@@ -1,4 +1,3 @@
-from typing import List
 
 from pytest import raises
 
@@ -9,7 +8,7 @@ from i13c.llvm.typing.instructions.ctrl import Call, Jump, Label, Nop, Return, S
 
 
 def can_encode_instructions_nop_twice():
-    flow: List[Instruction] = [
+    flow: list[Instruction] = [
         Nop(),
         Nop(),
     ]
@@ -20,7 +19,7 @@ def can_encode_instructions_nop_twice():
     assert bytecode == expected
 
 def can_encode_instructions_syscall():
-    flow: List[Instruction] = [
+    flow: list[Instruction] = [
         SysCall(),
     ]
 
@@ -31,7 +30,7 @@ def can_encode_instructions_syscall():
 
 
 def can_encode_instructions_jump_forward():
-    flow: List[Instruction] = [
+    flow: list[Instruction] = [
         Jump(target=BlockId(value=1)),
         Nop(),
         Label(id=BlockId(value=1)),
@@ -44,7 +43,7 @@ def can_encode_instructions_jump_forward():
 
 
 def can_encode_call_with_forward_relocation():
-    flow: List[Instruction] = [
+    flow: list[Instruction] = [
         Call(target=BlockId(value=1)),
         Return(),
         Label(id=BlockId(value=1)),
@@ -58,7 +57,7 @@ def can_encode_call_with_forward_relocation():
 
 
 def can_reject_call_to_missing_label():
-    flow: List[Instruction] = [Call(target=BlockId(value=9))]
+    flow: list[Instruction] = [Call(target=BlockId(value=9))]
 
     with raises(MissingLabelError) as error:
         encode(flow)
@@ -69,7 +68,7 @@ def can_reject_call_to_missing_label():
 
 
 def can_reject_duplicate_labels():
-    flow: List[Instruction] = [
+    flow: list[Instruction] = [
         Label(id=BlockId(value=1)),
         Return(),
         Label(id=BlockId(value=1)),

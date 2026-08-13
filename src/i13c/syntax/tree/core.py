@@ -1,5 +1,6 @@
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Iterator, List, Type, TypeVar
+from typing import Any, TypeVar
 
 PathNode = TypeVar("PathNode")
 
@@ -7,10 +8,10 @@ PathNode = TypeVar("PathNode")
 class Path:
     def __init__(self) -> None:
         self._count: int = 0
-        self._nodes: List[Any] = []
+        self._nodes: list[Any] = []
 
     @contextmanager
-    def push(self, node: Any) -> Iterator["Path"]:
+    def push(self, node: Any) -> Generator[Path]:
 
         if len(self._nodes) == self._count:
             self._count += 1
@@ -24,7 +25,7 @@ class Path:
         finally:
             self._count -= 1
 
-    def contains(self, type: Type[PathNode]) -> bool:
+    def contains(self, type: type[PathNode]) -> bool:
         for i in range(self._count - 1, -1, -1):
             node = self._nodes[i]
             if isinstance(node, type):
@@ -32,7 +33,7 @@ class Path:
 
         return False
 
-    def find(self, type: Type[PathNode]) -> PathNode:
+    def find(self, type: type[PathNode]) -> PathNode:
         for i in range(self._count - 1, -1, -1):
             node = self._nodes[i]
             if isinstance(node, type):

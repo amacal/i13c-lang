@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from typing import List, Optional, Protocol, Union
+from typing import Protocol
 
-import i13c.syntax.tree.literals as literals
-import i13c.syntax.tree.types as types
 from i13c.syntax.source import Span
+from i13c.syntax.tree import literals, types
 from i13c.syntax.tree.core import Path
 
 
@@ -43,7 +42,7 @@ class Expression:
         visitor.on_expression(self, path)
 
 
-Argument = Union[Literal, Expression]
+Argument = Literal | Expression
 
 
 @dataclass(kw_only=True, eq=False)
@@ -63,7 +62,7 @@ class Parameter:
 class CallSite:
     ref: Span
     name: bytes
-    arguments: List[Argument]
+    arguments: list[Argument]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_callsite(self, path)
@@ -89,7 +88,7 @@ class CallStatement:
             self.target.accept(visitor, node)
 
 
-ValueExpression = Union[Literal, Expression]
+ValueExpression = Literal | Expression
 
 
 @dataclass(kw_only=True, eq=False)
@@ -126,7 +125,7 @@ class AssignStatement:
 class Signature:
     ref: Span
     name: bytes
-    params: List[Parameter]
+    params: list[Parameter]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_signature(self, path)
@@ -136,7 +135,7 @@ class Signature:
                 entry.accept(visitor, node)
 
 
-StatementTarget = Union[CallStatement, AssignStatement]
+StatementTarget = CallStatement | AssignStatement
 
 
 @dataclass(kw_only=True, eq=False)
@@ -154,7 +153,7 @@ class Statement:
 @dataclass(kw_only=True, eq=False)
 class Flags:
     ref: Span
-    noreturn: Optional[bool]
+    noreturn: bool | None
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_flags(self, path)
@@ -164,8 +163,8 @@ class Flags:
 class Function:
     ref: Span
     signature: Signature
-    flags: Optional[Flags]
-    statements: List[Statement]
+    flags: Flags | None
+    statements: list[Statement]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_function(self, path)

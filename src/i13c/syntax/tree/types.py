@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Protocol
 
 from i13c.syntax.source import Span
 from i13c.syntax.tree.core import Path
@@ -15,7 +15,7 @@ class Visitor(Protocol):
 class Type:
     ref: Span
     name: bytes
-    range: Optional[Range]
+    range: Range | None
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_type(self, path)

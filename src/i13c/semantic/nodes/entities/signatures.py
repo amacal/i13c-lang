@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -21,7 +21,7 @@ def configure_signatures() -> GraphNode:
 def build_signatures(
     graph: SyntaxGraph,
 ) -> OneToOne[SignatureId, Signature]:
-    signatures: Dict[SignatureId, Signature] = {}
+    signatures: dict[SignatureId, Signature] = {}
 
     for nid, entry in graph.snippet.signatures.items():
         # derive signature ID from globally unique node ID
@@ -68,12 +68,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[SignatureId, Signature]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SignatureId, Signature]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SignatureId, Signature]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -82,7 +81,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: SignatureId, entry: Signature) -> Dict[str, str]:
+    def rows(key: SignatureId, entry: Signature) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

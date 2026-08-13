@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -84,7 +85,7 @@ def build_callsite_resolution(
     literals: OneToOne[LiteralId, LiteralAcceptance],
     signatures: OneToMany[bytes, SignatureAcceptance],
 ) -> OneToOne[CallSiteId, CallSiteResolution]:
-    resolutions: Dict[CallSiteId, CallSiteResolution] = {}
+    resolutions: dict[CallSiteId, CallSiteResolution] = {}
 
     for sid, entry in callsites.items():
         resolution = CallSiteResolution(
@@ -98,12 +99,12 @@ def build_callsite_resolution(
         stmt_id = entry.get_statement(StatementId.from_context)
 
         environment = cflows.get(function_id).environments[stmt_id]
-        rejected: Optional[CallSiteRejectionReason] = "unknown-target"
+        rejected: CallSiteRejectionReason | None = "unknown-target"
 
         if found := signatures.find(entry.callee):
             for signature in found:
                 rejected = None
-                arguments: List[CallSiteArgument] = []
+                arguments: list[CallSiteArgument] = []
 
                 if len(signature.parameters) != len(entry.arguments):
                     resolution.rejected.append(
@@ -118,9 +119,7 @@ def build_callsite_resolution(
                     continue
 
                 for parameter, argument in zip(signature.parameters, entry.arguments):
-                    target: Optional[
-                        Union[LiteralAcceptance, ParameterAcceptance, ValueAcceptance]
-                    ]
+                    target: LiteralAcceptance | ParameterAcceptance | ValueAcceptance | None
 
                     if isinstance(argument, LiteralId):
                         target = literals.get(argument)
@@ -133,7 +132,7 @@ def build_callsite_resolution(
                         rejected = "unknown-target"
                         break
 
-                    if parameter.bind == "literal":
+                    if parameter.bind == "literal": # noqa: SIM102
                         if not isinstance(argument, LiteralId):
                             rejected = "not-literal"
                             break
@@ -198,17 +197,17 @@ def build_callsite_resolution(
 
 
 def check_callsite_resolution_accepted(
-    rule_e3006: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3006: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3006) == 0
 
 
 def build_callsite_resolution_accepted(
     resolutions: OneToOne[CallSiteId, CallSiteResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[CallSiteId, CallSiteAcceptance]:
-    accepted: Dict[CallSiteId, CallSiteAcceptance] = {}
+    accepted: dict[CallSiteId, CallSiteAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -218,9 +217,9 @@ def build_callsite_resolution_accepted(
 
 def build_callsite_resolution_rejected(
     resolutions: OneToOne[CallSiteId, CallSiteResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToMany[CallSiteId, CallSiteRejection]:
-    rejected: Dict[CallSiteId, List[CallSiteRejection]] = {}
+    rejected: dict[CallSiteId, list[CallSiteRejection]] = {}
 
     for id, resolution in resolutions.items():
         rejected[id] = resolution.rejected
@@ -231,8 +230,8 @@ def build_callsite_resolution_rejected(
 def validate_callsite_resolution_e3006(
     callsites: OneToOne[CallSiteId, CallSite],
     resolutions: OneToOne[CallSiteId, CallSiteResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -259,12 +258,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[CallSiteId, CallSiteResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[CallSiteId, CallSiteResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[CallSiteId, CallSiteResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -273,7 +271,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: CallSiteId, entry: CallSiteResolution) -> Dict[str, str]:
+    def rows(key: CallSiteId, entry: CallSiteResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -286,13 +284,13 @@ class ListRejectedExtractor:
     def __init__(self, data: OneToMany[CallSiteId, CallSiteRejection]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[CallSiteId, CallSiteRejection]]:
+    def extract(self) -> Iterable[tuple[CallSiteId, CallSiteRejection]]:
         for key, entries in self.data.items():
             for entry in entries:
                 yield key, entry
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -301,7 +299,7 @@ class ListRejectedExtractor:
         }
 
     @staticmethod
-    def rows(key: CallSiteId, entry: CallSiteRejection) -> Dict[str, str]:
+    def rows(key: CallSiteId, entry: CallSiteRejection) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -314,12 +312,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[CallSiteId, CallSiteAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[CallSiteId, CallSiteAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[CallSiteId, CallSiteAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -329,7 +326,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: CallSiteId, entry: CallSiteAcceptance) -> Dict[str, str]:
+    def rows(key: CallSiteId, entry: CallSiteAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

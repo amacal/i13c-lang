@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Optional
 
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.flags import FlagsId
@@ -24,5 +23,5 @@ class FunctionId:
 class Function:
     ref: Span
     signature: SignatureId
-    flags: Optional[FlagsId]
-    statements: List[StatementId]
+    flags: FlagsId | None
+    statements: list[StatementId]

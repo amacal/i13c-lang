@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
-from typing import Union
 
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
@@ -9,7 +7,7 @@ from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.syntax.source import Span
 
 StatementRejectionReason = Kind["unknown"]
-StatementTarget = Union[AssignAcceptance, CallAcceptance]
+StatementTarget = AssignAcceptance | CallAcceptance
 
 
 @dataclass(kw_only=True)
@@ -32,5 +30,5 @@ class StatementResolution:
     ref: Span
     id: StatementId
 
-    accepted: List[StatementAcceptance]
-    rejected: List[StatementRejection]
+    accepted: list[StatementAcceptance]
+    rejected: list[StatementRejection]

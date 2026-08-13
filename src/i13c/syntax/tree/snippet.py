@@ -1,11 +1,9 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
-from typing import Optional, Protocol, Union
+from typing import Protocol
 
-import i13c.syntax.tree.literals as literals
-import i13c.syntax.tree.types as types
 from i13c.syntax.source import Span
+from i13c.syntax.tree import literals, types
 from i13c.syntax.tree.core import Path
 
 
@@ -71,8 +69,8 @@ class Offset:
 @dataclass(kw_only=True, eq=False)
 class Address:
     ref: Span
-    base: Union[Register, Reference]
-    offset: Optional[Offset]
+    base: Register | Reference
+    offset: Offset | None
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_address(self, path)
@@ -93,7 +91,7 @@ class Label:
         visitor.on_label(self, path)
 
 
-OperandTarget = Union[Register, Immediate, Reference, Address]
+OperandTarget = Register | Immediate | Reference | Address
 
 
 @dataclass(kw_only=True, eq=False)
@@ -145,7 +143,7 @@ class Mnemonic:
 class Instruction:
     ref: Span
     mnemonic: Mnemonic
-    operands: List[Operand]
+    operands: list[Operand]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_instruction(self, path)
@@ -157,14 +155,14 @@ class Instruction:
                 entry.accept(visitor, node)
 
 
-InstructionOrLabel = Union[Instruction, Label]
+InstructionOrLabel = Instruction | Label
 
 
 @dataclass(kw_only=True, eq=False)
 class Signature:
     ref: Span
     name: bytes
-    slots: List[Slot]
+    slots: list[Slot]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_signature(self, path)
@@ -177,8 +175,8 @@ class Signature:
 @dataclass(kw_only=True, eq=False)
 class Flags:
     ref: Span
-    noreturn: Optional[bool]
-    clobbers: Optional[List[Register]]
+    noreturn: bool | None
+    clobbers: list[Register] | None
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_flags(self, path)
@@ -193,8 +191,8 @@ class Flags:
 class Snippet:
     ref: Span
     signature: Signature
-    flags: Optional[Flags]
-    body: List[InstructionOrLabel]
+    flags: Flags | None
+    body: list[InstructionOrLabel]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_snippet(self, path)

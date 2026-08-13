@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -73,7 +74,7 @@ def build_control_flow_resolution(
     values: OneToMany[StatementId, ValueAcceptance],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
 ) -> OneToOne[FunctionId, ControlFlowResolution]:
-    resolutions: Dict[FunctionId, ControlFlowResolution] = {}
+    resolutions: dict[FunctionId, ControlFlowResolution] = {}
 
     for fid, entry in cflows.items():
         function = functions.get(fid)
@@ -131,17 +132,17 @@ def build_control_flow_resolution(
 
 
 def check_control_flow_resolution_accepted(
-    rule_e3005: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3005: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3005) == 0
 
 
 def build_control_flow_resolution_accepted(
     resolutions: OneToOne[FunctionId, ControlFlowResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[FunctionId, ControlFlowAcceptance]:
-    accepted: Dict[FunctionId, ControlFlowAcceptance] = {}
+    accepted: dict[FunctionId, ControlFlowAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -152,8 +153,8 @@ def build_control_flow_resolution_accepted(
 def validate_control_flow_resolution_e3005(
     cflows: OneToOne[FunctionId, ControlFlows],
     resolutions: OneToOne[FunctionId, ControlFlowResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -177,12 +178,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[FunctionId, ControlFlowResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FunctionId, ControlFlowResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FunctionId, ControlFlowResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "fn": "Function",
@@ -192,7 +192,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: ControlFlowResolution) -> Dict[str, str]:
+    def rows(key: FunctionId, entry: ControlFlowResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "fn": key.identify(1),
@@ -206,12 +206,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[FunctionId, ControlFlowAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FunctionId, ControlFlowAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FunctionId, ControlFlowAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "fn": "Function",
@@ -220,7 +219,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: ControlFlowAcceptance) -> Dict[str, str]:
+    def rows(key: FunctionId, entry: ControlFlowAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "fn": key.identify(1),

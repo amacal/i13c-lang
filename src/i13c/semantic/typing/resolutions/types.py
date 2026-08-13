@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
-from typing import Optional, Union
 
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.entities.types import TypeId
@@ -31,12 +29,12 @@ class TypeAcceptance:
 
     name: bytes
     width: TypeWidth
-    range: Optional[RangeAcceptance]
+    range: RangeAcceptance | None
 
     def __str__(self) -> str:
         return f"{self.name.decode()}"
 
-    def accepts(self, value: Union[LiteralAcceptance, TypeAcceptance]) -> bool:
+    def accepts(self, value: LiteralAcceptance | TypeAcceptance) -> bool:
         if isinstance(value, LiteralAcceptance):
             if value.target.width != self.width:
                 return False
@@ -70,5 +68,5 @@ class TypeResolution:
     ref: Span
     id: TypeId
 
-    accepted: List[TypeAcceptance]
-    rejected: List[TypeRejection]
+    accepted: list[TypeAcceptance]
+    rejected: list[TypeRejection]

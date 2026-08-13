@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.asmlets import Asmlet, AsmletId
@@ -17,11 +16,11 @@ from i13c.semantic.typing.entities.signatures import SignatureId
 
 @dataclass
 class AnalysisNodes:
-    asmlets: Optional[OneToOne[AsmletId, Asmlet]]
-    callings: Optional[OneToOne[CallSiteId, Calling]]
-    cflows: Optional[OneToOne[FunctionId, ControlFlows]]
-    cgraphs: Optional[OneToOne[SignatureId, CallGraph]]
-    cpaths: Optional[OneToOne[FunctionId, ControlPaths]]
-    dflows: Optional[OneToOne[FunctionId, DataFlows]]
-    entrypoints: Optional[OneToOne[SignatureId, Entrypoint]]
-    noreturns: Optional[OneToOne[SignatureId, NoReturn]]
+    asmlets: OneToOne[AsmletId, Asmlet] | None
+    callings: OneToOne[CallSiteId, Calling] | None
+    cflows: OneToOne[FunctionId, ControlFlows] | None
+    cgraphs: OneToOne[SignatureId, CallGraph] | None
+    cpaths: OneToOne[FunctionId, ControlPaths] | None
+    dflows: OneToOne[FunctionId, DataFlows] | None
+    entrypoints: OneToOne[SignatureId, Entrypoint] | None
+    noreturns: OneToOne[SignatureId, NoReturn] | None

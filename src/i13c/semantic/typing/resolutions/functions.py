@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.analyses.cflows import ControlFlows
@@ -32,5 +31,5 @@ class FunctionResolution:
     ref: Span
     id: FunctionId
 
-    accepted: List[FunctionAcceptance]
-    rejected: List[FunctionRejection]
+    accepted: list[FunctionAcceptance]
+    rejected: list[FunctionRejection]

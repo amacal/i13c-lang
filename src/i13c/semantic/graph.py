@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
@@ -10,7 +10,7 @@ from i13c.semantic.nodes.resolutions import parse_resolutions
 
 
 def configure_e3xxx() -> GraphNode:
-    def build(rules: Dict[str, List[Diagnostic]]) -> SemanticRules:
+    def build(rules: dict[str, list[Diagnostic]]) -> SemanticRules:
         return SemanticRules(data=rules)
 
     return GraphNode(
@@ -50,11 +50,11 @@ def configure_self() -> GraphNode:
 
 
 def build(
-    entities: Dict[str, Any],
-    indices: Dict[str, Any],
-    resolutions: Dict[str, Any],
-    analyses: Dict[str, Any],
-    **kwargs: Dict[str, Any],
+    entities: dict[str, Any],
+    indices: dict[str, Any],
+    resolutions: dict[str, Any],
+    analyses: dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> SemanticGraph:
     return SemanticGraph(
         entities=parse_entities(entities),

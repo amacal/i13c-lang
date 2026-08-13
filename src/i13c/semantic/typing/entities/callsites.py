@@ -1,12 +1,13 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, List, Protocol, TypeVar, Union
+from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.syntax.source import Span
 
-CallSiteTarget = Union[LiteralId, ExpressionId]
+CallSiteTarget = LiteralId | ExpressionId
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -32,7 +33,7 @@ class CallSite:
     statement: NodeId
 
     callee: bytes
-    arguments: List[CallSiteTarget]
+    arguments: list[CallSiteTarget]
 
     def get_function(
         self, factory: Callable[[NodeId], CallSiteContext]

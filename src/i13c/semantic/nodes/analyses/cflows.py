@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode, GraphViews
@@ -34,7 +34,7 @@ def build_control_flows(
     generator: Generator,
     graph: SyntaxGraph,
 ) -> OneToOne[FunctionId, ControlFlows]:
-    cflows: Dict[FunctionId, ControlFlows] = {}
+    cflows: dict[FunctionId, ControlFlows] = {}
 
     for nid, node in graph.function.functions.items():
         # derive function ID from globally unique node ID
@@ -43,9 +43,9 @@ def build_control_flows(
         entry = FlowEntry(value=generator.next())
         exit = FlowExit(value=generator.next())
 
-        nodes: List[FlowMember] = [entry]
-        forward: Dict[int, List[int]] = {}
-        backward: Dict[int, List[int]] = {}
+        nodes: list[FlowMember] = [entry]
+        forward: dict[int, list[int]] = {}
+        backward: dict[int, list[int]] = {}
 
         prev: int = 0
         for stmt in node.statements:
@@ -61,7 +61,7 @@ def build_control_flows(
         forward[prev] = [len(nodes)]
         nodes.append(exit)
 
-        for idx in range(0, len(nodes)):
+        for idx in range(len(nodes)):
             backward[idx] = []
 
         for start, ends in forward.items():
@@ -89,12 +89,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[FunctionId, ControlFlows]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FunctionId, ControlFlows]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FunctionId, ControlFlows]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "fn": "Function",
@@ -104,7 +103,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: ControlFlows) -> Dict[str, str]:
+    def rows(key: FunctionId, entry: ControlFlows) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "fn": key.identify(1),

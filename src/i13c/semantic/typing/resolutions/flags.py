@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.flags import FlagsId
@@ -22,7 +21,7 @@ class FlagsAcceptance:
     id: FlagsId
 
     noreturn: bool
-    clobbers: List[RegisterAcceptance]
+    clobbers: list[RegisterAcceptance]
 
 
 @dataclass(kw_only=True)
@@ -30,5 +29,5 @@ class FlagsResolution:
     ref: Span
     id: FlagsId
 
-    accepted: List[FlagsAcceptance]
-    rejected: List[FlagsRejection]
+    accepted: list[FlagsAcceptance]
+    rejected: list[FlagsRejection]

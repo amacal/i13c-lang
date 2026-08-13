@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -28,12 +28,12 @@ def configure_snippets() -> GraphNode:
 def build_snippets(
     graph: SyntaxGraph,
 ) -> OneToOne[SnippetId, Snippet]:
-    snippets: Dict[SnippetId, Snippet] = {}
+    snippets: dict[SnippetId, Snippet] = {}
 
     for nid, node in graph.snippet.snippets.items():
         # derive snippet ID from globally unique node ID
         snippet_id = SnippetId(value=nid.value)
-        instructions: List[InstructionOrLabel] = []
+        instructions: list[InstructionOrLabel] = []
 
         # identify signature ID from globally unique node ID
         nid = graph.snippet.signatures.get_by_node(node.signature)
@@ -71,12 +71,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[SnippetId, Snippet]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SnippetId, Snippet]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SnippetId, Snippet]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -86,7 +85,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: SnippetId, entry: Snippet) -> Dict[str, str]:
+    def rows(key: SnippetId, entry: Snippet) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

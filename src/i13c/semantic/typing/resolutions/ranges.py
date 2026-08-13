@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.core import Hex
@@ -32,5 +31,5 @@ class RangeAcceptance:
 
 @dataclass(kw_only=True)
 class RangeResolution:
-    accepted: List[RangeAcceptance]
-    rejected: List[RangeRejection]
+    accepted: list[RangeAcceptance]
+    rejected: list[RangeRejection]

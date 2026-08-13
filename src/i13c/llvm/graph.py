@@ -1,5 +1,5 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator, Optional
 
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.llvm.typing.abstracts import AbstractEntry
@@ -76,14 +76,12 @@ class LowLevelGraph:
     bregs: BlockRegistersNode
 
     def flows_all(self) -> Iterator[BlockInstruction]:
-        for _, flow in self.flows.items():
-            for instr in flow:
-                yield instr
+        for flow in self.flows.values():
+            yield from flow
 
     def instructions_all(self) -> Iterator[Instruction]:
-        for _, batch in self.instructions.items():
-            for instr in batch:
-                yield instr
+        for batch in self.instructions.values():
+            yield from batch
 
     def instructions_of(self, origin: BlockOrigin) -> Iterator[str]:
         for bid, batch in self.instructions.items():
@@ -91,7 +89,7 @@ class LowLevelGraph:
                 for instr in batch:
                     yield instr.native()
 
-    def find_block_by_origin(self, origin: BlockOrigin) -> Optional[BlockId]:
+    def find_block_by_origin(self, origin: BlockOrigin) -> BlockId | None:
         for bid, block in self.nodes.items():
             if block.origin == origin:
                 return bid

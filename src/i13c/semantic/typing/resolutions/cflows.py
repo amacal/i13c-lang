@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List
 from typing import Literal as Kind
-from typing import Union
 
 from i13c.semantic.typing.analyses.cflows import (
     ControlFlows,
@@ -15,12 +13,12 @@ from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span
 
-ControlFlowMember = Union[FlowEntry, FlowExit, FlowTarget]
-ControlFlowTarget = Union[ParameterAcceptance, ValueAcceptance]
+ControlFlowMember = FlowEntry | FlowExit | FlowTarget
+ControlFlowTarget = ParameterAcceptance | ValueAcceptance
 
 ControlFlowRejectionReason = Kind["unknown",]
-ControlFlowEntry = Dict[bytes, ControlFlowTarget]
-ControlFlowEnvironment = Dict[ControlFlowMember, ControlFlowEntry]
+ControlFlowEntry = dict[bytes, ControlFlowTarget]
+ControlFlowEnvironment = dict[ControlFlowMember, ControlFlowEntry]
 
 
 @dataclass(kw_only=True)
@@ -49,5 +47,5 @@ class ControlFlowResolution:
     function: FunctionId
     signature: SignatureId
 
-    accepted: List[ControlFlowAcceptance]
-    rejected: List[ControlFlowRejection]
+    accepted: list[ControlFlowAcceptance]
+    rejected: list[ControlFlowRejection]

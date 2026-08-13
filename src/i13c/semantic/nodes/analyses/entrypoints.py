@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
@@ -32,17 +32,17 @@ def build_entrypoints(
     functions: OneToOne[FunctionId, FunctionAcceptance],
     cgraphs: OneToMany[SignatureId, StatementId],
 ) -> OneToOne[SignatureId, Entrypoint]:
-    entrypoints: Dict[SignatureId, Entrypoint] = {}
+    entrypoints: dict[SignatureId, Entrypoint] = {}
 
     for entry in snippets.values():
-        if entry.signature.name == b"main":
-            if len(entry.signature.parameters) == 0:
+        if entry.signature.name == b"main": # noqa: SIM102
+            if len(entry.signature.parameters) == 0: # noqa: SIM102
                 if entry.noreturn:
                     entrypoints[entry.signature.id] = Entrypoint(target=entry)
 
     for entry in functions.values():
-        if entry.signature.name == b"main":
-            if len(entry.signature.parameters) == 0:
+        if entry.signature.name == b"main": # noqa: SIM102
+            if len(entry.signature.parameters) == 0: # noqa: SIM102
                 if entry.noreturn:
                     entrypoints[entry.signature.id] = Entrypoint(target=entry)
 
@@ -53,12 +53,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[SignatureId, Entrypoint]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SignatureId, Entrypoint]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SignatureId, Entrypoint]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "Id",
@@ -67,7 +66,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: SignatureId, entry: Entrypoint) -> Dict[str, str]:
+    def rows(key: SignatureId, entry: Entrypoint) -> dict[str, str]:
         return {
             "ref": str(entry.target.ref),
             "id": key.identify(1),

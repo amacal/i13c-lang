@@ -1,12 +1,13 @@
 import json
 import sys
+from collections.abc import Iterable
 from functools import partial
-from typing import Any, Iterable, List, NoReturn
+from typing import Any, NoReturn
 
 import click
 
 from i13c.core.diagnostics import Diagnostic, show
-from i13c.core.result import A, Result, unwrap
+from i13c.core.result import Result, unwrap
 from i13c.syntax.source import SourceCode
 
 
@@ -33,7 +34,7 @@ def emit_and_exit(
     sys.exit(1)
 
 
-def unwrap_result(
-    result: Result[A, List[Diagnostic]], /, source: SourceCode
+def unwrap_result[A](
+    result: Result[A, list[Diagnostic]], /, source: SourceCode
 ) -> A:
     return unwrap(result, partial(emit_and_exit, source=source))

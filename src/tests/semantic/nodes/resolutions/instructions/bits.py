@@ -1,4 +1,3 @@
-from typing import List, Optional
 
 from tests.semantic.nodes.resolutions.instructions import (
     samples,
@@ -21,9 +20,9 @@ from tests.semantic.nodes.resolutions.instructions import (
 def can_handle_bswap(
     instruction: str,
     mnemonic: str,
-    variant: List[str],
+    variant: list[str],
     status: bool,
-    reason: Optional[str],
+    reason: str | None,
 ):
     verify_instruction_resolution(instruction, mnemonic, variant, status, reason)
 
@@ -45,8 +44,8 @@ def can_handle_bswap(
 def can_handle_shl(
     instruction: str,
     mnemonic: str,
-    variant: List[str],
+    variant: list[str],
     status: bool,
-    reason: Optional[str],
+    reason: str | None,
 ):
     verify_instruction_resolution(instruction, mnemonic, variant, status, reason)

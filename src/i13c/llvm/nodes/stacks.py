@@ -1,4 +1,3 @@
-from typing import Dict, List, Set
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
@@ -34,14 +33,14 @@ def build_stack_frames(
     pressures: OneToMany[FunctionId, IntervalPressure],
 ) -> OneToOne[FunctionId, StackFrame]:
 
-    frames: Dict[FunctionId, StackFrame] = {}
+    frames: dict[FunctionId, StackFrame] = {}
 
     for fid, entries in pressures.items():
         size: int = max(entry.pressure for entry in entries) if entries else 0
-        previous: Set[int] = set()
+        previous: set[int] = set()
 
-        allocated: Dict[int, int] = {}
-        available: List[int] = list(range(size))
+        allocated: dict[int, int] = {}
+        available: list[int] = list(range(size))
 
         for entry in entries:
             # append new used anymore registers
@@ -82,7 +81,7 @@ def patch_stack_frames(
     instructions: OneToMany[BlockId, BlockInstruction],
 ) -> OneToMany[FlowId, AbstractEntry]:
 
-    result: Dict[FlowId, List[AbstractEntry]] = {}
+    result: dict[FlowId, list[AbstractEntry]] = {}
 
     # then patch all prologues/epilogues
     for fid, bids in blocks.items():

@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -24,7 +24,7 @@ def configure_operands() -> GraphNode:
 def build_operands(
     graph: SyntaxGraph,
 ) -> OneToOne[OperandId, Operand]:
-    operands: Dict[OperandId, Operand] = {}
+    operands: dict[OperandId, Operand] = {}
 
     # try all immediates
     for oid, node in graph.snippet.operands.items():
@@ -96,12 +96,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[OperandId, Operand]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[OperandId, Operand]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[OperandId, Operand]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -110,7 +109,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: OperandId, entry: Operand) -> Dict[str, str]:
+    def rows(key: OperandId, entry: Operand) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

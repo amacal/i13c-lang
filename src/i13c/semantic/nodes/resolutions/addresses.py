@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -69,7 +70,7 @@ def build_address_resolution(
     immediates: OneToOne[ImmediateId, ImmediateAcceptance],
     references: OneToOne[ReferenceId, ReferenceAcceptance],
 ) -> OneToOne[AddressId, AddressResolution]:
-    resolutions: Dict[AddressId, AddressResolution] = {}
+    resolutions: dict[AddressId, AddressResolution] = {}
 
     for aid, entry in addresses.items():
         resolution = AddressResolution(
@@ -98,17 +99,7 @@ def build_address_resolution(
         else:
             reference = references.get(entry.base)
 
-            if not isinstance(reference.target, ParameterAcceptance):
-                resolution.rejected.append(
-                    AddressRejection(
-                        ref=entry.ref,
-                        id=aid,
-                        reason="invalid-register",
-                    )
-                )
-
-            # reject base bound to immediate values
-            elif reference.target.bind == "literal":
+            if not isinstance(reference.target, ParameterAcceptance) or reference.target.bind == "literal":
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
@@ -125,17 +116,7 @@ def build_address_resolution(
             immediate = immediates.get(entry.offset.value)
 
             # reject 64-bit immediates
-            if immediate.value.width == 64:
-                resolution.rejected.append(
-                    AddressRejection(
-                        ref=entry.ref,
-                        id=aid,
-                        reason="invalid-offset",
-                    )
-                )
-
-            # reject 32-bit immediates with the highest bit set (negative values)
-            elif immediate.value.width == 32 and immediate.value.highest_bit():
+            if immediate.value.width == 64 or immediate.value.width == 32 and immediate.value.highest_bit():
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
@@ -169,17 +150,17 @@ def build_address_resolution(
 
 
 def check_address_resolution_accepted(
-    rule_e3022: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3022: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3022) == 0
 
 
 def build_address_resolution_accepted(
     resolutions: OneToOne[AddressId, AddressResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[AddressId, AddressAcceptance]:
-    accepted: Dict[AddressId, AddressAcceptance] = {}
+    accepted: dict[AddressId, AddressAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -190,8 +171,8 @@ def build_address_resolution_accepted(
 def validate_address_resolution_e3022(
     addresses: OneToOne[AddressId, Address],
     resolutions: OneToOne[AddressId, AddressResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -210,7 +191,7 @@ def report_address_resolution_e3022(
     return Diagnostic(
         ref=rejection.ref,
         code="E3022",
-        message=f"Address resolution failed {str(entry)}, reason: {rejection.reason}.",
+        message=f"Address resolution failed {entry!s}, reason: {rejection.reason}.",
     )
 
 
@@ -218,12 +199,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[AddressId, AddressResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[AddressId, AddressResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[AddressId, AddressResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -232,7 +212,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: AddressId, entry: AddressResolution) -> Dict[str, str]:
+    def rows(key: AddressId, entry: AddressResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -245,12 +225,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[AddressId, AddressAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[AddressId, AddressAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[AddressId, AddressAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -261,11 +240,11 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: AddressId, entry: AddressAcceptance) -> Dict[str, str]:
+    def rows(key: AddressId, entry: AddressAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
-            "base": entry.base.name.decode() if isinstance(entry.base, RegisterAcceptance) else entry.base.name.decode(),
+            "base": entry.base.name.decode(),
             "okind": entry.offset.kind if entry.offset else "",
             "owidth": str(entry.offset.value.value.width) if entry.offset else "",
             "ovalue": str(entry.offset.value.value) if entry.offset else "",

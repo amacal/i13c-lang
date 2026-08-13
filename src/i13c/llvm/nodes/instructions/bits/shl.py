@@ -1,4 +1,4 @@
-from typing import Dict, Protocol, Tuple
+from typing import Protocol
 
 from i13c.core.generator import Generator
 from i13c.llvm.typing.instructions import InstructionEntry, InstructionId
@@ -93,7 +93,7 @@ class InstructionHandler(Protocol):
     ) -> InstructionEntry: ...
 
 
-DISPATCH_TABLE: Dict[Tuple[OperandSymbol, OperandSymbol], InstructionHandler] = {
+DISPATCH_TABLE: dict[tuple[OperandSymbol, OperandSymbol], InstructionHandler] = {
     ("reg8", "imm8"): lower_reg8_imm8,
     ("reg16", "imm8"): lower_reg16_imm8,
     ("reg32", "imm8"): lower_reg32_imm8,

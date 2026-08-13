@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Set, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -59,7 +60,7 @@ def build_binding_resolution(
     signatures: OneToOne[SignatureId, SignatureAcceptance],
     binds: OneToOne[ParameterId, BindAcceptance],
 ) -> OneToOne[SignatureId, BindingResolution]:
-    resolutions: Dict[SignatureId, BindingResolution] = {}
+    resolutions: dict[SignatureId, BindingResolution] = {}
 
     for sid, entry in signatures.items():
         resolution = BindingResolution(
@@ -69,8 +70,8 @@ def build_binding_resolution(
             rejected=[],
         )
 
-        names: Set[bytes] = set()
-        found: List[BindAcceptance] = []
+        names: set[bytes] = set()
+        found: list[BindAcceptance] = []
 
         # only snippets may have binds
         for parameter in entry.parameters:
@@ -103,17 +104,17 @@ def build_binding_resolution(
 
 
 def check_binding_resolution_accepted(
-    rule_e3011: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3011: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3011) == 0
 
 
 def build_binding_resolution_accepted(
     resolutions: OneToOne[SignatureId, BindingResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[SignatureId, BindingAcceptance]:
-    accepted: Dict[SignatureId, BindingAcceptance] = {}
+    accepted: dict[SignatureId, BindingAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -123,10 +124,10 @@ def build_binding_resolution_accepted(
 
 def validate_binding_resolution_e3011(
     resolutions: OneToOne[SignatureId, BindingResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
-    for _, resolution in resolutions.items():
+    for resolution in resolutions.values():
         if len(resolution.accepted) != 1:
             for rejection in resolution.rejected:
                 diagnostics.append(report_binding_resolution_e3011(rejection))
@@ -148,12 +149,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[SignatureId, BindingResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SignatureId, BindingResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SignatureId, BindingResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "sig": "Signature",
@@ -162,7 +162,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: SignatureId, entry: BindingResolution) -> Dict[str, str]:
+    def rows(key: SignatureId, entry: BindingResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "sig": key.identify(1),
@@ -175,12 +175,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[SignatureId, BindingAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SignatureId, BindingAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SignatureId, BindingAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "sig": "Signature",
@@ -188,7 +187,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: SignatureId, entry: BindingAcceptance) -> Dict[str, str]:
+    def rows(key: SignatureId, entry: BindingAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "sig": key.identify(1),

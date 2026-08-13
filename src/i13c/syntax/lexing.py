@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, List
 
 from i13c.core import result
 from i13c.core.diagnostics import Diagnostic
@@ -70,7 +69,7 @@ SET_KEYWORDS = {
     b"asm", b"clobbers", b"noreturn", b"fn", b"imm", b"val",
 }
 
-TOKEN_NAMES: Dict[int, str] = {
+TOKEN_NAMES: dict[int, str] = {
     Tokens.SEMICOLON: "semicolon",
     Tokens.COMMA: "comma",
     Tokens.HEX: "hex",
@@ -220,9 +219,9 @@ class Token:
         return Token(code=Tokens.EQUALS, offset=offset, length=1)
 
 
-def tokenize(code: SourceCode) -> result.Result[List[Token], List[Diagnostic]]:
-    tokens: List[Token] = []
-    diagnostics: List[Diagnostic] = []
+def tokenize(code: SourceCode) -> result.Result[list[Token], list[Diagnostic]]:
+    tokens: list[Token] = []
+    diagnostics: list[Diagnostic] = []
     lexer = Lexer(code=code, offset=0)
 
     try:
@@ -306,7 +305,7 @@ def skip_whitespace(lexer: Lexer) -> None:
         lexer.advance(1)
 
 
-def read_dot(lexer: Lexer, tokens: List[Token]) -> None:
+def read_dot(lexer: Lexer, tokens: list[Token]) -> None:
     start_offset = lexer.offset
     lexer.advance(1)  # consume the '.'
 
@@ -323,7 +322,7 @@ def read_dot(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(token)
 
 
-def read_hex(lexer: Lexer, tokens: List[Token]) -> None:
+def read_hex(lexer: Lexer, tokens: list[Token]) -> None:
     start_offset = lexer.offset
     lexer.advance(1)  # consume the '0'
 
@@ -355,7 +354,7 @@ def read_hex(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(Token.hex_token(offset=start_offset, length=length))
 
 
-def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
+def read_ident(lexer: Lexer, tokens: list[Token]) -> None:
     start_offset = lexer.offset
     lexer.advance(1)  # consume first letter
 
@@ -377,67 +376,67 @@ def read_ident(lexer: Lexer, tokens: List[Token]) -> None:
     tokens.append(token)
 
 
-def emit_semicolon(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_semicolon(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.semicolon_token(offset=lexer.offset))
     lexer.advance(1)  # consume semicolon
 
 
-def emit_comma(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_comma(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.comma_token(offset=lexer.offset))
     lexer.advance(1)  # consume comma
 
 
-def emit_round_open(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_round_open(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.round_open_token(offset=lexer.offset))
     lexer.advance(1)  # consume '('
 
 
-def emit_round_close(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_round_close(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.round_close_token(offset=lexer.offset))
     lexer.advance(1)  # consume ')'
 
 
-def emit_curly_open(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_curly_open(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.curly_open_token(offset=lexer.offset))
     lexer.advance(1)  # consume '{'
 
 
-def emit_curly_close(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_curly_close(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.curly_close_token(offset=lexer.offset))
     lexer.advance(1)  # consume '}'
 
 
-def emit_square_open(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_square_open(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.square_open_token(offset=lexer.offset))
     lexer.advance(1)  # consume '['
 
 
-def emit_square_close(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_square_close(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.square_close_token(offset=lexer.offset))
     lexer.advance(1)  # consume ']'
 
 
-def emit_colon(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_colon(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.colon_token(offset=lexer.offset))
     lexer.advance(1)  # consume ':'
 
 
-def emit_at(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_at(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.at_token(offset=lexer.offset))
     lexer.advance(1)  # consume '@'
 
 
-def emit_equals(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_equals(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.equals_token(offset=lexer.offset))
     lexer.advance(1)  # consume '='
 
 
-def emit_plus(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_plus(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token(code=Tokens.PLUS, offset=lexer.offset, length=1))
     lexer.advance(1)  # consume '+'
 
 
-def emit_minus(lexer: Lexer, tokens: List[Token]) -> None:
+def emit_minus(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token(code=Tokens.MINUS, offset=lexer.offset, length=1))
     lexer.advance(1)  # consume '-'
 

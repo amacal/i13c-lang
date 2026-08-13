@@ -1,4 +1,5 @@
-from typing import Dict, Iterable, List, Literal, Tuple, Union
+from collections.abc import Iterable
+from typing import Literal
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
@@ -39,7 +40,7 @@ def build_noreturns(
     signatures: OneToOne[SignatureId, SignatureAcceptance],
     callsites: OneToMany[StatementId, CallSiteAcceptance],
 ) -> OneToOne[SignatureId, NoReturn]:
-    noreturns: Dict[SignatureId, NoReturn] = {}
+    noreturns: dict[SignatureId, NoReturn] = {}
 
     # seed noreturn from all snippets
     for entry in snippets.values():
@@ -69,7 +70,7 @@ def build_noreturns(
 
             if noreturn is not None:
                 signature = signatures.get(sig)
-                outcome = True if isinstance(noreturn, NoReturn) else False
+                outcome = isinstance(noreturn, NoReturn)
 
                 noreturns[sig] = NoReturn(
                     signature=signature,
@@ -81,11 +82,11 @@ def build_noreturns(
 
 
 def is_function_noreturn(
-    noreturns: Dict[SignatureId, NoReturn],
+    noreturns: dict[SignatureId, NoReturn],
     callsites: OneToMany[StatementId, CallSiteAcceptance],
     target: ControlPaths,
-) -> Union[NoReturn, None, Literal[False]]:
-    noreturn: Union[NoReturn, None, Literal[False]] = None
+) -> NoReturn | None | Literal[False]:
+    noreturn: NoReturn | None | Literal[False] = None
 
     # if any path is returning, the function is returning
     for idx in range(len(target.paths)):
@@ -107,11 +108,11 @@ def is_function_noreturn(
 
 
 def is_path_noreturn(
-    noreturns: Dict[SignatureId, NoReturn],
+    noreturns: dict[SignatureId, NoReturn],
     callsites: OneToMany[StatementId, CallSiteAcceptance],
-    paths: List[int],
-    nodes: List[FlowMember],
-) -> Union[NoReturn, None, Literal[False]]:
+    paths: list[int],
+    nodes: list[FlowMember],
+) -> NoReturn | None | Literal[False]:
     for node in paths:
         node = nodes[node]
 
@@ -141,12 +142,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[SignatureId, NoReturn]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SignatureId, NoReturn]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SignatureId, NoReturn]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "fn": "Function",
@@ -156,7 +156,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: SignatureId, entry: NoReturn) -> Dict[str, str]:
+    def rows(key: SignatureId, entry: NoReturn) -> dict[str, str]:
         return {
             "ref": str(entry.signature.ref),
             "fn": key.identify(1),

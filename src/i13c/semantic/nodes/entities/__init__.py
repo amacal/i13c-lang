@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.entities.addresses import configure_addresses
@@ -59,7 +59,7 @@ def configure_entities() -> GraphGroup:
     )
 
 
-def parse_entities(entities: Dict[str, Any]) -> EntityNodes:
+def parse_entities(entities: dict[str, Any]) -> EntityNodes:
     return EntityNodes(
         addresses=entities["entities/addresses"],
         assigns=entities["entities/assigns"],

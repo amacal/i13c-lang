@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
@@ -22,10 +21,10 @@ class SnippetAcceptance:
 
     binding: BindingAcceptance
     signature: SignatureAcceptance
-    instructions: List[InstructionAcceptance]
+    instructions: list[InstructionAcceptance]
 
     noreturn: bool
-    clobbers: List[RegisterAcceptance]
+    clobbers: list[RegisterAcceptance]
 
 
 @dataclass(kw_only=True)
@@ -33,5 +32,5 @@ class SnippetResolution:
     ref: Span
     id: SnippetId
 
-    accepted: List[SnippetAcceptance]
-    rejected: List[SnippetRejection]
+    accepted: list[SnippetAcceptance]
+    rejected: list[SnippetRejection]

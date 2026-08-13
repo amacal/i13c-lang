@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -60,7 +61,7 @@ def build_expression_resolution(
     expressions: OneToOne[ExpressionId, Expression],
     cflows: OneToOne[FunctionId, ControlFlowAcceptance],
 ) -> OneToOne[ExpressionId, ExpressionResolution]:
-    resolutions: Dict[ExpressionId, ExpressionResolution] = {}
+    resolutions: dict[ExpressionId, ExpressionResolution] = {}
 
     for eid, entry in expressions.items():
         resolution = ExpressionResolution(
@@ -105,17 +106,17 @@ def build_expression_resolution(
 
 
 def check_expression_resolution_accepted(
-    rule_e3010: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3010: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3010) == 0
 
 
 def build_expression_resolution_accepted(
     resolutions: OneToOne[ExpressionId, ExpressionResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[ExpressionId, ExpressionAcceptance]:
-    accepted: Dict[ExpressionId, ExpressionAcceptance] = {}
+    accepted: dict[ExpressionId, ExpressionAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -126,8 +127,8 @@ def build_expression_resolution_accepted(
 def validate_expression_resolution_e3010(
     expressions: OneToOne[ExpressionId, Expression],
     resolutions: OneToOne[ExpressionId, ExpressionResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -151,12 +152,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[ExpressionId, ExpressionResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ExpressionId, ExpressionResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ExpressionId, ExpressionResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -165,7 +165,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: ExpressionId, entry: ExpressionResolution) -> Dict[str, str]:
+    def rows(key: ExpressionId, entry: ExpressionResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -178,12 +178,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[ExpressionId, ExpressionAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ExpressionId, ExpressionAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ExpressionId, ExpressionAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -192,10 +191,10 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: ExpressionId, entry: ExpressionAcceptance) -> Dict[str, str]:
+    def rows(key: ExpressionId, entry: ExpressionAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
             "name": entry.name.decode(),
-            "env": ", ".join(key.decode() for key in entry.environment.keys()),
+            "env": ", ".join(key.decode() for key in entry.environment),
         }

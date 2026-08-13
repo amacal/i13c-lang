@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Union
 
 from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.entities.callsites import CallSiteId
@@ -11,7 +10,7 @@ from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
 
-CallingTarget = Union[Asmlet, CallSiteAcceptance]
+CallingTarget = Asmlet | CallSiteAcceptance
 
 
 @dataclass(kw_only=True)
@@ -27,5 +26,5 @@ class Calling:
 
     target: CallingTarget
     signature: SignatureAcceptance
-    arguments: List[CallSiteArgument]
-    parameters: List[ParameterAcceptance]
+    arguments: list[CallSiteArgument]
+    parameters: list[ParameterAcceptance]

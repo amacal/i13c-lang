@@ -1,4 +1,3 @@
-from typing import Dict
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
@@ -19,9 +18,9 @@ def configure_control_paths_by_signatures() -> GraphNode:
 def build_control_cpaths_by_signatures(
     cpaths: OneToOne[FunctionId, ControlPaths],
 ) -> OneToOne[SignatureId, ControlPaths]:
-    index: Dict[SignatureId, ControlPaths] = {}
+    index: dict[SignatureId, ControlPaths] = {}
 
-    for _, entry in cpaths.items():
+    for entry in cpaths.values():
         index[entry.flows.signature] = entry
 
     return OneToOne[SignatureId, ControlPaths].instance(index)

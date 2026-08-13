@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -20,7 +20,7 @@ def configure_types() -> GraphNode:
 def build_types(
     graph: SyntaxGraph,
 ) -> OneToOne[TypeId, Type]:
-    types: Dict[TypeId, Type] = {}
+    types: dict[TypeId, Type] = {}
 
     for nid, entry in graph.types.items():
         # derive type ID from globally unique node ID
@@ -46,12 +46,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[TypeId, Type]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[TypeId, Type]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[TypeId, Type]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -60,7 +59,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: TypeId, entry: Type) -> Dict[str, str]:
+    def rows(key: TypeId, entry: Type) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

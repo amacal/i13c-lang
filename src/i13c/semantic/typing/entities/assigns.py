@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import Union
 
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.syntax.source import Span
 
-AssignExpression = Union[LiteralId, ExpressionId]
+AssignExpression = LiteralId | ExpressionId
 
 
 @dataclass(kw_only=True, frozen=True)

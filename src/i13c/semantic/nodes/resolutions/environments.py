@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Sequence, Tuple
+from collections.abc import Iterable, Sequence
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -64,7 +65,7 @@ def build_environment_resolution(
     labels: OneToOne[LabelId, LabelAcceptance],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
 ) -> OneToOne[EnvironmentId, EnvironmentResolution]:
-    resolutions: Dict[EnvironmentId, EnvironmentResolution] = {}
+    resolutions: dict[EnvironmentId, EnvironmentResolution] = {}
 
     for eid, entry in environments.items():
         resolution = EnvironmentResolution(
@@ -74,7 +75,7 @@ def build_environment_resolution(
             rejected=[],
         )
 
-        mapping: Dict[bytes, EnvironmentTarget] = {}
+        mapping: dict[bytes, EnvironmentTarget] = {}
 
         for item in entry.entries:
             targets: Sequence[EnvironmentTarget]
@@ -113,17 +114,17 @@ def build_environment_resolution(
 
 
 def check_environment_resolution_accepted(
-    rule_e3019: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3019: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3019) == 0
 
 
 def build_environment_resolution_accepted(
     resolutions: OneToOne[EnvironmentId, EnvironmentResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[EnvironmentId, EnvironmentAcceptance]:
-    accepted: Dict[EnvironmentId, EnvironmentAcceptance] = {}
+    accepted: dict[EnvironmentId, EnvironmentAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -134,8 +135,8 @@ def build_environment_resolution_accepted(
 def validate_environment_resolution_e3019(
     environments: OneToOne[EnvironmentId, Environment],
     resolutions: OneToOne[EnvironmentId, EnvironmentResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -161,12 +162,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[EnvironmentId, EnvironmentResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[EnvironmentId, EnvironmentResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[EnvironmentId, EnvironmentResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -175,7 +175,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: EnvironmentId, entry: EnvironmentResolution) -> Dict[str, str]:
+    def rows(key: EnvironmentId, entry: EnvironmentResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -188,12 +188,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[EnvironmentId, EnvironmentAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[EnvironmentId, EnvironmentAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[EnvironmentId, EnvironmentAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -201,9 +200,9 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: EnvironmentId, entry: EnvironmentAcceptance) -> Dict[str, str]:
+    def rows(key: EnvironmentId, entry: EnvironmentAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
-            "entries": ", ".join(key.decode() for key in entry.entries.keys()),
+            "entries": ", ".join(key.decode() for key in entry.entries),
         }

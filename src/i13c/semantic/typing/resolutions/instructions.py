@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
-from typing import Optional, Tuple
 
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.resolutions.mnemonics import (
@@ -31,8 +29,8 @@ class InstructionRejection:
 
     target: Instruction
     mnemonic: MnemonicAcceptance
-    variant: Optional[MnemonicVariant]
-    operands: Optional[Tuple[OperandAcceptance, ...]]
+    variant: MnemonicVariant | None
+    operands: tuple[OperandAcceptance, ...] | None
 
     reason: InstructionRejectionReason
 
@@ -40,42 +38,42 @@ class InstructionRejection:
 @dataclass(kw_only=True, frozen=True)
 class OperandSpec:
     symbol: OperandSymbol
-    names: Optional[Tuple[bytes, ...]]
+    names: tuple[bytes, ...] | None
 
     @staticmethod
-    def reg8(*names: bytes) -> "OperandSpec":
+    def reg8(*names: bytes) -> OperandSpec:
         return OperandSpec(symbol="reg8", names=names)
 
     @staticmethod
-    def reg16(*names: bytes) -> "OperandSpec":
+    def reg16(*names: bytes) -> OperandSpec:
         return OperandSpec(symbol="reg16", names=names)
 
     @staticmethod
-    def reg32(*names: bytes) -> "OperandSpec":
+    def reg32(*names: bytes) -> OperandSpec:
         return OperandSpec(symbol="reg32", names=names)
 
     @staticmethod
-    def reg64(*names: bytes) -> "OperandSpec":
+    def reg64(*names: bytes) -> OperandSpec:
         return OperandSpec(symbol="reg64", names=names)
 
     @staticmethod
-    def imm8() -> "OperandSpec":
+    def imm8() -> OperandSpec:
         return OperandSpec(symbol="imm8", names=())
 
     @staticmethod
-    def imm16() -> "OperandSpec":
+    def imm16() -> OperandSpec:
         return OperandSpec(symbol="imm16", names=())
 
     @staticmethod
-    def imm32() -> "OperandSpec":
+    def imm32() -> OperandSpec:
         return OperandSpec(symbol="imm32", names=())
 
     @staticmethod
-    def imm64() -> "OperandSpec":
+    def imm64() -> OperandSpec:
         return OperandSpec(symbol="imm64", names=())
 
     @staticmethod
-    def addr() -> "OperandSpec":
+    def addr() -> OperandSpec:
         return OperandSpec(symbol="addr", names=())
 
     def __str__(self) -> str:
@@ -93,7 +91,7 @@ class InstructionAcceptance:
     index: int
     mnemonic: MnemonicAcceptance
     variant: MnemonicVariant
-    operands: Tuple[OperandAcceptance, ...]
+    operands: tuple[OperandAcceptance, ...]
 
 
 @dataclass(kw_only=True)
@@ -101,5 +99,5 @@ class InstructionResolution:
     ref: Span
     id: InstructionId
 
-    accepted: List[InstructionAcceptance]
-    rejected: List[InstructionRejection]
+    accepted: list[InstructionAcceptance]
+    rejected: list[InstructionRejection]

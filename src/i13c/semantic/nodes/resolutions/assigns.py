@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
@@ -61,7 +61,7 @@ def build_assign_resolution(
     literals: OneToOne[LiteralId, LiteralAcceptance],
     expressions: OneToOne[ExpressionId, ExpressionAcceptance],
 ) -> OneToOne[AssignId, AssignResolution]:
-    resolutions: Dict[AssignId, AssignResolution] = {}
+    resolutions: dict[AssignId, AssignResolution] = {}
 
     for aid, entry in assigns.items():
         resolution = AssignResolution(
@@ -90,17 +90,17 @@ def build_assign_resolution(
 
 
 def check_assign_resolution_accepted(
-    rule_e3007: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3007: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3007) == 0
 
 
 def build_assign_resolution_accepted(
     resolutions: OneToOne[AssignId, AssignResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[AssignId, AssignAcceptance]:
-    accepted: Dict[AssignId, AssignAcceptance] = {}
+    accepted: dict[AssignId, AssignAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -111,8 +111,8 @@ def build_assign_resolution_accepted(
 def validate_assign_resolution_e3007(
     assigns: OneToOne[AssignId, Assign],
     resolutions: OneToOne[AssignId, AssignResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:

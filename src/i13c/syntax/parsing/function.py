@@ -1,4 +1,3 @@
-from typing import List, Optional, Tuple
 
 from i13c.syntax import tree
 from i13c.syntax.lexing import Token as LexingToken
@@ -14,9 +13,9 @@ from i13c.syntax.parsing.types import parse_range
 
 
 def parse_function(state: ParsingState) -> tree.function.Function:
-    statements: List[tree.function.Statement] = []
-    parameters: List[tree.function.Parameter] = []
-    flags: Optional[tree.function.Flags] = None
+    statements: list[tree.function.Statement] = []
+    parameters: list[tree.function.Parameter] = []
+    flags: tree.function.Flags | None = None
 
     # function name is an identifier
     name = state.expect(Tokens.IDENT)
@@ -57,8 +56,8 @@ def parse_function(state: ParsingState) -> tree.function.Function:
     )
 
 
-def parse_parameters(state: ParsingState) -> List[tree.function.Parameter]:
-    parameters: List[tree.function.Parameter] = []
+def parse_parameters(state: ParsingState) -> list[tree.function.Parameter]:
+    parameters: list[tree.function.Parameter] = []
     parameters.append(parse_parameter(state))
 
     # a comma suggests next parameter
@@ -91,12 +90,12 @@ def parse_parameter(state: ParsingState) -> tree.function.Parameter:
     )
 
 
-def parse_function_flags(state: ParsingState) -> Optional[tree.function.Flags]:
-    keyword: Optional[LexingToken] = None
-    noreturn: Optional[bool] = None
+def parse_function_flags(state: ParsingState) -> tree.function.Flags | None:
+    keyword: LexingToken | None = None
+    noreturn: bool | None = None
 
-    start: Optional[LexingToken] = None
-    end: Optional[LexingToken] = None
+    start: LexingToken | None = None
+    end: LexingToken | None = None
 
     while not state.is_in(Tokens.CURLY_OPEN):
         expected = {b"noreturn"}
@@ -128,7 +127,7 @@ def parse_function_flags(state: ParsingState) -> Optional[tree.function.Flags]:
 
 def parse_statement(state: ParsingState) -> tree.function.Statement:
     token = state.expect(Tokens.IDENT, Tokens.KEYWORD)
-    target: Optional[tree.function.StatementTarget] = None
+    target: tree.function.StatementTarget | None = None
 
     if token.code == Tokens.IDENT:
         target = parse_callsite(state, token)
@@ -148,7 +147,7 @@ def parse_statement(state: ParsingState) -> tree.function.Statement:
 def parse_callsite(
     state: ParsingState, ident: LexingToken
 ) -> tree.function.CallStatement:
-    arguments: List[tree.function.Argument] = []
+    arguments: list[tree.function.Argument] = []
 
     # expect opening round bracket
     state.expect(Tokens.ROUND_OPEN)
@@ -209,12 +208,12 @@ def parse_value(state: ParsingState) -> tree.function.AssignStatement:
 
 def parse_value_expression(
     state: ParsingState,
-) -> Tuple[tree.function.ValueExpression, LexingToken]:
+) -> tuple[tree.function.ValueExpression, LexingToken]:
     return parse_argument(state)
 
 
-def parse_arguments(state: ParsingState) -> List[tree.function.Argument]:
-    arguments: List[tree.function.Argument] = []
+def parse_arguments(state: ParsingState) -> list[tree.function.Argument]:
+    arguments: list[tree.function.Argument] = []
     arguments.append(parse_argument(state)[0])
 
     # a comma suggests next argument
@@ -224,7 +223,7 @@ def parse_arguments(state: ParsingState) -> List[tree.function.Argument]:
     return arguments
 
 
-def parse_argument(state: ParsingState) -> Tuple[tree.function.Argument, LexingToken]:
+def parse_argument(state: ParsingState) -> tuple[tree.function.Argument, LexingToken]:
     token = state.expect(Tokens.HEX, Tokens.IDENT)
 
     # a hex can be only an integer literal

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.entities.literals import LiteralId
@@ -27,5 +26,5 @@ class LiteralResolution:
     ref: Span
     id: LiteralId
 
-    accepted: List[LiteralAcceptance]
-    rejected: List[LiteralRejection]
+    accepted: list[LiteralAcceptance]
+    rejected: list[LiteralRejection]

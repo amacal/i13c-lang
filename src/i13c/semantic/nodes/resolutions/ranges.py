@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
@@ -50,7 +50,7 @@ def configure_range_resolution() -> GraphGroup:
 def build_range_resolution(
     ranges: OneToOne[RangeId, Range],
 ) -> OneToOne[RangeId, RangeResolution]:
-    resolutions: Dict[RangeId, RangeResolution] = {}
+    resolutions: dict[RangeId, RangeResolution] = {}
 
     for rid, entry in ranges.items():
         resolution = RangeResolution(
@@ -91,17 +91,17 @@ def build_range_resolution(
 
 
 def check_range_resolution_accepted(
-    rule_e3001: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3001: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3001) == 0
 
 
 def build_range_resolution_accepted(
     resolutions: OneToOne[RangeId, RangeResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[RangeId, RangeAcceptance]:
-    accepted: Dict[RangeId, RangeAcceptance] = {}
+    accepted: dict[RangeId, RangeAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -112,8 +112,8 @@ def build_range_resolution_accepted(
 def validate_range_resolution_e3001(
     ranges: OneToOne[RangeId, Range],
     resolutions: OneToOne[RangeId, RangeResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:

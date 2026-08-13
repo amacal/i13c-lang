@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
@@ -23,9 +22,9 @@ def configure_values_by_statements() -> GraphNode:
 def build_values_by_statements(
     values: OneToOne[ValueId, ValueAcceptance],
 ) -> OneToMany[StatementId, ValueAcceptance]:
-    index: Dict[StatementId, List[ValueAcceptance]] = {}
+    index: dict[StatementId, list[ValueAcceptance]] = {}
 
-    for _, entry in values.items():
+    for entry in values.values():
         stmt_id = entry.get_statement(StatementId.from_context)
         data = index.get(stmt_id)
 

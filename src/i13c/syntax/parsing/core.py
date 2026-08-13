@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Set, Union
 
 from i13c.syntax.lexing import Token as LexingToken
 from i13c.syntax.lexing import Tokens
@@ -7,7 +6,7 @@ from i13c.syntax.source import SourceCode, Span
 
 
 class UnexpectedTokenCode(Exception):
-    def __init__(self, token: LexingToken, expected: List[int], found: int) -> None:
+    def __init__(self, token: LexingToken, expected: list[int], found: int) -> None:
         self.token = token
         self.expected = expected
         self.found = found
@@ -20,7 +19,7 @@ class UnexpectedEndOfTokens(Exception):
 
 class UnexpectedKeyword(Exception):
     def __init__(
-        self, token: LexingToken, expected: Union[List[bytes], Set[bytes]], found: bytes
+        self, token: LexingToken, expected: list[bytes] | set[bytes], found: bytes
     ) -> None:
         self.token = token
         self.expected = expected
@@ -42,7 +41,7 @@ class InvalidHexLiteral(Exception):
 @dataclass(kw_only=True)
 class ParsingState:
     code: SourceCode
-    tokens: List[LexingToken]
+    tokens: list[LexingToken]
     position: int
 
     def is_eof(self) -> bool:

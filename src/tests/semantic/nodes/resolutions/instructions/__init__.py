@@ -1,4 +1,5 @@
-from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, Union
+from collections.abc import Callable, Iterable, Sequence
+from typing import Any
 
 from pytest import mark
 
@@ -7,7 +8,7 @@ from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from tests.semantic import prepare_program
 
 
-def parse_value(header: str, value: str) -> Optional[Union[str, bool, List[str]]]:
+def parse_value(header: str, value: str) -> str | bool | list[str] | None:
     if not value.strip(" -"):
         return None
 
@@ -22,8 +23,8 @@ def parse_value(header: str, value: str) -> Optional[Union[str, bool, List[str]]
 
 def parse_samples(
     table: str,
-) -> Tuple[Sequence[str], Iterable[Sequence[Optional[Union[str, bool, List[str]]]]]]:
-    rows: List[Sequence[Optional[Union[str, bool, List[str]]]]] = []
+) -> tuple[Sequence[str], Iterable[Sequence[str | bool | list[str] | None]]]:
+    rows: list[Sequence[str | bool | list[str] | None]] = []
     lines = [line.strip("|\n ") for line in table.strip().splitlines()[1:-1]]
     headers = [h.strip().lower() for h in lines[0].split("|")]
 
@@ -66,9 +67,9 @@ def prepare_resolution(code: str) -> InstructionResolution:
 def verify_instruction_resolution(
     instruction: str,
     mnemonic: str,
-    variant: List[str],
+    variant: list[str],
     status: bool,
-    reason: Optional[str],
+    reason: str | None,
 ):
     resolution = prepare_resolution(
         f"""

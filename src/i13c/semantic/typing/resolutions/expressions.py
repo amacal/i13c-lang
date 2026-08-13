@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.expressions import ExpressionId
@@ -33,5 +32,5 @@ class ExpressionResolution:
     ref: Span
     id: ExpressionId
 
-    accepted: List[ExpressionAcceptance]
-    rejected: List[ExpressionRejection]
+    accepted: list[ExpressionAcceptance]
+    rejected: list[ExpressionRejection]

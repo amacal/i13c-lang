@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.parameters import ParameterId
@@ -33,5 +32,5 @@ class ParameterResolution:
     ref: Span
     id: ParameterId
 
-    accepted: List[ParameterAcceptance]
-    rejected: List[ParameterRejection]
+    accepted: list[ParameterAcceptance]
+    rejected: list[ParameterRejection]

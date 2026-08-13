@@ -1,4 +1,3 @@
-from typing import List, Optional, Tuple
 
 from i13c.syntax import tree
 from i13c.syntax.lexing import Token as LexingToken
@@ -13,9 +12,9 @@ from i13c.syntax.parsing.types import parse_range
 
 
 def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
-    body: List[tree.snippet.InstructionOrLabel] = []
-    slots: List[tree.snippet.Slot] = []
-    flags: Optional[tree.snippet.Flags] = None
+    body: list[tree.snippet.InstructionOrLabel] = []
+    slots: list[tree.snippet.Slot] = []
+    flags: tree.snippet.Flags | None = None
 
     # snippet name is an identifier
     name = state.expect(Tokens.IDENT)
@@ -56,8 +55,8 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
     )
 
 
-def parse_slots(state: ParsingState) -> List[tree.snippet.Slot]:
-    parameters: List[tree.snippet.Slot] = []
+def parse_slots(state: ParsingState) -> list[tree.snippet.Slot]:
+    parameters: list[tree.snippet.Slot] = []
     parameters.append(parse_slot(state))
 
     # a comma suggests next parameter
@@ -75,7 +74,7 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
     bind = state.expect(Tokens.IDENT, Tokens.KEYWORD)
 
     # if it's a keyword, it has to be "imm"
-    if bind.code == Tokens.KEYWORD:
+    if bind.code == Tokens.KEYWORD: # noqa: SIM102
         if state.extract(bind) != b"imm":
             raise UnexpectedKeyword(bind, [b"imm"], state.extract(bind))
 
@@ -105,13 +104,13 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
 
 def parse_flags(
     state: ParsingState,
-) -> Optional[tree.snippet.Flags]:
-    keyword: Optional[LexingToken] = None
-    start: Optional[LexingToken] = None
-    end: Optional[LexingToken] = None
+) -> tree.snippet.Flags | None:
+    keyword: LexingToken | None = None
+    start: LexingToken | None = None
+    end: LexingToken | None = None
 
-    clobbers: Optional[List[tree.snippet.Register]] = None
-    noreturn: Optional[bool] = None
+    clobbers: list[tree.snippet.Register] | None = None
+    noreturn: bool | None = None
 
     while not state.is_in(Tokens.CURLY_OPEN):
         expected = {b"clobbers", b"noreturn"}
@@ -151,8 +150,8 @@ def parse_flags(
 
 def parse_clobbers(
     state: ParsingState,
-) -> Tuple[List[tree.snippet.Register], LexingToken]:
-    clobbers: List[tree.snippet.Register] = []
+) -> tuple[list[tree.snippet.Register], LexingToken]:
+    clobbers: list[tree.snippet.Register] = []
 
     # at least one register is expected
     clobber = state.expect(Tokens.IDENT)
@@ -177,7 +176,7 @@ def parse_clobbers(
 
 
 def parse_instruction(state: ParsingState) -> tree.snippet.InstructionOrLabel:
-    operands: List[tree.snippet.Operand] = []
+    operands: list[tree.snippet.Operand] = []
     token = state.expect(Tokens.IDENT, Tokens.DOT)
 
     # if instruction starts with a dot, it's a label definition
@@ -220,8 +219,8 @@ def parse_label(state: ParsingState, start: LexingToken) -> tree.snippet.Label:
 OPERANDS_START = [Tokens.IDENT, Tokens.HEX, Tokens.AT, Tokens.SQUARE_OPEN]
 
 
-def parse_operands(state: ParsingState) -> List[tree.snippet.Operand]:
-    operands: List[tree.snippet.Operand] = []
+def parse_operands(state: ParsingState) -> list[tree.snippet.Operand]:
+    operands: list[tree.snippet.Operand] = []
     operands.append(parse_operand(state))
 
     # a comma suggests next operand
@@ -264,7 +263,7 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
 
 def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Address:
-    offset: Optional[tree.snippet.Offset] = None
+    offset: tree.snippet.Offset | None = None
 
     # now we expect a register as the base
     base = state.expect(Tokens.IDENT, Tokens.AT)

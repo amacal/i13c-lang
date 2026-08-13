@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -22,10 +22,10 @@ def configure_instructions() -> GraphNode:
 def build_instructions(
     graph: SyntaxGraph,
 ) -> OneToOne[InstructionId, Instruction]:
-    instructions: Dict[InstructionId, Instruction] = {}
+    instructions: dict[InstructionId, Instruction] = {}
 
     for nid, instruction in graph.snippet.instructions.items():
-        operands: List[OperandId] = []
+        operands: list[OperandId] = []
 
         # collect operand IDs from reverse mapping
         for operand in instruction.operands:
@@ -58,12 +58,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[InstructionId, Instruction]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[InstructionId, Instruction]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[InstructionId, Instruction]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -73,7 +72,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: InstructionId, entry: Instruction) -> Dict[str, str]:
+    def rows(key: InstructionId, entry: Instruction) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

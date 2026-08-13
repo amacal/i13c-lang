@@ -1,4 +1,3 @@
-from typing import Optional
 
 from i13c.llvm.typing.instructions import addr
 from i13c.llvm.typing.instructions.core import Register, ScaleValue
@@ -40,11 +39,11 @@ from tests.encoding import encode_instruction, parse_address, samples
 )
 def can_encode_lea(
     dst: str,
-    base: Optional[str],
-    scale: Optional[ScaleValue],
-    index: Optional[str],
-    disp32: Optional[bytes],
-    encoding: Optional[bytes],
+    base: str | None,
+    scale: ScaleValue | None,
+    index: str | None,
+    disp32: bytes | None,
+    encoding: bytes | None,
 ):
     encode_instruction(
         addr.LEA(

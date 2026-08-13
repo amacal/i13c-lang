@@ -1,4 +1,3 @@
-from typing import Optional
 
 from i13c.encoding import kind
 from i13c.llvm.typing.instructions.core import Address, Immediate, Register
@@ -31,11 +30,11 @@ RM = {
 
 def encode_sub_reg_imm(instruction: SUB, bytecode: bytearray) -> None:
     # assume no immediate value for now
-    immediate: Optional[Immediate] = None
+    immediate: Immediate | None = None
 
     # reg/rm will be determined
     reg: kind.RegisterOrConstant
-    rm: Optional[kind.RegisterOrAddress] = None
+    rm: kind.RegisterOrAddress | None = None
 
     # handle immediates first
     if isinstance(instruction.src, Immediate):
@@ -54,10 +53,7 @@ def encode_sub_reg_imm(instruction: SUB, bytecode: bytearray) -> None:
         if is_acc and immediate.width == rm_width and imm_width == 8:
             opcode = 0x2C
 
-        elif is_acc and immediate.width == rm_width and imm_width in (16, 32):
-            opcode = 0x2D
-
-        elif is_acc and immediate.width == 32 and rm_width == 64:
+        elif is_acc and immediate.width == rm_width and imm_width in (16, 32) or is_acc and immediate.width == 32 and rm_width == 64:
             opcode = 0x2D
 
         else:

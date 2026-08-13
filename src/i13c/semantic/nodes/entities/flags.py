@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -21,7 +21,7 @@ def configure_flags() -> GraphNode:
 def build_flags(
     graph: SyntaxGraph,
 ) -> OneToOne[FlagsId, Flags]:
-    flags: Dict[FlagsId, Flags] = {}
+    flags: dict[FlagsId, Flags] = {}
 
     # first collect all snippet flags
     for nid, entry in graph.snippet.flags.items():
@@ -61,12 +61,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[FlagsId, Flags]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FlagsId, Flags]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FlagsId, Flags]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -75,7 +74,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: FlagsId, entry: Flags) -> Dict[str, str]:
+    def rows(key: FlagsId, entry: Flags) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

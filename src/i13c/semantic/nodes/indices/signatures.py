@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
@@ -22,9 +21,9 @@ def configure_signatures_by_names() -> GraphNode:
 def build_signatures_by_names(
     signatures: OneToOne[SignatureId, SignatureAcceptance],
 ) -> OneToMany[bytes, SignatureAcceptance]:
-    index: Dict[bytes, List[SignatureAcceptance]] = {}
+    index: dict[bytes, list[SignatureAcceptance]] = {}
 
-    for _, entry in signatures.items():
+    for entry in signatures.values():
         data = index.get(entry.name)
 
         if data is None:

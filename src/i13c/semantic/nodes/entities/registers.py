@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -19,7 +19,7 @@ def configure_registers() -> GraphNode:
 def build_registers(
     graph: SyntaxGraph,
 ) -> OneToOne[RegisterId, Register]:
-    registers: Dict[RegisterId, Register] = {}
+    registers: dict[RegisterId, Register] = {}
 
     for id, entry in graph.snippet.registers.items():
         # derive register ID from globally unique node ID
@@ -37,12 +37,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[RegisterId, Register]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[RegisterId, Register]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[RegisterId, Register]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -50,7 +49,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: RegisterId, entry: Register) -> Dict[str, str]:
+    def rows(key: RegisterId, entry: Register) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, List, Protocol, TypeVar
+from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
@@ -27,7 +28,7 @@ class Instruction:
     snippet: NodeId
 
     mnemonic: MnemonicId
-    operands: List[OperandId]
+    operands: list[OperandId]
 
     def get_snippet(
         self, factory: Callable[[NodeId], SnippetContext]

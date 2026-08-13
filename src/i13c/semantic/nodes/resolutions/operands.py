@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -123,7 +124,7 @@ def build_operand_resolution(
     addresses: OneToOne[AddressId, AddressAcceptance],
     binds: OneToOne[ParameterId, BindAcceptance],
 ) -> OneToOne[OperandId, OperandResolution]:
-    resolutions: Dict[OperandId, OperandResolution] = {}
+    resolutions: dict[OperandId, OperandResolution] = {}
 
     for oid, entry in operands.items():
         resolution = OperandResolution(
@@ -190,17 +191,17 @@ def build_operand_resolution(
 
 
 def check_operand_resolution_accepted(
-    rule_e3021: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3021: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3021) == 0
 
 
 def build_operand_resolution_accepted(
     resolutions: OneToOne[OperandId, OperandResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[OperandId, OperandAcceptance]:
-    accepted: Dict[OperandId, OperandAcceptance] = {}
+    accepted: dict[OperandId, OperandAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -211,8 +212,8 @@ def build_operand_resolution_accepted(
 def validate_operand_resolution_e3021(
     operands: OneToOne[OperandId, Operand],
     resolutions: OneToOne[OperandId, OperandResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -238,12 +239,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[OperandId, OperandResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[OperandId, OperandResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[OperandId, OperandResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -252,7 +252,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: OperandId, entry: OperandResolution) -> Dict[str, str]:
+    def rows(key: OperandId, entry: OperandResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -265,12 +265,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[OperandId, OperandAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[OperandId, OperandAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[OperandId, OperandAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -280,7 +279,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: OperandId, entry: OperandAcceptance) -> Dict[str, str]:
+    def rows(key: OperandId, entry: OperandAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
 
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.entities.instructions import InstructionId
@@ -29,14 +28,14 @@ class Asmlet:
     source: SnippetId
 
     signature: SignatureAcceptance
-    keys: Dict[bytes, Hex]
+    keys: dict[bytes, Hex]
 
-    binding: List[BindAcceptance]
-    parameters: List[ParameterAcceptance]
+    binding: list[BindAcceptance]
+    parameters: list[ParameterAcceptance]
 
     noreturn: bool
-    instructions: List[AsmletInstruction]
-    callsites: List[CallSiteAcceptance]
+    instructions: list[AsmletInstruction]
+    callsites: list[CallSiteAcceptance]
 
 
 @dataclass(kw_only=True)
@@ -45,7 +44,7 @@ class AsmletInstruction:
     id: InstructionId
 
     mnemonic: bytes
-    operands: List[AsmletOperand]
+    operands: list[AsmletOperand]
 
 
 @dataclass(kw_only=True)
@@ -73,12 +72,9 @@ class AsmletOperandRelocation:
 @dataclass(kw_only=True)
 class AsmletOperandAddress:
     base: AsmletOperandRegister
-    displacement: Optional[Hex]
+    displacement: Hex | None
 
 
-AsmletOperandTarget = Union[
-    AsmletOperandRegister,
-    AsmletOperandImmediate,
-    AsmletOperandAddress,
-    AsmletOperandRelocation,
-]
+AsmletOperandTarget = (
+    AsmletOperandRegister | AsmletOperandImmediate | AsmletOperandAddress | AsmletOperandRelocation
+)

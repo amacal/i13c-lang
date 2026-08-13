@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import AddressId
@@ -56,29 +55,29 @@ from i13c.semantic.typing.resolutions.values import ValueResolution
 
 @dataclass
 class ResolutionNodes:
-    assigns: Optional[OneToOne[AssignId, AssignResolution]]
-    addresses: Optional[OneToOne[AddressId, AddressResolution]]
-    bindings: Optional[OneToOne[SignatureId, BindingResolution]]
-    binds: Optional[OneToOne[BindId, BindResolution]]
-    calls: Optional[OneToOne[CallId, CallResolution]]
-    callsites: Optional[OneToOne[CallSiteId, CallSiteResolution]]
-    cflows: Optional[OneToOne[FunctionId, ControlFlowResolution]]
-    environments: Optional[OneToOne[EnvironmentId, EnvironmentResolution]]
-    expressions: Optional[OneToOne[ExpressionId, ExpressionResolution]]
-    flags: Optional[OneToOne[FlagsId, FlagsResolution]]
-    functions: Optional[OneToOne[FunctionId, FunctionResolution]]
-    immediates: Optional[OneToOne[ImmediateId, ImmediateResolution]]
-    instructions: Optional[OneToOne[InstructionId, InstructionResolution]]
-    labels: Optional[OneToOne[LabelId, LabelResolution]]
-    literals: Optional[OneToOne[LiteralId, LiteralResolution]]
-    mnemonics: Optional[OneToOne[MnemonicId, MnemonicResolution]]
-    operands: Optional[OneToOne[OperandId, OperandResolution]]
-    ranges: Optional[OneToOne[RangeId, RangeResolution]]
-    references: Optional[OneToOne[ReferenceId, ReferenceResolution]]
-    registers: Optional[OneToOne[RegisterId, RegisterResolution]]
-    signatures: Optional[OneToOne[SignatureId, SignatureResolution]]
-    statements: Optional[OneToOne[StatementId, StatementResolution]]
-    parameters: Optional[OneToOne[ParameterId, ParameterResolution]]
-    snippets: Optional[OneToOne[SnippetId, SnippetResolution]]
-    types: Optional[OneToOne[TypeId, TypeResolution]]
-    values: Optional[OneToOne[ValueId, ValueResolution]]
+    assigns: OneToOne[AssignId, AssignResolution] | None
+    addresses: OneToOne[AddressId, AddressResolution] | None
+    bindings: OneToOne[SignatureId, BindingResolution] | None
+    binds: OneToOne[BindId, BindResolution] | None
+    calls: OneToOne[CallId, CallResolution] | None
+    callsites: OneToOne[CallSiteId, CallSiteResolution] | None
+    cflows: OneToOne[FunctionId, ControlFlowResolution] | None
+    environments: OneToOne[EnvironmentId, EnvironmentResolution] | None
+    expressions: OneToOne[ExpressionId, ExpressionResolution] | None
+    flags: OneToOne[FlagsId, FlagsResolution] | None
+    functions: OneToOne[FunctionId, FunctionResolution] | None
+    immediates: OneToOne[ImmediateId, ImmediateResolution] | None
+    instructions: OneToOne[InstructionId, InstructionResolution] | None
+    labels: OneToOne[LabelId, LabelResolution] | None
+    literals: OneToOne[LiteralId, LiteralResolution] | None
+    mnemonics: OneToOne[MnemonicId, MnemonicResolution] | None
+    operands: OneToOne[OperandId, OperandResolution] | None
+    ranges: OneToOne[RangeId, RangeResolution] | None
+    references: OneToOne[ReferenceId, ReferenceResolution] | None
+    registers: OneToOne[RegisterId, RegisterResolution] | None
+    signatures: OneToOne[SignatureId, SignatureResolution] | None
+    statements: OneToOne[StatementId, StatementResolution] | None
+    parameters: OneToOne[ParameterId, ParameterResolution] | None
+    snippets: OneToOne[SnippetId, SnippetResolution] | None
+    types: OneToOne[TypeId, TypeResolution] | None
+    values: OneToOne[ValueId, ValueResolution] | None

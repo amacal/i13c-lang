@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -22,12 +22,12 @@ def configure_functions() -> GraphNode:
 def build_functions(
     graph: SyntaxGraph,
 ) -> OneToOne[FunctionId, Function]:
-    functions: Dict[FunctionId, Function] = {}
+    functions: dict[FunctionId, Function] = {}
 
     for nid, node in graph.function.functions.items():
         # derive function ID from globally unique node ID
         function_id = FunctionId(value=nid.value)
-        statements: List[StatementId] = []
+        statements: list[StatementId] = []
 
         # identify signature ID from globally unique node ID
         nid = graph.function.signatures.get_by_node(node.signature)
@@ -58,12 +58,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[FunctionId, Function]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FunctionId, Function]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FunctionId, Function]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -73,7 +72,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: Function) -> Dict[str, str]:
+    def rows(key: FunctionId, entry: Function) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

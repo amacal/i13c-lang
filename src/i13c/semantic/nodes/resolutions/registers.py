@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Set, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -57,17 +58,17 @@ def configure_register_resolution() -> GraphGroup:
 def build_register_resolution(
     registers: OneToOne[RegisterId, Register],
 ) -> OneToOne[RegisterId, RegisterResolution]:
-    resolutions: Dict[RegisterId, RegisterResolution] = {}
+    resolutions: dict[RegisterId, RegisterResolution] = {}
 
     # fmt: off
-    widths: Dict[RegisterWidth, Set[bytes]] = {
+    widths: dict[RegisterWidth, set[bytes]] = {
         8: { b"al", b"cl", b"dl", b"bl", b"ah", b"ch", b"dh", b"bh", b"spl", b"bpl", b"sil", b"dil", b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b" },
         16: { b"ax", b"cx", b"dx", b"bx", b"sp", b"bp", b"si", b"di", b"r8w", b"r9w", b"r10w", b"r11w", b"r12w", b"r13w", b"r14w", b"r15w" },
         32: { b"eax", b"ecx", b"edx", b"ebx", b"esp", b"ebp", b"esi", b"edi", b"r8d", b"r9d", b"r10d", b"r11d", b"r12d", b"r13d", b"r14d", b"r15d" },
         64: { b"rax", b"rcx", b"rdx", b"rbx", b"rsp", b"rbp", b"rsi", b"rdi", b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15", b"rip" },
     }
 
-    kinds: Dict[RegisterKind, Set[bytes]] = {
+    kinds: dict[RegisterKind, set[bytes]] = {
         "rip": { b"rip" },
         "low": { b"al", b"cl", b"dl", b"bl" },
         "high": { b"ah", b"ch", b"dh", b"bh" },
@@ -79,11 +80,11 @@ def build_register_resolution(
     # fmt: on
 
     # invert both mappings for efficient lookup
-    widths_inverted: Dict[bytes, RegisterWidth] = {
+    widths_inverted: dict[bytes, RegisterWidth] = {
         name: width for width, names in widths.items() for name in names
     }
 
-    kinds_inverted: Dict[bytes, RegisterKind] = {
+    kinds_inverted: dict[bytes, RegisterKind] = {
         name: kind for kind, names in kinds.items() for name in names
     }
 
@@ -121,17 +122,17 @@ def build_register_resolution(
 
 
 def check_register_resolution_accepted(
-    rule_e3017: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3017: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3017) == 0
 
 
 def build_register_resolution_accepted(
     resolutions: OneToOne[RegisterId, RegisterResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[RegisterId, RegisterAcceptance]:
-    accepted: Dict[RegisterId, RegisterAcceptance] = {}
+    accepted: dict[RegisterId, RegisterAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -142,8 +143,8 @@ def build_register_resolution_accepted(
 def validate_register_resolution_e3017(
     registers: OneToOne[RegisterId, Register],
     resolutions: OneToOne[RegisterId, RegisterResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -170,12 +171,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[RegisterId, RegisterResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[RegisterId, RegisterResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[RegisterId, RegisterResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -184,7 +184,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: RegisterId, entry: RegisterResolution) -> Dict[str, str]:
+    def rows(key: RegisterId, entry: RegisterResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -197,12 +197,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[RegisterId, RegisterAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[RegisterId, RegisterAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[RegisterId, RegisterAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -212,7 +211,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: RegisterId, entry: RegisterAcceptance) -> Dict[str, str]:
+    def rows(key: RegisterId, entry: RegisterAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

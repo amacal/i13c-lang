@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -27,7 +27,7 @@ def build_callings(
     asmlets: OneToOne[AsmletId, Asmlet],
     callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ) -> OneToOne[CallSiteId, Calling]:
-    callings: Dict[CallSiteId, Calling] = {}
+    callings: dict[CallSiteId, Calling] = {}
 
     # copy by default all available callsites
     for cid, entry in callsites.items():
@@ -69,12 +69,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[CallSiteId, Calling]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[CallSiteId, Calling]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[CallSiteId, Calling]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "callsite": "CallSite",
@@ -83,7 +82,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: CallSiteId, entry: Calling) -> Dict[str, str]:
+    def rows(key: CallSiteId, entry: Calling) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "callsite": key.identify(1),

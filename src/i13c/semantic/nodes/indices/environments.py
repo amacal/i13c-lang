@@ -1,4 +1,3 @@
-from typing import Dict
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
@@ -19,9 +18,9 @@ def configure_environments_by_snippets() -> GraphNode:
 def build_environments_by_snippets(
     environments: OneToOne[EnvironmentId, EnvironmentAcceptance],
 ) -> OneToOne[SnippetId, EnvironmentAcceptance]:
-    index: Dict[SnippetId, EnvironmentAcceptance] = {}
+    index: dict[SnippetId, EnvironmentAcceptance] = {}
 
-    for _, entry in environments.items():
+    for entry in environments.values():
         index[entry.ctx] = entry
 
     return OneToOne[SnippetId, EnvironmentAcceptance].instance(index)

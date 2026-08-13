@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -24,13 +24,13 @@ def configure_callsites() -> GraphNode:
 def build_callsites(
     graph: SyntaxGraph,
 ) -> OneToOne[CallSiteId, CallSite]:
-    callsites: Dict[CallSiteId, CallSite] = {}
+    callsites: dict[CallSiteId, CallSite] = {}
 
     for nid, callsite in graph.function.callsites.items():
 
         # derive callsite ID from globally unique node ID
         callsite_id = CallSiteId(value=nid.value)
-        arguments: List[CallSiteTarget] = []
+        arguments: list[CallSiteTarget] = []
 
         # derive function ID from globally unique node ID
         stmt = graph.function.callsites.get_ctx(nid)
@@ -66,12 +66,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[CallSiteId, CallSite]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[CallSiteId, CallSite]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[CallSiteId, CallSite]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -82,7 +81,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: CallSiteId, entry: CallSite) -> Dict[str, str]:
+    def rows(key: CallSiteId, entry: CallSite) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

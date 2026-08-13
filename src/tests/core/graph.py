@@ -1,4 +1,3 @@
-from typing import Dict, Tuple
 
 from pytest import raises
 
@@ -55,7 +54,7 @@ def can_evaluate_multiple_nodes_with_dependencies():
 
 
 def can_produce_multiple_artifacts():
-    def produce_multiple() -> Tuple[int, str]:
+    def produce_multiple() -> tuple[int, str]:
         return 42, "hello"
 
     node: GraphNode = GraphNode(
@@ -164,7 +163,7 @@ def can_consume_prefix_from_single_multi_producer():
         requires=frozenset(),
     )
 
-    def consume_entities(entities: Dict[str, int]) -> int:
+    def consume_entities(entities: dict[str, int]) -> int:
         # Prefix should give all artifacts at once
         return sum(entities.values())
 
@@ -267,7 +266,7 @@ def can_reject_single_node_producing_duplicate_artifacts():
 
 
 def can_reject_missing_prefix_dependency():
-    def build(entities: Dict[str, int]) -> int:
+    def build(entities: dict[str, int]) -> int:
         return len(entities)
 
     consumer = GraphNode(
@@ -289,7 +288,7 @@ def can_reject_missing_prefix_dependency():
 
 
 def can_not_consume_prefix_if_no_prefix_artifacts_were_produced():
-    def build(entities: Dict[str, int]) -> int:
+    def build(entities: dict[str, int]) -> int:
         return len(entities)
 
     producer = GraphNode(

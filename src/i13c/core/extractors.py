@@ -1,14 +1,15 @@
-from typing import Dict, Iterable, Protocol, Tuple, TypeVar
+from collections.abc import Iterable
+from typing import Protocol, TypeVar
 
 ListKey = TypeVar("ListKey")
 ListEntry = TypeVar("ListEntry")
 
 
 class AbstractListExtractor(Protocol[ListKey, ListEntry]):
-    def extract(self) -> Iterable[Tuple[ListKey, ListEntry]]: ...
+    def extract(self) -> Iterable[tuple[ListKey, ListEntry]]: ...
 
     @staticmethod
-    def headers() -> Dict[str, str]: ...
+    def headers() -> dict[str, str]: ...
 
     @staticmethod
-    def rows(key: ListKey, entry: ListEntry) -> Dict[str, str]: ...
+    def rows(key: ListKey, entry: ListEntry) -> dict[str, str]: ...

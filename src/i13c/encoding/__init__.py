@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Protocol, Type, Union
+from typing import Protocol
 
 from i13c.encoding import addr, bits, ctrl, math, move, stack
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
@@ -18,10 +18,10 @@ class DuplicateLabelError(Exception):
         super().__init__(f"duplicate label with id {target}")
 
 
-def encode(instructions: List[Instruction]) -> bytes:
+def encode(instructions: list[Instruction]) -> bytes:
     bytecode = bytearray()
-    labels: Dict[int, LabelArtifact] = {}
-    relocations: List[RelocationArtifact] = []
+    labels: dict[int, LabelArtifact] = {}
+    relocations: list[RelocationArtifact] = []
 
     for instruction in instructions:
         if artifact := DISPATCH_TABLE[type(instruction)](instruction, bytecode):
@@ -49,10 +49,10 @@ def encode(instructions: List[Instruction]) -> bytes:
 class Encoder(Protocol):
     def __call__(
         self, instruction: Instruction, out: bytearray
-    ) -> Optional[Union[LabelArtifact, RelocationArtifact]]: ...
+    ) -> LabelArtifact | RelocationArtifact | None: ...
 
 
-DISPATCH_TABLE: Dict[Type[Instruction], Encoder] = {
+DISPATCH_TABLE: dict[type[Instruction], Encoder] = {
     llvm.addr.LEA: addr.encode_lea_reg_off,
     llvm.bits.BSWAP: bits.encode_bswap,
     llvm.bits.SHL: bits.encode_shl,

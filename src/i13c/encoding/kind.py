@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional, Protocol, Union
+from typing import Protocol
 
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.llvm.typing.instructions import core as llvm
 
-RegisterOrAddress = Union[llvm.Register, llvm.ComputedAddress, llvm.RelativeAddress]
-RegisterOrConstant = Union[llvm.Register, int]
+RegisterOrAddress = llvm.Register | llvm.ComputedAddress | llvm.RelativeAddress
+RegisterOrConstant = llvm.Register | int
 
 
 @dataclass(kw_only=True)
@@ -31,7 +31,7 @@ class ModRMEncoding:
             sib_index=0b000,
             sib_base=0b000,
             disp_width=0,
-            disp_value=bytes(),
+            disp_value=b"",
         )
 
     def is_sib_required(self) -> bool:
@@ -112,9 +112,9 @@ def encode_prefixes(target: RegisterOrAddress) -> PrefixEncoding:
 def encode_rex(
     target: RegisterOrAddress,
     /,
-    modrm_reg: Optional[ModRegToRex] = None,
-    modrm_rm: Optional[ModRmToRex] = None,
-    opcode_reg: Optional[OpCodeToRex] = None,
+    modrm_reg: ModRegToRex | None = None,
+    modrm_rm: ModRmToRex | None = None,
+    opcode_reg: OpCodeToRex | None = None,
 ) -> RexEncoding:
     rex = RexEncoding.default()
     reg = isinstance(target, llvm.Register)
@@ -271,7 +271,7 @@ def write_opcode(
     opcode_length: int,
     opcode_value: int,
     /,
-    opcode_reg: Optional[OpCodeEncoding] = None,
+    opcode_reg: OpCodeEncoding | None = None,
 ) -> None:
 
     # append opcode register bits to opcode value if present
@@ -284,7 +284,7 @@ def write_opcode(
 
 def write_immediate(
     bytecode: bytearray,
-    imm: Optional[llvm.Immediate],
+    imm: llvm.Immediate | None,
     /,
     condition: bool = True,
 ) -> None:

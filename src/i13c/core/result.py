@@ -1,24 +1,21 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Generic, TypeVar
-
-A = TypeVar("A")
-B = TypeVar("B")
 
 
 @dataclass(frozen=True)
-class Ok(Generic[A]):
+class Ok[A]:
     value: A
 
 
 @dataclass(frozen=True)
-class Err(Generic[B]):
+class Err[B]:
     error: B
 
 
-Result = Ok[A] | Err[B]
+type Result[A, B] = Ok[A] | Err[B]
 
 
-def unwrap(r: Result[A, B], callback: Callable[[B], A]) -> A:
+def unwrap[A, B](r: Result[A, B], callback: Callable[[B], A]) -> A:
     match r:
         case Ok(v):
             return v

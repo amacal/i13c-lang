@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -73,7 +74,7 @@ def build_snippet_resolution(
     flags: OneToOne[FlagsId, FlagsAcceptance],
     bindings: OneToOne[SignatureId, BindingAcceptance],
 ) -> OneToOne[SnippetId, SnippetResolution]:
-    resolutions: Dict[SnippetId, SnippetResolution] = {}
+    resolutions: dict[SnippetId, SnippetResolution] = {}
 
     for sid, entry in snippets.items():
         resolution = SnippetResolution(
@@ -87,7 +88,7 @@ def build_snippet_resolution(
         binding = bindings.get(entry.signature)
 
         noreturn: bool = False
-        clobbers: List[RegisterAcceptance] = []
+        clobbers: list[RegisterAcceptance] = []
 
         if entry.flags is not None:
             clobbers = flags.get(entry.flags).clobbers
@@ -118,17 +119,17 @@ def build_snippet_resolution(
 
 
 def check_snippet_resolution_accepted(
-    rule_e3015: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3015: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3015) == 0
 
 
 def build_snippet_resolution_accepted(
     resolutions: OneToOne[SnippetId, SnippetResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[SnippetId, SnippetAcceptance]:
-    accepted: Dict[SnippetId, SnippetAcceptance] = {}
+    accepted: dict[SnippetId, SnippetAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -138,10 +139,10 @@ def build_snippet_resolution_accepted(
 
 def validate_snippet_resolution_e3015(
     resolutions: OneToOne[SnippetId, SnippetResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
-    for _, resolution in resolutions.items():
+    for resolution in resolutions.values():
         if len(resolution.accepted) != 1:
             for rejection in resolution.rejected:
                 diagnostics.append(report_snippet_resolution_e3015(rejection))
@@ -163,12 +164,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[SnippetId, SnippetResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SnippetId, SnippetResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SnippetId, SnippetResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -177,7 +177,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: SnippetId, entry: SnippetResolution) -> Dict[str, str]:
+    def rows(key: SnippetId, entry: SnippetResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -190,12 +190,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[SnippetId, SnippetAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SnippetId, SnippetAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SnippetId, SnippetAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -207,7 +206,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: SnippetId, entry: SnippetAcceptance) -> Dict[str, str]:
+    def rows(key: SnippetId, entry: SnippetAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, Tuple, Union
 
 
 @dataclass(kw_only=True)
@@ -20,7 +19,7 @@ class ExitFrame:
 
 @dataclass(kw_only=True)
 class Preserve:
-    registers: Dict[int, int]
+    registers: dict[int, int]
 
     def native(self) -> str:
         regs = ", ".join(f"{k}:{v}" for k, v in self.registers.items())
@@ -29,19 +28,14 @@ class Preserve:
 
 @dataclass(kw_only=True)
 class Restore:
-    registers: Dict[int, int]
+    registers: dict[int, int]
 
     def native(self) -> str:
         regs = ", ".join(f"{k}:{v}" for k, v in self.registers.items())
         return f"restore {regs}"
 
 
-Abstracts = Union[
-    EnterFrame,
-    ExitFrame,
-    Preserve,
-    Restore,
-]
+Abstracts = EnterFrame | ExitFrame | Preserve | Restore
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -52,4 +46,4 @@ class AbstractId:
         return "#".join(("abstract", f"{self.value:<{length}}"))
 
 
-AbstractEntry = Tuple[AbstractId, Abstracts]
+AbstractEntry = tuple[AbstractId, Abstracts]

@@ -1,4 +1,3 @@
-from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, SIB, Displacement, ModRM, Opcode
@@ -7,7 +6,7 @@ from i13c.llvm.typing.instructions.stack import PopOff, PushOff
 
 def encode_push_off(
     instruction: PushOff, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+) -> LabelArtifact | RelocationArtifact | None:
 
     # chosen encoding: REX.W + FF /6
     # encoded as: [rex] [opcode] [modrm] [sib?] [disp32]
@@ -55,7 +54,7 @@ def encode_push_off(
 
 def encode_pop_off(
     instruction: PopOff, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+) -> LabelArtifact | RelocationArtifact | None:
 
     # chosen encoding: REX.W + FF /0
     # encoded as: [rex] [opcode] [modrm] [sib?] [disp32]

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.analyses.callings import Calling
@@ -28,5 +27,5 @@ class CallResolution:
     ref: Span
     id: CallId
 
-    accepted: List[CallAcceptance]
-    rejected: List[CallRejection]
+    accepted: list[CallAcceptance]
+    rejected: list[CallRejection]

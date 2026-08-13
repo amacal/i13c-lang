@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Tuple, Union
 
 from i13c.llvm.typing.registers import reg64_to_name
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -32,7 +31,7 @@ class CallFlow:
 
 @dataclass(kw_only=True)
 class ClobbersFlow:
-    clobbers: List[int]
+    clobbers: list[int]
 
     def native(self) -> str:
         return f"clobbers {', '.join(map(reg64_to_name, sorted(self.clobbers)))}"
@@ -81,16 +80,16 @@ class MoveFlow:
         return f"move {reg64_to_name(self.dst)}, {reg64_to_name(self.src)}"
 
 
-Flow = Union[
-    CallFlow,
-    ClobbersFlow,
-    BindingFlow,
-    PrologueFlow,
-    EpilogueFlow,
-    SnapshotFlow,
-    ImmediateFlow,
-    MoveFlow,
-]
+Flow = (
+    CallFlow
+    | ClobbersFlow
+    | BindingFlow
+    | PrologueFlow
+    | EpilogueFlow
+    | SnapshotFlow
+    | ImmediateFlow
+    | MoveFlow
+)
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -101,4 +100,4 @@ class FlowId:
         return "#".join(("flow", f"{self.value:<{length}}"))
 
 
-FlowEntry = Tuple[FlowId, Flow]
+FlowEntry = tuple[FlowId, Flow]

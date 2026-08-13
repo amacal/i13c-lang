@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Set, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -59,7 +60,7 @@ def build_signature_resolution(
     signatures: OneToOne[SignatureId, Signature],
     parameters: OneToOne[ParameterId, ParameterAcceptance],
 ) -> OneToOne[SignatureId, SignatureResolution]:
-    resolutions: Dict[SignatureId, SignatureResolution] = {}
+    resolutions: dict[SignatureId, SignatureResolution] = {}
 
     for sid, entry in signatures.items():
         resolution = SignatureResolution(
@@ -69,8 +70,8 @@ def build_signature_resolution(
             rejected=[],
         )
 
-        names: Set[bytes] = set()
-        accepted: List[ParameterAcceptance] = []
+        names: set[bytes] = set()
+        accepted: list[ParameterAcceptance] = []
 
         for id in entry.parameters:
             parameter = parameters.get(id)
@@ -106,17 +107,17 @@ def build_signature_resolution(
 
 
 def check_signature_resolution_accepted(
-    rule_e3003: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3003: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3003) == 0
 
 
 def build_signature_resolution_accepted(
     resolutions: OneToOne[SignatureId, SignatureResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[SignatureId, SignatureAcceptance]:
-    accepted: Dict[SignatureId, SignatureAcceptance] = {}
+    accepted: dict[SignatureId, SignatureAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -127,8 +128,8 @@ def build_signature_resolution_accepted(
 def validate_signature_resolution_e3003(
     signatures: OneToOne[SignatureId, Signature],
     resolutions: OneToOne[SignatureId, SignatureResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -156,12 +157,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[SignatureId, SignatureResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SignatureId, SignatureResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SignatureId, SignatureResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -170,7 +170,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: SignatureId, entry: SignatureResolution) -> Dict[str, str]:
+    def rows(key: SignatureId, entry: SignatureResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -183,12 +183,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[SignatureId, SignatureAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SignatureId, SignatureAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SignatureId, SignatureAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -197,7 +196,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: SignatureId, entry: SignatureAcceptance) -> Dict[str, str]:
+    def rows(key: SignatureId, entry: SignatureAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

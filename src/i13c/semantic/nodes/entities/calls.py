@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -20,7 +20,7 @@ def configure_calls() -> GraphNode:
 def build_calls(
     graph: SyntaxGraph,
 ) -> OneToOne[CallId, Call]:
-    calls: Dict[CallId, Call] = {}
+    calls: dict[CallId, Call] = {}
 
     for nid, call in graph.function.calls.items():
 
@@ -43,12 +43,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[CallId, Call]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[CallId, Call]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[CallId, Call]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -56,7 +55,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: CallId, entry: Call) -> Dict[str, str]:
+    def rows(key: CallId, entry: Call) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

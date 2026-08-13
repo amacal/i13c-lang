@@ -1,4 +1,3 @@
-from typing import List, Optional
 
 from tests.semantic.nodes.resolutions.instructions import (
     samples,
@@ -17,7 +16,7 @@ from tests.semantic.nodes.resolutions.instructions import (
         | ----------- | -------- | ------- | -------- | ---------------- |
     """
 )
-def can_handle_jmp(instruction: str, mnemonic: str, variant: List[str], status: bool, reason: Optional[str]):
+def can_handle_jmp(instruction: str, mnemonic: str, variant: list[str], status: bool, reason: str | None):
     verify_instruction_resolution(instruction, mnemonic, variant, status, reason)
 
 
@@ -31,5 +30,5 @@ def can_handle_jmp(instruction: str, mnemonic: str, variant: List[str], status: 
         | ----------- | -------- | ------- | -------- | -------------- |
     """
 )
-def can_handle_syscall(instruction: str, mnemonic: str, variant: List[str], status: bool, reason: Optional[str]):
+def can_handle_syscall(instruction: str, mnemonic: str, variant: list[str], status: bool, reason: str | None):
     verify_instruction_resolution(instruction, mnemonic, variant, status, reason)

@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
@@ -25,8 +24,8 @@ def lower_snippet_bindings(
     generator: Generator,
     bindings: None,
     registers: OneToOne[None, VirtualRegister],
-) -> List[BlockInstruction]:
-    out: List[BlockInstruction] = []
+) -> list[BlockInstruction]:
+    out: list[BlockInstruction] = []
 
     # for binding in bindings.entries:
 
@@ -71,8 +70,8 @@ def lower_function_bindings(
     generator: Generator,
     bindings: None,
     registers: OneToOne[None, VirtualRegister],
-) -> List[BlockInstruction]:
-    out: List[BlockInstruction] = []
+) -> list[BlockInstruction]:
+    out: list[BlockInstruction] = []
 
     # for idx, binding in enumerate(bindings.entries):
 
@@ -131,7 +130,7 @@ def patch_bindings(
     stackframes: OneToOne[FunctionId, StackFrame],
     instructions: OneToMany[BlockId, BlockInstruction],
 ) -> OneToMany[FlowId, InstructionEntry]:
-    bindings: Dict[FlowId, List[InstructionEntry]] = {}
+    bindings: dict[FlowId, list[InstructionEntry]] = {}
 
     for fid, bids in blocks.items():
         for bid in bids:

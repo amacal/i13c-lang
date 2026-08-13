@@ -17,7 +17,7 @@ def can_detect_dflow_in_empty_function():
     assert len(dflows.forward) == 0
     assert len(dflows.backward) == 0
 
-    assert len(dflows.nodes) == 2
+    assert len(dflows.control.nodes) == 2
     assert len(dflows.defs) == 2
     assert len(dflows.uses) == 2
 
@@ -45,7 +45,7 @@ def can_detect_dflow_with_unused_parameter():
     assert dflows.values[0].name == b"x"
     assert dflows.values[0].type.name == b"u8"
 
-    assert len(dflows.nodes) == 2
+    assert len(dflows.control.nodes) == 2
     assert len(dflows.defs) == 2
     assert len(dflows.uses) == 2
 
@@ -76,7 +76,7 @@ def can_detect_dflow_with_a_callsite_using_literal():
     assert dflows.forward[0] == []
     assert dflows.backward[0] == []
 
-    assert len(dflows.nodes) == 3
+    assert len(dflows.control.nodes) == 3
     assert len(dflows.defs) == 3
     assert len(dflows.uses) == 3
 
@@ -131,7 +131,7 @@ def can_detect_dflow_with_a_callsite_using_parameter():
         else:
             assert False
 
-    assert len(dflows.nodes) == 3
+    assert len(dflows.control.nodes) == 3
     assert len(dflows.defs) == 3
     assert len(dflows.uses) == 3
 
@@ -184,7 +184,7 @@ def can_detect_dflow_with_a_callsite_using_value():
         else:
             assert False
 
-    assert len(dflows.nodes) == 4
+    assert len(dflows.control.nodes) == 4
     assert len(dflows.defs) == 4
     assert len(dflows.uses) == 4
 
@@ -221,7 +221,7 @@ def can_detect_dflow_with_an_assignment_using_literal():
     assert dflows.forward[0] == []
     assert dflows.backward[0] == []
 
-    assert len(dflows.nodes) == 3
+    assert len(dflows.control.nodes) == 3
     assert len(dflows.defs) == 3
     assert len(dflows.uses) == 3
 
@@ -272,7 +272,7 @@ def can_detect_dflow_with_an_assignment_using_parameter():
         else:
             assert False
 
-    assert len(dflows.nodes) == 3
+    assert len(dflows.control.nodes) == 3
     assert len(dflows.defs) == 3
     assert len(dflows.uses) == 3
 
@@ -329,7 +329,7 @@ def can_detect_dflow_with_a_chain_of_parameter_to_value_to_callsite():
             assert len(dflows.backward[idx]) == 1
             assert isinstance(dflows.values[dflows.backward[idx][0]], ValueAcceptance)
 
-    assert len(dflows.nodes) == 4
+    assert len(dflows.control.nodes) == 4
     assert len(dflows.defs) == 4
     assert len(dflows.uses) == 4
 
@@ -385,7 +385,7 @@ def can_detect_dflow_with_an_assignment_using_value():
         else:
             assert False
 
-    assert len(dflows.nodes) == 4
+    assert len(dflows.control.nodes) == 4
     assert len(dflows.defs) == 4
     assert len(dflows.uses) == 4
 

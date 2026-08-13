@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import AbstractListExtractor, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -19,7 +19,7 @@ def configure_literals() -> GraphNode:
 def build_literals(
     graph: SyntaxGraph,
 ) -> OneToOne[LiteralId, Literal]:
-    literals: Dict[LiteralId, Literal] = {}
+    literals: dict[LiteralId, Literal] = {}
 
     for nid, literal in graph.function.literals.items():
         # derive literal ID from globally unique node ID
@@ -37,12 +37,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[LiteralId, Literal]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[LiteralId, Literal]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[LiteralId, Literal]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -51,7 +50,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: LiteralId, entry: Literal) -> Dict[str, str]:
+    def rows(key: LiteralId, entry: Literal) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

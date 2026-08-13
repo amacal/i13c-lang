@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -22,7 +22,7 @@ def configure_environments() -> GraphNode:
 def build_environments(
     graph: SyntaxGraph,
 ) -> OneToOne[EnvironmentId, Environment]:
-    environments: Dict[EnvironmentId, Environment] = {}
+    environments: dict[EnvironmentId, Environment] = {}
 
     for id, entry in graph.snippet.snippets.items():
         # derive environment ID from globally unique node ID
@@ -74,12 +74,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[EnvironmentId, Environment]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[EnvironmentId, Environment]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[EnvironmentId, Environment]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -88,7 +87,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: EnvironmentId, entry: Environment) -> Dict[str, str]:
+    def rows(key: EnvironmentId, entry: Environment) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

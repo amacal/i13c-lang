@@ -1,14 +1,13 @@
-from typing import Callable, Dict, Iterable, List, TypeVar
+from collections.abc import Callable, Iterable
 
-DrawItem = TypeVar("DrawItem")
-DrawCallback = Callable[[DrawItem], str]
+type DrawCallback[DrawItem] = Callable[[DrawItem], str]
 
 
 class Table:
-    def __init__(self, entries: List[str]):
+    def __init__(self, entries: list[str]):
         self.entries = entries
 
-    def reformat(self) -> List[str]:
+    def reformat(self) -> list[str]:
         return [
             line.replace("-+-", " | ").replace("+-", "| ").replace("-+", " |")
             for line in self.entries
@@ -20,7 +19,7 @@ class Table:
         )
 
 
-def draw_table(headers: Dict[str, str], rows: List[Dict[str, str]]) -> Table:
+def draw_table(headers: dict[str, str], rows: list[dict[str, str]]) -> Table:
     header_widths = measure_headers(headers)
     row_widths = measure_rows(headers, rows)
 
@@ -37,11 +36,11 @@ def draw_table(headers: Dict[str, str], rows: List[Dict[str, str]]) -> Table:
     )
 
 
-def measure_headers(headers: Dict[str, str]) -> Dict[str, int]:
+def measure_headers(headers: dict[str, str]) -> dict[str, int]:
     return {key: len(value) for key, value in headers.items()}
 
 
-def measure_rows(headers: Dict[str, str], rows: List[Dict[str, str]]) -> Dict[str, int]:
+def measure_rows(headers: dict[str, str], rows: list[dict[str, str]]) -> dict[str, int]:
     return {key: max(len(row[key]) for row in rows) if rows else 0 for key in headers}
 
 
@@ -49,13 +48,13 @@ def draw_separator(widths: Iterable[int]) -> str:
     return draw("+", widths, lambda width: "-" * (width + 2))
 
 
-def draw_header(widths: Iterable[int], headers: Dict[str, str]) -> str:
+def draw_header(widths: Iterable[int], headers: dict[str, str]) -> str:
     return draw("|", zip(headers, widths), lambda x: f" {headers[x[0]]:<{x[1]}} ")
 
 
-def draw_row(widths: Iterable[int], headers: Dict[str, str], row: Dict[str, str]) -> str:
+def draw_row(widths: Iterable[int], headers: dict[str, str], row: dict[str, str]) -> str:
     return draw("|", zip(headers, widths), lambda x: f" {row[x[0]]:<{x[1]}} ")
 
 
-def draw(sep: str, items: Iterable[DrawItem], callback: DrawCallback[DrawItem]) -> str:
+def draw[DrawItem](sep: str, items: Iterable[DrawItem], callback: DrawCallback[DrawItem]) -> str:
     return sep + sep.join(callback(item) for item in items) + sep

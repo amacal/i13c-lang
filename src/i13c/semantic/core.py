@@ -142,8 +142,8 @@ def default_range(name: bytes) -> Range:
         )
 
     return Range(
-        lower=Hex(data=bytes(), width=8),
-        upper=Hex(data=bytes(), width=8),
+        lower=Hex(data=b"", width=8),
+        upper=Hex(data=b"", width=8),
     )
 
 

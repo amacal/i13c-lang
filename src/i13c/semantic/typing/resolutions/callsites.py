@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
-from typing import Union
 
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -20,11 +18,7 @@ CallSiteRejectionReason = Kind[
     "not-literal",
 ]
 
-CallSiteArgument = Union[
-    LiteralAcceptance,
-    ParameterAcceptance,
-    ValueAcceptance,
-]
+CallSiteArgument = LiteralAcceptance | ParameterAcceptance | ValueAcceptance
 
 
 @dataclass(kw_only=True)
@@ -44,7 +38,7 @@ class CallSiteAcceptance:
     stmt: StatementId
 
     signature: SignatureAcceptance
-    arguments: List[CallSiteArgument]
+    arguments: list[CallSiteArgument]
 
 
 @dataclass(kw_only=True)
@@ -52,5 +46,5 @@ class CallSiteResolution:
     ref: Span
     id: CallSiteId
 
-    accepted: List[CallSiteAcceptance]
-    rejected: List[CallSiteRejection]
+    accepted: list[CallSiteAcceptance]
+    rejected: list[CallSiteRejection]

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.resolutions.addresses import configure_address_resolution
@@ -67,7 +67,7 @@ def configure_resolutions() -> GraphGroup:
     )
 
 
-def parse_resolutions(resolutions: Dict[str, Any]) -> ResolutionNodes:
+def parse_resolutions(resolutions: dict[str, Any]) -> ResolutionNodes:
     return ResolutionNodes(
         assigns=resolutions.get("resolutions/assigns"),
         addresses=resolutions.get("resolutions/addresses"),

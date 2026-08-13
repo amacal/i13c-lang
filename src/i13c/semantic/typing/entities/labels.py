@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, TypeVar, Union
+from typing import TypeVar
 
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.instructions import InstructionId
@@ -12,10 +13,7 @@ class EndOfSnippet:
         return "end-of-snippet"
 
 
-LabelTarget = Union[
-    InstructionId,
-    EndOfSnippet,
-]
+LabelTarget = InstructionId | EndOfSnippet
 
 
 @dataclass(kw_only=True, frozen=True)

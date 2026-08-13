@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Union
 
 from i13c.llvm.typing.instructions.core import Address, Immediate, Register
 from i13c.llvm.typing.registers import reg64_to_name
@@ -25,8 +24,8 @@ class AddRegReg:
 
 @dataclass(kw_only=True)
 class SUB:
-    dst: Union[Register, Address]
-    src: Union[Immediate, Register, Address]
+    dst: Register | Address
+    src: Immediate | Register | Address
 
     def native(self) -> str:
         return f"sub {self.dst}, {self.src}"

@@ -1,4 +1,3 @@
-from typing import Optional
 
 from i13c.llvm.typing.instructions import bits
 from i13c.llvm.typing.instructions.core import Immediate, Register, ScaleValue
@@ -112,12 +111,12 @@ def can_encode_instructions_shl_cl(dst: str, encoding: bytes):
     """
 )
 def can_encode_shl_mem_imm8(
-    base: Optional[str],
-    scale: Optional[ScaleValue],
-    index: Optional[str],
-    disp32: Optional[bytes],
+    base: str | None,
+    scale: ScaleValue | None,
+    index: str | None,
+    disp32: bytes | None,
     imm8: bytes,
-    encoding: Optional[bytes],
+    encoding: bytes | None,
 ):
     encode_instruction(
         bits.SHL(
@@ -159,11 +158,11 @@ def can_encode_shl_mem_imm8(
     """
 )
 def can_encode_shl_mem_cl(
-    base: Optional[str],
-    scale: Optional[ScaleValue],
-    index: Optional[str],
-    disp32: Optional[bytes],
-    encoding: Optional[bytes],
+    base: str | None,
+    scale: ScaleValue | None,
+    index: str | None,
+    disp32: bytes | None,
+    encoding: bytes | None,
 ):
     encode_instruction(
         bits.SHL(

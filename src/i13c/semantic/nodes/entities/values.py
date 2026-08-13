@@ -1,4 +1,3 @@
-from typing import Dict
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
@@ -19,7 +18,7 @@ def configure_values() -> GraphNode:
 def build_values(
     graph: SyntaxGraph,
 ) -> OneToOne[ValueId, Value]:
-    values: Dict[ValueId, Value] = {}
+    values: dict[ValueId, Value] = {}
 
     for nid, value in graph.function.values.items():
         # derive value ID from globally unique node ID

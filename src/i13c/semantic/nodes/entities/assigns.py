@@ -1,4 +1,3 @@
-from typing import Dict
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
@@ -22,7 +21,7 @@ def configure_assigns() -> GraphNode:
 def build_assigns(
     graph: SyntaxGraph,
 ) -> OneToOne[AssignId, Assign]:
-    assigns: Dict[AssignId, Assign] = {}
+    assigns: dict[AssignId, Assign] = {}
 
     for nid, statement in graph.function.assigns.items():
         # derive assign ID from globally unique node ID

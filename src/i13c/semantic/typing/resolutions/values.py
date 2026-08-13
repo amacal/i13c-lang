@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, List
 from typing import Literal as Kind
 from typing import TypeVar
 
@@ -40,5 +40,5 @@ class ValueResolution:
     ref: Span
     id: ValueId
 
-    accepted: List[ValueAcceptance]
-    rejected: List[ValueRejection]
+    accepted: list[ValueAcceptance]
+    rejected: list[ValueRejection]

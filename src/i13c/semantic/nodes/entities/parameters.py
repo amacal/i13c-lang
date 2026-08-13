@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -20,7 +20,7 @@ def configure_parameters() -> GraphNode:
 def build_parameters(
     graph: SyntaxGraph,
 ) -> OneToOne[ParameterId, Parameter]:
-    parameters: Dict[ParameterId, Parameter] = {}
+    parameters: dict[ParameterId, Parameter] = {}
 
     # first collect all snippet slots as parameters
     for nid, entry in graph.snippet.slots.items():
@@ -59,12 +59,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[ParameterId, Parameter]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ParameterId, Parameter]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ParameterId, Parameter]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -73,7 +72,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: ParameterId, entry: Parameter) -> Dict[str, str]:
+    def rows(key: ParameterId, entry: Parameter) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

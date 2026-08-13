@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
-from typing import Optional, Tuple
 
 from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
 from i13c.syntax.source import Span
@@ -34,7 +32,7 @@ class MnemonicRejection:
 @dataclass(kw_only=True, frozen=True)
 class MnemonicOperandSpec:
     symbol: MnemonicOperandSymbol
-    names: Optional[Tuple[bytes, ...]]
+    names: tuple[bytes, ...] | None
 
     @staticmethod
     def reg8(*names: bytes) -> MnemonicOperandSpec:
@@ -91,7 +89,7 @@ class MnemonicAcceptance:
     id: MnemonicId
 
     name: bytes
-    variants: List[MnemonicVariant]
+    variants: list[MnemonicVariant]
 
 
 @dataclass(kw_only=True)
@@ -99,8 +97,8 @@ class MnemonicResolution:
     ref: Span
     id: MnemonicId
 
-    accepted: List[MnemonicAcceptance]
-    rejected: List[MnemonicRejection]
+    accepted: list[MnemonicAcceptance]
+    rejected: list[MnemonicRejection]
 
 
-MnemonicVariant = Tuple[MnemonicOperandSpec, ...]
+MnemonicVariant = tuple[MnemonicOperandSpec, ...]

@@ -1,5 +1,6 @@
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Dict, Iterable, Optional, Tuple, TypeVar
+from typing import TypeVar
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphGroup, GraphNode
@@ -17,16 +18,16 @@ class NodeId:
 
 @dataclass(kw_only=True)
 class Bidirectional[AstNode, AstCtx]:
-    node_to_id: Dict[AstNode, NodeId]
-    id_to_node: Dict[NodeId, AstNode]
-    id_to_ctx: Dict[NodeId, AstCtx]
+    node_to_id: dict[AstNode, NodeId]
+    id_to_node: dict[NodeId, AstNode]
+    id_to_ctx: dict[NodeId, AstCtx]
 
     @staticmethod
     def empty() -> Bidirectional[AstNode, AstCtx]:
         return Bidirectional(node_to_id={}, id_to_node={}, id_to_ctx={})
 
     def append(
-        self, id: NodeId, node: AstNode, /, ctx: Optional[AstCtx] = None
+        self, id: NodeId, node: AstNode, /, ctx: AstCtx | None = None
     ) -> None:
         self.node_to_id[node] = id
         self.id_to_node[id] = node
@@ -34,7 +35,7 @@ class Bidirectional[AstNode, AstCtx]:
         if ctx is not None:
             self.id_to_ctx[id] = ctx
 
-    def items(self) -> Iterable[Tuple[NodeId, AstNode]]:
+    def items(self) -> Iterable[tuple[NodeId, AstNode]]:
         return self.id_to_node.items()
 
     def get_ctx(self, node_id: NodeId) -> AstCtx:

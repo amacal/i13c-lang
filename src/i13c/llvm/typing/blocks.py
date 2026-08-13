@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Set, Union
 
 from i13c.llvm.typing.abstracts import AbstractEntry, AbstractId
 from i13c.llvm.typing.flows import BlockId, FlowEntry, FlowId
@@ -10,9 +9,9 @@ from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.values import ValueId
 
-BlockOrigin = Union[FunctionId, SnippetId, CallSiteId, ValueId]
-BlockInstruction = Union[InstructionEntry, AbstractEntry, FlowEntry]
-BlockInstructionId = Union[InstructionId, AbstractId, FlowId]
+BlockOrigin = FunctionId | SnippetId | CallSiteId | ValueId
+BlockInstruction = InstructionEntry | AbstractEntry | FlowEntry
+BlockInstructionId = InstructionId | AbstractId | FlowId
 
 
 @dataclass(kw_only=True)
@@ -24,14 +23,14 @@ class InstructionPosition:
 
 @dataclass
 class Registers:
-    items: Set[int]
+    items: set[int]
 
     @staticmethod
     def empty() -> Registers:
         return Registers(items=set())
 
     @staticmethod
-    def instance(registers: Set[int]) -> Registers:
+    def instance(registers: set[int]) -> Registers:
         return Registers(items=registers)
 
 

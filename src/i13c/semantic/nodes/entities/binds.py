@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -20,7 +20,7 @@ def configure_binds() -> GraphNode:
 def build_binds(
     graph: SyntaxGraph,
 ) -> OneToOne[BindId, Bind]:
-    binds: Dict[BindId, Bind] = {}
+    binds: dict[BindId, Bind] = {}
 
     for nid, entry in graph.snippet.binds.items():
         # find the parent slot
@@ -45,12 +45,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[BindId, Bind]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[BindId, Bind]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[BindId, Bind]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -60,7 +59,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: BindId, entry: Bind) -> Dict[str, str]:
+    def rows(key: BindId, entry: Bind) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

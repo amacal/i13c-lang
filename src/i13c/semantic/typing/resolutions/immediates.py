@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.entities.immediates import ImmediateId
@@ -27,5 +26,5 @@ class ImmediateResolution:
     ref: Span
     id: ImmediateId
 
-    accepted: List[ImmediateAcceptance]
-    rejected: List[ImmediateRejection]
+    accepted: list[ImmediateAcceptance]
+    rejected: list[ImmediateRejection]

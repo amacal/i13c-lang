@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -24,7 +24,7 @@ def configure_control_paths() -> GraphNode:
 def build_control_paths(
     cflows: OneToOne[FunctionId, ControlFlowAcceptance],
 ) -> OneToOne[FunctionId, ControlPaths]:
-    cpaths: Dict[FunctionId, ControlPaths] = {}
+    cpaths: dict[FunctionId, ControlPaths] = {}
 
     for fid, entry in cflows.items():
         cpaths[fid] = ControlPaths(
@@ -35,9 +35,9 @@ def build_control_paths(
     return OneToOne[FunctionId, ControlPaths].instance(cpaths)
 
 
-def analyze_flows(flows: ControlFlowAcceptance) -> List[List[int]]:
-    stack: List[List[int]] = [[flows.source.entry]]
-    paths: List[List[int]] = []
+def analyze_flows(flows: ControlFlowAcceptance) -> list[list[int]]:
+    stack: list[list[int]] = [[flows.source.entry]]
+    paths: list[list[int]] = []
 
     while stack:
         path = stack.pop()
@@ -64,12 +64,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[FunctionId, ControlPaths]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FunctionId, ControlPaths]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FunctionId, ControlPaths]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "fn": "Function",
@@ -77,7 +76,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: ControlPaths) -> Dict[str, str]:
+    def rows(key: FunctionId, entry: ControlPaths) -> dict[str, str]:
         return {
             "ref": str(entry.flows.ref),
             "fn": key.identify(1),

@@ -1,4 +1,3 @@
-from typing import Optional, Union
 
 from i13c.encoding.core import LabelArtifact, RelocationArtifact
 from i13c.encoding.intel import REX, SIB, Displacement, Immediate, ModRM, Opcode
@@ -13,7 +12,7 @@ from i13c.llvm.typing.instructions.move import (
 
 def encode_mov_reg_imm(
     instruction: MovRegImm, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+) -> LabelArtifact | RelocationArtifact | None:
 
     # chosen encoding: REX.W + (B8 + rd) + imm64
     # encoded as: [rex] [opcode] [imm64]
@@ -47,7 +46,7 @@ def encode_mov_reg_imm(
 
 def encode_mov_reg_reg(
     instruction: MovRegReg, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+) -> LabelArtifact | RelocationArtifact | None:
 
     # chosen encoding: REX.W + 89 /r
     # encoded as: [rex] [opcode] [modrm]
@@ -81,7 +80,7 @@ def encode_mov_reg_reg(
 
 def encode_mov_off_imm(
     instruction: MovOffImm, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+) -> LabelArtifact | RelocationArtifact | None:
 
     # will be encoded as single imm32 if possible, otherwise as two moves
 
@@ -140,7 +139,7 @@ def encode_mov_off_imm(
 
 def encode_mov_off_reg(
     instruction: MovOffReg, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+) -> LabelArtifact | RelocationArtifact | None:
 
     # chosen encoding: REX.W + 89 /r
     # encoded as: [rex] [opcode] [modrm] [sib?] [disp32]
@@ -190,7 +189,7 @@ def encode_mov_off_reg(
 
 def encode_mov_reg_off(
     instruction: MovRegOff, bytecode: bytearray
-) -> Optional[Union[LabelArtifact, RelocationArtifact]]:
+) -> LabelArtifact | RelocationArtifact | None:
 
     # chosen encoding: REX.W + 8B /r
     # encoded as: [rex] [opcode] [modrm] [sib?] [disp32]

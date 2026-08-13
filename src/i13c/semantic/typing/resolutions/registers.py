@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.registers import RegisterId
@@ -39,5 +38,5 @@ class RegisterResolution:
     ref: Span
     id: RegisterId
 
-    accepted: List[RegisterAcceptance]
-    rejected: List[RegisterRejection]
+    accepted: list[RegisterAcceptance]
+    rejected: list[RegisterRejection]

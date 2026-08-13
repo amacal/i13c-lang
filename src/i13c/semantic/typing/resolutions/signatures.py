@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -22,7 +21,7 @@ class SignatureAcceptance:
     id: SignatureId
 
     name: bytes
-    parameters: List[ParameterAcceptance]
+    parameters: list[ParameterAcceptance]
 
 
 @dataclass(kw_only=True)
@@ -30,5 +29,5 @@ class SignatureResolution:
     ref: Span
     id: SignatureId
 
-    accepted: List[SignatureAcceptance]
-    rejected: List[SignatureRejection]
+    accepted: list[SignatureAcceptance]
+    rejected: list[SignatureRejection]

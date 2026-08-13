@@ -1,4 +1,3 @@
-from typing import Optional
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphGroup, evaluate
@@ -9,7 +8,7 @@ from i13c.semantic.syntax import configure_syntax_graph
 from i13c.syntax.tree import Program
 
 
-def run(program: Program, target: Optional[str] = None) -> GraphArtifacts:
+def run(program: Program, target: str | None = None) -> GraphArtifacts:
     nodes = GraphGroup(
         nodes=[
             configure_syntax_graph(),

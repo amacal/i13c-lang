@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
@@ -23,10 +22,10 @@ def lower_callsite(
     graph: SemanticGraph,
     node: CallSiteId,
     registers: OneToOne[None, VirtualRegister],
-) -> List[BlockInstruction]:
+) -> list[BlockInstruction]:
 
     # prepare instructions
-    instructions: List[BlockInstruction] = []
+    instructions: list[BlockInstruction] = []
 
     # # retrieve callsite bindings
     # bindings = graph.entities.bindings.get(node)
@@ -90,7 +89,7 @@ def patch_all_callsites(
     instructions: OneToMany[BlockId, BlockInstruction],
     entries: OneToOne[FunctionId, BlockId],
 ) -> OneToMany[FlowId, InstructionEntry]:
-    calls: Dict[FlowId, List[InstructionEntry]] = {}
+    calls: dict[FlowId, list[InstructionEntry]] = {}
 
     for batch in instructions.values():
         for fid, flow in batch:
@@ -128,9 +127,9 @@ def patch_clobbers(
     blocks: OneToMany[FunctionId, BlockId],
     instructions: OneToMany[BlockId, BlockInstruction],
 ) -> OneToMany[FlowId, InstructionEntry]:
-    bindings: Dict[FlowId, List[InstructionEntry]] = {}
+    bindings: dict[FlowId, list[InstructionEntry]] = {}
 
-    for _, bids in blocks.items():
+    for bids in blocks.values():
         for bid in bids:
             for iid, instr in instructions.get(bid):
                 if not isinstance(iid, FlowId):

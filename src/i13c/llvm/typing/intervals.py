@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 
 @dataclass(kw_only=True)
@@ -13,4 +12,4 @@ class RegisterInterval:
 class IntervalPressure:
     index: int
     pressure: int
-    registers: List[int]
+    registers: list[int]

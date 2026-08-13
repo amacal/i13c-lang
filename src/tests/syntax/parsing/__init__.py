@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from i13c.core import diagnostics, result
 from i13c.syntax import tree
 from i13c.syntax.lexing import tokenize
@@ -7,7 +5,7 @@ from i13c.syntax.parsing import parse
 from i13c.syntax.source import SourceCode, open_text
 
 
-def reject_program(data: str) -> Tuple[SourceCode, List[diagnostics.Diagnostic]]:
+def reject_program(data: str) -> tuple[SourceCode, list[diagnostics.Diagnostic]]:
     code = open_text(data)
 
     tokens = tokenize(code)
@@ -19,7 +17,7 @@ def reject_program(data: str) -> Tuple[SourceCode, List[diagnostics.Diagnostic]]
     return code, program.error
 
 
-def parse_program(data: str) -> Tuple[SourceCode, tree.Program]:
+def parse_program(data: str) -> tuple[SourceCode, tree.Program]:
     code = open_text(data)
 
     tokens = tokenize(code)
@@ -39,7 +37,7 @@ def parse_snippet(data: str) -> tree.snippet.Snippet:
     return program.snippets[0]
 
 
-def parse_instructions(data: str) -> Tuple[tree.snippet.Instruction, ...]:
+def parse_instructions(data: str) -> tuple[tree.snippet.Instruction, ...]:
     snippet = parse_snippet(data)
 
     assert len(snippet.body) >= 1

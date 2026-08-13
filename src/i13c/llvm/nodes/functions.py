@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Protocol, Tuple, Type
+from typing import Any, Protocol
 
 from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode
@@ -19,11 +19,9 @@ from i13c.llvm.typing.instructions.core import (
     ComputedAddress,
     Displacement,
     Immediate,
-)
-from i13c.llvm.typing.instructions.core import Register as Reg
-from i13c.llvm.typing.instructions.core import (
     Scaler,
 )
+from i13c.llvm.typing.instructions.core import Register as Reg
 from i13c.llvm.typing.instructions.ctrl import Nop
 from i13c.llvm.typing.instructions.move import MovOffImm, MovOffReg
 from i13c.llvm.typing.instructions.stack import PopOff, PushOff
@@ -41,7 +39,7 @@ from i13c.semantic.typing.resolutions.values import ValueResolution
 # additionally exactly one entrypoint must be found;
 
 
-def verify(rules: SemanticRules, **kwargs: Dict[str, Any]) -> bool:
+def verify(rules: SemanticRules, **kwargs: dict[str, Any]) -> bool:
     return rules.count() == -1
 
 
@@ -74,19 +72,19 @@ def configure_functions() -> GraphNode:
 class Context:
     graph: SemanticGraph
     generator: Generator
-    entrypoint: Optional[BlockId]
+    entrypoint: BlockId | None
 
-    blocks: Dict[BlockId, Block]
-    instructions: Dict[BlockId, List[BlockInstruction]]
+    blocks: dict[BlockId, Block]
+    instructions: dict[BlockId, list[BlockInstruction]]
 
     registers: OneToOne[None, VirtualRegister]
     values: OneToOne[ValueId, ValueResolution]
 
-    forward: Dict[BlockId, List[BlockId]]
-    backward: Dict[BlockId, List[BlockId]]
+    forward: dict[BlockId, list[BlockId]]
+    backward: dict[BlockId, list[BlockId]]
 
-    entries: Dict[FunctionId, BlockId]
-    exits: Dict[FunctionId, BlockId]
+    entries: dict[FunctionId, BlockId]
+    exits: dict[FunctionId, BlockId]
 
     @staticmethod
     def empty(
@@ -115,9 +113,9 @@ def lower_active_functions(
     graph: SemanticGraph,
     registers: OneToOne[None, VirtualRegister],
     values: OneToOne[ValueId, ValueResolution],
-    **kwargs: Dict[str, Any],
-) -> Tuple[
-    Optional[BlockId],
+    **kwargs: dict[str, Any],
+) -> tuple[
+    BlockId | None,
     OneToOne[BlockId, Block],
     OneToMany[BlockId, BlockId],
     OneToMany[BlockId, BlockId],
@@ -159,7 +157,7 @@ def lower_flow_entry(
     ctx: Context,
     fid: FunctionId,
     flow: None,
-    mapping: Dict[None, BlockId],
+    mapping: dict[None, BlockId],
     node: None,
 ) -> FlowNodeContext:
     # # obtain successors
@@ -200,7 +198,7 @@ def lower_flow_exit(
     ctx: Context,
     fid: FunctionId,
     flow: None,
-    mapping: Dict[None, BlockId],
+    mapping: dict[None, BlockId],
     node: None,
 ) -> FlowNodeContext:
     # register exit block
@@ -208,7 +206,7 @@ def lower_flow_exit(
 
     # prepare exit instructions
     iid = FlowId(value=ctx.generator.next())
-    instructions: List[BlockInstruction] = [(iid, EpilogueFlow(target=fid))]
+    instructions: list[BlockInstruction] = [(iid, EpilogueFlow(target=fid))]
 
     # create empty block with exit
     return FlowNodeContext(
@@ -221,7 +219,7 @@ def lower_flow_callsite(
     ctx: Context,
     fid: FunctionId,
     flow: None,
-    mapping: Dict[None, BlockId],
+    mapping: dict[None, BlockId],
     node: None,
 ) -> FlowNodeContext:
 
@@ -249,7 +247,7 @@ def lower_flow_value(
     ctx: Context,
     fid: FunctionId,
     flow: None,
-    mapping: Dict[None, BlockId],
+    mapping: dict[None, BlockId],
     node: None,
 ) -> FlowNodeContext:
 
@@ -305,7 +303,7 @@ def lower_flow_value(
 @dataclass
 class FlowNodeContext:
     block: Block
-    instructions: List[BlockInstruction]
+    instructions: list[BlockInstruction]
 
 
 class FlowNodeLowerer(Protocol):
@@ -314,12 +312,12 @@ class FlowNodeLowerer(Protocol):
         ctx: Context,
         fid: FunctionId,
         flow: None,
-        mapping: Dict[None, BlockId],
+        mapping: dict[None, BlockId],
         node: None,
     ) -> FlowNodeContext: ...
 
 
-DISPATCH_TABLE: Dict[Type[None], FlowNodeLowerer] = {
+DISPATCH_TABLE: dict[type[None], FlowNodeLowerer] = {
     # FlowEntry: lower_flow_entry,
     # FlowExit: lower_flow_exit,
     CallSiteId: lower_flow_callsite,
@@ -381,7 +379,7 @@ def patch_snapshots(
     stackframes: OneToOne[FunctionId, StackFrame],
     instructions: OneToMany[BlockId, BlockInstruction],
 ) -> OneToMany[FlowId, InstructionEntry]:
-    bindings: Dict[FlowId, List[InstructionEntry]] = {}
+    bindings: dict[FlowId, list[InstructionEntry]] = {}
 
     for fid, bids in blocks.items():
         for bid in bids:

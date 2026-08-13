@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Set
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
@@ -49,13 +49,13 @@ def configure_bind_resolution() -> GraphGroup:
 def build_bind_resolution(
     binds: OneToOne[BindId, Bind],
 ) -> OneToOne[BindId, BindResolution]:
-    resolutions: Dict[BindId, BindResolution] = {}
+    resolutions: dict[BindId, BindResolution] = {}
 
     # fmt: off
-    whitelist: Set[bytes] = set([
+    whitelist: set[bytes] = {
         b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
         b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15", b"imm",
-    ])
+    }
     # fmt: on
 
     for bid, entry in binds.items():
@@ -90,17 +90,17 @@ def build_bind_resolution(
 
 
 def check_bind_resolution_accepted(
-    rule_e3013: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3013: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3013) == 0
 
 
 def build_bind_resolution_accepted(
     resolutions: OneToOne[BindId, BindResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[BindId, BindAcceptance]:
-    accepted: Dict[BindId, BindAcceptance] = {}
+    accepted: dict[BindId, BindAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -111,8 +111,8 @@ def build_bind_resolution_accepted(
 def validate_bind_resolution_e3013(
     binds: OneToOne[BindId, Bind],
     resolutions: OneToOne[BindId, BindResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:

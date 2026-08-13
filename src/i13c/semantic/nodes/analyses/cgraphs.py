@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
@@ -27,11 +27,11 @@ def build_call_graphs(
     signatures: OneToOne[SignatureId, SignatureAcceptance],
     callsites: OneToMany[SignatureId, CallSiteAcceptance],
 ) -> OneToOne[SignatureId, CallGraph]:
-    cgraphs: Dict[SignatureId, CallGraph] = {}
+    cgraphs: dict[SignatureId, CallGraph] = {}
 
     # identify already available backward edges
     for sid, entries in callsites.items():
-        backward: List[SignatureAcceptance] = []
+        backward: list[SignatureAcceptance] = []
 
         for entry in entries:
             backward.append(signatures.get(entry.sig))
@@ -63,12 +63,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[SignatureId, CallGraph]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[SignatureId, CallGraph]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[SignatureId, CallGraph]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "fn": "Function",
@@ -78,7 +77,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: SignatureId, entry: CallGraph) -> Dict[str, str]:
+    def rows(key: SignatureId, entry: CallGraph) -> dict[str, str]:
         return {
             "ref": str(entry.target.ref),
             "fn": key.identify(1),

@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -54,7 +55,7 @@ def configure_literal_resolution() -> GraphGroup:
 def build_literal_resolution(
     literals: OneToOne[LiteralId, Literal],
 ) -> OneToOne[LiteralId, LiteralResolution]:
-    resolutions: Dict[LiteralId, LiteralResolution] = {}
+    resolutions: dict[LiteralId, LiteralResolution] = {}
 
     for lid, entry in literals.items():
         resolution = LiteralResolution(
@@ -78,17 +79,17 @@ def build_literal_resolution(
 
 
 def check_literal_resolution_accepted(
-    rule_e3004: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3004: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3004) == 0
 
 
 def build_literal_resolution_accepted(
     resolutions: OneToOne[LiteralId, LiteralResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[LiteralId, LiteralAcceptance]:
-    accepted: Dict[LiteralId, LiteralAcceptance] = {}
+    accepted: dict[LiteralId, LiteralAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -99,8 +100,8 @@ def build_literal_resolution_accepted(
 def validate_literal_resolution_e3004(
     literals: OneToOne[LiteralId, Literal],
     resolutions: OneToOne[LiteralId, LiteralResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -122,12 +123,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[LiteralId, LiteralResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[LiteralId, LiteralResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[LiteralId, LiteralResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -136,7 +136,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: LiteralId, entry: LiteralResolution) -> Dict[str, str]:
+    def rows(key: LiteralId, entry: LiteralResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -149,12 +149,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[LiteralId, LiteralAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[LiteralId, LiteralAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[LiteralId, LiteralAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -163,7 +162,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: LiteralId, entry: LiteralAcceptance) -> Dict[str, str]:
+    def rows(key: LiteralId, entry: LiteralAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

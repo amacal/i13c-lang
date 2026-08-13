@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -54,7 +55,7 @@ def configure_immediate_resolution() -> GraphGroup:
 def build_immediate_resolution(
     immediates: OneToOne[ImmediateId, Immediate],
 ) -> OneToOne[ImmediateId, ImmediateResolution]:
-    resolutions: Dict[ImmediateId, ImmediateResolution] = {}
+    resolutions: dict[ImmediateId, ImmediateResolution] = {}
 
     for iid, entry in immediates.items():
         resolution = ImmediateResolution(
@@ -78,17 +79,17 @@ def build_immediate_resolution(
 
 
 def check_immediate_resolution_accepted(
-    rule_e3016: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3016: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3016) == 0
 
 
 def build_immediate_resolution_accepted(
     resolutions: OneToOne[ImmediateId, ImmediateResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[ImmediateId, ImmediateAcceptance]:
-    accepted: Dict[ImmediateId, ImmediateAcceptance] = {}
+    accepted: dict[ImmediateId, ImmediateAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -99,8 +100,8 @@ def build_immediate_resolution_accepted(
 def validate_immediate_resolution_e3016(
     immediates: OneToOne[ImmediateId, Immediate],
     resolutions: OneToOne[ImmediateId, ImmediateResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -124,12 +125,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[ImmediateId, ImmediateResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ImmediateId, ImmediateResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ImmediateId, ImmediateResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -138,7 +138,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: ImmediateId, entry: ImmediateResolution) -> Dict[str, str]:
+    def rows(key: ImmediateId, entry: ImmediateResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -151,12 +151,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[ImmediateId, ImmediateAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ImmediateId, ImmediateAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ImmediateId, ImmediateAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -165,7 +164,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: ImmediateId, entry: ImmediateAcceptance) -> Dict[str, str]:
+    def rows(key: ImmediateId, entry: ImmediateAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

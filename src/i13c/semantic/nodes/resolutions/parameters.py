@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -62,7 +63,7 @@ def build_parameter_resolution(
     types: OneToOne[TypeId, TypeAcceptance],
     binds: OneToOne[ParameterId, BindAcceptance],
 ) -> OneToOne[ParameterId, ParameterResolution]:
-    resolutions: Dict[ParameterId, ParameterResolution] = {}
+    resolutions: dict[ParameterId, ParameterResolution] = {}
 
     for pid, entry in parameters.items():
         resolution = ParameterResolution(
@@ -93,17 +94,17 @@ def build_parameter_resolution(
 
 
 def check_parameter_resolution_accepted(
-    rule_e3014: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3014: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3014) == 0
 
 
 def build_parameter_resolution_accepted(
     resolutions: OneToOne[ParameterId, ParameterResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[ParameterId, ParameterAcceptance]:
-    accepted: Dict[ParameterId, ParameterAcceptance] = {}
+    accepted: dict[ParameterId, ParameterAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -114,8 +115,8 @@ def build_parameter_resolution_accepted(
 def validate_parameter_resolution_e3014(
     parameters: OneToOne[ParameterId, Parameter],
     resolutions: OneToOne[ParameterId, ParameterResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -139,12 +140,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[ParameterId, ParameterResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ParameterId, ParameterResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ParameterId, ParameterResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -153,7 +153,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: ParameterId, entry: ParameterResolution) -> Dict[str, str]:
+    def rows(key: ParameterId, entry: ParameterResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -166,12 +166,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[ParameterId, ParameterAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[ParameterId, ParameterAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[ParameterId, ParameterAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -182,7 +181,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: ParameterId, entry: ParameterAcceptance) -> Dict[str, str]:
+    def rows(key: ParameterId, entry: ParameterAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

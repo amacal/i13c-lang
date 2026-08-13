@@ -2,16 +2,13 @@
 # pyright: reportUnusedImport=false
 
 from dataclasses import dataclass
-from typing import List, Protocol, Union
+from typing import Protocol
 
-import i13c.syntax.tree.function as function
-import i13c.syntax.tree.literals as literals
-import i13c.syntax.tree.snippet as snippet
-import i13c.syntax.tree.types as types
+from i13c.syntax.tree import function, literals, snippet, types
 from i13c.syntax.tree.core import Path
 
-Flags = Union[snippet.Flags, function.Flags]
-Signature = Union[function.Signature, snippet.Signature]
+Flags = snippet.Flags | function.Flags
+Signature = function.Signature | snippet.Signature
 
 class Visitor(Protocol):
     def on_program(self, program: Program, path: Path) -> None: ...
@@ -51,8 +48,8 @@ class Visitor(Protocol):
 
 @dataclass(kw_only=True, eq=False)
 class Program:
-    functions: List[function.Function]
-    snippets: List[snippet.Snippet]
+    functions: list[function.Function]
+    snippets: list[snippet.Snippet]
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_program(self, path)

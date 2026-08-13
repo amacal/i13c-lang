@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -36,7 +36,7 @@ def build_data_flows(
     functions: OneToOne[FunctionId, FunctionAcceptance],
     statements: OneToOne[StatementId, StatementAcceptance],
 ) -> OneToOne[FunctionId, DataFlows]:
-    dflows: Dict[FunctionId, DataFlows] = {}
+    dflows: dict[FunctionId, DataFlows] = {}
 
     for fid, entry in cflows.items():
         dflow = DataFlows(
@@ -47,7 +47,7 @@ def build_data_flows(
             values=[],
             forward={},
             backward={},
-            nodes=entry.nodes,
+            control=entry,
             defs={},
             uses={},
         )
@@ -92,7 +92,7 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
         for arg in stmt.target.target.arguments:
             if isinstance(arg, ParameterAcceptance):
                 for nix, node in enumerate(dflow.values):
-                    if isinstance(node, ParameterAcceptance):
+                    if isinstance(node, ParameterAcceptance): # noqa: SIM102
                         if node.id == arg.id:
                             dflow.forward[nix].append(idx)
                             dflow.backward[idx].append(nix)
@@ -100,7 +100,7 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
 
             elif isinstance(arg, ValueAcceptance):
                 for nix, node in enumerate(dflow.values):
-                    if isinstance(node, ValueAcceptance):
+                    if isinstance(node, ValueAcceptance): # noqa: SIM102
                         if node.id == arg.id:
                             dflow.forward[nix].append(idx)
                             dflow.backward[idx].append(nix)
@@ -116,13 +116,7 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
 
         if isinstance(stmt.target.expression, ExpressionAcceptance):
             for nix, node in enumerate(dflow.values):
-                if isinstance(node, ParameterAcceptance):
-                    if node.id == stmt.target.expression.target.id:
-                        dflow.forward[nix].append(idx)
-                        dflow.backward[idx].append(nix)
-                        dflow.uses[nid].append(nix)
-
-                elif isinstance(node, ValueAcceptance):
+                if isinstance(node, (ParameterAcceptance, ValueAcceptance)): # noqa: SIM102
                     if node.id == stmt.target.expression.target.id:
                         dflow.forward[nix].append(idx)
                         dflow.backward[idx].append(nix)
@@ -133,32 +127,25 @@ class ListExtractor:
     def __init__(self, data: OneToOne[FunctionId, DataFlows]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FunctionId, DataFlows]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FunctionId, DataFlows]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "fn": "Function",
             "values": "values",
             "forward": "Forward",
             "backward": "Backward",
-            "nodes": "Nodes",
-            "defs": "Defs",
-            "uses": "Uses",
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: DataFlows) -> Dict[str, str]:
+    def rows(key: FunctionId, entry: DataFlows) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "fn": key.identify(1),
             "values": str(len(entry.values)),
             "forward": str(len(entry.forward)),
             "backward": str(len(entry.backward)),
-            "nodes": str(len(entry.nodes)),
-            "defs": str(len(entry.defs)),
-            "uses": str(len(entry.uses)),
         }

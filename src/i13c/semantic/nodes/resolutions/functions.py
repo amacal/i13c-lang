@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -69,7 +70,7 @@ def build_functions_resolution(
     cflows: OneToOne[FunctionId, ControlFlows],
     statements: OneToOne[StatementId, StatementAcceptance],
 ) -> OneToOne[FunctionId, FunctionResolution]:
-    resolutions: Dict[FunctionId, FunctionResolution] = {}
+    resolutions: dict[FunctionId, FunctionResolution] = {}
 
     for fid, entry in functions.items():
         resolution = FunctionResolution(
@@ -95,17 +96,17 @@ def build_functions_resolution(
 
 
 def check_functions_resolution_accepted(
-    rule_e3026: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3026: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3026) == 0
 
 
 def build_functions_resolution_accepted(
     resolutions: OneToOne[FunctionId, FunctionResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[FunctionId, FunctionAcceptance]:
-    accepted: Dict[FunctionId, FunctionAcceptance] = {}
+    accepted: dict[FunctionId, FunctionAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -116,8 +117,8 @@ def build_functions_resolution_accepted(
 def validate_functions_resolution_e3026(
     functions: OneToOne[FunctionId, Function],
     resolutions: OneToOne[FunctionId, FunctionResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -144,12 +145,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[FunctionId, FunctionResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FunctionId, FunctionResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FunctionId, FunctionResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -158,7 +158,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: FunctionResolution) -> Dict[str, str]:
+    def rows(key: FunctionId, entry: FunctionResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -171,12 +171,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[FunctionId, FunctionAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[FunctionId, FunctionAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[FunctionId, FunctionAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -185,7 +184,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: FunctionAcceptance) -> Dict[str, str]:
+    def rows(key: FunctionId, entry: FunctionAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

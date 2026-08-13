@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -20,7 +19,7 @@ class BindingRejection:
 class BindingAcceptance:
     ref: Span
     owner: SignatureId
-    binds: List[BindAcceptance]
+    binds: list[BindAcceptance]
 
 
 @dataclass(kw_only=True)
@@ -28,5 +27,5 @@ class BindingResolution:
     ref: Span
     owner: SignatureId
 
-    accepted: List[BindingAcceptance]
-    rejected: List[BindingRejection]
+    accepted: list[BindingAcceptance]
+    rejected: list[BindingRejection]

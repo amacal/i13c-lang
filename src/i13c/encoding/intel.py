@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass(kw_only=True)
@@ -36,7 +35,7 @@ class REX:
 @dataclass(kw_only=True)
 class Opcode:
     hex: int
-    reg: Optional[int]
+    reg: int | None
 
     def rex_b(self) -> bool:
         return ((self.reg & 0x08) == 0x08) if self.reg is not None else False
@@ -66,9 +65,9 @@ class ModRM:
 
 @dataclass(kw_only=True)
 class SIB:
-    base: Optional[int]
+    base: int | None
     scale: int
-    index: Optional[int]
+    index: int | None
 
     @staticmethod
     def none() -> SIB:

@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from i13c.core.graph import AbstractListExtractor, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
@@ -32,7 +32,7 @@ def build_labels(
     graph: SyntaxGraph,
     snippets: OneToOne[SnippetId, Snippet],
 ) -> OneToOne[LabelId, Label]:
-    labels: Dict[LabelId, Label] = {}
+    labels: dict[LabelId, Label] = {}
 
     for id, entry in graph.snippet.labels.items():
         # derive label ID from globally unique node ID
@@ -71,12 +71,11 @@ class ListExtractor:
     def __init__(self, data: OneToOne[LabelId, Label]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[LabelId, Label]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[LabelId, Label]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -87,7 +86,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: LabelId, entry: Label) -> Dict[str, str]:
+    def rows(key: LabelId, entry: Label) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

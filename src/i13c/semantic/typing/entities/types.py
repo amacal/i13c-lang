@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from i13c.semantic.typing.entities.ranges import RangeId
 from i13c.syntax.source import Span
@@ -17,7 +16,7 @@ class TypeId:
 class Type:
     ref: Span
     name: bytes
-    range: Optional[RangeId]
+    range: RangeId | None
 
     def __str__(self) -> str:
         return (

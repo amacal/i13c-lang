@@ -1,18 +1,8 @@
 from collections import defaultdict
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from logging import Logger, getLogger
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    FrozenSet,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-)
+from typing import Any
 
 from i13c.core.extractors import AbstractListExtractor
 
@@ -36,7 +26,7 @@ class MissingArtifactProducerError(Exception):
 
 
 class DuplicateArtifactError(Exception):
-    def __init__(self, artifact: str, producers: List[GraphNode]) -> None:
+    def __init__(self, artifact: str, producers: list[GraphNode]) -> None:
         self.artifact = artifact
         self.producers = producers
 
@@ -59,35 +49,35 @@ class InvalidDatasetArityError(Exception):
 class Prefix:
     value: str
 
-    def find(self, nodes: Iterable[str]) -> Set[str]:
+    def find(self, nodes: Iterable[str]) -> set[str]:
         return {node for node in nodes if node.startswith(self.value)}
 
 
-GraphBuilder = Callable[..., Union[Any, Tuple[Any, ...]]]
-GraphConstraint = Optional[Callable[..., bool]]
-Requirement = FrozenSet[Tuple[str, Union[str, Prefix]]]
+GraphBuilder = Callable[..., Any | tuple[Any, ...]]
+GraphConstraint = Callable[..., bool] | None
+Requirement = frozenset[tuple[str, str | Prefix]]
 
 
 @dataclass(kw_only=True)
 class GraphViews:
-    list: Optional[Callable[..., AbstractListExtractor[Any, Any]]]
+    list: Callable[..., AbstractListExtractor[Any, Any]] | None
 
 
 @dataclass(kw_only=True, eq=False)
 class GraphNode:
     builder: GraphBuilder
     constraint: GraphConstraint
-    produces: Tuple[str, ...]
+    produces: tuple[str, ...]
     requires: Requirement
-    views: Optional[GraphViews] = None
+    views: GraphViews | None = None
 
 
 @dataclass(kw_only=True, eq=False)
 class GraphGroup:
-    nodes: List[Union[GraphNode, GraphGroup]]
+    nodes: list[GraphNode | GraphGroup]
 
-    def flatten(self) -> List[GraphNode]:
-        out: List[GraphNode] = []
+    def flatten(self) -> list[GraphNode]:
+        out: list[GraphNode] = []
 
         for node in self.nodes:
             if isinstance(node, GraphGroup):
@@ -98,9 +88,9 @@ class GraphGroup:
         return out
 
 
-def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
+def reorder_configurations(nodes: list[GraphNode]) -> list[GraphNode]:
     # build producer map
-    producer: Dict[str, GraphNode] = {}
+    producer: dict[str, GraphNode] = {}
 
     for node in nodes:
         for product in node.produces:
@@ -112,8 +102,8 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
             producer[product] = node
 
     # build dependency graph
-    edges: Dict[GraphNode, List[GraphNode]] = defaultdict(list)
-    indeg: Dict[GraphNode, int] = {node: 0 for node in nodes}
+    edges: dict[GraphNode, list[GraphNode]] = defaultdict(list)
+    indeg: dict[GraphNode, int] = {node: 0 for node in nodes}
 
     for node in nodes:
         for _, req in node.requires:
@@ -138,7 +128,7 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
 
     # topological sorting
     queue = [node for node in nodes if indeg[node] == 0]
-    out: List[GraphNode] = []
+    out: list[GraphNode] = []
 
     while queue:
         c = queue.pop()
@@ -156,9 +146,13 @@ def reorder_configurations(nodes: List[GraphNode]) -> List[GraphNode]:
     return out
 
 
-def evaluate(nodes: List[GraphNode], initial: Dict[str, Any], targets: Set[str] = set()) -> Tuple[Dict[str, GraphViews], Dict[str, Any]]:
-    artifacts: Dict[str, Any] = {}
-    views: Dict[str, GraphViews] = {}
+def evaluate(
+    nodes: list[GraphNode],
+    initial: dict[str, Any],
+    targets: set[str] | None = None,
+) -> tuple[dict[str, GraphViews], dict[str, Any]]:
+    artifacts: dict[str, Any] = {}
+    views: dict[str, GraphViews] = {}
 
     logger: Logger = getLogger("dag")
 
@@ -179,7 +173,7 @@ def evaluate(nodes: List[GraphNode], initial: Dict[str, Any], targets: Set[str] 
             )
         )
 
-    def expand(req: Union[str, Prefix]) -> Optional[Any]:
+    def expand(req: str | Prefix) -> Any | None:
         if isinstance(req, Prefix):
             return {key: artifacts[key] for key in req.find(artifacts.keys())} or None
         else:

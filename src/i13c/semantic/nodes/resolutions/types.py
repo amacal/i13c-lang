@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -60,9 +61,9 @@ def build_type_resolution(
     types: OneToOne[TypeId, Type],
     ranges: OneToOne[RangeId, RangeAcceptance],
 ) -> OneToOne[TypeId, TypeResolution]:
-    resolutions: Dict[TypeId, TypeResolution] = {}
+    resolutions: dict[TypeId, TypeResolution] = {}
 
-    mapping: Dict[bytes, TypeWidth] = {
+    mapping: dict[bytes, TypeWidth] = {
         b"u8": 8,
         b"u16": 16,
         b"u32": 32,
@@ -117,17 +118,17 @@ def build_type_resolution(
 
 
 def check_type_resolution_accepted(
-    rule_e3009: List[Diagnostic],
-    **kwargs: Dict[str, Any],
+    rule_e3009: list[Diagnostic],
+    **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3009) == 0
 
 
 def build_type_resolution_accepted(
     resolutions: OneToOne[TypeId, TypeResolution],
-    **kwargs: Dict[str, Any],
+    **kwargs: dict[str, Any],
 ) -> OneToOne[TypeId, TypeAcceptance]:
-    accepted: Dict[TypeId, TypeAcceptance] = {}
+    accepted: dict[TypeId, TypeAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
@@ -138,8 +139,8 @@ def build_type_resolution_accepted(
 def validate_type_resolution_e3009(
     types: OneToOne[TypeId, Type],
     resolutions: OneToOne[TypeId, TypeResolution],
-) -> List[Diagnostic]:
-    diagnostics: List[Diagnostic] = []
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
 
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
@@ -163,12 +164,11 @@ class ListAllExtractor:
     def __init__(self, data: OneToOne[TypeId, TypeResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[TypeId, TypeResolution]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[TypeId, TypeResolution]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -177,7 +177,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: TypeId, entry: TypeResolution) -> Dict[str, str]:
+    def rows(key: TypeId, entry: TypeResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -190,12 +190,11 @@ class ListAcceptedExtractor:
     def __init__(self, data: OneToOne[TypeId, TypeAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[Tuple[TypeId, TypeAcceptance]]:
-        for key, entry in self.data.items():
-            yield key, entry
+    def extract(self) -> Iterable[tuple[TypeId, TypeAcceptance]]:
+        yield from self.data.items()
 
     @staticmethod
-    def headers() -> Dict[str, str]:
+    def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
@@ -204,7 +203,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: TypeId, entry: TypeAcceptance) -> Dict[str, str]:
+    def rows(key: TypeId, entry: TypeAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

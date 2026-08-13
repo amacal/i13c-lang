@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
-from typing import Optional, Protocol, Union
+from typing import Protocol
 
 from i13c.llvm.typing.registers import (
     name_to_reg8,
@@ -89,10 +89,10 @@ class Displacement:
 
     @staticmethod
     def none() -> Displacement:
-        return Displacement(data=bytes(), width=0, direction="none")
+        return Displacement(data=b"", width=0, direction="none")
 
     @staticmethod
-    def auto(source: Union[bytes, Optional[DisplacementSource]]) -> Displacement:
+    def auto(source: bytes | DisplacementSource | None) -> Displacement:
         if isinstance(source, (bytes, bytearray)):
             width = len(source) * 8
             assert width in (8, 32)
@@ -164,7 +164,7 @@ class Register:
         return Register(id=16, width="8bit")
 
     @staticmethod
-    def auto(name: Optional[str]) -> Register:
+    def auto(name: str | None) -> Register:
         if name is None:
             return Register.none()
 
@@ -222,7 +222,7 @@ class Register:
     def is_available(self) -> bool:
         return self.id != 16
 
-    def value_or_none(self) -> Optional[int]:
+    def value_or_none(self) -> int | None:
         return self.id if self.is_available() else None
 
     def low3bits(self) -> int:
@@ -284,7 +284,7 @@ class Scaler:
         return Scaler(index=Register.none(), scale=1)
 
     @staticmethod
-    def auto(index: Optional[str], scale: Optional[ScaleValue]) -> Scaler:
+    def auto(index: str | None, scale: ScaleValue | None) -> Scaler:
         return (
             Scaler(index=Register.auto(index), scale=scale)
             if scale is not None
@@ -297,7 +297,7 @@ class Scaler:
     def index_uses_rsp(self) -> bool:
         return self.index.id in (4,)
 
-    def index_or_none(self) -> Optional[int]:
+    def index_or_none(self) -> int | None:
         return self.index.value_or_none()
 
     def scale_offset(self) -> int:
@@ -327,4 +327,4 @@ class RelativeAddress:
         return f"[rip{self.disp}]"
 
 
-Address = Union[ComputedAddress, RelativeAddress]
+Address = ComputedAddress | RelativeAddress

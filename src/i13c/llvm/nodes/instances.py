@@ -1,4 +1,3 @@
-from typing import List
 
 from i13c.core.generator import Generator
 from i13c.llvm.typing.instructions import InstructionEntry
@@ -9,8 +8,8 @@ def lower_instance(
     graph: SemanticGraph,
     generator: Generator,
     target: None,
-) -> List[InstructionEntry]:
-    out: List[InstructionEntry] = []
+) -> list[InstructionEntry]:
+    out: list[InstructionEntry] = []
 
     # # values
     # rewritten: Dict[OperandId, Operand] = target.operands
