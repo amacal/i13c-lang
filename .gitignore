@@ -1,7 +1,10 @@
 src/**/__pycache__/
 .claude
+.other
 .pytest_cache
 .mypy_cache
 .ruff_cache
 **/*.out
 dump
+.tmp
+docs/*.pdf
