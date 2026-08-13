@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.analyses.cflows import ControlFlows
+from i13c.semantic.typing.analyses.cflows import FlowMember
+from i13c.semantic.typing.analyses.dflows import FlowValue
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.syntax.source import Span
 
@@ -10,6 +11,11 @@ class Liveness:
     ref: Span
     target: FunctionId
 
-    flow: ControlFlows
+    entry: int
+    exit: int
+
+    nodes: list[FlowMember]
+    values: list[FlowValue]
+
     live_in: dict[int, set[int]]
     live_out: dict[int, set[int]]

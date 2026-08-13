@@ -1,0 +1,9 @@
+title: "Liveness Analysis"
+kind: implementation
+files:
+  - "src/i13c/semantic/nodes/analyses/liveness.py"
+  - "src/i13c/semantic/nodes/analyses/core.py"
+  - "src/i13c/semantic/typing/analyses/liveness.py"
+  - "src/i13c/semantic/typing/analyses/core.py"
+source: —
+date: "2026-08-13"

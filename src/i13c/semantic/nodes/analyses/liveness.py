@@ -26,14 +26,47 @@ def build_liveness(
 ) -> OneToOne[FunctionId, Liveness]:
     liveness: dict[FunctionId, Liveness] = {}
 
+    for dflow in dflows.values():
+        worklist = list(range(len(dflow.control.nodes)))
+        live_in: dict[int, set[int]] = {node: set() for node in worklist}
+        live_out: dict[int, set[int]] = {node: set() for node in worklist}
+
+        # iterate until no changes occur
+        while worklist:
+            node = worklist.pop()
+
+            # compute live_out as union of live_in of successors
+            for successor in dflow.control.forward.get(node, []):
+                live_out[node].update(live_in[successor])
+
+            # compute live_in as union of uses and live_out minus defs
+            defined = live_out[node] - set(dflow.defs[node])
+            new_live_in = set(dflow.uses[node]).union(defined)
+
+            # if live_in[node] has changed
+            if new_live_in != live_in[node]:
+                live_in[node] = new_live_in
+                worklist.extend(dflow.control.backward.get(node, []))
+
+        liveness[dflow.target] = Liveness(
+            ref=dflow.ref,
+            target=dflow.target,
+            entry=dflow.entry,
+            exit=dflow.exit,
+            nodes=dflow.control.nodes,
+            values=dflow.values,
+            live_in=live_in,
+            live_out=live_out,
+        )
+
     return OneToOne[FunctionId, Liveness].instance(liveness)
 
 
 class ListExtractor:
-    def __init__(self, data: OneToOne[FunctionId, DataFlows]):
+    def __init__(self, data: OneToOne[FunctionId, Liveness]) -> None:
         self.data = data
 
-    def extract(self) -> Iterable[tuple[FunctionId, DataFlows]]:
+    def extract(self) -> Iterable[tuple[FunctionId, Liveness]]:
         yield from self.data.items()
 
     @staticmethod
@@ -41,17 +74,23 @@ class ListExtractor:
         return {
             "ref": "Ref",
             "fn": "Function",
-            "values": "values",
-            "forward": "Forward",
-            "backward": "Backward",
+            "entry": "Entry",
+            "exit": "Exit",
+            "nodes": "Nodes",
+            "values": "Values",
+            "in": "Live In",
+            "out": "Live Out",
         }
 
     @staticmethod
-    def rows(key: FunctionId, entry: DataFlows) -> dict[str, str]:
+    def rows(key: FunctionId, entry: Liveness) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "fn": key.identify(1),
+            "entry": str(entry.entry),
+            "exit": str(entry.exit),
+            "nodes": str(len(entry.nodes)),
             "values": str(len(entry.values)),
-            "forward": str(len(entry.forward)),
-            "backward": str(len(entry.backward)),
+            "in": str(len(entry.live_in)),
+            "out": str(len(entry.live_out)),
         }

@@ -1,0 +1,37 @@
+date: "2026-08-13"
+title: "Liveness Analysis"
+session:
+  files:
+    - "src/i13c/semantic/nodes/analyses/liveness.py"
+    - "src/i13c/semantic/nodes/analyses/core.py"
+    - "src/i13c/semantic/typing/analyses/liveness.py"
+    - "src/i13c/semantic/typing/analyses/core.py"
+  source: —
+  status: completed
+  attempted:
+    - "Implement the previously-stubbed backward liveness dataflow analysis (build_liveness) at the semantic layer"
+  explored:
+    - "Derived the two backward liveness equations and the case for iterating to a fixed point from first principles"
+    - "Verified, via a dispatched investigation rather than assumption, that every graph currently built in this codebase is acyclic, and that ControlFlows.forward/backward is provably acyclic by construction via a monotonic-index argument"
+    - "Confirmed the real loop construct inside data/hello.i13c's asm print_asm block never becomes a graph in this compiler's own CFG machinery, since analyses/cflows only walks SyntaxGraph.function, never SyntaxGraph.snippet"
+    - "Compared a naive round-robin sweep against a worklist algorithm for the fixed-point iteration"
+  tried:
+    - "Considered a round-robin sweep for the fixed-point iteration before settling on a worklist algorithm"
+  corrections:
+    - "Assumed live_in at the entry node would include its own passed parameters; corrected — live_in[entry] is always empty since defs[entry] contains every parameter, and only live_out[entry] can hold a parameter that's actually used downstream"
+    - "Assumed an unused parameter would still appear in live_out[entry]; corrected — an unused value never enters any node's uses set, so it never appears in any live_in/live_out set"
+  bugs_found:
+    - "configure_liveness() was never added to configure_analyses()'s node list (src/i13c/semantic/nodes/analyses/core.py) or to AnalysisNodes (src/i13c/semantic/typing/analyses/core.py) — the GraphNode had existed since before this session but had never once executed, in any test or CLI run; fixed by wiring it into both"
+    - "ListExtractor in src/i13c/semantic/nodes/analyses/liveness.py was stale scaffolding still typed for DataFlows, accessing entry.forward/entry.backward on what are actually Liveness objects, causing AttributeError: 'Liveness' object has no attribute 'forward' once the node was wired in; fixed to match Liveness's actual fields"
+  completed:
+    - "Implemented build_liveness as a worklist-based backward fixed-point liveness analysis"
+    - "Wired configure_liveness() into configure_analyses() and AnalysisNodes"
+    - "Fixed ListExtractor to match Liveness's actual shape"
+    - "Changed the Liveness dataclass to hold nodes/values/entry/exit directly instead of embedding the whole ControlFlows"
+    - "Wrote src/tests/semantic/nodes/analyses/liveness.py from scratch with 8 test functions covering the empty-function, callsite, unused-parameter, used-parameter, pass-through-propagation, multiple-uses, partial-live-range-ending, and declared-value cases"
+    - "Verified make test passes with 772 tests (22 core, 39 syntax, 337 semantic, 374 encoding)"
+    - "Verified computed live_in/live_out values against a hand-derived expectation for the real print()/main() functions in data/hello.i13c"
+  not_completed: —
+  open_questions:
+    - "Whether the permanently-inert 'Calling'-typed values slot allocated for every call statement in dflows.py's handle_node (never marked as a def, never matchable as a use) is deliberate scaffolding for a future call-return-value capability or worth flagging as dead weight — raised but left unanswered when asked"
+  notes: —
