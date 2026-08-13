@@ -309,8 +309,11 @@ def can_not_consume_prefix_if_no_prefix_artifacts_were_produced():
         ),
     )
 
+    views, artifacts = evaluate([producer, consumer], initial={})
+
     # producer didn't produce any artifacts, so consumer should be skipped
-    assert evaluate([producer, consumer], initial={}) == {}
+    assert views == {}
+    assert artifacts == {}
 
 
 def can_reject_missing_artifact_dependency():

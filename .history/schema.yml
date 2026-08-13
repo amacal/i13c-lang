@@ -44,7 +44,7 @@ file_format:
     title: "exact Session Title, double-quoted — must exactly match slug_algorithm(title) against the filename's slug"
     session:
       fields_in_order: [files, source, status, attempted, explored, tried, corrections, bugs_found, completed, not_completed, open_questions, notes]
-      files: "YAML list of primary src/i13c/** paths created or changed this session, or — for spec-study sessions"
+      files: "YAML list of primary src/i13c/** paths created or changed this session, or — for spec-study sessions or for an implementation session that genuinely touched no src/i13c/** path (e.g. tooling/test-only work)"
       source: "\"Document Name, section/table reference\", or — for implementation sessions"
       status: "completed"
       list_fields: [attempted, explored, tried, corrections, bugs_found, completed, not_completed, open_questions, notes]
@@ -100,5 +100,5 @@ validation:
     - "the entry's filename slug matches slug_algorithm(title) exactly"
     - "session's fields_in_order are all present, none omitted, none extra"
     - "every list_field is either the scalar — or a non-empty YAML list, never mixed"
-    - "spec-study entries have bugs_found: — and files: —; implementation entries have source: —"
+    - "spec-study entries have bugs_found: — and files: —; implementation entries have source: — and files: — only if the session genuinely touched no src/i13c/** path (e.g. tooling/test-only work), otherwise a non-empty files list"
     - "no entry file other than the one just written was modified this session, unless the change matches one of the immutability rule's explicit exceptions"

@@ -77,7 +77,7 @@ directory_layout:
         field_notes:
           title: "exact Session Title, double-quoted"
           kind: "implementation | spec-study"
-          files: "YAML list of primary src/i13c/** paths created or changed this session, or — for spec-study sessions"
+          files: "YAML list of primary src/i13c/** paths created or changed this session, or — for spec-study sessions or for an implementation session that genuinely touched no src/i13c/** path (e.g. tooling/test-only work)"
           source: "\"Document Name, section/table reference\" for spec-study sessions, — for implementation sessions"
           date: "YYYY-MM-DD, double-quoted"
       summary.txt:
@@ -200,4 +200,4 @@ validation:
     - "no future-targets/<slug>.yml title is also a sessions/*/meta.yml title (a target must be deleted the moment it graduates)"
     - "every branches/*.yml's sessions and frontier entries resolve to a real sessions/*/meta.yml title"
     - "every concepts.yml/capabilities.yml tag matches ^[a-z0-9]+(-[a-z0-9]+)*$"
-    - "every implementation session's files list contains only paths that exist under src/i13c/; every spec-study session has files: — and a non-— source"
+    - "every implementation session's files list contains only paths that exist under src/i13c/, or is — if the session genuinely touched no src/i13c/** path (e.g. tooling/test-only work); every spec-study session has files: — and a non-— source"

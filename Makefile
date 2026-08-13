@@ -17,17 +17,25 @@ lint:
 	@poetry run pyright src/i13c src/tests
 	@poetry run ruff check src/i13c src/tests --fix
 
-.PHONY: test-semantic
-test-semantic:
-	@poetry run pytest -vvo python_files='*.py' -o python_functions="can_*" src/tests/semantic/
+.PHONY: test
+test: test-core test-syntax test-semantic test-encoding
+	@echo "All tests passed!"
 
-.PHONY: test-semantic-first
-test-semantic-first:
-	@poetry run pytest -vvxo python_files='*.py' -o python_functions="can_*" src/tests/semantic/
+.PHONY: test-core
+test-core:
+	@poetry run pytest -vvo python_files='*.py' -o python_functions="can_*" src/tests/core/
 
 .PHONY: test-syntax
 test-syntax:
 	@poetry run pytest -vvo python_files='*.py' -o python_functions="can_*" src/tests/syntax/
+
+.PHONY: test-semantic
+test-semantic:
+	@poetry run pytest -vvo python_files='*.py' -o python_functions="can_*" src/tests/semantic/
+
+.PHONY: test-encoding
+test-encoding:
+	@poetry run pytest -vvo python_files='*.py' -o python_functions="can_*" src/tests/encoding/
 
 .PHONY: asm
 asm:

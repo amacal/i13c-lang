@@ -1,0 +1,7 @@
+title: "LLVM Backend Rewrite"
+status: not-completed
+mentioned_by:
+  - "Restore a Green Build"
+evidence:
+  - "Restore a Green Build .history entry, corrections field: user stated llvm/* is questionable and will be fixed/adapted/rewritten soon"
+  - "Restore a Green Build .history entry, not_completed field: llvm/nodes/functions.py's verify() constraint bug and the 32 src/tests/llvm/*.py failures it causes were deferred pending this rewrite"

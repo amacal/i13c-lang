@@ -1,0 +1,26 @@
+date: "2026-08-13"
+title: "Restore a Green Build"
+session:
+  files: —
+  source: —
+  status: completed
+  attempted:
+    - "Restore a passing test suite (first tracked session in this repo; pytest had 33 failures out of 796 tests, though make lint was already clean)"
+  explored:
+    - "Traced core/graph.py's evaluate()/reorder_configurations mechanism to explain why a node whose constraint never evaluates True silently omits its declared artifact rather than raising an error"
+    - "Connected that mechanism to why the llvm/graph KeyError surfaced downstream at GraphArtifacts.llvm_graph() instead of at the graph engine itself"
+  tried: —
+  corrections:
+    - "Assumed fixing llvm/nodes/functions.py's verify() constraint (and restoring src/tests/llvm/*.py) was in scope for this session; corrected — user stated llvm/* is questionable and will be rewritten soon, and defined make test to intentionally exclude src/tests/llvm/"
+  bugs_found:
+    - "src/tests/core/graph.py::can_not_consume_prefix_if_no_prefix_artifacts_were_produced asserted evaluate(...) == {} against evaluate()'s current tuple[dict, dict] return type — a leftover from a prior refactor of every other test in the file; fixed to unpack views/artifacts and assert each separately"
+    - "src/i13c/llvm/nodes/functions.py's configure_functions() gates lower_active_functions behind verify(rules) -> rules.count() == -1, which SemanticRules.count() (a non-negative sum) can never satisfy — permanently starving llvm/entrypoint, llvm/instructions, etc., and cascading to GraphArtifacts.llvm_graph() KeyError-ing on \"llvm/graph\"; identified as the root cause of the other 32 failures, left unfixed (deferred)"
+  completed:
+    - "Fixed the tuple-vs-dict assertion mismatch in can_not_consume_prefix_if_no_prefix_artifacts_were_produced"
+    - "Added test-core and test-encoding Makefile targets, and a composed test target (test-core test-syntax test-semantic test-encoding)"
+    - "Verified make test passes: 763 tests (22 core, 39 syntax, 328 semantic, 374 encoding), src/tests/llvm/ excluded by design"
+  not_completed:
+    - "src/i13c/llvm/nodes/functions.py's verify() constraint bug, and the 32 src/tests/llvm/*.py failures it causes, deferred pending a planned llvm/* rewrite"
+  open_questions: —
+  notes:
+    - "The prior test-semantic-first (-x fail-fast) Makefile target was dropped during this session's Makefile restructuring; confirmed intentional"
