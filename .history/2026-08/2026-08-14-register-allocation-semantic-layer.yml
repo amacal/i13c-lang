@@ -1,0 +1,40 @@
+date: "2026-08-14"
+title: "Register Allocation (semantic layer)"
+session:
+  files:
+    - "src/i13c/semantic/typing/analyses/allocations.py"
+    - "src/i13c/semantic/nodes/analyses/allocations.py"
+    - "src/i13c/semantic/nodes/analyses/core.py"
+    - "src/i13c/semantic/typing/analyses/core.py"
+  source: —
+  status: completed
+  attempted:
+    - "Implement a register-allocation analysis (Allocation) at the semantic layer, built directly on the just-completed Liveness Analysis session, entirely within semantic/ — llvm/ and encoding/ explicitly out of scope"
+  explored:
+    - "Derived interference-graph construction from Liveness's live_in/live_out sets, and the simplify/select worklist coloring algorithm (Chaitin, refined by Briggs), including why select must process the stack in strict reverse of simplify's push order"
+    - "Compared merging live_in[n] and live_out[n] into one set before pairing against treating them as two separate cliques, using a dying-source/newborn-destination case (val y: u8 = abc;) and a simultaneous-uses-that-both-die case to show the merged approach over-connects and a live-out-only approach under-connects"
+    - "Investigated, via an empirical scratch script (not committed), whether an interval graph can get stuck under arbitrary-order degree<k removal despite being colorable with its true chromatic number; confirmed the phenomenon is real in general but currently unreachable by any i13c program, since the language has no fn-level branching yet, so every live range is a single contiguous interval"
+    - "Worked through four extensions beyond this session's scope: call-site register precoloring via a transient mov, clobbers modeled as precolored pseudo-values defined at a call node, spill-slot assignment as the same coloring algorithm with k=infinity, and live-range splitting via proactive local spill/reload"
+  tried:
+    - "Considered giving Allocation a separate `spilled` set/field before settling on a colors-only dict, using absence from colors (for a value present in some live_in/live_out) as the implicit spill signal"
+  corrections:
+    - "Assumed merging live_in[n] and live_out[n] into one set before pairing was a correct interference-graph construction; corrected — it can create a spurious edge between a value that dies at a node and an unrelated value born at the same node (fix not yet applied to the implementation, see not_completed)"
+    - "Assumed the select phase could look up colors for all of a node's original neighbors; corrected — only neighbors pushed after the node during simplify are guaranteed colored by pop time, the rest must be filtered out"
+  bugs_found:
+    - "build_allocations's simplify loop used `while size:` (a running degree-sum) as its stopping condition, which reached zero before every value index had been pushed onto the worklist (e.g. isolated/zero-degree values were skipped); fixed by looping on `while graph:` until every node is removed"
+    - "The select phase's `used = {colors[neighbor] for neighbor in copy[node]}` assumed every original neighbor was already colored, producing an incorrect used-colors set for neighbors not yet processed; fixed to `used = {colors[neighbor] for neighbor in copy[node] if neighbor in colors}`"
+  completed:
+    - "Implemented the Allocation dataclass (ref, target, values, colors: dict[int,int])"
+    - "Implemented configure_allocations/build_allocations: interference-graph construction, simplify/select worklist coloring with k=8, wired as a GraphNode requiring analyses/liveness and producing analyses/allocations"
+    - "Wired configure_allocations() into configure_analyses() and AnalysisNodes"
+    - "Wrote src/tests/semantic/nodes/analyses/allocations.py with 12 tests covering empty functions, an isolated Calling-only value, unused/used/multiple/later-call parameters, abandoned values, declared values used and unused in a call, an assigned-value-that-dies case, a three-color case, and a forced-spill case (12 values, k=8, exactly one spill)"
+    - "Added can_detect_liveness_with_of_assigned_value to src/tests/semantic/nodes/analyses/liveness.py as the liveness-level fixture for the assigned-value-that-dies case"
+    - "Verified make test-semantic passes (350 tests), ruff check and mypy clean on the new files"
+    - "Stress-tested a 12-value complete-interference case (4 simultaneous spills) via a scratch script, confirming no crash"
+  not_completed:
+    - "build_allocations's interference-graph construction still merges live_in[idx] and live_out[idx] into one set before pairing, which can produce a spurious edge for a value that dies at the same node where another is born; can_detect_allocations_with_of_assigned_value currently asserts the resulting (incorrect) distinct-color outcome rather than catching the bug — deferred by explicit decision"
+    - "The simplify phase's not-broken branch commits a node to spills immediately without ever attempting to color it in the select phase (pessimistic rather than attempt-then-confirm); deferred by explicit decision, since it cannot currently be triggered by any real i13c program"
+    - "Four extensions named as future work, not built this session: call-site register precoloring (a value forced into a specific register at one call instruction via a transient mov, not a permanent color change), clobbers modeled as interference (precolored pseudo-values defined at a call node for each clobbered register), spill-slot assignment via the same graph-coloring algorithm applied to the spilled-values subgraph with k=infinity, and live-range splitting via proactive local spill/reload (see explored for what was worked through on each)"
+  open_questions: —
+  notes:
+    - "Reused the exact test fixtures from the prior Liveness Analysis session's test file as the basis for most of the new allocation tests, extending with an assigned-value-that-dies case and a new forced-spill fixture"

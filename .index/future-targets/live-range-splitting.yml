@@ -1,0 +1,6 @@
+title: "Live-Range Splitting"
+status: not-completed
+mentioned_by:
+  - "Register Allocation (semantic layer)"
+evidence:
+  - ".history/2026-08/2026-08-14-register-allocation-semantic-layer.yml session.not_completed"

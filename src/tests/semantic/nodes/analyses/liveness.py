@@ -281,3 +281,39 @@ def can_detect_liveness_with_of_declared_value_in_a_call_unused():
 
     assert liveness.live_in[liveness.exit] == set()
     assert liveness.live_out[liveness.exit] == set()
+
+
+def can_detect_liveness_with_of_assigned_value():
+    _, analyses = prepare_analyses("""
+        asm foo(x@rax: u8, y@rbx: u8) { }
+        fn main(abc: u8) { val x: u8 = abc; foo(x,x); }
+    """)
+
+    assert analyses.liveness is not None
+    assert analyses.liveness.size() == 1
+    _, liveness = analyses.liveness.peak()
+
+    assert len(liveness.nodes) == 4
+    assert len(liveness.values) == 3
+
+    assert len(liveness.live_in) == 4
+    assert len(liveness.live_out) == 4
+
+    assert isinstance(liveness.nodes[1], FlowNode)
+    assert isinstance(liveness.nodes[2], FlowNode)
+
+    assert isinstance(liveness.values[0], ParameterAcceptance)
+    assert isinstance(liveness.values[1], ValueAcceptance)
+    assert isinstance(liveness.values[2], Calling)
+
+    assert liveness.live_in[liveness.entry] == set()
+    assert liveness.live_out[liveness.entry] == {0}
+
+    assert liveness.live_in[1] == {0}
+    assert liveness.live_out[1] == {1}
+
+    assert liveness.live_in[2] == {1}
+    assert liveness.live_out[2] == set()
+
+    assert liveness.live_in[liveness.exit] == set()
+    assert liveness.live_out[liveness.exit] == set()

@@ -1,0 +1,1 @@
+Implemented a semantic-layer register-allocation analysis (interference graph plus simplify/select graph coloring) built directly on Liveness Analysis, entirely within semantic/, with spill detection and a full test suite.

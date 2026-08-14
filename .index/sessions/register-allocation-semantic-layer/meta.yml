@@ -1,0 +1,9 @@
+title: "Register Allocation (semantic layer)"
+kind: implementation
+files:
+  - "src/i13c/semantic/typing/analyses/allocations.py"
+  - "src/i13c/semantic/nodes/analyses/allocations.py"
+  - "src/i13c/semantic/nodes/analyses/core.py"
+  - "src/i13c/semantic/typing/analyses/core.py"
+source: —
+date: "2026-08-14"
