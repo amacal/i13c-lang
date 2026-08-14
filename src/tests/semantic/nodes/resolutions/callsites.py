@@ -568,6 +568,25 @@ def can_reject_a_call_to_immediate_bound_snippet_with_non_literal_argument():
     assert source.extract(resolution.rejected[0].ref) == b"bar(x)"
 
 
+def can_reject_a_call_with_more_than_six_arguments():
+    source, resolutions = prepare_resolutions(
+        """
+            fn main() { foo(0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07); }
+        """
+    )
+
+    assert resolutions.callsites is not None
+    assert resolutions.callsites.size() == 1
+
+    _, resolution = resolutions.callsites.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "too-many-arguments"
+    assert source.extract(resolution.rejected[0].ref) == b"foo(0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07)"
+
+
 def can_detect_a_broken_range_rule_e3006():
     _, rules = prepare_rules(
         """

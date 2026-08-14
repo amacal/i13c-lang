@@ -1,0 +1,6 @@
+title: "Consuming Register Allocation in the Encoding Backend"
+status: not-completed
+mentioned_by:
+  - "Calling Convention in Register Allocation"
+evidence:
+  - ".history/2026-08/2026-08-14-calling-convention-in-register-allocation.yml session.not_completed (originally selected topic, redirected before any encoding/ work began)"

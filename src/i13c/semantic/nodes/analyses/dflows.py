@@ -50,6 +50,7 @@ def build_data_flows(
             control=entry,
             defs={},
             uses={},
+            clobbers={},
         )
 
         for idx, node in enumerate(entry.nodes):
@@ -88,6 +89,13 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
         dflow.uses[nid] = []
         dflow.forward[idx] = []
         dflow.backward[idx] = []
+        dflow.clobbers[nid] = []
+
+        for off, clobber in enumerate(stmt.target.target.clobbers):
+            dflow.forward[idx + off + 1] = []
+            dflow.backward[idx + off + 1] = []
+            dflow.clobbers[nid].append(idx + off + 1)
+            dflow.values.append(clobber)
 
         for arg in stmt.target.target.arguments:
             if isinstance(arg, ParameterAcceptance):

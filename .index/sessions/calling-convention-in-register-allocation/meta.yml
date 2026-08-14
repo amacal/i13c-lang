@@ -1,0 +1,17 @@
+title: "Calling Convention in Register Allocation"
+kind: implementation
+files:
+  - "src/i13c/semantic/typing/analyses/allocations.py"
+  - "src/i13c/semantic/nodes/analyses/allocations.py"
+  - "src/i13c/semantic/typing/analyses/callings.py"
+  - "src/i13c/semantic/nodes/analyses/callings.py"
+  - "src/i13c/semantic/typing/analyses/dflows.py"
+  - "src/i13c/semantic/nodes/analyses/dflows.py"
+  - "src/i13c/semantic/typing/analyses/liveness.py"
+  - "src/i13c/semantic/nodes/analyses/liveness.py"
+  - "src/i13c/semantic/typing/analyses/asmlets.py"
+  - "src/i13c/semantic/nodes/analyses/asmlets.py"
+  - "src/i13c/semantic/typing/resolutions/callsites.py"
+  - "src/i13c/semantic/nodes/resolutions/callsites.py"
+source: —
+date: "2026-08-14"

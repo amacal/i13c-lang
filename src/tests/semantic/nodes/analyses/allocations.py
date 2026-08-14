@@ -1,4 +1,4 @@
-from i13c.semantic.typing.analyses.callings import Calling
+from i13c.semantic.typing.analyses.callings import Calling, CallingClobber
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from tests.semantic.nodes.analyses import prepare_analyses
@@ -28,6 +28,20 @@ def can_detect_allocations_with_a_callsite():
     _, allocations = analyses.allocations.peak()
 
     assert len(allocations.values) == 1
+    assert len(allocations.colors) == 0
+
+
+def can_detect_allocations_with_a_clobber():
+    _, analyses = prepare_analyses("""
+        asm foo(x@imm: u8) clobbers rcx { }
+        fn main() { foo(0x42); }
+    """)
+
+    assert analyses.allocations is not None
+    assert analyses.allocations.size() == 1
+    _, allocations = analyses.allocations.peak()
+
+    assert len(allocations.values) == 2
     assert len(allocations.colors) == 0
 
 
@@ -227,10 +241,22 @@ def can_detect_allocations_with_forced_spill():
             val g: u8 = 0x17;
             val h: u8 = 0x18;
             val i: u8 = 0x19;
+            val j: u8 = 0x1a;
+            val k: u8 = 0x1b;
+            val l: u8 = 0x1c;
+            val m: u8 = 0x1d;
+            val n: u8 = 0x1e;
+            val o: u8 = 0x1f;
+            val p: u8 = 0x20;
+            val q: u8 = 0x21;
+            val r: u8 = 0x22;
 
             foo(a,b,c);
             foo(d,e,f);
             foo(g,h,i);
+            foo(j,k,l);
+            foo(m,n,o);
+            foo(p,q,r);
         }
     """)
 
@@ -238,31 +264,101 @@ def can_detect_allocations_with_forced_spill():
     assert analyses.allocations.size() == 1
     _, allocations = analyses.allocations.peak()
 
-    assert len(allocations.values) == 12
-    assert len(allocations.colors) == 8
+    assert len(allocations.values) == 24
+    assert len(allocations.colors) == 15
 
     assert isinstance(allocations.values[0], ParameterAcceptance)
     assert isinstance(allocations.values[1], ParameterAcceptance)
-    assert isinstance(allocations.values[2], ValueAcceptance)
-    assert isinstance(allocations.values[3], ValueAcceptance)
-    assert isinstance(allocations.values[4], ValueAcceptance)
-    assert isinstance(allocations.values[5], ValueAcceptance)
-    assert isinstance(allocations.values[6], ValueAcceptance)
-    assert isinstance(allocations.values[7], ValueAcceptance)
-    assert isinstance(allocations.values[8], ValueAcceptance)
-    assert isinstance(allocations.values[9], Calling)
-    assert isinstance(allocations.values[10], Calling)
-    assert isinstance(allocations.values[11], Calling)
+
+    for idx in range(2, 18):
+        assert isinstance(allocations.values[idx], ValueAcceptance)
+
+    for idx in range(18, 24):
+        assert isinstance(allocations.values[idx], Calling)
 
     # colors are assigned backwards
-    assert allocations.colors[1] == 7
-    assert allocations.colors[2] == 6
-    assert allocations.colors[3] == 5
-    assert allocations.colors[4] == 4
-    assert allocations.colors[5] == 3
-    assert allocations.colors[6] == 2
-    assert allocations.colors[7] == 1
-    assert allocations.colors[8] == 0
+    for idx in range(3, 18):
+        assert allocations.colors[idx] == 17 - idx
 
     # spilled values are not colored
-    assert 0 not in allocations.colors
+    for idx in range(3):
+        assert idx not in allocations.colors
+
+
+def can_detect_allocations_with_value_surviving_a_call():
+    _, analyses = prepare_analyses("""
+        asm foo() clobbers rdi { }
+        fn main(abc: u8) { val x: u8 = abc; foo(); val y: u8 = x; }
+    """)
+
+    assert analyses.allocations is not None
+    assert analyses.allocations.size() == 1
+    _, allocations = analyses.allocations.peak()
+
+    assert len(allocations.values) == 5
+    assert len(allocations.colors) == 2
+
+    assert isinstance(allocations.values[0], ParameterAcceptance)
+    assert isinstance(allocations.values[1], ValueAcceptance)
+    assert isinstance(allocations.values[2], Calling)
+    assert isinstance(allocations.values[3], CallingClobber)
+    assert isinstance(allocations.values[4], ValueAcceptance)
+
+    # colors are assigned backwards
+    assert allocations.colors[0] == 0
+    assert allocations.colors[1] == 1
+
+
+def can_detect_allocations_with_value_surviving_a_call_colliding():
+    _, analyses = prepare_analyses("""
+        asm foo() clobbers rdi { }
+        fn main(abc: u8) { val x: u8 = abc; foo(); val y: u8 = x; val z: u8 = abc; }
+    """)
+
+    assert analyses.allocations is not None
+    assert analyses.allocations.size() == 1
+    _, allocations = analyses.allocations.peak()
+
+    assert len(allocations.values) == 6
+    assert len(allocations.colors) == 2
+
+    assert isinstance(allocations.values[0], ParameterAcceptance)
+    assert isinstance(allocations.values[1], ValueAcceptance)
+    assert isinstance(allocations.values[2], Calling)
+    assert isinstance(allocations.values[3], CallingClobber)
+    assert isinstance(allocations.values[4], ValueAcceptance)
+    assert isinstance(allocations.values[5], ValueAcceptance)
+
+    # colors are assigned backwards
+    assert allocations.colors[0] == 2
+    assert allocations.colors[1] == 1
+
+
+def can_detect_allocations_with_value_surviving_a_call_of_regular_function():
+    _, analyses = prepare_analyses("""
+        fn foo() { }
+        fn main(abc: u8) { val x: u8 = abc; foo(); val y: u8 = x; }
+    """)
+
+    assert analyses.allocations is not None
+    assert analyses.allocations.size() == 2
+    _, allocations = analyses.allocations.peak()
+
+    for allocations in analyses.allocations.values():
+        if len(allocations.values) == 0:
+            continue
+
+        assert len(allocations.values) == 13
+        assert len(allocations.colors) == 2
+
+        assert isinstance(allocations.values[0], ParameterAcceptance)
+        assert isinstance(allocations.values[1], ValueAcceptance)
+        assert isinstance(allocations.values[2], Calling)
+        assert isinstance(allocations.values[12], ValueAcceptance)
+
+        for idx in range(3, 12):
+            assert isinstance(allocations.values[idx], CallingClobber)
+
+        # colors are assigned backwards
+        assert allocations.colors[0] == 0
+        assert allocations.colors[1] == 9

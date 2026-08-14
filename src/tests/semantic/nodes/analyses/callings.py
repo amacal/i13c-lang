@@ -29,6 +29,10 @@ def can_resolve_callsite_to_function():
     assert len(calling.arguments) == 0
     assert len(calling.parameters) == 0
 
+    assert len(calling.bindings) == 0
+    assert len(calling.clobbers) == 9
+    assert len(calling.unbounds) == 6
+
 
 def can_resolve_callsite_to_function_with_parameters():
     _, analyses = prepare_analyses("""
@@ -51,10 +55,14 @@ def can_resolve_callsite_to_function_with_parameters():
     assert isinstance(calling.arguments[0], LiteralAcceptance)
     assert str(calling.arguments[0].target) == "0x42"
 
+    assert len(calling.bindings) == 1
+    assert len(calling.clobbers) == 8
+    assert len(calling.unbounds) == 6
+
 
 def can_resolve_callsite_to_asmlet():
     _, analyses = prepare_analyses("""
-        asm foo() { }
+        asm foo() clobbers rax { }
         fn main() { foo(); }
     """)
 
@@ -67,6 +75,10 @@ def can_resolve_callsite_to_asmlet():
 
     assert len(calling.arguments) == 0
     assert len(calling.parameters) == 0
+
+    assert len(calling.bindings) == 0
+    assert len(calling.clobbers) == 1
+    assert len(calling.unbounds) == 14
 
 
 def can_resolve_callsite_to_asmlet_with_parameters():
@@ -90,10 +102,14 @@ def can_resolve_callsite_to_asmlet_with_parameters():
     assert isinstance(calling.arguments[0], LiteralAcceptance)
     assert str(calling.arguments[0].target) == "0x42"
 
+    assert len(calling.bindings) == 1
+    assert len(calling.clobbers) == 0
+    assert len(calling.unbounds) == 14
+
 
 def can_resolve_callsite_to_asmlet_reduced():
     _, analyses = prepare_analyses("""
-        asm foo(x@imm: u8) { }
+        asm foo(x@imm: u8) clobbers r10, r11 { }
         fn main() { foo(0x42); }
     """)
 
@@ -106,6 +122,10 @@ def can_resolve_callsite_to_asmlet_reduced():
 
     assert len(calling.parameters) == 0
     assert len(calling.arguments) == 0
+
+    assert len(calling.bindings) == 0
+    assert len(calling.clobbers) == 2
+    assert len(calling.unbounds) == 13
 
 
 def can_resolve_callsite_to_asmlet_reduced_twice():
@@ -123,3 +143,7 @@ def can_resolve_callsite_to_asmlet_reduced_twice():
 
         assert len(calling.parameters) == 0
         assert len(calling.arguments) == 0
+
+        assert len(calling.bindings) == 0
+        assert len(calling.clobbers) == 0
+        assert len(calling.unbounds) == 15

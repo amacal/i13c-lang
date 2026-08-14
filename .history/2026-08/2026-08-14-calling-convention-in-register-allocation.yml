@@ -1,0 +1,55 @@
+date: "2026-08-14"
+title: "Calling Convention in Register Allocation"
+session:
+  files:
+    - "src/i13c/semantic/typing/analyses/allocations.py"
+    - "src/i13c/semantic/nodes/analyses/allocations.py"
+    - "src/i13c/semantic/typing/analyses/callings.py"
+    - "src/i13c/semantic/nodes/analyses/callings.py"
+    - "src/i13c/semantic/typing/analyses/dflows.py"
+    - "src/i13c/semantic/nodes/analyses/dflows.py"
+    - "src/i13c/semantic/typing/analyses/liveness.py"
+    - "src/i13c/semantic/nodes/analyses/liveness.py"
+    - "src/i13c/semantic/typing/analyses/asmlets.py"
+    - "src/i13c/semantic/nodes/analyses/asmlets.py"
+    - "src/i13c/semantic/typing/resolutions/callsites.py"
+    - "src/i13c/semantic/nodes/resolutions/callsites.py"
+  source: —
+  status: completed
+  attempted:
+    - "Extend Register Allocation (semantic layer) to account for calling convention — model call clobbers as interference, model argument-register bindings and safe/unbound registers, and correct the register palette to the full usable x86-64 GPR set"
+  explored:
+    - "Interference-graph construction options for representing call clobbers as precolored graph nodes, including why defs-only leaves a synthetic value invisible to liveness and why uses-only/defs-plus-uses both leak it backward to the function entry"
+    - "Ordering requirements in build_allocations's precolor mechanism relative to copy = {k: set(v) for k, v in graph.items()} and to the simplify/select loop"
+    - "Raising the register palette from k=8 to k=15, checked against encoding/'s existing rsp-relative stack-frame design (llvm/nodes/stacks.py) to confirm rbp is genuinely free to color"
+    - "Cost tradeoff between spilling and callee-saved register preservation"
+    - "Asymmetry between asmlet and plain-function calling convention, and that Asmlet's clobbers/bindings data was already fully resolved upstream but dropped before this session"
+  tried:
+    - "Considered dropping Calling from FlowValue in favor of a separate CallingRegister pseudo-value type, and considered reusing the existing but unused CallingBinding{idx,register} scaffold, before keeping Calling and adding CallingClobber/CallingBinding/CallingUnbound alongside it"
+    - "Considered generating clobber pseudo-values directly in dflows.py's defs/uses, before moving that responsibility into a dedicated DataFlows/Liveness node-to-value-index field applied after build_liveness's fixed-point loop converges"
+  corrections:
+    - "Assumed adding a clobber pseudo-value to both defs[K] and uses[K] confines its liveness to node K; corrected by a failing test — defs[K] only cancels the live_out[K]-side contribution to live_in[K], never the uses[K]-side, so it still leaks backward to the function entry"
+    - "Assumed slicing a single 9-entry caller-saved list by parameter count correctly split call arguments from clobbers for any function; corrected — a 7-or-more-parameter function would have bound rax or r10/r11 as argument registers, fixed by rejecting callsites with more than 6 arguments"
+    - "Assumed general register-name resolution already restricted an asm snippet's clobbers clause to the 15-register palette used by build_allocations; corrected on inspection — it accepts rsp, rip, and narrower-width aliases too, none of which are in that palette"
+  bugs_found:
+    - "build_liveness's fixed-point recurrence let a clobber pseudo-value added to both defs[K] and uses[K] propagate backward through every predecessor to the function entry, confirmed by a failing live_in[entry] assertion; fixed by carrying clobbers on a separate DataFlows/Liveness field injected only after the fixed-point loop converges"
+    - "build_callings's caller-saved-register slicing loop would bind rax or r10/r11 as argument registers for a function with more than 6 parameters; fixed by rejecting such callsites with a new too-many-arguments reason before build_callings ever sees them"
+    - "asm ... clobbers <register-not-in-system_v> (e.g. rsp, rip, or a non-64-bit alias) is accepted by register resolution but raises an uncaught KeyError in build_allocations; not fixed this session"
+  completed:
+    - "Extended Calling with bindings/clobbers/unbound register lists, populated in build_callings from the standard SysV split for plain function calls and from the asmlet's own explicit clobbers/bindings for asmlet-targeted calls"
+    - "Added a too-many-arguments CallSiteRejectionReason rejecting callsites with more than 6 arguments"
+    - "Threaded Asmlet's previously-resolved but dropped clobbers and bindings fields through from snippet/flags resolution data"
+    - "Added a CallingClobber FlowValue variant and a DataFlows.clobbers/Liveness.clobbers node-to-value-index field, populated in dflows.py's handle_node and copied through build_liveness after its fixed-point loop converges"
+    - "Extended build_allocations with a 15-entry register-name-to-color table, precoloring of clobber values before simplify/select runs, removal of precolored nodes from the working graph after copy is taken, a palette raised to the table's full size, and stripping of clobber entries from the final colors output"
+    - "Added tests across dflows/liveness/allocations/callings/asmlets/callsites covering clobber propagation, precoloring, a value surviving a partial asmlet clobber, two simultaneously-surviving values, and a value forced from caller-saved into callee-saved color range by a zero-parameter function call"
+    - "Verified make test-semantic (356 tests) and make lint clean"
+  not_completed:
+    - "asm ... clobbers <register not in system_v> (e.g. rsp, rip, narrower-width aliases) is not rejected anywhere and crashes build_allocations with an uncaught KeyError; fix location identified as resolutions/snippets.py"
+    - "The register palette is a fixed module-level table rather than a per-function/per-CallingTarget Convention object; no new syntax was added for pinning registers, reducing available colors, or declaring extra clobbers on a plain function"
+    - "Argument-placement lowering (a transient mov into the correct argument register at a call site) was designed but not implemented; bindings/unbound data exists on Calling but nothing consumes it yet"
+    - "Consuming Register Allocation in the encoding backend — the session's originally selected topic — was not attempted; scope was redirected to calling-convention-aware coloring before any encoding/ work began"
+    - "The simplify phase's forced-spill branch remains pessimistic, unchanged from the prior session"
+  open_questions: —
+  notes:
+    - "CallingBinding was changed from its prior {idx, register} shape to {name: bytes}; CallingClobber and CallingUnbound were added in the same shape"
+    - "Preserve/Restore (llvm/typing/abstracts.py) remain pre-existing, unused scaffolding relevant to a future callee-saved-preservation lowering session"

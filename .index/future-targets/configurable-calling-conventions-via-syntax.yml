@@ -1,0 +1,6 @@
+title: "Configurable Calling Conventions via Syntax"
+status: not-completed
+mentioned_by:
+  - "Calling Convention in Register Allocation"
+evidence:
+  - ".history/2026-08/2026-08-14-calling-convention-in-register-allocation.yml session.not_completed (register palette fixed at a module-level table rather than a per-function/per-CallingTarget Convention object; no syntax for pinning registers, reducing colors, or declaring extra clobbers on a plain function)"

@@ -15,6 +15,7 @@ CallSiteRejectionReason = Kind[
     "type-mismatch",
     "unknown-target",
     "ambiguous-target",
+    "too-many-arguments",
     "not-literal",
 ]
 

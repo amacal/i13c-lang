@@ -28,7 +28,7 @@ def can_do_nothing_without_any_callsite():
 
 def can_substitute_a_snippet_without_any_parameters():
     entities, analyses = prepare_analyses("""
-        asm bar() { mov rax, rbx; }
+        asm bar() clobbers rax { mov rax, rbx; }
         fn main() { bar(); }
     """)
 
@@ -43,8 +43,11 @@ def can_substitute_a_snippet_without_any_parameters():
     assert len(asmlet.callsites) == 1
 
     assert asmlet.source == id
-    assert len(asmlet.binding) == 0
+    assert len(asmlet.bindings) == 0
     assert len(asmlet.parameters) == 0
+
+    assert len(asmlet.clobbers) == 1
+    assert asmlet.clobbers[0].name == b"rax"
 
     assert len(asmlet.instructions) == 1
     instr = asmlet.instructions[0]
@@ -63,7 +66,7 @@ def can_substitute_a_snippet_without_any_parameters():
 
 def can_substitute_a_snippet_with_a_register_parameter():
     entities, analyses = prepare_analyses("""
-        asm bar(v@rcx: u8) { mov rax, @v; }
+        asm bar(v@rcx: u8) clobbers rax { mov rax, @v; }
         fn main() { bar(0x01); }
     """)
 
@@ -78,11 +81,14 @@ def can_substitute_a_snippet_with_a_register_parameter():
     id, _ = entities.snippets.peak()
 
     assert asmlet.source == id
-    assert len(asmlet.binding) == 1
+    assert len(asmlet.bindings) == 1
 
-    assert asmlet.binding[0].src == b"v"
-    assert asmlet.binding[0].dst == b"rcx"
-    assert asmlet.binding[0].mode == "register"
+    assert len(asmlet.clobbers) == 1
+    assert asmlet.clobbers[0].name == b"rax"
+
+    assert asmlet.bindings[0].src == b"v"
+    assert asmlet.bindings[0].dst == b"rcx"
+    assert asmlet.bindings[0].mode == "register"
 
     assert len(asmlet.parameters) == 1
     assert asmlet.parameters[0].name == b"v"
@@ -121,11 +127,12 @@ def can_substitute_a_snippet_with_a_base_register_parameter():
     assert len(asmlet.callsites) == 1
 
     assert asmlet.source == id
-    assert len(asmlet.binding) == 1
+    assert len(asmlet.bindings) == 1
+    assert len(asmlet.clobbers) == 0
 
-    assert asmlet.binding[0].src == b"v"
-    assert asmlet.binding[0].dst == b"rcx"
-    assert asmlet.binding[0].mode == "register"
+    assert asmlet.bindings[0].src == b"v"
+    assert asmlet.bindings[0].dst == b"rcx"
+    assert asmlet.bindings[0].mode == "register"
 
     assert len(asmlet.parameters) == 1
     assert asmlet.parameters[0].name == b"v"
@@ -165,7 +172,8 @@ def can_substitute_a_snippet_with_a_label_relocation_forward():
     assert len(asmlet.callsites) == 1
 
     assert asmlet.source == id
-    assert len(asmlet.binding) == 0
+    assert len(asmlet.bindings) == 0
+    assert len(asmlet.clobbers) == 0
     assert len(asmlet.parameters) == 0
 
     assert len(asmlet.instructions) == 2
@@ -196,7 +204,8 @@ def can_substitute_a_snippet_with_a_label_relocation_backward():
     assert len(asmlet.callsites) == 1
 
     assert asmlet.source == id
-    assert len(asmlet.binding) == 0
+    assert len(asmlet.bindings) == 0
+    assert len(asmlet.clobbers) == 0
     assert len(asmlet.parameters) == 0
 
     assert len(asmlet.instructions) == 2
@@ -227,11 +236,12 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement():
     assert len(asmlet.callsites) == 1
 
     assert asmlet.source == id
-    assert len(asmlet.binding) == 1
+    assert len(asmlet.bindings) == 1
+    assert len(asmlet.clobbers) == 0
 
-    assert asmlet.binding[0].src == b"v"
-    assert asmlet.binding[0].dst == b"rcx"
-    assert asmlet.binding[0].mode == "register"
+    assert asmlet.bindings[0].src == b"v"
+    assert asmlet.bindings[0].dst == b"rcx"
+    assert asmlet.bindings[0].mode == "register"
 
     assert len(asmlet.parameters) == 1
     assert asmlet.parameters[0].name == b"v"
@@ -297,7 +307,8 @@ def can_substitute_a_snippet_with_a_immediate_parameter():
     id, _ = entities.snippets.peak()
 
     assert asmlet.source == id
-    assert len(asmlet.binding) == 0
+    assert len(asmlet.bindings) == 0
+    assert len(asmlet.clobbers) == 0
     assert len(asmlet.parameters) == 0
     assert len(asmlet.callsites) == 1
 
@@ -347,7 +358,8 @@ def can_substitute_a_snippet_with_a_immediate_parameter_twice():
         id, _ = entities.snippets.peak()
 
         assert asmlet.source == id
-        assert len(asmlet.binding) == 0
+        assert len(asmlet.bindings) == 0
+        assert len(asmlet.clobbers) == 0
         assert len(asmlet.parameters) == 0
         assert len(asmlet.callsites) == 1
 
@@ -385,6 +397,9 @@ def can_substitute_a_snippet_with_a_direct_immediate_operand():
     _, asmlet = analyses.asmlets.peak()
     assert len(asmlet.instructions) == 1
 
+    assert len(asmlet.clobbers) == 0
+    assert len(asmlet.bindings) == 0
+
     instr = asmlet.instructions[0]
     assert instr.mnemonic == b"mov"
     assert len(instr.operands) == 2
@@ -410,7 +425,8 @@ def can_substitute_a_snippet_with_two_immediate_parameters():
 
     _, asmlet = analyses.asmlets.peak()
 
-    assert len(asmlet.binding) == 0
+    assert len(asmlet.bindings) == 0
+    assert len(asmlet.clobbers) == 0
     assert len(asmlet.parameters) == 0
     assert len(asmlet.keys) == 2
 

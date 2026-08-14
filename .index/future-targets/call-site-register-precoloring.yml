@@ -2,5 +2,7 @@ title: "Call-Site Register Precoloring"
 status: not-completed
 mentioned_by:
   - "Register Allocation (semantic layer)"
+  - "Calling Convention in Register Allocation"
 evidence:
   - ".history/2026-08/2026-08-14-register-allocation-semantic-layer.yml session.not_completed"
+  - ".history/2026-08/2026-08-14-calling-convention-in-register-allocation.yml session.not_completed (argument-placement lowering designed but not implemented)"

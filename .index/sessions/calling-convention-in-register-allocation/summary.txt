@@ -1,0 +1,1 @@
+Extended semantic-layer register allocation to model call clobbers as precolored interference-graph nodes and to correct the register palette to the full usable x86-64 GPR set, catching and fixing a liveness-recurrence backward-leak bug along the way.

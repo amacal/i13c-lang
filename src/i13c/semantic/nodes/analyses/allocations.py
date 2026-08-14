@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.allocations import Allocation
+from i13c.semantic.typing.analyses.callings import CallingClobber
 from i13c.semantic.typing.analyses.liveness import Liveness
 from i13c.semantic.typing.entities.functions import FunctionId
 
@@ -26,6 +27,13 @@ def build_allocations(
 ) -> OneToOne[FunctionId, Allocation]:
     allocations: dict[FunctionId, Allocation] = {}
 
+    # fmt: off
+    system_v: dict[bytes, int] = {
+        b"rdi": 0, b"rsi": 1, b"rdx": 2, b"rcx": 3, b"r8": 4, b"r9": 5, b"r10": 6, b"r11": 7,
+        b"rax": 8, b"rbx": 9, b"rbp": 10, b"r12": 11, b"r13": 12, b"r14": 13, b"r15": 14,
+    }
+    # fmt: on
+
     for fid, live in liveness.items():
         graph: dict[int, set[int]] = {}
         worklist: list[int] = []
@@ -35,7 +43,7 @@ def build_allocations(
             graph[idx] = set()
 
         for idx in range(len(live.nodes)):
-            values = live.live_in[idx].union(live.live_out[idx])
+            values = live.live_in[idx].union(live.live_out[idx]).union(live.clobbers[idx])
             pairs = [(a, b) for a in values for b in values if a != b]
 
             targets.update(values)
@@ -51,11 +59,23 @@ def build_allocations(
         colors: dict[int, int] = {}
         copy = {k: set(v) for k, v in graph.items()}
 
+        for clobbers in live.clobbers.values():
+            for idx in clobbers:
+                if idx in graph:
+                    for neighbor in graph[idx]:
+                        graph[neighbor].remove(idx)
+
+                    del graph[idx]
+                    value = live.values[idx]
+
+                    assert isinstance(value, CallingClobber)
+                    colors[idx] = system_v[value.name]
+
         while graph:
             broken = False
 
             for idx, edges in list(graph.items()):
-                if len(edges) < 8:
+                if len(edges) < len(system_v):
                     worklist.append(idx)
 
                     for neighbor in graph[idx]:
@@ -78,11 +98,15 @@ def build_allocations(
         while worklist:
             node = worklist.pop()
 
-            pallet = set(range(8))
+            pallet = set(range(len(system_v)))
             used = {colors[neighbor] for neighbor in copy[node] if neighbor in colors}
 
             available = pallet - used
             colors[node] = min(available)
+
+        for idx, value in enumerate(live.values):
+            if isinstance(value, CallingClobber):
+                del colors[idx]
 
         allocations[fid] = Allocation(
             ref=live.ref,

@@ -17,7 +17,8 @@ def can_index_one_asmlet_by_its_signature():
     assert len(asmlets) == 1
     assert len(asmlets[0].instructions) == 1
     assert len(asmlets[0].parameters) == 0
-    assert len(asmlets[0].binding) == 0
+    assert len(asmlets[0].bindings) == 0
+    assert len(asmlets[0].clobbers) == 0
 
     assert asmlets[0].name == b"foo"
     assert source.extract(asmlets[0].ref) == b"foo()"
@@ -39,7 +40,8 @@ def can_index_two_callsite_by_called_signature():
     assert len(asmlets) == 1
     assert len(asmlets[0].instructions) == 1
     assert len(asmlets[0].parameters) == 0
-    assert len(asmlets[0].binding) == 0
+    assert len(asmlets[0].bindings) == 0
+    assert len(asmlets[0].clobbers) == 0
 
     assert asmlets[0].name == b"foo"
     assert source.extract(asmlets[0].ref) == b"foo()"
@@ -62,7 +64,8 @@ def can_index_immediate_callsite_by_called_signature():
 
     for entry in asmlets:
         assert len(entry.parameters) == 0
-        assert len(entry.binding) == 0
+        assert len(entry.bindings) == 0
+        assert len(entry.clobbers) == 0
         assert len(entry.instructions) == 1
 
         assert entry.name == b"foo"

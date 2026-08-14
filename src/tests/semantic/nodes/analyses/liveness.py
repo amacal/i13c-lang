@@ -1,4 +1,4 @@
-from i13c.semantic.typing.analyses.callings import Calling
+from i13c.semantic.typing.analyses.callings import Calling, CallingClobber
 from i13c.semantic.typing.analyses.cflows import FlowNode
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
@@ -45,6 +45,37 @@ def can_detect_liveness_with_a_callsite():
     for idx in range(len(liveness.nodes)):
         assert len(liveness.live_in[idx]) == 0
         assert len(liveness.live_out[idx]) == 0
+
+
+def can_detect_liveness_with_a_callsite_with_clobbers():
+    _, analyses = prepare_analyses("""
+        asm foo(x@imm: u8) clobbers rcx { }
+        fn main() { foo(0x42); }
+    """)
+
+    assert analyses.liveness is not None
+    assert analyses.liveness.size() == 1
+    _, liveness = analyses.liveness.peak()
+
+    assert len(liveness.nodes) == 3
+    assert len(liveness.values) == 2
+
+    assert len(liveness.live_in) == 3
+    assert len(liveness.live_out) == 3
+
+    assert len(liveness.live_in[liveness.entry]) == 0
+    assert len(liveness.live_out[liveness.entry]) == 0
+
+    assert len(liveness.live_in[1]) == 0
+    assert len(liveness.live_out[1]) == 0
+
+    assert len(liveness.clobbers[1]) == 1
+    assert liveness.clobbers[1] == {1}
+
+    assert isinstance(liveness.values[1], CallingClobber)
+
+    assert len(liveness.live_in[liveness.exit]) == 0
+    assert len(liveness.live_out[liveness.exit]) == 0
 
 
 def can_detect_liveness_with_of_parameters_unused():

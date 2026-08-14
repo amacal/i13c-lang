@@ -101,7 +101,17 @@ def build_callsite_resolution(
         environment = cflows.get(function_id).environments[stmt_id]
         rejected: CallSiteRejectionReason | None = "unknown-target"
 
-        if found := signatures.find(entry.callee):
+        if len(entry.arguments) > 6:
+            resolution.rejected.append(
+                CallSiteRejection(
+                    ref=entry.ref,
+                    id=sid,
+                    target=entry,
+                    reason="too-many-arguments",
+                )
+            )
+
+        elif found := signatures.find(entry.callee):
             for signature in found:
                 rejected = None
                 arguments: list[CallSiteArgument] = []

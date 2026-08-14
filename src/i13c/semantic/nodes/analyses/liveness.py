@@ -28,6 +28,7 @@ def build_liveness(
 
     for dflow in dflows.values():
         worklist = list(range(len(dflow.control.nodes)))
+        clobbers: dict[int, set[int]] = {node: set() for node in worklist}
         live_in: dict[int, set[int]] = {node: set() for node in worklist}
         live_out: dict[int, set[int]] = {node: set() for node in worklist}
 
@@ -48,6 +49,9 @@ def build_liveness(
                 live_in[node] = new_live_in
                 worklist.extend(dflow.control.backward.get(node, []))
 
+        for node, items in dflow.clobbers.items():
+            clobbers[node].update(items)
+
         liveness[dflow.target] = Liveness(
             ref=dflow.ref,
             target=dflow.target,
@@ -57,6 +61,7 @@ def build_liveness(
             values=dflow.values,
             live_in=live_in,
             live_out=live_out,
+            clobbers=clobbers,
         )
 
     return OneToOne[FunctionId, Liveness].instance(liveness)

@@ -322,7 +322,7 @@ def can_detect_dflow_with_a_chain_of_parameter_to_value_to_callsite():
             )
             assert isinstance(dflows.values[dflows.forward[idx][0]], Calling)
 
-        else:
+        elif isinstance(node, Calling):
             assert node.signature.name == b"foo"
 
             assert len(dflows.forward[idx]) == 0

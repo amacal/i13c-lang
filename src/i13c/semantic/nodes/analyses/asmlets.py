@@ -118,7 +118,8 @@ def build_asmlets(
                 signature=snippet.signature,
                 name=snippet.signature.name,
                 callsites=index[frozenset(keys)],
-                binding=binds,
+                bindings=binds,
+                clobbers=snippet.clobbers,
                 parameters=parameters,
                 instructions=instructions,
             )

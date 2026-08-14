@@ -19,3 +19,5 @@ class Liveness:
 
     live_in: dict[int, set[int]]
     live_out: dict[int, set[int]]
+
+    clobbers: dict[int, set[int]]

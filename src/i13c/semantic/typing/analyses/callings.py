@@ -15,8 +15,17 @@ CallingTarget = Asmlet | CallSiteAcceptance
 
 @dataclass(kw_only=True)
 class CallingBinding:
-    idx: int
-    register: bytes
+    name: bytes
+
+
+@dataclass(kw_only=True, eq=False)
+class CallingClobber:
+    name: bytes
+
+
+@dataclass(kw_only=True)
+class CallingUnbound:
+    name: bytes
 
 
 @dataclass(kw_only=True)
@@ -28,3 +37,7 @@ class Calling:
     signature: SignatureAcceptance
     arguments: list[CallSiteArgument]
     parameters: list[ParameterAcceptance]
+
+    bindings: list[CallingBinding]
+    clobbers: list[CallingClobber]
+    unbounds: list[CallingUnbound]
