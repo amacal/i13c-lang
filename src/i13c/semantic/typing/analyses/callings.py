@@ -11,7 +11,7 @@ from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
 
 CallingTarget = Asmlet | CallSiteAcceptance
-
+CallingArgument = CallSiteArgument
 
 @dataclass(kw_only=True)
 class CallingBinding:
@@ -35,7 +35,7 @@ class Calling:
 
     target: CallingTarget
     signature: SignatureAcceptance
-    arguments: list[CallSiteArgument]
+    arguments: list[CallingArgument]
     parameters: list[ParameterAcceptance]
 
     bindings: list[CallingBinding]

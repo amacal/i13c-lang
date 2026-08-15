@@ -1,0 +1,14 @@
+title: "Argument-Placement Lowering"
+kind: implementation
+files:
+  - "src/i13c/semantic/nodes/resolutions/snippets.py"
+  - "src/i13c/semantic/typing/resolutions/snippets.py"
+  - "src/i13c/semantic/nodes/analyses/callings.py"
+  - "src/i13c/semantic/typing/analyses/callings.py"
+  - "src/i13c/semantic/typing/analyses/allocations.py"
+  - "src/i13c/semantic/typing/analyses/shuffles.py"
+  - "src/i13c/semantic/nodes/analyses/shuffles.py"
+  - "src/i13c/semantic/nodes/analyses/core.py"
+  - "src/i13c/semantic/typing/analyses/core.py"
+source: —
+date: "2026-08-15"

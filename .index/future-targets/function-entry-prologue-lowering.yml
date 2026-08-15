@@ -1,0 +1,6 @@
+title: "Function-Entry Prologue Lowering"
+status: not-completed
+mentioned_by:
+  - "Argument-Placement Lowering"
+evidence:
+  - ".history/2026-08/2026-08-15-argument-placement-lowering.yml session.not_completed (moving a function's own SysV-arriving parameters to their allocated colors; confirmed a correctness requirement, not an optional follow-up, since nothing currently relocates a parameter from its true arrival register to wherever the allocator colored it)"

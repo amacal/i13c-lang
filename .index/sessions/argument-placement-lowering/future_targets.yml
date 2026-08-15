@@ -1,0 +1,4 @@
+- "Function-Entry Prologue Lowering"
+- "Whole-Function Instruction Lowering"
+- "Live-Range Splitting"
+- "Spill-Slot Assignment via Graph Coloring"

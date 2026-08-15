@@ -1,4 +1,4 @@
-from tests.semantic.nodes.resolutions import prepare_resolutions
+from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
 def can_accept_a_snippet():
@@ -135,3 +135,67 @@ def can_accept_a_snippet_with_clobbers():
 
     assert resolution.accepted[0].instructions[0].id == id
     assert source.extract(resolution.accepted[0].ref) == b"main()"
+
+
+def can_reject_a_snippet_with_rsp_in_clobbers():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main() clobbers rsp { mov rax, rbx; }
+        """
+    )
+
+    assert resolutions.snippets is not None
+    assert resolutions.snippets.size() == 1
+    _, resolution = resolutions.snippets.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "unallowed-clobber"
+    assert source.extract(resolution.rejected[0].ref) == b"main()"
+
+
+def can_reject_a_snippet_with_rip_in_clobbers():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main() clobbers rip { mov rax, rbx; }
+        """
+    )
+
+    assert resolutions.snippets is not None
+    assert resolutions.snippets.size() == 1
+    _, resolution = resolutions.snippets.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "unallowed-clobber"
+    assert source.extract(resolution.rejected[0].ref) == b"main()"
+
+
+def can_reject_a_snippet_with_non_64_in_clobbers():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main() clobbers r8d { mov rax, rbx; }
+        """
+    )
+
+    assert resolutions.snippets is not None
+    assert resolutions.snippets.size() == 1
+    _, resolution = resolutions.snippets.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "unallowed-clobber"
+    assert source.extract(resolution.rejected[0].ref) == b"main()"
+
+
+def can_detect_a_broken_range_rule_e3015():
+    _, rules = prepare_rules(
+        """
+            asm main() clobbers rsp { mov rax, rbx; }
+        """
+    )
+
+    assert len(rules.get("e3015")) == 1

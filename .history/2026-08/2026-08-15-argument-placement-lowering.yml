@@ -1,0 +1,55 @@
+date: "2026-08-15"
+title: "Argument-Placement Lowering"
+session:
+  files:
+    - "src/i13c/semantic/nodes/resolutions/snippets.py"
+    - "src/i13c/semantic/typing/resolutions/snippets.py"
+    - "src/i13c/semantic/nodes/analyses/callings.py"
+    - "src/i13c/semantic/typing/analyses/callings.py"
+    - "src/i13c/semantic/typing/analyses/allocations.py"
+    - "src/i13c/semantic/typing/analyses/shuffles.py"
+    - "src/i13c/semantic/nodes/analyses/shuffles.py"
+    - "src/i13c/semantic/nodes/analyses/core.py"
+    - "src/i13c/semantic/typing/analyses/core.py"
+  source: —
+  status: completed
+  attempted:
+    - "Fix Session 4's identified unallowed-clobber rejection gap in snippet resolution"
+    - "Design and implement a calling-sequence lowering pass (Shuffle) resolving each call site's current-register-to-required-binding-register mapping into an ordered sequence of mov/xchg instructions"
+  explored:
+    - "Whether post-call restoration logic is needed once the clobber-completeness bug is fixed; concluded no, since any value surviving a call is then guaranteed never colored to a caller-saved register"
+    - "Whether the new pass's output should be a whole-function instruction stream versus scoped to one call site's pre-call moves; scoped to the latter, rejecting the broader idea as premature generalization with no second concrete consumer yet"
+    - "Whether live-range splitting/recoloring around call boundaries belongs in this pass; concluded no, since it requires changing how Allocation itself is computed, not something a lowering pass can do by only consuming Allocation"
+    - "Whether a function-entry prologue is in scope; deferred, but the investigation showed precoloring a function's own parameters directly to their SysV arrival registers would make the interference graph uncolorable whenever a parameter survives an internal call, since the precolored parameter and that call's precolored clobber pseudo-value would claim the same color"
+    - "Whether Calling.unbounds is a safe source of scratch register for cycle-breaking; found it is not (it is the callee-saved set, which can already be occupied), and that the correct free-scratch source (clobbers minus bindings) is only guaranteed non-empty for plain function calls, not asmlet calls"
+    - "Cross-checked build_shuffles end-to-end against real compiled source via the CLI model command and direct pipeline probes, and confirmed build_allocations's simplify/select worklist uses LIFO ordering, meaning which value receives which color is an artifact of the graph-coloring implementation's internal order rather than predictable from source text"
+  tried:
+    - "Considered temp-register-based cycle-breaking (stash one value in scratch, redirect, continue peeling) before settling on xchg-only cycle resolution, which needs no scratch register at all"
+    - "Considered Calling.unbounds as the cycle-breaking scratch source before finding it unsafe"
+  corrections:
+    - "Assumed Calling.unbounds represented free caller-saved registers available as zero-cost scratch; corrected — Calling.unbounds is the callee-saved register set, which could already hold some other surviving value; the safe source is clobbers minus bindings, guaranteed available only for plain function calls"
+    - "Assumed a snippet's declared clobbers were already restricted to the 15-register allocatable palette; corrected — width-64 non-rsp/non-rip clobbers were the only ones rejected, and register-name resolution accepts rsp, rip, and narrower-width aliases too"
+    - "Assumed build_callings's clobber/binding split already modeled every caller-saved register as interfering with a call; corrected via a hand-built three-callsite example — registers used as a call's own argument bindings were excluded from the clobber/interference set, even though SysV clobbers every caller-saved register regardless of argument count"
+    - "Assumed values.index(argument) in build_mapping could raise an uncaught ValueError for an argument absent from the function's value list; verified unreachable, since ParameterAcceptance and ValueAcceptance each have exactly one construction site in the codebase, so every reference is a lookup into the same object"
+  bugs_found:
+    - "build_snippet_resolution accepted an asm snippet's clobbers clause naming a register outside the 15-register allocatable palette (e.g. rsp, rip, a narrower-width alias) with no diagnostic, later crashing build_allocations with an unhandled KeyError; fixed by rejecting such clobbers at snippet resolution with a new unallowed-clobber reason"
+    - "build_callings only added a caller-saved register to a call's clobber/interference set when its position exceeded the call's own parameter count, so a value colored into one of that call's own argument-binding registers was not recognized as interfering with that call at all, even though SysV clobbers every caller-saved register on every call; fixed by unconditionally adding every caller-saved register to clobbers in the plain-call branch of build_callings (the asmlet branch was left unchanged, since an asmlet's own declared clobbers are already exhaustive and not an ABI-opaque boundary)"
+    - "build_moves's cycle-breaking loop always emitted one trailing no-op self-exchange (xchg reg,reg) at the end of resolving any cycle, since the final redirect step always produces a self-referential entry that needs no further action but was not filtered before being emitted; fixed and verified against hand-built 2-cycle and 3-cycle mappings (now exactly n-1 exchanges, matching the expected count)"
+  completed:
+    - "Rejected unallowed asm snippet clobbers (rsp, rip, non-64-bit registers) at snippet resolution with a new diagnostic reason, with tests covering each rejected case and the resulting E3015 diagnostic"
+    - "Fixed build_callings to treat every caller-saved register as a call clobber regardless of parameter count, with an updated test assertion"
+    - "Implemented the Shuffle calling-sequence lowering pass (typing/analyses/shuffles.py and nodes/analyses/shuffles.py), producing an ordered list of register-only mov/xchg instructions per call site from a locally-built reverse color-to-register lookup and Calling.bindings, wired into the top-level analyses graph"
+    - "Fixed the trailing self-exchange bug in the cycle-breaking loop"
+    - "Wrote and passed a test suite for the Shuffle pass covering an empty function, literal-only call arguments, parameter and value call arguments, already-correct bindings, an inverted two-argument swap, and a shifted-argument case"
+    - "Verified make test-semantic (368 tests) and make lint clean"
+  not_completed:
+    - "Function-entry prologue lowering (moving a function's own SysV-arriving parameters to their allocated colors) — confirmed this session to be a correctness requirement, not an optional follow-up, since nothing currently relocates a parameter from its true arrival register to wherever the allocator colored it"
+    - "Whole-function instruction-stream container for lowered instructions, beyond a single call site's pre-call moves"
+    - "Live-range splitting/recoloring around call boundaries"
+    - "Spilled-argument handling in the Shuffle pass (Allocation does not yet expose which values were spilled)"
+  open_questions: —
+  notes:
+    - "docs/ does not exist yet in this repo; a question about xchg-versus-mov performance was deferred pending adding the Intel SDM PDF for a future spec-study session"
+    - "encoding/'s current DISPATCH_TABLE has no Xchg entry and is wired to llvm.typing.instructions types, which the user separately flagged as due for a rewrite; not treated as stable ground for any design reasoning this session"
+    - "CallAcceptance.target (resolutions/calls.py) is typed as Calling directly, meaning resolutions/calls depends on analyses/callings having already run"
+    - "An unrelated one-line lint fix in resolutions/nodes/instructions.py (a ruff SIM102/SIM114 interaction) was made during this session but is tangential to the design work"

@@ -93,6 +93,16 @@ def build_snippet_resolution(
         if entry.flags is not None:
             clobbers = flags.get(entry.flags).clobbers
 
+        for clobber in clobbers:
+            if clobber.width != 64 or clobber.name in (b"rsp", b"rip"):
+                resolution.rejected.append(
+                    SnippetRejection(
+                        ref=entry.ref,
+                        id=sid,
+                        reason="unallowed-clobber",
+                    )
+                )
+
         if found := noreturns.get(entry.signature):
             noreturn = found.outcome
 
@@ -156,7 +166,7 @@ def report_snippet_resolution_e3015(
     return Diagnostic(
         ref=rejection.ref,
         code="E3015",
-        message=f"Unresolved snippet {rejection.id}, reason: unknown.",
+        message=f"Unresolved snippet {rejection.id}, reason: {rejection.reason}.",
     )
 
 
@@ -211,12 +221,10 @@ class ListAcceptedExtractor:
             "ref": str(entry.ref),
             "id": key.identify(1),
             "name": entry.signature.name.decode(),
-            "params": ", ".join(
-                [str(param) for param in entry.signature.parameters]
-            ),
+            "params": ", ".join([str(param) for param in entry.signature.parameters]),
             "noreturn": str(entry.noreturn),
-            "clobbers":
-                ", ".join([clobber.name.decode() for clobber in entry.clobbers])
-            ,
+            "clobbers": ", ".join(
+                [clobber.name.decode() for clobber in entry.clobbers]
+            ),
             "statements": str(len(entry.instructions)),
         }

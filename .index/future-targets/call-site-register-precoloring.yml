@@ -3,6 +3,8 @@ status: not-completed
 mentioned_by:
   - "Register Allocation (semantic layer)"
   - "Calling Convention in Register Allocation"
+  - "Argument-Placement Lowering"
 evidence:
   - ".history/2026-08/2026-08-14-register-allocation-semantic-layer.yml session.not_completed"
   - ".history/2026-08/2026-08-14-calling-convention-in-register-allocation.yml session.not_completed (argument-placement lowering designed but not implemented)"
+  - ".history/2026-08/2026-08-15-argument-placement-lowering.yml session.completed — the cited gap (getting call arguments into their required registers) is now closed, but via a post-coloring shuffle/lowering pass, not literal precoloring: precoloring a call's own arguments directly in the interference graph was shown this session to be unsound in general (the same value can be required in a different register at a different call site, e.g. fn(a,b) -> foo(1,a,b); foo(b,1,a); foo(a,b,1)), so 'precoloring' as this target's literal title describes is not the adopted approach"

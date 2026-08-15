@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
@@ -7,11 +8,16 @@ from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
 
+SnippetRejectionReason = Kind[
+    "unallowed-clobber",
+]
 
 @dataclass(kw_only=True)
 class SnippetRejection:
     ref: Span
     id: SnippetId
+
+    reason: SnippetRejectionReason
 
 
 @dataclass(kw_only=True)

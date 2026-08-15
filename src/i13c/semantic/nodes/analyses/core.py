@@ -11,6 +11,7 @@ from i13c.semantic.nodes.analyses.dflows import configure_data_flows
 from i13c.semantic.nodes.analyses.entrypoints import configure_entrypoints
 from i13c.semantic.nodes.analyses.liveness import configure_liveness
 from i13c.semantic.nodes.analyses.noreturns import configure_noreturns
+from i13c.semantic.nodes.analyses.shuffles import configure_shuffles
 from i13c.semantic.typing.analyses.core import AnalysisNodes
 
 
@@ -27,6 +28,7 @@ def configure_analyses() -> GraphGroup:
             configure_entrypoints(),
             configure_liveness(),
             configure_noreturns(),
+            configure_shuffles(),
         ]
     )
 
@@ -43,4 +45,5 @@ def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
         entrypoints=analyses.get("analyses/entrypoints"),
         liveness=analyses.get("analyses/liveness"),
         noreturns=analyses.get("analyses/noreturns"),
+        shuffles=analyses.get("analyses/shuffles")
     )

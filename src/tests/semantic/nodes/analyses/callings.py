@@ -56,7 +56,7 @@ def can_resolve_callsite_to_function_with_parameters():
     assert str(calling.arguments[0].target) == "0x42"
 
     assert len(calling.bindings) == 1
-    assert len(calling.clobbers) == 8
+    assert len(calling.clobbers) == 9
     assert len(calling.unbounds) == 6
 
 

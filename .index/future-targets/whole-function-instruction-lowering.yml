@@ -1,0 +1,6 @@
+title: "Whole-Function Instruction Lowering"
+status: not-completed
+mentioned_by:
+  - "Argument-Placement Lowering"
+evidence:
+  - ".history/2026-08/2026-08-15-argument-placement-lowering.yml session.not_completed (whole-function instruction-stream container for lowered instructions, beyond a single call site's pre-call moves; deliberately deferred as premature generalization with no second concrete consumer yet)"

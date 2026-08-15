@@ -116,8 +116,11 @@ def build_instruction_resolution(
                 if accepted.symbol != spec.symbol:
                     reason = "variant-mismatch"
 
-                if spec.names and not reason: # noqa: SIM102
-                    if not isinstance(accepted.target, RegisterAcceptance) or accepted.target.name not in spec.names:
+                if spec.names and not reason:
+                    if not isinstance(accepted.target, RegisterAcceptance): # noqa: SIM114
+                        reason = "register-mismatch"
+
+                    elif accepted.target.name not in spec.names:
                         reason = "register-mismatch"
 
                 if reason is not None:
@@ -237,7 +240,6 @@ def report_instruction_resolution_e3023(
     )
 
 
-
 class ListAllExtractor:
     def __init__(self, data: OneToOne[InstructionId, InstructionResolution]):
         self.data = data
@@ -290,8 +292,16 @@ class ListRejectedExtractor:
             "ref": str(entry.ref),
             "id": key.identify(1),
             "mnemonic": entry.mnemonic.name.decode(),
-            "variant": ", ".join(spec.symbol for spec in entry.variant) if entry.variant else "",
-            "operands": ", ".join(str(op.target) for op in entry.operands) if entry.operands else "",
+            "variant": (
+                ", ".join(spec.symbol for spec in entry.variant)
+                if entry.variant
+                else ""
+            ),
+            "operands": (
+                ", ".join(str(op.target) for op in entry.operands)
+                if entry.operands
+                else ""
+            ),
             "reason": entry.reason,
         }
 

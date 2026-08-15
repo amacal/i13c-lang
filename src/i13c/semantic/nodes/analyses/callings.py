@@ -49,8 +49,9 @@ def build_callings(
         for idx, reg in enumerate(caller_saved):
             if idx < len(entry.signature.parameters):
                 bindings.append(CallingBinding(name=reg))
-            else:
-                clobbers.append(CallingClobber(name=reg))
+
+            # caller saved registers are clobbered by default
+            clobbers.append(CallingClobber(name=reg))
 
         for reg in callee_saved:
             unbounds.append(CallingUnbound(name=reg))

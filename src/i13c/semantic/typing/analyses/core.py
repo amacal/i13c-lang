@@ -11,6 +11,7 @@ from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.analyses.liveness import Liveness
 from i13c.semantic.typing.analyses.noreturns import NoReturn
+from i13c.semantic.typing.analyses.shuffles import Shuffle
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -28,3 +29,4 @@ class AnalysisNodes:
     entrypoints: OneToOne[SignatureId, Entrypoint] | None
     liveness: OneToOne[FunctionId, Liveness] | None
     noreturns: OneToOne[SignatureId, NoReturn] | None
+    shuffles: OneToOne[FunctionId, Shuffle] | None
