@@ -1,0 +1,11 @@
+title: "Function-Entry Prologue and Epilogue Lowering"
+kind: implementation
+files:
+  - "src/i13c/semantic/nodes/analyses/frames.py"
+  - "src/i13c/semantic/typing/analyses/frames.py"
+  - "src/i13c/semantic/nodes/analyses/core.py"
+  - "src/i13c/semantic/typing/analyses/core.py"
+  - "src/i13c/semantic/nodes/resolutions/signatures.py"
+  - "src/i13c/semantic/typing/resolutions/signatures.py"
+source: —
+date: "2026-08-15"

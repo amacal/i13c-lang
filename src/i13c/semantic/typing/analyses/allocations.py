@@ -14,3 +14,4 @@ class Allocation:
 
     values: list[AllocationValue]
     colors: dict[int, int]
+    spills: dict[int, int]

@@ -1,0 +1,41 @@
+date: "2026-08-15"
+title: "Function-Entry Prologue and Epilogue Lowering"
+session:
+  files:
+    - "src/i13c/semantic/nodes/analyses/frames.py"
+    - "src/i13c/semantic/typing/analyses/frames.py"
+    - "src/i13c/semantic/nodes/analyses/core.py"
+    - "src/i13c/semantic/typing/analyses/core.py"
+    - "src/i13c/semantic/nodes/resolutions/signatures.py"
+    - "src/i13c/semantic/typing/resolutions/signatures.py"
+  source: —
+  status: completed
+  attempted:
+    - "Design and implement a new StackFrame analysis that lowers a function's own parameter-arrival convention into a concrete entry/exit sequence: moving colored parameters from their fixed SysV arrival registers into their allocated colors, storing spilled parameters into their assigned stack slots, and determining which callee-saved registers must be saved at entry and restored at exit"
+  explored:
+    - "That the source side of the parameter-placement mapping is purely positional (parameter index N maps to the N-th entry of the fixed SysV integer-argument register order), and that neither the existing per-call-site Calling/CallingBinding structures nor the asmlet-only BindingResolution/BindAcceptance machinery model a plain function's own implicit arrival convention, since both are scoped to explicit asmlet bindings or outgoing call sites respectively"
+    - "That a spilled parameter's stack-slot store can never participate in a register mov/xchg cycle, since a stack slot can never be the source of another parameter's move; handled as a separate, simple, symbolic store step outside the existing cycle-breaking machinery, left as a symbolic slot reference rather than a computed byte offset"
+    - "That callee-saved registers must be saved/restored exactly once per distinct register, not per value, even when multiple non-overlapping values share a color, and that push/pop rather than indexed mov is the right instruction shape for this, since callee-saved preservation is a strict LIFO discipline (push at entry in some order, pop in the exact reverse order at exit) unlike the random-access-by-index spill slots"
+    - "That the whole prologue/epilogue pair is itself a mirror-image LIFO relationship (sub rsp,N pairs with add rsp,N; callee-saved pushes pair with reverse-order pops)"
+    - "That callee-saved preservation must account for both registers this function's own coloring assigns and registers clobbered by any call this function itself makes that fall in the callee-saved range, since both represent ways this function's body can modify a callee-saved register and both must be protected to honor the ABI contract with this function's own caller"
+  tried:
+    - "Initial draft reused the existing register-color lookup table to also resolve a parameter's positional arrival register, exploiting the coincidence that its first six entries happen to match the SysV argument order"
+    - "Initial draft of the callee-saved-clobber save logic added a save entry for every clobber found anywhere in a function's values with no filter for caller-saved vs callee-saved"
+  corrections:
+    - "Initially believed any register clobbered by an inner call needed protecting by this function; corrected via a concrete test case (a function whose only content is a call to a plain function, which clobbers all 9 caller-saved registers) showing this would force saving/restoring registers that are never this function's responsibility, since caller-saved registers are already the calling function's own responsibility and clobber-precoloring already guarantees no surviving value is ever colored into a clobbered register"
+  bugs_found:
+    - "The stack-frame slot-count field was initially computed by counting spilled values rather than distinct slot values; since non-interfering spilled values can share a slot, this over-counted and would have reserved more stack space than necessary; fixed to count distinct slot values"
+    - "The callee-saved-clobber save loop initially included caller-saved clobbered registers; fixed by filtering to a callee-saved register set"
+    - "The register-coloring save loop added a save entry once per value rather than once per distinct register, so two non-interfering values sharing the same callee-saved color produced a duplicate save/restore entry; fixed to deduplicate"
+  completed:
+    - "Added frames.py (both nodes/analyses and typing/analyses) implementing StackFrame{ref, target, slots, moved, spill, saved}, wired into the analyses graph consuming analyses/allocations"
+    - "Added a new too-many-parameters signature-rejection reason, applied uniformly to both fn and asm signatures as a deliberate simplification/symmetry with the existing call-site 6-argument cap, at signature resolution, since every declared function is compiled regardless of whether any call site can reach it"
+    - "Confirmed StackFrame's existing fields (saved, reversed for pop order; slots, for add/sub rsp sizing) are sufficient to represent epilogue too, with no separate epilogue-specific structure needed, which was the deliberate reason for naming it StackFrame rather than Prologue"
+    - "Verified make test-semantic (378 passed) and make lint clean after each of the three bug fixes above"
+  not_completed:
+    - "Storing non-parameter spilled values (e.g. a declared value that spills) at their point of definition mid-function-body is out of scope; recognized as requiring general mid-body instruction insertion, the existing Whole-Function Instruction Lowering future-target, now with a second concrete motivating use case"
+    - "The coincidental reuse of the register-color table for a parameter's positional arrival register was explicitly deferred rather than fixed, pending a future per-function/per-convention object, tying to the existing Configurable Calling Conventions via Syntax future-target"
+    - "Reusing the generic E3003 diagnostic code for the new too-many-parameters rejection reason, rather than giving it its own code as the prior session's clobber-rejection precedent did, was explicitly deferred; diagnostic quality will be addressed in a future session"
+    - "No byte-offset or encoding work was done; StackFrame stays entirely symbolic (slot indices, register names); encoding/ was not touched"
+  open_questions: —
+  notes: —

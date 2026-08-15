@@ -5,6 +5,9 @@
         "dockerfile": "Dockerfile",
         "context": ".."
     },
+    "containerEnv": {
+        "CLAUDE_CODE_DISABLE_MCP": "1"
+    },
     "customizations": {
         "vscode": {
             "extensions": [

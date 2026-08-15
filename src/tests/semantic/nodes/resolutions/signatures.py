@@ -88,6 +88,32 @@ def can_reject_duplicate_slot_name_usage():
     assert source.extract(resolution.rejected[0].ref) == b"x@rbx: u8"
 
 
+def can_reject_too_many_parameters_in_a_signature():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main(
+                a@rax: u8,
+                b@rbx: u8,
+                c@rcx: u8,
+                d@rdx: u8,
+                e@rsi: u8,
+                f@rdi: u8,
+                g@r8: u8
+            ) { mov rax, rbx; }
+        """
+    )
+
+    assert resolutions.signatures is not None
+    assert resolutions.signatures.size() == 1
+    _, resolution = resolutions.signatures.peak()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "too-many-parameters"
+    assert b"main" in source.extract(resolution.rejected[0].ref)
+
+
 def can_detect_a_duplicate_slot_name_in_a_snippet():
     _, rules = prepare_rules(
         """

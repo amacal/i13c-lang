@@ -1,0 +1,6 @@
+title: "Dedicated Diagnostic Codes for Signature Rejections"
+status: not-completed
+mentioned_by:
+  - "Function-Entry Prologue and Epilogue Lowering"
+evidence:
+  - ".history/2026-08/2026-08-15-function-entry-prologue-and-epilogue-lowering.yml session.not_completed (too-many-parameters rejection reused the generic E3003 code with a generic message rather than getting its own code, breaking from the clobber-rejection precedent; user stated diagnostic quality will be addressed in a future session)"

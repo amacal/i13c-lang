@@ -1,0 +1,1 @@
+Implemented a StackFrame analysis lowering a function's own parameter-arrival convention into register moves, spilled-parameter stores, and callee-saved save/restore tracking sufficient to represent both prologue and epilogue, and added a signature-level cap on parameter count to keep the fixed SysV positional register list always sufficient.

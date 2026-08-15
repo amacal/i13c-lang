@@ -73,6 +73,15 @@ def build_signature_resolution(
         names: set[bytes] = set()
         accepted: list[ParameterAcceptance] = []
 
+        if len(entry.parameters) > 6:
+            resolution.rejected.append(
+                SignatureRejection(
+                    ref=entry.ref,
+                    id=sid,
+                    reason="too-many-parameters",
+                )
+            )
+
         for id in entry.parameters:
             parameter = parameters.get(id)
 
@@ -134,10 +143,9 @@ def validate_signature_resolution_e3003(
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
             for rejection in resolution.rejected:
-                if rejection.reason == "duplicated-name":
-                    diagnostics.append(
-                        report_signature_resolution_e3003(signatures.get(id), rejection)
-                    )
+                diagnostics.append(
+                    report_signature_resolution_e3003(signatures.get(id), rejection)
+                )
 
     return diagnostics
 
@@ -149,7 +157,7 @@ def report_signature_resolution_e3003(
     return Diagnostic(
         ref=rejection.ref,
         code="E3003",
-        message=f"Duplicated parameter name {entry}.",
+        message=f"Invalid signature {entry}, reason={rejection.reason}",
     )
 
 

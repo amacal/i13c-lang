@@ -1,0 +1,30 @@
+date: "2026-08-15"
+title: "Spill-Slot Assignment via Graph Coloring"
+session:
+  files:
+    - "src/i13c/semantic/nodes/analyses/allocations.py"
+    - "src/i13c/semantic/typing/analyses/allocations.py"
+  source: —
+  status: completed
+  attempted:
+    - "Extend Allocation (semantic layer) with a second graph-coloring pass that assigns symbolic stack slots to values that failed to receive a register color in the existing simplify/select pass, reusing the same interference graph and algorithm shape rather than building a separate analysis"
+  explored:
+    - "Whether slot-coloring should be a new analysis/GraphNode or extend Allocation directly; decided to extend Allocation with a new spills: dict[int,int] field, reusing the exact simplify/select algorithm on the subgraph induced by only the previously-uncolored value-indices"
+    - "Whether k for this second pass needs to be unbounded; established k = len(live.values) is a safe upper bound (max possible degree in an n-node graph is n-1, always less than n), making the pessimistic forced-spill branch structurally unreachable in this pass"
+    - "Why graph-coloring, not trivial index enumeration, is used for slot assignment: two non-interfering spilled values can share the same slot, mirroring the register-sharing benefit of the original coloring pass; confirmed against small worked cases (singleton spill gets slot 0; two interfering spills get distinct slots; two non-interfering spills share slot 0)"
+  tried:
+    - "An initial draft used spills: set[int] as a placeholder membership marker during the first (register) pass's forced-spill branch, then repurposed and cleared the same dict for the second pass's real slot assignments"
+  corrections:
+    - "Conflated 'number of spilled values needing placement' with 'maximum possible degree of one node' when justifying dropping the degree check in the second pass (compared spilled-count against register-count rather than against len(live.values)); corrected via a small worked example to the precise bound: max degree <= n_spilled - 1 <= len(live.values) - 1 < len(live.values)"
+  bugs_found:
+    - "Pre-existing bug from the prior Calling Convention in Register Allocation session: build_allocations stripped CallingClobber precolored nodes and their edges out of the working graph before the simplify loop, but select still computed used colors from copy, the full original graph captured before that stripping; this let simplify measure a lower degree than the true interference reality, causing min(available) to raise ValueError: min() iterable argument is empty whenever two real values both survived across a call whose clobbers consumed nearly the whole register palette. Surfaced by a new two-call, 14-clobbers-per-call fixture (can_detect_allocations_with_forced_spill_two_blocks). Fixed by keeping clobber-precolored nodes resident in graph throughout simplify (never stripped, never pushed onto the worklist since already colored) and changing the simplify loop's stopping condition from 'graph is empty' to 'no non-precolored nodes remain', tracked via a count of distinct clobber pseudo-values"
+  completed:
+    - "Extended Allocation with a spills: dict[int,int] field populated by a second simplify/select pass over the subgraph of previously-uncolored values, with k sized to len(live.values) and no degree-check needed"
+    - "Fixed the precolored-node/degree-desync bug described above"
+    - "Added a new two-call heavy-clobber regression test (can_detect_allocations_with_forced_spill_two_blocks) and updated the existing forced-spill test's assertions to check the new spills field instead of only asserting absence from colors"
+    - "Verified make test-semantic (370 passed at this point in the session) and make lint clean"
+  not_completed:
+    - "No test case exercises the specific scenario of two non-interfering spilled values sharing the same slot, the packing benefit that motivated using graph-coloring over trivial index enumeration; judged too complex to construct today (would need two independent register-pressure blocks with a full liveness gap between them) and explicitly deferred"
+  open_questions: —
+  notes:
+    - "An unrelated .devcontainer/devcontainer.json change (disabling MCP for a future session) was made during this session; not part of this feature"

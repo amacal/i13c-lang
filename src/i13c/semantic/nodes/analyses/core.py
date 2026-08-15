@@ -9,6 +9,7 @@ from i13c.semantic.nodes.analyses.cgraphs import configure_call_graphs
 from i13c.semantic.nodes.analyses.cpaths import configure_control_paths
 from i13c.semantic.nodes.analyses.dflows import configure_data_flows
 from i13c.semantic.nodes.analyses.entrypoints import configure_entrypoints
+from i13c.semantic.nodes.analyses.frames import configure_frames
 from i13c.semantic.nodes.analyses.liveness import configure_liveness
 from i13c.semantic.nodes.analyses.noreturns import configure_noreturns
 from i13c.semantic.nodes.analyses.shuffles import configure_shuffles
@@ -26,6 +27,7 @@ def configure_analyses() -> GraphGroup:
             configure_control_paths(),
             configure_data_flows(),
             configure_entrypoints(),
+            configure_frames(),
             configure_liveness(),
             configure_noreturns(),
             configure_shuffles(),
@@ -43,6 +45,7 @@ def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
         cpaths=analyses.get("analyses/cpaths"),
         dflows=analyses.get("analyses/dflows"),
         entrypoints=analyses.get("analyses/entrypoints"),
+        frames=analyses.get("analyses/frames"),
         liveness=analyses.get("analyses/liveness"),
         noreturns=analyses.get("analyses/noreturns"),
         shuffles=analyses.get("analyses/shuffles")

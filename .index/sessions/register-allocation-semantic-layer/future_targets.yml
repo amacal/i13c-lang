@@ -1,4 +1,3 @@
 - "Call-Site Register Precoloring"
 - "Clobbers as Interference"
-- "Spill-Slot Assignment via Graph Coloring"
 - "Live-Range Splitting"

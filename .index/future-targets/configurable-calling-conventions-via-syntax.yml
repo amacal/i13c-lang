@@ -2,5 +2,7 @@ title: "Configurable Calling Conventions via Syntax"
 status: not-completed
 mentioned_by:
   - "Calling Convention in Register Allocation"
+  - "Function-Entry Prologue and Epilogue Lowering"
 evidence:
   - ".history/2026-08/2026-08-14-calling-convention-in-register-allocation.yml session.not_completed (register palette fixed at a module-level table rather than a per-function/per-CallingTarget Convention object; no syntax for pinning registers, reducing colors, or declaring extra clobbers on a plain function)"
+  - ".history/2026-08/2026-08-15-function-entry-prologue-and-epilogue-lowering.yml session.not_completed (a parameter's positional arrival register was resolved via a coincidental reuse of the register-color table rather than a genuinely shared source; deferred pending a per-function/per-convention object)"

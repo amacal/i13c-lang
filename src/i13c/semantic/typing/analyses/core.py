@@ -9,6 +9,7 @@ from i13c.semantic.typing.analyses.cgraphs import CallGraph
 from i13c.semantic.typing.analyses.cpaths import ControlPaths
 from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
+from i13c.semantic.typing.analyses.frames import StackFrame
 from i13c.semantic.typing.analyses.liveness import Liveness
 from i13c.semantic.typing.analyses.noreturns import NoReturn
 from i13c.semantic.typing.analyses.shuffles import Shuffle
@@ -27,6 +28,7 @@ class AnalysisNodes:
     cpaths: OneToOne[FunctionId, ControlPaths] | None
     dflows: OneToOne[FunctionId, DataFlows] | None
     entrypoints: OneToOne[SignatureId, Entrypoint] | None
+    frames: OneToOne[FunctionId, StackFrame] | None
     liveness: OneToOne[FunctionId, Liveness] | None
     noreturns: OneToOne[SignatureId, NoReturn] | None
     shuffles: OneToOne[FunctionId, Shuffle] | None

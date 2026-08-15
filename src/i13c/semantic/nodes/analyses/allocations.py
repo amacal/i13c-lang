@@ -55,26 +55,31 @@ def build_allocations(
         for idx in graph.keys() - targets:
             del graph[idx]
 
-        spills: set[int] = set()
+        count = 0
+        spills: dict[int, int] = {}
         colors: dict[int, int] = {}
         copy = {k: set(v) for k, v in graph.items()}
 
         for clobbers in live.clobbers.values():
             for idx in clobbers:
                 if idx in graph:
-                    for neighbor in graph[idx]:
-                        graph[neighbor].remove(idx)
+                    # for neighbor in graph[idx]:
+                    #     graph[neighbor].remove(idx)
 
-                    del graph[idx]
+                    # del graph[idx]
                     value = live.values[idx]
+                    count = count + 1
 
                     assert isinstance(value, CallingClobber)
                     colors[idx] = system_v[value.name]
 
-        while graph:
+        while len(graph) > count:
             broken = False
 
             for idx, edges in list(graph.items()):
+                if isinstance(live.values[idx], CallingClobber):
+                    continue
+
                 if len(edges) < len(system_v):
                     worklist.append(idx)
 
@@ -87,7 +92,10 @@ def build_allocations(
 
             if not broken:
                 for idx in list(graph.keys()):
-                    spills.add(idx)
+                    if isinstance(live.values[idx], CallingClobber):
+                        continue
+
+                    spills[idx] = 0
 
                     for neighbor in graph[idx]:
                         graph[neighbor].remove(idx)
@@ -98,21 +106,59 @@ def build_allocations(
         while worklist:
             node = worklist.pop()
 
-            pallet = set(range(len(system_v)))
+            palette = set(range(len(system_v)))
             used = {colors[neighbor] for neighbor in copy[node] if neighbor in colors}
 
-            available = pallet - used
+            available = palette - used
             colors[node] = min(available)
+
+        for idx in list(copy.keys()):
+            if isinstance(live.values[idx], CallingClobber):
+                continue
+
+            if idx not in spills:
+                for neighbor in copy[idx]:
+                    if idx != neighbor:
+                        copy[neighbor].remove(idx)
+
+                del copy[idx]
+
+        graph = copy
+        copy = {k: set(v) for k, v in graph.items()}
+        spills.clear()
 
         for idx, value in enumerate(live.values):
             if isinstance(value, CallingClobber):
                 del colors[idx]
+
+        while len(graph) > count:
+            for idx, edges in list(graph.items()):
+                if isinstance(live.values[idx], CallingClobber):
+                    continue
+
+                worklist.append(idx)
+
+                for neighbor in graph[idx]:
+                    graph[neighbor].remove(idx)
+
+                del graph[idx]
+                break
+
+        while worklist:
+            node = worklist.pop()
+
+            palette = set(range(len(live.values)))
+            used = {spills[neighbor] for neighbor in copy[node] if neighbor in spills}
+
+            available = palette - used
+            spills[node] = min(available)
 
         allocations[fid] = Allocation(
             ref=live.ref,
             target=fid,
             values=live.values,
             colors=colors,
+            spills=spills,
         )
 
     return OneToOne[FunctionId, Allocation].instance(allocations)

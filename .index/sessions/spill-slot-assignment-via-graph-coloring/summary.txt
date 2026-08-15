@@ -1,0 +1,1 @@
+Extended semantic-layer Allocation with a second graph-coloring pass that assigns symbolic stack slots to previously-uncolored values, reusing the register-coloring interference graph and algorithm shape, and fixed a pre-existing precolored-node/degree-desync bug in the register-coloring pass surfaced along the way.
