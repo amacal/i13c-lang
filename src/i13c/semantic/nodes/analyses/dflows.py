@@ -10,6 +10,7 @@ from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.statements import StatementAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
@@ -42,12 +43,10 @@ def build_data_flows(
         dflow = DataFlows(
             ref=entry.ref,
             target=fid,
-            entry=entry.entry,
-            exit=entry.exit,
+            nodes=entry.nodes,
             values=[],
             forward={},
             backward={},
-            control=entry,
             defs={},
             uses={},
             clobbers={},
@@ -100,7 +99,7 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
         for arg in stmt.target.target.arguments:
             if isinstance(arg, ParameterAcceptance):
                 for nix, node in enumerate(dflow.values):
-                    if isinstance(node, ParameterAcceptance): # noqa: SIM102
+                    if isinstance(node, ParameterAcceptance):  # noqa: SIM102
                         if node.id == arg.id:
                             dflow.forward[nix].append(idx)
                             dflow.backward[idx].append(nix)
@@ -108,7 +107,7 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
 
             elif isinstance(arg, ValueAcceptance):
                 for nix, node in enumerate(dflow.values):
-                    if isinstance(node, ValueAcceptance): # noqa: SIM102
+                    if isinstance(node, ValueAcceptance):  # noqa: SIM102
                         if node.id == arg.id:
                             dflow.forward[nix].append(idx)
                             dflow.backward[idx].append(nix)
@@ -129,6 +128,14 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
                         dflow.forward[nix].append(idx)
                         dflow.backward[idx].append(nix)
                         dflow.uses[nid].append(nix)
+
+        # an assignment with literal makes short-lived inline edge
+        if isinstance(stmt.target.expression, LiteralAcceptance):
+            off = len(dflow.values)
+            dflow.values.append(stmt.target.expression)
+            dflow.forward[off] = [idx]
+            dflow.backward[off] = []
+            dflow.backward[idx].append(off)
 
 
 class ListExtractor:

@@ -43,7 +43,9 @@ def build_allocations(
             graph[idx] = set()
 
         for idx in range(len(live.nodes)):
-            values = live.live_in[idx].union(live.live_out[idx]).union(live.clobbers[idx])
+            clobbers = live.clobbers[idx]
+
+            values = live.live_in[idx].union(live.live_out[idx]).union(clobbers)
             pairs = [(a, b) for a in values for b in values if a != b]
 
             targets.update(values)
@@ -63,10 +65,6 @@ def build_allocations(
         for clobbers in live.clobbers.values():
             for idx in clobbers:
                 if idx in graph:
-                    # for neighbor in graph[idx]:
-                    #     graph[neighbor].remove(idx)
-
-                    # del graph[idx]
                     value = live.values[idx]
                     count = count + 1
 
@@ -80,7 +78,7 @@ def build_allocations(
                 if isinstance(live.values[idx], CallingClobber):
                     continue
 
-                if len(edges) < len(system_v):
+                if len(edges) < len(system_v) - 1:
                     worklist.append(idx)
 
                     for neighbor in graph[idx]:
@@ -106,11 +104,22 @@ def build_allocations(
         while worklist:
             node = worklist.pop()
 
-            palette = set(range(len(system_v)))
+            palette = set(range(len(system_v))) - {7}
             used = {colors[neighbor] for neighbor in copy[node] if neighbor in colors}
 
             available = palette - used
             colors[node] = min(available)
+
+        for idx in reversed(list(spills.keys())):
+            palette = set(range(len(system_v))) - {7}
+            used = {colors[neighbor] for neighbor in copy[idx] if neighbor in colors}
+
+            # determine available colors
+            available = palette - used
+
+            if len(available) > 0:
+                colors[idx] = min(available)
+                del spills[idx]
 
         for idx in list(copy.keys()):
             if isinstance(live.values[idx], CallingClobber):
@@ -128,8 +137,9 @@ def build_allocations(
         spills.clear()
 
         for idx, value in enumerate(live.values):
-            if isinstance(value, CallingClobber):
-                del colors[idx]
+            if isinstance(value, CallingClobber):  # noqa: SIM102
+                if idx in graph:
+                    del colors[idx]
 
         while len(graph) > count:
             for idx, edges in list(graph.items()):
@@ -159,6 +169,7 @@ def build_allocations(
             values=live.values,
             colors=colors,
             spills=spills,
+            scratch=7,
         )
 
     return OneToOne[FunctionId, Allocation].instance(allocations)

@@ -13,6 +13,7 @@ from i13c.semantic.typing.analyses.frames import StackFrame
 from i13c.semantic.typing.analyses.liveness import Liveness
 from i13c.semantic.typing.analyses.noreturns import NoReturn
 from i13c.semantic.typing.analyses.shuffles import Shuffle
+from i13c.semantic.typing.analyses.spills import Spill
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -32,3 +33,4 @@ class AnalysisNodes:
     liveness: OneToOne[FunctionId, Liveness] | None
     noreturns: OneToOne[SignatureId, NoReturn] | None
     shuffles: OneToOne[FunctionId, Shuffle] | None
+    spills: OneToOne[FunctionId, Spill] | None

@@ -23,6 +23,7 @@
                 "files.trimTrailingWhitespace": true,
                 "files.trimFinalNewlines": true,
                 "files.insertFinalNewline": true,
+                "terminal.integrated.scrollback": 10000,
                 "python.languageServer": "Pylance",
                 "python.venvPath": "/home/vscode/.cache/pypoetry/virtualenvs",
                 "python.terminal.activateEnvironment": false,

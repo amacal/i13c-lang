@@ -41,5 +41,6 @@ class ControlFlows:
     target: FunctionId
     nodes: list[FlowMember]
 
+    # CFG Node -> CFG Nodes
     forward: dict[int, list[int]]
     backward: dict[int, list[int]]

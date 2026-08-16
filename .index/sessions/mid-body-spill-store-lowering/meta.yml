@@ -1,0 +1,20 @@
+title: "Mid-Body Spill-Store Lowering"
+kind: implementation
+files:
+  - "src/i13c/semantic/typing/analyses/spills.py"
+  - "src/i13c/semantic/nodes/analyses/spills.py"
+  - "src/i13c/semantic/nodes/analyses/core.py"
+  - "src/i13c/semantic/typing/analyses/core.py"
+  - "src/i13c/semantic/nodes/analyses/allocations.py"
+  - "src/i13c/semantic/typing/analyses/allocations.py"
+  - "src/i13c/semantic/nodes/analyses/dflows.py"
+  - "src/i13c/semantic/typing/analyses/dflows.py"
+  - "src/i13c/semantic/nodes/analyses/liveness.py"
+  - "src/i13c/semantic/typing/analyses/liveness.py"
+  - "src/i13c/semantic/typing/analyses/cflows.py"
+  - "src/i13c/semantic/typing/analyses/callings.py"
+  - "src/i13c/semantic/typing/resolutions/literals.py"
+  - "src/i13c/semantic/typing/resolutions/parameters.py"
+  - "src/i13c/semantic/typing/resolutions/values.py"
+source: —
+date: "2026-08-16"

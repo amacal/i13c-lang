@@ -11,7 +11,7 @@ class LiteralRejection:
     id: LiteralId
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class LiteralAcceptance:
     ref: Span
     id: LiteralId

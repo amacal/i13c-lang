@@ -1,4 +1,5 @@
 from i13c.semantic.typing.analyses.callings import Calling, CallingClobber
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from tests.semantic.nodes.analyses import prepare_analyses
@@ -161,13 +162,14 @@ def can_detect_allocations_with_of_declared_value_in_a_call():
     assert analyses.allocations.size() == 1
     _, allocations = analyses.allocations.peak()
 
-    assert len(allocations.values) == 3
+    assert len(allocations.values) == 4
     assert len(allocations.colors) == 2
     assert len(allocations.spills) == 0
 
     assert isinstance(allocations.values[0], ParameterAcceptance)
     assert isinstance(allocations.values[1], ValueAcceptance)
-    assert isinstance(allocations.values[2], Calling)
+    assert isinstance(allocations.values[2], LiteralAcceptance)
+    assert isinstance(allocations.values[3], Calling)
 
     # colors are assigned backwards
     assert allocations.colors[0] == 1
@@ -184,13 +186,14 @@ def can_detect_allocations_with_of_declared_value_in_a_call_unused():
     assert analyses.allocations.size() == 1
     _, allocations = analyses.allocations.peak()
 
-    assert len(allocations.values) == 3
+    assert len(allocations.values) == 4
     assert len(allocations.colors) == 1
     assert len(allocations.spills) == 0
 
     assert isinstance(allocations.values[0], ParameterAcceptance)
     assert isinstance(allocations.values[1], ValueAcceptance)
-    assert isinstance(allocations.values[2], Calling)
+    assert isinstance(allocations.values[2], LiteralAcceptance)
+    assert isinstance(allocations.values[3], Calling)
 
     assert allocations.colors[0] == 0
 
@@ -227,14 +230,15 @@ def can_detect_allocations_with_of_three_needed_colors():
     assert analyses.allocations.size() == 1
     _, allocations = analyses.allocations.peak()
 
-    assert len(allocations.values) == 4
+    assert len(allocations.values) == 5
     assert len(allocations.colors) == 3
     assert len(allocations.spills) == 0
 
     assert isinstance(allocations.values[0], ParameterAcceptance)
     assert isinstance(allocations.values[1], ParameterAcceptance)
     assert isinstance(allocations.values[2], ValueAcceptance)
-    assert isinstance(allocations.values[3], Calling)
+    assert isinstance(allocations.values[3], LiteralAcceptance)
+    assert isinstance(allocations.values[4], Calling)
 
     # colors are assigned backwards
     assert allocations.colors[0] == 2
@@ -276,25 +280,30 @@ def can_detect_allocations_with_forced_spill():
     assert analyses.allocations.size() == 1
     _, allocations = analyses.allocations.peak()
 
-    assert len(allocations.values) == 24
-    assert len(allocations.colors) == 15
+    assert len(allocations.values) == 40
+    assert len(allocations.colors) == 14
 
     assert isinstance(allocations.values[0], ParameterAcceptance)
     assert isinstance(allocations.values[1], ParameterAcceptance)
 
-    for idx in range(2, 18):
+    for idx in range(2, 34, 2):
         assert isinstance(allocations.values[idx], ValueAcceptance)
+        assert isinstance(allocations.values[idx + 1], LiteralAcceptance)
 
-    for idx in range(18, 24):
+    for idx in range(34, 40):
         assert isinstance(allocations.values[idx], Calling)
 
     # colors are assigned backwards
-    for idx in range(3, 18):
-        assert allocations.colors[idx] == 17 - idx
+    for idx in range(6, 20, 2):
+        assert allocations.colors[idx] == 17 - idx // 2
+
+    # colors are assigned backwards
+    for idx in range(20, 34, 2):
+        assert allocations.colors[idx] == 16 - idx // 2
 
     # spilled values are not colored
     for idx in range(3):
-        assert allocations.spills[idx] == 2 - idx
+        assert allocations.spills[idx] == 3 - idx
 
 
 def can_detect_allocations_with_forced_spill_two_blocks():
@@ -316,8 +325,8 @@ def can_detect_allocations_with_forced_spill_two_blocks():
     assert analyses.allocations.size() == 1
     _, allocations = analyses.allocations.peak()
 
-    assert len(allocations.values) == 34
-    assert allocations.colors == {1: 10, 18: 10}
+    assert len(allocations.values) == 36
+    assert allocations.colors == {1: 10, 19: 10}
     assert allocations.spills == {0: 1, 17: 0}
 
     assert isinstance(allocations.values[0], ParameterAcceptance)

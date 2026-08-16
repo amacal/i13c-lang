@@ -13,6 +13,7 @@ from i13c.semantic.nodes.analyses.frames import configure_frames
 from i13c.semantic.nodes.analyses.liveness import configure_liveness
 from i13c.semantic.nodes.analyses.noreturns import configure_noreturns
 from i13c.semantic.nodes.analyses.shuffles import configure_shuffles
+from i13c.semantic.nodes.analyses.spills import configure_spills
 from i13c.semantic.typing.analyses.core import AnalysisNodes
 
 
@@ -31,6 +32,7 @@ def configure_analyses() -> GraphGroup:
             configure_liveness(),
             configure_noreturns(),
             configure_shuffles(),
+            configure_spills(),
         ]
     )
 
@@ -48,5 +50,6 @@ def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
         frames=analyses.get("analyses/frames"),
         liveness=analyses.get("analyses/liveness"),
         noreturns=analyses.get("analyses/noreturns"),
-        shuffles=analyses.get("analyses/shuffles")
+        shuffles=analyses.get("analyses/shuffles"),
+        spills=analyses.get("analyses/spills")
     )

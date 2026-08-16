@@ -14,7 +14,7 @@ class ParameterRejection:
     id: ParameterId
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class ParameterAcceptance:
     ref: Span
     id: ParameterId

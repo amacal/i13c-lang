@@ -13,22 +13,22 @@ from i13c.syntax.source import Span
 CallingTarget = Asmlet | CallSiteAcceptance
 CallingArgument = CallSiteArgument
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, eq=False, repr=False)
 class CallingBinding:
     name: bytes
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass(kw_only=True, eq=False, repr=False)
 class CallingClobber:
     name: bytes
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, eq=False, repr=False)
 class CallingUnbound:
     name: bytes
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class Calling:
     ref: Span
     callsite: CallSiteId

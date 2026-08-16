@@ -1,0 +1,68 @@
+date: "2026-08-16"
+title: "Mid-Body Spill-Store Lowering"
+session:
+  files:
+    - "src/i13c/semantic/typing/analyses/spills.py"
+    - "src/i13c/semantic/nodes/analyses/spills.py"
+    - "src/i13c/semantic/nodes/analyses/core.py"
+    - "src/i13c/semantic/typing/analyses/core.py"
+    - "src/i13c/semantic/nodes/analyses/allocations.py"
+    - "src/i13c/semantic/typing/analyses/allocations.py"
+    - "src/i13c/semantic/nodes/analyses/dflows.py"
+    - "src/i13c/semantic/typing/analyses/dflows.py"
+    - "src/i13c/semantic/nodes/analyses/liveness.py"
+    - "src/i13c/semantic/typing/analyses/liveness.py"
+    - "src/i13c/semantic/typing/analyses/cflows.py"
+    - "src/i13c/semantic/typing/analyses/callings.py"
+    - "src/i13c/semantic/typing/resolutions/literals.py"
+    - "src/i13c/semantic/typing/resolutions/parameters.py"
+    - "src/i13c/semantic/typing/resolutions/values.py"
+  source: —
+  status: completed
+  attempted:
+    - "Design and implement a new Spill analysis emitting spill-store instructions for non-parameter values forced to a stack slot mid-function (e.g. a declared value initialized from a literal), a gap StackFrame (entry/exit-only) and Shuffle (per-callsite-only) both left explicitly open in prior sessions"
+    - "Originally framed as the standing Whole-Function Instruction Lowering future-target (merging StackFrame, Shuffle, and the new spill-store output into one ordered per-function instruction stream); scope narrowed during the session to building the new Spill analysis alone, deferring the merge/ordering-container question"
+  explored:
+    - "Whether StackFrame or Shuffle needed modification to support mid-body spills; concluded no — a new analysis following the existing nodes/analyses+typing/analyses dual-file pattern was the right shape, since every StackFrame entry already executes at a fixed position (function entry) with no need to carry a CFG-node index"
+    - "Whether a new ordering concept was needed for the new analysis, or whether ControlFlows' existing node-index scheme (already reused by DataFlows.defs/uses) was sufficient; concluded the latter, keyed by CFG node index, with no changes to cflows.py's node model"
+    - "A three-way taxonomy for a spilled value's source at its definition point (immediate/literal, already-colored register, already-spilled memory), derived from what a single x86-64 mov instruction can and cannot do directly (no immediate-to-memory move for a full 64-bit immediate; no memory-to-memory move)"
+    - "Whether scratch-register selection for the immediate/memory cases belongs to register allocation or to a later lowering step; concluded a fixed convention register used transiently via push/pop needs no allocator involvement, since push/pop is safe regardless of the register's prior contents"
+    - "Whether to permanently exclude the chosen scratch register from Allocation's colorable palette versus only borrowing it transiently via push/pop; chosen to reserve it permanently in Allocation, which required the two Chaitin-Briggs fixes below once real regressions surfaced"
+    - "Live-range splitting (per-CFG-node recoloring with reconciliation at merges) and finer-than-statement CFG-node granularity (motivated by hypothetical future arithmetic expressions) were both raised as adjacent ideas and explicitly set aside as out of scope"
+  tried:
+    - "Excluded register-color index 7 (the reserved scratch register) from Allocation's clobber/palette computation by subtracting the literal 7 from a DFG-value-index set; wrong index space — coincidentally stripped an unrelated CallingClobber entry in one test instead of the scratch register's own entry; reverted"
+    - "A single-pass design where a value with no simplify candidate was marked spilled immediately, with no attempt at optimistic coloring; caused two previously-colorable values in an existing test to force-spill unnecessarily once the palette and simplify threshold were both shrunk by one for the reserved scratch register"
+    - "A two-loop retroactive-rescue design (fully color the simplify-worklist first, then retry leftover colors for force-spilled candidates in insertion order) — the version kept; verbally flagged as not implementing the theoretically-correct reverse-of-removal LIFO retry order, so a different node ordering could still misassign a scarce color to an unresolvable high-degree node ahead of one that structurally needs it"
+  corrections:
+    - "Initially proposed relocating StackFrame's existing parameter-spill logic into the new analysis for uniformity; corrected to leaving StackFrame untouched after weighing the risk of modifying an already-completed, tested analysis against a single skip-condition in the new one"
+    - "Proposed r10, then corrected to r11, as the scratch register, citing the SysV convention that r11 is caller-saved with no value expected to survive a call; stated from general recollection, not a rendered spec page, and flagged as unverified since docs/ does not yet contain the psABI PDF"
+    - "Assumed excluding r11 from Allocation's colorable palette would be cost-free; corrected after two previously-passing tests from the already-completed Spill-Slot Assignment via Graph Coloring session failed (can_detect_allocations_with_forced_spill_two_blocks, can_detect_allocations_with_value_surviving_a_call_of_regular_function)"
+    - "Claimed the high-degree node in the two-loop rescue design was 'resolved at the end'; asked to verify, then found the rescue loop actually retries force-spilled nodes in plain insertion order, letting the first-inserted (highest-degree) node claim a scarce color ahead of lower-degree nodes that structurally needed it"
+    - "Claimed the store instruction for a literal-sourced spill was fully described as a single 'mov mem, reg'; corrected to acknowledging the scratch-register op records only the store half — the literal's actual value is not captured anywhere in the current data model"
+    - "A test assertion in can_detect_liveness_with_of_declared_value_in_a_call_unused used index 1 for what should have been the function's exit node (index 3), left over from replacing a named liveness.exit reference with a literal during an unrelated field-removal refactor; corrected to 3"
+  bugs_found:
+    - "allocations.py: excluding the reserved scratch register from clobber/palette computation via `live.clobbers[idx] - {7}` operated on the wrong index space (DFG value index, not register color); fixed by removing that line and handling the reservation only via the simplify threshold and final palette"
+    - "allocations.py: after shrinking both the palette and the simplify threshold by one for the reserved register, the 'no simplify candidate' branch marked a node as spilled immediately with no coloring attempt; fixed by retrying such nodes for an available color in a second pass after the main worklist coloring completes, only leaving a node spilled if none was available on retry"
+    - "liveness.py/dflows.py entry/exit-field-removal refactor left a stray literal node-index in a test assertion (see corrections); fixed"
+  completed:
+    - "Implemented Spill (typing/analyses/spills.py) and build_spills/configure_spills (nodes/analyses/spills.py), wired into configure_analyses()/parse_analyses() in nodes/analyses/core.py and typing/analyses/core.py"
+    - "Spill.spills: dict[int, list[SpillOp]] keyed by CFG node index, values being SpillReg (register-source case) or SpillScratch (immediate-source case, naming the reserved scratch register but not yet the literal's bytes)"
+    - "Verified against concrete cases via direct interpreter runs: a value assigned from an already-colored value produces a SpillReg at its definition node; a value assigned from a literal, with every register clobbered, produces a SpillScratch at its definition node"
+    - "Added 6 new tests in src/tests/semantic/nodes/analyses/spills.py, all passing"
+    - "Fixed the two allocations.py bugs above; all 18 previously-passing allocations tests pass again alongside the new scratch-register reservation"
+    - "Removed an unused SpillStolen dataclass stub added speculatively for the not-yet-built memory-source case"
+    - "Verified full suite green (820 tests: core, syntax, semantic, encoding) and pyright clean (0 errors/warnings/informations) at session close"
+  not_completed:
+    - "The memory-source case (a spilled value assigned from another already-spilled value) has no build_spills branch or dataclass; only discussed as needing a scratch-register-mediated copy via push/pop"
+    - "The literal's actual value is not captured anywhere in Spill or any other analysis; SpillScratch records only the destination slot and the scratch register's name, deferred pending a future instruction-lowering pass"
+    - "The original session framing — merging StackFrame, Shuffle, and Spill into one ordered whole-function instruction stream — was not attempted; whether a genuinely unified container is still needed, or three independently node-indexed structures suffice for a future consumer, is unresolved"
+    - "The Allocation optimistic-coloring retry (see bugs_found) uses plain insertion order rather than reverse-of-removal LIFO order for retrying force-spill candidates; not exercised by any currently-failing test"
+  open_questions:
+    - "Whether Spill needs a single unified merged data structure, or whether StackFrame, Shuffle, and Spill staying independent and node-indexed is sufficient for a future encoding/-side consumer to interleave"
+    - "Whether reserving r11 permanently out of Allocation's colorable palette is the final design, or whether a future session should reconsider borrowing it only transiently via push/pop without touching Allocation at all"
+    - "Whether CFG nodes should eventually be finer-grained than one-per-statement, to order multiple temporary values defined within a single complex expression; raised and explicitly left for independent thought outside this session"
+    - "Whether the SysV ABI actually specifies r11 as a designated caller-saved scratch register, or whether this is only conventional usage; unverified against a rendered psABI page"
+  notes:
+    - "The session's working anchor throughout was `asm foo(v@rax: u16, w@rsi: u16) clobbers ... { }` / `fn main(v: u16) { val x: u16 = 0x01; foo(v, x); }`, used to inspect StackFrame, Shuffle, Allocation, and DataFlows output directly via interpreter runs before any code was written"
+    - "DataFlows gained an inline literal-as-DFG-value edge (a literal initializer appears as its own entry in DataFlows.values, linked via backward from the value it initializes) as part of this session, which Spill's source classification depends on directly"
+    - "A separate, smaller cleanup early in the session removed a redundant control: ControlFlows field from DataFlows in favor of Liveness reading cflows directly; bundled into this session's file list since it happened in the same session and touches the same subsystem"

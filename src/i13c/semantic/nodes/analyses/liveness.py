@@ -2,6 +2,7 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.analyses.cflows import ControlFlows
 from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.liveness import Liveness
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -14,6 +15,7 @@ def configure_liveness() -> GraphNode:
         produces=("analyses/liveness",),
         requires=frozenset(
             {
+                ("cflows", "analyses/cflows"),
                 ("dflows", "analyses/dflows"),
             }
         ),
@@ -22,12 +24,15 @@ def configure_liveness() -> GraphNode:
 
 
 def build_liveness(
+    cflows: OneToOne[FunctionId, ControlFlows],
     dflows: OneToOne[FunctionId, DataFlows],
 ) -> OneToOne[FunctionId, Liveness]:
     liveness: dict[FunctionId, Liveness] = {}
 
     for dflow in dflows.values():
-        worklist = list(range(len(dflow.control.nodes)))
+        worklist = list(range(len(dflow.nodes)))
+        cflow = cflows.get(dflow.target)
+
         clobbers: dict[int, set[int]] = {node: set() for node in worklist}
         live_in: dict[int, set[int]] = {node: set() for node in worklist}
         live_out: dict[int, set[int]] = {node: set() for node in worklist}
@@ -37,7 +42,7 @@ def build_liveness(
             node = worklist.pop()
 
             # compute live_out as union of live_in of successors
-            for successor in dflow.control.forward.get(node, []):
+            for successor in cflow.forward.get(node, []):
                 live_out[node].update(live_in[successor])
 
             # compute live_in as union of uses and live_out minus defs
@@ -47,7 +52,7 @@ def build_liveness(
             # if live_in[node] has changed
             if new_live_in != live_in[node]:
                 live_in[node] = new_live_in
-                worklist.extend(dflow.control.backward.get(node, []))
+                worklist.extend(cflow.backward.get(node, []))
 
         for node, items in dflow.clobbers.items():
             clobbers[node].update(items)
@@ -55,9 +60,7 @@ def build_liveness(
         liveness[dflow.target] = Liveness(
             ref=dflow.ref,
             target=dflow.target,
-            entry=dflow.entry,
-            exit=dflow.exit,
-            nodes=dflow.control.nodes,
+            nodes=cflow.nodes,
             values=dflow.values,
             live_in=live_in,
             live_out=live_out,
@@ -79,8 +82,6 @@ class ListExtractor:
         return {
             "ref": "Ref",
             "fn": "Function",
-            "entry": "Entry",
-            "exit": "Exit",
             "nodes": "Nodes",
             "values": "Values",
             "in": "Live In",
@@ -92,8 +93,6 @@ class ListExtractor:
         return {
             "ref": str(entry.ref),
             "fn": key.identify(1),
-            "entry": str(entry.entry),
-            "exit": str(entry.exit),
             "nodes": str(len(entry.nodes)),
             "values": str(len(entry.values)),
             "in": str(len(entry.live_in)),

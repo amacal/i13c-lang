@@ -1,5 +1,6 @@
 from i13c.semantic.typing.analyses.callings import Calling, CallingClobber
 from i13c.semantic.typing.analyses.cflows import FlowNode
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from tests.semantic.nodes.analyses import prepare_analyses
@@ -15,9 +16,8 @@ def can_detect_liveness_in_empty_function():
     _, liveness = analyses.liveness.peak()
 
     assert len(liveness.values) == 0
-    assert liveness.entry != liveness.exit
-
     assert len(liveness.nodes) == 2
+
     assert len(liveness.live_in) == 2
     assert len(liveness.live_out) == 2
 
@@ -63,8 +63,8 @@ def can_detect_liveness_with_a_callsite_with_clobbers():
     assert len(liveness.live_in) == 3
     assert len(liveness.live_out) == 3
 
-    assert len(liveness.live_in[liveness.entry]) == 0
-    assert len(liveness.live_out[liveness.entry]) == 0
+    assert len(liveness.live_in[0]) == 0
+    assert len(liveness.live_out[0]) == 0
 
     assert len(liveness.live_in[1]) == 0
     assert len(liveness.live_out[1]) == 0
@@ -74,8 +74,8 @@ def can_detect_liveness_with_a_callsite_with_clobbers():
 
     assert isinstance(liveness.values[1], CallingClobber)
 
-    assert len(liveness.live_in[liveness.exit]) == 0
-    assert len(liveness.live_out[liveness.exit]) == 0
+    assert len(liveness.live_in[2]) == 0
+    assert len(liveness.live_out[2]) == 0
 
 
 def can_detect_liveness_with_of_parameters_unused():
@@ -93,11 +93,11 @@ def can_detect_liveness_with_of_parameters_unused():
     assert len(liveness.live_in) == 2
     assert len(liveness.live_out) == 2
 
-    assert liveness.live_in[liveness.entry] == set()
-    assert liveness.live_out[liveness.entry] == set()
+    assert liveness.live_in[0] == set()
+    assert liveness.live_out[0] == set()
 
-    assert liveness.live_in[liveness.exit] == set()
-    assert liveness.live_out[liveness.exit] == set()
+    assert liveness.live_in[1] == set()
+    assert liveness.live_out[1] == set()
 
 
 def can_detect_liveness_with_of_parameters_used():
@@ -120,14 +120,14 @@ def can_detect_liveness_with_of_parameters_used():
     assert isinstance(liveness.values[0], ParameterAcceptance)
     assert isinstance(liveness.values[1], Calling)
 
-    assert liveness.live_in[liveness.entry] == set()
-    assert liveness.live_out[liveness.entry] == {0}
+    assert liveness.live_in[0] == set()
+    assert liveness.live_out[0] == {0}
 
     assert liveness.live_in[1] == {0}
     assert liveness.live_out[1] == set()
 
-    assert liveness.live_in[liveness.exit] == set()
-    assert liveness.live_out[liveness.exit] == set()
+    assert liveness.live_in[2] == set()
+    assert liveness.live_out[2] == set()
 
 
 def can_detect_liveness_with_of_parameters_used_in_later_calls():
@@ -154,8 +154,8 @@ def can_detect_liveness_with_of_parameters_used_in_later_calls():
     assert isinstance(liveness.values[1], Calling)
     assert isinstance(liveness.values[2], Calling)
 
-    assert liveness.live_in[liveness.entry] == set()
-    assert liveness.live_out[liveness.entry] == {0}
+    assert liveness.live_in[0] == set()
+    assert liveness.live_out[0] == {0}
 
     assert liveness.live_in[1] == {0}
     assert liveness.live_out[1] == {0}
@@ -163,8 +163,8 @@ def can_detect_liveness_with_of_parameters_used_in_later_calls():
     assert liveness.live_in[2] == {0}
     assert liveness.live_out[2] == set()
 
-    assert liveness.live_in[liveness.exit] == set()
-    assert liveness.live_out[liveness.exit] == set()
+    assert liveness.live_in[3] == set()
+    assert liveness.live_out[3] == set()
 
 
 def can_detect_liveness_with_of_parameters_used_in_multiple_calls():
@@ -191,8 +191,8 @@ def can_detect_liveness_with_of_parameters_used_in_multiple_calls():
     assert isinstance(liveness.values[1], Calling)
     assert isinstance(liveness.values[2], Calling)
 
-    assert liveness.live_in[liveness.entry] == set()
-    assert liveness.live_out[liveness.entry] == {0}
+    assert liveness.live_in[0] == set()
+    assert liveness.live_out[0] == {0}
 
     assert liveness.live_in[1] == {0}
     assert liveness.live_out[1] == {0}
@@ -200,8 +200,8 @@ def can_detect_liveness_with_of_parameters_used_in_multiple_calls():
     assert liveness.live_in[2] == {0}
     assert liveness.live_out[2] == set()
 
-    assert liveness.live_in[liveness.exit] == set()
-    assert liveness.live_out[liveness.exit] == set()
+    assert liveness.live_in[3] == set()
+    assert liveness.live_out[3] == set()
 
 
 def can_detect_liveness_with_of_parameters_used_in_abandoned_values():
@@ -229,8 +229,8 @@ def can_detect_liveness_with_of_parameters_used_in_abandoned_values():
     assert isinstance(liveness.values[2], Calling)
     assert isinstance(liveness.values[3], Calling)
 
-    assert liveness.live_in[liveness.entry] == set()
-    assert liveness.live_out[liveness.entry] == {0, 1}
+    assert liveness.live_in[0] == set()
+    assert liveness.live_out[0] == {0, 1}
 
     assert liveness.live_in[1] == {0, 1}
     assert liveness.live_out[1] == {1}
@@ -238,8 +238,8 @@ def can_detect_liveness_with_of_parameters_used_in_abandoned_values():
     assert liveness.live_in[2] == {1}
     assert liveness.live_out[2] == set()
 
-    assert liveness.live_in[liveness.exit] == set()
-    assert liveness.live_out[liveness.exit] == set()
+    assert liveness.live_in[3] == set()
+    assert liveness.live_out[3] == set()
 
 
 def can_detect_liveness_with_of_declared_value_in_a_call():
@@ -253,7 +253,7 @@ def can_detect_liveness_with_of_declared_value_in_a_call():
     _, liveness = analyses.liveness.peak()
 
     assert len(liveness.nodes) == 4
-    assert len(liveness.values) == 3
+    assert len(liveness.values) == 4
 
     assert len(liveness.live_in) == 4
     assert len(liveness.live_out) == 4
@@ -263,10 +263,11 @@ def can_detect_liveness_with_of_declared_value_in_a_call():
 
     assert isinstance(liveness.values[0], ParameterAcceptance)
     assert isinstance(liveness.values[1], ValueAcceptance)
-    assert isinstance(liveness.values[2], Calling)
+    assert isinstance(liveness.values[2], LiteralAcceptance)
+    assert isinstance(liveness.values[3], Calling)
 
-    assert liveness.live_in[liveness.entry] == set()
-    assert liveness.live_out[liveness.entry] == {0}
+    assert liveness.live_in[0] == set()
+    assert liveness.live_out[0] == {0}
 
     assert liveness.live_in[1] == {0}
     assert liveness.live_out[1] == {0, 1}
@@ -274,8 +275,8 @@ def can_detect_liveness_with_of_declared_value_in_a_call():
     assert liveness.live_in[2] == {0, 1}
     assert liveness.live_out[2] == set()
 
-    assert liveness.live_in[liveness.exit] == set()
-    assert liveness.live_out[liveness.exit] == set()
+    assert liveness.live_in[3] == set()
+    assert liveness.live_out[3] == set()
 
 
 def can_detect_liveness_with_of_declared_value_in_a_call_unused():
@@ -289,7 +290,7 @@ def can_detect_liveness_with_of_declared_value_in_a_call_unused():
     _, liveness = analyses.liveness.peak()
 
     assert len(liveness.nodes) == 4
-    assert len(liveness.values) == 3
+    assert len(liveness.values) == 4
 
     assert len(liveness.live_in) == 4
     assert len(liveness.live_out) == 4
@@ -299,10 +300,11 @@ def can_detect_liveness_with_of_declared_value_in_a_call_unused():
 
     assert isinstance(liveness.values[0], ParameterAcceptance)
     assert isinstance(liveness.values[1], ValueAcceptance)
-    assert isinstance(liveness.values[2], Calling)
+    assert isinstance(liveness.values[2], LiteralAcceptance)
+    assert isinstance(liveness.values[3], Calling)
 
-    assert liveness.live_in[liveness.entry] == set()
-    assert liveness.live_out[liveness.entry] == {0}
+    assert liveness.live_in[0] == set()
+    assert liveness.live_out[0] == {0}
 
     assert liveness.live_in[1] == {0}
     assert liveness.live_out[1] == {0}
@@ -310,8 +312,8 @@ def can_detect_liveness_with_of_declared_value_in_a_call_unused():
     assert liveness.live_in[2] == {0}
     assert liveness.live_out[2] == set()
 
-    assert liveness.live_in[liveness.exit] == set()
-    assert liveness.live_out[liveness.exit] == set()
+    assert liveness.live_in[3] == set()
+    assert liveness.live_out[3] == set()
 
 
 def can_detect_liveness_with_of_assigned_value():
@@ -337,8 +339,8 @@ def can_detect_liveness_with_of_assigned_value():
     assert isinstance(liveness.values[1], ValueAcceptance)
     assert isinstance(liveness.values[2], Calling)
 
-    assert liveness.live_in[liveness.entry] == set()
-    assert liveness.live_out[liveness.entry] == {0}
+    assert liveness.live_in[0] == set()
+    assert liveness.live_out[0] == {0}
 
     assert liveness.live_in[1] == {0}
     assert liveness.live_out[1] == {1}
@@ -346,5 +348,5 @@ def can_detect_liveness_with_of_assigned_value():
     assert liveness.live_in[2] == {1}
     assert liveness.live_out[2] == set()
 
-    assert liveness.live_in[liveness.exit] == set()
-    assert liveness.live_out[liveness.exit] == set()
+    assert liveness.live_in[3] == set()
+    assert liveness.live_out[3] == set()

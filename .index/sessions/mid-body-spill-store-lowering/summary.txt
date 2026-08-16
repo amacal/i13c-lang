@@ -1,0 +1,1 @@
+Implemented a new Spill analysis emitting node-indexed spill-store instructions for non-parameter values forced to a stack slot mid-function, and fixed two Chaitin-Briggs coloring bugs in Allocation exposed while reserving a scratch register for it.

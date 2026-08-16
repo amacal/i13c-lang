@@ -12,7 +12,7 @@ ValueRejectionReason = Kind["unknown"]
 ValueContext = TypeVar("ValueContext")
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class ValueAcceptance:
     ref: Span
     id: ValueId

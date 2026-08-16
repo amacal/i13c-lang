@@ -1,5 +1,6 @@
 from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.resolutions.assigns import ValueAcceptance
+from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from tests.semantic.nodes.analyses import prepare_analyses
 
@@ -17,15 +18,15 @@ def can_detect_dflow_in_empty_function():
     assert len(dflows.forward) == 0
     assert len(dflows.backward) == 0
 
-    assert len(dflows.control.nodes) == 2
+    assert len(dflows.nodes) == 2
     assert len(dflows.defs) == 2
     assert len(dflows.uses) == 2
 
-    assert dflows.defs[dflows.entry] == []
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == []
+    assert dflows.defs[1] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[1] == []
 
 
 def can_detect_dflow_with_unused_parameter():
@@ -45,15 +46,15 @@ def can_detect_dflow_with_unused_parameter():
     assert dflows.values[0].name == b"x"
     assert dflows.values[0].type.name == b"u8"
 
-    assert len(dflows.control.nodes) == 2
+    assert len(dflows.nodes) == 2
     assert len(dflows.defs) == 2
     assert len(dflows.uses) == 2
 
-    assert dflows.defs[dflows.entry] == [0]
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == [0]
+    assert dflows.defs[1] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[1] == []
 
 
 def can_detect_dflow_with_a_callsite_using_literal():
@@ -76,15 +77,15 @@ def can_detect_dflow_with_a_callsite_using_literal():
     assert dflows.forward[0] == []
     assert dflows.backward[0] == []
 
-    assert len(dflows.control.nodes) == 3
+    assert len(dflows.nodes) == 3
     assert len(dflows.defs) == 3
     assert len(dflows.uses) == 3
 
-    assert dflows.defs[dflows.entry] == []
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == []
+    assert dflows.defs[2] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[2] == []
 
     assert dflows.defs[1] == []
     assert dflows.uses[1] == []
@@ -131,15 +132,15 @@ def can_detect_dflow_with_a_callsite_using_parameter():
         else:
             assert False
 
-    assert len(dflows.control.nodes) == 3
+    assert len(dflows.nodes) == 3
     assert len(dflows.defs) == 3
     assert len(dflows.uses) == 3
 
-    assert dflows.defs[dflows.entry] == [0]
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == [0]
+    assert dflows.defs[2] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[2] == []
 
     assert dflows.defs[1] == []
     assert dflows.uses[1] == [0]
@@ -155,9 +156,9 @@ def can_detect_dflow_with_a_callsite_using_value():
     assert analyses.dflows.size() == 1
     _, dflows = analyses.dflows.peak()
 
-    assert len(dflows.values) == 2
-    assert len(dflows.forward) == 2
-    assert len(dflows.backward) == 2
+    assert len(dflows.values) == 3
+    assert len(dflows.forward) == 3
+    assert len(dflows.backward) == 3
 
     for idx, node in enumerate(dflows.values):
         if isinstance(node, ValueAcceptance):
@@ -168,12 +169,14 @@ def can_detect_dflow_with_a_callsite_using_value():
             assert len(dflows.forward[idx]) == 1
             assert isinstance(dflows.values[dflows.forward[idx][0]], Calling)
 
-            assert len(dflows.backward[idx]) == 0
+            assert len(dflows.backward[idx]) == 1
+            assert isinstance(dflows.values[dflows.backward[idx][0]], LiteralAcceptance)
+
             assert len(dflows.backward[dflows.forward[idx][0]]) == 1
             assert dflows.backward[dflows.forward[idx][0]][0] == idx
 
         elif isinstance(node, Calling):
-            assert idx == 1
+            assert idx == 2
             assert node.signature.name == b"foo"
 
             assert len(dflows.forward[idx]) == 0
@@ -181,18 +184,27 @@ def can_detect_dflow_with_a_callsite_using_value():
 
             assert isinstance(dflows.values[dflows.backward[idx][0]], ValueAcceptance)
 
+        elif isinstance(node, LiteralAcceptance):
+            assert idx == 1
+            assert str(node.target) == "0x42"
+
+            assert len(dflows.forward[idx]) == 1
+            assert isinstance(dflows.values[dflows.forward[idx][0]], ValueAcceptance)
+
+            assert len(dflows.backward[idx]) == 0
+
         else:
             assert False
 
-    assert len(dflows.control.nodes) == 4
+    assert len(dflows.nodes) == 4
     assert len(dflows.defs) == 4
     assert len(dflows.uses) == 4
 
-    assert dflows.defs[dflows.entry] == []
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == []
+    assert dflows.defs[3] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[3] == []
 
     assert dflows.defs[1] == [0]
     assert dflows.uses[1] == []
@@ -210,26 +222,32 @@ def can_detect_dflow_with_an_assignment_using_literal():
     assert analyses.dflows.size() == 1
     _, dflows = analyses.dflows.peak()
 
-    assert len(dflows.values) == 1
-    assert len(dflows.forward) == 1
-    assert len(dflows.backward) == 1
+    assert len(dflows.values) == 2
+    assert len(dflows.forward) == 2
+    assert len(dflows.backward) == 2
 
     assert isinstance(dflows.values[0], ValueAcceptance)
     assert dflows.values[0].name == b"x"
     assert dflows.values[0].type.name == b"u8"
 
-    assert dflows.forward[0] == []
-    assert dflows.backward[0] == []
+    assert isinstance(dflows.values[1], LiteralAcceptance)
+    assert str(dflows.values[1].target) == "0x42"
 
-    assert len(dflows.control.nodes) == 3
+    assert dflows.forward[0] == []
+    assert dflows.backward[0] == [1]
+
+    assert dflows.forward[1] == [0]
+    assert dflows.backward[1] == []
+
+    assert len(dflows.nodes) == 3
     assert len(dflows.defs) == 3
     assert len(dflows.uses) == 3
 
-    assert dflows.defs[dflows.entry] == []
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == []
+    assert dflows.defs[2] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[2] == []
 
     assert dflows.defs[1] == [0]
     assert dflows.uses[1] == []
@@ -272,15 +290,15 @@ def can_detect_dflow_with_an_assignment_using_parameter():
         else:
             assert False
 
-    assert len(dflows.control.nodes) == 3
+    assert len(dflows.nodes) == 3
     assert len(dflows.defs) == 3
     assert len(dflows.uses) == 3
 
-    assert dflows.defs[dflows.entry] == [0]
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == [0]
+    assert dflows.defs[2] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[2] == []
 
     assert dflows.defs[1] == [1]
     assert dflows.uses[1] == [0]
@@ -329,15 +347,15 @@ def can_detect_dflow_with_a_chain_of_parameter_to_value_to_callsite():
             assert len(dflows.backward[idx]) == 1
             assert isinstance(dflows.values[dflows.backward[idx][0]], ValueAcceptance)
 
-    assert len(dflows.control.nodes) == 4
+    assert len(dflows.nodes) == 4
     assert len(dflows.defs) == 4
     assert len(dflows.uses) == 4
 
-    assert dflows.defs[dflows.entry] == [0]
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == [0]
+    assert dflows.defs[3] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[3] == []
 
     assert dflows.defs[1] == [1]
     assert dflows.uses[1] == [0]
@@ -355,48 +373,49 @@ def can_detect_dflow_with_an_assignment_using_value():
     assert analyses.dflows.size() == 1
     _, dflows = analyses.dflows.peak()
 
-    assert len(dflows.values) == 2
-    assert len(dflows.forward) == 2
-    assert len(dflows.backward) == 2
+    assert len(dflows.values) == 3
+    assert len(dflows.forward) == 3
+    assert len(dflows.backward) == 3
 
     for idx, node in enumerate(dflows.values):
-        assert isinstance(node, ValueAcceptance)
 
-        if node.name == b"x":
-            assert idx == 0
-            assert node.type.name == b"u8"
+        if isinstance(node, ValueAcceptance):
+            if node.name == b"x":
+                assert idx == 0
+                assert node.type.name == b"u8"
 
-            assert len(dflows.forward[idx]) == 1
-            assert len(dflows.backward[idx]) == 0
+                assert dflows.forward[idx] == [2]
+                assert dflows.backward[idx] == [1]
 
-            assert dflows.forward[idx][0] != idx
-            assert isinstance(dflows.values[dflows.forward[idx][0]], ValueAcceptance)
+            elif node.name == b"y":
+                assert idx == 2
+                assert node.type.name == b"u8"
 
-        elif node.name == b"y":
+                assert dflows.forward[idx] == []
+                assert dflows.backward[idx] == [0]
+
+            else:
+                assert False
+
+        if isinstance(node, LiteralAcceptance):
             assert idx == 1
-            assert node.type.name == b"u8"
+            assert str(node.target) == "0x42"
 
-            assert len(dflows.forward[idx]) == 0
-            assert len(dflows.backward[idx]) == 1
+            assert dflows.forward[idx] == [0]
+            assert dflows.backward[idx] == []
 
-            assert dflows.backward[idx][0] != idx
-            assert isinstance(dflows.values[dflows.backward[idx][0]], ValueAcceptance)
-
-        else:
-            assert False
-
-    assert len(dflows.control.nodes) == 4
+    assert len(dflows.nodes) == 4
     assert len(dflows.defs) == 4
     assert len(dflows.uses) == 4
 
-    assert dflows.defs[dflows.entry] == []
-    assert dflows.defs[dflows.exit] == []
+    assert dflows.defs[0] == []
+    assert dflows.defs[3] == []
 
-    assert dflows.uses[dflows.entry] == []
-    assert dflows.uses[dflows.exit] == []
+    assert dflows.uses[0] == []
+    assert dflows.uses[3] == []
 
     assert dflows.defs[1] == [0]
     assert dflows.uses[1] == []
 
-    assert dflows.defs[2] == [1]
+    assert dflows.defs[2] == [2]
     assert dflows.uses[2] == [0]
