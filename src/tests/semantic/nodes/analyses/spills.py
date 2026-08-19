@@ -1,5 +1,5 @@
-from tests.semantic.nodes.analyses import prepare_analyses
 from i13c.semantic.typing.analyses.spills import SpillReg, SpillScratch
+from tests.semantic.nodes.analyses import prepare_analyses
 
 
 def can_detect_spills_in_empty_function():
@@ -9,7 +9,7 @@ def can_detect_spills_in_empty_function():
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
-    _, spills = analyses.spills.peak()
+    _, spills = analyses.spills.peek()
 
     assert len(spills.spills) == 2
     assert len(spills.spills[spills.entry]) == 0
@@ -24,7 +24,7 @@ def can_detect_no_spills_on_callsite_with_a_literal():
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
-    _, spills = analyses.spills.peak()
+    _, spills = analyses.spills.peek()
 
     assert len(spills.spills) == 3
     assert len(spills.spills[1]) == 0
@@ -45,7 +45,7 @@ def can_detect_no_spills_on_parameter_put_in_reg():
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
-    _, spills = analyses.spills.peak()
+    _, spills = analyses.spills.peek()
 
     assert len(spills.spills) == 3
     assert len(spills.spills[1]) == 0
@@ -66,7 +66,7 @@ def can_detect_no_spills_on_parameter_put_in_slot():
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
-    _, spills = analyses.spills.peak()
+    _, spills = analyses.spills.peek()
 
     assert len(spills.spills) == 3
     assert len(spills.spills[1]) == 0
@@ -87,7 +87,7 @@ def can_detect_one_spill_on_value_of_literal_put_in_reg():
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
-    _, spills = analyses.spills.peak()
+    _, spills = analyses.spills.peek()
 
     assert len(spills.spills) == 4
     assert len(spills.spills[spills.entry]) == 0
@@ -109,7 +109,7 @@ def can_detect_one_spill_on_value_of_literal_put_in_slot():
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
-    _, spills = analyses.spills.peak()
+    _, spills = analyses.spills.peek()
 
     assert len(spills.spills) == 4
     assert len(spills.spills[spills.entry]) == 0
@@ -135,7 +135,7 @@ def can_detect_one_spill_on_value_of_variable_put_in_slot():
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
-    _, spills = analyses.spills.peak()
+    _, spills = analyses.spills.peek()
 
     assert len(spills.spills) == 4
     assert len(spills.spills[spills.entry]) == 0

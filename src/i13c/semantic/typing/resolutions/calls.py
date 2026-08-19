@@ -3,6 +3,8 @@ from typing import Literal as Kind
 
 from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.entities.calls import CallId
+from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.syntax.source import Span
 
 CallRejectionReason = Kind["unknown"]
@@ -12,6 +14,10 @@ CallRejectionReason = Kind["unknown"]
 class CallAcceptance:
     ref: Span
     id: CallId
+
+    fn: FunctionId
+    stmt: StatementId
+
     target: Calling
 
 

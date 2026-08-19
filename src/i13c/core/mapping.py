@@ -24,7 +24,7 @@ class OneToOne[SemanticId, SemanticNode]:
     def pop(self) -> tuple[SemanticId, SemanticNode]:
         return self.data.popitem()
 
-    def peak(self) -> tuple[SemanticId, SemanticNode]:
+    def peek(self) -> tuple[SemanticId, SemanticNode]:
         return next(iter(self.data.items()))
 
     def get(self, key: SemanticId) -> SemanticNode:
@@ -62,7 +62,7 @@ class OneToMany[SemanticId, SemanticNode]:
     def pop(self) -> tuple[SemanticId, list[SemanticNode]]:
         return self.data.popitem()
 
-    def peak(self) -> tuple[SemanticId, list[SemanticNode]]:
+    def peek(self) -> tuple[SemanticId, list[SemanticNode]]:
         return next(iter(self.data.items()))
 
     def get(self, key: SemanticId) -> list[SemanticNode]:

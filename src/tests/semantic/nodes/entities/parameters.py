@@ -19,7 +19,7 @@ def can_detect_a_parameter_of_a_snippet():
     )
 
     assert entities.parameters.size() == 1
-    _, value = entities.parameters.peak()
+    _, value = entities.parameters.peek()
 
     assert value.name == b"v"
 
@@ -32,6 +32,6 @@ def can_detect_a_parameter_of_a_function():
     )
 
     assert entities.parameters.size() == 1
-    _, value = entities.parameters.peak()
+    _, value = entities.parameters.peek()
 
     assert value.name == b"x"

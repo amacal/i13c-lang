@@ -28,8 +28,16 @@ def build_assigns(
         assign_id = AssignId(value=nid.value)
 
         # derive value ID from value statement
-        nid = graph.function.values.get_by_node(statement.destination)
-        value_id = ValueId(value=nid.value)
+        value_nid = graph.function.values.get_by_node(statement.destination)
+        value_id = ValueId(value=value_nid.value)
+
+        # find the owning statement of this value
+        stmt = graph.function.assigns.get_ctx(nid)
+        stmt_nid = graph.function.statements.get_by_node(stmt)
+
+        # find the owning function of this value
+        fn = graph.function.statements.get_ctx(stmt_nid)
+        fn_nid = graph.function.functions.get_by_node(fn)
 
         # derive literal ID from the statement
         if isinstance(statement.expression, tree.function.Literal):
@@ -43,6 +51,8 @@ def build_assigns(
 
         assigns[assign_id] = Assign(
             ref=statement.ref,
+            fn=fn_nid,
+            stmt=stmt_nid,
             destination=value_id,
             expression=target,
         )

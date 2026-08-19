@@ -9,7 +9,7 @@ def can_detect_a_snippet_signature():
     )
 
     assert entities.signatures.size() == 1
-    _, value = entities.signatures.peak()
+    _, value = entities.signatures.peek()
 
     assert value.name == b"main"
     assert len(value.parameters) == 1
@@ -23,7 +23,7 @@ def can_detect_a_function_signature():
     )
 
     assert entities.signatures.size() == 1
-    _, value = entities.signatures.peak()
+    _, value = entities.signatures.peek()
 
     assert value.name == b"main"
     assert len(value.parameters) == 2

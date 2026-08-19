@@ -11,7 +11,7 @@ def can_index_signature_by_snippet_name():
     assert indices.signatures_by_names is not None
     assert indices.signatures_by_names.size() == 1
 
-    _, acceptance = indices.signatures_by_names.peak()
+    _, acceptance = indices.signatures_by_names.peek()
 
     assert len(acceptance) == 1
     assert acceptance[0].name == b"main"
@@ -30,7 +30,7 @@ def can_index_multiple_signatures_by_snippet_name():
     assert indices.signatures_by_names is not None
     assert indices.signatures_by_names.size() == 1
 
-    _, acceptance = indices.signatures_by_names.peak()
+    _, acceptance = indices.signatures_by_names.peek()
 
     assert len(acceptance) == 2
     assert acceptance[0].id != acceptance[1].id
@@ -53,7 +53,7 @@ def can_index_mixed_signatures():
     assert indices.signatures_by_names is not None
     assert indices.signatures_by_names.size() == 1
 
-    _, acceptance = indices.signatures_by_names.peak()
+    _, acceptance = indices.signatures_by_names.peek()
 
     assert len(acceptance) == 2
     assert acceptance[0].id != acceptance[1].id

@@ -7,6 +7,8 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.entities.calls import Call, CallId
 from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.calls import CallAcceptance, CallResolution
 
 
@@ -70,6 +72,8 @@ def build_call_resolution(
             CallAcceptance(
                 ref=entry.ref,
                 id=cid,
+                fn=entry.get_function(FunctionId.from_context),
+                stmt=entry.get_statement(StatementId.from_context),
                 target=callings.get(entry.target),
             )
         )

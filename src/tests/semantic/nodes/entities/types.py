@@ -19,7 +19,7 @@ def can_detect_a_type():
     )
 
     assert entities.types.size() == 1
-    _, value = entities.types.peak()
+    _, value = entities.types.peek()
 
     assert value.name == b"u16"
     assert value.range is None
@@ -33,7 +33,7 @@ def can_detect_a_type_with_a_range():
     )
 
     assert entities.types.size() == 1
-    _, value = entities.types.peak()
+    _, value = entities.types.peek()
 
     assert value.name == b"u8"
     assert value.range is not None

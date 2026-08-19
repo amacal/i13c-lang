@@ -1,4 +1,9 @@
-from i13c.semantic.typing.analyses.shuffles import ShuffleExchange, ShuffleMove
+from i13c.semantic.typing.analyses.shuffles import (
+    ShuffleExchange,
+    ShuffleImmediate,
+    ShuffleLoad,
+    ShuffleMove,
+)
 from tests.semantic.nodes.analyses import prepare_analyses
 
 
@@ -9,7 +14,7 @@ def can_detect_shuffles_in_empty_function():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 0
 
@@ -22,7 +27,7 @@ def can_detect_shuffles_with_asm_callsite_using_literal():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 0
@@ -36,7 +41,7 @@ def can_detect_shuffles_with_asm_callsite_using_parameter():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 1
@@ -54,7 +59,7 @@ def can_detect_shuffles_with_asm_callsite_using_value():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 1
@@ -72,7 +77,7 @@ def can_detect_shuffles_with_asm_callsite_with_correct_params():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 0
@@ -86,7 +91,7 @@ def can_detect_shuffles_with_asm_callsite_with_inverted_params():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 1
@@ -104,7 +109,7 @@ def can_detect_shuffles_with_asm_callsite_with_shifted_params():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 2
@@ -126,7 +131,7 @@ def can_detect_shuffles_with_asm_callsite_with_three_params():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 2
@@ -148,7 +153,7 @@ def can_detect_shuffles_with_asm_callsite_with_same_params():
 
     assert analyses.shuffles is not None
     assert analyses.shuffles.size() == 1
-    _, shuffles = analyses.shuffles.peak()
+    _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 2
@@ -160,3 +165,43 @@ def can_detect_shuffles_with_asm_callsite_with_same_params():
     assert isinstance(shuffles.callsites[0].moves[1], ShuffleMove)
     assert shuffles.callsites[0].moves[1].src == b"rdi"
     assert shuffles.callsites[0].moves[1].dst == b"rdx"
+
+
+def can_detect_shuffles_with_asm_callsite_with_literal():
+    _, analyses = prepare_analyses("""
+        asm foo(x@rdi: u8) { }
+        fn main() { foo(0x05); }
+    """)
+
+    assert analyses.shuffles is not None
+    assert analyses.shuffles.size() == 1
+    _, shuffles = analyses.shuffles.peek()
+
+    assert len(shuffles.callsites) == 1
+    assert len(shuffles.callsites[0].moves) == 1
+
+    assert isinstance(shuffles.callsites[0].moves[0], ShuffleImmediate)
+    assert str(shuffles.callsites[0].moves[0].src) == "0x05"
+    assert shuffles.callsites[0].moves[0].dst == b"rdi"
+
+
+def can_detect_shuffles_with_asm_callsite_with_spilled_param():
+    _, analyses = prepare_analyses("""
+        asm foo(x@rax: u8)
+            clobbers
+                rdi, rsi, rdx, rcx, r8, r9, r10, r11,
+                r12, r13, r14, r15, rbx, rax, rbp { }
+
+        fn main(x: u8) { foo(x); }
+    """)
+
+    assert analyses.shuffles is not None
+    assert analyses.shuffles.size() == 1
+    _, shuffles = analyses.shuffles.peek()
+
+    assert len(shuffles.callsites) == 1
+    assert len(shuffles.callsites[0].moves) == 1
+
+    assert isinstance(shuffles.callsites[0].moves[0], ShuffleLoad)
+    assert shuffles.callsites[0].moves[0].src == 0
+    assert shuffles.callsites[0].moves[0].dst == b"rax"

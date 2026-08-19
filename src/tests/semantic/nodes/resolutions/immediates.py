@@ -10,7 +10,7 @@ def can_accept_valid_immediate():
 
     assert resolutions.immediates is not None
     assert resolutions.immediates.size() == 1
-    id, resolution = resolutions.immediates.peak()
+    id, resolution = resolutions.immediates.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

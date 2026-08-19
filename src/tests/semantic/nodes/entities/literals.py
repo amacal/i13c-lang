@@ -19,7 +19,7 @@ def can_detect_a_literal_in_a_function():
     )
 
     assert entities.literals.size() == 1
-    _, value = entities.literals.peak()
+    _, value = entities.literals.peek()
 
     assert value.target.width == 16
     assert value.target.data.hex() == "1234"

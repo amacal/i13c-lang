@@ -12,7 +12,7 @@ def can_detect_dflow_in_empty_function():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 0
     assert len(dflows.forward) == 0
@@ -36,7 +36,7 @@ def can_detect_dflow_with_unused_parameter():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 1
     assert len(dflows.forward) == 1
@@ -65,7 +65,7 @@ def can_detect_dflow_with_a_callsite_using_literal():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 1
     assert len(dflows.forward) == 1
@@ -99,7 +99,7 @@ def can_detect_dflow_with_a_callsite_using_parameter():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 2
     assert len(dflows.forward) == 2
@@ -154,7 +154,7 @@ def can_detect_dflow_with_a_callsite_using_value():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 3
     assert len(dflows.forward) == 3
@@ -220,7 +220,7 @@ def can_detect_dflow_with_an_assignment_using_literal():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 2
     assert len(dflows.forward) == 2
@@ -260,7 +260,7 @@ def can_detect_dflow_with_an_assignment_using_parameter():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 2
     assert len(dflows.forward) == 2
@@ -312,7 +312,7 @@ def can_detect_dflow_with_a_chain_of_parameter_to_value_to_callsite():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 3
     assert len(dflows.forward) == 3
@@ -371,7 +371,7 @@ def can_detect_dflow_with_an_assignment_using_value():
 
     assert analyses.dflows is not None
     assert analyses.dflows.size() == 1
-    _, dflows = analyses.dflows.peak()
+    _, dflows = analyses.dflows.peek()
 
     assert len(dflows.values) == 3
     assert len(dflows.forward) == 3

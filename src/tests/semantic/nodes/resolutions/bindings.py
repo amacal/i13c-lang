@@ -10,13 +10,13 @@ def can_accept_a_binding_without_parameters():
 
     assert resolutions.bindings is not None
     assert resolutions.bindings.size() == 1
-    id, resolution = resolutions.bindings.peak()
+    id, resolution = resolutions.bindings.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
 
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].owner == id
     assert len(resolution.accepted[0].binds) == 0
@@ -33,13 +33,13 @@ def can_accept_a_binding_to_immediate():
 
     assert resolutions.bindings is not None
     assert resolutions.bindings.size() == 1
-    id, resolution = resolutions.bindings.peak()
+    id, resolution = resolutions.bindings.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
 
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].owner == id
     assert len(resolution.accepted[0].binds) == 1
@@ -59,13 +59,13 @@ def can_accept_a_double_binding_to_immediates():
 
     assert resolutions.bindings is not None
     assert resolutions.bindings.size() == 1
-    id, resolution = resolutions.bindings.peak()
+    id, resolution = resolutions.bindings.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
 
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].owner == id
     assert len(resolution.accepted[0].binds) == 2
@@ -88,7 +88,7 @@ def can_reject_duplicated_slot_bind_usage():
 
     assert resolutions.bindings is not None
     assert resolutions.bindings.size() == 1
-    _, resolution = resolutions.bindings.peak()
+    _, resolution = resolutions.bindings.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

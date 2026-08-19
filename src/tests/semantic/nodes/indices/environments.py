@@ -11,6 +11,6 @@ def can_index_a_snippet_environment_without_entries():
     assert indices.environments_by_snippets is not None
     assert indices.environments_by_snippets.size() == 1
 
-    _, acceptance = indices.environments_by_snippets.peak()
+    _, acceptance = indices.environments_by_snippets.peek()
 
     assert len(acceptance.entries) == 0

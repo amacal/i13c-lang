@@ -10,7 +10,7 @@ def can_accept_multi_value_range():
 
     assert resolutions.ranges is not None
     assert resolutions.ranges.size() == 1
-    id, resolution = resolutions.ranges.peak()
+    id, resolution = resolutions.ranges.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -36,7 +36,7 @@ def can_accept_single_value_range():
 
     assert resolutions.ranges is not None
     assert resolutions.ranges.size() == 1
-    id, resolution = resolutions.ranges.peak()
+    id, resolution = resolutions.ranges.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -62,7 +62,7 @@ def can_reject_a_range_with_lower_greater_than_upper():
 
     assert resolutions.ranges is not None
     assert resolutions.ranges.size() == 1
-    _, resolution = resolutions.ranges.peak()
+    _, resolution = resolutions.ranges.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -80,7 +80,7 @@ def can_reject_a_range_with_inconsistent_widths():
 
     assert resolutions.ranges is not None
     assert resolutions.ranges.size() == 1
-    _, resolution = resolutions.ranges.peak()
+    _, resolution = resolutions.ranges.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

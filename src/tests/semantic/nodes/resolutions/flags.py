@@ -10,7 +10,7 @@ def can_accept_a_snippet_flags_noreturn():
 
     assert resolutions.flags is not None
     assert resolutions.flags.size() == 1
-    id, resolution = resolutions.flags.peak()
+    id, resolution = resolutions.flags.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -31,7 +31,7 @@ def can_accept_a_snippet_flags_clobbers():
 
     assert resolutions.flags is not None
     assert resolutions.flags.size() == 1
-    id, resolution = resolutions.flags.peak()
+    id, resolution = resolutions.flags.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -55,7 +55,7 @@ def can_reject_duplicate_clobber_name_usage():
 
     assert resolutions.flags is not None
     assert resolutions.flags.size() == 1
-    _, resolution = resolutions.flags.peak()
+    _, resolution = resolutions.flags.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

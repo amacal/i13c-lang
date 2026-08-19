@@ -19,7 +19,7 @@ def can_detect_an_immediate_as_the_operand():
     )
 
     assert entities.immediates.size() == 1
-    _, value = entities.immediates.peak()
+    _, value = entities.immediates.peek()
 
     assert value.value.width == 16
     assert value.value.data.hex() == "1234"

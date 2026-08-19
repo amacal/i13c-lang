@@ -8,7 +8,7 @@ def can_detect_frames_in_empty_function():
 
     assert analyses.frames is not None
     assert analyses.frames.size() == 1
-    _, frames = analyses.frames.peak()
+    _, frames = analyses.frames.peek()
 
     assert len(frames.moved) == 0
     assert len(frames.spill) == 0
@@ -23,7 +23,7 @@ def can_detect_frames_with_a_parameter():
 
     assert analyses.frames is not None
     assert analyses.frames.size() == 1
-    _, frames = analyses.frames.peak()
+    _, frames = analyses.frames.peek()
 
     assert len(frames.moved) == 0
     assert len(frames.spill) == 0
@@ -42,7 +42,7 @@ def can_detect_frames_with_a_parameter_move():
 
     assert analyses.frames is not None
     assert analyses.frames.size() == 1
-    _, frames = analyses.frames.peak()
+    _, frames = analyses.frames.peek()
 
     assert len(frames.moved) == 1
     assert len(frames.spill) == 0
@@ -64,7 +64,7 @@ def can_detect_frames_with_a_parameter_spill():
 
     assert analyses.frames is not None
     assert analyses.frames.size() == 1
-    _, frames = analyses.frames.peak()
+    _, frames = analyses.frames.peek()
 
     assert len(frames.moved) == 0
     assert len(frames.spill) == 1
@@ -86,7 +86,7 @@ def can_detect_frames_with_a_parameter_spill_and_value():
 
     assert analyses.frames is not None
     assert analyses.frames.size() == 1
-    _, frames = analyses.frames.peak()
+    _, frames = analyses.frames.peek()
 
     assert len(frames.moved) == 0
     assert len(frames.spill) == 1

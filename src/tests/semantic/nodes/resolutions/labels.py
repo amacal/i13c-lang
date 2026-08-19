@@ -11,7 +11,7 @@ def can_accept_a_label():
 
     assert resolutions.labels is not None
     assert resolutions.labels.size() == 1
-    id, resolution = resolutions.labels.peak()
+    id, resolution = resolutions.labels.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

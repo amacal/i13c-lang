@@ -10,7 +10,7 @@ def can_accept_64bit_register():
 
     assert resolutions.registers is not None
     assert resolutions.registers.size() == 1
-    id, resolution = resolutions.registers.peak()
+    id, resolution = resolutions.registers.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -33,7 +33,7 @@ def can_accept_32bit_register():
 
     assert resolutions.registers is not None
     assert resolutions.registers.size() == 1
-    id, resolution = resolutions.registers.peak()
+    id, resolution = resolutions.registers.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -56,7 +56,7 @@ def can_accept_16bit_register():
 
     assert resolutions.registers is not None
     assert resolutions.registers.size() == 1
-    id, resolution = resolutions.registers.peak()
+    id, resolution = resolutions.registers.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -79,7 +79,7 @@ def can_accept_8bit_register():
 
     assert resolutions.registers is not None
     assert resolutions.registers.size() == 1
-    id, resolution = resolutions.registers.peak()
+    id, resolution = resolutions.registers.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -102,7 +102,7 @@ def can_accept_a_low_register():
 
     assert resolutions.registers is not None
     assert resolutions.registers.size() == 1
-    id, resolution = resolutions.registers.peak()
+    id, resolution = resolutions.registers.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -125,7 +125,7 @@ def can_accept_a_high_register():
 
     assert resolutions.registers is not None
     assert resolutions.registers.size() == 1
-    id, resolution = resolutions.registers.peak()
+    id, resolution = resolutions.registers.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -148,7 +148,7 @@ def can_accept_a_rip_register():
 
     assert resolutions.registers is not None
     assert resolutions.registers.size() == 1
-    id, resolution = resolutions.registers.peak()
+    id, resolution = resolutions.registers.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -171,7 +171,7 @@ def can_reject_an_unknown_register():
 
     assert resolutions.registers is not None
     assert resolutions.registers.size() == 1
-    _, resolution = resolutions.registers.peak()
+    _, resolution = resolutions.registers.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

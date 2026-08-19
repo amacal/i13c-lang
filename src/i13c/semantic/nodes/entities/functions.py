@@ -46,6 +46,7 @@ def build_functions(
 
         functions[function_id] = Function(
             ref=node.ref,
+            id=function_id,
             signature=signature_id,
             flags=flags_id,
             statements=statements,

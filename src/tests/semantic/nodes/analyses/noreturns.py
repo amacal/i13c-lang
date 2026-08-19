@@ -8,7 +8,7 @@ def can_detect_a_snippet_flags_noreturn_true():
 
     assert analyses.noreturns is not None
     assert analyses.noreturns.size() == 1
-    _, value = analyses.noreturns.peak()
+    _, value = analyses.noreturns.peek()
 
     assert value.outcome is True
     assert len(value.path) == 0
@@ -21,7 +21,7 @@ def can_detect_a_snippet_flags_noreturn_false():
 
     assert analyses.noreturns is not None
     assert analyses.noreturns.size() == 1
-    _, value = analyses.noreturns.peak()
+    _, value = analyses.noreturns.peek()
 
     assert value.outcome is False
     assert len(value.path) == 0
@@ -34,7 +34,7 @@ def can_detect_a_function_noreturn_false():
 
     assert analyses.noreturns is not None
     assert analyses.noreturns.size() == 1
-    _, value = analyses.noreturns.peak()
+    _, value = analyses.noreturns.peek()
 
     assert value.outcome is False
     assert len(value.path) == 0
@@ -47,7 +47,7 @@ def can_detect_a_function_noreturn_false_even_with_noreturn_flag():
 
     assert analyses.noreturns is not None
     assert analyses.noreturns.size() == 1
-    _, value = analyses.noreturns.peak()
+    _, value = analyses.noreturns.peek()
 
     assert value.outcome is False
     assert len(value.path) == 0

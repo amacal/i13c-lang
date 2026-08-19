@@ -11,7 +11,7 @@ def can_accept_valid_call_of_snippet():
 
     assert resolutions.calls is not None
     assert resolutions.calls.size() == 1
-    id, resolution = resolutions.calls.peak()
+    id, resolution = resolutions.calls.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -35,7 +35,7 @@ def can_accept_valid_call_of_other_function():
 
     assert resolutions.calls is not None
     assert resolutions.calls.size() == 1
-    id, resolution = resolutions.calls.peak()
+    id, resolution = resolutions.calls.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

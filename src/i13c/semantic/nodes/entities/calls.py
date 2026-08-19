@@ -23,7 +23,6 @@ def build_calls(
     calls: dict[CallId, Call] = {}
 
     for nid, call in graph.function.calls.items():
-
         # derive call ID from globally unique node ID
         call_id = CallId(value=nid.value)
 
@@ -31,8 +30,18 @@ def build_calls(
         callsite_nid = graph.function.callsites.get_by_node(call.target)
         callsite_id = CallSiteId(value=callsite_nid.value)
 
+        # find the owning statement of this value
+        stmt = graph.function.calls.get_ctx(nid)
+        stmt_nid = graph.function.statements.get_by_node(stmt)
+
+        # find the owning function of this value
+        fn = graph.function.statements.get_ctx(stmt_nid)
+        fn_nid = graph.function.functions.get_by_node(fn)
+
         calls[call_id] = Call(
             ref=call.ref,
+            fn=fn_nid,
+            stmt=stmt_nid,
             target=callsite_id,
         )
 

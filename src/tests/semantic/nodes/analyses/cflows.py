@@ -9,7 +9,7 @@ def can_detect_cflow_in_empty_function():
 
     assert analyses.cflows is not None
     assert analyses.cflows.size() == 1
-    _, cflows = analyses.cflows.peak()
+    _, cflows = analyses.cflows.peek()
 
     assert len(cflows.nodes) == 2
     assert len(cflows.forward) == 1
@@ -34,7 +34,7 @@ def can_detect_cflow_with_a_callsite():
 
     assert analyses.cflows is not None
     assert analyses.cflows.size() == 1
-    _, cflows = analyses.cflows.peak()
+    _, cflows = analyses.cflows.peek()
 
     assert len(cflows.nodes) == 3
     assert len(cflows.forward) == 2

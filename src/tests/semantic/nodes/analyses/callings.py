@@ -21,7 +21,7 @@ def can_resolve_callsite_to_function():
 
     assert analyses.callings is not None
     assert analyses.callings.size() == 1
-    _, calling = analyses.callings.peak()
+    _, calling = analyses.callings.peek()
 
     assert calling.signature.name == b"foo"
     assert isinstance(calling.target, CallSiteAcceptance)
@@ -42,7 +42,7 @@ def can_resolve_callsite_to_function_with_parameters():
 
     assert analyses.callings is not None
     assert analyses.callings.size() == 1
-    _, calling = analyses.callings.peak()
+    _, calling = analyses.callings.peek()
 
     assert calling.signature.name == b"foo"
     assert isinstance(calling.target, CallSiteAcceptance)
@@ -68,7 +68,7 @@ def can_resolve_callsite_to_asmlet():
 
     assert analyses.callings is not None
     assert analyses.callings.size() == 1
-    _, calling = analyses.callings.peak()
+    _, calling = analyses.callings.peek()
 
     assert calling.signature.name == b"foo"
     assert isinstance(calling.target, Asmlet)
@@ -89,7 +89,7 @@ def can_resolve_callsite_to_asmlet_with_parameters():
 
     assert analyses.callings is not None
     assert analyses.callings.size() == 1
-    _, calling = analyses.callings.peak()
+    _, calling = analyses.callings.peek()
 
     assert calling.signature.name == b"foo"
     assert isinstance(calling.target, Asmlet)
@@ -115,7 +115,7 @@ def can_resolve_callsite_to_asmlet_reduced():
 
     assert analyses.callings is not None
     assert analyses.callings.size() == 1
-    _, calling = analyses.callings.peak()
+    _, calling = analyses.callings.peek()
 
     assert calling.signature.name == b"foo"
     assert isinstance(calling.target, Asmlet)

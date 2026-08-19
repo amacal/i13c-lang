@@ -8,7 +8,7 @@ def can_detect_cpath_in_empty_function():
 
     assert analyses.cpaths is not None
     assert analyses.cpaths.size() == 1
-    _, cpaths = analyses.cpaths.peak()
+    _, cpaths = analyses.cpaths.peek()
 
     assert len(cpaths.paths) == 1
     assert cpaths.paths[0][0] == cpaths.flows.source.entry
@@ -22,7 +22,7 @@ def can_detect_cflow_with_one_callsite():
 
     assert analyses.cpaths is not None
     assert analyses.cpaths.size() == 1
-    _, cpaths = analyses.cpaths.peak()
+    _, cpaths = analyses.cpaths.peek()
 
     assert len(cpaths.paths) == 1
     assert len(cpaths.paths[0]) == 3
@@ -44,7 +44,7 @@ def can_detect_cpath_with_two_callsites():
     assert analyses.cpaths is not None
     assert analyses.cpaths.size() == 1
 
-    _, cpaths = analyses.cpaths.peak()
+    _, cpaths = analyses.cpaths.peek()
 
     assert len(cpaths.paths) == 1
     assert len(cpaths.paths[0]) == 4

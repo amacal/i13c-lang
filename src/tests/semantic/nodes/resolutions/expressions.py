@@ -12,7 +12,7 @@ def can_accept_valid_expression_from_value():
 
     assert resolutions.expressions is not None
     assert resolutions.expressions.size() == 1
-    id, resolution = resolutions.expressions.peak()
+    id, resolution = resolutions.expressions.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -35,7 +35,7 @@ def can_accept_valid_expression_from_parameter():
 
     assert resolutions.expressions is not None
     assert resolutions.expressions.size() == 1
-    id, resolution = resolutions.expressions.peak()
+    id, resolution = resolutions.expressions.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -58,7 +58,7 @@ def can_rejected_unresolved_expression():
 
     assert resolutions.expressions is not None
     assert resolutions.expressions.size() == 1
-    id, resolution = resolutions.expressions.peak()
+    id, resolution = resolutions.expressions.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

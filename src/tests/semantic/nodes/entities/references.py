@@ -19,10 +19,10 @@ def can_detect_a_reference():
     )
 
     assert entities.references.size() == 1
-    _, value = entities.references.peak()
+    _, value = entities.references.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert value.name == b"me"
     assert value.snippet.value == id.value

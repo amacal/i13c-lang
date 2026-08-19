@@ -13,7 +13,7 @@ def can_detect_liveness_in_empty_function():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.values) == 0
     assert len(liveness.nodes) == 2
@@ -34,7 +34,7 @@ def can_detect_liveness_with_a_callsite():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 3
     assert len(liveness.values) == 1
@@ -55,7 +55,7 @@ def can_detect_liveness_with_a_callsite_with_clobbers():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 3
     assert len(liveness.values) == 2
@@ -85,7 +85,7 @@ def can_detect_liveness_with_of_parameters_unused():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 2
     assert len(liveness.values) == 1
@@ -108,7 +108,7 @@ def can_detect_liveness_with_of_parameters_used():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 3
     assert len(liveness.values) == 2
@@ -139,7 +139,7 @@ def can_detect_liveness_with_of_parameters_used_in_later_calls():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 4
     assert len(liveness.values) == 3
@@ -176,7 +176,7 @@ def can_detect_liveness_with_of_parameters_used_in_multiple_calls():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 4
     assert len(liveness.values) == 3
@@ -213,7 +213,7 @@ def can_detect_liveness_with_of_parameters_used_in_abandoned_values():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 4
     assert len(liveness.values) == 4
@@ -250,7 +250,7 @@ def can_detect_liveness_with_of_declared_value_in_a_call():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 4
     assert len(liveness.values) == 4
@@ -287,7 +287,7 @@ def can_detect_liveness_with_of_declared_value_in_a_call_unused():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 4
     assert len(liveness.values) == 4
@@ -324,7 +324,7 @@ def can_detect_liveness_with_of_assigned_value():
 
     assert analyses.liveness is not None
     assert analyses.liveness.size() == 1
-    _, liveness = analyses.liveness.peak()
+    _, liveness = analyses.liveness.peek()
 
     assert len(liveness.nodes) == 4
     assert len(liveness.values) == 3

@@ -1,0 +1,6 @@
+title: "Testing Generated Instruction Sequences"
+status: not-completed
+mentioned_by:
+  - "Whole-Function Instruction Lowering"
+evidence:
+  - ".history/2026-08/2026-08-19-whole-function-instruction-lowering.yml session.not_completed (analyses/fnlets has no per-instruction content tests, only instruction counts, because per-instruction isinstance-plus-field assertions as used for analyses/calls don't scale by hand for a whole function's instruction stream; a better methodology, e.g. an expected-sequence comparison or small DSL, was named as future work for its own session)"

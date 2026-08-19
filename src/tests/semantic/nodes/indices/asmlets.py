@@ -12,7 +12,7 @@ def can_index_one_asmlet_by_its_signature():
     assert indices.asmlets_by_signatures is not None
     assert indices.asmlets_by_signatures.size() == 1
 
-    _, asmlets = indices.asmlets_by_signatures.peak()
+    _, asmlets = indices.asmlets_by_signatures.peek()
 
     assert len(asmlets) == 1
     assert len(asmlets[0].instructions) == 1
@@ -35,7 +35,7 @@ def can_index_two_callsite_by_called_signature():
     assert indices.asmlets_by_signatures is not None
     assert indices.asmlets_by_signatures.size() == 1
 
-    _, asmlets = indices.asmlets_by_signatures.peak()
+    _, asmlets = indices.asmlets_by_signatures.peek()
 
     assert len(asmlets) == 1
     assert len(asmlets[0].instructions) == 1
@@ -58,7 +58,7 @@ def can_index_immediate_callsite_by_called_signature():
     assert indices.asmlets_by_signatures is not None
     assert indices.asmlets_by_signatures.size() == 1
 
-    _, asmlets = indices.asmlets_by_signatures.peak()
+    _, asmlets = indices.asmlets_by_signatures.peek()
 
     assert len(asmlets) == 2
 

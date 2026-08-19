@@ -10,7 +10,7 @@ def can_accept_u8_type_usage():
 
     assert resolutions.types is not None
     assert resolutions.types.size() == 1
-    id, resolution = resolutions.types.peak()
+    id, resolution = resolutions.types.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -33,7 +33,7 @@ def can_accept_u16_with_range():
 
     assert resolutions.types is not None
     assert resolutions.types.size() == 1
-    id, resolution = resolutions.types.peak()
+    id, resolution = resolutions.types.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -56,7 +56,7 @@ def can_reject_an_unknown_type():
 
     assert resolutions.types is not None
     assert resolutions.types.size() == 1
-    _, resolution = resolutions.types.peak()
+    _, resolution = resolutions.types.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -74,7 +74,7 @@ def can_reject_a_ranged_type_with_incompatible_widths():
 
     assert resolutions.types is not None
     assert resolutions.types.size() == 1
-    _, resolution = resolutions.types.peak()
+    _, resolution = resolutions.types.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

@@ -19,6 +19,6 @@ def can_detect_a_mnemonic():
     )
 
     assert entities.mnemonics.size() == 1
-    _, value = entities.mnemonics.peak()
+    _, value = entities.mnemonics.peek()
 
     assert value.name == b"call"

@@ -19,10 +19,10 @@ def can_detect_a_value_declaration_with_literal_initialization():
     )
 
     assert entities.values.size() == 1
-    _, value = entities.values.peak()
+    _, value = entities.values.peek()
 
     assert entities.types.size() == 1
-    id, _ = entities.types.peak()
+    id, _ = entities.types.peek()
 
     assert value.name == b"x"
     assert value.type == id
@@ -36,10 +36,10 @@ def can_detect_a_value_declaration_with_expression_initialization():
     )
 
     assert entities.values.size() == 1
-    _, value = entities.values.peak()
+    _, value = entities.values.peek()
 
     assert entities.types.size() == 1
-    id, _ = entities.types.peak()
+    id, _ = entities.types.peek()
 
     assert value.name == b"x"
     assert value.type == id

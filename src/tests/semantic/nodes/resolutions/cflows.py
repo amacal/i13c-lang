@@ -10,7 +10,7 @@ def can_accept_an_empty_function():
 
     assert resolutions.cflows is not None
     assert resolutions.cflows.size() == 1
-    id, resolution = resolutions.cflows.peak()
+    id, resolution = resolutions.cflows.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -36,7 +36,7 @@ def can_accept_an_empty_function_with_parameters():
 
     assert resolutions.cflows is not None
     assert resolutions.cflows.size() == 1
-    id, resolution = resolutions.cflows.peak()
+    id, resolution = resolutions.cflows.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -67,7 +67,7 @@ def can_accept_a_function_with_declared_value():
 
     assert resolutions.cflows is not None
     assert resolutions.cflows.size() == 1
-    id, resolution = resolutions.cflows.peak()
+    id, resolution = resolutions.cflows.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -98,7 +98,7 @@ def can_accept_a_function_with_parameters_and_values():
 
     assert resolutions.cflows is not None
     assert resolutions.cflows.size() == 1
-    id, resolution = resolutions.cflows.peak()
+    id, resolution = resolutions.cflows.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

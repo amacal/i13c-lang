@@ -13,7 +13,7 @@ def can_accept_valid_assign_from_literal():
 
     assert resolutions.assigns is not None
     assert resolutions.assigns.size() == 1
-    id, resolution = resolutions.assigns.peak()
+    id, resolution = resolutions.assigns.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -40,7 +40,7 @@ def can_accept_valid_assign_from_parameter():
 
     assert resolutions.assigns is not None
     assert resolutions.assigns.size() == 1
-    id, resolution = resolutions.assigns.peak()
+    id, resolution = resolutions.assigns.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

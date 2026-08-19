@@ -10,7 +10,7 @@ def can_accept_valid_parameter_in_a_snippet():
 
     assert resolutions.parameters is not None
     assert resolutions.parameters.size() == 1
-    id, resolution = resolutions.parameters.peak()
+    id, resolution = resolutions.parameters.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -43,7 +43,7 @@ def can_accept_immediate_parameter_in_a_snippet():
 
     assert resolutions.parameters is not None
     assert resolutions.parameters.size() == 1
-    id, resolution = resolutions.parameters.peak()
+    id, resolution = resolutions.parameters.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -76,7 +76,7 @@ def can_accept_valid_parameter_in_a_function():
 
     assert resolutions.parameters is not None
     assert resolutions.parameters.size() == 1
-    id, resolution = resolutions.parameters.peak()
+    id, resolution = resolutions.parameters.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

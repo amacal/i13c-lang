@@ -10,7 +10,7 @@ def can_accept_an_offsetless_address():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    id, resolution = resolutions.addresses.peak()
+    id, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -33,7 +33,7 @@ def can_accept_a_forward_address():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    id, resolution = resolutions.addresses.peak()
+    id, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -61,7 +61,7 @@ def can_accept_a_backward_address():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    id, resolution = resolutions.addresses.peak()
+    id, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -89,7 +89,7 @@ def can_accept_register_bound_param_as_the_base():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    id, resolution = resolutions.addresses.peak()
+    id, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -113,7 +113,7 @@ def can_reject_immediate_bound_param_as_the_base():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    _, resolution = resolutions.addresses.peak()
+    _, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -129,7 +129,7 @@ def can_reject_rip_register():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    _, resolution = resolutions.addresses.peak()
+    _, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -145,7 +145,7 @@ def can_reject_label_as_the_address_base():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    _, resolution = resolutions.addresses.peak()
+    _, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -161,7 +161,7 @@ def can_reject_non_64bit_register():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    _, resolution = resolutions.addresses.peak()
+    _, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -177,7 +177,7 @@ def can_reject_forward_offset_not_eligible_for_displacement():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    _, resolution = resolutions.addresses.peak()
+    _, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -193,7 +193,7 @@ def can_reject_backward_offset_not_eligible_for_displacement():
 
     assert resolutions.addresses is not None
     assert resolutions.addresses.size() == 1
-    _, resolution = resolutions.addresses.peak()
+    _, resolution = resolutions.addresses.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

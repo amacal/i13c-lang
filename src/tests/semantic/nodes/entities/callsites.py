@@ -19,13 +19,13 @@ def can_detect_a_callsite_with_literal():
     )
 
     assert entities.callsites.size() == 1
-    _, callsites = entities.callsites.peak()
+    _, callsites = entities.callsites.peek()
 
     assert callsites.callee == b"foo"
     assert len(callsites.arguments) == 1
 
     assert entities.literals.size() == 1
-    id, _ = entities.literals.peak()
+    id, _ = entities.literals.peek()
 
     assert callsites.arguments[0] == id
 
@@ -38,12 +38,12 @@ def can_detect_a_callsite_with_expression():
     )
 
     assert entities.callsites.size() == 1
-    _, callsites = entities.callsites.peak()
+    _, callsites = entities.callsites.peek()
 
     assert callsites.callee == b"foo"
     assert len(callsites.arguments) == 1
 
     assert entities.expressions.size() == 1
-    id, _ = entities.expressions.peak()
+    id, _ = entities.expressions.peek()
 
     assert callsites.arguments[0] == id

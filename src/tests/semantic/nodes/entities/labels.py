@@ -21,10 +21,10 @@ def can_detect_a_label():
     )
 
     assert entities.labels.size() == 1
-    _, value = entities.labels.peak()
+    _, value = entities.labels.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert value.name == b"me"
     assert value.snippet.value == id.value
@@ -40,10 +40,10 @@ def can_detect_a_label_at_the_end():
     )
 
     assert entities.labels.size() == 1
-    _, value = entities.labels.peak()
+    _, value = entities.labels.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert value.name == b"me"
     assert value.snippet.value == id.value
@@ -61,7 +61,7 @@ def can_detect_a_two_same_labels():
     assert entities.labels.size() == 2
 
     assert entities.instructions.size() == 1
-    id, _ = entities.instructions.peak()
+    id, _ = entities.instructions.peek()
 
     for value in entities.labels.values():
         assert value.name in (b"me1", b"me2")

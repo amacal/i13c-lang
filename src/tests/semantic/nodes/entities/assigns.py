@@ -19,15 +19,15 @@ def can_detect_an_assignment_using_the_literal():
     )
 
     assert entities.assigns.size() == 1
-    _, assign = entities.assigns.peak()
+    _, assign = entities.assigns.peek()
 
     assert entities.values.size() == 1
-    id, _ = entities.values.peak()
+    id, _ = entities.values.peek()
 
     assert assign.destination == id
 
     assert entities.literals.size() == 1
-    id, _ = entities.literals.peak()
+    id, _ = entities.literals.peek()
 
     assert assign.expression == id
 
@@ -40,14 +40,14 @@ def can_detect_an_assignment_using_an_expression():
     )
 
     assert entities.assigns.size() == 1
-    _, assign = entities.assigns.peak()
+    _, assign = entities.assigns.peek()
 
     assert entities.values.size() == 1
-    id, _ = entities.values.peak()
+    id, _ = entities.values.peek()
 
     assert assign.destination == id
 
     assert entities.expressions.size() == 1
-    id, _ = entities.expressions.peak()
+    id, _ = entities.expressions.peek()
 
     assert assign.expression == id

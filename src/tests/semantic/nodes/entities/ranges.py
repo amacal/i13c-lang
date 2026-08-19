@@ -19,7 +19,7 @@ def can_detect_a_range():
     )
 
     assert entities.ranges.size() == 1
-    _, value = entities.ranges.peak()
+    _, value = entities.ranges.peek()
 
     assert value.lower.width == 8
     assert value.lower.data.hex() == "01"

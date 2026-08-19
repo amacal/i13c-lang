@@ -10,7 +10,7 @@ def can_accept_a_snippet():
 
     assert resolutions.snippets is not None
     assert resolutions.snippets.size() == 1
-    id, resolution = resolutions.snippets.peak()
+    id, resolution = resolutions.snippets.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -19,7 +19,7 @@ def can_accept_a_snippet():
     assert len(resolution.accepted[0].instructions) == 1
 
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].signature.id == id
     assert resolution.accepted[0].binding.owner == id
@@ -28,7 +28,7 @@ def can_accept_a_snippet():
     assert len(resolution.accepted[0].clobbers) == 0
 
     assert resolutions.instructions is not None
-    id, _ = resolutions.instructions.peak()
+    id, _ = resolutions.instructions.peek()
 
     assert resolution.accepted[0].instructions[0].id == id
     assert source.extract(resolution.accepted[0].ref) == b"main()"
@@ -43,7 +43,7 @@ def can_accept_a_snippet_with_parameters():
 
     assert resolutions.snippets is not None
     assert resolutions.snippets.size() == 1
-    id, resolution = resolutions.snippets.peak()
+    id, resolution = resolutions.snippets.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -52,7 +52,7 @@ def can_accept_a_snippet_with_parameters():
     assert len(resolution.accepted[0].instructions) == 1
 
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].signature.id == id
     assert resolution.accepted[0].binding.owner == id
@@ -62,7 +62,7 @@ def can_accept_a_snippet_with_parameters():
     assert resolution.accepted[0].binding.binds[0].dst == b"rbx"
 
     assert resolutions.instructions is not None
-    id, _ = resolutions.instructions.peak()
+    id, _ = resolutions.instructions.peek()
 
     assert resolution.accepted[0].instructions[0].id == id
     assert source.extract(resolution.accepted[0].ref) == b"main(x@rbx: u8)"
@@ -77,7 +77,7 @@ def can_accept_a_snippet_with_noreturn():
 
     assert resolutions.snippets is not None
     assert resolutions.snippets.size() == 1
-    id, resolution = resolutions.snippets.peak()
+    id, resolution = resolutions.snippets.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -86,7 +86,7 @@ def can_accept_a_snippet_with_noreturn():
     assert len(resolution.accepted[0].instructions) == 1
 
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].signature.id == id
     assert resolution.accepted[0].binding.owner == id
@@ -95,7 +95,7 @@ def can_accept_a_snippet_with_noreturn():
     assert len(resolution.accepted[0].clobbers) == 0
 
     assert resolutions.instructions is not None
-    id, _ = resolutions.instructions.peak()
+    id, _ = resolutions.instructions.peek()
 
     assert resolution.accepted[0].instructions[0].id == id
     assert source.extract(resolution.accepted[0].ref) == b"main()"
@@ -110,7 +110,7 @@ def can_accept_a_snippet_with_clobbers():
 
     assert resolutions.snippets is not None
     assert resolutions.snippets.size() == 1
-    id, resolution = resolutions.snippets.peak()
+    id, resolution = resolutions.snippets.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -119,7 +119,7 @@ def can_accept_a_snippet_with_clobbers():
     assert len(resolution.accepted[0].instructions) == 1
 
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].signature.id == id
     assert resolution.accepted[0].binding.owner == id
@@ -131,7 +131,7 @@ def can_accept_a_snippet_with_clobbers():
     assert resolution.accepted[0].clobbers[1].name == b"rbx"
 
     assert resolutions.instructions is not None
-    id, _ = resolutions.instructions.peak()
+    id, _ = resolutions.instructions.peek()
 
     assert resolution.accepted[0].instructions[0].id == id
     assert source.extract(resolution.accepted[0].ref) == b"main()"
@@ -146,7 +146,7 @@ def can_reject_a_snippet_with_rsp_in_clobbers():
 
     assert resolutions.snippets is not None
     assert resolutions.snippets.size() == 1
-    _, resolution = resolutions.snippets.peak()
+    _, resolution = resolutions.snippets.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -164,7 +164,7 @@ def can_reject_a_snippet_with_rip_in_clobbers():
 
     assert resolutions.snippets is not None
     assert resolutions.snippets.size() == 1
-    _, resolution = resolutions.snippets.peak()
+    _, resolution = resolutions.snippets.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -182,7 +182,7 @@ def can_reject_a_snippet_with_non_64_in_clobbers():
 
     assert resolutions.snippets is not None
     assert resolutions.snippets.size() == 1
-    _, resolution = resolutions.snippets.peak()
+    _, resolution = resolutions.snippets.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

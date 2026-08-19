@@ -10,7 +10,7 @@ def can_accept_valid_value():
 
     assert resolutions.values is not None
     assert resolutions.values.size() == 1
-    id, resolution = resolutions.values.peak()
+    id, resolution = resolutions.values.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

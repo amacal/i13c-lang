@@ -10,7 +10,7 @@ def can_accept_a_snippet_signature_without_slots():
 
     assert resolutions.signatures is not None
     assert resolutions.signatures.size() == 1
-    id, resolution = resolutions.signatures.peak()
+    id, resolution = resolutions.signatures.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -31,7 +31,7 @@ def can_accept_a_function_signature_without_slots():
 
     assert resolutions.signatures is not None
     assert resolutions.signatures.size() == 1
-    id, resolution = resolutions.signatures.peak()
+    id, resolution = resolutions.signatures.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -52,7 +52,7 @@ def can_accept_a_snippet_signature_with_a_slot():
 
     assert resolutions.signatures is not None
     assert resolutions.signatures.size() == 1
-    id, resolution = resolutions.signatures.peak()
+    id, resolution = resolutions.signatures.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -79,7 +79,7 @@ def can_reject_duplicate_slot_name_usage():
 
     assert resolutions.signatures is not None
     assert resolutions.signatures.size() == 1
-    _, resolution = resolutions.signatures.peak()
+    _, resolution = resolutions.signatures.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -105,7 +105,7 @@ def can_reject_too_many_parameters_in_a_signature():
 
     assert resolutions.signatures is not None
     assert resolutions.signatures.size() == 1
-    _, resolution = resolutions.signatures.peak()
+    _, resolution = resolutions.signatures.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

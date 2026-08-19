@@ -8,7 +8,7 @@ def can_detect_entrypoint_from_a_snippet():
 
     assert analyses.entrypoints is not None
     assert analyses.entrypoints.size() == 1
-    _, value = analyses.entrypoints.peak()
+    _, value = analyses.entrypoints.peek()
 
     assert value.target.signature.name == b"main"
 
@@ -21,7 +21,7 @@ def can_detect_entrypoint_from_a_function():
 
     assert analyses.entrypoints is not None
     assert analyses.entrypoints.size() == 1
-    _, value = analyses.entrypoints.peak()
+    _, value = analyses.entrypoints.peek()
 
     assert value.target.signature.name == b"main"
 

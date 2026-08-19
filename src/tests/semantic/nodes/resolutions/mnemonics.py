@@ -10,7 +10,7 @@ def can_accept_a_known_mnemonic():
 
     assert resolutions.mnemonics is not None
     assert resolutions.mnemonics.size() == 1
-    id, resolution = resolutions.mnemonics.peak()
+    id, resolution = resolutions.mnemonics.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -31,7 +31,7 @@ def can_reject_an_unknown_mnemonic():
 
     assert resolutions.mnemonics is not None
     assert resolutions.mnemonics.size() == 1
-    _, resolution = resolutions.mnemonics.peak()
+    _, resolution = resolutions.mnemonics.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

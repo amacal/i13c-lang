@@ -11,7 +11,7 @@ def can_index_value_by_its_statement():
     assert indices.values_by_statements is not None
     assert indices.values_by_statements.size() == 1
 
-    _, acceptance = indices.values_by_statements.peak()
+    _, acceptance = indices.values_by_statements.peek()
 
     assert len(acceptance) == 1
     assert acceptance[0].name == b"x"

@@ -9,7 +9,7 @@ def can_detect_a_snippet_flags_noreturn():
     )
 
     assert entities.flags.size() == 1
-    _, value = entities.flags.peak()
+    _, value = entities.flags.peek()
 
     assert value.noreturn is True
     assert value.clobbers is None
@@ -23,7 +23,7 @@ def can_detect_a_snippet_flags_clobbers():
     )
 
     assert entities.flags.size() == 1
-    _, value = entities.flags.peak()
+    _, value = entities.flags.peek()
 
     assert value.noreturn is None
     assert len(value.clobbers or []) == 2
@@ -37,7 +37,7 @@ def can_detect_a_function_noreturn():
     )
 
     assert entities.flags.size() == 1
-    _, value = entities.flags.peak()
+    _, value = entities.flags.peek()
 
     assert value.noreturn is True
     assert value.clobbers is None

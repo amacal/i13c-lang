@@ -10,7 +10,7 @@ def can_accept_register_bind():
 
     assert resolutions.binds is not None
     assert resolutions.binds.size() == 1
-    id, resolution = resolutions.binds.peak()
+    id, resolution = resolutions.binds.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -32,7 +32,7 @@ def can_accept_immediate_bind():
 
     assert resolutions.binds is not None
     assert resolutions.binds.size() == 1
-    id, resolution = resolutions.binds.peak()
+    id, resolution = resolutions.binds.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -52,7 +52,7 @@ def can_reject_an_unknown_register_bind():
 
     assert resolutions.binds is not None
     assert resolutions.binds.size() == 1
-    _, resolution = resolutions.binds.peak()
+    _, resolution = resolutions.binds.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

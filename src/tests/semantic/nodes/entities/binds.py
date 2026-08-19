@@ -19,7 +19,7 @@ def can_detect_a_bind():
     )
 
     assert entities.binds.size() == 1
-    _, value = entities.binds.peak()
+    _, value = entities.binds.peek()
 
     assert value.src == b"v"
     assert value.dst == b"rax"

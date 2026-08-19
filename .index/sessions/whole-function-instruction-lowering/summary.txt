@@ -1,0 +1,1 @@
+Materialized fn-declared function bodies into one ordered pseudo-instruction stream (prologue, per-statement dispatch, epilogue) by consuming existing register-allocation, argument-placement, spill, and stack-frame analyses, entirely within semantic/ and independent of the disclaimed llvm/ module.

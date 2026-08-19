@@ -11,7 +11,7 @@ def can_index_a_bind_by_slot():
     assert indices.binds_by_parameters is not None
     assert indices.binds_by_parameters.size() == 1
 
-    _, acceptance = indices.binds_by_parameters.peak()
+    _, acceptance = indices.binds_by_parameters.peek()
 
     assert acceptance.mode == "register"
     assert acceptance.src == b"v"

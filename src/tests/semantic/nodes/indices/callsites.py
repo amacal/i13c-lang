@@ -12,7 +12,7 @@ def can_index_one_callsite_by_called_signature():
     assert indices.callsites_by_signatures is not None
     assert indices.callsites_by_signatures.size() == 1
 
-    _, acceptance = indices.callsites_by_signatures.peak()
+    _, acceptance = indices.callsites_by_signatures.peek()
 
     assert len(acceptance) == 1
     assert len(acceptance[0].arguments) == 0
@@ -32,7 +32,7 @@ def can_index_two_callsite_by_called_signature():
     assert indices.callsites_by_signatures is not None
     assert indices.callsites_by_signatures.size() == 1
 
-    _, acceptance = indices.callsites_by_signatures.peak()
+    _, acceptance = indices.callsites_by_signatures.peek()
 
     assert len(acceptance) == 2
 
@@ -53,7 +53,7 @@ def can_index_immediate_callsite_by_called_signature():
     assert indices.callsites_by_signatures is not None
     assert indices.callsites_by_signatures.size() == 1
 
-    _, acceptance = indices.callsites_by_signatures.peak()
+    _, acceptance = indices.callsites_by_signatures.peek()
 
     assert len(acceptance) == 2
 

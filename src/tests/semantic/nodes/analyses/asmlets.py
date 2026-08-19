@@ -34,10 +34,10 @@ def can_substitute_a_snippet_without_any_parameters():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert len(asmlet.keys) == 0
     assert len(asmlet.callsites) == 1
@@ -72,13 +72,13 @@ def can_substitute_a_snippet_with_a_register_parameter():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
 
     assert len(asmlet.keys) == 0
     assert len(asmlet.callsites) == 1
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert asmlet.source == id
     assert len(asmlet.bindings) == 1
@@ -118,10 +118,10 @@ def can_substitute_a_snippet_with_a_base_register_parameter():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert len(asmlet.keys) == 0
     assert len(asmlet.callsites) == 1
@@ -163,10 +163,10 @@ def can_substitute_a_snippet_with_a_label_relocation_forward():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert len(asmlet.keys) == 0
     assert len(asmlet.callsites) == 1
@@ -195,10 +195,10 @@ def can_substitute_a_snippet_with_a_label_relocation_backward():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert len(asmlet.keys) == 0
     assert len(asmlet.callsites) == 1
@@ -227,10 +227,10 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert len(asmlet.keys) == 0
     assert len(asmlet.callsites) == 1
@@ -276,7 +276,7 @@ def can_substitute_only_once_the_same_signatured_called_twice():
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
 
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
     assert len(asmlet.callsites) == 2
 
 
@@ -289,7 +289,7 @@ def can_substitute_only_once_the_same_signatured_called_twice_via_register():
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
 
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
     assert len(asmlet.callsites) == 2
 
 
@@ -301,10 +301,10 @@ def can_substitute_a_snippet_with_a_immediate_parameter():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
 
     assert entities.snippets.size() == 1
-    id, _ = entities.snippets.peak()
+    id, _ = entities.snippets.peek()
 
     assert asmlet.source == id
     assert len(asmlet.bindings) == 0
@@ -355,7 +355,7 @@ def can_substitute_a_snippet_with_a_immediate_parameter_twice():
 
     for idx, asmlet in enumerate(analyses.asmlets.values()):
         assert entities.snippets.size() == 1
-        id, _ = entities.snippets.peak()
+        id, _ = entities.snippets.peek()
 
         assert asmlet.source == id
         assert len(asmlet.bindings) == 0
@@ -394,7 +394,7 @@ def can_substitute_a_snippet_with_a_direct_immediate_operand():
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
 
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
     assert len(asmlet.instructions) == 1
 
     assert len(asmlet.clobbers) == 0
@@ -423,7 +423,7 @@ def can_substitute_a_snippet_with_two_immediate_parameters():
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
 
-    _, asmlet = analyses.asmlets.peak()
+    _, asmlet = analyses.asmlets.peek()
 
     assert len(asmlet.bindings) == 0
     assert len(asmlet.clobbers) == 0

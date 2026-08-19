@@ -12,7 +12,7 @@ def can_detect_allocations_in_empty_function():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 0
     assert len(allocations.colors) == 0
@@ -27,7 +27,7 @@ def can_detect_allocations_with_a_callsite():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 1
     assert len(allocations.colors) == 0
@@ -42,7 +42,7 @@ def can_detect_allocations_with_a_clobber():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 2
     assert len(allocations.colors) == 0
@@ -56,7 +56,7 @@ def can_detect_allocations_with_of_parameters_unused():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 1
     assert len(allocations.colors) == 0
@@ -71,7 +71,7 @@ def can_detect_allocations_with_of_parameters_used():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 2
     assert len(allocations.colors) == 1
@@ -92,7 +92,7 @@ def can_detect_allocations_with_of_parameters_used_in_later_calls():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 3
     assert len(allocations.colors) == 1
@@ -114,7 +114,7 @@ def can_detect_allocations_with_of_parameters_used_in_multiple_calls():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 3
     assert len(allocations.colors) == 1
@@ -136,7 +136,7 @@ def can_detect_allocations_with_of_parameters_used_in_abandoned_values():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 4
     assert len(allocations.colors) == 2
@@ -160,7 +160,7 @@ def can_detect_allocations_with_of_declared_value_in_a_call():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 4
     assert len(allocations.colors) == 2
@@ -184,7 +184,7 @@ def can_detect_allocations_with_of_declared_value_in_a_call_unused():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 4
     assert len(allocations.colors) == 1
@@ -206,7 +206,7 @@ def can_detect_allocations_with_of_assigned_value():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 3
     assert len(allocations.colors) == 2
@@ -228,7 +228,7 @@ def can_detect_allocations_with_of_three_needed_colors():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 5
     assert len(allocations.colors) == 3
@@ -278,7 +278,7 @@ def can_detect_allocations_with_forced_spill():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 40
     assert len(allocations.colors) == 14
@@ -323,7 +323,7 @@ def can_detect_allocations_with_forced_spill_two_blocks():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 36
     assert allocations.colors == {1: 10, 19: 10}
@@ -347,7 +347,7 @@ def can_detect_allocations_with_forced_spill_all_clobbered():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 18
     assert len(allocations.colors) == 0
@@ -365,7 +365,7 @@ def can_detect_allocations_with_value_surviving_a_call():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 5
     assert len(allocations.colors) == 2
@@ -390,7 +390,7 @@ def can_detect_allocations_with_value_surviving_a_call_colliding():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 1
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     assert len(allocations.values) == 6
     assert len(allocations.colors) == 2
@@ -416,7 +416,7 @@ def can_detect_allocations_with_value_surviving_a_call_of_regular_function():
 
     assert analyses.allocations is not None
     assert analyses.allocations.size() == 2
-    _, allocations = analyses.allocations.peak()
+    _, allocations = analyses.allocations.peek()
 
     for allocations in analyses.allocations.values():
         if len(allocations.values) == 0:

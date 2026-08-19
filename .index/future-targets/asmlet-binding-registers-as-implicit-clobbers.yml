@@ -1,0 +1,7 @@
+title: "Asmlet Binding Registers as Implicit Clobbers"
+status: not-completed
+mentioned_by:
+  - "Whole-Function Instruction Lowering"
+evidence:
+  - ".history/2026-08/2026-08-19-whole-function-instruction-lowering.yml session.not_completed (an asmlet whose declared clobbers list omits one of its own binding registers, e.g. asm foo(b@rdi: u8) with no clobbers rdi, lets the allocator legitimately color another live value into that register, which the shuffle then silently overwrites when placing the argument; identified concretely this session, not fixed)"
+  - ".history/2026-08/2026-08-19-whole-function-instruction-lowering.yml session.open_questions (whether the fix should be an automatic union of binding registers into the effective clobber set, or a validated rejection of an asmlet whose clobbers list omits its own bindings, was raised and left undecided)"

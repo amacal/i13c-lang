@@ -5,7 +5,9 @@ from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
 from i13c.semantic.typing.entities.expressions import ExpressionId
+from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import LiteralId
+from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance, AssignResolution
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
@@ -79,6 +81,8 @@ def build_assign_resolution(
             AssignAcceptance(
                 ref=entry.ref,
                 id=aid,
+                fn=entry.get_function(FunctionId.from_context),
+                stmt=entry.get_statement(StatementId.from_context),
                 destination=values.get(entry.destination),
                 expression=expression,
             )

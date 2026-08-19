@@ -25,7 +25,7 @@ def can_accept_an_empty_resolved_call():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    id, resolution = resolutions.callsites.peak()
+    id, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -49,7 +49,7 @@ def can_accept_a_call_with_literal():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    id, resolution = resolutions.callsites.peak()
+    id, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -79,7 +79,7 @@ def can_accept_a_call_with_literal_ranged():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    id, resolution = resolutions.callsites.peak()
+    id, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -109,7 +109,7 @@ def can_accept_a_call_with_parameter():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    id, resolution = resolutions.callsites.peak()
+    id, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -140,7 +140,7 @@ def can_accept_a_call_with_parameter_ranged():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    id, resolution = resolutions.callsites.peak()
+    id, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -174,7 +174,7 @@ def can_accept_a_call_with_expression():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    id, resolution = resolutions.callsites.peak()
+    id, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -208,7 +208,7 @@ def can_accept_a_call_with_multiple_arguments():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    id, resolution = resolutions.callsites.peak()
+    id, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -249,7 +249,7 @@ def can_reject_a_call_with_unknown_target():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -268,7 +268,7 @@ def can_reject_a_call_with_unmatched_arity():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -287,7 +287,7 @@ def can_reject_a_call_with_unmatched_literal_type():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -306,7 +306,7 @@ def can_reject_a_call_with_unmatched_literal_type_lower_bound():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -325,7 +325,7 @@ def can_reject_a_call_with_unmatched_literal_type_upper_bound():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -344,7 +344,7 @@ def can_reject_a_call_with_unmatched_parameter_type():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -363,7 +363,7 @@ def can_reject_a_call_with_unmatched_parameter_type_lower_bound():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -382,7 +382,7 @@ def can_reject_a_call_with_unmatched_parameter_type_upper_bound():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -401,7 +401,7 @@ def can_reject_a_call_with_unmatched_expression_type():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -420,7 +420,7 @@ def can_reject_a_call_with_unmatched_expression_type_lower_bound():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -439,7 +439,7 @@ def can_reject_a_call_with_unmatched_expression_type_upper_bound():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -458,7 +458,7 @@ def can_reject_a_call_with_unmatched_3rd_argument():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -477,7 +477,7 @@ def can_reject_a_call_with_unresolved_symbol():
 
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -498,7 +498,7 @@ def can_accept_matching_overload_after_arity_mismatch():
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
 
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 1
@@ -519,7 +519,7 @@ def can_accept_one_overload_without_recording_later_rejection():
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
 
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 1
@@ -540,7 +540,7 @@ def can_reject_ambiguous_callsite():
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
 
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 2
     assert len(resolution.rejected) == 1
@@ -559,7 +559,7 @@ def can_reject_a_call_to_immediate_bound_snippet_with_non_literal_argument():
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
 
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -578,7 +578,7 @@ def can_reject_a_call_with_more_than_six_arguments():
     assert resolutions.callsites is not None
     assert resolutions.callsites.size() == 1
 
-    _, resolution = resolutions.callsites.peak()
+    _, resolution = resolutions.callsites.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

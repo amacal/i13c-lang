@@ -59,7 +59,7 @@ def prepare_resolution(code: str) -> InstructionResolution:
 
     assert semantic.resolutions.instructions is not None
     assert semantic.resolutions.instructions.size() == 1
-    _, value = semantic.resolutions.instructions.peak()
+    _, value = semantic.resolutions.instructions.peek()
 
     return value
 

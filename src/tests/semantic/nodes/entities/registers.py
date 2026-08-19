@@ -19,6 +19,6 @@ def can_detect_a_register_as_the_operand():
     )
 
     assert entities.registers.size() == 1
-    _, value = entities.registers.peak()
+    _, value = entities.registers.peek()
 
     assert value.name == b"rax"

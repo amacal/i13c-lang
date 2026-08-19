@@ -19,10 +19,10 @@ def can_detect_an_immediate_operand():
     )
 
     assert entities.operands.size() == 1
-    _, value = entities.operands.peak()
+    _, value = entities.operands.peek()
 
     assert entities.immediates.size() == 1
-    id, _ = entities.immediates.peak()
+    id, _ = entities.immediates.peek()
 
     assert value.kind == "immediate"
     assert value.target == id
@@ -36,10 +36,10 @@ def can_detect_a_register_operand():
     )
 
     assert entities.operands.size() == 1
-    _, value = entities.operands.peak()
+    _, value = entities.operands.peek()
 
     assert entities.registers.size() == 1
-    id, _ = entities.registers.peak()
+    id, _ = entities.registers.peek()
 
     assert value.kind == "register"
     assert value.target == id
@@ -53,10 +53,10 @@ def can_detect_a_reference_operand():
     )
 
     assert entities.operands.size() == 1
-    _, value = entities.operands.peak()
+    _, value = entities.operands.peek()
 
     assert entities.references.size() == 1
-    id, _ = entities.references.peak()
+    id, _ = entities.references.peek()
 
     assert value.kind == "reference"
     assert value.target == id

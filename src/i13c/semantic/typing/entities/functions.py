@@ -22,6 +22,8 @@ class FunctionId:
 @dataclass(kw_only=True)
 class Function:
     ref: Span
+    id: FunctionId
+
     signature: SignatureId
     flags: FlagsId | None
     statements: list[StatementId]

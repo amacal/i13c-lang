@@ -10,7 +10,7 @@ def can_accept_a_function():
 
     assert resolutions.functions is not None
     assert resolutions.functions.size() == 1
-    id, resolution = resolutions.functions.peak()
+    id, resolution = resolutions.functions.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -18,7 +18,7 @@ def can_accept_a_function():
     assert resolution.accepted[0].id == id
 
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].signature.id == id
     assert resolution.accepted[0].noreturn is False
@@ -33,14 +33,14 @@ def can_accept_a_snippet_with_parameters():
 
     assert resolutions.functions is not None
     assert resolutions.functions.size() == 1
-    id, resolution = resolutions.functions.peak()
+    id, resolution = resolutions.functions.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
     assert resolutions.signatures is not None
-    id, _ = resolutions.signatures.peak()
+    id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].signature.id == id
 
@@ -55,7 +55,7 @@ def can_accept_a_function_with_noreturn():
 
     assert resolutions.functions is not None
     assert resolutions.functions.size() == 1
-    id, resolution = resolutions.functions.peak()
+    id, resolution = resolutions.functions.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0

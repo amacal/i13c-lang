@@ -19,10 +19,10 @@ def can_detect_a_statement_on_assignment():
     )
 
     assert entities.statements.size() == 1
-    _, statement = entities.statements.peak()
+    _, statement = entities.statements.peek()
 
     assert entities.assigns.size() == 1
-    id, _ = entities.assigns.peak()
+    id, _ = entities.assigns.peek()
 
     assert statement.target == id
 
@@ -35,9 +35,9 @@ def can_detect_a_statement_on_callsite():
     )
 
     assert entities.statements.size() == 1
-    _, value = entities.statements.peak()
+    _, value = entities.statements.peek()
 
     assert entities.calls.size() == 1
-    id, _ = entities.calls.peak()
+    id, _ = entities.calls.peek()
 
     assert value.target == id

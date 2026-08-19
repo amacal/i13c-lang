@@ -19,7 +19,7 @@ def can_detect_an_expression_declaration_in_a_value_declaration():
     )
 
     assert entities.expressions.size() == 1
-    _, value = entities.expressions.peak()
+    _, value = entities.expressions.peek()
 
     assert value.name == b"abc"
 
@@ -32,6 +32,6 @@ def can_detect_an_expression_in_a_callsite():
     )
 
     assert entities.expressions.size() == 1
-    _, value = entities.expressions.peak()
+    _, value = entities.expressions.peek()
 
     assert value.name == b"cde"

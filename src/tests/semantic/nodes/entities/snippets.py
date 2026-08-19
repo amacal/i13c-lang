@@ -11,7 +11,7 @@ def can_detect_a_snippet():
     )
 
     assert entities.snippets.size() == 1
-    _, value = entities.snippets.peak()
+    _, value = entities.snippets.peek()
 
     assert len(value.body) == 1
 
@@ -24,7 +24,7 @@ def can_count_a_label_in_the_snippet():
     )
 
     assert entities.snippets.size() == 1
-    _, value = entities.snippets.peak()
+    _, value = entities.snippets.peek()
 
     assert len(value.body) == 2
     assert isinstance(value.body[0], LabelId)

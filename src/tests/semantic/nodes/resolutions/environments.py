@@ -10,7 +10,7 @@ def can_accept_a_snippet_environment_without_entries():
 
     assert resolutions.environments is not None
     assert resolutions.environments.size() == 1
-    id, resolution = resolutions.environments.peak()
+    id, resolution = resolutions.environments.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -31,7 +31,7 @@ def can_accept_a_snippet_environment_with_a_label():
 
     assert resolutions.environments is not None
     assert resolutions.environments.size() == 1
-    id, resolution = resolutions.environments.peak()
+    id, resolution = resolutions.environments.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -52,7 +52,7 @@ def can_accept_a_snippet_environment_with_a_slot():
 
     assert resolutions.environments is not None
     assert resolutions.environments.size() == 1
-    id, resolution = resolutions.environments.peak()
+    id, resolution = resolutions.environments.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -73,7 +73,7 @@ def can_reject_duplicate_label_name_usage():
 
     assert resolutions.environments is not None
     assert resolutions.environments.size() == 1
-    _, resolution = resolutions.environments.peak()
+    _, resolution = resolutions.environments.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -91,7 +91,7 @@ def can_reject_duplicate_slot_name_usage():
 
     assert resolutions.environments is not None
     assert resolutions.environments.size() == 1
-    _, resolution = resolutions.environments.peak()
+    _, resolution = resolutions.environments.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

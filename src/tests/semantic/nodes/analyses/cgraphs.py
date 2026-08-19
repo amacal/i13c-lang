@@ -8,7 +8,7 @@ def can_detect_cgraph_in_a_snippet():
 
     assert analyses.cgraphs is not None
     assert analyses.cgraphs.size() == 1
-    _, cgraph = analyses.cgraphs.peak()
+    _, cgraph = analyses.cgraphs.peek()
 
     assert len(cgraph.forward) == 0
     assert len(cgraph.backward) == 0
@@ -21,7 +21,7 @@ def can_detect_cgraph_in_empty_function():
 
     assert analyses.cgraphs is not None
     assert analyses.cgraphs.size() == 1
-    _, cgraph = analyses.cgraphs.peak()
+    _, cgraph = analyses.cgraphs.peek()
 
     assert len(cgraph.forward) == 0
     assert len(cgraph.backward) == 0

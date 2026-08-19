@@ -12,7 +12,7 @@ def can_accept_a_reference_handled_by_a_slot():
 
     assert resolutions.references is not None
     assert resolutions.references.size() == 1
-    id, resolution = resolutions.references.peak()
+    id, resolution = resolutions.references.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -35,7 +35,7 @@ def can_accept_a_reference_handled_by_a_label():
 
     assert resolutions.references is not None
     assert resolutions.references.size() == 1
-    id, resolution = resolutions.references.peak()
+    id, resolution = resolutions.references.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -58,7 +58,7 @@ def can_reject_unresolved_reference():
 
     assert resolutions.references is not None
     assert resolutions.references.size() == 1
-    _, resolution = resolutions.references.peak()
+    _, resolution = resolutions.references.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1

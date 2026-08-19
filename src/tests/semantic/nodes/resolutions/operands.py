@@ -15,7 +15,7 @@ def can_accept_an_operand_from_a_register():
 
     assert resolutions.operands is not None
     assert resolutions.operands.size() == 1
-    id, resolution = resolutions.operands.peak()
+    id, resolution = resolutions.operands.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -41,7 +41,7 @@ def can_accept_an_operand_from_an_immediate():
 
     assert resolutions.operands is not None
     assert resolutions.operands.size() == 1
-    id, resolution = resolutions.operands.peak()
+    id, resolution = resolutions.operands.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -65,7 +65,7 @@ def can_accept_an_operand_from_a_reference():
 
     assert resolutions.operands is not None
     assert resolutions.operands.size() == 1
-    id, resolution = resolutions.operands.peak()
+    id, resolution = resolutions.operands.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -88,7 +88,7 @@ def can_accept_an_operand_from_a_label():
 
     assert resolutions.operands is not None
     assert resolutions.operands.size() == 1
-    id, resolution = resolutions.operands.peak()
+    id, resolution = resolutions.operands.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -112,7 +112,7 @@ def can_accept_an_operand_from_an_address():
 
     assert resolutions.operands is not None
     assert resolutions.operands.size() == 1
-    id, resolution = resolutions.operands.peak()
+    id, resolution = resolutions.operands.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -141,7 +141,7 @@ def can_accept_an_operand_from_an_address_using_a_reference_as_base():
 
     assert resolutions.operands is not None
     assert resolutions.operands.size() == 1
-    id, resolution = resolutions.operands.peak()
+    id, resolution = resolutions.operands.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -170,7 +170,7 @@ def can_reject_rip_register():
 
     assert resolutions.operands is not None
     assert resolutions.operands.size() == 1
-    _, resolution = resolutions.operands.peak()
+    _, resolution = resolutions.operands.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
