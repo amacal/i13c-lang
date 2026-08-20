@@ -1,5 +1,4 @@
 
-from i13c.semantic.typing.analyses.llvm import Call, Exchange, Move
 from tests.semantic.nodes.analyses import prepare_analyses
 
 
@@ -24,13 +23,11 @@ def can_detect_calls_with_asm_callsite_using_literal():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 1
-    assert isinstance(call.instructions[0], Call)
-
-    assert call.instructions[0].target == asmlet.id
-
+    assert call.listing() == [
+        f"call {asmlet.identify(1)}",
+    ]
 
 def can_detect_calls_with_asm_callsite_using_parameter():
     _, analyses = prepare_analyses("""
@@ -44,16 +41,12 @@ def can_detect_calls_with_asm_callsite_using_parameter():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 2
-    assert isinstance(call.instructions[0], Move)
-    assert isinstance(call.instructions[1], Call)
-
-    assert str(call.instructions[0].variant[0]) == "rax"
-    assert str(call.instructions[0].variant[1]) == "rdi"
-
-    assert call.instructions[1].target == asmlet.id
+    assert call.listing() == [
+        "mov rax, rdi",
+        f"call {asmlet.identify(1)}",
+    ]
 
 
 def can_detect_calls_with_asm_callsite_using_value():
@@ -68,16 +61,12 @@ def can_detect_calls_with_asm_callsite_using_value():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 2
-    assert isinstance(call.instructions[0], Move)
-    assert isinstance(call.instructions[1], Call)
-
-    assert str(call.instructions[0].variant[0]) == "rax"
-    assert str(call.instructions[0].variant[1]) == "rdi"
-
-    assert call.instructions[1].target == asmlet.id
+    assert call.listing() == [
+        "mov rax, rdi",
+        f"call {asmlet.identify(1)}",
+    ]
 
 
 def can_detect_calls_with_asm_callsite_with_correct_params():
@@ -92,12 +81,11 @@ def can_detect_calls_with_asm_callsite_with_correct_params():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 1
-    assert isinstance(call.instructions[0], Call)
-
-    assert call.instructions[0].target == asmlet.id
+    assert call.listing() == [
+        f"call {asmlet.identify(1)}",
+    ]
 
 
 def can_detect_calls_with_asm_callsite_with_inverted_params():
@@ -112,16 +100,12 @@ def can_detect_calls_with_asm_callsite_with_inverted_params():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 2
-    assert isinstance(call.instructions[0], Exchange)
-    assert isinstance(call.instructions[1], Call)
-
-    assert str(call.instructions[0].dst) == "rsi"
-    assert str(call.instructions[0].src) == "rdi"
-
-    assert call.instructions[1].target == asmlet.id
+    assert call.listing() == [
+        "xchg rsi, rdi",
+        f"call {asmlet.identify(1)}",
+    ]
 
 
 def can_detect_calls_with_asm_callsite_with_shifted_params():
@@ -136,20 +120,13 @@ def can_detect_calls_with_asm_callsite_with_shifted_params():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 3
-    assert isinstance(call.instructions[0], Move)
-    assert isinstance(call.instructions[1], Move)
-    assert isinstance(call.instructions[2], Call)
-
-    assert str(call.instructions[0].variant[0]) == "rax"
-    assert str(call.instructions[0].variant[1]) == "rsi"
-
-    assert str(call.instructions[1].variant[0]) == "rbx"
-    assert str(call.instructions[1].variant[1]) == "rdi"
-
-    assert call.instructions[2].target == asmlet.id
+    assert call.listing() == [
+        "mov rax, rsi",
+        "mov rbx, rdi",
+        f"call {asmlet.identify(1)}",
+    ]
 
 
 def can_detect_calls_with_asm_callsite_with_three_params():
@@ -164,20 +141,13 @@ def can_detect_calls_with_asm_callsite_with_three_params():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 3
-    assert isinstance(call.instructions[0], Exchange)
-    assert isinstance(call.instructions[1], Exchange)
-    assert isinstance(call.instructions[2], Call)
-
-    assert str(call.instructions[0].src) == "rdx"
-    assert str(call.instructions[0].dst) == "rdi"
-
-    assert str(call.instructions[1].src) == "rdx"
-    assert str(call.instructions[1].dst) == "rsi"
-
-    assert call.instructions[2].target == asmlet.id
+    assert call.listing() == [
+        "xchg rdi, rdx",
+        "xchg rsi, rdx",
+        f"call {asmlet.identify(1)}",
+    ]
 
 
 def can_detect_calls_with_asm_callsite_with_same_params():
@@ -192,20 +162,13 @@ def can_detect_calls_with_asm_callsite_with_same_params():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 3
-    assert isinstance(call.instructions[0], Move)
-    assert isinstance(call.instructions[1], Move)
-    assert isinstance(call.instructions[2], Call)
-
-    assert str(call.instructions[0].variant[0]) == "rsi"
-    assert str(call.instructions[0].variant[1]) == "rdi"
-
-    assert str(call.instructions[1].variant[0]) == "rdx"
-    assert str(call.instructions[1].variant[1]) == "rdi"
-
-    assert call.instructions[2].target == asmlet.id
+    assert call.listing() == [
+        "mov rsi, rdi",
+        "mov rdx, rdi",
+        f"call {asmlet.identify(1)}",
+    ]
 
 
 def can_detect_calls_with_asm_callsite_with_literal():
@@ -220,16 +183,12 @@ def can_detect_calls_with_asm_callsite_with_literal():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 2
-    assert isinstance(call.instructions[0], Move)
-    assert isinstance(call.instructions[1], Call)
-
-    assert str(call.instructions[0].variant[0]) == "rdi"
-    assert str(call.instructions[0].variant[1]) == "0x05"
-
-    assert call.instructions[1].target == asmlet.id
+    assert call.listing() == [
+        "mov rdi, 0x05",
+        f"call {asmlet.identify(1)}",
+    ]
 
 
 def can_detect_calls_with_asm_callsite_with_spilled_param():
@@ -248,13 +207,9 @@ def can_detect_calls_with_asm_callsite_with_spilled_param():
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
-    _, asmlet = analyses.asmlets.peek()
+    asmlet, _ = analyses.asmlets.peek()
 
-    assert len(call.instructions) == 2
-    assert isinstance(call.instructions[0], Move)
-    assert isinstance(call.instructions[1], Call)
-
-    assert str(call.instructions[0].variant[0]) == "rax"
-    assert str(call.instructions[0].variant[1]) == "#0"
-
-    assert call.instructions[1].target == asmlet.id
+    assert call.listing() == [
+        "mov rax, [rsp + 0x00]",
+        f"call {asmlet.identify(1)}",
+    ]

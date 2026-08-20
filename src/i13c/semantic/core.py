@@ -18,6 +18,21 @@ class Hex:
     width: Width
 
     @staticmethod
+    def smallest(value: int) -> Hex:
+        assert value >= 0 and value <= 0xFFFF_FFFF_FFFF_FFFF
+
+        if value < 128:
+            return Hex(data=value.to_bytes(1, byteorder="big"), width=8)
+
+        if value < 0x8000:
+            return Hex(data=value.to_bytes(2, byteorder="big"), width=16)
+
+        if value < 0x8000_0000:
+            return Hex(data=value.to_bytes(4, byteorder="big"), width=32)
+
+        return Hex(data=value.to_bytes(8, byteorder="big"), width=64)
+
+    @staticmethod
     def derive(data: bytes) -> Hex:
         width = len(data) * 8
         assert width in (8, 16, 32, 64)

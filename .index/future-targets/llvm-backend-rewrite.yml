@@ -2,6 +2,8 @@ title: "LLVM Backend Rewrite"
 status: not-completed
 mentioned_by:
   - "Restore a Green Build"
+  - "Consolidating Fnlet and Asmlet into a Shared Blocklet Instruction Vocabulary"
 evidence:
   - "Restore a Green Build .history entry, corrections field: user stated llvm/* is questionable and will be fixed/adapted/rewritten soon"
   - "Restore a Green Build .history entry, not_completed field: llvm/nodes/functions.py's verify() constraint bug and the 32 src/tests/llvm/*.py failures it causes were deferred pending this rewrite"
+  - ".history/2026-08/2026-08-20-consolidating-fnlet-and-asmlet-into-a-shared-blocklet-instruction-vocabulary.yml session.not_completed (direction decided in dialogue: llvm/ will not retain independent register allocation, and will not attempt spec-faithful LLVM IR/SSA discipline — it becomes a pure emission layer consuming the same post-allocation Blocklet that encoding/ consumes; CLAUDE.md's own \"Primary sources and specs\"/\"Cross-backend comparison\"/\"Scope\" text still describes the old shape and was not updated this session, by the user's own choice, to be done separately)"

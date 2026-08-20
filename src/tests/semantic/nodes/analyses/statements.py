@@ -1,5 +1,3 @@
-
-from i13c.semantic.typing.analyses.llvm import Call, Move
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from tests.semantic.nodes.analyses import prepare_analyses
 
@@ -22,27 +20,23 @@ def can_detect_statements_pure_assign_and_call():
     assert analyses.statements is not None
     assert analyses.statements.size() == 2
 
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    asmlet, _ = analyses.asmlets.peek()
+
     for idx, statement in enumerate(analyses.statements.values()):
         if isinstance(statement.acceptance.target, AssignAcceptance):
             assert idx == 0
-            assert len(statement.instructions) == 1
-
-            # move to rax
-            assert isinstance(statement.instructions[0], Move)
-            assert str(statement.instructions[0].variant[0]) == "rdi"
-            assert str(statement.instructions[0].variant[1]) == "0x42"
+            assert statement.listing() == [
+                "mov rdi, 0x42",
+            ]
 
         else:
             assert idx == 1
-            assert len(statement.instructions) == 2
-
-            # move to rdi
-            assert isinstance(statement.instructions[0], Move)
-            assert str(statement.instructions[0].variant[0]) == "rax"
-            assert str(statement.instructions[0].variant[1]) == "rdi"
-
-            # call
-            assert isinstance(statement.instructions[1], Call)
+            assert statement.listing() == [
+                "mov rax, rdi",
+                f"call {asmlet.identify(1)}",
+            ]
 
 
 def can_detect_statements_assign_with_spills():
@@ -58,29 +52,21 @@ def can_detect_statements_assign_with_spills():
     assert analyses.statements is not None
     assert analyses.statements.size() == 2
 
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    asmlet, _ = analyses.asmlets.peek()
+
     for idx, statement in enumerate(analyses.statements.values()):
         if isinstance(statement.acceptance.target, AssignAcceptance):
             assert idx == 0
-            assert len(statement.instructions) == 2
-
-            # move to rax
-            assert isinstance(statement.instructions[0], Move)
-            assert str(statement.instructions[0].variant[0]) == "r11"
-            assert str(statement.instructions[0].variant[1]) == "0x42"
-
-            # move to stack
-            assert isinstance(statement.instructions[1], Move)
-            assert str(statement.instructions[1].variant[0]) == "#0"
-            assert str(statement.instructions[1].variant[1]) == "r11"
+            assert statement.listing() == [
+                "mov r11, 0x42",
+                "mov [rsp + 0x00], r11",
+            ]
 
         else:
             assert idx == 1
-            assert len(statement.instructions) == 2
-
-            # move to rdi
-            assert isinstance(statement.instructions[0], Move)
-            assert str(statement.instructions[0].variant[0]) == "rax"
-            assert str(statement.instructions[0].variant[1]) == "#0"
-
-            # call
-            assert isinstance(statement.instructions[1], Call)
+            assert statement.listing() == [
+                "mov rax, [rsp + 0x00]",
+                f"call {asmlet.identify(1)}",
+            ]

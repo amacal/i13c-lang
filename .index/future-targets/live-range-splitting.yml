@@ -3,6 +3,8 @@ status: not-completed
 mentioned_by:
   - "Register Allocation (semantic layer)"
   - "Argument-Placement Lowering"
+  - "Consolidating Fnlet and Asmlet into a Shared Blocklet Instruction Vocabulary"
 evidence:
   - ".history/2026-08/2026-08-14-register-allocation-semantic-layer.yml session.not_completed"
   - ".history/2026-08/2026-08-15-argument-placement-lowering.yml session.explored (recoloring around call boundaries considered as a way to give post-call restoration a use, confirmed it would require changing how Allocation itself is computed, not something a lowering pass can do by only consuming Allocation)"
+  - ".history/2026-08/2026-08-20-consolidating-fnlet-and-asmlet-into-a-shared-blocklet-instruction-vocabulary.yml session.explored (raised again as \"less aggressive coloring, accepting a reshuffle as a new color\"; confirmed as the same tracked target and deliberately not pursued this session, scoped as its own future session since it changes Allocation's own algorithm)"

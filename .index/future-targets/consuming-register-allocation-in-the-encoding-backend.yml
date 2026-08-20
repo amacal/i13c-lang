@@ -2,5 +2,7 @@ title: "Consuming Register Allocation in the Encoding Backend"
 status: not-completed
 mentioned_by:
   - "Calling Convention in Register Allocation"
+  - "Consolidating Fnlet and Asmlet into a Shared Blocklet Instruction Vocabulary"
 evidence:
   - ".history/2026-08/2026-08-14-calling-convention-in-register-allocation.yml session.not_completed (originally selected topic, redirected before any encoding/ work began)"
+  - ".history/2026-08/2026-08-20-consolidating-fnlet-and-asmlet-into-a-shared-blocklet-instruction-vocabulary.yml session.not_completed (Blocklet built as the intended shared pre-encoding artifact; encoding/ itself was not wired to consume it this session, remaining the ultimate goal)"

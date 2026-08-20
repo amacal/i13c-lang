@@ -2,9 +2,10 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
+from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.assigns import AssignLlvm
 from i13c.semantic.typing.analyses.calls import CallLlvm
-from i13c.semantic.typing.analyses.llvm import Move, Register, Slot
+from i13c.semantic.typing.analyses.llvm import MOV, Address, Register
 from i13c.semantic.typing.analyses.spills import SpillOp
 from i13c.semantic.typing.analyses.statements import StatementInstruction, StatementLlvm
 from i13c.semantic.typing.entities.assigns import AssignId
@@ -52,9 +53,12 @@ def build_statements(
         # some statements may cause spills
         for spill in spills.find(eid):
             instructions.append(
-                Move(
-                    variant=(
-                        Slot(idx=spill.slot),
+                MOV(
+                    operands=(
+                        Address(
+                            base=Register(name=b"rsp"),
+                            disp=Hex.smallest(spill.slot),
+                        ),
                         Register(name=spill.src),
                     )
                 )

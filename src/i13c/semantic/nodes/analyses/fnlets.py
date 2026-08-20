@@ -2,18 +2,20 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
+from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.cflows import ControlFlows, FlowNode
-from i13c.semantic.typing.analyses.fnlet import Fnlet, FnletBlock, FnletInstruction
+from i13c.semantic.typing.analyses.fnlets import Fnlet, FnletBlock, FnletInstruction
 from i13c.semantic.typing.analyses.frames import StackFrame
 from i13c.semantic.typing.analyses.llvm import (
-    DecreaseStackPointer,
-    IncreaseStackPointer,
-    Move,
-    PopFromStackPointer,
-    PushToStackPointer,
+    ADD,
+    MOV,
+    POP,
+    PUSH,
+    RET,
+    SUB,
+    Address,
+    Immediate,
     Register,
-    Return,
-    Slot,
 )
 from i13c.semantic.typing.analyses.statements import StatementLlvm
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -66,30 +68,52 @@ def build_fnlets(
 
 def emit_prologue(instructions: list[FnletInstruction], frame: StackFrame):
     for entry in frame.saved:
-        instructions.append(PushToStackPointer(src=Register(name=entry.name)))
+        instructions.append(PUSH(operands=(Register(name=entry.name),)))
 
     if frame.slots > 0:
-        instructions.append(DecreaseStackPointer(slots=frame.slots))
+        instructions.append(
+            SUB(
+                operands=(
+                    Register(name=b"rsp"),
+                    Immediate(value=Hex.smallest(8 * frame.slots)),
+                )
+            )
+        )
 
     for entry in frame.spill:
         instructions.append(
-            Move(variant=(Slot(idx=entry.slot), Register(name=entry.name)))
+            MOV(
+                operands=(
+                    Address(
+                        base=Register(name=b"rsp"),
+                        disp=Hex.smallest(8 * entry.slot),
+                    ),
+                    Register(name=entry.name),
+                ),
+            )
         )
 
     for entry in frame.moved:
         instructions.append(
-            Move(variant=(Register(name=entry.dst), Register(name=entry.src)))
+            MOV(operands=(Register(name=entry.dst), Register(name=entry.src)))
         )
 
 
 def emit_epilogue(instructions: list[FnletInstruction], frame: StackFrame):
     if frame.slots > 0:
-        instructions.append(IncreaseStackPointer(slots=frame.slots))
+        instructions.append(
+            ADD(
+                operands=(
+                    Register(name=b"rsp"),
+                    Immediate(value=Hex.smallest(8 * frame.slots)),
+                )
+            )
+        )
 
     for entry in reversed(frame.saved):
-        instructions.append(PopFromStackPointer(dst=Register(name=entry.name)))
+        instructions.append(POP(operands=(Register(name=entry.name),)))
 
-    instructions.append(Return())
+    instructions.append(RET())
 
 
 def emit_body(

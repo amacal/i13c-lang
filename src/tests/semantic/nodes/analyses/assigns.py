@@ -1,5 +1,5 @@
 
-from i13c.semantic.typing.analyses.llvm import Move
+from i13c.semantic.typing.analyses.llvm import MOV
 from tests.semantic.nodes.analyses import prepare_analyses
 
 
@@ -23,10 +23,10 @@ def can_detect_assigns_using_literal():
     _, assign = analyses.assigns.peek()
 
     assert len(assign.instructions) == 1
-    assert isinstance(assign.instructions[0], Move)
+    assert isinstance(assign.instructions[0], MOV)
 
-    assert str(assign.instructions[0].variant[0]) == "rdi"
-    assert str(assign.instructions[0].variant[1]) == "0x42"
+    assert str(assign.instructions[0].operands[0]) == "rdi"
+    assert str(assign.instructions[0].operands[1]) == "0x42"
 
 
 def can_detect_assigns_using_parameter():
@@ -40,7 +40,7 @@ def can_detect_assigns_using_parameter():
     _, assign = analyses.assigns.peek()
 
     assert len(assign.instructions) == 1
-    assert isinstance(assign.instructions[0], Move)
+    assert isinstance(assign.instructions[0], MOV)
 
-    assert str(assign.instructions[0].variant[0]) == "rdi"
-    assert str(assign.instructions[0].variant[1]) == "rsi"
+    assert str(assign.instructions[0].operands[0]) == "rdi"
+    assert str(assign.instructions[0].operands[1]) == "rsi"

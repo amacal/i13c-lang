@@ -22,49 +22,158 @@ class Register:
 
 
 @dataclass(kw_only=True, repr=False)
-class Slot:
-    idx: int
+class Address:
+    base: Register
+    disp: Hex | None
 
     def __str__(self) -> str:
-        return f"#{self.idx}"
+        if self.disp is None:
+            return f"[{self.base}]"
+        else:
+            return f"[{self.base} + {self.disp}]"
 
 
 @dataclass(kw_only=True, repr=False)
-class Move:
-    variant: tuple[Register, Register | Slot | Immediate] | tuple[Slot, Register]
+class Relocation:
+    block: int
+
+    def __str__(self) -> str:
+        return f"#{self.block}"
 
 
 @dataclass(kw_only=True, repr=False)
-class Exchange:
-    src: Register
-    dst: Register
+class MOV:
+    operands: tuple[Register | Address, Immediate | Register | Address]
+
+    def __str__(self) -> str:
+        return f"mov {self.operands[0]}, {self.operands[1]}"
 
 
 @dataclass(kw_only=True, repr=False)
-class DecreaseStackPointer:
-    slots: int
+class BSWAP:
+    operands: tuple[Register]
+
+    def __str__(self) -> str:
+        return f"bswap {self.operands[0]}"
 
 
 @dataclass(kw_only=True, repr=False)
-class IncreaseStackPointer:
-    slots: int
+class XCHG:
+    operands: tuple[Register, Register]
+
+    def __str__(self) -> str:
+        return f"xchg {self.operands[0]}, {self.operands[1]}"
 
 
 @dataclass(kw_only=True, repr=False)
-class PushToStackPointer:
-    src: Register
+class LEA:
+    operands: tuple[Register, Address]
+
+    def __str__(self) -> str:
+        return f"lea {self.operands[0]}, {self.operands[1]}"
 
 
 @dataclass(kw_only=True, repr=False)
-class PopFromStackPointer:
-    dst: Register
+class SHR:
+    operands: tuple[Register, Register | Immediate]
+
+    def __str__(self) -> str:
+        return f"shr {self.operands[0]}, {self.operands[1]}"
 
 
 @dataclass(kw_only=True, repr=False)
-class Call:
+class SHL:
+    operands: tuple[Register, Register | Immediate]
+
+    def __str__(self) -> str:
+        return f"shl {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class AND:
+    operands: tuple[Register, Register | Immediate]
+
+    def __str__(self) -> str:
+        return f"and {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class OR:
+    operands: tuple[Register, Register | Immediate]
+
+    def __str__(self) -> str:
+        return f"or {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class NOP:
+    def __str__(self) -> str:
+        return "nop"
+
+
+@dataclass(kw_only=True, repr=False)
+class LOOP:
+    operands: tuple[Relocation]
+
+    def __str__(self) -> str:
+        return f"loop {self.operands[0]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class JMP:
+    operands: tuple[Relocation]
+
+    def __str__(self) -> str:
+        return f"jmp {self.operands[0]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class PUSH:
+    operands: tuple[Register | Address]
+
+    def __str__(self) -> str:
+        return f"push {self.operands[0]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class POP:
+    operands: tuple[Register | Address]
+
+    def __str__(self) -> str:
+        return f"pop {self.operands[0]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class ADD:
+    operands: tuple[Register, Register | Immediate]
+
+    def __str__(self) -> str:
+        return f"add {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class SUB:
+    operands: tuple[Register, Register | Immediate]
+
+    def __str__(self) -> str:
+        return f"sub {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class CALL:
     target: AsmletId | FunctionId
 
+    def __str__(self) -> str:
+        return f"call {self.target.identify(1)}"
+
 
 @dataclass(kw_only=True, repr=False)
-class Return:
-    pass
+class RET:
+    def __str__(self) -> str:
+        return "ret"
+
+
+@dataclass(kw_only=True, repr=False)
+class SYSCALL:
+    def __str__(self) -> str:
+        return "syscall"

@@ -1,0 +1,7 @@
+- "Whole-Function Instruction Lowering"
+- "Register Allocation (semantic layer)"
+- "Calling Convention in Register Allocation"
+- "Argument-Placement Lowering"
+- "Function-Entry Prologue and Epilogue Lowering"
+- "Spill-Slot Assignment via Graph Coloring"
+- "Mid-Body Spill-Store Lowering"

@@ -4,6 +4,7 @@ from i13c.core.graph import GraphGroup
 from i13c.semantic.nodes.analyses.allocations import configure_allocations
 from i13c.semantic.nodes.analyses.asmlets import configure_asmlets
 from i13c.semantic.nodes.analyses.assigns import configure_assigns
+from i13c.semantic.nodes.analyses.blocklets import configure_blocklets
 from i13c.semantic.nodes.analyses.callings import configure_callings
 from i13c.semantic.nodes.analyses.calls import configure_calls
 from i13c.semantic.nodes.analyses.cflows import configure_control_flows
@@ -11,7 +12,7 @@ from i13c.semantic.nodes.analyses.cgraphs import configure_call_graphs
 from i13c.semantic.nodes.analyses.cpaths import configure_control_paths
 from i13c.semantic.nodes.analyses.dflows import configure_data_flows
 from i13c.semantic.nodes.analyses.entrypoints import configure_entrypoints
-from i13c.semantic.nodes.analyses.fnlet import configure_fnlets
+from i13c.semantic.nodes.analyses.fnlets import configure_fnlets
 from i13c.semantic.nodes.analyses.frames import configure_frames
 from i13c.semantic.nodes.analyses.liveness import configure_liveness
 from i13c.semantic.nodes.analyses.noreturns import configure_noreturns
@@ -27,6 +28,7 @@ def configure_analyses() -> GraphGroup:
             configure_allocations(),
             configure_asmlets(),
             configure_assigns(),
+            configure_blocklets(),
             configure_call_graphs(),
             configure_callings(),
             configure_calls(),
@@ -50,6 +52,7 @@ def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
         allocations=analyses.get("analyses/allocations"),
         asmlets=analyses.get("analyses/asmlets"),
         assigns=analyses.get("analyses/assigns"),
+        blocklets=analyses.get("analyses/blocklets"),
         callings=analyses.get("analyses/callings"),
         calls=analyses.get("analyses/calls"),
         cflows=analyses["analyses/cflows"],
@@ -63,5 +66,5 @@ def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
         noreturns=analyses.get("analyses/noreturns"),
         shuffles=analyses.get("analyses/shuffles"),
         spills=analyses.get("analyses/spills"),
-        statements=analyses.get("analyses/statements")
+        statements=analyses.get("analyses/statements"),
     )

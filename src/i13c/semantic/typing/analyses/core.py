@@ -4,6 +4,7 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.allocations import Allocation
 from i13c.semantic.typing.analyses.asmlets import Asmlet, AsmletId
 from i13c.semantic.typing.analyses.assigns import AssignLlvm
+from i13c.semantic.typing.analyses.blocklets import Blocklet, BlockletId
 from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.analyses.calls import CallLlvm
 from i13c.semantic.typing.analyses.cflows import ControlFlows
@@ -11,7 +12,7 @@ from i13c.semantic.typing.analyses.cgraphs import CallGraph
 from i13c.semantic.typing.analyses.cpaths import ControlPaths
 from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
-from i13c.semantic.typing.analyses.fnlet import Fnlet
+from i13c.semantic.typing.analyses.fnlets import Fnlet
 from i13c.semantic.typing.analyses.frames import StackFrame
 from i13c.semantic.typing.analyses.liveness import Liveness
 from i13c.semantic.typing.analyses.noreturns import NoReturn
@@ -31,6 +32,7 @@ class AnalysisNodes:
     allocations: OneToOne[FunctionId, Allocation] | None
     asmlets: OneToOne[AsmletId, Asmlet] | None
     assigns: OneToOne[AssignId, AssignLlvm] | None
+    blocklets: OneToOne[BlockletId, Blocklet] | None
     callings: OneToOne[CallSiteId, Calling] | None
     calls: OneToOne[CallId, CallLlvm] | None
     cflows: OneToOne[FunctionId, ControlFlows] | None

@@ -1,0 +1,6 @@
+title: "Instruction-Table Grouping by SDM Opcode Group"
+status: not-completed
+mentioned_by:
+  - "Consolidating Fnlet and Asmlet into a Shared Blocklet Instruction Vocabulary"
+evidence:
+  - ".history/2026-08/2026-08-20-consolidating-fnlet-and-asmlet-into-a-shared-blocklet-instruction-vocabulary.yml session.not_completed (nodes/resolutions/mnemonics.py's INSTRUCTIONS_TABLE duplicates near-identical operand-variant lists per mnemonic — and/or ended up byte-for-byte identical, and a copy-paste of that pattern onto shl/shr's shift-count operand had to be caught and reverted; user proposed modeling the table around the SDM's own opcode-group concept, Vol 2 Appendix B's \"Group 1\" ALU opcodes (ADD/OR/ADC/SBB/AND/SUB/XOR/CMP sharing one operand-encoding shape, differing only by ModRM.reg sub-opcode), instead of a flat per-mnemonic list, as a future session)"

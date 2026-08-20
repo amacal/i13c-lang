@@ -1,0 +1,1 @@
+Unified compiled-function (Fnlet) and asm-snippet (Asmlet) bodies into one shared, closed pseudo-instruction vocabulary and a single Blocklet type, adding a new label-driven block-splitting/relocation pass for asmlets, as the intended single artifact any future backend consumes before encoding.

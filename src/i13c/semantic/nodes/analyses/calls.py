@@ -2,15 +2,16 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
+from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.analyses.calls import CallInstruction, CallLlvm
 from i13c.semantic.typing.analyses.llvm import (
-    Call,
-    Exchange,
+    CALL,
+    MOV,
+    XCHG,
+    Address,
     Immediate,
-    Move,
     Register,
-    Slot,
 )
 from i13c.semantic.typing.analyses.shuffles import (
     ShuffleCallSite,
@@ -78,8 +79,8 @@ def emit(
         for move in shuffle.moves:
             if isinstance(move, ShuffleMove):
                 instructions.append(
-                    Move(
-                        variant=(
+                    MOV(
+                        operands=(
                             Register(name=move.dst),
                             Register(name=move.src),
                         )
@@ -90,9 +91,11 @@ def emit(
         for move in shuffle.moves:
             if isinstance(move, ShuffleExchange):
                 instructions.append(
-                    Exchange(
-                        dst=Register(name=move.dst),
-                        src=Register(name=move.src),
+                    XCHG(
+                        operands=(
+                            Register(name=move.dst),
+                            Register(name=move.src),
+                        )
                     )
                 )
 
@@ -100,10 +103,13 @@ def emit(
         for move in shuffle.moves:
             if isinstance(move, ShuffleLoad):
                 instructions.append(
-                    Move(
-                        variant=(
+                    MOV(
+                        operands=(
                             Register(name=move.dst),
-                            Slot(idx=move.src),
+                            Address(
+                                base=Register(name=b"rsp"),
+                                disp=Hex.smallest(8 * move.src),
+                            ),
                         )
                     )
                 )
@@ -112,8 +118,8 @@ def emit(
         for move in shuffle.moves:
             if isinstance(move, ShuffleImmediate):
                 instructions.append(
-                    Move(
-                        variant=(
+                    MOV(
+                        operands=(
                             Register(name=move.dst),
                             Immediate(value=move.src),
                         )
@@ -121,10 +127,10 @@ def emit(
                 )
 
     if asmlet := asmlets.find(entry.target.callsite):
-        instructions.append(Call(target=asmlet.id))
+        instructions.append(CALL(target=asmlet.id))
 
     elif function := functions.find(entry.target.callsite):
-        instructions.append(Call(target=function.id))
+        instructions.append(CALL(target=function.id))
 
 
 class ListExtractor:

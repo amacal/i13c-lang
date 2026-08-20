@@ -1,0 +1,69 @@
+date: "2026-08-20"
+title: "Consolidating Fnlet and Asmlet into a Shared Blocklet Instruction Vocabulary"
+session:
+  files:
+    - "src/i13c/semantic/typing/analyses/llvm.py"
+    - "src/i13c/semantic/typing/analyses/blocklets.py"
+    - "src/i13c/semantic/nodes/analyses/blocklets.py"
+    - "src/i13c/semantic/typing/analyses/fnlets.py"
+    - "src/i13c/semantic/nodes/analyses/fnlets.py"
+    - "src/i13c/semantic/typing/analyses/calls.py"
+    - "src/i13c/semantic/nodes/analyses/calls.py"
+    - "src/i13c/semantic/typing/analyses/assigns.py"
+    - "src/i13c/semantic/nodes/analyses/assigns.py"
+    - "src/i13c/semantic/typing/analyses/statements.py"
+    - "src/i13c/semantic/nodes/analyses/statements.py"
+    - "src/i13c/semantic/typing/analyses/core.py"
+    - "src/i13c/semantic/nodes/analyses/core.py"
+    - "src/i13c/semantic/core.py"
+    - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+  source: —
+  status: completed
+  attempted:
+    - "Consolidate Fnlet (compiled function bodies) and Asmlet (raw asm-snippet bodies) into a single shared Blocklet type with one closed pseudo-instruction vocabulary, consumable identically by any downstream backend"
+  explored:
+    - "Whether Blocklet should be one type per block or one type per function/asmlet holding all its blocks; settled on the latter, mirroring Fnlet's existing {ref, target, blocks} shape"
+    - "Block-splitting rule for asmlets: compared classic leader-based basic-block construction (split after every branch) against a narrower labels-only rule, and why the narrower rule is sufficient given asmlet registers are never re-run through liveness/allocation, unlike Fnlet's"
+    - "Whether llvm.py's existing operand/instruction vocabulary already covered asmlet needs; found gaps (no memory-addressing operand, no jump-target operand, no arbitrary mnemonic beyond Move/Exchange/Call/Return) via the concrete case of data/hello.i13c's print_asm asmlet (AND, SHR, LOOP mnemonics, and a base+index+displacement addressing mode)"
+    - "Investigated whether encoding/ already consumed any part of this work; found encoding/__init__.py's DISPATCH_TABLE already wired to a separate, older instruction vocabulary at llvm/typing/instructions/ (width-aware Register, ComputedAddress with base+index*scale+displacement, an existing BlockId), including a half-built, abandoned Block.instructions field in llvm/typing/blocks.py attempting the same consolidation previously"
+    - "Direction for llvm/'s planned rewrite: whether it should retain independent register allocation for cross-backend comparison, or become a pure emission layer consuming the same post-allocation Blocklet encoding/ will consume"
+    - "Raised again whether register allocation should accept a reshuffle as a new color mid-lifetime rather than one fixed color per value (\"less aggressive coloring\"); confirmed as the already-tracked Live-Range Splitting target and deferred again"
+    - "Whether OR's 16-bit and 8-bit register forms are real x86 encodings, checked against the Intel SDM Vol 2B OR—Logical Inclusive OR opcode table (docs/325383-sdm-vol-2abcd.pdf, physical page 902 / printed 4-168)"
+  tried:
+    - "Considered reusing the existing llvm/typing/instructions/ and llvm/typing/blocks.py::Block types instead of building a new vocabulary in semantic/; chose to build the new vocabulary and retarget encoding/'s DISPATCH_TABLE onto it in a later session instead"
+    - "Considered folding the asmlet mnemonic-to-typed-instruction dispatch into the existing build_asmlets pass; placed it in a new, separate pass instead, mirroring build_fnlets's position downstream of already-resolved data"
+  corrections:
+    - "Assumed the encoding/ backend had no existing consumer of any pseudo-instruction vocabulary; corrected — encoding/__init__.py's DISPATCH_TABLE already consumes a separate, older vocabulary at llvm/typing/instructions/, unrelated to this session's semantic/typing/analyses/llvm.py"
+    - "Assumed asmlet block-splitting needed the classic leader rule (split after every branch); corrected to a labels-only rule specific to asmlets, since their registers are never re-run through liveness/allocation the way Fnlet's are"
+    - "A first draft of emit_fnlets built a separate Blocklet per individual FnletBlock rather than one Blocklet holding all of a function's blocks together; corrected to match Fnlet's own {target, blocks: list[...]} shape"
+    - "While rewriting src/tests/semantic/nodes/analyses/calls.py from isinstance-based assertions to the new .listing() string style, three assertions (can_detect_calls_with_asm_callsite_using_literal, _with_correct_params, _with_shifted_params) introduced incorrect expected strings; corrected against the prior, already-validated assertions as ground truth"
+    - "Added (reg16, reg16) and (reg8, reg8) shift-count variants to INSTRUCTIONS_TABLE's shl/shr entries, copied from and/or's pattern; reverted — x86 shift instructions only accept an immediate or the CL register as the shift-count operand, per the file's own pre-existing (reg64, reg8(b\"cl\")) entry"
+  bugs_found:
+    - "nodes/analyses/fnlets.py's emit_prologue and nodes/analyses/calls.py's ShuffleLoad handling computed a spill address's displacement directly from the slot index (Hex.smallest(entry.slot) / Hex.smallest(move.src)) without multiplying by 8 bytes-per-slot, inconsistent with the adjacent Hex.smallest(8 * frame.slots) used for the total stack allocation; two spilled values would have overlapped by 7 bytes instead of landing 8 bytes apart. Fixed to Hex.smallest(8 * entry.slot) / Hex.smallest(8 * move.src) in both places"
+    - "A first working draft of emit_asmlets built its final Blocklet from the leftover instructions variable (only the last still-open block) instead of the accumulated blocks list, silently dropping every earlier block; fixed before being tested"
+    - "data/hello.i13c's print_asm asmlet resolves [rsp + r11 - 0x10] and [rsp + rcx - 0x30] (base + index register + displacement) as base+displacement only, silently dropping the index register — confirmed via the resolutions/addresses/accepted model view; traced to entities/addresses.py's Address/AddressAcceptance/AsmletOperandAddress, none of which have an index-register field. Not fixed this session, tracked as a future target"
+  completed:
+    - "Extended typing/analyses/llvm.py's pseudo-instruction vocabulary with Address, Relocation, BSWAP, LEA, SHR, SHL, AND, OR, NOP, LOOP, JMP, PUSH, POP, ADD, SUB, SYSCALL, unifying it onto one closed set (MOV/XCHG/CALL/RET) instead of two separate, overlapping vocabularies an intermediate draft had produced"
+    - "Added typing/analyses/blocklets.py and nodes/analyses/blocklets.py: Blocklet{ref, id, target: FunctionId|AsmletId, blocks: list[BlockletBlock]}, built by unifying emit_fnlets (one Blocklet per function) and a new emit_asmlets pass (one Blocklet per asmlet) into one OneToOne[BlockletId, Blocklet] table"
+    - "Implemented emit_asmlets's mnemonic-to-typed-instruction dispatch (mov/bswap/xchg/nop/jmp/syscall/and/or/lea/shr/shl/loop), converting each Asmlet's raw AsmletInstruction stream into the closed llvm.py vocabulary"
+    - "Implemented label-driven block-splitting for asmlets (a fixes: dict[int, int] pre-scan pass over every instruction's relocation operands, run before emission) and a two-phase relocation design (EmitRelocation collected during emission with a placeholder Relocation(block=0), patched once real block indices are known)"
+    - "Replaced nodes/analyses/fnlet.py and typing/analyses/fnlet.py with fnlets.py in both locations, rewriting emit_prologue/emit_epilogue onto the unified vocabulary"
+    - "Fixed the x8 slot-to-byte scaling bug in nodes/analyses/fnlets.py and nodes/analyses/calls.py"
+    - "Added b\"ret\" and a fully-populated b\"or\" entry (reg64/reg32/reg16/reg8/addr tiers) to nodes/resolutions/mnemonics.py's INSTRUCTIONS_TABLE, verified against the Intel SDM"
+    - "Added src/tests/semantic/nodes/analyses/blocklets.py (asmlet block-splitting, including a loop-to-entry and a loop-to-middle two-block case) and rewrote src/tests/semantic/nodes/analyses/calls.py, assigns.py, statements.py onto a new .listing()-based string-assertion style"
+    - "Verified make lint and make test-semantic both pass (413 tests, up from 407) with all changes in place"
+  not_completed:
+    - "Address's missing index-register field (needed for data/hello.i13c's actual addressing modes) was diagnosed but not fixed"
+    - "The build_callings asmlet-clobbers-vs-bindings invariant bug (tracked separately) was re-traced to its exact location but not fixed"
+    - "Wiring encoding/ (or a future rewritten llvm/) to actually consume Blocklet was not attempted; remains the ultimate motivating goal"
+    - "or/and's INSTRUCTIONS_TABLE entries still lack (reg16, addr)/(reg8, addr)/(addr, reg16)/(addr, reg8) forms"
+    - "llvm/'s planned rewrite direction (a pure emission layer over Blocklet, not independent register allocation, and not spec-faithful LLVM IR) was decided but CLAUDE.md's own text describing llvm/ was not updated to match; the user stated they would update it themselves"
+    - "Live-Range Splitting (\"less aggressive coloring\") was raised again and deferred, unchanged from prior sessions"
+    - "A new idea — modeling INSTRUCTIONS_TABLE around the SDM's own opcode-group concept instead of per-mnemonic duplication — was proposed and deferred to its own future session"
+  open_questions: —
+  notes:
+    - "Added docs/325383-sdm-vol-2abcd.pdf (Intel SDM Vol 2A-2D combined instruction set reference), the first spec document in this repo's docs/"
+    - "Added poppler-utils to .devcontainer/Dockerfile's apt-install line (provides pdftoppm/pdftocairo) and installed it in the running container"
+    - "Edited CLAUDE.md's own 'Spec study sessions' and 'Session closing ritual' text, by explicit user instruction: .tmp/'s rendered spec-page images now persist indefinitely across sessions as a reusable cache (organized as .tmp/<doc-slug>/<page>-<slug>.png) instead of being deleted at each session's closing ritual"
+    - "data/hello.i13c's print_asm asmlet is not marked noreturn and has no explicit ret at the end of its body (ends in a returning syscall); since asmlet calls compile to a real CALL instruction, this would fall through past the asmlet's own compiled code. Noted, not fixed (data/ is out of scope)"
+    - "Blocklet's .listing() method (a plain list[str] of each instruction's __str__) was applied broadly across this session's new/rewritten tests, directly answering the per-instruction content-testing gap named by the still-open 'Testing Generated Instruction Sequences' future target, though that target was not marked resolved"

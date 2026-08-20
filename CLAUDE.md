@@ -125,12 +125,16 @@ document name and section/page number.
   `pdftoppm`/`pdftocairo` (`-png -r <dpi>`) into `.tmp/{page}.png`, named by the
   document's printed page number where it differs from the PDF's physical page index,
   and read them directly with multimodal vision. Use 200 DPI by default, raised to
-  ~300 DPI for dense encoding tables or small annotations. `.tmp/` is gitignored and its
-  contents are deleted only at the Session closing ritual — never earlier, so pages
-  already rendered this session can be re-referenced without re-rendering. This applies
-  to every session, not only dedicated spec-study sessions — implementation sessions
-  constantly need to re-check an opcode table or the ABI register-usage table mid-session,
-  and the same rendering discipline applies.
+  ~300 DPI for dense encoding tables or small annotations. `.tmp/` is gitignored and
+  persists indefinitely, across sessions, as a reusable page-render cache — never
+  deleted automatically, so a page rendered in an earlier session is re-referenced
+  directly instead of re-rendered. Keep it well organized so this stays usable as it
+  grows: one subdirectory per source document (e.g. `.tmp/<doc-slug>/`), each page named
+  by its printed page number where it differs from the PDF's physical page index, plus a
+  short descriptive slug (e.g. `4-168-or.png`). This applies to every session, not only
+  dedicated spec-study sessions — implementation sessions constantly need to re-check an
+  opcode table or the ABI register-usage table mid-session, and the same rendering
+  discipline applies.
 - This ban on `pdftotext` (or any other text-extraction tool) against a spec PDF is
   total, not just for content: never invoke it for any purpose whatsoever, including
   locating a section by heading, finding an opcode's page, or building a searchable
@@ -476,9 +480,9 @@ Two sequential agent calls:
    instead of re-deriving "what changed" by globbing the whole tree. Fix any found
    directly yourself (don't spawn another agent for this).
 
-Once the verify agent finishes: delete every file under `.tmp/` (the rendered spec-page
-images) — this is the only point in the session they may be removed, for any session
-kind.
+Once the verify agent finishes, the ritual is complete — `.tmp/`'s rendered pages are
+left in place. They're a persistent, cross-session cache (see "Spec study sessions"),
+not session-scoped, so nothing there gets cleaned up as part of closing.
 
 ## Workflow
 

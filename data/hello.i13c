@@ -28,7 +28,9 @@ asm print_asm(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
     lea rsi, [rsp - 0x30];
     mov rdx, 0x11;
     mov rax, 0x01;
+
     syscall;
+    ret;
 }
 
 fn print(value: u64) {
