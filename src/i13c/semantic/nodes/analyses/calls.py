@@ -108,7 +108,8 @@ def emit(
                             Register(name=move.dst),
                             Address(
                                 base=Register(name=b"rsp"),
-                                disp=Hex.smallest(8 * move.src),
+                                indx=None,
+                                disp=Hex.smallest(8 * move.src).data,
                             ),
                         )
                     )

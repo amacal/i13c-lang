@@ -152,7 +152,7 @@ def can_substitute_a_snippet_with_a_base_register_parameter():
     assert instr.operands[1].symbol == "addr"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
     assert instr.operands[1].target.base.name == b"rcx"
-    assert instr.operands[1].target.displacement is None
+    assert instr.operands[1].target.disp is None
 
 
 def can_substitute_a_snippet_with_a_label_relocation_forward():
@@ -219,7 +219,101 @@ def can_substitute_a_snippet_with_a_label_relocation_backward():
     assert instr.operands[0].target.offset == -1
 
 
-def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement():
+def can_substitute_a_snippet_with_a_index_register():
+    entities, analyses = prepare_analyses("""
+        asm bar(v@rcx: u8) { mov rax, [@v + rax]; }
+        fn main() { bar(0x01); }
+    """)
+
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peek()
+
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peek()
+
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
+
+    assert asmlet.source == id
+    assert len(asmlet.bindings) == 1
+    assert len(asmlet.clobbers) == 0
+
+    assert asmlet.bindings[0].src == b"v"
+    assert asmlet.bindings[0].dst == b"rcx"
+    assert asmlet.bindings[0].mode == "register"
+
+    assert len(asmlet.parameters) == 1
+    assert asmlet.parameters[0].name == b"v"
+    assert asmlet.parameters[0].type.name == b"u8"
+    assert asmlet.parameters[0].type.width == 8
+
+    assert len(asmlet.instructions) == 1
+    instr = asmlet.instructions[0]
+
+    assert instr.mnemonic == b"mov"
+    assert len(instr.operands) == 2
+
+    assert instr.operands[0].symbol == "reg64"
+    assert isinstance(instr.operands[0].target, AsmletOperandRegister)
+    assert instr.operands[0].target.name == b"rax"
+
+    assert instr.operands[1].symbol == "addr"
+    assert isinstance(instr.operands[1].target, AsmletOperandAddress)
+    assert instr.operands[1].target.base.name == b"rcx"
+
+    assert instr.operands[1].target.indx is not None
+    assert instr.operands[1].target.indx.name == b"rax"
+
+
+def can_substitute_a_snippet_with_a_index_register_indirectly():
+    entities, analyses = prepare_analyses("""
+        asm bar(v@rcx: u8) { mov rax, [rax + @v]; }
+        fn main() { bar(0x01); }
+    """)
+
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peek()
+
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peek()
+
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
+
+    assert asmlet.source == id
+    assert len(asmlet.bindings) == 1
+    assert len(asmlet.clobbers) == 0
+
+    assert asmlet.bindings[0].src == b"v"
+    assert asmlet.bindings[0].dst == b"rcx"
+    assert asmlet.bindings[0].mode == "register"
+
+    assert len(asmlet.parameters) == 1
+    assert asmlet.parameters[0].name == b"v"
+    assert asmlet.parameters[0].type.name == b"u8"
+    assert asmlet.parameters[0].type.width == 8
+
+    assert len(asmlet.instructions) == 1
+    instr = asmlet.instructions[0]
+
+    assert instr.mnemonic == b"mov"
+    assert len(instr.operands) == 2
+
+    assert instr.operands[0].symbol == "reg64"
+    assert isinstance(instr.operands[0].target, AsmletOperandRegister)
+    assert instr.operands[0].target.name == b"rax"
+
+    assert instr.operands[1].symbol == "addr"
+    assert isinstance(instr.operands[1].target, AsmletOperandAddress)
+    assert instr.operands[1].target.base.name == b"rax"
+
+    assert instr.operands[1].target.indx is not None
+    assert instr.operands[1].target.indx.name == b"rcx"
+
+
+def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement_positive():
     entities, analyses = prepare_analyses("""
         asm bar(v@rcx: u8) { mov rax, [@v + 0x10]; }
         fn main() { bar(0x01); }
@@ -262,9 +356,55 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement():
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
     assert instr.operands[1].target.base.name == b"rcx"
 
-    assert instr.operands[1].target.displacement is not None
-    assert instr.operands[1].target.displacement.width == 8
-    assert instr.operands[1].target.displacement.data.hex() == "10"
+    assert instr.operands[1].target.disp is not None
+    assert instr.operands[1].target.disp.hex() == "0x10"
+
+
+def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement_negative():
+    entities, analyses = prepare_analyses("""
+        asm bar(v@rcx: u8) { mov rax, [@v - 0x10]; }
+        fn main() { bar(0x01); }
+    """)
+
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peek()
+
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peek()
+
+    assert len(asmlet.keys) == 0
+    assert len(asmlet.callsites) == 1
+
+    assert asmlet.source == id
+    assert len(asmlet.bindings) == 1
+    assert len(asmlet.clobbers) == 0
+
+    assert asmlet.bindings[0].src == b"v"
+    assert asmlet.bindings[0].dst == b"rcx"
+    assert asmlet.bindings[0].mode == "register"
+
+    assert len(asmlet.parameters) == 1
+    assert asmlet.parameters[0].name == b"v"
+    assert asmlet.parameters[0].type.name == b"u8"
+    assert asmlet.parameters[0].type.width == 8
+
+    assert len(asmlet.instructions) == 1
+    instr = asmlet.instructions[0]
+
+    assert instr.mnemonic == b"mov"
+    assert len(instr.operands) == 2
+
+    assert instr.operands[0].symbol == "reg64"
+    assert isinstance(instr.operands[0].target, AsmletOperandRegister)
+    assert instr.operands[0].target.name == b"rax"
+
+    assert instr.operands[1].symbol == "addr"
+    assert isinstance(instr.operands[1].target, AsmletOperandAddress)
+    assert instr.operands[1].target.base.name == b"rcx"
+
+    assert instr.operands[1].target.disp is not None
+    assert instr.operands[1].target.disp.hex() == "0xf0"
 
 
 def can_substitute_only_once_the_same_signatured_called_twice():

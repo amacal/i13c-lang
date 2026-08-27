@@ -29,30 +29,41 @@ def build_addresses(
         # derive address ID from globally unique node ID
         address_id = AddressId(value=nid.value)
 
+        # optionally available index or offset information
+        indx_id: RegisterId | ReferenceId | None = None
+        offset: Offset | None = None
+
         # reverse mapping to base register ID
         if isinstance(entry.base, tree.snippet.Register):
-            base = graph.snippet.registers.get_by_node(entry.base)
-            base_id = RegisterId(value=base.value)
+            base_nid = graph.snippet.registers.get_by_node(entry.base)
+            base_id = RegisterId(value=base_nid.value)
         else:
-            base = graph.snippet.references.get_by_node(entry.base)
-            base_id = ReferenceId(value=base.value)
+            base_nid = graph.snippet.references.get_by_node(entry.base)
+            base_id = ReferenceId(value=base_nid.value)
+
+        # reverse mapping to index register ID
+        if entry.indx is not None:
+            if isinstance(entry.indx, tree.snippet.Register):
+                indx_nid = graph.snippet.registers.get_by_node(entry.indx)
+                indx_id = RegisterId(value=indx_nid.value)
+            else:
+                indx_nid = graph.snippet.references.get_by_node(entry.indx)
+                indx_id = ReferenceId(value=indx_nid.value)
 
         # reverse mapping to immediate ID
         if entry.offset is not None:
-            offset = graph.snippet.immediates.get_by_node(entry.offset.value)
-            offset_id = ImmediateId(value=offset.value)
+            offset_nid = graph.snippet.immediates.get_by_node(entry.offset.value)
+            offset_id = ImmediateId(value=offset_nid.value)
 
             offset = Offset(
                 kind=entry.offset.kind,
                 value=offset_id,
             )
 
-        else:
-            offset = None
-
         addresses[address_id] = Address(
             ref=entry.ref,
             base=base_id,
+            indx=indx_id,
             offset=offset,
         )
 

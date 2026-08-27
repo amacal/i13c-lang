@@ -28,11 +28,11 @@ class AddressRejection:
 class OffsetAcceptance:
     kind: OffsetKind
     width: OffsetWidth
-    value: ImmediateAcceptance
+    imm: ImmediateAcceptance
 
     @property
     def data(self) -> bytes:
-        return self.value.value.data
+        return self.imm.value.data
 
 
 @dataclass(kw_only=True)
@@ -41,6 +41,7 @@ class AddressAcceptance:
     id: AddressId
 
     base: AddressBase
+    indx: AddressBase | None
     offset: OffsetAcceptance | None
 
     def __str__(self) -> str:
@@ -48,9 +49,9 @@ class AddressAcceptance:
 
         if self.offset is not None:
             if self.offset.kind == "forward":
-                output += f" + {self.offset.value.value}"
+                output += f" + {self.offset.imm.value}"
             else:
-                output += f" - {self.offset.value.value}"
+                output += f" - {self.offset.imm.value}"
 
         return f"[{output}]"
 

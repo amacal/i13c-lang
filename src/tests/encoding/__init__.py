@@ -3,9 +3,17 @@ from typing import Any
 
 from pytest import mark
 
-from i13c.encoding import encode
+from i13c.encoding import DISPATCH_TABLE
 from i13c.encoding.core import UnreachableEncodingError
-from i13c.llvm.typing.instructions import Instruction, core
+from i13c.semantic.core import Hex
+from i13c.semantic.typing.analyses.blocklets import BlockletInstruction
+from i13c.semantic.typing.analyses.llvm import (
+    Address,
+    Fixed,
+    Immediate,
+    Index,
+    Register,
+)
 
 
 def parse_value(header: str, value: str) -> str | int | bytes | None:
@@ -15,7 +23,7 @@ def parse_value(header: str, value: str) -> str | int | bytes | None:
     if header in ("scale"):
         return int(value, 16)
 
-    if header in ("imm8", "imm32", "imm64", "disp8", "disp32"):
+    if header in ("imm", "imm8", "imm32", "imm64", "disp8", "disp32"):
         return bytes.fromhex(value[2:])
 
     return value
@@ -63,32 +71,62 @@ def samples(table: str):
     return wrapper
 
 
-def parse_address(
-    base: str | None,
-    scale: core.ScaleValue | None,
-    index: str | None,
-    disp32: bytes | None,
-) -> core.ComputedAddress | core.RelativeAddress:
+class RegisterInfo:
+    @staticmethod
+    def auto(name: str) -> Register:
+        return Register(name=name.encode("utf-8"))
 
-    if base == "rip" and scale is None and index is None:
-        return core.RelativeAddress(
-            disp=core.Displacement.auto(disp32),
-            width=64,
+    @staticmethod
+    def optional(name: str | None) -> Register | None:
+        return RegisterInfo.auto(name) if name is not None else None
+
+
+class ImmediateInfo:
+    @staticmethod
+    def auto(value: bytes) -> Immediate:
+        return Immediate(value=Hex.derive(value))
+
+
+class IndexInfo:
+    @staticmethod
+    def optional(reg: str | None, scale: int | None) -> Index | None:
+        return (
+            Index(reg=RegisterInfo.auto(reg), val=scale)
+            if reg is not None and scale is not None
+            else None
         )
 
-    return core.ComputedAddress(
-        base=core.Register.auto(base),
-        disp=core.Displacement.auto(disp32),
-        scaler=core.Scaler.auto(index, scale),
-        width=64,
+class DisplacementInfo:
+    @staticmethod
+    def auto(value: bytes | None) -> bytes | None:
+        return value if value and len(value.strip(bytes([0x00]))) else None
+
+
+def parse_address(
+    base: str | None,
+    scale: int | None,
+    index: str | None,
+    disp32: bytes | None,
+) -> Address | Fixed:
+
+    if base == "rip" and scale is None and index is None and disp32 is not None:
+        return Fixed(value=disp32)
+
+    return Address(
+        base=RegisterInfo.optional(base),
+        indx=IndexInfo.optional(index, scale),
+        disp=disp32,
     )
 
 
-def encode_instruction(instruction: Instruction, encoding: bytes | None) -> None:
+def encode_instruction(
+    instruction: BlockletInstruction, encoding: bytes | None
+) -> None:
     try:
-        encoded = encode([instruction]).hex(" ")
+        bytes = bytearray()
+        DISPATCH_TABLE[type(instruction)](instruction, bytes)
 
         assert encoding is not None
-        assert encoded == encoding.hex(" ")
+        assert bytes.hex(" ") == encoding.hex(" ")
     except UnreachableEncodingError:
         assert encoding is None

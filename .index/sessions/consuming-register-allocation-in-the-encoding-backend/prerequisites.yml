@@ -1,0 +1,8 @@
+- "Liveness Analysis"
+- "Register Allocation (semantic layer)"
+- "Calling Convention in Register Allocation"
+- "Spill-Slot Assignment via Graph Coloring"
+- "Function-Entry Prologue and Epilogue Lowering"
+- "Mid-Body Spill-Store Lowering"
+- "Whole-Function Instruction Lowering"
+- "Consolidating Fnlet and Asmlet into a Shared Blocklet Instruction Vocabulary"

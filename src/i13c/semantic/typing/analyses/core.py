@@ -16,6 +16,7 @@ from i13c.semantic.typing.analyses.fnlets import Fnlet
 from i13c.semantic.typing.analyses.frames import StackFrame
 from i13c.semantic.typing.analyses.liveness import Liveness
 from i13c.semantic.typing.analyses.noreturns import NoReturn
+from i13c.semantic.typing.analyses.sections import Section, SectiontId
 from i13c.semantic.typing.analyses.shuffles import Shuffle
 from i13c.semantic.typing.analyses.spills import Spill
 from i13c.semantic.typing.analyses.statements import StatementLlvm
@@ -44,6 +45,7 @@ class AnalysisNodes:
     frames: OneToOne[FunctionId, StackFrame] | None
     liveness: OneToOne[FunctionId, Liveness] | None
     noreturns: OneToOne[SignatureId, NoReturn] | None
+    sections: OneToOne[SectiontId, Section] | None
     shuffles: OneToOne[FunctionId, Shuffle] | None
     spills: OneToOne[FunctionId, Spill] | None
     statements: OneToOne[StatementId, StatementLlvm] | None

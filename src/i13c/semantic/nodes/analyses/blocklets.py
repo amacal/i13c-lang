@@ -37,6 +37,7 @@ from i13c.semantic.typing.analyses.llvm import (
     XCHG,
     Address,
     Immediate,
+    Index,
     Register,
     Relocation,
 )
@@ -292,9 +293,16 @@ def accept_addr(operand: AsmletOperand) -> Address:
     # sanity checks
     assert isinstance(operand.target, AsmletOperandAddress)
 
+    index = (
+        Index(reg=Register(name=operand.target.indx.name), val=1)
+        if operand.target.indx is not None
+        else None
+    )
+
     return Address(
         base=Register(name=operand.target.base.name),
-        disp=operand.target.displacement,
+        indx=index,
+        disp=operand.target.disp.value if operand.target.disp is not None else None,
     )
 
 
@@ -308,10 +316,20 @@ def accept_reg_addr(operand: AsmletOperand) -> Register | Address:
         ),
     )
 
+    index: Index | None = None
+
+    if isinstance(operand.target, AsmletOperandAddress):
+        index = (
+            Index(reg=Register(name=operand.target.indx.name), val=1)
+            if operand.target.indx is not None
+            else None
+        )
+
     if isinstance(operand.target, AsmletOperandAddress):
         return Address(
             base=Register(name=operand.target.base.name),
-            disp=operand.target.displacement,
+            indx=index,
+            disp=operand.target.disp.value if operand.target.disp is not None else None,
         )
 
     return Register(name=operand.target.name)
@@ -344,13 +362,23 @@ def accept_reg_imm_addr(operand: AsmletOperand) -> Register | Immediate | Addres
         ),
     )
 
+    index: Index | None = None
+
+    if isinstance(operand.target, AsmletOperandAddress):
+        index = (
+            Index(reg=Register(name=operand.target.indx.name), val=1)
+            if operand.target.indx is not None
+            else None
+        )
+
     if isinstance(operand.target, AsmletOperandImmediate):
         return Immediate(value=operand.target.value)
 
     if isinstance(operand.target, AsmletOperandAddress):
         return Address(
             base=Register(name=operand.target.base.name),
-            disp=operand.target.displacement,
+            indx=index,
+            disp=operand.target.disp.value if operand.target.disp is not None else None,
         )
 
     return Register(name=operand.target.name)

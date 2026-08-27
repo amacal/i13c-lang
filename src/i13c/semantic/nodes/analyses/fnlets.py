@@ -86,7 +86,8 @@ def emit_prologue(instructions: list[FnletInstruction], frame: StackFrame):
                 operands=(
                     Address(
                         base=Register(name=b"rsp"),
-                        disp=Hex.smallest(8 * entry.slot),
+                        indx=None,
+                        disp=Hex.smallest(8 * entry.slot).data,
                     ),
                     Register(name=entry.name),
                 ),

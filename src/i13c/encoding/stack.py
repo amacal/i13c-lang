@@ -1,100 +1,54 @@
-
-from i13c.encoding.core import LabelArtifact, RelocationArtifact
-from i13c.encoding.intel import REX, SIB, Displacement, ModRM, Opcode
-from i13c.llvm.typing.instructions.stack import PopOff, PushOff
+from i13c.encoding import kind
+from i13c.semantic.typing.analyses.llvm import POP, PUSH
 
 
-def encode_push_off(
-    instruction: PushOff, bytecode: bytearray
-) -> LabelArtifact | RelocationArtifact | None:
+def encode_push(instruction: PUSH, bytecode: bytearray) -> None:
+    # sanity check
+    assert len(instruction.operands) == 1
 
-    # chosen encoding: REX.W + FF /6
-    # encoded as: [rex] [opcode] [modrm] [sib?] [disp32]
+    # extract operands
+    target = instruction.operands[0]
 
-    sib = SIB(
-        scale=0,
-        index=None,
-        base=instruction.src,
+    # compute ModRM fields
+    modrm_reg = kind.encode_modrm_reg(0x06)
+    modrm_rm = kind.encode_modrm_rm(target)
+
+    # derive prefixes and rex
+    prefixes = kind.encode_prefixes(target)
+    rex = kind.encode_rex(
+        target,
+        modrm_reg=modrm_reg,
+        modrm_rm=modrm_rm,
     )
 
-    modrm = ModRM(
-        mod=0b10,
-        reg=6,
-        rm=sib.mod_rm(),
+    # encode instruction
+    kind.write_prefixes(bytecode, prefixes)
+    kind.write_rex(bytecode, rex)
+    kind.write_opcode(bytecode, 1, 0xFF)
+    kind.write_modrm(bytecode, modrm_reg, modrm_rm)
+
+
+def encode_pop(instruction: POP, bytecode: bytearray) -> None:
+    # sanity check
+    assert len(instruction.operands) == 1
+
+    # extract operands
+    target = instruction.operands[0]
+
+    # compute ModRM fields
+    modrm_reg = kind.encode_modrm_reg(0x00)
+    modrm_rm = kind.encode_modrm_rm(target)
+
+    # derive prefixes and rex
+    prefixes = kind.encode_prefixes(target)
+    rex = kind.encode_rex(
+        target,
+        modrm_reg=modrm_reg,
+        modrm_rm=modrm_rm,
     )
 
-    rex = REX(
-        w=False,  # ignored
-        r=False,
-        x=sib.rex_x(),
-        b=modrm.rex_b() or sib.rex_b(),
-    )
-
-    opcode = Opcode(
-        hex=0xFF,
-        reg=None,
-    )
-
-    disp32 = Displacement(
-        value=instruction.off,
-        width=4,
-        signed=True,
-    )
-
-    bytecode.extend(
-        [
-            *rex.to_bytes(),
-            opcode.to_byte(),
-            modrm.to_byte(),
-            *sib.to_bytes(),
-            *disp32.to_bytes(),
-        ]
-    )
-
-
-def encode_pop_off(
-    instruction: PopOff, bytecode: bytearray
-) -> LabelArtifact | RelocationArtifact | None:
-
-    # chosen encoding: REX.W + FF /0
-    # encoded as: [rex] [opcode] [modrm] [sib?] [disp32]
-
-    sib = SIB(
-        scale=0,
-        index=None,
-        base=instruction.dst,
-    )
-
-    modrm = ModRM(
-        mod=0b10,
-        reg=0,
-        rm=sib.mod_rm(),
-    )
-
-    rex = REX(
-        w=False,  # ignored
-        r=False,
-        x=sib.rex_x(),
-        b=modrm.rex_b() or sib.rex_b(),
-    )
-
-    opcode = Opcode(
-        hex=0x8F,
-        reg=None,
-    )
-
-    disp32 = Displacement(
-        value=instruction.off,
-        width=4,
-        signed=True,
-    )
-
-    bytecode.extend(
-        [
-            *rex.to_bytes(),
-            opcode.to_byte(),
-            modrm.to_byte(),
-            *sib.to_bytes(),
-            *disp32.to_bytes(),
-        ]
-    )
+    # encode instruction
+    kind.write_prefixes(bytecode, prefixes)
+    kind.write_rex(bytecode, rex)
+    kind.write_opcode(bytecode, 1, 0x8F)
+    kind.write_modrm(bytecode, modrm_reg, modrm_rm)

@@ -72,11 +72,23 @@ class AsmletOperandRelocation:
 
 
 @dataclass(kw_only=True)
+class AsmletOperandDisplacement:
+    value: bytes
+
+    def hex(self) -> str:
+        return f"0x{self.value.hex()}"
+
+
+@dataclass(kw_only=True)
 class AsmletOperandAddress:
     base: AsmletOperandRegister
-    displacement: Hex | None
+    indx: AsmletOperandRegister | None
+    disp: AsmletOperandDisplacement | None
 
 
 AsmletOperandTarget = (
-    AsmletOperandRegister | AsmletOperandImmediate | AsmletOperandAddress | AsmletOperandRelocation
+    AsmletOperandRegister
+    | AsmletOperandImmediate
+    | AsmletOperandAddress
+    | AsmletOperandRelocation
 )

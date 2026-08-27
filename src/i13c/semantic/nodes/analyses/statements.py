@@ -57,7 +57,8 @@ def build_statements(
                     operands=(
                         Address(
                             base=Register(name=b"rsp"),
-                            disp=Hex.smallest(spill.slot),
+                            indx=None,
+                            disp=Hex.smallest(8 * spill.slot).data,
                         ),
                         Register(name=spill.src),
                     )

@@ -1,12 +1,11 @@
 from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
-from i13c.core.mapping import OneToMany, OneToOne
+from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
-from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
 from i13c.semantic.typing.resolutions.snippets import SnippetAcceptance
 
@@ -20,7 +19,6 @@ def configure_entrypoints() -> GraphNode:
             {
                 ("snippets", "resolutions/snippets/accepted"),
                 ("functions", "resolutions/functions/accepted"),
-                ("cgraphs", "analyses/cgraphs"),
             }
         ),
         views=GraphViews(list=ListExtractor),
@@ -30,7 +28,6 @@ def configure_entrypoints() -> GraphNode:
 def build_entrypoints(
     snippets: OneToOne[SnippetId, SnippetAcceptance],
     functions: OneToOne[FunctionId, FunctionAcceptance],
-    cgraphs: OneToMany[SignatureId, StatementId],
 ) -> OneToOne[SignatureId, Entrypoint]:
     entrypoints: dict[SignatureId, Entrypoint] = {}
 

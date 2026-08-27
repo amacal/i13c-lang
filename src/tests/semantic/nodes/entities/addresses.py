@@ -27,12 +27,33 @@ def can_detect_an_offsetless_address():
     id, _ = entities.registers.peek()
 
     assert value.base == id
+    assert value.indx is None
+
+
+def can_detect_an_indexed_address():
+    entities = prepare_entities(
+        """
+            asm main() { mov [rax + rbx]; }
+        """
+    )
+
+    assert entities.addresses.size() == 1
+    _, value = entities.addresses.peek()
+
+    assert value.offset is None
+
+    assert entities.registers.size() == 2
+    ids = list(entities.registers.keys())
+
+    assert value.base in ids
+    assert value.indx in ids
+    assert value.base != value.indx
 
 
 def can_detect_a_forward_address():
     entities = prepare_entities(
         """
-            asm main() { call [rbx + 0x1234]; }
+            asm main() { jmp [rbx + 0x1234]; }
         """
     )
 
@@ -51,12 +72,13 @@ def can_detect_a_forward_address():
     id, _ = entities.immediates.peek()
 
     assert value.offset.value == id
+    assert value.indx is None
 
 
 def can_detect_a_backward_address():
     entities = prepare_entities(
         """
-            asm main() { call [rbx - 0x1234]; }
+            asm main() { jmp [rbx - 0x1234]; }
         """
     )
 
@@ -75,3 +97,4 @@ def can_detect_a_backward_address():
     id, _ = entities.immediates.peek()
 
     assert value.offset.value == id
+    assert value.indx is None

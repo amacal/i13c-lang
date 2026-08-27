@@ -5,7 +5,12 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.allocations import Allocation
 from i13c.semantic.typing.analyses.assigns import AssignInstruction, AssignLlvm
-from i13c.semantic.typing.analyses.llvm import MOV, Address, Immediate, Register
+from i13c.semantic.typing.analyses.llvm import (
+    MOV,
+    Address,
+    Immediate,
+    Register,
+)
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
@@ -79,7 +84,8 @@ def emit(
         else:
             src = Address(
                 base=Register(name=b"rsp"),
-                disp=Hex.smallest(allocation.spills[idx]),
+                indx=None,
+                disp=Hex.smallest(8 * allocation.spills[idx]).data,
             )
 
     # emit single instruction

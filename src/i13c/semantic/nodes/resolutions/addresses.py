@@ -18,6 +18,7 @@ from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
+from i13c.syntax.source import Span
 
 
 def configure_address_resolution() -> GraphGroup:
@@ -80,43 +81,38 @@ def build_address_resolution(
             rejected=[],
         )
 
-        # assume no offset is available
-        offset, register = None, None
+        # assume no offset nor registers are available
+        offset, base, indx = None, None, None
 
         # resolve base register
-        if isinstance(entry.base, RegisterId):
-            register = registers.get(entry.base)
+        match resolve_register(aid, entry.ref, entry.base, registers, references):
+            case AddressRejection() as rejection:
+                resolution.rejected.append(rejection)
+            case RegisterAcceptance() as register:
+                base = register
+            case ParameterAcceptance() as register:
+                base = register
 
-            if register.kind != "64bit":
-                resolution.rejected.append(
-                    AddressRejection(
-                        ref=entry.ref,
-                        id=aid,
-                        reason="invalid-register",
-                    )
-                )
-
-        else:
-            reference = references.get(entry.base)
-
-            if not isinstance(reference.target, ParameterAcceptance) or reference.target.bind == "literal":
-                resolution.rejected.append(
-                    AddressRejection(
-                        ref=entry.ref,
-                        id=aid,
-                        reason="invalid-register",
-                    )
-                )
-
-            else:
-                register = reference.target
+        # resolve index register, if present
+        if entry.indx is not None:
+            match resolve_register(aid, entry.ref, entry.indx, registers, references):
+                case AddressRejection() as rejection:
+                    resolution.rejected.append(rejection)
+                case RegisterAcceptance() as register:
+                    indx = register
+                case ParameterAcceptance() as register:
+                    indx = register
 
         # resolve offset immediate, if present
         if entry.offset is not None:
             immediate = immediates.get(entry.offset.value)
 
             # reject 64-bit immediates
-            if immediate.value.width == 64 or immediate.value.width == 32 and immediate.value.highest_bit():
+            if (
+                immediate.value.width == 64
+                or immediate.value.width == 32
+                and immediate.value.highest_bit()
+            ):
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
@@ -128,18 +124,19 @@ def build_address_resolution(
             else:
                 offset = OffsetAcceptance(
                     kind=entry.offset.kind,
-                    value=immediate,
+                    imm=immediate,
                     width=immediate.value.width,
                 )
 
         if len(resolution.rejected) == 0:
-            assert register is not None
+            assert base is not None
 
             resolution.accepted.append(
                 AddressAcceptance(
                     ref=entry.ref,
                     id=aid,
-                    base=register,
+                    base=base,
+                    indx=indx,
                     offset=offset,
                 )
             )
@@ -147,6 +144,42 @@ def build_address_resolution(
         resolutions[aid] = resolution
 
     return OneToOne[AddressId, AddressResolution].instance(resolutions)
+
+
+def resolve_register(
+    aid: AddressId,
+    ref: Span,
+    target: RegisterId | ReferenceId,
+    registers: OneToOne[RegisterId, RegisterAcceptance],
+    references: OneToOne[ReferenceId, ReferenceAcceptance],
+) -> RegisterAcceptance | ParameterAcceptance | AddressRejection:
+
+    if isinstance(target, RegisterId):
+        register = registers.get(target)
+
+        if register.kind != "64bit":
+            return AddressRejection(
+                ref=ref,
+                id=aid,
+                reason="invalid-register",
+            )
+
+        return register
+
+    else:
+        reference = references.get(target)
+
+        if (
+            not isinstance(reference.target, ParameterAcceptance)
+            or reference.target.bind == "literal"
+        ):
+            return AddressRejection(
+                ref=ref,
+                id=aid,
+                reason="invalid-register",
+            )
+
+        return reference.target
 
 
 def check_address_resolution_accepted(
@@ -246,6 +279,6 @@ class ListAcceptedExtractor:
             "id": key.identify(1),
             "base": entry.base.name.decode(),
             "okind": entry.offset.kind if entry.offset else "",
-            "owidth": str(entry.offset.value.value.width) if entry.offset else "",
-            "ovalue": str(entry.offset.value.value) if entry.offset else "",
+            "owidth": str(entry.offset.imm.value.width) if entry.offset else "",
+            "ovalue": str(entry.offset.imm.value) if entry.offset else "",
         }

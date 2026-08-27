@@ -2,10 +2,166 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from i13c.encoding.core import UnreachableEncodingError
-from i13c.llvm.typing.instructions import core as llvm
+from i13c.semantic.typing.analyses import llvm
 
-RegisterOrAddress = llvm.Register | llvm.ComputedAddress | llvm.RelativeAddress
+RegisterOrAddress = llvm.Register | llvm.Address | llvm.Relocation | llvm.Fixed
 RegisterOrConstant = llvm.Register | int
+
+
+# fmt: off
+REGISTERS = {
+    # 64-bit
+    b"rax": 0, b"rcx": 1, b"rdx": 2, b"rbx": 3, b"rsp": 4, b"rbp": 5, b"rsi": 6, b"rdi": 7,
+    b"r8": 8, b"r9": 9, b"r10": 10, b"r11": 11, b"r12": 12, b"r13": 13, b"r14": 14, b"r15": 15,
+
+    # 32-bit
+    b"eax": 0, b"ecx": 1, b"edx": 2, b"ebx": 3, b"esp": 4, b"ebp": 5, b"esi": 6, b"edi": 7,
+    b"r8d": 8, b"r9d": 9, b"r10d": 10, b"r11d": 11, b"r12d": 12, b"r13d": 13, b"r14d": 14, b"r15d": 15,
+
+    # 16-bit
+    b"ax": 0, b"cx": 1, b"dx": 2, b"bx": 3, b"sp": 4, b"bp": 5, b"si": 6, b"di": 7,
+    b"r8w": 8, b"r9w": 9, b"r10w": 10, b"r11w": 11, b"r12w": 12, b"r13w": 13, b"r14w": 14, b"r15w": 15,
+
+    # 8-bit low
+    b"al": 0, b"cl": 1, b"dl": 2, b"bl": 3, b"spl": 4, b"bpl": 5, b"sil": 6, b"dil": 7,
+    b"r8b": 8, b"r9b": 9, b"r10b": 10, b"r11b": 11, b"r12b": 12, b"r13b": 13, b"r14b": 14, b"r15b": 15,
+
+    # 8-bit high
+    b"ah": 4, b"ch": 5, b"dh": 6, b"bh": 7,
+}
+# fmt: on
+
+
+class DisplacementInfo:
+    @staticmethod
+    def width(disp: llvm.Displacement | None) -> int:
+        return 0 if disp is None else len(disp) * 8
+
+    @staticmethod
+    def fixed(value: int, width: int) -> bytes:
+        assert width in (8, 16, 32, 64)
+        return value.to_bytes(width // 8, byteorder="big", signed=True)
+
+    @staticmethod
+    def normalize(disp: llvm.Displacement | llvm.Fixed | None, width: int) -> bytes:
+        if disp is None:
+            return bytes(width // 8)
+
+        if isinstance(disp, llvm.Fixed):
+            disp = disp.value
+
+        assert width in (8, 16, 32, 64)
+        assert 8 * len(disp) <= width
+
+        val = int.from_bytes(disp, byteorder="big", signed=True)
+        hex = val.to_bytes(width // 8, byteorder="big", signed=True)
+
+        return hex
+
+
+class ImmediateInfo:
+    @staticmethod
+    def is_one(imm: llvm.Immediate) -> bool:
+        return imm.value.width == 8 and imm.value.data == b"\x01"
+
+    @staticmethod
+    def fits_signed(imm: llvm.Immediate, width: int) -> bool:
+        assert width in (8, 16, 32, 64)
+
+        return (
+            imm.value.width == width
+            or imm.value.width < width
+            and imm.value.highest_bit() == 0
+        )
+
+    @staticmethod
+    def normalize(imm: llvm.Immediate, width: int) -> llvm.Immediate:
+        assert width in (8, 16, 32, 64)
+        assert imm.value.width <= width
+
+        val = int.from_bytes(imm.value.data, byteorder="big", signed=False)
+        hex = val.to_bytes(width // 8, byteorder="big", signed=False)
+
+        return llvm.Immediate(value=llvm.Hex(data=hex, width=width))
+
+
+class AddressInfo:
+    @staticmethod
+    def get_width(addr: llvm.Address) -> int:
+        return 64
+
+
+class RegisterInfo:
+    @staticmethod
+    def is_64bit(reg: llvm.Register) -> bool:
+        # fmt: off
+        return reg.name in (
+            b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp",
+            b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15",
+        )
+        # fmt: on
+
+    @staticmethod
+    def is_32bit(reg: llvm.Register) -> bool:
+        # fmt: off
+        return reg.name in (
+            b"eax", b"ebx", b"ecx", b"edx", b"esi", b"edi", b"esp", b"ebp",
+            b"r8d", b"r9d", b"r10d", b"r11d", b"r12d", b"r13d", b"r14d", b"r15d",
+        )
+        # fmt: on
+
+    @staticmethod
+    def is_16bit(reg: llvm.Register) -> bool:
+        # fmt: off
+        return reg.name in (
+            b"ax", b"bx", b"cx", b"dx", b"si", b"di", b"sp", b"bp",
+            b"r8w", b"r9w", b"r10w", b"r11w", b"r12w", b"r13w", b"r14w", b"r15w",
+        )
+        # fmt: on
+
+    @staticmethod
+    def is_8bit(reg: llvm.Register) -> bool:
+        # fmt: off
+        return reg.name in (
+            b"al", b"cl", b"dl", b"bl", b"spl", b"bpl", b"sil", b"dil",
+            b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b",
+            b"ah", b"ch", b"dh", b"bh",
+        )
+        # fmt: on
+
+    @staticmethod
+    def is_low8bit(reg: llvm.Register) -> bool:
+        # fmt: off
+        return reg.name in (
+            b"al", b"bl", b"cl", b"dl", b"spl", b"bpl", b"sil", b"dil",
+            b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b",
+        )
+        # fmt: on
+
+    @staticmethod
+    def is_acc(reg: llvm.Register) -> bool:
+        return reg.name in (b"al", b"ax", b"eax", b"rax")
+
+    @staticmethod
+    def get_width(reg: llvm.Register) -> int:
+        if RegisterInfo.is_64bit(reg):
+            return 64
+
+        if RegisterInfo.is_32bit(reg):
+            return 32
+
+        if RegisterInfo.is_16bit(reg):
+            return 16
+
+        return 8
+
+    @staticmethod
+    def low_3bits(reg: llvm.Register) -> int:
+        return REGISTERS[reg.name] & 0x07
+
+    @staticmethod
+    def high_bit(reg: llvm.Register) -> bool:
+        return REGISTERS[reg.name] >= 8
 
 
 @dataclass(kw_only=True)
@@ -104,7 +260,9 @@ class PrefixEncoding:
 def encode_prefixes(target: RegisterOrAddress) -> PrefixEncoding:
     return PrefixEncoding(
         operand_override=(
-            0x66 if isinstance(target, llvm.Register) and target.is_16bit() else 0x00
+            0x66
+            if isinstance(target, llvm.Register) and RegisterInfo.is_16bit(target)
+            else 0x00
         ),
     )
 
@@ -119,11 +277,15 @@ def encode_rex(
     rex = RexEncoding.default()
     reg = isinstance(target, llvm.Register)
 
-    if not reg or target.is_64bit():
+    if not reg or RegisterInfo.is_64bit(target):
         rex.w |= 0b1000
         rex.h |= 0x40
 
-    if reg and target.is_low8bit() and target.id in (4, 5, 6, 7):
+    if (
+        reg
+        and RegisterInfo.is_low8bit(target)
+        and REGISTERS[target.name] in (4, 5, 6, 7)
+    ):
         rex.h |= 0x40
 
     if modrm_reg is not None:
@@ -145,18 +307,18 @@ def encode_rex(
 
 def encode_opcode_reg(reg: llvm.Register) -> OpCodeEncoding:
     return OpCodeEncoding(
-        rex_w=0b1000 if reg.is_64bit() else 0b0000,
-        rex_b=0b0001 if reg.high_bit() else 0b0000,
-        opcode_reg=reg.low3bits(),
+        rex_w=0b1000 if RegisterInfo.is_64bit(reg) else 0b0000,
+        rex_b=0b0001 if RegisterInfo.high_bit(reg) else 0b0000,
+        opcode_reg=RegisterInfo.low_3bits(reg),
     )
 
 
 def encode_modrm_reg(reg: RegisterOrConstant) -> ModRegEncoding:
     if isinstance(reg, llvm.Register):
         return ModRegEncoding(
-            rex_w=0b1000 if reg.is_64bit() else 0b0000,
-            rex_r=0b0100 if reg.high_bit() else 0b0000,
-            modrm_reg=reg.low3bits(),
+            rex_w=0b1000 if RegisterInfo.is_64bit(reg) else 0b0000,
+            rex_r=0b0100 if RegisterInfo.high_bit(reg) else 0b0000,
+            modrm_reg=RegisterInfo.low_3bits(reg),
         )
 
     return ModRegEncoding(
@@ -171,40 +333,46 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
 
     if isinstance(rm, llvm.Register):
         encoding.modrm_mod = 0b11
-        encoding.modrm_rm = rm.low3bits()
-        encoding.rex_b = 0b0001 if rm.high_bit() else 0b0000
+        encoding.modrm_rm = RegisterInfo.low_3bits(rm)
+        encoding.rex_b = 0b0001 if RegisterInfo.high_bit(rm) else 0b0000
 
-    elif isinstance(rm, llvm.RelativeAddress):
+    elif isinstance(rm, llvm.Relocation):
         encoding.modrm_mod = 0b00
         encoding.modrm_rm = 0b101
         encoding.disp_width = 4
-        encoding.disp_value = rm.disp.normalize(32)
+        encoding.disp_value = DisplacementInfo.fixed(rm.block, 32)
+
+    elif isinstance(rm, llvm.Fixed):
+        encoding.modrm_mod = 0b00
+        encoding.modrm_rm = 0b101
+        encoding.disp_width = 4
+        encoding.disp_value = DisplacementInfo.normalize(rm, 32)
 
     else:
-        has_base = rm.base.is_available()
-        has_index = rm.scaler.index.is_available()
-        is_rsp_r12 = has_base and rm.base.low3bits() == 0b100
-        is_rbp_r13 = has_base and rm.base.low3bits() == 0b101
+        is_rsp_r12 = RegisterInfo.low_3bits(rm.base) == 0b100 if rm.base else False
+        is_rbp_r13 = RegisterInfo.low_3bits(rm.base) == 0b101 if rm.base else False
 
         # RSP cannot be used as index register
-        if has_index and rm.scaler.index.id == 0b0100:
+        if rm.indx and rm.indx.reg.name == b"rsp":
             raise UnreachableEncodingError()
 
-        if not has_base or has_index or is_rsp_r12:
+        if not rm.base or rm.indx or is_rsp_r12:
             encoding.modrm_mod = 0b00
             encoding.modrm_rm = 0b100
 
-            if has_index:
-                encoding.sib_index = rm.scaler.index.low3bits()
-                encoding.sib_scale = [1, 2, 4, 8].index(int(rm.scaler.scale))
-                encoding.rex_x = 0b0010 if rm.scaler.index.high_bit() else 0b0000
+            if rm.indx:
+                encoding.sib_index = RegisterInfo.low_3bits(rm.indx.reg)
+                encoding.sib_scale = [1, 2, 4, 8].index(rm.indx.val)
+                encoding.rex_x = (
+                    0b0010 if RegisterInfo.high_bit(rm.indx.reg) else 0b0000
+                )
             else:
                 encoding.sib_index = 0b100
                 encoding.sib_scale = 0b00
 
-            if has_base:
-                encoding.sib_base = rm.base.low3bits()
-                encoding.rex_b = 0b0001 if rm.base.high_bit() else 0b0000
+            if rm.base:
+                encoding.sib_base = RegisterInfo.low_3bits(rm.base)
+                encoding.rex_b = 0b0001 if RegisterInfo.high_bit(rm.base) else 0b0000
                 encoding.disp_width = 0
             else:
                 encoding.sib_base = 0b101
@@ -212,8 +380,8 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
 
         else:
             encoding.modrm_mod = 0b00
-            encoding.modrm_rm = rm.base.low3bits()
-            encoding.rex_b = 0b0001 if rm.base.high_bit() else 0b0000
+            encoding.modrm_rm = RegisterInfo.low_3bits(rm.base)
+            encoding.rex_b = 0b0001 if RegisterInfo.high_bit(rm.base) else 0b0000
             encoding.disp_width = 0
 
         # RBP and R13 cannot be used as base register without displacement
@@ -221,15 +389,17 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
             encoding.modrm_mod = 0b01
             encoding.disp_width = 1
 
-        if encoding.disp_width < rm.disp.get_width() // 8:
-            if rm.disp.get_width() == 8:
+        if encoding.disp_width < DisplacementInfo.width(rm.disp) // 8:
+            if DisplacementInfo.width(rm.disp) == 8:
                 encoding.modrm_mod = 0b01
                 encoding.disp_width = 1
             else:
                 encoding.modrm_mod = 0b10
                 encoding.disp_width = 4
 
-        encoding.disp_value = rm.disp.normalize(encoding.disp_width * 8)
+        encoding.disp_value = DisplacementInfo.normalize(
+            rm.disp, encoding.disp_width * 8
+        )
 
     return encoding
 
@@ -289,4 +459,4 @@ def write_immediate(
     condition: bool = True,
 ) -> None:
     if condition and imm is not None:
-        bytecode.extend(reversed(imm.data))
+        bytecode.extend(reversed(imm.value.data))

@@ -1,0 +1,1 @@
+Deleted the legacy llvm/ package, wired encoding/ to consume the Blocklet instruction vocabulary directly via a new relocation-resolving encode() and an analyses/sections graph node, added end-to-end indexed-addressing support, and fixed a chain of byte-level encoding bugs until data/hello.i13c compiled and ran correctly, verified via strace.

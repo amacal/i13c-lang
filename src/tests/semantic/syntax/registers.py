@@ -14,7 +14,7 @@ def can_visit_registers_in_an_operand() -> None:
 def can_visit_registers_in_an_base_of_an_address() -> None:
     visitor = parse_syntax_graph(
         """
-            asm main() { call [rbx + 0x1234]; }
+            asm main() { jmp [rbx + 0x1234]; }
         """
     )
 

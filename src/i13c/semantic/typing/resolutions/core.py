@@ -53,7 +53,7 @@ from i13c.semantic.typing.resolutions.types import TypeResolution
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
-@dataclass
+@dataclass(repr=False)
 class ResolutionNodes:
     assigns: OneToOne[AssignId, AssignResolution] | None
     addresses: OneToOne[AddressId, AddressResolution] | None

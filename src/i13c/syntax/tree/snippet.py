@@ -70,6 +70,7 @@ class Offset:
 class Address:
     ref: Span
     base: Register | Reference
+    indx: Register | Reference | None
     offset: Offset | None
 
     def accept(self, visitor: Visitor, path: Path) -> None:
@@ -77,6 +78,9 @@ class Address:
 
         with path.push(self) as node:
             self.base.accept(visitor, node)
+
+            if self.indx is not None:
+                self.indx.accept(visitor, node)
 
             if self.offset is not None:
                 self.offset.accept(visitor, node)

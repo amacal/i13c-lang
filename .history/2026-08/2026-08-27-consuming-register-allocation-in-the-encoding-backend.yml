@@ -1,0 +1,72 @@
+date: "2026-08-27"
+title: "Consuming Register Allocation in the Encoding Backend"
+session:
+  files:
+    - "src/i13c/encoding/__init__.py"
+    - "src/i13c/encoding/kind.py"
+    - "src/i13c/encoding/move.py"
+    - "src/i13c/encoding/ctrl.py"
+    - "src/i13c/encoding/stack.py"
+    - "src/i13c/encoding/addr.py"
+    - "src/i13c/encoding/bits.py"
+    - "src/i13c/encoding/math.py"
+    - "src/i13c/encoding/core.py"
+    - "src/i13c/semantic/typing/analyses/llvm.py"
+    - "src/i13c/semantic/nodes/analyses/blocklets.py"
+    - "src/i13c/semantic/nodes/analyses/asmlets.py"
+    - "src/i13c/semantic/nodes/analyses/fnlets.py"
+    - "src/i13c/semantic/nodes/resolutions/addresses.py"
+    - "src/i13c/syntax/parsing/snippet.py"
+    - "src/i13c/syntax/tree/snippet.py"
+    - "src/i13c/semantic/nodes/analyses/sections.py"
+    - "src/i13c/semantic/core.py"
+    - "src/i13c/cli/__init__.py"
+  source: —
+  status: completed
+  attempted:
+    - "Wire the register-allocated Blocklet output into the encoding/ backend so `i13c elf data/hello.i13c` produces a real, correctly-running x86-64 ELF executable, replacing the crashed llvm_graph()-based path"
+  explored:
+    - "Whether RelativeAddress (RIP-relative addressing, SDM Vol 2A section 2.2.1.6) had any real use in the pre-session codebase before its deletion; confirmed it was fully encoded/tested but never actually constructed by any real instruction-emission code, and that near JMP/CALL use a structurally separate mechanism (raw rel32 immediate + RelocationArtifact, no ModRM/SIB at all)"
+    - "Whether Blocklet-level block starts need an explicit Label pseudo-instruction (the deleted domain's approach) versus being derived structurally from Blocklet's own nested blocks-list position; settled on the structural approach, no Label class exists in the new domain"
+    - "Naming for the addressing variant whose displacement value is a literal known at compile time, as opposed to Relocation whose value is deferred; considered Literal, Resolved, Fixed, HardCoded; settled on Fixed"
+    - "Where immediate/displacement width-normalization responsibility belongs, encoding/ versus semantic/ Blocklet construction; settled on encoding/, using the C7-opcode-always-wants-imm32-regardless-of-source-width case to show pre-widening upstream cannot be uniformly correct across opcodes"
+    - "Whether encode()'s local/global relocation resolution should be one flat pass or two-tier; settled on two-tier, local resolved immediately per-blocklet, global deferred until every blocklet is encoded, since a global target may be a forward reference"
+  tried:
+    - "First relocation-resolution design keyed local_relocations/global_relocations as plain dicts, one entry per target; found this silently drops all but the last relocation when multiple call/jump sites share a target, changed to defaultdict(set) accumulating every entry per target"
+    - "First fix for the immediate-width bug widened only encode_mov's `mov reg, imm` (0xB8) branch; the sibling `mov r/m, imm` (0xC7) branch had the identical missing-widening bug and needed the identical fix separately"
+    - "First pass at threading the new indx field through semantic/nodes/analyses/blocklets.py found three call sites (accept_addr, accept_reg_addr, accept_reg_imm) hardcoding indx=None; a fourth (accept_reg_imm_addr), used by emit_mov's source operand, was missed due to overlapping grep context and found and fixed separately"
+  corrections:
+    - "Assumed RIP-relative addressing was primarily what JMP/CALL use; corrected by tracing actual code and the SDM (Vol 2A section 2.2.1.6) — near JMP/CALL use a structurally separate raw-rel32-plus-relocation mechanism, unrelated to ModRM-based RIP-relative addressing, which instead applies to ModRM-addressed memory operands such as MOV and LEA"
+    - "First reasoning for why unconditional-control-flow-guarded inline data is safe from being executed invoked branch-predictor likelihood; corrected — branch prediction only affects speculative execution for performance and has no bearing on architectural correctness, safety comes purely from there being zero control-flow edges into the data region, not from any prediction being unlikely"
+  bugs_found:
+    - "encoding/stack.py's PUSH/POP encoders referenced .dst/.off fields that do not exist on the PUSH/POP dataclasses (only .operands exists), a stale-field bug from before the Blocklet consolidation; acknowledged by the user as something they would handle, not confirmed fixed this session"
+    - "encode()'s relocation-offset arithmetic (encoding/__init__.py) computed entry = (len(bytecode) - relocation.offset, relocation.offset), storing a small delta instead of the absolute end-of-instruction address, producing wrong rel32 values; fixed by storing len(bytecode) directly"
+    - "local_relocations/global_relocations were plain dicts keyed by target, silently overwriting an earlier relocation when a later one shared the same target; fixed by switching to defaultdict(set)"
+    - "kind.py's RSP-cannot-be-SIB-index check compared RegisterInfo.low_3bits(rm.indx.reg) == 0b100, which is also true for R12 (id 12) since low-3-bits strips the REX.X-carried distinguishing bit; a regression from the deleted domain's correct rm.scaler.index.id == 0b0100 full-id comparison; fixed by restoring a full-id-equivalent check"
+    - "Displacement/Hex construction set width purely from input byte-length, never checking whether the value was genuinely zero, so an explicit zero-valued displacement with a real base+index still forced an unnecessary disp32 instead of being omitted; fixed by the user, confirmed via can_encode_modrm_rm_m64_all's zero-displacement cases turning green, exact implementation not read in detail during the session"
+    - "asmlets.py's address_converter read only src.offset.value.value (magnitude), discarding src.offset.kind (forward/backward) entirely, so [rsp - 0x10] and [rsp + 0x10] produced identical bytes; fixed by branching on kind and adding Hex.negate() (two's-complement negation at the value's own width) for the backward case; kind.py's DisplacementInfo.normalize/fixed were also changed from signed=False to signed=True so later width-widening correctly sign-extends instead of reinterpreting as unsigned"
+    - "encode_mov's mov reg, imm branch (encoding/move.py) chose opcode 0xB8+rd, which always requires a full imm64 when REX.W is set, but wrote the immediate at its own source-literal width via write_immediate (e.g. one byte for a u8 literal), producing a 3-byte instruction where 10 were required and corrupting every subsequent byte in the stream; fixed via a new ImmediateInfo.normalize(src, width) helper; the identical bug in the sibling mov r/m, imm (0xC7) branch was found and fixed the same way, since C7 always wants imm32 regardless of source width"
+    - "encode_rex (kind.py) determined REX.W purely from whether its target parameter was a Register at all, correct when there is no register operand to consult (mov r/m, imm) but wrong for mov r/m, reg / mov reg, r/m, where target was always the ModRM rm operand even when the other operand (reg) was a narrower register, e.g. r11b, that should have governed REX.W; symptom was ndisasm flagging a redundant o64 prefix on a byte-mov; fixed in encode_mov's shared ModRM-encoding block by passing reg if isinstance(reg, Register) else rm to encode_rex instead of always rm"
+    - "syntax/parsing/snippet.py's parse_address recognized [base + index ...] syntax but never captured the index token; an intermediate revision built the Register/Reference from the wrong token (end, whatever followed the index, e.g. the closing bracket) instead of value (the actual index token), producing an 'Invalid register ]' diagnostic; fixed by capturing indx from value before advancing end, and widening value's accepted token set to include Tokens.AT so index registers can also be @name references"
+    - "semantic/nodes/resolutions/addresses.py's build_address_resolution hardcoded indx=None on the resulting AddressAcceptance, never reading entry.indx, even after the entity/resolution types already carried an indx field; fixed by mirroring the existing base-resolution branch for indx"
+    - "AsmletOperandAddress (semantic/typing/analyses/asmlets.py) had no indx field at all and address_converter never read src.indx; fixed by adding the field and threading it through, mirroring base's handling"
+    - "Four call sites in semantic/nodes/analyses/blocklets.py (accept_addr, accept_reg_addr, accept_reg_imm_addr, and a fourth found separately) all hardcoded indx=None when constructing the final Blocklet-level Address, never reading operand.target.indx; fixed by constructing Index(reg=Register(name=operand.target.indx.name), val=1) when present"
+    - "cli/__init__.py's elf_command computed entry_point as ELF_BASE_ADDR + file_off_code, the start of the code section, with no awareness of which blocklet is the program's actual entrypoint; confirmed via strace that the process executed exactly one syscall, exit(0), and nothing else, because whichever blocklet happened to be laid out first (originally the exit asmlet) ran immediately; the user's fix reordered blocklet iteration so the real entrypoint function ends up first, which resolves it for this single-entrypoint program but does not consult the existing analyses/entrypoints Entrypoint analysis and is not a general fix"
+  completed:
+    - "Restructured encoding/ to consume semantic/typing/analyses/llvm.py's Blocklet instruction vocabulary directly, replacing the deleted llvm/ package's independent register-allocation-and-lowering pipeline"
+    - "Implemented encode(blocklets: list[Blocklet]) -> bytes with two-tier local/global relocation resolution, deriving block-start offsets structurally from Blocklet's nested list structure with no Label pseudo-instruction"
+    - "Added a new semantic-graph analysis node analyses/sections (semantic/nodes/analyses/sections.py) that calls encode() during graph evaluation and produces ELF section bytes as a first-class artifact; rewired elf_command to consume it instead of the deleted llvm_graph().instructions_all() path"
+    - "Added index/scale-register support for addressing ([base + index +/- disp]) end to end: parser (syntax/parsing/snippet.py), AST (syntax/tree/snippet.py's Address.indx), resolution (semantic/nodes/resolutions/addresses.py), asmlet-operand conversion (semantic/nodes/analyses/asmlets.py), and Blocklet construction (semantic/nodes/analyses/blocklets.py); scale is always 1, no scale syntax exists yet"
+    - "Fixed the relocation-arithmetic, relocation-overwrite, RSP/R12-index, zero-displacement, sign, immediate-width (both mov opcode branches), and REX.W-selection bugs listed above; full suite green at 965 passing tests, 0 lint errors"
+    - "Verified via strace that data/hello.i13c compiles to a real x86-64 ELF executable that runs correctly end to end: write(1, \"0000000001020304\\n\", 17) then exit(0), matching the source program's intended behavior exactly"
+  not_completed:
+    - "PUSH/POP's stale .dst/.off field references were acknowledged by the user but not confirmed fixed this session"
+    - "ELF entry point is not computed from the real Entrypoint analysis; the current fix only works because of blocklet iteration order, not by design"
+    - "*scale addressing syntax (an explicit multiplier, e.g. [rsp + rcx*4]) does not exist in the language at all; deliberately deferred, every index use in data/hello.i13c is implicit scale=1"
+    - "The Fixed (literal-value RIP-relative) addressing variant exists in the type system and encoder but was never exercised by a real lea rax, [rip + literal] in data/hello.i13c this session; the Relocation-based deferred-value sibling for lea rax, [rel @label], referencing a future .quad-style inline data block via the same block/relocation mechanism as JMP/CALL, was designed in dialogue but not implemented"
+    - "The .quad-style inline-data-in-.text pattern (raw bytes placed after an unconditional ret/jmp, referenced via RIP-relative LEA) was designed conceptually but not implemented"
+  open_questions: —
+  notes:
+    - "The entire src/i13c/llvm/ package (a from-scratch register allocator and typed near-machine IR) was deleted this session; it turned out to be legacy, superseded scaffolding, not the future hand-written LLVM-IR-text backend CLAUDE.md's Scope section describes — confirmed in dialogue that no LLVM IR text emission ever existed in it. CLAUDE.md's own Scope/Hard-constraints/Cross-backend-comparison text still describes the old shape; this was flagged to the user as a naming/scope staleness but left for the user to correct themselves, per CLAUDE.md never being edited by Claude"
+    - "semantic/typing/analyses/llvm.py (the Blocklet instruction vocabulary encoding/ now consumes directly) shares its module name with the deleted top-level llvm/ package but is unrelated to it"
+    - "Program correctness was verified by actually running the compiled a.out and reading its real syscalls via strace, not merely by the test suite passing"

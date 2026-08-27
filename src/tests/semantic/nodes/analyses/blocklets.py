@@ -65,6 +65,28 @@ def can_detect_blocklets_of_asm_snippet_with_bits():
             ]
 
 
+def can_detect_blocklets_of_asm_snippet_with_address():
+    _, analyses = prepare_analyses("""
+        asm foo(x@rax: u8) clobbers rdi {
+            mov rdi, [rax + rax + 0x10];
+            ret;
+        }
+
+        fn main() { foo(0x42); }
+    """)
+
+    assert analyses.blocklets is not None
+    assert analyses.blocklets.size() == 2
+
+    for blocklet in analyses.blocklets.values():
+        if isinstance(blocklet.target, AsmletId):
+            assert len(blocklet.blocks) == 1
+            assert blocklet.listing() == [
+                "mov rdi, [rax + rax + 0x10]",
+                "ret",
+            ]
+
+
 def can_detect_blocklets_of_asm_snippet_with_loop_to_entry():
     _, analyses = prepare_analyses("""
         asm foo(x@rcx: u8) clobbers rdi, rcx {

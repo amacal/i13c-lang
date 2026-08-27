@@ -1,75 +1,94 @@
+from collections import defaultdict
+from collections.abc import Iterable
 from typing import Protocol
 
 from i13c.encoding import addr, bits, ctrl, math, move, stack
-from i13c.encoding.core import LabelArtifact, RelocationArtifact
-from i13c.llvm.typing import instructions as llvm
-from i13c.llvm.typing.instructions import Instruction
+from i13c.encoding.core import RelocationInfo
+from i13c.semantic.typing.analyses import llvm
+from i13c.semantic.typing.analyses.blocklets import (
+    Blocklet,
+    BlockletInstruction,
+    BlockletTarget,
+)
+
+RelocationEntry = tuple[int, int, int]
 
 
-class MissingLabelError(Exception):
-    def __init__(self, target: int) -> None:
-        self.target = target
-        super().__init__(f"missing target label for relocation {target}")
-
-
-class DuplicateLabelError(Exception):
-    def __init__(self, target: int) -> None:
-        self.target = target
-        super().__init__(f"duplicate label with id {target}")
-
-
-def encode(instructions: list[Instruction]) -> bytes:
+def encode(blocklets: Iterable[Blocklet]) -> bytes:
     bytecode = bytearray()
-    labels: dict[int, LabelArtifact] = {}
-    relocations: list[RelocationArtifact] = []
 
-    for instruction in instructions:
-        if artifact := DISPATCH_TABLE[type(instruction)](instruction, bytecode):
-            if isinstance(artifact, LabelArtifact):
-                # check for duplicate labels
-                if artifact.target in labels:
-                    raise DuplicateLabelError(artifact.target)
+    # collected global relocations
+    global_relocations: dict[BlockletTarget, set[RelocationEntry]] = defaultdict(set)
+    global_symbols: dict[BlockletTarget, int] = {}
 
-                labels[artifact.target] = artifact
-            else:
-                relocations.append(artifact)
+    def serialize(value: int, width: int) -> bytes:
+        return value.to_bytes(width, byteorder="little", signed=True)
 
-    for relocation in relocations:
-        if relocation.target not in labels:
-            raise MissingLabelError(relocation.target)
+    for blocklet in blocklets:
+        # collect local relocations
+        local_relocations: dict[int, set[RelocationEntry]] = defaultdict(set)
+        local_symbols: dict[int, int] = {}
 
-        target = labels[relocation.target].offset - (relocation.offset + 4)
-        low, high = relocation.offset, relocation.offset + 4
+        # record the symbol of this blocklet
+        global_symbols[blocklet.target] = len(bytecode)
 
-        bytecode[low:high] = target.to_bytes(4, byteorder="little", signed=True)
+        # handle each block, blocks are indexed by their position
+        for idx, block in enumerate(blocklet.blocks):
+            # record the symbol of this block
+            local_symbols[idx] = len(bytecode)
+
+            # encode each instruction in the block
+            for instruction in block.instructions:
+                if relocation := DISPATCH_TABLE[type(instruction)](
+                    instruction, bytecode
+                ):
+                    # the end of the instruction, and the offset of the displacement
+                    entry = (len(bytecode), relocation.offset, relocation.width)
+
+                    # record the relocation in the appropriate table
+                    if isinstance(relocation.target, int):
+                        local_relocations[relocation.target].add(entry)
+                    else:
+                        global_relocations[relocation.target].add(entry)
+
+        # resolve local relocations
+        for block, entries in local_relocations.items():
+            for next, offset, width in entries:
+                low, high, target = offset, offset + width, local_symbols[block] - next
+                bytecode[low:high] = serialize(target, width)
+
+    # resolve global relocations
+    for block, entries in global_relocations.items():
+        for next, offset, width in entries:
+            low, high, target = offset, offset + width, global_symbols[block] - next
+            bytecode[low:high] = serialize(target, width)
 
     return bytes(bytecode)
 
 
 class Encoder(Protocol):
     def __call__(
-        self, instruction: Instruction, out: bytearray
-    ) -> LabelArtifact | RelocationArtifact | None: ...
+        self, instruction: BlockletInstruction, out: bytearray
+    ) -> RelocationInfo | None: ...
 
 
-DISPATCH_TABLE: dict[type[Instruction], Encoder] = {
-    llvm.addr.LEA: addr.encode_lea_reg_off,
-    llvm.bits.BSWAP: bits.encode_bswap,
-    llvm.bits.SHL: bits.encode_shl,
-    llvm.ctrl.Call: ctrl.encode_call,
-    llvm.ctrl.Jump: ctrl.encode_jump,
-    llvm.ctrl.Label: ctrl.encode_label,
-    llvm.ctrl.Nop: ctrl.encode_nop,
-    llvm.ctrl.Return: ctrl.encode_return,
-    llvm.ctrl.SysCall: ctrl.encode_syscall,
-    llvm.math.AddRegImm: math.encode_add_reg_imm,
-    llvm.math.AddRegReg: math.encode_add_reg_reg,
-    llvm.math.SUB: math.encode_sub_reg_imm,
-    llvm.move.MovOffImm: move.encode_mov_off_imm,
-    llvm.move.MovOffReg: move.encode_mov_off_reg,
-    llvm.move.MovRegImm: move.encode_mov_reg_imm,
-    llvm.move.MovRegOff: move.encode_mov_reg_off,
-    llvm.move.MovRegReg: move.encode_mov_reg_reg,
-    llvm.stack.PopOff: stack.encode_pop_off,
-    llvm.stack.PushOff: stack.encode_push_off,
+DISPATCH_TABLE: dict[type[BlockletInstruction], Encoder] = {
+    llvm.ADD: math.encode_add,
+    llvm.AND: math.encode_and,
+    llvm.BSWAP: bits.encode_bswap,
+    llvm.CALL: ctrl.encode_call,
+    llvm.JMP: ctrl.encode_jmp,
+    llvm.LEA: addr.encode_lea,
+    llvm.LOOP: ctrl.encode_loop,
+    llvm.MOV: move.encode_mov,
+    llvm.NOP: ctrl.encode_nop,
+    llvm.OR: math.encode_or,
+    llvm.POP: stack.encode_pop,
+    llvm.PUSH: stack.encode_push,
+    llvm.RET: ctrl.encode_ret,
+    llvm.SHL: bits.encode_shl,
+    llvm.SHR: bits.encode_shr,
+    llvm.SUB: math.encode_sub,
+    llvm.SYSCALL: ctrl.encode_syscall,
+    llvm.XCHG: move.encode_xchg,
 }  # pyright: ignore[reportAssignmentType]

@@ -106,7 +106,7 @@ def can_accept_an_operand_from_a_label():
 def can_accept_an_operand_from_an_address():
     source, resolutions = prepare_resolutions(
         """
-            asm main() { call [rax]; }
+            asm main() { jmp [rax]; }
         """
     )
 
@@ -135,7 +135,7 @@ def can_accept_an_operand_from_an_address():
 def can_accept_an_operand_from_an_address_using_a_reference_as_base():
     source, resolutions = prepare_resolutions(
         """
-            asm main(x@rax: u16) { call [@x + 0x0f]; }
+            asm main(x@rax: u16) { jmp [@x + 0x0f]; }
         """
     )
 

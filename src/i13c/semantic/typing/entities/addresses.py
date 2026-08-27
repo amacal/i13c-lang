@@ -8,6 +8,7 @@ from i13c.syntax.source import Span
 
 OffsetKind = Kind["forward", "backward"]
 BaseRegister = RegisterId | ReferenceId
+IndexRegister = RegisterId | ReferenceId
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -31,6 +32,7 @@ class Offset:
 class Address:
     ref: Span
     base: BaseRegister
+    indx: IndexRegister | None
     offset: Offset | None
 
     def __str__(self) -> str:

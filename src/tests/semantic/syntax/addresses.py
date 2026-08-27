@@ -2,20 +2,24 @@ from tests.semantic.syntax import parse_syntax_graph
 
 
 def can_visit_a_base_address() -> None:
-    visitor = parse_syntax_graph(
-        """
-            asm main() { call [rax + 0x1234]; }
-        """
-    )
+    visitor = parse_syntax_graph("""
+            asm main() { jmp [rax + 0x1234]; }
+        """)
+
+    assert len(list(visitor.graph.snippet.addresses.items())) == 1
+
+
+def can_visit_an_indexed_address() -> None:
+    visitor = parse_syntax_graph("""
+            asm main() { jmp [rax + rbx + 0x1234]; }
+        """)
 
     assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
 def can_visit_a_rip_address() -> None:
-    visitor = parse_syntax_graph(
-        """
-            asm main() { call [rip + 0x1234]; }
-        """
-    )
+    visitor = parse_syntax_graph("""
+            asm main() { jmp [rip + 0x1234]; }
+        """)
 
     assert len(list(visitor.graph.snippet.addresses.items())) == 1

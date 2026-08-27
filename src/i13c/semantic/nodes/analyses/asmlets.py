@@ -11,6 +11,7 @@ from i13c.semantic.typing.analyses.asmlets import (
     AsmletInstruction,
     AsmletOperand,
     AsmletOperandAddress,
+    AsmletOperandDisplacement,
     AsmletOperandImmediate,
     AsmletOperandRegister,
     AsmletOperandRelocation,
@@ -93,9 +94,7 @@ def build_asmlets(
             ]
 
             # mapping of parameter name to bind source for all register parameters
-            mapping: dict[bytes, bytes | Hex] = {
-                bind.src: bind.dst for bind in binds
-            }
+            mapping: dict[bytes, bytes | Hex] = {bind.src: bind.dst for bind in binds}
 
             # append all immediate arguments
             for entry in keys:
@@ -175,6 +174,10 @@ def address_converter(
     binds: dict[bytes, bytes | Hex],
 ) -> AsmletOperandAddress:
 
+    # the index and displacement are optional and can be None
+    indx: AsmletOperandRegister | None = None
+    disp: AsmletOperandDisplacement | None = None
+
     # the base of an address can only be a register
     if isinstance(src.base, RegisterAcceptance):
         base = AsmletOperandRegister(name=src.base.name)
@@ -185,15 +188,31 @@ def address_converter(
         assert not isinstance(value, Hex)
         base = AsmletOperandRegister(name=value)
 
+    # index is optional
+    if src.indx is not None:
+        if isinstance(src.indx, RegisterAcceptance):
+            indx = AsmletOperandRegister(name=src.indx.name)
+
+        # or a referenced register via binds
+        else:
+            value = binds[src.indx.name]
+            assert not isinstance(value, Hex)
+            indx = AsmletOperandRegister(name=value)
+
     # displacement is optional
     if src.offset is not None:
-        displacement = src.offset.value.value
-    else:
-        displacement = None
+        value = (
+            src.offset.imm.value.data
+            if src.offset.kind == "forward"
+            else src.offset.imm.value.negate().data
+        )
+
+        disp = AsmletOperandDisplacement(value=value)
 
     return AsmletOperandAddress(
         base=base,
-        displacement=displacement,
+        indx=indx,
+        disp=disp,
     )
 
 
@@ -268,7 +287,9 @@ class ListExtractor:
             "src": entry.source.identify(1),
             "sig": entry.signature.id.identify(1),
             "name": entry.name.decode(),
-            "keys": ", ".join(f"{key.decode()}:{value}" for key, value in entry.keys.items()),
+            "keys": ", ".join(
+                f"{key.decode()}:{value}" for key, value in entry.keys.items()
+            ),
             "parameters": ", ".join(str(param) for param in entry.parameters),
             "callsites": str(len(entry.callsites)),
             "instructions": str(len(entry.instructions)),

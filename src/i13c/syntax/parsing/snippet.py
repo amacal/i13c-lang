@@ -1,4 +1,3 @@
-
 from i13c.syntax import tree
 from i13c.syntax.lexing import Token as LexingToken
 from i13c.syntax.lexing import Tokens
@@ -74,7 +73,7 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
     bind = state.expect(Tokens.IDENT, Tokens.KEYWORD)
 
     # if it's a keyword, it has to be "imm"
-    if bind.code == Tokens.KEYWORD: # noqa: SIM102
+    if bind.code == Tokens.KEYWORD:  # noqa: SIM102
         if state.extract(bind) != b"imm":
             raise UnexpectedKeyword(bind, [b"imm"], state.extract(bind))
 
@@ -270,6 +269,7 @@ def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Addre
 
     if base.code == Tokens.AT:
         base = parse_reference(state, base)
+
     else:
         base = tree.snippet.Register(
             ref=state.between(base, base),
@@ -277,6 +277,7 @@ def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Addre
         )
 
     # optionally, an offset or an index can be provided
+    indx: tree.snippet.Register | tree.snippet.Reference | None = None
     end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
 
     while end.code != Tokens.SQUARE_CLOSE:
@@ -284,10 +285,21 @@ def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Addre
         if end.code == Tokens.MINUS:
             value = state.expect(Tokens.HEX)
         else:
-            value = state.expect(Tokens.HEX, Tokens.IDENT)
+            value = state.expect(Tokens.HEX, Tokens.IDENT, Tokens.AT)
 
         # if we found an index
-        if value.code == Tokens.IDENT:
+        if value.code != Tokens.HEX:
+            # index can be a reference
+            if value.code == Tokens.AT:
+                indx = parse_reference(state, value)
+
+            # or just plain register
+            else:
+                indx = tree.snippet.Register(
+                    ref=state.between(value, value),
+                    name=state.extract(value),
+                )
+
             # index can be closed or followed by an offset
             end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
 
@@ -310,6 +322,7 @@ def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Addre
     return tree.snippet.Address(
         ref=state.between(token, end),
         base=base,
+        indx=indx,
         offset=offset,
     )
 

@@ -5,8 +5,6 @@ asm exit(code@imm: u8) noreturn clobbers rdi, rcx, r11, rax {
 }
 
 asm print_asm(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
-    bswap rax;
-
     mov rcx, 0x3736353433323130;
     mov [rsp - 0x10], rcx;
     mov rcx, 0x6665646362613938;

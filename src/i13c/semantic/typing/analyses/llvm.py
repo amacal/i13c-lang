@@ -9,6 +9,9 @@ from i13c.semantic.typing.entities.functions import FunctionId
 class Immediate:
     value: Hex
 
+    def width(self) -> int:
+        return self.value.width
+
     def __str__(self) -> str:
         return str(self.value)
 
@@ -22,15 +25,36 @@ class Register:
 
 
 @dataclass(kw_only=True, repr=False)
-class Address:
-    base: Register
-    disp: Hex | None
+class Index:
+    reg: Register
+    val: int
 
     def __str__(self) -> str:
-        if self.disp is None:
-            return f"[{self.base}]"
-        else:
-            return f"[{self.base} + {self.disp}]"
+        return str(self.reg)
+
+
+Displacement = bytes
+
+
+@dataclass(kw_only=True, repr=False)
+class Address:
+    base: Register | None
+    indx: Index | None
+    disp: Displacement | None
+
+    def __str__(self) -> str:
+        repr: list[str] = []
+
+        if self.base is not None:
+            repr.append(str(self.base))
+
+        if self.indx is not None:
+            repr.append(str(self.indx))
+
+        if self.disp is not None:
+            repr.append(f"0x{self.disp.hex()}")
+
+        return f"[{' + '.join(repr)}]"
 
 
 @dataclass(kw_only=True, repr=False)
@@ -42,8 +66,16 @@ class Relocation:
 
 
 @dataclass(kw_only=True, repr=False)
+class Fixed:
+    value: bytes
+
+    def __str__(self) -> str:
+        return f"0x{self.value.hex()}"
+
+
+@dataclass(kw_only=True, repr=False)
 class MOV:
-    operands: tuple[Register | Address, Immediate | Register | Address]
+    operands: tuple[Register | Address | Fixed, Immediate | Register | Address | Fixed]
 
     def __str__(self) -> str:
         return f"mov {self.operands[0]}, {self.operands[1]}"
@@ -67,7 +99,7 @@ class XCHG:
 
 @dataclass(kw_only=True, repr=False)
 class LEA:
-    operands: tuple[Register, Address]
+    operands: tuple[Register, Address | Fixed]
 
     def __str__(self) -> str:
         return f"lea {self.operands[0]}, {self.operands[1]}"
@@ -83,7 +115,7 @@ class SHR:
 
 @dataclass(kw_only=True, repr=False)
 class SHL:
-    operands: tuple[Register, Register | Immediate]
+    operands: tuple[Register | Address | Fixed, Register | Immediate]
 
     def __str__(self) -> str:
         return f"shl {self.operands[0]}, {self.operands[1]}"
@@ -129,7 +161,7 @@ class JMP:
 
 @dataclass(kw_only=True, repr=False)
 class PUSH:
-    operands: tuple[Register | Address]
+    operands: tuple[Address | Register]
 
     def __str__(self) -> str:
         return f"push {self.operands[0]}"
@@ -137,7 +169,7 @@ class PUSH:
 
 @dataclass(kw_only=True, repr=False)
 class POP:
-    operands: tuple[Register | Address]
+    operands: tuple[Address | Register]
 
     def __str__(self) -> str:
         return f"pop {self.operands[0]}"
@@ -145,7 +177,7 @@ class POP:
 
 @dataclass(kw_only=True, repr=False)
 class ADD:
-    operands: tuple[Register, Register | Immediate]
+    operands: tuple[Register | Address, Register | Address | Immediate]
 
     def __str__(self) -> str:
         return f"add {self.operands[0]}, {self.operands[1]}"
@@ -153,7 +185,7 @@ class ADD:
 
 @dataclass(kw_only=True, repr=False)
 class SUB:
-    operands: tuple[Register, Register | Immediate]
+    operands: tuple[Register | Address, Register | Address | Immediate]
 
     def __str__(self) -> str:
         return f"sub {self.operands[0]}, {self.operands[1]}"

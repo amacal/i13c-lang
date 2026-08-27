@@ -34,7 +34,7 @@ def can_visit_a_reference_operand() -> None:
 def can_visit_a_base_operand() -> None:
     visitor = parse_syntax_graph(
         """
-            asm main() { call [rax + 0x1234]; }
+            asm main() { jmp [rax + 0x1234]; }
         """
     )
 
@@ -44,7 +44,7 @@ def can_visit_a_base_operand() -> None:
 def can_visit_a_rip_operand() -> None:
     visitor = parse_syntax_graph(
         """
-            asm main() { call [rip + 0x1234]; }
+            asm main() { jmp [rip + 0x1234]; }
         """
     )
 

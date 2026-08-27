@@ -6,7 +6,7 @@ import click
 
 from i13c.cli.core import BytesAsTextEncoder, emit_and_exit, unwrap_result
 from i13c.core.table import draw_table
-from i13c.encoding import elf, encode
+from i13c.encoding import elf
 from i13c.graph.nodes import run as run_graph
 from i13c.syntax.lexing import TOKEN_NAMES, tokenize
 from i13c.syntax.parsing import parse
@@ -83,14 +83,14 @@ def elf_command(path: str) -> None:
     if artifacts.rules().count() > 0:
         emit_and_exit(artifacts.rules().enumerate(), source=code)
 
-    llg = artifacts.llvm_graph()
-    assert llg is not None
+    graph = artifacts.semantic_graph()
+    sections = graph.analyses.sections
 
-    flow = llg.instructions_all()
-    binary = encode(list(flow))
-    executable = elf.emit(binary)
+    if sections:
+        _, section = sections.peek()
+        executable = elf.emit(section.data)
 
-    with open("a.out", "wb") as f:
-        f.write(executable)
+        with open("a.out", "wb") as f:
+            f.write(executable)
 
-    os.chmod("a.out", 0o755)
+        os.chmod("a.out", 0o755)
