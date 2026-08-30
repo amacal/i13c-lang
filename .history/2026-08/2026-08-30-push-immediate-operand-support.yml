@@ -1,0 +1,30 @@
+date: "2026-08-30"
+title: "PUSH Immediate Operand Support"
+session:
+  files:
+    - "src/i13c/encoding/stack.py"
+    - "src/i13c/encoding/kind.py"
+    - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+    - "src/i13c/semantic/typing/analyses/llvm.py"
+  source: —
+  status: completed
+  attempted:
+    - "Added PUSH immediate operand support (opcodes 6A ib, 68 iw, 68 id) to close the gap left by the prior session"
+  explored:
+    - "Whether immediate-width selection needs runtime 'narrowest fit' logic (e.g. reusing ImmediateInfo.fits_signed) versus relying on resolution's existing exact digit-width-to-symbol match"
+    - "Rendered and read SDM Vol 2B PUSH page (4-516/4-517) to confirm the exact opcode table, the absence of any imm64 form, and the PUSH-ESP address-timing note"
+  tried:
+    - "Confirmed via `i13c lex`/`i13c ast` that a hex literal's AST representation (digits field) is already sized to how it was written (e.g. 0x42 -> 1 byte, 0x0042 -> 2 bytes), before writing any encoder code"
+  corrections:
+    - "Assumed some existing mnemonic's test suite already showed an imm16 literal being 'reduced' to an imm8 encoding; checked semantic/nodes/resolutions/operands.py's get_immediate_symbol and instructions.py's exact-symbol-match resolution and found no such narrowing anywhere in the pipeline — corrected to: resolution always matches the immediate's exact resolved width, no runtime narrowing exists"
+  bugs_found: —
+  completed:
+    - "PUSH.operands widened from Address | Register to include Immediate"
+    - "encode_push given an Immediate branch selecting opcode 6A (imm8) or 68 (imm16/imm32)"
+    - "kind.encode_prefixes generalized to also derive the 0x66 operand-size override from an Immediate's own width (needed only for the imm16 case)"
+    - "INSTRUCTIONS_TABLE[b'push'] extended with imm8/imm16/imm32 variants"
+    - "Verified push 0x8000/0x42/0x00112233 against real ndisasm output (66 68 00 80, 6a 42, 68 33 22 11 00 respectively), matching the SDM table and confirming PUSH's forced 64-bit default operand size in 64-bit mode"
+  not_completed: —
+  open_questions: —
+  notes:
+    - "PUSH has no imm64 opcode form at all in the SDM table; a narrow immediate's stack effect is always sign-extended to the active operand size by the CPU, not by the encoder"

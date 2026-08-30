@@ -1,0 +1,8 @@
+title: "POP Instruction Test Completeness"
+kind: implementation
+files:
+  - "src/i13c/encoding/stack.py"
+  - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+  - "src/i13c/semantic/nodes/analyses/blocklets.py"
+source: —
+date: "2026-08-30"

@@ -10,7 +10,7 @@ from i13c.semantic.typing.entities.functions import FunctionId
 class Immediate:
     value: Hex
 
-    def width(self) -> int:
+    def width(self) -> Kind[8, 16, 32, 64]:
         return self.value.width
 
     def __str__(self) -> str:
@@ -193,7 +193,7 @@ class JMP:
 
 @dataclass(kw_only=True, repr=False)
 class PUSH:
-    operands: tuple[Address | Register]
+    operands: tuple[Address | Register | Immediate]
 
     def __str__(self) -> str:
         return f"push {self.operands[0]}"

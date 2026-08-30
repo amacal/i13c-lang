@@ -5,6 +5,7 @@ from i13c.syntax.parsing import parse
 from i13c.syntax.source import open_text
 from i13c.graph.nodes import run as run_graph
 
+from i13c.semantic.nodes.resolutions.mnemonics import INSTRUCTIONS_TABLE
 from i13c.semantic.nodes.resolutions.mnemonics import MnemonicVariant
 from i13c.semantic.typing.resolutions.mnemonics import MnemonicOperandSymbol
 
@@ -83,7 +84,7 @@ def encode(table: str):
         _, section = semantic.analyses.sections.peek()
 
         assert len(section.data) > 0, message
-        assert section.data.hex() == encoding.hex(), message
+        assert section.data.hex(" ") == encoding.hex(" "), message
 
 
 def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
@@ -97,6 +98,21 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
         "ax", "cx", "dx", "bx", "sp", "bp", "si", "di",
         "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w",
     )
+
+    imm8 = (
+        "0x00", "0x01", "0x7f", "0x80", "0xff",
+    )
+
+    imm16 = (
+        "0x0000", "0x0001", "0x007f", "0x0080", "0x00ff",
+        "0x0100", "0x7fff", "0x8000", "0xffff",
+    )
+
+    imm32 = (
+        "0x00000000", "0x00000001", "0x0000007f", "0x00000080", "0x000000ff", "0x00000100",
+        "0x00007fff", "0x00008000", "0x0000ffff", "0x00010000", "0x7fffffff", "0x80000000",
+        "0xffffffff",
+    )
     # fmt: on
 
     match symbol:
@@ -105,6 +121,15 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
 
         case "reg16":
             return reg16
+
+        case "imm8":
+            return imm8
+
+        case "imm16":
+            return imm16
+
+        case "imm32":
+            return imm32
 
         case "addr":
             scales = (1, 2, 4, 8)
@@ -222,8 +247,9 @@ def cover(domains: list[tuple[str, ...]]) -> tuple[tuple[str, ...], ...]:
     return tuple(rows)
 
 
-def exhaust(variants: list[MnemonicVariant], *tables: str):
+def exhaust(*tables: str):
     visited: set[MnemonicVariant] = set()
+    variants: list[MnemonicVariant] = []
 
     for table in tables:
         variant: MnemonicVariant | None = None
@@ -237,6 +263,9 @@ def exhaust(variants: list[MnemonicVariant], *tables: str):
 
             _, resolved = semantic.resolutions.instructions.peek()
             assert len(resolved.accepted) == 1
+
+            mnemonic = resolved.accepted[0].mnemonic
+            variants = INSTRUCTIONS_TABLE[mnemonic.name]
 
             visited.add(resolved.accepted[0].variant)
             variant = resolved.accepted[0].variant

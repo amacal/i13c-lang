@@ -1,0 +1,30 @@
+date: "2026-08-30"
+title: "POP Instruction Test Completeness"
+session:
+  files:
+    - "src/i13c/encoding/stack.py"
+    - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+    - "src/i13c/semantic/nodes/analyses/blocklets.py"
+  source: —
+  status: completed
+  attempted:
+    - "Wired POP into mnemonic resolution and blocklet dispatch, and extended encode_pop with the same short-form register encoding as PUSH, so pop becomes reachable and fully tested from an asm{} block"
+  explored:
+    - "Rendered and read SDM Vol 2B POP page (4-392/4-393) to confirm POP's opcode table (8F /0, 58+rd) and that it has no immediate form at all"
+    - "Whether POP's ESP/RSP-as-base-address timing note (address computed after RSP is incremented, versus PUSH's before decrement) requires any encoder-side handling"
+  tried:
+    - "Confirmed `pop rax;` failed with E3024 unknown-mnemonic before this session, one stage earlier than PUSH's original gap (which failed at instruction-variant resolution, not mnemonic lookup)"
+    - "Compared encode_modrm_rm's sib_base computation for push [rsp] and pop [rsp] directly, confirming both produce byte-identical SIB output"
+  corrections:
+    - "Predicted `push 0x100000000` (from the related PUSH work) would fail at instruction-level resolution (variant-mismatch); actual failure is E2004 invalid hex literal at the lexer, before AST/resolution ever runs — corrected after two empirical tests (a 9-digit and a 6-digit non-power-of-two-byte literal both failed identically) to: the lexer enforces that a hex literal's byte-width must land on exactly 1/2/4/8 bytes, independent of digit parity"
+  bugs_found: —
+  completed:
+    - "INSTRUCTIONS_TABLE[b'pop'] added with reg64/reg16/addr variants (no immediate variant, matching the SDM)"
+    - "emit_pop dispatch added to blocklets.py's mnemonic-to-instruction table"
+    - "encode_pop extended with the mode='64-bit' short-form register branch, reusing PUSH Short-Form Register Encoding's machinery unchanged"
+    - "src/tests/encoding/stack.py split into push.py and pop.py; exhaust() generalized to derive the mnemonic/table from the resolved instruction instead of requiring an explicit INSTRUCTIONS_TABLE argument, and this held for POP as the second mnemonic without further changes"
+    - "Verified against real ndisasm output: pop rax -> 58, pop r8 -> 41 58, pop [rbx] -> 48 8f 03"
+  not_completed: —
+  open_questions: —
+  notes:
+    - "make lint has one pre-existing, unrelated failure (src/tests/encoding/core.py:309, CALL/RET/NOP/SYSCALL lack .operands) — not introduced by this session, left as-is"

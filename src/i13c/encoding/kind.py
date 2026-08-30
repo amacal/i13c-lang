@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, Literal as Kind
 
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.semantic.typing.analyses import llvm
@@ -42,7 +42,7 @@ class DisplacementInfo:
             if disp.offset[0] > 0x80:
                 return 32
 
-            if disp.offset[0] > 0x7f and disp.direction == "forward":
+            if disp.offset[0] > 0x7F and disp.direction == "forward":
                 return 32
 
         return disp.width
@@ -279,19 +279,30 @@ class OpCodeToRex(Protocol):
 class PrefixEncoding:
     operand_override: int
 
+    @staticmethod
+    def default() -> PrefixEncoding:
+        return PrefixEncoding(
+            operand_override=0x00,
+        )
 
-def encode_prefixes(target: RegisterOrAddress) -> PrefixEncoding:
+
+def encode_prefixes(target: RegisterOrAddress | llvm.Immediate) -> PrefixEncoding:
+    is_16bit_register = False
+    is_16bit_immediate = False
+
+    if isinstance(target, llvm.Register):
+        is_16bit_register = RegisterInfo.is_16bit(target)
+
+    if isinstance(target, llvm.Immediate):
+        is_16bit_immediate = target.width() == 16
+
     return PrefixEncoding(
-        operand_override=(
-            0x66
-            if isinstance(target, llvm.Register) and RegisterInfo.is_16bit(target)
-            else 0x00
-        ),
+        operand_override=(0x66 if is_16bit_register or is_16bit_immediate else 0x00),
     )
 
 
 def encode_rex(
-    target: RegisterOrAddress,
+    target: RegisterOrAddress | None,
     /,
     modrm_reg: ModRegToRex | None = None,
     modrm_rm: ModRmToRex | None = None,
@@ -300,9 +311,10 @@ def encode_rex(
     rex = RexEncoding.default()
     reg = isinstance(target, llvm.Register)
 
-    if not reg or RegisterInfo.is_64bit(target):
-        rex.w |= 0b1000
-        rex.h |= 0x40
+    if target is not None:
+        if not reg or RegisterInfo.is_64bit(target):  # noqa: SIM102
+            rex.w |= 0b1000
+            rex.h |= 0x40
 
     if (
         reg
@@ -328,9 +340,16 @@ def encode_rex(
     return rex
 
 
-def encode_opcode_reg(reg: llvm.Register) -> OpCodeEncoding:
+DefaultMode = Kind["64-bit", "32-bit"]
+
+
+def encode_opcode_reg(
+    reg: llvm.Register,
+    /,
+    mode: DefaultMode = "32-bit",
+) -> OpCodeEncoding:
     return OpCodeEncoding(
-        rex_w=0b1000 if RegisterInfo.is_64bit(reg) else 0b0000,
+        rex_w=0b1000 if mode == "32-bit" and RegisterInfo.is_64bit(reg) else 0b0000,
         rex_b=0b0001 if RegisterInfo.high_bit(reg) else 0b0000,
         opcode_reg=RegisterInfo.low_3bits(reg),
     )

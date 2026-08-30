@@ -1,0 +1,1 @@
+Added a byte-minimal 50+rd short-form encoding for PUSH with a register operand (both r64 and r16), generalizing encode_opcode_reg with an explicit operand-size mode and encode_rex to accept no ModRM/SIB target.

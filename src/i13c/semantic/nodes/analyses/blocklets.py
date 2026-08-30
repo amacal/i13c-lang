@@ -32,6 +32,7 @@ from i13c.semantic.typing.analyses.llvm import (
     MOV,
     NOP,
     OR,
+    POP,
     PUSH,
     RET,
     SHL,
@@ -101,20 +102,21 @@ def emit_asmlets(
 ) -> Iterable[tuple[BlockletId, Blocklet]]:
 
     dispatch: dict[bytes, EmitSignature] = {
-        b"mov": emit_mov,
-        b"bswap": emit_bswap,
-        b"xchg": emit_xchg,
-        b"nop": emit_nop,
-        b"jmp": emit_jmp,
-        b"syscall": emit_syscall,
         b"and": emit_and,
-        b"or": emit_or,
+        b"bswap": emit_bswap,
+        b"jmp": emit_jmp,
         b"lea": emit_lea,
+        b"loop": emit_loop,
+        b"mov": emit_mov,
+        b"nop": emit_nop,
+        b"or": emit_or,
+        b"pop": emit_pop,
         b"push": emit_push,
         b"ret": emit_ret,
-        b"shr": emit_shr,
         b"shl": emit_shl,
-        b"loop": emit_loop,
+        b"shr": emit_shr,
+        b"syscall": emit_syscall,
+        b"xchg": emit_xchg,
     }
 
     for eid, entry in asmlets.items():
@@ -259,11 +261,20 @@ def emit_lea(operands: list[AsmletOperand]) -> EmitRelocated:
     return LEA(operands=(dst, src)), None
 
 
-def emit_push(operands: list[AsmletOperand]) -> EmitRelocated:
+def emit_pop(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 1
 
     dst = accept_reg_addr(operands[0])
+
+    return POP(operands=(dst,)), None
+
+
+def emit_push(operands: list[AsmletOperand]) -> EmitRelocated:
+    # sanity checks
+    assert len(operands) == 1
+
+    dst = accept_reg_imm_addr(operands[0])
 
     return PUSH(operands=(dst,)), None
 

@@ -1,0 +1,9 @@
+title: "PUSH Immediate Operand Support"
+kind: implementation
+files:
+  - "src/i13c/encoding/stack.py"
+  - "src/i13c/encoding/kind.py"
+  - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+  - "src/i13c/semantic/typing/analyses/llvm.py"
+source: —
+date: "2026-08-30"

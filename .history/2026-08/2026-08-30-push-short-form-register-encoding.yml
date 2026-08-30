@@ -1,0 +1,26 @@
+date: "2026-08-30"
+title: "PUSH Short-Form Register Encoding"
+session:
+  files:
+    - "src/i13c/encoding/stack.py"
+    - "src/i13c/encoding/kind.py"
+  source: —
+  status: completed
+  attempted:
+    - "Replaced PUSH's ModRM-only (FF /6) register encoding with the byte-minimal 50+rd short form for both r64 and r16 operands"
+  explored:
+    - "Whether encode_opcode_reg (already used by BSWAP and mov reg64,imm64) could be reused unmodified for PUSH's short form"
+  tried:
+    - "Traced encode_opcode_reg's existing rex_w rule (set for any 64-bit register) against PUSH's own opcode table, which has no REX.W row at all"
+  corrections:
+    - "Initially reasoned that reusing encode_opcode_reg as-is would still be correct for PUSH; corrected after tracing that BSWAP/mov reg64,imm64 default to a 32-bit operand size and need REX.W to reach 64-bit, while PUSH's operand size is already forced to 64-bit by the instruction itself, so an unmodified reuse would emit a redundant REX.W byte and miss the byte-minimal encoding"
+  bugs_found: —
+  completed:
+    - "encode_opcode_reg given a mode: DefaultMode = '32-bit' parameter (default preserves existing BSWAP/mov reg64,imm64 behavior unchanged); PUSH passes mode='64-bit' so REX.W is never forced"
+    - "encode_rex generalized to accept target: RegisterOrAddress | None, guarding the unconditional REX.W-forcing branch so the short-form path (which has no ModRM/SIB target) doesn't get an incorrect forced REX.W"
+    - "encode_push's register branch now emits opcode 0x50+rd uniformly for both r64 and r16 (disambiguated only by the existing 66h prefix, exactly like the old ModRM form was)"
+    - "Verified against real ndisasm output: push rax -> 50, push r8 -> 41 50, push ax -> 66 50, push r8w -> 66 41 50"
+  not_completed: —
+  open_questions: —
+  notes:
+    - "PUSH_REG64/PUSH_REG16 test fixtures were updated from their old 3-byte ModRM encodings to the new short-form encodings"

@@ -1,0 +1,7 @@
+title: "PUSH Short-Form Register Encoding"
+kind: implementation
+files:
+  - "src/i13c/encoding/stack.py"
+  - "src/i13c/encoding/kind.py"
+source: —
+date: "2026-08-30"

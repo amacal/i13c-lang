@@ -104,7 +104,15 @@ INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
         (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg64()),
         (MnemonicOperandSpec.addr(), MnemonicOperandSpec.reg32()),
     ],
+    b"pop": [
+        (MnemonicOperandSpec.reg64(),),
+        (MnemonicOperandSpec.reg16(),),
+        (MnemonicOperandSpec.addr(),),
+    ],
     b"push": [
+        (MnemonicOperandSpec.imm8(),),
+        (MnemonicOperandSpec.imm16(),),
+        (MnemonicOperandSpec.imm32(),),
         (MnemonicOperandSpec.reg64(),),
         (MnemonicOperandSpec.reg16(),),
         (MnemonicOperandSpec.addr(),),

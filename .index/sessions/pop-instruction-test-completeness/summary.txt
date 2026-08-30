@@ -1,0 +1,1 @@
+Wired POP into INSTRUCTIONS_TABLE and the blocklet emit dispatch, extended encode_pop with the same short-form register encoding as PUSH, and built exhaustive POP register/addressing-mode test coverage, closing the original test-completeness gap.

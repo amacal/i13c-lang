@@ -1,0 +1,1 @@
+Added PUSH immediate operand support (opcodes 6A/68 for imm8/imm16/imm32), widening PUSH's operand type and generalizing the prefix machinery to select the correct opcode and 66h override from the resolved immediate's own width.

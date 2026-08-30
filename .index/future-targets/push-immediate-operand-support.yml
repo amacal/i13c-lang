@@ -1,6 +1,0 @@
-title: "PUSH Immediate Operand Support"
-status: not-completed
-mentioned_by:
-  - "PUSH Instruction Test Completeness and Address Displacement Redesign"
-evidence:
-  - ".history/2026-08/2026-08-30-push-instruction-test-completeness-and-address-displacement-redesign.yml session.not_completed (PUSH imm8/imm16/imm32, opcodes 6A/68, is not implemented at all — no imm variant is declared for push in INSTRUCTIONS_TABLE, and encode_push has no code path for an Immediate operand; a mid-session attempt to widen PUSH.operands' type to include Immediate was reverted since no actual encoder logic was written for it)"

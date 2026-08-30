@@ -1,6 +1,0 @@
-title: "POP Instruction Test Completeness"
-status: not-completed
-mentioned_by:
-  - "PUSH Instruction Test Completeness and Address Displacement Redesign"
-evidence:
-  - ".history/2026-08/2026-08-30-push-instruction-test-completeness-and-address-displacement-redesign.yml session.not_completed (POP still has zero test coverage, the same original gap this session set out to close for PUSH; not started, though it shares almost all of PUSH's underlying encoding machinery)"
