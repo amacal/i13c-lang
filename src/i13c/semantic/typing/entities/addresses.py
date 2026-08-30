@@ -1,14 +1,12 @@
 from dataclasses import dataclass
-from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.entities.displacements import DisplacementId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.indices import IndexId
 from i13c.syntax.source import Span
 
-OffsetKind = Kind["forward", "backward"]
 BaseRegister = RegisterId | ReferenceId
-IndexRegister = RegisterId | ReferenceId
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -20,24 +18,22 @@ class AddressId:
 
 
 @dataclass(kw_only=True)
-class Offset:
-    kind: OffsetKind
-    value: ImmediateId
-
-    def __str__(self) -> str:
-        return f"{self.kind}/{self.value.identify(1)}"
-
-
-@dataclass(kw_only=True)
 class Address:
     ref: Span
-    base: BaseRegister
-    indx: IndexRegister | None
-    offset: Offset | None
+    base: BaseRegister | None
+    indx: IndexId | None
+    disp: DisplacementId | None
 
     def __str__(self) -> str:
-        return (
-            self.base.identify(1)
-            if self.offset is None
-            else f"{self.base.identify(1)}/{self.offset}"
-        )
+        parts: list[str] = []
+
+        if self.base is not None:
+            parts.append(str(self.base))
+
+        if self.indx is not None:
+            parts.append(str(self.indx))
+
+        if self.disp is not None:
+            parts.append(str(self.disp))
+
+        return "/".join(parts)

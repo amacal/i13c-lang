@@ -16,9 +16,11 @@ from i13c.semantic.typing.analyses.asmlets import (
     AsmletOperandRegister,
     AsmletOperandRelocation,
     AsmletOperandTarget,
+    AsmletOperandIndex,
 )
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
@@ -39,6 +41,7 @@ def configure_asmlets() -> GraphNode:
         requires=frozenset(
             {
                 ("generator", "core/generator"),
+                ("entrypoints", "analyses/entrypoints"),
                 ("callsites", "indices/callsites/signatures"),
                 ("snippets", "resolutions/snippets/accepted"),
             }
@@ -49,6 +52,7 @@ def configure_asmlets() -> GraphNode:
 
 def build_asmlets(
     generator: Generator,
+    entrypoints: OneToOne[SignatureId, Entrypoint],
     callsites: OneToMany[SignatureId, CallSiteAcceptance],
     snippets: OneToOne[SnippetId, SnippetAcceptance],
 ) -> OneToOne[AsmletId, Asmlet]:
@@ -65,20 +69,29 @@ def build_asmlets(
             else:
                 positions[idx] = True
 
-        for callsite in callsites.find(snippet.signature.id):
+        if entrypoints.find(snippet.signature.id) is not None:
+            calls = [None]
+        else:
+            calls = callsites.find(snippet.signature.id)
+
+        for callsite in calls:
             keys: list[tuple[bytes, Hex]] = []
 
-            for idx, (bind, argument) in enumerate(
-                zip(snippet.binding.binds, callsite.arguments)
-            ):
-                if not positions[idx]:
-                    assert isinstance(argument, LiteralAcceptance)
-                    keys.append((bind.src, argument.target))
+            if callsite is None:
+                index[frozenset()] = []
 
-            if frozenset(keys) not in index:
-                index[frozenset(keys)] = [callsite]
             else:
-                index[frozenset(keys)].append(callsite)
+                for idx, (bind, argument) in enumerate(
+                    zip(snippet.binding.binds, callsite.arguments)
+                ):
+                    if not positions[idx]:
+                        assert isinstance(argument, LiteralAcceptance)
+                        keys.append((bind.src, argument.target))
+
+                if frozenset(keys) not in index:
+                    index[frozenset(keys)] = [callsite]
+                else:
+                    index[frozenset(keys)].append(callsite)
 
             if len(index[frozenset(keys)]) > 1:
                 continue
@@ -175,7 +188,8 @@ def address_converter(
 ) -> AsmletOperandAddress:
 
     # the index and displacement are optional and can be None
-    indx: AsmletOperandRegister | None = None
+    base: AsmletOperandRegister | None = None
+    indx: AsmletOperandIndex | None = None
     disp: AsmletOperandDisplacement | None = None
 
     # the base of an address can only be a register
@@ -183,31 +197,35 @@ def address_converter(
         base = AsmletOperandRegister(name=src.base.name)
 
     # or a referenced register via binds
-    else:
+    if isinstance(src.base, ParameterAcceptance):
         value = binds[src.base.name]
         assert not isinstance(value, Hex)
         base = AsmletOperandRegister(name=value)
 
     # index is optional
     if src.indx is not None:
-        if isinstance(src.indx, RegisterAcceptance):
-            indx = AsmletOperandRegister(name=src.indx.name)
+        if isinstance(src.indx.target, RegisterAcceptance):
+            indx = AsmletOperandIndex(
+                scale=src.indx.scale,
+                reg=AsmletOperandRegister(name=src.indx.target.name),
+            )
 
         # or a referenced register via binds
         else:
-            value = binds[src.indx.name]
+            value = binds[src.indx.target.name]
             assert not isinstance(value, Hex)
-            indx = AsmletOperandRegister(name=value)
+            indx = AsmletOperandIndex(
+                scale=src.indx.scale,
+                reg=AsmletOperandRegister(name=value),
+            )
 
     # displacement is optional
-    if src.offset is not None:
-        value = (
-            src.offset.imm.value.data
-            if src.offset.kind == "forward"
-            else src.offset.imm.value.negate().data
+    if src.disp is not None:
+        disp = AsmletOperandDisplacement(
+            width=src.disp.width,
+            offset=src.disp.offset,
+            direction=src.disp.direction,
         )
-
-        disp = AsmletOperandDisplacement(value=value)
 
     return AsmletOperandAddress(
         base=base,

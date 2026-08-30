@@ -6,11 +6,13 @@ from i13c.semantic.nodes.entities.assigns import configure_assigns
 from i13c.semantic.nodes.entities.binds import configure_binds
 from i13c.semantic.nodes.entities.calls import configure_calls
 from i13c.semantic.nodes.entities.callsites import configure_callsites
+from i13c.semantic.nodes.entities.displacements import configure_displacements
 from i13c.semantic.nodes.entities.environments import configure_environments
 from i13c.semantic.nodes.entities.expressions import configure_expressions
 from i13c.semantic.nodes.entities.flags import configure_flags
 from i13c.semantic.nodes.entities.functions import configure_functions
 from i13c.semantic.nodes.entities.immediates import configure_immediates
+from i13c.semantic.nodes.entities.indices import configure_indices
 from i13c.semantic.nodes.entities.instructions import configure_instructions
 from i13c.semantic.nodes.entities.labels import configure_labels
 from i13c.semantic.nodes.entities.literals import configure_literals
@@ -36,11 +38,13 @@ def configure_entities() -> GraphGroup:
             configure_binds(),
             configure_calls(),
             configure_callsites(),
+            configure_displacements(),
             configure_environments(),
             configure_expressions(),
             configure_flags(),
             configure_functions(),
             configure_immediates(),
+            configure_indices(),
             configure_instructions(),
             configure_labels(),
             configure_literals(),
@@ -66,11 +70,13 @@ def parse_entities(entities: dict[str, Any]) -> EntityNodes:
         binds=entities["entities/binds"],
         calls=entities["entities/calls"],
         callsites=entities["entities/callsites"],
+        displacements=entities["entities/displacements"],
         environments=entities["entities/environments"],
         expressions=entities["entities/expressions"],
         flags=entities["entities/flags"],
         functions=entities["entities/functions"],
         immediates=entities["entities/immediates"],
+        indices=entities["entities/indices"],
         instructions=entities["entities/instructions"],
         labels=entities["entities/labels"],
         literals=entities["entities/literals"],

@@ -2,7 +2,6 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.analyses.calls import CallInstruction, CallLlvm
 from i13c.semantic.typing.analyses.llvm import (
@@ -12,6 +11,7 @@ from i13c.semantic.typing.analyses.llvm import (
     Address,
     Immediate,
     Register,
+    Displacement,
 )
 from i13c.semantic.typing.analyses.shuffles import (
     ShuffleCallSite,
@@ -109,7 +109,7 @@ def emit(
                             Address(
                                 base=Register(name=b"rsp"),
                                 indx=None,
-                                disp=Hex.smallest(8 * move.src).data,
+                                disp=Displacement.positive(8 * move.src),
                             ),
                         )
                     )

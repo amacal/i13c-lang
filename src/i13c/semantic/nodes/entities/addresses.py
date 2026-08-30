@@ -3,10 +3,11 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.addresses import Address, AddressId, Offset
-from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.entities.addresses import Address, AddressId, BaseRegister
+from i13c.semantic.typing.entities.displacements import DisplacementId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.indices import IndexId
 from i13c.syntax import tree
 
 
@@ -30,41 +31,34 @@ def build_addresses(
         address_id = AddressId(value=nid.value)
 
         # optionally available index or offset information
-        indx_id: RegisterId | ReferenceId | None = None
-        offset: Offset | None = None
+        base_id: BaseRegister | None = None
+        indx_id: IndexId | None = None
+        disp_id: DisplacementId | None = None
 
         # reverse mapping to base register ID
         if isinstance(entry.base, tree.snippet.Register):
             base_nid = graph.snippet.registers.get_by_node(entry.base)
             base_id = RegisterId(value=base_nid.value)
-        else:
+
+        if isinstance(entry.base, tree.snippet.Reference):
             base_nid = graph.snippet.references.get_by_node(entry.base)
             base_id = ReferenceId(value=base_nid.value)
 
         # reverse mapping to index register ID
         if entry.indx is not None:
-            if isinstance(entry.indx, tree.snippet.Register):
-                indx_nid = graph.snippet.registers.get_by_node(entry.indx)
-                indx_id = RegisterId(value=indx_nid.value)
-            else:
-                indx_nid = graph.snippet.references.get_by_node(entry.indx)
-                indx_id = ReferenceId(value=indx_nid.value)
+            indx_nid = graph.snippet.indices.get_by_node(entry.indx)
+            indx_id = IndexId(value=indx_nid.value)
 
         # reverse mapping to immediate ID
-        if entry.offset is not None:
-            offset_nid = graph.snippet.immediates.get_by_node(entry.offset.value)
-            offset_id = ImmediateId(value=offset_nid.value)
-
-            offset = Offset(
-                kind=entry.offset.kind,
-                value=offset_id,
-            )
+        if entry.disp is not None:
+            offset_nid = graph.snippet.displacements.get_by_node(entry.disp)
+            disp_id = DisplacementId(value=offset_nid.value)
 
         addresses[address_id] = Address(
             ref=entry.ref,
             base=base_id,
             indx=indx_id,
-            offset=offset,
+            disp=disp_id,
         )
 
     return OneToOne[AddressId, Address].instance(addresses)
@@ -83,8 +77,7 @@ class ListExtractor:
             "ref": "Ref",
             "id": "ID",
             "base": "Base",
-            "okind": "Offset Kind",
-            "ovalue": "Offset Value",
+            "disp": "Displacement",
         }
 
     @staticmethod
@@ -92,7 +85,6 @@ class ListExtractor:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
-            "base": entry.base.identify(1),
-            "okind": str(entry.offset.kind) if entry.offset else "",
-            "ovalue": entry.offset.value.identify(1) if entry.offset else "",
+            "base": entry.base.identify(1) if entry.base else "",
+            "disp": entry.disp.identify(1) if entry.disp else "",
         }

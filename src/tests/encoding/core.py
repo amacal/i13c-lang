@@ -1,0 +1,292 @@
+from i13c.core.result import Err, Ok
+from i13c.semantic.graph import SemanticGraph
+from i13c.syntax.lexing import tokenize
+from i13c.syntax.parsing import parse
+from i13c.syntax.source import open_text
+from i13c.graph.nodes import run as run_graph
+
+from i13c.semantic.nodes.resolutions.mnemonics import MnemonicVariant
+from i13c.semantic.typing.resolutions.mnemonics import MnemonicOperandSymbol
+
+
+def parse_table(table: str) -> list[tuple[str, bytes | None]]:
+    rows: list[tuple[str, bytes | None]] = []
+    lines = [line.strip("|\n ") for line in table.splitlines()[2:-1]]
+    headers = [h.strip().lower() for h in lines[0].split("|")]
+
+    assert headers[0] == "instruction"
+    assert headers[1] == "encoding"
+
+    try:
+        separator = headers.index("***")
+    except ValueError:
+        separator = len(headers)
+
+    if separator < len(headers):
+        assert headers[separator + 1] == "instruction"
+        assert headers[separator + 2] == "encoding"
+
+    for line in [line for line in lines[2:] if "---" not in line]:
+        parts = [p.strip() for p in line.split("|")]
+        left, right = parts[:separator], parts[separator + 1 :]
+
+        for line in [left] if separator == len(headers) else [left, right]:
+            assert len(line) == 2
+
+            if "!!" in line[1]:
+                rows.append((line[0], None))
+            else:
+                rows.append((line[0], bytes.fromhex(line[1]) if line[1] else None))
+
+    return rows
+
+
+def compile(instruction: str) -> SemanticGraph:
+    source = open_text(f"""
+        asm main() noreturn {{
+            {instruction};
+        }}
+    """)
+
+    match tokenize(source):
+        case Err(diagnostics):
+            assert False, f"Tokenization failed: {diagnostics}"
+        case Ok(tokens):
+            tokenized = tokens
+
+    match parse(source, tokenized):
+        case Err(diagnostics):
+            assert False, f"Parsing failed: {diagnostics}"
+        case Ok(program):
+            program = program
+
+    graph = run_graph(program)
+    return graph.semantic_graph()
+
+
+def encode(table: str):
+    for instruction, encoding in parse_table(table):
+
+        try:
+            semantic = compile(instruction)
+            message = f"Encoding mismatch for instruction: {instruction}"
+        except AssertionError:
+            assert False, f"Compilation failed for instruction: {instruction}"
+
+        if encoding is None:
+            assert semantic.analyses.sections is None
+            continue
+
+        assert semantic.analyses.sections is not None, message
+        assert semantic.analyses.sections.size() == 1, message
+
+        _, section = semantic.analyses.sections.peek()
+
+        assert len(section.data) > 0, message
+        assert section.data.hex() == encoding.hex(), message
+
+
+def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
+    # fmt: off
+    reg64 = (
+        "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
+        "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    )
+
+    reg16 = (
+        "ax", "cx", "dx", "bx", "sp", "bp", "si", "di",
+        "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w",
+    )
+    # fmt: on
+
+    match symbol:
+        case "reg64":
+            return reg64
+
+        case "reg16":
+            return reg16
+
+        case "addr":
+            scales = (1, 2, 4, 8)
+            indexes = tuple(register for register in reg64 if register != "rsp")
+            cases: list[str] = []
+
+            # every base through ModRM or mandatory SIB
+            cases.extend(f"[{base}]" for base in reg64)
+
+            # every SIB base, implicit scale 1
+            cases.extend(f"[{base} + 1 * rcx]" for base in reg64)
+
+            # every legal SIB index, implicit scale 1
+            cases.extend(f"[rax + 1 * {index}]" for index in indexes)
+
+            # explicit scale field, ordinary registers
+            cases.extend(f"[rax + {scale} * rcx]" for scale in scales)
+
+            # explicit scale with REX.B and REX.X
+            cases.extend(f"[r8 + {scale} * r9]" for scale in scales)
+
+            # index without a base: mandatory SIB disp32
+            cases.extend(f"[{scale} * rcx]" for scale in scales)
+
+            # extended index without a base
+            cases.extend(f"[{scale} * r9]" for scale in scales)
+
+            # special index/base interactions
+            cases.extend(
+                [
+                    "[r13 + 8 * r12]",
+                    "[rsp + 4 * r15]",
+                ]
+            )
+
+            displacements = (
+                "+ 0x00",
+                "- 0x00",
+                "+ 0x0000",
+                "- 0x0000",
+                "+ 0x01",
+                "- 0x01",
+                "+ 0x0001",
+                "- 0x0001",
+                "+ 0x00000001",
+                "- 0x00000001",
+                "+ 0x7f",
+                "- 0x7f",
+                "+ 0x80",
+                "- 0x80",
+                "- 0x81",
+                "+ 0xff",
+                "- 0xff",
+                "+ 0x7fff",
+                "- 0x7fff",
+                "+ 0x8000",
+                "- 0x8000",
+                "+ 0xffff",
+                "- 0xffff",
+                "+ 0x7fffffff",
+                "- 0x7fffffff",
+                "- 0x80000000",
+            )
+
+            # displacement cases through SIB.
+            cases.extend(
+                f"[rax + 1 * rcx {displacement}]" for displacement in displacements
+            )
+
+            # boundary cases without SIB.
+            cases.extend(
+                (
+                    "[r10 + 0x7f]",
+                    "[r10 + 0x80]",
+                    "[r10 - 0x80]",
+                    "[r10 - 0x81]",
+                )
+            )
+
+            # ordered de-duplication.
+            return tuple(dict.fromkeys(cases))
+
+    return ()
+
+
+def cover(domains: list[tuple[str, ...]]) -> tuple[tuple[str, ...], ...]:
+    if not domains:
+        return ((),)
+
+    rows: dict[tuple[str, ...], None] = {}
+
+    # different baseline value for each operand position.
+    baseline = tuple(
+        domain[position % len(domain)] for position, domain in enumerate(domains)
+    )
+    rows[baseline] = None
+
+    # every value appears in every applicable operand position.
+    for position, domain in enumerate(domains):
+        for value in domain:
+            row = list(baseline)
+            row[position] = value
+            rows[tuple(row)] = None
+
+    # add mixed combinations, including extended/extended registers.
+    count = max(len(domain) for domain in domains)
+
+    for index in range(count):
+        row = tuple(
+            domain[(index + position) % len(domain)]
+            for position, domain in enumerate(domains)
+        )
+        rows[row] = None
+
+    return tuple(rows)
+
+
+def exhaust(variants: list[MnemonicVariant], *tables: str):
+    visited: set[MnemonicVariant] = set()
+
+    for table in tables:
+        variant: MnemonicVariant | None = None
+        combinations: list[tuple[str, ...]] = []
+
+        for instruction, _ in parse_table(table):
+            semantic = compile(instruction)
+
+            assert semantic.resolutions.instructions is not None
+            assert semantic.resolutions.instructions.size() == 1
+
+            _, resolved = semantic.resolutions.instructions.peek()
+            assert len(resolved.accepted) == 1
+
+            visited.add(resolved.accepted[0].variant)
+            variant = resolved.accepted[0].variant
+            combinations: list[tuple[str, ...]] = []
+
+            for operand in variant:
+                combinations.append(
+                    tuple(name.decode() for name in operand.names or [])
+                    or expand(operand.symbol)
+                )
+
+            break
+
+        assert variant is not None
+        assert combinations is not None
+
+        found: set[str] = set()
+        expected = {":".join(entry) for entry in cover(combinations)}
+
+        for instruction, _ in parse_table(table):
+            semantic = compile(instruction)
+
+            if semantic.resolutions.instructions is None:
+                continue
+
+            assert semantic.resolutions.instructions is not None
+            assert semantic.resolutions.instructions.size() == 1
+
+            _, resolved = semantic.resolutions.instructions.peek()
+            assert len(resolved.accepted) == 1
+
+            # we expect exactly the same variant in single array
+            assert id(variant) == id(resolved.accepted[0].variant)
+
+            assert semantic.analyses.blocklets is not None
+            assert semantic.analyses.blocklets.size() == 1
+
+            _, blocklet = semantic.analyses.blocklets.peek()
+            assert len(blocklet.blocks) == 1
+            assert len(blocklet.blocks[0].instructions) == 1
+
+            found.add(
+                ":".join(
+                    [
+                        str(operand)
+                        for operand in blocklet.blocks[0].instructions[0].operands
+                    ]
+                )
+            )
+
+        assert found == expected
+
+    assert visited == set(variants)

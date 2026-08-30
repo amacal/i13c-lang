@@ -29,7 +29,7 @@ def build_signatures(
 
         # find the context of the signature entry
         snippet = graph.snippet.signatures.get_ctx(nid)
-        nid = graph.snippet.snippets.get_by_node(snippet)
+        snippet_nid = graph.snippet.snippets.get_by_node(snippet)
 
         # reverse mapping to parameter ID
         def map_slot(slot: tree.snippet.Slot) -> ParameterId:
@@ -38,6 +38,7 @@ def build_signatures(
 
         signatures[signature_id] = Signature(
             ref=entry.ref,
+            nid=snippet_nid,
             name=entry.name,
             parameters=[map_slot(slot) for slot in entry.slots],
         )
@@ -48,7 +49,7 @@ def build_signatures(
 
         # find the context of the signature entry
         function = graph.function.signatures.get_ctx(nid)
-        nid = graph.function.functions.get_by_node(function)
+        function_nid = graph.function.functions.get_by_node(function)
 
         # reverse mapping to slot ID
         def map_param(param: tree.function.Parameter) -> ParameterId:
@@ -57,6 +58,7 @@ def build_signatures(
 
         signatures[signature_id] = Signature(
             ref=entry.ref,
+            nid=function_nid,
             name=entry.name,
             parameters=[map_param(param) for param in entry.params],
         )

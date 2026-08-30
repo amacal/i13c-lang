@@ -21,7 +21,7 @@ def can_detect_an_offsetless_address():
     assert entities.addresses.size() == 1
     _, value = entities.addresses.peek()
 
-    assert value.offset is None
+    assert value.disp is None
 
     assert entities.registers.size() == 1
     id, _ = entities.registers.peek()
@@ -40,14 +40,16 @@ def can_detect_an_indexed_address():
     assert entities.addresses.size() == 1
     _, value = entities.addresses.peek()
 
-    assert value.offset is None
+    assert value.disp is None
 
     assert entities.registers.size() == 2
-    ids = list(entities.registers.keys())
+    registers = list(entities.registers.keys())
 
-    assert value.base in ids
-    assert value.indx in ids
-    assert value.base != value.indx
+    assert entities.indices.size() == 1
+    indices = list(entities.indices.keys())
+
+    assert value.base in registers
+    assert value.indx in indices
 
 
 def can_detect_a_forward_address():
@@ -60,18 +62,15 @@ def can_detect_a_forward_address():
     assert entities.addresses.size() == 1
     _, value = entities.addresses.peek()
 
-    assert value.offset is not None
-    assert value.offset.kind == "forward"
-
     assert entities.registers.size() == 1
     id, _ = entities.registers.peek()
 
     assert value.base == id
 
-    assert entities.immediates.size() == 1
-    id, _ = entities.immediates.peek()
+    assert entities.displacements.size() == 1
+    id, _ = entities.displacements.peek()
 
-    assert value.offset.value == id
+    assert value.disp == id
     assert value.indx is None
 
 
@@ -85,16 +84,13 @@ def can_detect_a_backward_address():
     assert entities.addresses.size() == 1
     _, value = entities.addresses.peek()
 
-    assert value.offset is not None
-    assert value.offset.kind == "backward"
-
     assert entities.registers.size() == 1
     id, _ = entities.registers.peek()
 
     assert value.base == id
 
-    assert entities.immediates.size() == 1
-    id, _ = entities.immediates.peek()
+    assert entities.displacements.size() == 1
+    id, _ = entities.displacements.peek()
 
-    assert value.offset.value == id
+    assert value.disp == id
     assert value.indx is None

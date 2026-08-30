@@ -10,7 +10,7 @@ def can_detect_entrypoint_from_a_snippet():
     assert analyses.entrypoints.size() == 1
     _, value = analyses.entrypoints.peek()
 
-    assert value.target.signature.name == b"main"
+    assert value.target.name == b"main"
 
 
 def can_detect_entrypoint_from_a_function():
@@ -23,7 +23,7 @@ def can_detect_entrypoint_from_a_function():
     assert analyses.entrypoints.size() == 1
     _, value = analyses.entrypoints.peek()
 
-    assert value.target.signature.name == b"main"
+    assert value.target.name == b"main"
 
 
 def can_reject_entrypoint_from_a_snippet_without_noreturn():

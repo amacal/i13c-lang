@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Literal as Kind
 
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.asmlets import AsmletId
@@ -27,13 +28,42 @@ class Register:
 @dataclass(kw_only=True, repr=False)
 class Index:
     reg: Register
-    val: int
+    scale: Kind[1, 2, 4, 8]
 
     def __str__(self) -> str:
-        return str(self.reg)
+        return f"{self.scale} * {self.reg}"
 
 
-Displacement = bytes
+DisplacementWidth = Kind[0, 8, 32]
+DisplacementDirection = Kind["forward", "backward"]
+DisplacementOffset = bytes
+
+
+@dataclass(kw_only=True, repr=False)
+class Displacement:
+    width: DisplacementWidth
+    offset: DisplacementOffset
+    direction: DisplacementDirection
+
+    @staticmethod
+    def positive(value: int) -> Displacement:
+        data = value.to_bytes(4, "big")
+        width = 8 if len(data.lstrip(bytes([0x00]))) <= 1 else 32
+
+        if width == 8:
+            data = data[-1:]
+
+        return Displacement(
+            width=width,
+            offset=data,
+            direction="forward",
+        )
+
+    def __str__(self) -> str:
+        if self.direction == "forward":
+            return f"+ 0x{self.offset.hex()}"
+        else:
+            return f"- 0x{self.offset.hex()}"
 
 
 @dataclass(kw_only=True, repr=False)
@@ -44,6 +74,7 @@ class Address:
 
     def __str__(self) -> str:
         repr: list[str] = []
+        disp: str = ""
 
         if self.base is not None:
             repr.append(str(self.base))
@@ -52,9 +83,10 @@ class Address:
             repr.append(str(self.indx))
 
         if self.disp is not None:
-            repr.append(f"0x{self.disp.hex()}")
+            disp = str(self.disp)
 
-        return f"[{' + '.join(repr)}]"
+        value = f"{' + '.join(repr)} {disp}"
+        return f"[{value.strip()}]"
 
 
 @dataclass(kw_only=True, repr=False)

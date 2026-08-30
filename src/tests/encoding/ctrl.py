@@ -10,6 +10,7 @@ def can_encode_instructions_nop_twice():
         ref=Span(offset=0, length=3),
         id=BlockletId(value=1),
         target=AsmletId(value=2),
+        entrypoint=True,
         blocks=[
             BlockletBlock(
                 instructions=[
@@ -31,6 +32,7 @@ def can_encode_instructions_jump_forward():
         ref=Span(offset=0, length=3),
         id=BlockletId(value=1),
         target=AsmletId(value=2),
+        entrypoint=True,
         blocks=[
             BlockletBlock(
                 instructions=[
@@ -67,6 +69,7 @@ def can_encode_instructions_jump_backward():
         ref=Span(offset=0, length=3),
         id=BlockletId(value=1),
         target=AsmletId(value=2),
+        entrypoint=True,
         blocks=[
             BlockletBlock(
                 instructions=[

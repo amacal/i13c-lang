@@ -105,6 +105,7 @@ def build_signature_resolution(
                 SignatureAcceptance(
                     ref=entry.ref,
                     id=sid,
+                    nid=entry.nid,
                     name=entry.name,
                     parameters=accepted,
                 )

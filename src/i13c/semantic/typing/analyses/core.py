@@ -28,7 +28,7 @@ from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.statements import StatementId
 
 
-@dataclass
+@dataclass(repr=False)
 class AnalysisNodes:
     allocations: OneToOne[FunctionId, Allocation] | None
     asmlets: OneToOne[AsmletId, Asmlet] | None

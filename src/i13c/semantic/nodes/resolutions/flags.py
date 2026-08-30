@@ -96,6 +96,7 @@ def build_flags_resolution(
                 FlagsAcceptance(
                     ref=entry.ref,
                     id=fid,
+                    nid=entry.nid,
                     clobbers=accepted,
                     noreturn=entry.noreturn or False,
                 )

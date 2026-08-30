@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
+from i13c.semantic.syntax import NodeId
 
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
@@ -22,6 +23,7 @@ class SignatureRejection:
 class SignatureAcceptance:
     ref: Span
     id: SignatureId
+    nid: NodeId
 
     name: bytes
     parameters: list[ParameterAcceptance]

@@ -2,7 +2,6 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.allocations import Allocation
 from i13c.semantic.typing.analyses.assigns import AssignInstruction, AssignLlvm
 from i13c.semantic.typing.analyses.llvm import (
@@ -10,6 +9,7 @@ from i13c.semantic.typing.analyses.llvm import (
     Address,
     Immediate,
     Register,
+    Displacement,
 )
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -85,7 +85,7 @@ def emit(
             src = Address(
                 base=Register(name=b"rsp"),
                 indx=None,
-                disp=Hex.smallest(8 * allocation.spills[idx]).data,
+                disp=Displacement.positive(8 * allocation.spills[idx]),
             )
 
     # emit single instruction

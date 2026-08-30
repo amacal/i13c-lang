@@ -262,69 +262,133 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
 
 def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Address:
-    offset: tree.snippet.Offset | None = None
+    displacement: tree.snippet.Displacement | None = None
 
-    # now we expect a register as the base
-    base = state.expect(Tokens.IDENT, Tokens.AT)
+    # optionally, a base, an offset or an index can be provided
+    base: tree.snippet.Register | tree.snippet.Reference | None = None
+    indx: tree.snippet.Index | None = None
+    operator: LexingToken | None = None
 
-    if base.code == Tokens.AT:
-        base = parse_reference(state, base)
-
-    else:
-        base = tree.snippet.Register(
-            ref=state.between(base, base),
-            name=state.extract(base),
-        )
-
-    # optionally, an offset or an index can be provided
-    indx: tree.snippet.Register | tree.snippet.Reference | None = None
-    end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
+    end = state.expect(
+        Tokens.IDENT,  # for any register
+        Tokens.AT,  # for any reference
+        Tokens.DIGIT,  # for any scaler
+    )
 
     while end.code != Tokens.SQUARE_CLOSE:
-        # if there's a plus or minus, we expect an immediate offset
+        # if there's a base (register or reference)
+        if base is None and end.code in (Tokens.IDENT, Tokens.AT):
+            end, base = parse_base(state, end)
+            continue
+
+        # if there's an index (register, reference, or scaled)
+        if indx is None and end.code in (Tokens.DIGIT, Tokens.IDENT, Tokens.AT):
+            end, indx = parse_index(state, end)
+            continue
+
+        if displacement is None and end.code == Tokens.HEX:
+            assert operator is not None
+            end, displacement = parse_displacement(state, end, operator)
+            continue
+
+        # if there's a minus, we expect an immediate offset
         if end.code == Tokens.MINUS:
-            value = state.expect(Tokens.HEX)
-        else:
-            value = state.expect(Tokens.HEX, Tokens.IDENT, Tokens.AT)
+            operator = end
+            end = state.expect(Tokens.HEX)
+            continue
 
-        # if we found an index
-        if value.code != Tokens.HEX:
-            # index can be a reference
-            if value.code == Tokens.AT:
-                indx = parse_reference(state, value)
+        # if plus we expect an index or a displacement
+        if end.code == Tokens.PLUS:
+            operator = end
+            end = state.expect(Tokens.HEX, Tokens.IDENT, Tokens.AT, Tokens.DIGIT)
+            continue
 
-            # or just plain register
-            else:
-                indx = tree.snippet.Register(
-                    ref=state.between(value, value),
-                    name=state.extract(value),
-                )
-
-            # index can be closed or followed by an offset
-            end = state.expect(Tokens.SQUARE_CLOSE, Tokens.PLUS, Tokens.MINUS)
-
-        else:
-            # determine the sign of the offset
-            kind = "forward" if end.code == Tokens.PLUS else "backward"
-
-            # to be converted to an offset operand
-            offset = tree.snippet.Offset(
-                kind=kind,
-                value=tree.snippet.Immediate(
-                    ref=state.between(value, value),
-                    data=extract_hex(state, value),
-                ),
-            )
-
-            # address has to be closed with a square close bracket
-            end = state.expect(Tokens.SQUARE_CLOSE)
+        assert False
 
     return tree.snippet.Address(
         ref=state.between(token, end),
         base=base,
         indx=indx,
-        offset=offset,
+        disp=displacement,
     )
+
+
+def parse_base(
+    state: ParsingState, token: LexingToken
+) -> tuple[LexingToken, tree.snippet.Register | tree.snippet.Reference]:
+    if token.code == Tokens.AT:
+        base = parse_reference(state, token)
+
+    else:
+        base = tree.snippet.Register(
+            ref=state.between(token, token),
+            name=state.extract(token),
+        )
+
+    # base index can be followed by a scaled index or an offset
+    token = state.expect(
+        Tokens.SQUARE_CLOSE,
+        Tokens.PLUS,
+        Tokens.MINUS,
+        Tokens.IDENT,
+        Tokens.AT,
+        Tokens.DIGIT,
+    )
+
+    return token, base
+
+
+def parse_index(
+    state: ParsingState, token: LexingToken
+) -> tuple[LexingToken, tree.snippet.Index]:
+    scale: int = 1
+
+    # index can have a scale
+    if token.code == Tokens.DIGIT:
+        scale = int(state.extract(token))
+        _ = state.expect(Tokens.STAR)
+        token = state.expect(Tokens.IDENT)
+
+    # index can be a reference
+    if token.code == Tokens.AT:
+        target = parse_reference(state, token)
+
+    # or just plain register
+    else:
+        target = tree.snippet.Register(
+            ref=state.between(token, token),
+            name=state.extract(token),
+        )
+
+    indx = tree.snippet.Index(
+        ref=state.between(token, token),
+        target=target,
+        scale=scale,
+    )
+
+    token = state.expect(
+        Tokens.SQUARE_CLOSE,
+        Tokens.PLUS,
+        Tokens.MINUS,
+    )
+
+    return token, indx
+
+def parse_displacement(state: ParsingState, token: LexingToken, operator: LexingToken) -> tuple[LexingToken, tree.snippet.Displacement]:
+    # determine the sign of the displacement
+    kind = "forward" if operator.code == Tokens.PLUS else "backward"
+
+    # to be converted to a displacement entry
+    displacement = tree.snippet.Displacement(
+        ref=state.between(token, token),
+        kind=kind,
+        offset=extract_hex(state, token),
+    )
+
+    # address has to be closed with a square close bracket
+    token = state.expect(Tokens.SQUARE_CLOSE)
+
+    return token, displacement
 
 
 def parse_reference(state: ParsingState, start: LexingToken) -> tree.snippet.Reference:

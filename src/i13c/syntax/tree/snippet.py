@@ -21,6 +21,8 @@ class Visitor(Protocol):
     def on_register(self, register: Register, path: Path) -> None: ...
     def on_reference(self, reference: Reference, path: Path) -> None: ...
     def on_address(self, address: Address, path: Path) -> None: ...
+    def on_index(self, index: Index, path: Path) -> None: ...
+    def on_displacement(self, displacement: Displacement, path: Path) -> None: ...
 
     # types related
     def on_type(self, type: types.Type, path: Path) -> None: ...
@@ -54,36 +56,49 @@ class Reference:
         visitor.on_reference(self, path)
 
 
-OffsetKind = Kind["forward", "backward"]
+@dataclass(kw_only=True, eq=False)
+class Index:
+    ref: Span
+
+    scale: int
+    target: Register | Reference
+
+    def accept(self, visitor: Visitor, path: Path) -> None:
+        visitor.on_index(self, path)
+
+        with path.push(self) as node:
+            self.target.accept(visitor, node)
 
 
 @dataclass(kw_only=True, eq=False)
-class Offset:
-    kind: OffsetKind
-    value: Immediate
+class Displacement:
+    ref: Span
+    kind: Kind["forward", "backward"]
+    offset: literals.Hex
 
     def accept(self, visitor: Visitor, path: Path) -> None:
-        visitor.on_immediate(self.value, path)
+        visitor.on_displacement(self, path)
 
 
 @dataclass(kw_only=True, eq=False)
 class Address:
     ref: Span
-    base: Register | Reference
-    indx: Register | Reference | None
-    offset: Offset | None
+    base: Register | Reference | None
+    indx: Index | None
+    disp: Displacement | None
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_address(self, path)
 
         with path.push(self) as node:
-            self.base.accept(visitor, node)
+            if self.base is not None:
+                self.base.accept(visitor, node)
 
             if self.indx is not None:
                 self.indx.accept(visitor, node)
 
-            if self.offset is not None:
-                self.offset.accept(visitor, node)
+            if self.disp is not None:
+                self.disp.accept(visitor, node)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -188,7 +203,6 @@ class Flags:
         with path.push(self) as node:
             for entry in self.clobbers or []:
                 entry.accept(visitor, node)
-
 
 
 @dataclass(kw_only=True, eq=False)

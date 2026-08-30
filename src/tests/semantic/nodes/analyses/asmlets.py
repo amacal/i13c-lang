@@ -151,6 +151,7 @@ def can_substitute_a_snippet_with_a_base_register_parameter():
 
     assert instr.operands[1].symbol == "addr"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
+    assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rcx"
     assert instr.operands[1].target.disp is None
 
@@ -260,10 +261,12 @@ def can_substitute_a_snippet_with_a_index_register():
 
     assert instr.operands[1].symbol == "addr"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
+    assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rcx"
 
     assert instr.operands[1].target.indx is not None
-    assert instr.operands[1].target.indx.name == b"rax"
+    assert instr.operands[1].target.indx.scale == 1
+    assert instr.operands[1].target.indx.reg.name == b"rax"
 
 
 def can_substitute_a_snippet_with_a_index_register_indirectly():
@@ -307,10 +310,12 @@ def can_substitute_a_snippet_with_a_index_register_indirectly():
 
     assert instr.operands[1].symbol == "addr"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
+    assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rax"
 
     assert instr.operands[1].target.indx is not None
-    assert instr.operands[1].target.indx.name == b"rcx"
+    assert instr.operands[1].target.indx.scale == 1
+    assert instr.operands[1].target.indx.reg.name == b"rcx"
 
 
 def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement_positive():
@@ -354,10 +359,11 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement_pos
 
     assert instr.operands[1].symbol == "addr"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
+    assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rcx"
 
     assert instr.operands[1].target.disp is not None
-    assert instr.operands[1].target.disp.hex() == "0x10"
+    assert str(instr.operands[1].target.disp) == "+ 0x10"
 
 
 def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement_negative():
@@ -401,10 +407,11 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement_neg
 
     assert instr.operands[1].symbol == "addr"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
+    assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rcx"
 
     assert instr.operands[1].target.disp is not None
-    assert instr.operands[1].target.disp.hex() == "0xf0"
+    assert str(instr.operands[1].target.disp) == "- 0x10"
 
 
 def can_substitute_only_once_the_same_signatured_called_twice():

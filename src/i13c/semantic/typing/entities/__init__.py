@@ -6,11 +6,13 @@ from i13c.semantic.typing.entities.assigns import Assign, AssignId
 from i13c.semantic.typing.entities.binds import Bind, BindId
 from i13c.semantic.typing.entities.calls import Call, CallId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
+from i13c.semantic.typing.entities.displacements import Displacement, DisplacementId
 from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
 from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.flags import Flags, FlagsId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
+from i13c.semantic.typing.entities.indices import Index, IndexId
 from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
 from i13c.semantic.typing.entities.labels import Label, LabelId
 from i13c.semantic.typing.entities.literals import Literal, LiteralId
@@ -34,11 +36,13 @@ class EntityNodes:
     binds: OneToOne[BindId, Bind]
     calls: OneToOne[CallId, Call]
     callsites: OneToOne[CallSiteId, CallSite]
+    displacements: OneToOne[DisplacementId, Displacement]
     environments: OneToOne[EnvironmentId, Environment]
     expressions: OneToOne[ExpressionId, Expression]
     flags: OneToOne[FlagsId, Flags]
     functions: OneToOne[FunctionId, Function]
     immediates: OneToOne[ImmediateId, Immediate]
+    indices: OneToOne[IndexId, Index]
     instructions: OneToOne[InstructionId, Instruction]
     labels: OneToOne[LabelId, Label]
     literals: OneToOne[LiteralId, Literal]

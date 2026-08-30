@@ -1,5 +1,5 @@
 from collections.abc import Callable, Iterable, Sequence
-from typing import Any
+from typing import Any, Literal as Kind
 
 from pytest import mark
 
@@ -13,6 +13,7 @@ from i13c.semantic.typing.analyses.llvm import (
     Immediate,
     Index,
     Register,
+    Displacement,
 )
 
 
@@ -89,22 +90,22 @@ class ImmediateInfo:
 
 class IndexInfo:
     @staticmethod
-    def optional(reg: str | None, scale: int | None) -> Index | None:
+    def optional(reg: str | None, scale: Kind[1, 2, 4, 8] | None) -> Index | None:
         return (
-            Index(reg=RegisterInfo.auto(reg), val=scale)
+            Index(reg=RegisterInfo.auto(reg), scale=scale)
             if reg is not None and scale is not None
             else None
         )
 
 class DisplacementInfo:
     @staticmethod
-    def auto(value: bytes | None) -> bytes | None:
-        return value if value and len(value.strip(bytes([0x00]))) else None
+    def auto(value: bytes | None) -> Displacement | None:
+        return Displacement.positive(int.from_bytes(value, "big")) if value and len(value.strip(bytes([0x00]))) else None
 
 
 def parse_address(
     base: str | None,
-    scale: int | None,
+    scale: Kind[1, 2, 4, 8] | None,
     index: str | None,
     disp32: bytes | None,
 ) -> Address | Fixed:
@@ -115,7 +116,7 @@ def parse_address(
     return Address(
         base=RegisterInfo.optional(base),
         indx=IndexInfo.optional(index, scale),
-        disp=disp32,
+        disp=DisplacementInfo.auto(disp32),
     )
 
 

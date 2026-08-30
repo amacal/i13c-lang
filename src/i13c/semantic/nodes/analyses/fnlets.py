@@ -16,10 +16,12 @@ from i13c.semantic.typing.analyses.llvm import (
     Address,
     Immediate,
     Register,
+    Displacement,
 )
 from i13c.semantic.typing.analyses.statements import StatementLlvm
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
 from i13c.syntax.source import Span
 
 
@@ -33,6 +35,7 @@ def configure_fnlets() -> GraphNode:
                 ("cflows", "analyses/cflows"),
                 ("frames", "analyses/frames"),
                 ("statements", "analyses/statements"),
+                ("functions", "resolutions/functions/accepted"),
             }
         ),
         views=GraphViews(list=ListExtractor),
@@ -42,6 +45,7 @@ def configure_fnlets() -> GraphNode:
 def build_fnlets(
     cflows: OneToOne[FunctionId, ControlFlows],
     frames: OneToOne[FunctionId, StackFrame],
+    functions: OneToOne[FunctionId, FunctionAcceptance],
     statements: OneToOne[StatementId, StatementLlvm],
 ) -> OneToOne[FunctionId, Fnlet]:
     fnlets: dict[FunctionId, Fnlet] = {}
@@ -58,9 +62,8 @@ def build_fnlets(
         fnlets[fid] = Fnlet(
             ref=cflow.ref,
             target=fid,
-            blocks=[
-                FnletBlock(instructions=instructions),
-            ],
+            signature=functions.get(fid).signature,
+            blocks=[FnletBlock(instructions=instructions)],
         )
 
     return OneToOne[FunctionId, Fnlet].instance(fnlets)
@@ -87,7 +90,7 @@ def emit_prologue(instructions: list[FnletInstruction], frame: StackFrame):
                     Address(
                         base=Register(name=b"rsp"),
                         indx=None,
-                        disp=Hex.smallest(8 * entry.slot).data,
+                        disp=Displacement.positive(8 * entry.slot),
                     ),
                     Register(name=entry.name),
                 ),

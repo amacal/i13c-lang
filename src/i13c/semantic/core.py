@@ -61,15 +61,6 @@ class Hex:
     def highest_bit(self) -> bool:
         return self.data[0] & 0x80 != 0
 
-    def negate(self) -> Hex:
-        val = int.from_bytes(self.data, byteorder="big", signed=True)
-        neg = (-val).to_bytes(self.width // 8, byteorder="big", signed=True)
-
-        # ensure that the negated value has the same width as the original
-        assert len(self.data) == len(neg)
-
-        return Hex(data=neg, width=self.width)
-
     def __str__(self) -> str:
         return f"0x{self.data.hex()}"
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.syntax.source import Span
-
+from i13c.semantic.syntax import NodeId
 
 @dataclass(kw_only=True, frozen=True)
 class FlagsId:
@@ -15,6 +15,8 @@ class FlagsId:
 @dataclass(kw_only=True)
 class Flags:
     ref: Span
+    nid: NodeId
+
     noreturn: bool | None
     clobbers: list[RegisterId] | None
 

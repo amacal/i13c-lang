@@ -1,18 +1,18 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.addresses import AddressId, OffsetKind
-from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
+from i13c.semantic.typing.entities.addresses import AddressId
+from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
+from i13c.semantic.typing.resolutions.indices import IndexAcceptance
 from i13c.syntax.source import Span
 
 AddressRejectionReason = Kind[
     "invalid-register",
-    "invalid-offset",
+    "invalid-index",
 ]
 
-OffsetWidth = Kind[8, 16, 32]
 AddressBase = RegisterAcceptance | ParameterAcceptance
 
 
@@ -25,33 +25,25 @@ class AddressRejection:
 
 
 @dataclass(kw_only=True)
-class OffsetAcceptance:
-    kind: OffsetKind
-    width: OffsetWidth
-    imm: ImmediateAcceptance
-
-    @property
-    def data(self) -> bytes:
-        return self.imm.value.data
-
-
-@dataclass(kw_only=True)
 class AddressAcceptance:
     ref: Span
     id: AddressId
 
-    base: AddressBase
-    indx: AddressBase | None
-    offset: OffsetAcceptance | None
+    base: AddressBase | None
+    indx: IndexAcceptance | None
+    disp: DisplacementAcceptance | None
 
     def __str__(self) -> str:
-        output = self.base.name.decode()
+        output = ""
 
-        if self.offset is not None:
-            if self.offset.kind == "forward":
-                output += f" + {self.offset.imm.value}"
-            else:
-                output += f" - {self.offset.imm.value}"
+        if self.base is not None:
+            output += self.base.name.decode()
+
+        if self.indx is not None:
+            output += f" {self.indx}"
+
+        if self.disp is not None:
+            output += f" {self.disp}"
 
         return f"[{output}]"
 

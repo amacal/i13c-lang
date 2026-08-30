@@ -1,4 +1,5 @@
 from i13c.semantic.typing.analyses.llvm import BSWAP, SHL
+from typing import Literal as Kind
 from tests.encoding import (
     ImmediateInfo,
     RegisterInfo,
@@ -112,7 +113,7 @@ def can_encode_instructions_shl_cl(dst: str, encoding: bytes):
     """)
 def can_encode_shl_mem_imm8(
     base: str | None,
-    scale: int | None,
+    scale: Kind[1, 2, 4, 8],
     index: str | None,
     disp32: bytes | None,
     imm8: bytes,
@@ -159,7 +160,7 @@ def can_encode_shl_mem_imm8(
     """)
 def can_encode_shl_mem_cl(
     base: str | None,
-    scale: int | None,
+    scale: Kind[1, 2, 4, 8],
     index: str | None,
     disp32: bytes | None,
     encoding: bytes | None,

@@ -8,6 +8,7 @@ RUN cd /opt && make install
 
 USER vscode
 RUN poetry completions bash >> ~/.bash_completion
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 ENV PYTHONPATH="/workspaces/i13c-lang/src"
 ENV PATH="$PATH:/workspaces/i13c-lang/scripts"

@@ -5,9 +5,7 @@ from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.encoding import encode
 from i13c.semantic.typing.analyses.blocklets import Blocklet, BlockletId
-from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.analyses.sections import Section, SectiontId
-from i13c.semantic.typing.entities.signatures import SignatureId
 
 
 def configure_sections() -> GraphNode:
@@ -19,7 +17,6 @@ def configure_sections() -> GraphNode:
             {
                 ("generator", "core/generator"),
                 ("blocklets", "analyses/blocklets"),
-                ("entrypoints", "analyses/entrypoints"),
             }
         ),
         views=GraphViews(list=ListExtractor),
@@ -29,18 +26,16 @@ def configure_sections() -> GraphNode:
 def build_sections(
     generator: Generator,
     blocklets: OneToOne[BlockletId, Blocklet],
-    entrypoints: OneToOne[SignatureId, Entrypoint],
 ) -> OneToOne[SectiontId, Section]:
     sections: dict[SectiontId, Section] = {}
     entries: list[Blocklet] = []
 
-    for entrypoint in entrypoints.values():
-        for blocklet in blocklets.values():
-            if blocklet.target == entrypoint.target.id:
-                entries.append(blocklet)
+    for blocklet in blocklets.values():
+        if blocklet.entrypoint:
+            entries.append(blocklet)
 
     for blocklet in blocklets.values():
-        if entries and blocklet != entries[0]:
+        if blocklet.entrypoint is False:
             entries.append(blocklet)
 
     sections[SectiontId(value=generator.next())] = Section(

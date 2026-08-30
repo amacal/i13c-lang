@@ -1,0 +1,64 @@
+date: "2026-08-30"
+title: "PUSH Instruction Test Completeness and Address Displacement Redesign"
+session:
+  files:
+    - "src/i13c/encoding/kind.py"
+    - "src/i13c/semantic/core.py"
+    - "src/i13c/semantic/nodes/analyses/asmlets.py"
+    - "src/i13c/semantic/nodes/analyses/blocklets.py"
+    - "src/i13c/semantic/nodes/analyses/entrypoints.py"
+    - "src/i13c/semantic/nodes/analyses/sections.py"
+    - "src/i13c/semantic/nodes/analyses/fnlets.py"
+    - "src/i13c/semantic/nodes/entities/displacements.py"
+    - "src/i13c/semantic/nodes/resolutions/displacements.py"
+    - "src/i13c/semantic/nodes/entities/indices.py"
+    - "src/i13c/semantic/nodes/resolutions/indices.py"
+    - "src/i13c/semantic/nodes/resolutions/addresses.py"
+    - "src/i13c/semantic/typing/analyses/llvm.py"
+    - "src/i13c/syntax/parsing/snippet.py"
+    - "src/i13c/syntax/tree/snippet.py"
+  source: —
+  status: completed
+  attempted:
+    - "Build exhaustive encoding test coverage for the PUSH instruction (register form, 16-bit form, and every addressing-mode/ModRM/SIB branch) in src/tests/encoding/stack.py, assessed against the SDM's PUSH opcode summary table (Vol 2B, printed page 4-516)"
+  explored:
+    - "Whether encoding/kind.py should re-derive a displacement's byte-width from its own raw byte-length at encode time, versus trusting a width already validated upstream; settled on the latter, introducing a dedicated Displacement semantic entity/resolution stage instead of ad hoc width logic in the encoder"
+    - "Each-choice (per-axis) coverage as an alternative to full Cartesian-product coverage for the addr operand's base/index/scale/displacement axes, given the full product was combinatorially infeasible; implemented as a hand-curated expand(\"addr\") case list plus a cover() combinator in src/tests/encoding/core.py"
+    - "Whether PUSH imm8/imm16/imm32 and PUSH m16 are variants this compiler already supports; confirmed neither is (no imm variant declared in INSTRUCTIONS_TABLE for push, no address size-annotation syntax exists in the grammar), and that the SDM's sign-extension rule for PUSH's immediate forms is the same signed-width-fit rule this session kept re-deriving for address displacements"
+    - "Whether reg64/reg16 register-direct forms of PUSH needed rsp/rbp special-casing analogous to addr.py's memory-operand tests; confirmed they don't, since register-direct addressing (ModRM mod=11) never triggers the SIB-required or forced-displacement rules that apply only to memory operands"
+  tried:
+    - "First exhaust() test generator produced addr64 rows via a modular/cycling formula over full register lists; found it produced architecturally invalid rows (rsp as an index register) and boundary displacement values that don't fit a signed 32-bit forward offset (e.g. 0x80000000); replaced with a hand-curated expand(\"addr\") case list"
+    - "Displacement.positive() (llvm.py) was rewritten several times while deriving a positive value's minimal byte-width: first hardcoded to 8 bytes (overflowed on any value needing fewer), then to 1 byte (overflowed on any value needing more), then to 3 bytes using bytes.strip() (silently selected the wrong byte when the significant byte wasn't in the last position, since strip() removes matching bytes from both ends, not just the leading ones); settled on to_bytes(4, \"big\") plus lstrip(b\"\\x00\")"
+    - "Hex.negate() was similarly rewritten from interpreting its input as already-signed-in-its-own-width before negating (which overflows when negating that width's minimum representable value, e.g. 0x8000 at 16 bits) to interpreting it as an unsigned magnitude and negating into a derived output width"
+    - "First attempt at rejecting rsp-as-index added analyses/entrypoints as a direct dependency of build_asmlets to detect an entrypoint snippet without a real callsite; this closed a dependency cycle (asmlets -> entrypoints -> resolutions/functions/accepted -> resolutions/functions -> resolutions/statements/accepted -> resolutions/statements -> resolutions/calls/accepted -> resolutions/calls -> analyses/callings -> asmlets); resolved by re-deriving entrypoints.py from lower-level indices/flags/nid and indices/signatures/nid instead of resolutions/functions/accepted and resolutions/snippets/accepted, and by having build_blocklets (not build_asmlets) consume analyses/entrypoints to tag each Blocklet.entrypoint locally at construction time"
+  corrections:
+    - "Assumed encode_modrm_rm's disp8-vs-disp32 promotion check (DisplacementInfo.width(rm.disp) == 8) validated a value against the signed-byte range; corrected — it only checked the value's own raw byte-length, so a forward +0xff (255) was wrongly encoded as a single disp8 byte 0xff, which the CPU sign-extends to -1, not +255"
+    - "Assumed rsp used as an index register was already rejected before reaching the encoder; corrected — src/i13c/semantic/nodes/resolutions/addresses.py had no such check at all, and push [rbx + rsp] crashed with an unhandled UnreachableEncodingError instead of a diagnostic"
+    - "Assumed the parser only accepts a scale multiplier written before the index register (N * reg); corrected after two of the newly-added addressing rows (r13 + r12 * 8, rsp + r15 * 4) failed to parse — only prefix notation was implemented, not the conventional postfix reg * N form"
+  bugs_found:
+    - "emit_asmlets' mnemonic dispatch table (semantic/nodes/analyses/blocklets.py) had no entries for push or pop, so an asm-block push/pop instruction resolved successfully but produced zero bytes of output, silently; fixed by adding push -> emit_push (pop was left unaddressed, see not_completed)"
+    - "Hex.negate() (semantic/core.py, later removed in favor of the new Displacement entity) raised OverflowError when negating a value whose own byte-width's minimum representable signed value was passed in, e.g. negating 0x8000 at width 16 computed +32768 and tried to re-encode it in the same 16-bit signed width"
+    - "encode_modrm_rm's disp8-vs-disp32 promotion (encoding/kind.py) selected disp8 whenever the input's raw byte-length was 1, regardless of whether the value fit in a signed byte; e.g. push [r12 + r8 + 0xff] encoded a disp8 byte 0xff (decodes as -1) instead of promoting to disp32 for +255"
+    - "The 'backward' (-) address-offset negation step present in the pre-Displacement asmlets.py address_converter was dropped when the Displacement entity was introduced, so push [r10 - 0x01] emitted the raw un-negated magnitude (0x01) instead of its negation (0xff)"
+    - "Address.__str__ (llvm.py) unconditionally inserted a space before the displacement suffix regardless of whether one was present, producing a trailing space (e.g. \"[rbp + r11 ]\") on every offset-less address's string form"
+    - "src/tests/encoding/core.py's parse_table silently dropped a table's last data row: it applied a second [2:-1] slice to an already-trimmed lines list that no longer had a trailing border row to exclude, so the final row was excluded from every table that used it"
+    - "src/i13c/semantic/nodes/resolutions/addresses.py had no check rejecting rsp as an index register (a hard x86 encoding constraint enforced only as an UnreachableEncodingError deep in encoding/kind.py); a real .i13c program using rsp as an index crashed uncaught instead of producing a diagnostic; fixed with a resolution-time rejection reusing the existing invalid-register reason"
+  completed:
+    - "Wrote exhaustive encoding tests for PUSH covering all 16 registers in both 64-bit and 16-bit reg-direct forms, and a large addressing-mode table covering every base/index/scale/displacement branch in encode_modrm_rm including SIB-required-without-index (rsp/r12 alone), forced-displacement-without-explicit-offset (rbp/r13 alone), and the disp8/disp32 boundary from both directions"
+    - "Generalized src/tests/encoding/core.py's exhaustiveness-checking helper (exhaust()/cover()/expand()) from a push-specific harness into a shared, each-choice coverage checker usable by any mnemonic's operand-symbol variants"
+    - "Wired push/pop into emit_asmlets' dispatch table so asm-block push/pop instructions actually lower to BlockletInstructions"
+    - "Introduced a new Displacement semantic entity and resolution stage (entities/displacements.py, resolutions/displacements.py, and their typing/ counterparts) that validates a displacement's direction and magnitude and derives its correct byte-width (8 or 32, matching real x86 disp8/disp32 — there is no disp16), replacing the ad hoc width logic that used to live in encoding/kind.py's DisplacementInfo and Hex.negate()"
+    - "Introduced an analogous Index semantic entity/resolution stage (entities/indices.py, resolutions/indices.py) alongside the SIB scale-factor grammar addition"
+    - "Extended the address-syntax grammar (syntax/parsing/snippet.py, syntax/tree/snippet.py) to support an explicit SIB scale factor ([base + scale * index]), previously unsupported (every index use before this session was implicit scale=1)"
+    - "Added a resolution-time rejection for rsp used as an index register (semantic/nodes/resolutions/addresses.py), replacing an unhandled UnreachableEncodingError crash reaching real user programs with a proper diagnostic"
+    - "Reworked the entrypoint-to-blocklet matching mechanism (entrypoints.py, blocklets.py, sections.py) so build_sections locates the program's real entrypoint blocklet via a Blocklet.entrypoint flag set locally at construction time, instead of the prior session's coincidental blocklet-iteration-order fix; this generally resolves the ELF-entry-point gap the prior session left open, since sections.py now genuinely consults the entrypoint analysis rather than relying on ordering"
+    - "Verified via poetry run i13c elf ./data/hello.i13c plus disassembly, both before this session's changes and again at the end, that the compiled program's bytes are unchanged and correct throughout"
+  not_completed:
+    - "PUSH imm8/imm16/imm32 (pushing a literal constant, opcodes 6A/68) is not implemented at all — no imm variant is declared for push in INSTRUCTIONS_TABLE, and encode_push has no code path for an Immediate operand; a mid-session attempt to widen PUSH.operands' type to include Immediate was reverted since no actual encoder logic was written for it"
+    - "POP still has zero test coverage, the same original gap this session set out to close for PUSH; not started"
+    - "make lint has one open reportAttributeAccessIssue in src/tests/encoding/core.py's exhaust() helper: CALL/RET/NOP/SYSCALL lack an .operands field that the generic helper assumes exists; discussed at length (generalize BlockletInstruction to give every variant .operands, matching JMP/LOOP's existing precedent of folding a control-flow target into operands, versus isinstance-narrowing at the one call site) but deliberately left unresolved at close"
+    - "PUSH of a 16-bit memory operand (push word [rax]) is not expressible in the language at all — there is no operand-size annotation syntax for addresses — and was not pursued, since it requires a grammar decision rather than an encoding one"
+  open_questions:
+    - "Whether encoding/kind.py's shared exhaust() helper across every mnemonic should generalize every BlockletInstruction variant to carry .operands (bringing CALL in line with JMP/LOOP's existing operands: tuple[Relocation]-shaped target, and adding an empty operands: tuple[()] to RET/NOP/SYSCALL), or narrow with isinstance at the one call site that needs it"
+  notes:
+    - "The PUSH_ADDR64 test table in src/tests/encoding/stack.py contains one harmless duplicate row (push [r10 - 0x81] appears in both columns of its last row), left unfixed at the user's discretion"

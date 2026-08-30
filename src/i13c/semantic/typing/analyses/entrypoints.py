@@ -1,11 +1,8 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
-from i13c.semantic.typing.resolutions.snippets import SnippetAcceptance
-
-EntrypointTarget = FunctionAcceptance | SnippetAcceptance
+from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 
 
 @dataclass(kw_only=True)
 class Entrypoint:
-    target: EntrypointTarget
+    target: SignatureAcceptance

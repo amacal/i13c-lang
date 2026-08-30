@@ -28,6 +28,10 @@ def build_flags(
         # derive flags ID from globally unique node ID
         flags_id = FlagsId(value=nid.value)
 
+        # find the context of the flags entry
+        snippet = graph.snippet.flags.get_ctx(nid)
+        snippet_nid = graph.snippet.snippets.get_by_node(snippet)
+
         # reverse mapping to register ID
         def map_register(register: tree.snippet.Register) -> RegisterId:
             nid = graph.snippet.registers.get_by_node(register)
@@ -35,6 +39,7 @@ def build_flags(
 
         flags[flags_id] = Flags(
             ref=entry.ref,
+            nid=snippet_nid,
             noreturn=entry.noreturn,
             clobbers=(
                 [map_register(register) for register in entry.clobbers]
@@ -48,8 +53,13 @@ def build_flags(
         # derive flags ID from globally unique node ID
         flags_id = FlagsId(value=nid.value)
 
+        # find the context of the flags entry
+        function = graph.function.flags.get_ctx(nid)
+        function_nid = graph.function.functions.get_by_node(function)
+
         flags[flags_id] = Flags(
             ref=entry.ref,
+            nid=function_nid,
             noreturn=entry.noreturn,
             clobbers=None,
         )

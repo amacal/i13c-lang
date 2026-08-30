@@ -1,4 +1,5 @@
 from i13c.encoding import kind
+from typing import Literal as Kind
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.semantic.typing.analyses.llvm import Address, Fixed
 from tests.encoding import DisplacementInfo, IndexInfo, RegisterInfo, samples
@@ -307,7 +308,7 @@ def can_encode_modrm_rm_m64_disp32_only(disp32: bytes, encoding: bytes):
         Address(
             base=None,
             indx=None,
-            disp=disp32,
+            disp=DisplacementInfo.auto(disp32),
         )
     )
 
@@ -354,7 +355,7 @@ def can_encode_modrm_rm_m64_base_only(base: str, encoding: bytes):
     | 0x08  | rdi   | 00 00 00 04 03 07 05 04 00 00 00 00 | *** | 0x01  | r15   | 02 00 00 04 00 07 05 04 00 00 00 00 |
     | ----- | ----- | ----------------------------------- | --- | ----- | ----- | ----------------------------------- |
     """)
-def can_encode_modrm_rm_m64_index_only(scale: int, index: str, encoding: bytes | None):
+def can_encode_modrm_rm_m64_index_only(scale: Kind[1, 2, 4, 8], index: str, encoding: bytes | None):
     addr = Address(
         base=None,
         indx=IndexInfo.optional(index, scale),
@@ -385,7 +386,7 @@ def can_encode_modrm_rm_m64_index_only(scale: int, index: str, encoding: bytes |
     | ---- | ----- | ----- | ---------- | ----------------------------------- | --- | ---- | ----- | ----- | ---------- | ----------------------------------- |
     """)
 def can_encode_modrm_rm_m64_all(
-    scale: int,
+    scale: Kind[1, 2, 4, 8],
     index: str,
     base: str,
     disp32: bytes,

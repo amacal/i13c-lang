@@ -2,12 +2,11 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
+from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.snippets import SnippetId
-from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
-from i13c.semantic.typing.resolutions.snippets import SnippetAcceptance
+from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 
 
 def configure_entrypoints() -> GraphNode:
@@ -17,8 +16,8 @@ def configure_entrypoints() -> GraphNode:
         produces=("analyses/entrypoints",),
         requires=frozenset(
             {
-                ("snippets", "resolutions/snippets/accepted"),
-                ("functions", "resolutions/functions/accepted"),
+                ("flags", "indices/flags/nid"),
+                ("signatures", "indices/signatures/nid"),
             }
         ),
         views=GraphViews(list=ListExtractor),
@@ -26,22 +25,17 @@ def configure_entrypoints() -> GraphNode:
 
 
 def build_entrypoints(
-    snippets: OneToOne[SnippetId, SnippetAcceptance],
-    functions: OneToOne[FunctionId, FunctionAcceptance],
+    flags: OneToOne[NodeId, FlagsAcceptance],
+    signatures: OneToOne[NodeId, SignatureAcceptance],
 ) -> OneToOne[SignatureId, Entrypoint]:
     entrypoints: dict[SignatureId, Entrypoint] = {}
 
-    for entry in snippets.values():
-        if entry.signature.name == b"main": # noqa: SIM102
-            if len(entry.signature.parameters) == 0: # noqa: SIM102
-                if entry.noreturn:
-                    entrypoints[entry.signature.id] = Entrypoint(target=entry)
-
-    for entry in functions.values():
-        if entry.signature.name == b"main": # noqa: SIM102
-            if len(entry.signature.parameters) == 0: # noqa: SIM102
-                if entry.noreturn:
-                    entrypoints[entry.signature.id] = Entrypoint(target=entry)
+    for nid, signature in signatures.items():
+        if signature.name == b"main":  # noqa: SIM102
+            if len(signature.parameters) == 0:  # noqa: SIM102
+                if flag := flags.find(nid):  # noqa: SIM102
+                    if flag.noreturn:  # noqa: SIM102
+                        entrypoints[signature.id] = Entrypoint(target=signature)
 
     return OneToOne[SignatureId, Entrypoint].instance(entrypoints)
 
@@ -68,5 +62,5 @@ class ListExtractor:
             "ref": str(entry.target.ref),
             "id": key.identify(1),
             "target": entry.target.id.identify(1),
-            "name": entry.target.signature.name.decode(),
+            "name": entry.target.name.decode(),
         }

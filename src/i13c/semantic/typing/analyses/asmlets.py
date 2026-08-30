@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Literal as Kind
 
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.entities.instructions import InstructionId
@@ -71,18 +72,37 @@ class AsmletOperandRelocation:
     offset: int
 
 
+AsmletDisplacementOffset = bytes
+AsmletDisplacementWidth = Kind[0, 8, 32]
+AsmletDisplacementDirection = Kind["forward", "backward"]
+
+
+@dataclass(kw_only=True)
+class AsmletOperandIndex:
+    scale: Kind[1, 2, 4, 8]
+    reg: AsmletOperandRegister
+
+    def __str__(self) -> str:
+        return f"{self.scale} * {self.reg}"
+
+
 @dataclass(kw_only=True)
 class AsmletOperandDisplacement:
-    value: bytes
+    width: AsmletDisplacementWidth
+    offset: AsmletDisplacementOffset
+    direction: AsmletDisplacementDirection
 
-    def hex(self) -> str:
-        return f"0x{self.value.hex()}"
+    def __str__(self) -> str:
+        if self.direction == "forward":
+            return f"+ 0x{self.offset.hex()}"
+        else:
+            return f"- 0x{self.offset.hex()}"
 
 
 @dataclass(kw_only=True)
 class AsmletOperandAddress:
-    base: AsmletOperandRegister
-    indx: AsmletOperandRegister | None
+    base: AsmletOperandRegister | None
+    indx: AsmletOperandIndex | None
     disp: AsmletOperandDisplacement | None
 
 

@@ -1,0 +1,20 @@
+title: "PUSH Instruction Test Completeness and Address Displacement Redesign"
+kind: implementation
+files:
+  - "src/i13c/encoding/kind.py"
+  - "src/i13c/semantic/core.py"
+  - "src/i13c/semantic/nodes/analyses/asmlets.py"
+  - "src/i13c/semantic/nodes/analyses/blocklets.py"
+  - "src/i13c/semantic/nodes/analyses/entrypoints.py"
+  - "src/i13c/semantic/nodes/analyses/sections.py"
+  - "src/i13c/semantic/nodes/analyses/fnlets.py"
+  - "src/i13c/semantic/nodes/entities/displacements.py"
+  - "src/i13c/semantic/nodes/resolutions/displacements.py"
+  - "src/i13c/semantic/nodes/entities/indices.py"
+  - "src/i13c/semantic/nodes/resolutions/indices.py"
+  - "src/i13c/semantic/nodes/resolutions/addresses.py"
+  - "src/i13c/semantic/typing/analyses/llvm.py"
+  - "src/i13c/syntax/parsing/snippet.py"
+  - "src/i13c/syntax/tree/snippet.py"
+source: —
+date: "2026-08-30"

@@ -1,5 +1,6 @@
 from i13c.semantic.typing.analyses.llvm import LEA
 from tests.encoding import RegisterInfo, encode_instruction, parse_address, samples
+from typing import Literal as Kind
 
 
 @samples("""
@@ -9,7 +10,7 @@ from tests.encoding import RegisterInfo, encode_instruction, parse_address, samp
     | rax  | rsi  |       |       |            | 48 8d 06                   |
     | rbx  | rsp  |       |       |            | 48 8d 1c 24                |
     | r10  | rbp  |       |       |            | 4c 8d 55 00                |
-    | rax  | rdi  |       |       | 0x0000007f | 48 8d 87 7f 00 00 00       |
+    | rax  | rdi  |       |       | 0x0000007f | 48 8d 47 7f                |
     | rbx  | rdi  |       |       | 0x00000080 | 48 8d 9f 80 00 00 00       |
     | rax  |      | 1     | rdx   |            | 48 8d 04 15 00 00 00 00    |
     | rax  | rdi  | 4     | rbp   |            | 48 8d 04 af                |
@@ -36,7 +37,7 @@ from tests.encoding import RegisterInfo, encode_instruction, parse_address, samp
 def can_encode_lea(
     dst: str,
     base: str | None,
-    scale: int | None,
+    scale: Kind[1, 2, 4, 8] | None,
     index: str | None,
     disp32: bytes | None,
     encoding: bytes | None,

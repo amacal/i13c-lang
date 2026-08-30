@@ -6,11 +6,13 @@ from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.calls import CallId
 from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.displacements import DisplacementId
 from i13c.semantic.typing.entities.environments import EnvironmentId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.entities.indices import IndexId
 from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.labels import LabelId
 from i13c.semantic.typing.entities.literals import LiteralId
@@ -26,6 +28,7 @@ from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
+from i13c.semantic.typing.resolutions.displacements import DisplacementResolution
 from i13c.semantic.typing.resolutions.assigns import AssignResolution
 from i13c.semantic.typing.resolutions.bindings import BindingResolution
 from i13c.semantic.typing.resolutions.binds import BindResolution
@@ -37,6 +40,7 @@ from i13c.semantic.typing.resolutions.expressions import ExpressionResolution
 from i13c.semantic.typing.resolutions.flags import FlagsResolution
 from i13c.semantic.typing.resolutions.functions import FunctionResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
+from i13c.semantic.typing.resolutions.indices import IndexResolution
 from i13c.semantic.typing.resolutions.instructions import InstructionResolution
 from i13c.semantic.typing.resolutions.labels import LabelResolution
 from i13c.semantic.typing.resolutions.literals import LiteralResolution
@@ -62,11 +66,13 @@ class ResolutionNodes:
     calls: OneToOne[CallId, CallResolution] | None
     callsites: OneToOne[CallSiteId, CallSiteResolution] | None
     cflows: OneToOne[FunctionId, ControlFlowResolution] | None
+    displacements: OneToOne[DisplacementId, DisplacementResolution] | None
     environments: OneToOne[EnvironmentId, EnvironmentResolution] | None
     expressions: OneToOne[ExpressionId, ExpressionResolution] | None
     flags: OneToOne[FlagsId, FlagsResolution] | None
     functions: OneToOne[FunctionId, FunctionResolution] | None
     immediates: OneToOne[ImmediateId, ImmediateResolution] | None
+    indices: OneToOne[IndexId, IndexResolution] | None
     instructions: OneToOne[InstructionId, InstructionResolution] | None
     labels: OneToOne[LabelId, LabelResolution] | None
     literals: OneToOne[LiteralId, LiteralResolution] | None

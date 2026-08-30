@@ -1,4 +1,5 @@
 from i13c.semantic.typing.analyses.llvm import MOV
+from typing import Literal as Kind
 from tests.encoding import (
     ImmediateInfo,
     RegisterInfo,
@@ -138,7 +139,7 @@ def can_encode_mov_reg_reg(
 """)
 def can_encode_mov_mem_imm(
     base: str | None,
-    scale: int | None,
+    scale: Kind[1, 2, 4, 8] | None,
     index: str | None,
     disp32: bytes | None,
     imm32: bytes,
@@ -182,7 +183,7 @@ def can_encode_mov_mem_imm(
 """)
 def can_encode_mov_mem_reg(
     base: str | None,
-    scale: int | None,
+    scale: Kind[1, 2, 4, 8] | None,
     index: str | None,
     disp32: bytes | None,
     src: str,
@@ -227,7 +228,7 @@ def can_encode_mov_mem_reg(
 def can_encode_mov_reg_mem(
     dst: str,
     base: str | None,
-    scale: int | None,
+    scale: Kind[1, 2, 4, 8] | None,
     index: str | None,
     disp32: bytes | None,
     encoding: bytes | None,

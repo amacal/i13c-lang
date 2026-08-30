@@ -74,7 +74,7 @@ class MnemonicOperandSpec:
     def rel() -> MnemonicOperandSpec:
         return MnemonicOperandSpec(symbol="rel", names=())
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         if self.names is None:
             return self.symbol
 

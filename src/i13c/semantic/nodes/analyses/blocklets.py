@@ -2,6 +2,8 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 from i13c.core.generator import Generator
+from i13c.semantic.typing.analyses.entrypoints import Entrypoint
+from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.asmlets import (
@@ -30,6 +32,7 @@ from i13c.semantic.typing.analyses.llvm import (
     MOV,
     NOP,
     OR,
+    PUSH,
     RET,
     SHL,
     SHR,
@@ -40,6 +43,7 @@ from i13c.semantic.typing.analyses.llvm import (
     Index,
     Register,
     Relocation,
+    Displacement,
 )
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.syntax.source import Span
@@ -53,6 +57,7 @@ def configure_blocklets() -> GraphNode:
         requires=frozenset(
             {
                 ("generator", "core/generator"),
+                ("entrypoints", "analyses/entrypoints"),
                 ("asmlets", "analyses/asmlets"),
                 ("fnlets", "analyses/fnlets"),
             }
@@ -63,15 +68,16 @@ def configure_blocklets() -> GraphNode:
 
 def build_blocklets(
     generator: Generator,
+    entrypoints: OneToOne[SignatureId, Entrypoint],
     asmlets: OneToOne[AsmletId, Asmlet],
     fnlets: OneToOne[FunctionId, Fnlet],
 ) -> OneToOne[BlockletId, Blocklet]:
     blocklets: dict[BlockletId, Blocklet] = {}
 
-    for bid, blocklet in emit_asmlets(generator, asmlets):
+    for bid, blocklet in emit_asmlets(generator, asmlets, entrypoints):
         blocklets[bid] = blocklet
 
-    for bid, blocklet in emit_fnlets(generator, fnlets):
+    for bid, blocklet in emit_fnlets(generator, fnlets, entrypoints):
         blocklets[bid] = blocklet
 
     return OneToOne[BlockletId, Blocklet].instance(blocklets)
@@ -91,6 +97,7 @@ EmitSignature = Callable[[list[AsmletOperand]], EmitRelocated]
 def emit_asmlets(
     generator: Generator,
     asmlets: OneToOne[AsmletId, Asmlet],
+    entrypoints: OneToOne[SignatureId, Entrypoint],
 ) -> Iterable[tuple[BlockletId, Blocklet]]:
 
     dispatch: dict[bytes, EmitSignature] = {
@@ -103,6 +110,7 @@ def emit_asmlets(
         b"and": emit_and,
         b"or": emit_or,
         b"lea": emit_lea,
+        b"push": emit_push,
         b"ret": emit_ret,
         b"shr": emit_shr,
         b"shl": emit_shl,
@@ -149,6 +157,7 @@ def emit_asmlets(
         blocklet = Blocklet(
             ref=entry.ref,
             target=eid,
+            entrypoint=entrypoints.contains(entry.signature.id),
             id=BlockletId(value=generator.next()),
             blocks=blocks,
         )
@@ -250,6 +259,15 @@ def emit_lea(operands: list[AsmletOperand]) -> EmitRelocated:
     return LEA(operands=(dst, src)), None
 
 
+def emit_push(operands: list[AsmletOperand]) -> EmitRelocated:
+    # sanity checks
+    assert len(operands) == 1
+
+    dst = accept_reg_addr(operands[0])
+
+    return PUSH(operands=(dst,)), None
+
+
 def emit_shr(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 2
@@ -294,15 +312,32 @@ def accept_addr(operand: AsmletOperand) -> Address:
     assert isinstance(operand.target, AsmletOperandAddress)
 
     index = (
-        Index(reg=Register(name=operand.target.indx.name), val=1)
+        Index(
+            scale=operand.target.indx.scale,
+            reg=Register(name=operand.target.indx.reg.name),
+        )
         if operand.target.indx is not None
         else None
     )
 
+    disp = (
+        Displacement(
+            width=operand.target.disp.width,
+            offset=operand.target.disp.offset,
+            direction=operand.target.disp.direction,
+        )
+        if operand.target.disp is not None
+        else None
+    )
+
     return Address(
-        base=Register(name=operand.target.base.name),
+        base=(
+            Register(name=operand.target.base.name)
+            if operand.target.base is not None
+            else None
+        ),
         indx=index,
-        disp=operand.target.disp.value if operand.target.disp is not None else None,
+        disp=disp,
     )
 
 
@@ -320,16 +355,33 @@ def accept_reg_addr(operand: AsmletOperand) -> Register | Address:
 
     if isinstance(operand.target, AsmletOperandAddress):
         index = (
-            Index(reg=Register(name=operand.target.indx.name), val=1)
+            Index(
+                scale=operand.target.indx.scale,
+                reg=Register(name=operand.target.indx.reg.name),
+            )
             if operand.target.indx is not None
             else None
         )
 
     if isinstance(operand.target, AsmletOperandAddress):
+        disp = (
+            Displacement(
+                width=operand.target.disp.width,
+                offset=operand.target.disp.offset,
+                direction=operand.target.disp.direction,
+            )
+            if operand.target.disp is not None
+            else None
+        )
+
         return Address(
-            base=Register(name=operand.target.base.name),
+            base=(
+                Register(name=operand.target.base.name)
+                if operand.target.base is not None
+                else None
+            ),
             indx=index,
-            disp=operand.target.disp.value if operand.target.disp is not None else None,
+            disp=disp,
         )
 
     return Register(name=operand.target.name)
@@ -366,7 +418,10 @@ def accept_reg_imm_addr(operand: AsmletOperand) -> Register | Immediate | Addres
 
     if isinstance(operand.target, AsmletOperandAddress):
         index = (
-            Index(reg=Register(name=operand.target.indx.name), val=1)
+            Index(
+                scale=operand.target.indx.scale,
+                reg=Register(name=operand.target.indx.reg.name),
+            )
             if operand.target.indx is not None
             else None
         )
@@ -375,10 +430,24 @@ def accept_reg_imm_addr(operand: AsmletOperand) -> Register | Immediate | Addres
         return Immediate(value=operand.target.value)
 
     if isinstance(operand.target, AsmletOperandAddress):
+        disp = (
+            Displacement(
+                width=operand.target.disp.width,
+                offset=operand.target.disp.offset,
+                direction=operand.target.disp.direction,
+            )
+            if operand.target.disp is not None
+            else None
+        )
+
         return Address(
-            base=Register(name=operand.target.base.name),
+            base=(
+                Register(name=operand.target.base.name)
+                if operand.target.base is not None
+                else None
+            ),
             indx=index,
-            disp=operand.target.disp.value if operand.target.disp is not None else None,
+            disp=disp,
         )
 
     return Register(name=operand.target.name)
@@ -387,6 +456,7 @@ def accept_reg_imm_addr(operand: AsmletOperand) -> Register | Immediate | Addres
 def emit_fnlets(
     generator: Generator,
     fnlets: OneToOne[FunctionId, Fnlet],
+    entrypoints: OneToOne[SignatureId, Entrypoint],
 ) -> Iterable[tuple[BlockletId, Blocklet]]:
 
     for fid, fnlet in fnlets.items():
@@ -403,6 +473,7 @@ def emit_fnlets(
             ref=fnlet.ref,
             target=fid,
             id=BlockletId(value=generator.next()),
+            entrypoint=entrypoints.contains(fnlet.signature.id),
             blocks=blocks,
         )
 

@@ -26,9 +26,7 @@ class Bidirectional[AstNode, AstCtx]:
     def empty() -> Bidirectional[AstNode, AstCtx]:
         return Bidirectional(node_to_id={}, id_to_node={}, id_to_ctx={})
 
-    def append(
-        self, id: NodeId, node: AstNode, /, ctx: AstCtx | None = None
-    ) -> None:
+    def append(self, id: NodeId, node: AstNode, /, ctx: AstCtx | None = None) -> None:
         self.node_to_id[node] = id
         self.id_to_node[id] = node
 
@@ -64,9 +62,17 @@ class NodesVisitor:
 
     def on_flags(self, flags: tree.Flags, path: Path) -> None:
         if isinstance(flags, tree.snippet.Flags):
-            self.graph.snippet.flags.append(self.next(), flags)
+            self.graph.snippet.flags.append(
+                self.next(),
+                flags,
+                ctx=path.find(tree.snippet.Snippet),
+            )
         else:
-            self.graph.function.flags.append(self.next(), flags)
+            self.graph.function.flags.append(
+                self.next(),
+                flags,
+                ctx=path.find(tree.function.Function),
+            )
 
     def on_signature(self, signature: tree.Signature, path: Path) -> None:
         if isinstance(signature, tree.snippet.Signature):
@@ -127,6 +133,22 @@ class NodesVisitor:
 
     def on_address(self, address: tree.snippet.Address, path: Path) -> None:
         self.graph.snippet.addresses.append(self.next(), address)
+
+    def on_index(self, index: tree.snippet.Index, path: Path) -> None:
+        self.graph.snippet.indices.append(
+            self.next(),
+            index,
+            ctx=path.find(tree.snippet.Address),
+        )
+
+    def on_displacement(
+        self, displacement: tree.snippet.Displacement, path: Path
+    ) -> None:
+        self.graph.snippet.displacements.append(
+            self.next(),
+            displacement,
+            ctx=path.find(tree.snippet.Address),
+        )
 
     def on_function(self, function: tree.function.Function, path: Path) -> None:
         self.graph.function.functions.append(self.next(), function)
@@ -189,7 +211,7 @@ class NodesVisitor:
 @dataclass(kw_only=True)
 class Snippet:
     snippets: Bidirectional[tree.snippet.Snippet, None]
-    flags: Bidirectional[tree.snippet.Flags, None]
+    flags: Bidirectional[tree.snippet.Flags, tree.snippet.Snippet]
     signatures: Bidirectional[tree.snippet.Signature, tree.snippet.Snippet]
     slots: Bidirectional[tree.snippet.Slot, None]
     binds: Bidirectional[tree.snippet.Bind, tree.snippet.Slot]
@@ -201,12 +223,14 @@ class Snippet:
     registers: Bidirectional[tree.snippet.Register, None]
     references: Bidirectional[tree.snippet.Reference, tree.snippet.Snippet]
     addresses: Bidirectional[tree.snippet.Address, None]
+    indices: Bidirectional[tree.snippet.Index, tree.snippet.Address]
+    displacements: Bidirectional[tree.snippet.Displacement, tree.snippet.Address]
 
 
 @dataclass(kw_only=True)
 class Function:
     functions: Bidirectional[tree.function.Function, None]
-    flags: Bidirectional[tree.function.Flags, None]
+    flags: Bidirectional[tree.function.Flags, tree.function.Function]
     signatures: Bidirectional[tree.function.Signature, tree.function.Function]
     statements: Bidirectional[tree.function.Statement, tree.function.Function]
     calls: Bidirectional[tree.function.CallStatement, tree.function.Statement]
@@ -231,7 +255,7 @@ class SyntaxGraph:
         return SyntaxGraph(
             snippet=Snippet(
                 snippets=Bidirectional[tree.snippet.Snippet, None].empty(),
-                flags=Bidirectional[tree.snippet.Flags, None].empty(),
+                flags=Bidirectional[tree.snippet.Flags, tree.snippet.Snippet].empty(),
                 signatures=Bidirectional[
                     tree.snippet.Signature, tree.snippet.Snippet
                 ].empty(),
@@ -249,10 +273,16 @@ class SyntaxGraph:
                     tree.snippet.Reference, tree.snippet.Snippet
                 ].empty(),
                 addresses=Bidirectional[tree.snippet.Address, None].empty(),
+                indices=Bidirectional[tree.snippet.Index, tree.snippet.Address].empty(),
+                displacements=Bidirectional[
+                    tree.snippet.Displacement, tree.snippet.Address
+                ].empty(),
             ),
             function=Function(
                 functions=Bidirectional[tree.function.Function, None].empty(),
-                flags=Bidirectional[tree.function.Flags, None].empty(),
+                flags=Bidirectional[
+                    tree.function.Flags, tree.function.Function
+                ].empty(),
                 signatures=Bidirectional[
                     tree.function.Signature, tree.function.Function
                 ].empty(),

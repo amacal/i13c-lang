@@ -8,6 +8,7 @@ from i13c.semantic.nodes.resolutions.binds import configure_bind_resolution
 from i13c.semantic.nodes.resolutions.calls import configure_call_resolution
 from i13c.semantic.nodes.resolutions.callsites import configure_callsite_resolution
 from i13c.semantic.nodes.resolutions.cflows import configure_control_flow_resolution
+from i13c.semantic.nodes.resolutions.displacements import configure_displacement_resolution
 from i13c.semantic.nodes.resolutions.environments import (
     configure_environment_resolution,
 )
@@ -15,6 +16,7 @@ from i13c.semantic.nodes.resolutions.expressions import configure_expression_res
 from i13c.semantic.nodes.resolutions.flags import configure_flags_resolution
 from i13c.semantic.nodes.resolutions.functions import configure_function_resolution
 from i13c.semantic.nodes.resolutions.immediates import configure_immediate_resolution
+from i13c.semantic.nodes.resolutions.indices import configure_index_resolution
 from i13c.semantic.nodes.resolutions.instructions import (
     configure_instruction_resolution,
 )
@@ -44,11 +46,13 @@ def configure_resolutions() -> GraphGroup:
             configure_call_resolution(),
             configure_callsite_resolution(),
             configure_control_flow_resolution(),
+            configure_displacement_resolution(),
             configure_environment_resolution(),
             configure_expression_resolution(),
             configure_flags_resolution(),
             configure_function_resolution(),
             configure_immediate_resolution(),
+            configure_index_resolution(),
             configure_instruction_resolution(),
             configure_label_resolution(),
             configure_literal_resolution(),
@@ -76,11 +80,13 @@ def parse_resolutions(resolutions: dict[str, Any]) -> ResolutionNodes:
         calls=resolutions.get("resolutions/calls"),
         callsites=resolutions.get("resolutions/callsites"),
         cflows=resolutions.get("resolutions/cflows"),
+        displacements=resolutions.get("resolutions/displacements"),
         environments=resolutions.get("resolutions/environments"),
         expressions=resolutions.get("resolutions/expressions"),
         flags=resolutions.get("resolutions/flags"),
         functions=resolutions.get("resolutions/functions"),
         immediates=resolutions.get("resolutions/immediates"),
+        indices=resolutions.get("resolutions/indices"),
         instructions=resolutions.get("resolutions/instructions"),
         labels=resolutions.get("resolutions/labels"),
         literals=resolutions.get("resolutions/literals"),

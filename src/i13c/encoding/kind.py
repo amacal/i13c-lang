@@ -35,7 +35,17 @@ REGISTERS = {
 class DisplacementInfo:
     @staticmethod
     def width(disp: llvm.Displacement | None) -> int:
-        return 0 if disp is None else len(disp) * 8
+        if disp is None:
+            return 0
+
+        if len(disp.offset) == 1:
+            if disp.offset[0] > 0x80:
+                return 32
+
+            if disp.offset[0] > 0x7f and disp.direction == "forward":
+                return 32
+
+        return disp.width
 
     @staticmethod
     def fixed(value: int, width: int) -> bytes:
@@ -44,19 +54,32 @@ class DisplacementInfo:
 
     @staticmethod
     def normalize(disp: llvm.Displacement | llvm.Fixed | None, width: int) -> bytes:
+        data: bytes
+        direction: llvm.DisplacementDirection
+
         if disp is None:
             return bytes(width // 8)
 
         if isinstance(disp, llvm.Fixed):
-            disp = disp.value
+            data = disp.value
+            direction = "forward"
 
-        assert width in (8, 16, 32, 64)
-        assert 8 * len(disp) <= width
+        else:
+            data = disp.offset
+            direction = disp.direction
 
-        val = int.from_bytes(disp, byteorder="big", signed=True)
-        hex = val.to_bytes(width // 8, byteorder="big", signed=True)
+        assert width in (8, 16, 32)
+        assert 8 * len(data) <= width
 
-        return hex
+        if direction == "backward":
+            value = int.from_bytes(data, byteorder="big", signed=False)
+            data = (-value).to_bytes(width // 8, byteorder="big", signed=True)
+
+        else:
+            value = int.from_bytes(data, byteorder="big", signed=False)
+            data = value.to_bytes(width // 8, byteorder="big", signed=False)
+
+        return data
 
 
 class ImmediateInfo:
@@ -362,7 +385,7 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
 
             if rm.indx:
                 encoding.sib_index = RegisterInfo.low_3bits(rm.indx.reg)
-                encoding.sib_scale = [1, 2, 4, 8].index(rm.indx.val)
+                encoding.sib_scale = [1, 2, 4, 8].index(rm.indx.scale)
                 encoding.rex_x = (
                     0b0010 if RegisterInfo.high_bit(rm.indx.reg) else 0b0000
                 )

@@ -49,6 +49,7 @@ class Blocklet:
     ref: Span
     id: BlockletId
 
+    entrypoint: bool
     target: BlockletTarget
     blocks: list[BlockletBlock]
 

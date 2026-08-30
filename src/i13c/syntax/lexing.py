@@ -17,6 +17,8 @@ CLASS_COMMA = b","
 CLASS_COLON = b":"
 CLASS_PLUS = b"+"
 CLASS_MINUS = b"-"
+CLASS_STAR = b"*"
+CLASS_DIGIT = b"123456789"
 CLASS_SEMICOLON = b";"
 CLASS_WHITESPACE = b" \n"
 CLASS_UNDERSCORE = b"_"
@@ -38,6 +40,7 @@ class Tokens:
     COMMA = 2
     HEX = 3
     IDENT = 4
+    DIGIT = 5
     RANGE = 6
     KEYWORD = 7
     ROUND_OPEN = 8
@@ -52,6 +55,7 @@ class Tokens:
     PLUS = 18
     MINUS = 19
     DOT = 20
+    STAR = 21
     EOF = 255
 
 
@@ -62,7 +66,7 @@ SEPARATORS = (
     CLASS_CURLY_OPEN + CLASS_CURLY_CLOSE +
     CLASS_SQUARE_OPEN + CLASS_SQUARE_CLOSE +
     CLASS_AT + CLASS_COLON + CLASS_DOT + CLASS_EQUALS +
-    CLASS_PLUS + CLASS_MINUS
+    CLASS_PLUS + CLASS_MINUS + CLASS_STAR
 )
 
 SET_KEYWORDS = {
@@ -75,12 +79,15 @@ TOKEN_NAMES: dict[int, str] = {
     Tokens.HEX: "hex",
     Tokens.IDENT: "identifier",
     Tokens.RANGE: "range",
+    Tokens.DIGIT: "digit",
+    Tokens.STAR: "star",
     Tokens.KEYWORD: "keyword",
     Tokens.ROUND_OPEN: "round-open",
     Tokens.ROUND_CLOSE: "round-close",
     Tokens.CURLY_OPEN: "curly-open",
     Tokens.CURLY_CLOSE: "curly-close",
     Tokens.AT: "at",
+    Tokens.DIGIT: "digit",
     Tokens.DOT: "dot",
     Tokens.COLON: "colon",
     Tokens.EQUALS: "equals",
@@ -175,6 +182,14 @@ class Token:
         return Token(code=Tokens.DOT, offset=offset, length=1)
 
     @staticmethod
+    def digit_token(offset: int) -> Token:
+        return Token(code=Tokens.DIGIT, offset=offset, length=1)
+
+    @staticmethod
+    def star_token(offset: int) -> Token:
+        return Token(code=Tokens.STAR, offset=offset, length=1)
+
+    @staticmethod
     def range_token(offset: int, length: int) -> Token:
         return Token(code=Tokens.RANGE, offset=offset, length=length)
 
@@ -266,6 +281,12 @@ def tokenize(code: SourceCode) -> result.Result[list[Token], list[Diagnostic]]:
 
             elif lexer.is_in(CLASS_MINUS):
                 emit_minus(lexer, tokens)
+
+            elif lexer.is_in(CLASS_DIGIT):
+                emit_digit(lexer, tokens)
+
+            elif lexer.is_in(CLASS_STAR):
+                emit_star(lexer, tokens)
 
             elif lexer.is_in(CLASS_DOT):
                 read_dot(lexer, tokens)
@@ -439,6 +460,16 @@ def emit_plus(lexer: Lexer, tokens: list[Token]) -> None:
 def emit_minus(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token(code=Tokens.MINUS, offset=lexer.offset, length=1))
     lexer.advance(1)  # consume '-'
+
+
+def emit_digit(lexer: Lexer, tokens: list[Token]) -> None:
+    tokens.append(Token.digit_token(offset=lexer.offset))
+    lexer.advance(1)  # consume digit
+
+
+def emit_star(lexer: Lexer, tokens: list[Token]) -> None:
+    tokens.append(Token.star_token(offset=lexer.offset))
+    lexer.advance(1)  # consume '*'
 
 
 def report_e1000_unrecognized_token(offset: int) -> Diagnostic:

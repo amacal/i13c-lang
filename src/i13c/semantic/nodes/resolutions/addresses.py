@@ -5,16 +5,17 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import Address, AddressId
-from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.entities.displacements import DisplacementId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.indices import IndexId
 from i13c.semantic.typing.resolutions.addresses import (
     AddressAcceptance,
     AddressRejection,
     AddressResolution,
-    OffsetAcceptance,
 )
-from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
+from i13c.semantic.typing.resolutions.indices import IndexAcceptance
+from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
@@ -29,9 +30,10 @@ def configure_address_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("addresses", "entities/addresses"),
+                ("indices", "resolutions/indices/accepted"),
                 ("registers", "resolutions/registers/accepted"),
-                ("immediates", "resolutions/immediates/accepted"),
                 ("references", "resolutions/references/accepted"),
+                ("displacements", "resolutions/displacements/accepted"),
             }
         ),
         views=GraphViews(list=ListAllExtractor),
@@ -67,9 +69,10 @@ def configure_address_resolution() -> GraphGroup:
 
 def build_address_resolution(
     addresses: OneToOne[AddressId, Address],
+    indices: OneToOne[IndexId, IndexAcceptance],
     registers: OneToOne[RegisterId, RegisterAcceptance],
-    immediates: OneToOne[ImmediateId, ImmediateAcceptance],
     references: OneToOne[ReferenceId, ReferenceAcceptance],
+    displacements: OneToOne[DisplacementId, DisplacementAcceptance],
 ) -> OneToOne[AddressId, AddressResolution]:
     resolutions: dict[AddressId, AddressResolution] = {}
 
@@ -81,63 +84,45 @@ def build_address_resolution(
             rejected=[],
         )
 
-        # assume no offset nor registers are available
-        offset, base, indx = None, None, None
+        # assume no displacement nor registers are available
+        disp, base, indx = None, None, None
 
         # resolve base register
-        match resolve_register(aid, entry.ref, entry.base, registers, references):
-            case AddressRejection() as rejection:
-                resolution.rejected.append(rejection)
-            case RegisterAcceptance() as register:
-                base = register
-            case ParameterAcceptance() as register:
-                base = register
-
-        # resolve index register, if present
-        if entry.indx is not None:
-            match resolve_register(aid, entry.ref, entry.indx, registers, references):
+        if entry.base is not None:
+            match resolve_register(aid, entry.ref, entry.base, registers, references):
                 case AddressRejection() as rejection:
                     resolution.rejected.append(rejection)
                 case RegisterAcceptance() as register:
-                    indx = register
+                    base = register
                 case ParameterAcceptance() as register:
-                    indx = register
+                    base = register
 
-        # resolve offset immediate, if present
-        if entry.offset is not None:
-            immediate = immediates.get(entry.offset.value)
+        # resolve index register, if present
+        if entry.indx is not None:
+            indx = indices.get(entry.indx)
 
-            # reject 64-bit immediates
-            if (
-                immediate.value.width == 64
-                or immediate.value.width == 32
-                and immediate.value.highest_bit()
-            ):
+        if isinstance(indx, RegisterAcceptance):
+            if indx.name == b"rsp":  # noqa: SIM102
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,
                         id=aid,
-                        reason="invalid-offset",
+                        reason="invalid-index",
                     )
                 )
 
-            else:
-                offset = OffsetAcceptance(
-                    kind=entry.offset.kind,
-                    imm=immediate,
-                    width=immediate.value.width,
-                )
+        # resolve displacement, if present
+        if entry.disp is not None:
+            disp = displacements.get(entry.disp)
 
         if len(resolution.rejected) == 0:
-            assert base is not None
-
             resolution.accepted.append(
                 AddressAcceptance(
                     ref=entry.ref,
                     id=aid,
                     base=base,
                     indx=indx,
-                    offset=offset,
+                    disp=disp,
                 )
             )
 
@@ -267,9 +252,8 @@ class ListAcceptedExtractor:
             "ref": "Ref",
             "id": "ID",
             "base": "Base",
-            "okind": "Offset Kind",
-            "owidth": "Offset Width",
-            "ovalue": "Offset Value",
+            "indx": "Index",
+            "disp": "Displacement",
         }
 
     @staticmethod
@@ -277,8 +261,7 @@ class ListAcceptedExtractor:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
-            "base": entry.base.name.decode(),
-            "okind": entry.offset.kind if entry.offset else "",
-            "owidth": str(entry.offset.imm.value.width) if entry.offset else "",
-            "ovalue": str(entry.offset.imm.value) if entry.offset else "",
+            "base": entry.base.name.decode() if entry.base else "",
+            "indx": str(entry.indx) if entry.indx else "",
+            "disp": str(entry.disp) if entry.disp else "",
         }
