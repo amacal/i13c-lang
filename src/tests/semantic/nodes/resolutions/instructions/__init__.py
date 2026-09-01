@@ -90,4 +90,4 @@ def verify_instruction_resolution(
             assert list(map(str, acceptance.variant)) == variant
 
     if reason:
-        assert any(str(d.reason) == reason for d in resolution.rejected), f"Expected reason: {reason}"
+        assert resolution.rejected[0].reason == reason

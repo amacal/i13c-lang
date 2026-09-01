@@ -61,12 +61,12 @@ def can_detect_statements_assign_with_spills():
             assert idx == 0
             assert statement.listing() == [
                 "mov r11, 0x42",
-                "mov [rsp + 0x00], r11",
+                "mov qword [rsp + 0x00], r11",
             ]
 
         else:
             assert idx == 1
             assert statement.listing() == [
-                "mov rax, [rsp + 0x00]",
+                "mov rax, qword [rsp + 0x00]",
                 f"call {asmlet.identify(1)}",
             ]

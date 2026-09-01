@@ -83,6 +83,7 @@ def emit(
             src = Register(name=system_v[allocation.colors[idx]])
         else:
             src = Address(
+                size=64,
                 base=Register(name=b"rsp"),
                 indx=None,
                 disp=Displacement.positive(8 * allocation.spills[idx]),

@@ -127,7 +127,7 @@ def can_accept_an_operand_from_an_address():
     assert resolution.accepted[0].target.base.name == b"rax"
     assert resolution.accepted[0].target.base.width == 64
     assert resolution.accepted[0].target.disp is None
-    assert resolution.accepted[0].symbol == "addr"
+    assert resolution.accepted[0].symbol == "addr64"
 
     assert source.extract(resolution.accepted[0].ref) == b"[rax]"
 
@@ -156,7 +156,7 @@ def can_accept_an_operand_from_an_address_using_a_reference_as_base():
     assert resolution.accepted[0].target.base.name == b"x"
 
     assert resolution.accepted[0].target.base.name == b"x"
-    assert resolution.accepted[0].symbol == "addr"
+    assert resolution.accepted[0].symbol == "addr64"
 
     assert source.extract(resolution.accepted[0].ref) == b"[@x + 0x0f]"
 

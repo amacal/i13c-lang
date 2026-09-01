@@ -74,8 +74,8 @@ def encode(table: str):
         except AssertionError:
             assert False, f"Compilation failed for instruction: {instruction}"
 
-        if encoding is None:
-            assert semantic.analyses.sections is None
+        # wrong instruction stopped at resolver won't reach section data
+        if encoding is None and semantic.analyses.sections is None:
             continue
 
         assert semantic.analyses.sections is not None, message
@@ -83,8 +83,12 @@ def encode(table: str):
 
         _, section = semantic.analyses.sections.peek()
 
-        assert len(section.data) > 0, message
-        assert section.data.hex(" ") == encoding.hex(" "), message
+        if encoding is None:
+            assert section.data.hex(" ") == "", message
+
+        else:
+            assert len(section.data) > 0, message
+            assert section.data.hex(" ") == encoding.hex(" "), message
 
 
 def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
@@ -94,9 +98,20 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
         "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
     )
 
+    reg32 = (
+        "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
+        "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d",
+    )
+
     reg16 = (
         "ax", "cx", "dx", "bx", "sp", "bp", "si", "di",
         "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w",
+    )
+
+    reg8 = (
+        "al", "cl", "dl", "bl", "spl", "bpl", "sil", "dil",
+        "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b", "r15b",
+        "ah", "ch", "dh", "bh",
     )
 
     imm8 = (
@@ -119,8 +134,14 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
         case "reg64":
             return reg64
 
+        case "reg32":
+            return reg32
+
         case "reg16":
             return reg16
+
+        case "reg8":
+            return reg8
 
         case "imm8":
             return imm8
@@ -131,49 +152,55 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
         case "imm32":
             return imm32
 
-        case "addr":
+        case ("addr8" | "addr16" | "addr32" | "addr64") as symbol:
             scales = (1, 2, 4, 8)
             indexes = tuple(register for register in reg64 if register != "rsp")
             cases: list[str] = []
 
+            match symbol:
+                case "addr8":
+                    size = "byte"
+                case "addr16":
+                    size = "word"
+                case "addr32":
+                    size = "dword"
+                case "addr64":
+                    size = "qword"
+
             # every base through ModRM or mandatory SIB
-            cases.extend(f"[{base}]" for base in reg64)
+            cases.extend(f"{size} [{base}]" for base in reg64)
 
             # every SIB base, implicit scale 1
-            cases.extend(f"[{base} + 1 * rcx]" for base in reg64)
+            cases.extend(f"{size} [{base} + 1 * rcx]" for base in reg64)
 
             # every legal SIB index, implicit scale 1
-            cases.extend(f"[rax + 1 * {index}]" for index in indexes)
+            cases.extend(f"{size} [rax + 1 * {index}]" for index in indexes)
 
             # explicit scale field, ordinary registers
-            cases.extend(f"[rax + {scale} * rcx]" for scale in scales)
+            cases.extend(f"{size} [rax + {scale} * rcx]" for scale in scales)
 
             # explicit scale with REX.B and REX.X
-            cases.extend(f"[r8 + {scale} * r9]" for scale in scales)
+            cases.extend(f"{size} [r8 + {scale} * r9]" for scale in scales)
 
             # index without a base: mandatory SIB disp32
-            cases.extend(f"[{scale} * rcx]" for scale in scales)
+            cases.extend(f"{size} [{scale} * rcx]" for scale in scales)
 
             # extended index without a base
-            cases.extend(f"[{scale} * r9]" for scale in scales)
+            cases.extend(f"{size} [{scale} * r9]" for scale in scales)
 
             # special index/base interactions
             cases.extend(
                 [
-                    "[r13 + 8 * r12]",
-                    "[rsp + 4 * r15]",
+                    f"{size} [r13 + 8 * r12]",
+                    f"{size} [rsp + 4 * r15]",
                 ]
             )
 
             displacements = (
                 "+ 0x00",
                 "- 0x00",
-                "+ 0x0000",
-                "- 0x0000",
                 "+ 0x01",
                 "- 0x01",
-                "+ 0x0001",
-                "- 0x0001",
                 "+ 0x00000001",
                 "- 0x00000001",
                 "+ 0x7f",
@@ -183,12 +210,6 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
                 "- 0x81",
                 "+ 0xff",
                 "- 0xff",
-                "+ 0x7fff",
-                "- 0x7fff",
-                "+ 0x8000",
-                "- 0x8000",
-                "+ 0xffff",
-                "- 0xffff",
                 "+ 0x7fffffff",
                 "- 0x7fffffff",
                 "- 0x80000000",
@@ -196,16 +217,17 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
 
             # displacement cases through SIB.
             cases.extend(
-                f"[rax + 1 * rcx {displacement}]" for displacement in displacements
+                f"{size} [rax + 1 * rcx {displacement}]"
+                for displacement in displacements
             )
 
             # boundary cases without SIB.
             cases.extend(
                 (
-                    "[r10 + 0x7f]",
-                    "[r10 + 0x80]",
-                    "[r10 - 0x80]",
-                    "[r10 - 0x81]",
+                    f"{size} [r10 + 0x7f]",
+                    f"{size} [r10 + 0x80]",
+                    f"{size} [r10 - 0x80]",
+                    f"{size} [r10 - 0x81]",
                 )
             )
 
@@ -284,6 +306,7 @@ def exhaust(*tables: str):
 
         found: set[str] = set()
         expected = {":".join(entry) for entry in cover(combinations)}
+        rejected: int = 0
 
         for instruction, _ in parse_table(table):
             semantic = compile(instruction)
@@ -295,27 +318,38 @@ def exhaust(*tables: str):
             assert semantic.resolutions.instructions.size() == 1
 
             _, resolved = semantic.resolutions.instructions.peek()
-            assert len(resolved.accepted) == 1
 
-            # we expect exactly the same variant in single array
-            assert id(variant) == id(resolved.accepted[0].variant)
+            if resolved.accepted:
+                assert len(resolved.accepted) == 1
+                assert id(variant) == id(resolved.accepted[0].variant)
 
-            assert semantic.analyses.blocklets is not None
-            assert semantic.analyses.blocklets.size() == 1
+            elif resolved.rejected:
+                rejected += 1
+                assert len(resolved.rejected) == 1
+                assert id(variant) == id(resolved.rejected[0].variant)
 
-            _, blocklet = semantic.analyses.blocklets.peek()
-            assert len(blocklet.blocks) == 1
-            assert len(blocklet.blocks[0].instructions) == 1
+            if resolved.accepted:
+                assert semantic.analyses.blocklets is not None
+                assert semantic.analyses.blocklets.size() == 1
 
-            found.add(
-                ":".join(
-                    [
-                        str(operand)
-                        for operand in blocklet.blocks[0].instructions[0].operands
-                    ]
+                _, blocklet = semantic.analyses.blocklets.peek()
+                assert len(blocklet.blocks) == 1
+                assert len(blocklet.blocks[0].instructions) == 1
+
+                found.add(
+                    ":".join(
+                        [
+                            str(operand)
+                            for operand in blocklet.blocks[0].instructions[0].operands
+                        ]
+                    )
                 )
-            )
 
-        assert found == expected
+        # ensure all found instructions are part of the expected set
+        assert expected.intersection(found) == found
+
+        # remaining instructions that were expected but were rejected
+        difference = expected.difference(found)
+        assert len(difference) == rejected
 
     assert visited == set(variants)

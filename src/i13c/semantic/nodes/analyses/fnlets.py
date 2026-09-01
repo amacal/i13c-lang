@@ -88,6 +88,7 @@ def emit_prologue(instructions: list[FnletInstruction], frame: StackFrame):
             MOV(
                 operands=(
                     Address(
+                        size=64,
                         base=Register(name=b"rsp"),
                         indx=None,
                         disp=Displacement.positive(8 * entry.slot),

@@ -149,7 +149,7 @@ def can_substitute_a_snippet_with_a_base_register_parameter():
     assert isinstance(instr.operands[0].target, AsmletOperandRegister)
     assert instr.operands[0].target.name == b"rax"
 
-    assert instr.operands[1].symbol == "addr"
+    assert instr.operands[1].symbol == "addr64"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
     assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rcx"
@@ -259,7 +259,7 @@ def can_substitute_a_snippet_with_a_index_register():
     assert isinstance(instr.operands[0].target, AsmletOperandRegister)
     assert instr.operands[0].target.name == b"rax"
 
-    assert instr.operands[1].symbol == "addr"
+    assert instr.operands[1].symbol == "addr64"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
     assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rcx"
@@ -308,7 +308,7 @@ def can_substitute_a_snippet_with_a_index_register_indirectly():
     assert isinstance(instr.operands[0].target, AsmletOperandRegister)
     assert instr.operands[0].target.name == b"rax"
 
-    assert instr.operands[1].symbol == "addr"
+    assert instr.operands[1].symbol == "addr64"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
     assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rax"
@@ -357,7 +357,7 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement_pos
     assert isinstance(instr.operands[0].target, AsmletOperandRegister)
     assert instr.operands[0].target.name == b"rax"
 
-    assert instr.operands[1].symbol == "addr"
+    assert instr.operands[1].symbol == "addr64"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
     assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rcx"
@@ -405,7 +405,7 @@ def can_substitute_a_snippet_with_a_base_register_parameter_and_displacement_neg
     assert isinstance(instr.operands[0].target, AsmletOperandRegister)
     assert instr.operands[0].target.name == b"rax"
 
-    assert instr.operands[1].symbol == "addr"
+    assert instr.operands[1].symbol == "addr64"
     assert isinstance(instr.operands[1].target, AsmletOperandAddress)
     assert instr.operands[1].target.base is not None
     assert instr.operands[1].target.base.name == b"rcx"

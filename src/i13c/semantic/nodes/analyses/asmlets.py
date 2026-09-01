@@ -17,6 +17,7 @@ from i13c.semantic.typing.analyses.asmlets import (
     AsmletOperandRelocation,
     AsmletOperandTarget,
     AsmletOperandIndex,
+    AsmletAddressSize,
 )
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
@@ -188,6 +189,7 @@ def address_converter(
 ) -> AsmletOperandAddress:
 
     # the index and displacement are optional and can be None
+    size: AsmletAddressSize = src.size
     base: AsmletOperandRegister | None = None
     indx: AsmletOperandIndex | None = None
     disp: AsmletOperandDisplacement | None = None
@@ -228,6 +230,7 @@ def address_converter(
         )
 
     return AsmletOperandAddress(
+        size=size,
         base=base,
         indx=indx,
         disp=disp,

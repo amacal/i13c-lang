@@ -17,6 +17,7 @@ from i13c.semantic.typing.resolutions.instructions import (
 from i13c.semantic.typing.resolutions.mnemonics import MnemonicAcceptance
 from i13c.semantic.typing.resolutions.operands import OperandAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
+from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 
 
 def configure_instruction_resolution() -> GraphGroup:
@@ -78,6 +79,12 @@ def build_instruction_resolution(
     operands: OneToOne[OperandId, OperandAcceptance],
 ) -> OneToOne[InstructionId, InstructionResolution]:
     resolutions: dict[InstructionId, InstructionResolution] = {}
+    priorities: list[InstructionRejectionReason] = [
+        "variant-unsupported",
+        "register-mismatch",
+        "arity-mismatch",
+        "variant-mismatch",
+    ]
 
     for iid, entry in instructions.items():
         resolution = InstructionResolution(
@@ -89,13 +96,14 @@ def build_instruction_resolution(
 
         # fetch already resolved mnemonic
         mnemonic = mnemonics.get(entry.mnemonic)
+        rejected: list[InstructionRejection] = []
 
         # to iterate over all its variants
         for variant in mnemonic.variants:
             collected: list[OperandAcceptance] = []
 
             if len(variant) != len(entry.operands):
-                resolution.rejected.append(
+                rejected.append(
                     InstructionRejection(
                         ref=entry.ref,
                         id=iid,
@@ -117,14 +125,16 @@ def build_instruction_resolution(
                     reason = "variant-mismatch"
 
                 if spec.names and not reason:
-                    if not isinstance(accepted.target, RegisterAcceptance): # noqa: SIM114
+                    if not isinstance(
+                        accepted.target, RegisterAcceptance
+                    ):  # noqa: SIM114
                         reason = "register-mismatch"
 
                     elif accepted.target.name not in spec.names:
                         reason = "register-mismatch"
 
                 if reason is not None:
-                    resolution.rejected.append(
+                    rejected.append(
                         InstructionRejection(
                             ref=entry.ref,
                             id=iid,
@@ -140,7 +150,6 @@ def build_instruction_resolution(
                     collected.append(accepted)
 
             if len(variant) == len(collected):
-
                 index, idx = -1, -1
                 snippet_id = entry.get_snippet(SnippetId.from_context)
 
@@ -153,20 +162,40 @@ def build_instruction_resolution(
                             break
 
                 assert index >= 0
+                conflicted = False
 
-                resolution.accepted.append(
-                    InstructionAcceptance(
-                        ref=entry.ref,
-                        id=iid,
-                        index=index,
-                        mnemonic=mnemonic,
-                        operands=tuple(collected),
-                        variant=variant,
+                if len(collected) == 2:
+                    high_8bit = is_8bit_high(collected)
+                    index_high = is_index_high(collected)
+
+                    if high_8bit and index_high:
+                        conflicted = True
+                        rejected.append(
+                            InstructionRejection(
+                                ref=entry.ref,
+                                id=iid,
+                                target=entry,
+                                mnemonic=mnemonic,
+                                variant=variant,
+                                operands=tuple(collected),
+                                reason="variant-unsupported",
+                            )
+                        )
+
+                if not conflicted:
+                    resolution.accepted.append(
+                        InstructionAcceptance(
+                            ref=entry.ref,
+                            id=iid,
+                            index=index,
+                            mnemonic=mnemonic,
+                            operands=tuple(collected),
+                            variant=variant,
+                        )
                     )
-                )
 
         if not resolution.accepted:
-            resolution.rejected.append(
+            rejected.append(
                 InstructionRejection(
                     ref=entry.ref,
                     id=iid,
@@ -178,9 +207,45 @@ def build_instruction_resolution(
                 )
             )
 
+        for rejection in sorted(rejected, key=lambda x: priorities.index(x.reason)):
+            resolution.rejected.append(rejection)
+            break
+
         resolutions[iid] = resolution
 
     return OneToOne[InstructionId, InstructionResolution].instance(resolutions)
+
+
+def is_8bit_high(operands: list[OperandAcceptance]) -> bool:
+    for operand in operands:
+        if operand.symbol != "reg8":
+            continue
+
+        if isinstance(operand.target, RegisterAcceptance):
+            if operand.target.kind == "high":
+                return True
+
+    return False
+
+
+def is_index_high(operands: list[OperandAcceptance]) -> bool:
+    for operand in operands:
+        if isinstance(operand.target, RegisterAcceptance):
+            if operand.target.index == "high":
+                return True
+
+        if isinstance(operand.target, AddressAcceptance):
+            if operand.target.base:
+                if isinstance(operand.target.base, RegisterAcceptance):
+                    if operand.target.base.index == "high":
+                        return True
+
+            if operand.target.indx:
+                if isinstance(operand.target.indx.target, RegisterAcceptance):
+                    if operand.target.indx.target.index == "high":
+                        return True
+
+    return False
 
 
 def check_instruction_resolution_accepted(

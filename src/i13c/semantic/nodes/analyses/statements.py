@@ -55,6 +55,7 @@ def build_statements(
                 MOV(
                     operands=(
                         Address(
+                            size=64,
                             base=Register(name=b"rsp"),
                             indx=None,
                             disp=Displacement.positive(8 * spill.slot),

@@ -82,7 +82,7 @@ def can_detect_blocklets_of_asm_snippet_with_address():
         if isinstance(blocklet.target, AsmletId):
             assert len(blocklet.blocks) == 1
             assert blocklet.listing() == [
-                "mov rdi, [rax + 1 * rax + 0x10]",
+                "mov rdi, qword [rax + 1 * rax + 0x10]",
                 "ret",
             ]
 

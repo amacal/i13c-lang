@@ -29,7 +29,7 @@ class IndexEdges:
     asmlets_by_signatures: OneToMany[SignatureId, Asmlet] | None
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class SemanticGraph:
     analyses: AnalysisNodes
     entities: EntityNodes

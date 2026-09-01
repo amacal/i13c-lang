@@ -6,21 +6,21 @@ asm exit(code@imm: u8) noreturn clobbers rdi, rcx, r11, rax {
 
 asm print_asm(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
     mov rcx, 0x3736353433323130;
-    mov [rsp - 0x10], rcx;
+    mov qword [rsp - 0x10], rcx;
     mov rcx, 0x6665646362613938;
-    mov [rsp - 0x08], rcx;
+    mov qword [rsp - 0x08], rcx;
     mov rcx, 0x10;
 
   .nibble:
     mov r11, rax;
     and r11, 0x0f;
 
-    mov r11b, [rsp + r11 - 0x10];
-    mov [rsp + rcx - 0x30], r11b;
+    mov r11b, byte [rsp + r11 - 0x10];
+    mov byte [rsp + rcx - 0x30], r11b;
     shr rax, 0x04;
 
     loop @nibble;
-    mov [rsp - 0x10], 0x0a;
+    mov byte [rsp - 0x10], 0x0a;
 
     mov rdi, 0x01;
     lea rsi, [rsp - 0x30];

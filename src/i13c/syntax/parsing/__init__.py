@@ -11,8 +11,8 @@ from i13c.syntax.parsing.core import (
     UnexpectedKeyword,
     UnexpectedTokenCode,
 )
-from i13c.syntax.parsing.function import parse_function
-from i13c.syntax.parsing.snippet import parse_snippet
+from i13c.syntax.parsing.functions import parse_function
+from i13c.syntax.parsing.snippets import parse_snippet
 from i13c.syntax.source import SourceCode, Span, SpanLike
 
 

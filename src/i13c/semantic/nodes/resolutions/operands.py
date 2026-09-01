@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from typing import Any
+from unittest import case
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -19,6 +20,8 @@ from i13c.semantic.typing.resolutions.operands import (
     OperandRejection,
     OperandResolution,
     OperandSymbol,
+    OperandTarget,
+    OperandKind,
 )
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
@@ -134,6 +137,11 @@ def build_operand_resolution(
             rejected=[],
         )
 
+        # default target, size and kind for the operand
+        target: OperandTarget | None = None
+        symbol: OperandSymbol | None = None
+        kind: OperandKind | None = None
+
         if entry.kind == "register":
             assert isinstance(entry.target, RegisterId)
             target = registers.get(entry.target)
@@ -158,7 +166,7 @@ def build_operand_resolution(
 
         elif entry.kind == "reference":
             assert isinstance(entry.target, ReferenceId)
-            reference = target = references.get(entry.target)
+            reference = references.get(entry.target)
 
             if isinstance(reference.target, LabelAcceptance):
                 symbol, kind = "rel", "relocation"
@@ -172,7 +180,16 @@ def build_operand_resolution(
         else:
             assert isinstance(entry.target, AddressId)
             target = addresses.get(entry.target)
-            symbol, kind = "addr", "address"
+
+            match target.size:
+                case 8:
+                    symbol, kind = "addr8", "address"
+                case 16:
+                    symbol, kind = "addr16", "address"
+                case 32:
+                    symbol, kind = "addr32", "address"
+                case 64:
+                    symbol, kind = "addr64", "address"
 
         if not resolution.rejected:
             resolution.accepted.append(

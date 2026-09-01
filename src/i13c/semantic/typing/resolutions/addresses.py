@@ -11,8 +11,10 @@ from i13c.syntax.source import Span
 AddressRejectionReason = Kind[
     "invalid-register",
     "invalid-index",
+    "invalid-size",
 ]
 
+AddressSize = Kind[8, 16, 32, 64]
 AddressBase = RegisterAcceptance | ParameterAcceptance
 
 
@@ -29,6 +31,7 @@ class AddressAcceptance:
     ref: Span
     id: AddressId
 
+    size: AddressSize
     base: AddressBase | None
     indx: IndexAcceptance | None
     disp: DisplacementAcceptance | None

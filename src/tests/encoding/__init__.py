@@ -114,6 +114,7 @@ def parse_address(
         return Fixed(value=disp32)
 
     return Address(
+        size=64,
         base=RegisterInfo.optional(base),
         indx=IndexInfo.optional(index, scale),
         disp=DisplacementInfo.auto(disp32),

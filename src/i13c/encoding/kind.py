@@ -111,7 +111,19 @@ class ImmediateInfo:
 class AddressInfo:
     @staticmethod
     def get_width(addr: llvm.Address) -> int:
-        return 64
+        return addr.size
+
+    @staticmethod
+    def is_64bit(addr: llvm.Address) -> bool:
+        return addr.size == 64
+
+    @staticmethod
+    def is_32bit(addr: llvm.Address) -> bool:
+        return addr.size == 32
+
+    @staticmethod
+    def is_16bit(addr: llvm.Address) -> bool:
+        return addr.size == 16
 
 
 class RegisterInfo:
@@ -153,6 +165,10 @@ class RegisterInfo:
         # fmt: on
 
     @staticmethod
+    def is_8bit_special(reg: llvm.Register) -> bool:
+        return reg.name in (b"spl", b"bpl", b"sil", b"dil")
+
+    @staticmethod
     def is_low8bit(reg: llvm.Register) -> bool:
         # fmt: off
         return reg.name in (
@@ -189,6 +205,7 @@ class RegisterInfo:
 
 @dataclass(kw_only=True)
 class ModRMEncoding:
+    rex_h: int
     rex_x: int
     rex_b: int
     modrm_mod: int
@@ -202,6 +219,7 @@ class ModRMEncoding:
     @staticmethod
     def default() -> ModRMEncoding:
         return ModRMEncoding(
+            rex_h=0x00,
             rex_x=0b0000,
             rex_b=0b0000,
             modrm_mod=0b00,
@@ -222,6 +240,7 @@ class ModRMEncoding:
 
 @dataclass(kw_only=True)
 class ModRegEncoding:
+    rex_h: int
     rex_w: int
     rex_r: int
     modrm_reg: int
@@ -229,6 +248,7 @@ class ModRegEncoding:
 
 @dataclass(kw_only=True)
 class OpCodeEncoding:
+    rex_h: int
     rex_w: int
     rex_b: int
     opcode_reg: int
@@ -260,17 +280,20 @@ class RexEncoding:
 
 
 class ModRegToRex(Protocol):
+    rex_h: int
     rex_w: int
     rex_r: int
     modrm_reg: int
 
 
 class ModRmToRex(Protocol):
+    rex_h: int
     rex_x: int
     rex_b: int
 
 
 class OpCodeToRex(Protocol):
+    rex_h: int
     rex_w: int
     rex_b: int
 
@@ -287,17 +310,19 @@ class PrefixEncoding:
 
 
 def encode_prefixes(target: RegisterOrAddress | llvm.Immediate) -> PrefixEncoding:
-    is_16bit_register = False
-    is_16bit_immediate = False
+    is_16bit = False
 
     if isinstance(target, llvm.Register):
-        is_16bit_register = RegisterInfo.is_16bit(target)
+        is_16bit |= RegisterInfo.is_16bit(target)
 
     if isinstance(target, llvm.Immediate):
-        is_16bit_immediate = target.width() == 16
+        is_16bit |= target.width() == 16
+
+    if isinstance(target, llvm.Address):
+        is_16bit |= AddressInfo.is_16bit(target)
 
     return PrefixEncoding(
-        operand_override=(0x66 if is_16bit_register or is_16bit_immediate else 0x00),
+        operand_override=(0x66 if is_16bit else 0x00),
     )
 
 
@@ -310,9 +335,18 @@ def encode_rex(
 ) -> RexEncoding:
     rex = RexEncoding.default()
     reg = isinstance(target, llvm.Register)
+    mem = isinstance(target, llvm.Address)
 
     if target is not None:
-        if not reg or RegisterInfo.is_64bit(target):  # noqa: SIM102
+        if reg and RegisterInfo.is_64bit(target):  # noqa: SIM102
+            rex.w |= 0b1000
+            rex.h |= 0x40
+
+        elif mem and AddressInfo.is_64bit(target):  # noqa: SIM102
+            rex.w |= 0b1000
+            rex.h |= 0x40
+
+        elif not mem and not reg:
             rex.w |= 0b1000
             rex.h |= 0x40
 
@@ -324,13 +358,16 @@ def encode_rex(
         rex.h |= 0x40
 
     if modrm_reg is not None:
+        rex.h |= modrm_reg.rex_h
         rex.r |= modrm_reg.rex_r
 
     if modrm_rm is not None:
+        rex.h |= modrm_rm.rex_h
         rex.x |= modrm_rm.rex_x
         rex.b |= modrm_rm.rex_b
 
     if opcode_reg is not None:
+        rex.h |= opcode_reg.rex_h
         rex.w |= opcode_reg.rex_w
         rex.b |= opcode_reg.rex_b
 
@@ -349,6 +386,7 @@ def encode_opcode_reg(
     mode: DefaultMode = "32-bit",
 ) -> OpCodeEncoding:
     return OpCodeEncoding(
+        rex_h=0x00,
         rex_w=0b1000 if mode == "32-bit" and RegisterInfo.is_64bit(reg) else 0b0000,
         rex_b=0b0001 if RegisterInfo.high_bit(reg) else 0b0000,
         opcode_reg=RegisterInfo.low_3bits(reg),
@@ -358,16 +396,19 @@ def encode_opcode_reg(
 def encode_modrm_reg(reg: RegisterOrConstant) -> ModRegEncoding:
     if isinstance(reg, llvm.Register):
         return ModRegEncoding(
+            rex_h=0x40 if RegisterInfo.is_8bit_special(reg) else 0x00,
             rex_w=0b1000 if RegisterInfo.is_64bit(reg) else 0b0000,
             rex_r=0b0100 if RegisterInfo.high_bit(reg) else 0b0000,
             modrm_reg=RegisterInfo.low_3bits(reg),
         )
 
-    return ModRegEncoding(
-        rex_w=0b0000,
-        rex_r=0b0000,
-        modrm_reg=reg & 0x07,
-    )
+    else:
+        return ModRegEncoding(
+            rex_h=0x00,
+            rex_w=0b0000,
+            rex_r=0b0000,
+            modrm_reg=reg & 0x07,
+        )
 
 
 def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:

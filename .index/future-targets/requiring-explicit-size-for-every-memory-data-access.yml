@@ -1,0 +1,6 @@
+title: "Requiring Explicit Size for Every Memory Data Access"
+status: not-completed
+mentioned_by:
+  - "Group 1 Arithmetic Instructions, Explicit Memory-Operand Sizes, and REX Encodability Checking"
+evidence:
+  - ".history/2026-09/2026-09-01-group-1-arithmetic-instructions-explicit-memory-operand-sizes-and-rex-encodability-checking.yml session.open_questions (resolutions/addresses.py's AddressAcceptance.size currently defaults to 64 when a memory operand carries no explicit byte/word/dword/qword annotation, rather than being rejected; whether an unannotated data-access memory operand should instead be a hard compile error was raised and left open this session)"

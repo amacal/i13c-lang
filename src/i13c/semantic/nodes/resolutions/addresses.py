@@ -13,6 +13,7 @@ from i13c.semantic.typing.resolutions.addresses import (
     AddressAcceptance,
     AddressRejection,
     AddressResolution,
+    AddressSize,
 )
 from i13c.semantic.typing.resolutions.indices import IndexAcceptance
 from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
@@ -84,8 +85,17 @@ def build_address_resolution(
             rejected=[],
         )
 
-        # assume no displacement nor registers are available
+        # assume all values are unavailable
         disp, base, indx = None, None, None
+        size: AddressSize = 64
+
+        # resolve size
+        if entry.size is not None:
+            match resolve_size(aid, entry.ref, entry.size):
+                case AddressRejection() as rejection:
+                    resolution.rejected.append(rejection)
+                case (8 | 16 | 32 | 64) as result:
+                    size = result
 
         # resolve base register
         if entry.base is not None:
@@ -120,6 +130,7 @@ def build_address_resolution(
                 AddressAcceptance(
                     ref=entry.ref,
                     id=aid,
+                    size=size,
                     base=base,
                     indx=indx,
                     disp=disp,
@@ -129,6 +140,28 @@ def build_address_resolution(
         resolutions[aid] = resolution
 
     return OneToOne[AddressId, AddressResolution].instance(resolutions)
+
+
+def resolve_size(
+    aid: AddressId,
+    ref: Span,
+    size: bytes,
+) -> AddressSize | AddressRejection:
+    match size:
+        case b"byte":
+            return 8
+        case b"word":
+            return 16
+        case b"dword":
+            return 32
+        case b"qword":
+            return 64
+        case _:
+            return AddressRejection(
+                ref=ref,
+                id=aid,
+                reason="invalid-size",
+            )
 
 
 def resolve_register(
@@ -251,6 +284,7 @@ class ListAcceptedExtractor:
         return {
             "ref": "Ref",
             "id": "ID",
+            "size": "Size",
             "base": "Base",
             "indx": "Index",
             "disp": "Displacement",
@@ -261,6 +295,7 @@ class ListAcceptedExtractor:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
+            "size": str(entry.size),
             "base": entry.base.name.decode() if entry.base else "",
             "indx": str(entry.indx) if entry.indx else "",
             "disp": str(entry.disp) if entry.disp else "",

@@ -34,6 +34,7 @@ class Index:
         return f"{self.scale} * {self.reg}"
 
 
+AddressSize = Kind[8, 16, 32, 64]
 DisplacementWidth = Kind[0, 8, 32]
 DisplacementDirection = Kind["forward", "backward"]
 DisplacementOffset = bytes
@@ -68,6 +69,7 @@ class Displacement:
 
 @dataclass(kw_only=True, repr=False)
 class Address:
+    size: AddressSize
     base: Register | None
     indx: Index | None
     disp: Displacement | None
@@ -75,6 +77,16 @@ class Address:
     def __str__(self) -> str:
         repr: list[str] = []
         disp: str = ""
+
+        match self.size:
+            case 8:
+                size = "byte"
+            case 16:
+                size = "word"
+            case 32:
+                size = "dword"
+            case 64:
+                size = "qword"
 
         if self.base is not None:
             repr.append(str(self.base))
@@ -86,7 +98,7 @@ class Address:
             disp = str(self.disp)
 
         value = f"{' + '.join(repr)} {disp}"
-        return f"[{value.strip()}]"
+        return f"{size} [{value.strip()}]"
 
 
 @dataclass(kw_only=True, repr=False)
@@ -154,19 +166,67 @@ class SHL:
 
 
 @dataclass(kw_only=True, repr=False)
+class ADD:
+    operands: Group1Operands
+
+    def __str__(self) -> str:
+        return f"add {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class OR:
+    operands: Group1Operands
+
+    def __str__(self) -> str:
+        return f"or {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class ADC:
+    operands: Group1Operands
+
+    def __str__(self) -> str:
+        return f"adc {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class SBB:
+    operands: Group1Operands
+
+    def __str__(self) -> str:
+        return f"sbb {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
 class AND:
-    operands: tuple[Register, Register | Immediate]
+    operands: Group1Operands
 
     def __str__(self) -> str:
         return f"and {self.operands[0]}, {self.operands[1]}"
 
 
 @dataclass(kw_only=True, repr=False)
-class OR:
-    operands: tuple[Register, Register | Immediate]
+class SUB:
+    operands: Group1Operands
 
     def __str__(self) -> str:
-        return f"or {self.operands[0]}, {self.operands[1]}"
+        return f"sub {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class XOR:
+    operands: Group1Operands
+
+    def __str__(self) -> str:
+        return f"xor {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class CMP:
+    operands: Group1Operands
+
+    def __str__(self) -> str:
+        return f"cmp {self.operands[0]}, {self.operands[1]}"
 
 
 @dataclass(kw_only=True, repr=False)
@@ -208,22 +268,6 @@ class POP:
 
 
 @dataclass(kw_only=True, repr=False)
-class ADD:
-    operands: tuple[Register | Address, Register | Address | Immediate]
-
-    def __str__(self) -> str:
-        return f"add {self.operands[0]}, {self.operands[1]}"
-
-
-@dataclass(kw_only=True, repr=False)
-class SUB:
-    operands: tuple[Register | Address, Register | Address | Immediate]
-
-    def __str__(self) -> str:
-        return f"sub {self.operands[0]}, {self.operands[1]}"
-
-
-@dataclass(kw_only=True, repr=False)
 class CALL:
     target: AsmletId | FunctionId
 
@@ -241,3 +285,7 @@ class RET:
 class SYSCALL:
     def __str__(self) -> str:
         return "syscall"
+
+
+Group1Operands = tuple[Register | Address, Register | Address | Immediate]
+Group1Instruction = ADD | AND | OR | SUB | ADC | SBB | XOR | CMP

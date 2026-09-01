@@ -20,6 +20,7 @@ class AddressId:
 @dataclass(kw_only=True)
 class Address:
     ref: Span
+    size: bytes | None
     base: BaseRegister | None
     indx: IndexId | None
     disp: DisplacementId | None

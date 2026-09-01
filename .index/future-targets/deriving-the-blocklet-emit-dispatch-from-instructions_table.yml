@@ -1,0 +1,6 @@
+title: "Deriving the Blocklet Emit Dispatch from INSTRUCTIONS_TABLE"
+status: not-completed
+mentioned_by:
+  - "Group 1 Arithmetic Instructions, Explicit Memory-Operand Sizes, and REX Encodability Checking"
+evidence:
+  - ".history/2026-09/2026-09-01-group-1-arithmetic-instructions-explicit-memory-operand-sizes-and-rex-encodability-checking.yml session.open_questions (blocklets.py's emit_asmlets dispatch dict is a separately hand-maintained parallel table to resolutions/mnemonics.py's INSTRUCTIONS_TABLE, with no formal dependency between them; raised as the root cause of registration drift discovered this session — e.g. xchg was present in blocklets.py's dispatch but absent from INSTRUCTIONS_TABLE, the reverse of sub's gap — and deliberately not pursued as its own restructuring this session)"

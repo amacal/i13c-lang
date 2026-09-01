@@ -231,7 +231,7 @@ def parse_operands(state: ParsingState) -> list[tree.snippet.Operand]:
 
 def parse_operand(state: ParsingState) -> tree.snippet.Operand:
     token = state.expect(*OPERANDS_START)
-    operand: tree.snippet.OperandTarget
+    operand: tree.snippet.OperandTarget | None = None
 
     # register has to provide its name
     if token.code == Tokens.IDENT:
@@ -251,9 +251,17 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
     elif token.code == Tokens.AT:
         operand = parse_reference(state, token)
 
-    # address operands starts with a square open bracket
-    else:
+    # address operands starts fixed non-registerkeywords
+    # so it can really resemble a register operand
+    if isinstance(operand, tree.snippet.Register):
+        if operand.name in (b"byte", b"word", b"dword", b"qword"):
+            operand = parse_address(state, token)
+
+    if operand is None:
         operand = parse_address(state, token)
+
+    # at this place we have it
+    assert operand is not None
 
     return tree.snippet.Operand(
         ref=operand.ref,
@@ -263,6 +271,12 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
 def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Address:
     displacement: tree.snippet.Displacement | None = None
+    size: LexingToken | None = None
+
+    # remember size if provided
+    if token.code == Tokens.IDENT:
+        size = token
+        token = state.expect(Tokens.SQUARE_OPEN)
 
     # optionally, a base, an offset or an index can be provided
     base: tree.snippet.Register | tree.snippet.Reference | None = None
@@ -307,6 +321,7 @@ def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Addre
 
     return tree.snippet.Address(
         ref=state.between(token, end),
+        size=size and state.extract(size),
         base=base,
         indx=indx,
         disp=displacement,

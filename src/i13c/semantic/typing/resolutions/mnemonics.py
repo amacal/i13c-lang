@@ -15,7 +15,10 @@ MnemonicOperandSymbol = Kind[
     "imm16",
     "imm32",
     "imm64",
-    "addr",
+    "addr8",
+    "addr16",
+    "addr32",
+    "addr64",
     "rel",
 ]
 
@@ -67,8 +70,20 @@ class MnemonicOperandSpec:
         return MnemonicOperandSpec(symbol="imm64", names=())
 
     @staticmethod
-    def addr() -> MnemonicOperandSpec:
-        return MnemonicOperandSpec(symbol="addr", names=())
+    def addr8() -> MnemonicOperandSpec:
+        return MnemonicOperandSpec(symbol="addr8", names=())
+
+    @staticmethod
+    def addr16() -> MnemonicOperandSpec:
+        return MnemonicOperandSpec(symbol="addr16", names=())
+
+    @staticmethod
+    def addr32() -> MnemonicOperandSpec:
+        return MnemonicOperandSpec(symbol="addr32", names=())
+
+    @staticmethod
+    def addr64() -> MnemonicOperandSpec:
+        return MnemonicOperandSpec(symbol="addr64", names=())
 
     @staticmethod
     def rel() -> MnemonicOperandSpec:

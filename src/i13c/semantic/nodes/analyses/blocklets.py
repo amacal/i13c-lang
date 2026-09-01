@@ -1,5 +1,7 @@
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from typing import Protocol
+from functools import partial
 
 from i13c.core.generator import Generator
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
@@ -25,6 +27,8 @@ from i13c.semantic.typing.analyses.blocklets import (
 from i13c.semantic.typing.analyses.fnlets import Fnlet
 from i13c.semantic.typing.analyses.llvm import (
     AND,
+    ADC,
+    SBB,
     BSWAP,
     JMP,
     LEA,
@@ -36,6 +40,10 @@ from i13c.semantic.typing.analyses.llvm import (
     PUSH,
     RET,
     SHL,
+    SUB,
+    XOR,
+    CMP,
+    ADD,
     SHR,
     SYSCALL,
     XCHG,
@@ -45,6 +53,8 @@ from i13c.semantic.typing.analyses.llvm import (
     Register,
     Relocation,
     Displacement,
+    Group1Operands,
+    Group1Instruction,
 )
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.syntax.source import Span
@@ -102,21 +112,27 @@ def emit_asmlets(
 ) -> Iterable[tuple[BlockletId, Blocklet]]:
 
     dispatch: dict[bytes, EmitSignature] = {
-        b"and": emit_and,
+        b"add": partial(emit_group1, ADD),
+        b"adc": partial(emit_group1, ADC),
+        b"and": partial(emit_group1, AND),
         b"bswap": emit_bswap,
+        b"cmp": partial(emit_group1, CMP),
         b"jmp": emit_jmp,
         b"lea": emit_lea,
         b"loop": emit_loop,
         b"mov": emit_mov,
         b"nop": emit_nop,
-        b"or": emit_or,
+        b"or": partial(emit_group1, OR),
         b"pop": emit_pop,
         b"push": emit_push,
         b"ret": emit_ret,
+        b"sbb": partial(emit_group1, SBB),
         b"shl": emit_shl,
         b"shr": emit_shr,
+        b"sub": partial(emit_group1, SUB),
         b"syscall": emit_syscall,
         b"xchg": emit_xchg,
+        b"xor": partial(emit_group1, XOR),
     }
 
     for eid, entry in asmlets.items():
@@ -231,24 +247,23 @@ def emit_syscall(operands: list[AsmletOperand]) -> EmitRelocated:
     return SYSCALL(), None
 
 
-def emit_and(operands: list[AsmletOperand]) -> EmitRelocated:
+class Group1Constructor[T: Group1Instruction](Protocol):
+    def __call__(self, *, operands: Group1Operands) -> T: ...
+
+
+def emit_group1[T: Group1Instruction](
+    op: Group1Constructor[T],
+    operands: list[AsmletOperand],
+) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 2
 
-    dst = accept_reg(operands[0])
-    src = accept_reg_imm(operands[1])
+    # two operands
+    dst = accept_reg_addr(operands[0])
+    src = accept_reg_imm_addr(operands[1])
 
-    return AND(operands=(dst, src)), None
-
-
-def emit_or(operands: list[AsmletOperand]) -> EmitRelocated:
-    # sanity checks
-    assert len(operands) == 2
-
-    dst = accept_reg(operands[0])
-    src = accept_reg_imm(operands[1])
-
-    return OR(operands=(dst, src)), None
+    # no relocation
+    return op(operands=(dst, src)), None
 
 
 def emit_lea(operands: list[AsmletOperand]) -> EmitRelocated:
@@ -342,6 +357,7 @@ def accept_addr(operand: AsmletOperand) -> Address:
     )
 
     return Address(
+        size=operand.target.size,
         base=(
             Register(name=operand.target.base.name)
             if operand.target.base is not None
@@ -386,6 +402,7 @@ def accept_reg_addr(operand: AsmletOperand) -> Register | Address:
         )
 
         return Address(
+            size=operand.target.size,
             base=(
                 Register(name=operand.target.base.name)
                 if operand.target.base is not None
@@ -452,6 +469,7 @@ def accept_reg_imm_addr(operand: AsmletOperand) -> Register | Immediate | Addres
         )
 
         return Address(
+            size=operand.target.size,
             base=(
                 Register(name=operand.target.base.name)
                 if operand.target.base is not None

@@ -210,6 +210,6 @@ def can_detect_calls_with_asm_callsite_with_spilled_param():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "mov rax, [rsp + 0x00]",
+        "mov rax, qword [rsp + 0x00]",
         f"call {asmlet.identify(1)}",
     ]

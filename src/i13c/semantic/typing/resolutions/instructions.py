@@ -11,10 +11,9 @@ from i13c.syntax.source import Span
 
 InstructionRejectionReason = Kind[
     "arity-mismatch",
-    "type-mismatch",
-    "width-mismatch",
     "register-mismatch",
     "variant-mismatch",
+    "variant-unsupported",
 ]
 
 OperandSymbol = Kind[
@@ -94,7 +93,7 @@ class InstructionAcceptance:
     operands: tuple[OperandAcceptance, ...]
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class InstructionResolution:
     ref: Span
     id: InstructionId

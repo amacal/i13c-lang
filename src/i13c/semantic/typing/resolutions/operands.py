@@ -29,7 +29,10 @@ OperandSymbol = Kind[
     "imm16",
     "imm32",
     "imm64",
-    "addr",
+    "addr8",
+    "addr16",
+    "addr32",
+    "addr64",
     "rel",
 ]
 

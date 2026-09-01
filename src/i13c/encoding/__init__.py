@@ -74,9 +74,11 @@ class Encoder(Protocol):
 
 DISPATCH_TABLE: dict[type[BlockletInstruction], Encoder] = {
     llvm.ADD: math.encode_add,
+    llvm.ADC: math.encode_adc,
     llvm.AND: math.encode_and,
     llvm.BSWAP: bits.encode_bswap,
     llvm.CALL: ctrl.encode_call,
+    llvm.CMP: math.encode_cmp,
     llvm.JMP: ctrl.encode_jmp,
     llvm.LEA: addr.encode_lea,
     llvm.LOOP: ctrl.encode_loop,
@@ -89,6 +91,8 @@ DISPATCH_TABLE: dict[type[BlockletInstruction], Encoder] = {
     llvm.SHL: bits.encode_shl,
     llvm.SHR: bits.encode_shr,
     llvm.SUB: math.encode_sub,
+    llvm.SBB: math.encode_sbb,
     llvm.SYSCALL: ctrl.encode_syscall,
     llvm.XCHG: move.encode_xchg,
+    llvm.XOR: math.encode_xor,
 }  # pyright: ignore[reportAssignmentType]

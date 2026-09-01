@@ -83,6 +83,7 @@ class Displacement:
 @dataclass(kw_only=True, eq=False)
 class Address:
     ref: Span
+    size: bytes | None
     base: Register | Reference | None
     indx: Index | None
     disp: Displacement | None

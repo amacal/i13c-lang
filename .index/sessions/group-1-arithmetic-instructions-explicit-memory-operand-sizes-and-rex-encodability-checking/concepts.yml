@@ -1,0 +1,8 @@
+- "x86-encoding"
+- "resolution"
+- "parsing"
+- "mnemonic-registration"
+- "rex-prefix"
+- "addressing-modes"
+- "semantic-validation"
+- "opcode-tables"

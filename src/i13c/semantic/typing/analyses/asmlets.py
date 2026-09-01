@@ -72,6 +72,7 @@ class AsmletOperandRelocation:
     offset: int
 
 
+AsmletAddressSize = Kind[8, 16, 32, 64]
 AsmletDisplacementOffset = bytes
 AsmletDisplacementWidth = Kind[0, 8, 32]
 AsmletDisplacementDirection = Kind["forward", "backward"]
@@ -101,6 +102,7 @@ class AsmletOperandDisplacement:
 
 @dataclass(kw_only=True)
 class AsmletOperandAddress:
+    size: AsmletAddressSize
     base: AsmletOperandRegister | None
     indx: AsmletOperandIndex | None
     disp: AsmletOperandDisplacement | None

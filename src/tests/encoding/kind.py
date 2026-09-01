@@ -306,6 +306,7 @@ def can_encode_modrm_rm_rel64(disp32: bytes, encoding: bytes):
 def can_encode_modrm_rm_m64_disp32_only(disp32: bytes, encoding: bytes):
     modrm_rm = kind.encode_modrm_rm(
         Address(
+            size=64,
             base=None,
             indx=None,
             disp=DisplacementInfo.auto(disp32),
@@ -332,6 +333,7 @@ def can_encode_modrm_rm_m64_disp32_only(disp32: bytes, encoding: bytes):
 def can_encode_modrm_rm_m64_base_only(base: str, encoding: bytes):
     modrm_rm = kind.encode_modrm_rm(
         Address(
+            size=64,
             base=RegisterInfo.auto(base),
             indx=None,
             disp=None,
@@ -357,6 +359,7 @@ def can_encode_modrm_rm_m64_base_only(base: str, encoding: bytes):
     """)
 def can_encode_modrm_rm_m64_index_only(scale: Kind[1, 2, 4, 8], index: str, encoding: bytes | None):
     addr = Address(
+        size=64,
         base=None,
         indx=IndexInfo.optional(index, scale),
         disp=None,
@@ -393,6 +396,7 @@ def can_encode_modrm_rm_m64_all(
     encoding: bytes | None,
 ):
     addr = Address(
+        size=64,
         base=RegisterInfo.auto(base),
         indx=IndexInfo.optional(index, scale),
         disp=DisplacementInfo.auto(disp32),

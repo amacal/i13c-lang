@@ -56,6 +56,7 @@ def build_addresses(
 
         addresses[address_id] = Address(
             ref=entry.ref,
+            size=entry.size,
             base=base_id,
             indx=indx_id,
             disp=disp_id,
@@ -76,7 +77,9 @@ class ListExtractor:
         return {
             "ref": "Ref",
             "id": "ID",
+            "size": "Size",
             "base": "Base",
+            "indx": "Index",
             "disp": "Displacement",
         }
 
@@ -85,6 +88,8 @@ class ListExtractor:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
+            "size": entry.size.decode() if entry.size else "",
             "base": entry.base.identify(1) if entry.base else "",
+            "indx": entry.indx.identify(1) if entry.indx else "",
             "disp": entry.disp.identify(1) if entry.disp else "",
         }

@@ -68,14 +68,14 @@ def build_register_resolution(
         64: { b"rax", b"rcx", b"rdx", b"rbx", b"rsp", b"rbp", b"rsi", b"rdi", b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15", b"rip" },
     }
 
-    kinds: dict[RegisterKind, set[bytes]] = {
-        "rip": { b"rip" },
-        "low": { b"al", b"cl", b"dl", b"bl" },
-        "high": { b"ah", b"ch", b"dh", b"bh" },
-        "8bit": { b"spl", b"bpl", b"sil", b"dil", b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b" },
-        "16bit": { b"ax", b"cx", b"dx", b"bx", b"sp", b"bp", b"si", b"di", b"r8w", b"r9w", b"r10w", b"r11w", b"r12w", b"r13w", b"r14w", b"r15w" },
-        "32bit": { b"eax", b"ecx", b"edx", b"ebx", b"esp", b"ebp", b"esi", b"edi", b"r8d", b"r9d", b"r10d", b"r11d", b"r12d", b"r13d", b"r14d", b"r15d" },
-        "64bit": { b"rax", b"rcx", b"rdx", b"rbx", b"rsp", b"rbp", b"rsi", b"rdi", b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15" },
+    kinds: dict[RegisterKind, list[bytes]] = {
+        "rip": [ b"rip" ],
+        "low": [ b"al", b"cl", b"dl", b"bl" ],
+        "high": [ b"ah", b"ch", b"dh", b"bh" ],
+        "8bit": [ b"spl", b"bpl", b"sil", b"dil", b"r8b", b"r9b", b"r10b", b"r11b", b"r12b", b"r13b", b"r14b", b"r15b" ],
+        "16bit": [ b"ax", b"cx", b"dx", b"bx", b"sp", b"bp", b"si", b"di", b"r8w", b"r9w", b"r10w", b"r11w", b"r12w", b"r13w", b"r14w", b"r15w" ],
+        "32bit": [ b"eax", b"ecx", b"edx", b"ebx", b"esp", b"ebp", b"esi", b"edi", b"r8d", b"r9d", b"r10d", b"r11d", b"r12d", b"r13d", b"r14d", b"r15d" ],
+        "64bit": [ b"rax", b"rcx", b"rdx", b"rbx", b"rsp", b"rbp", b"rsi", b"rdi", b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15" ],
     }
     # fmt: on
 
@@ -106,13 +106,21 @@ def build_register_resolution(
             )
 
         else:
+            kind = kinds_inverted[entry.name]
+            width = widths_inverted[entry.name]
+
             resolution.accepted.append(
                 RegisterAcceptance(
                     ref=entry.ref,
                     id=rid,
                     name=entry.name,
-                    kind=kinds_inverted[entry.name],
-                    width=widths_inverted[entry.name],
+                    kind=kind,
+                    width=width,
+                    index=(
+                        "high"
+                        if kind == "8bit" or kinds[kind].index(entry.name) >= 8
+                        else "low"
+                    ),
                 )
             )
 
