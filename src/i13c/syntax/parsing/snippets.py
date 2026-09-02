@@ -253,7 +253,7 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
     # address operands starts fixed non-registerkeywords
     # so it can really resemble a register operand
-    if isinstance(operand, tree.snippet.Register):
+    if isinstance(operand, tree.snippet.Register):  # noqa: SIM102
         if operand.name in (b"byte", b"word", b"dword", b"qword"):
             operand = parse_address(state, token)
 

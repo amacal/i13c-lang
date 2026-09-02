@@ -88,7 +88,7 @@ def build_index_resolution(
                 target = register
 
         if isinstance(target, RegisterAcceptance):
-            if target.name == b"rsp":  # noqa: SIM102
+            if target.name == b"rsp":
                 resolution.rejected.append(
                     IndexRejection(
                         ref=entry.ref,

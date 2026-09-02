@@ -6,17 +6,17 @@ from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.addresses import Address, AddressId
 from i13c.semantic.typing.entities.displacements import DisplacementId
+from i13c.semantic.typing.entities.indices import IndexId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
-from i13c.semantic.typing.entities.indices import IndexId
 from i13c.semantic.typing.resolutions.addresses import (
     AddressAcceptance,
     AddressRejection,
     AddressResolution,
     AddressSize,
 )
-from i13c.semantic.typing.resolutions.indices import IndexAcceptance
 from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
+from i13c.semantic.typing.resolutions.indices import IndexAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
@@ -112,7 +112,7 @@ def build_address_resolution(
             indx = indices.get(entry.indx)
 
         if isinstance(indx, RegisterAcceptance):
-            if indx.name == b"rsp":  # noqa: SIM102
+            if indx.name == b"rsp":
                 resolution.rejected.append(
                     AddressRejection(
                         ref=entry.ref,

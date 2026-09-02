@@ -1,5 +1,6 @@
-from i13c.encoding import kind
 from typing import Literal as Kind
+
+from i13c.encoding import kind
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.semantic.typing.analyses.llvm import Address, Fixed
 from tests.encoding import DisplacementInfo, IndexInfo, RegisterInfo, samples

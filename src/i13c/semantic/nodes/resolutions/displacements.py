@@ -7,9 +7,9 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.displacements import Displacement, DisplacementId
 from i13c.semantic.typing.resolutions.displacements import (
     DisplacementAcceptance,
-    DisplacementWidth,
     DisplacementRejection,
     DisplacementResolution,
+    DisplacementWidth,
 )
 
 
@@ -71,25 +71,7 @@ def build_displacement_resolution(
         positive = entry.direction == "forward"
 
         if len(normalized) >= 4:
-            if len(normalized) > 4:
-                resolution.rejected.append(
-                    DisplacementRejection(
-                        ref=entry.ref,
-                        id=did,
-                        reason="overflow",
-                    )
-                )
-
-            elif positive and normalized[0] > 0x7F:
-                resolution.rejected.append(
-                    DisplacementRejection(
-                        ref=entry.ref,
-                        id=did,
-                        reason="overflow",
-                    )
-                )
-
-            elif not positive and normalized[0] > 0x80:
+            if len(normalized) > 4 or positive and normalized[0] > 0x7F or not positive and normalized[0] > 0x80:
                 resolution.rejected.append(
                     DisplacementRejection(
                         ref=entry.ref,

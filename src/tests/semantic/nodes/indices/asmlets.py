@@ -50,7 +50,7 @@ def can_index_two_callsite_by_called_signature():
 def can_index_immediate_callsite_by_called_signature():
     source, indices = prepare_indices(
         """
-            asm foo(v@imm: u16) { mov rax, @v; }
+            asm foo(v@imm: u16) { mov ax, @v; }
             fn main() { foo(0x0000); foo(0x0001); }
         """
     )

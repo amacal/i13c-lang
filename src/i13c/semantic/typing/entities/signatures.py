@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
+from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.syntax.source import Span
-from i13c.semantic.syntax import NodeId
+
 
 @dataclass(kw_only=True, frozen=True)
 class SignatureId:

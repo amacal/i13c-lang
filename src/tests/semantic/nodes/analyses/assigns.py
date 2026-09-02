@@ -25,8 +25,8 @@ def can_detect_assigns_using_literal():
     assert len(assign.instructions) == 1
     assert isinstance(assign.instructions[0], MOV)
 
-    assert str(assign.instructions[0].operands[0]) == "rdi"
-    assert str(assign.instructions[0].operands[1]) == "0x42"
+    assert str(assign.instructions[0].operands[0]) == "edi"
+    assert str(assign.instructions[0].operands[1]) == "0x00000042"
 
 
 def can_detect_assigns_using_parameter():

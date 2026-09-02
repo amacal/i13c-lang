@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.displacements import (
+    DisplacementDirection,
     DisplacementId,
     DisplacementOffset,
-    DisplacementDirection,
 )
 from i13c.syntax.source import Span
 

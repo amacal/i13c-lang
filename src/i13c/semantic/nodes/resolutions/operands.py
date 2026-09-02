@@ -1,6 +1,5 @@
 from collections.abc import Iterable
 from typing import Any
-from unittest import case
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
@@ -17,11 +16,11 @@ from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.operands import (
     OperandAcceptance,
+    OperandKind,
     OperandRejection,
     OperandResolution,
     OperandSymbol,
     OperandTarget,
-    OperandKind,
 )
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance

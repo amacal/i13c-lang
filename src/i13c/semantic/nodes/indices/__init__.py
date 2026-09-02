@@ -11,13 +11,16 @@ from i13c.semantic.nodes.indices.callsites import (
 from i13c.semantic.nodes.indices.cflows import configure_control_flows_by_signatures
 from i13c.semantic.nodes.indices.cpaths import configure_control_paths_by_signatures
 from i13c.semantic.nodes.indices.environments import configure_environments_by_snippets
+from i13c.semantic.nodes.indices.flags import configure_flags_by_nid
 from i13c.semantic.nodes.indices.functions import (
     configure_functions_by_callsites,
     configure_functions_by_signatures,
 )
 from i13c.semantic.nodes.indices.shuffles import configure_shuffles_by_callsites
-from i13c.semantic.nodes.indices.signatures import configure_signatures_by_names, configure_signatures_by_nid
-from i13c.semantic.nodes.indices.flags import configure_flags_by_nid
+from i13c.semantic.nodes.indices.signatures import (
+    configure_signatures_by_names,
+    configure_signatures_by_nid,
+)
 from i13c.semantic.nodes.indices.spills import configure_spills_by_statements
 from i13c.semantic.nodes.indices.values import configure_values_by_statements
 

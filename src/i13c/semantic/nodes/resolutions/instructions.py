@@ -8,6 +8,7 @@ from i13c.semantic.typing.entities.instructions import Instruction, InstructionI
 from i13c.semantic.typing.entities.mnemonics import MnemonicId
 from i13c.semantic.typing.entities.operands import OperandId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
+from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.instructions import (
     InstructionAcceptance,
     InstructionRejection,
@@ -17,7 +18,6 @@ from i13c.semantic.typing.resolutions.instructions import (
 from i13c.semantic.typing.resolutions.mnemonics import MnemonicAcceptance
 from i13c.semantic.typing.resolutions.operands import OperandAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
-from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 
 
 def configure_instruction_resolution() -> GraphGroup:
@@ -125,12 +125,10 @@ def build_instruction_resolution(
                     reason = "variant-mismatch"
 
                 if spec.names and not reason:
-                    if not isinstance(
-                        accepted.target, RegisterAcceptance
-                    ):  # noqa: SIM114
-                        reason = "register-mismatch"
-
-                    elif accepted.target.name not in spec.names:
+                    if (
+                        not isinstance(accepted.target, RegisterAcceptance)
+                        or accepted.target.name not in spec.names
+                    ):
                         reason = "register-mismatch"
 
                 if reason is not None:
@@ -207,9 +205,9 @@ def build_instruction_resolution(
                 )
             )
 
-        for rejection in sorted(rejected, key=lambda x: priorities.index(x.reason)):
-            resolution.rejected.append(rejection)
-            break
+            for rejection in sorted(rejected, key=lambda x: priorities.index(x.reason)):
+                resolution.rejected.append(rejection)
+                break
 
         resolutions[iid] = resolution
 
@@ -235,15 +233,16 @@ def is_index_high(operands: list[OperandAcceptance]) -> bool:
                 return True
 
         if isinstance(operand.target, AddressAcceptance):
-            if operand.target.base:
-                if isinstance(operand.target.base, RegisterAcceptance):
-                    if operand.target.base.index == "high":
-                        return True
+            base = operand.target.base
+            indx = operand.target.indx
 
-            if operand.target.indx:
-                if isinstance(operand.target.indx.target, RegisterAcceptance):
-                    if operand.target.indx.target.index == "high":
-                        return True
+            if base and isinstance(base, RegisterAcceptance):
+                if base.index == "high":
+                    return True
+
+            if indx and isinstance(indx.target, RegisterAcceptance):
+                if indx.target.index == "high":
+                    return True
 
     return False
 

@@ -4,8 +4,8 @@ from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
-from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 
 
@@ -34,7 +34,7 @@ def build_entrypoints(
         if signature.name == b"main":  # noqa: SIM102
             if len(signature.parameters) == 0:  # noqa: SIM102
                 if flag := flags.find(nid):  # noqa: SIM102
-                    if flag.noreturn:  # noqa: SIM102
+                    if flag.noreturn:
                         entrypoints[signature.id] = Entrypoint(target=signature)
 
     return OneToOne[SignatureId, Entrypoint].instance(entrypoints)

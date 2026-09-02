@@ -124,8 +124,8 @@ document name and section/page number.
   opcode column is worse than useless). Instead, render the needed pages as images with
   `pdftoppm`/`pdftocairo` (`-png -r <dpi>`) into `.tmp/{page}.png`, named by the
   document's printed page number where it differs from the PDF's physical page index,
-  and read them directly with multimodal vision. Use 200 DPI by default, raised to
-  ~300 DPI for dense encoding tables or small annotations. `.tmp/` is gitignored and
+  and read them directly with multimodal vision. Use 600 DPI by default, raised to
+  ~900 DPI for dense encoding tables or small annotations. `.tmp/` is gitignored and
   persists indefinitely, across sessions, as a reusable page-render cache — never
   deleted automatically, so a page rendered in an earlier session is re-referenced
   directly instead of re-rendered. Keep it well organized so this stays usable as it

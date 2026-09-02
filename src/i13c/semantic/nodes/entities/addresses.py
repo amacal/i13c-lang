@@ -5,9 +5,9 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.addresses import Address, AddressId, BaseRegister
 from i13c.semantic.typing.entities.displacements import DisplacementId
+from i13c.semantic.typing.entities.indices import IndexId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
-from i13c.semantic.typing.entities.indices import IndexId
 from i13c.syntax import tree
 
 

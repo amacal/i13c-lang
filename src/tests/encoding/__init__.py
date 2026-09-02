@@ -1,5 +1,6 @@
 from collections.abc import Callable, Iterable, Sequence
-from typing import Any, Literal as Kind
+from typing import Any
+from typing import Literal as Kind
 
 from pytest import mark
 
@@ -9,11 +10,11 @@ from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.blocklets import BlockletInstruction
 from i13c.semantic.typing.analyses.llvm import (
     Address,
+    Displacement,
     Fixed,
     Immediate,
     Index,
     Register,
-    Displacement,
 )
 
 

@@ -9,9 +9,10 @@ from i13c.semantic.typing.analyses.llvm import (
     MOV,
     XCHG,
     Address,
-    Immediate,
-    Register,
     Displacement,
+    ImmediateInfo,
+    Register,
+    RegisterInfo,
 )
 from i13c.semantic.typing.analyses.shuffles import (
     ShuffleCallSite,
@@ -122,8 +123,8 @@ def emit(
                 instructions.append(
                     MOV(
                         operands=(
-                            Register(name=move.dst),
-                            Immediate(value=move.src),
+                            RegisterInfo.derive32(move.dst, move.src.width),
+                            ImmediateInfo.extend32(move.src, move.src.width),
                         )
                     )
                 )

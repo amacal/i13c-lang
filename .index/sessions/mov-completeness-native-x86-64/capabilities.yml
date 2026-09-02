@@ -1,0 +1,3 @@
+- "mov-instruction-encoding"
+- "operand-width-normalization"
+- "resolver-encoder-invariant-checking"

@@ -58,6 +58,15 @@ class Hex:
     def min(left: Hex, right: Hex) -> Hex:
         return left if Hex.lesser(left.data, right.data) else right
 
+    def extend(self: Hex, width: Width) -> Hex:
+        assert self.width <= width
+        diff = width - self.width
+
+        return Hex(
+            width=width,
+            data=bytes(diff // 8) + self.data,
+        )
+
     def highest_bit(self) -> bool:
         return self.data[0] & 0x80 != 0
 

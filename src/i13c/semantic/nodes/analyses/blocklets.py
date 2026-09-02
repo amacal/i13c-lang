@@ -1,11 +1,9 @@
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Protocol
 from functools import partial
+from typing import Protocol
 
 from i13c.core.generator import Generator
-from i13c.semantic.typing.analyses.entrypoints import Entrypoint
-from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.asmlets import (
@@ -24,12 +22,14 @@ from i13c.semantic.typing.analyses.blocklets import (
     BlockletInstruction,
     BlockletTarget,
 )
+from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.analyses.fnlets import Fnlet
 from i13c.semantic.typing.analyses.llvm import (
-    AND,
     ADC,
-    SBB,
+    ADD,
+    AND,
     BSWAP,
+    CMP,
     JMP,
     LEA,
     LOOP,
@@ -39,24 +39,24 @@ from i13c.semantic.typing.analyses.llvm import (
     POP,
     PUSH,
     RET,
+    SBB,
     SHL,
-    SUB,
-    XOR,
-    CMP,
-    ADD,
     SHR,
+    SUB,
     SYSCALL,
     XCHG,
+    XOR,
     Address,
+    Displacement,
+    Group1Instruction,
+    Group1Operands,
     Immediate,
     Index,
     Register,
     Relocation,
-    Displacement,
-    Group1Operands,
-    Group1Instruction,
 )
 from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.syntax.source import Span
 
 

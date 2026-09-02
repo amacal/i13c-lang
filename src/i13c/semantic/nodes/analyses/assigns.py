@@ -7,9 +7,11 @@ from i13c.semantic.typing.analyses.assigns import AssignInstruction, AssignLlvm
 from i13c.semantic.typing.analyses.llvm import (
     MOV,
     Address,
-    Immediate,
-    Register,
     Displacement,
+    Immediate,
+    ImmediateInfo,
+    Register,
+    RegisterInfo,
 )
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -88,6 +90,11 @@ def emit(
                 indx=None,
                 disp=Displacement.positive(8 * allocation.spills[idx]),
             )
+
+    # match operand sizes
+    if isinstance(src, Immediate):
+        dst = RegisterInfo.derive32(dst.name, src.value.width)
+        src = ImmediateInfo.extend32(src.value, src.value.width)
 
     # emit single instruction
     instructions.append(MOV(operands=(dst, src)))

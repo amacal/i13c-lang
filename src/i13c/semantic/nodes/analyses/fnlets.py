@@ -14,9 +14,9 @@ from i13c.semantic.typing.analyses.llvm import (
     RET,
     SUB,
     Address,
+    Displacement,
     Immediate,
     Register,
-    Displacement,
 )
 from i13c.semantic.typing.analyses.statements import StatementLlvm
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -100,7 +100,12 @@ def emit_prologue(instructions: list[FnletInstruction], frame: StackFrame):
 
     for entry in frame.moved:
         instructions.append(
-            MOV(operands=(Register(name=entry.dst), Register(name=entry.src)))
+            MOV(
+                operands=(
+                    Register(name=entry.dst),
+                    Register(name=entry.src),
+                )
+            )
         )
 
 

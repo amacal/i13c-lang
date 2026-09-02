@@ -186,7 +186,7 @@ def can_detect_calls_with_asm_callsite_with_literal():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "mov rdi, 0x05",
+        "mov edi, 0x00000005",
         f"call {asmlet.identify(1)}",
     ]
 

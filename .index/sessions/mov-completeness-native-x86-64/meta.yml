@@ -1,0 +1,14 @@
+title: "MOV Completeness (native x86-64)"
+kind: implementation
+files:
+  - "src/i13c/encoding/move.py"
+  - "src/i13c/encoding/math.py"
+  - "src/i13c/encoding/kind.py"
+  - "src/i13c/semantic/core.py"
+  - "src/i13c/semantic/nodes/analyses/calls.py"
+  - "src/i13c/semantic/nodes/analyses/assigns.py"
+  - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+  - "src/i13c/semantic/nodes/resolutions/instructions.py"
+  - "src/i13c/semantic/typing/analyses/llvm.py"
+source: —
+date: "2026-09-02"

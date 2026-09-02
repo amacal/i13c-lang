@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
-from i13c.semantic.syntax import NodeId
 
+from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.syntax.source import Span

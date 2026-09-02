@@ -1,6 +1,7 @@
+from typing import Literal as Kind
+
 from i13c.semantic.typing.analyses.llvm import LEA
 from tests.encoding import RegisterInfo, encode_instruction, parse_address, samples
-from typing import Literal as Kind
 
 
 @samples("""

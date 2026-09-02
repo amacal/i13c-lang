@@ -1,17 +1,24 @@
 from i13c.encoding import kind
-from i13c.encoding.core import RelocationInfo, RelocationTarget
-from i13c.encoding.kind import ImmediateInfo, RegisterInfo
-from i13c.semantic.typing.analyses.llvm import (
-    MOV,
-    XCHG,
-    Address,
-    Fixed,
-    Immediate,
-    Register,
-)
+from i13c.encoding.kind import AddressInfo, ImmediateInfo, RegisterInfo
+from i13c.encoding.math import encode_mr
+from i13c.semantic.typing.analyses.llvm import MOV, XCHG, Immediate, Register
+
+MOV_MEM_IMM: dict[tuple[int, int], int] = {
+    (8, 8): 0xc6,
+    (16, 16): 0xc7,
+    (32, 32): 0xc7,
+    (64, 32): 0xc7,
+}
+
+MOV_REG_IMM: dict[tuple[int, int], int] = {
+    (8, 8): 0xb0,
+    (16, 16): 0xb8,
+    (32, 32): 0xb8,
+    (64, 64): 0xb8,
+}
 
 
-def encode_mov(instruction: MOV, bytecode: bytearray) -> RelocationInfo | None:
+def encode_mov(instruction: MOV, bytecode: bytearray) -> None:
     # sanity check
     assert len(instruction.operands) == 2
 
@@ -21,55 +28,37 @@ def encode_mov(instruction: MOV, bytecode: bytearray) -> RelocationInfo | None:
 
     # assume optional encoding components
     immediate: Immediate | None = None
+    opcode: int | None = None
     opcode_reg: kind.OpCodeEncoding | None = None
     reg: kind.RegisterOrConstant | None = None
     rm: kind.RegisterOrAddress | None = None
 
-    # optionally created relocation info
-    relocation: RelocationInfo | None = None
-    target: RelocationTarget | None = None
+    if isinstance(src, Immediate):
+        immediate = src
+        imm_width = ImmediateInfo.get_width(src)
 
-    # mov reg, imm
-    if isinstance(dst, Register) and isinstance(src, Immediate):
-        width = RegisterInfo.get_width(dst)
-
-        if width == 64 and ImmediateInfo.fits_signed(src, 32):
-            opcode = 0xc7
-            reg = 0x00
-            rm = dst
-            immediate = ImmediateInfo.normalize(src, 32)
-
-        else:
-            opcode = 0xB0 if width == 8 else 0xB8
-            opcode_reg = kind.encode_opcode_reg(dst)
-            immediate = ImmediateInfo.normalize(src, width)
-
-    # mov r/m, imm
-    elif isinstance(src, Immediate):
-        opcode = 0xC7
+        rm = dst
         reg = 0x00
-        rm = dst
-        immediate = ImmediateInfo.normalize(src, 32)
 
-    # mov r/m, reg
-    elif isinstance(src, Register):
-        width = RegisterInfo.get_width(src)
-        opcode = 0x88 if width == 8 else 0x89
+        # mov reg, imm if widths match
+        if isinstance(dst, Register) and RegisterInfo.get_width(dst) == imm_width:
+            rm_width = RegisterInfo.get_width(dst)
+            opcode = MOV_REG_IMM[(rm_width, imm_width)]
+            opcode_reg = kind.encode_opcode_reg(dst)
 
-        reg = src
-        rm = dst
+        elif isinstance(dst, Register):
+            rm_width = RegisterInfo.get_width(dst)
+            opcode = MOV_MEM_IMM[(rm_width, imm_width)]
 
-    # mov reg, r/m
+        # mov r/m, imm
+        else:
+            rm_width = AddressInfo.get_width(dst)
+            opcode = MOV_MEM_IMM[(rm_width, imm_width)]
+
     else:
-        assert isinstance(dst, Register)
-        assert isinstance(src, (Address, Fixed))
+        opcode, rm, reg = encode_mr(0x88, dst, src)
 
-        opcode = 0x8B
-        reg = dst
-        rm = src
-
-    # encode opcode-register form
-    if opcode_reg is not None:
+    if immediate is not None and opcode_reg is not None:
         prefixes = kind.encode_prefixes(dst)
         rex = kind.encode_rex(dst, opcode_reg=opcode_reg)
 
@@ -83,39 +72,23 @@ def encode_mov(instruction: MOV, bytecode: bytearray) -> RelocationInfo | None:
             opcode_reg=opcode_reg,
         )
 
-    # encode ModRM form
     else:
-        assert reg is not None
-        assert rm is not None
-
-        if isinstance(reg, Register):
-            rex_rm = reg
-        else:
-            rex_rm = rm
-
+        # compute ModRM fields
         modrm_reg = kind.encode_modrm_reg(reg)
         modrm_rm = kind.encode_modrm_rm(rm)
 
+        # derive prefixes and rex
         prefixes = kind.encode_prefixes(rm)
-        rex = kind.encode_rex(rex_rm, modrm_reg=modrm_reg, modrm_rm=modrm_rm)
+        rex = kind.encode_rex(rm, modrm_reg=modrm_reg, modrm_rm=modrm_rm)
 
+        # encode instruction
         kind.write_prefixes(bytecode, prefixes)
         kind.write_rex(bytecode, rex)
         kind.write_opcode(bytecode, 1, opcode)
         kind.write_modrm(bytecode, modrm_reg, modrm_rm)
 
-        # the address may require relocation
-        if target is not None:
-            relocation = RelocationInfo(
-                target=target,
-                offset=len(bytecode),
-                width=4,
-            )
-
     # encode optional immediate
     kind.write_immediate(bytecode, immediate)
-
-    return relocation
 
 
 def encode_xchg(instruction: XCHG, bytecode: bytearray) -> None:

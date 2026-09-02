@@ -1,13 +1,14 @@
 from i13c.core.result import Err, Ok
+from i13c.graph.nodes import run as run_graph
 from i13c.semantic.graph import SemanticGraph
+from i13c.semantic.nodes.resolutions.mnemonics import (
+    INSTRUCTIONS_TABLE,
+    MnemonicVariant,
+)
+from i13c.semantic.typing.resolutions.mnemonics import MnemonicOperandSymbol
 from i13c.syntax.lexing import tokenize
 from i13c.syntax.parsing import parse
 from i13c.syntax.source import open_text
-from i13c.graph.nodes import run as run_graph
-
-from i13c.semantic.nodes.resolutions.mnemonics import INSTRUCTIONS_TABLE
-from i13c.semantic.nodes.resolutions.mnemonics import MnemonicVariant
-from i13c.semantic.typing.resolutions.mnemonics import MnemonicOperandSymbol
 
 
 def parse_table(table: str) -> list[tuple[str, bytes | None]]:
@@ -58,8 +59,8 @@ def compile(instruction: str) -> SemanticGraph:
     match parse(source, tokenized):
         case Err(diagnostics):
             assert False, f"Parsing failed: {diagnostics}"
-        case Ok(program):
-            program = program
+        case Ok(_program):
+            program = _program
 
     graph = run_graph(program)
     return graph.semantic_graph()
@@ -128,6 +129,12 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
         "0x00007fff", "0x00008000", "0x0000ffff", "0x00010000", "0x7fffffff", "0x80000000",
         "0xffffffff",
     )
+
+    imm64 = (
+        "0x0000000000000000", "0x0000000000000001", "0x000000000000007f", "0x0000000000000080", "0x00000000000000ff", "0x0000000000000100",
+        "0x0000000000007fff", "0x0000000000008000", "0x000000000000ffff", "0x0000000000010000", "0x000000007fffffff", "0x0000000080000000",
+        "0x00000000ffffffff", "0x0000000100000000", "0x7fffffffffffffff", "0x8000000000000000", "0xffffffffffffffff",
+    )
     # fmt: on
 
     match symbol:
@@ -151,6 +158,9 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
 
         case "imm32":
             return imm32
+
+        case "imm64":
+            return imm64
 
         case ("addr8" | "addr16" | "addr32" | "addr64") as symbol:
             scales = (1, 2, 4, 8)

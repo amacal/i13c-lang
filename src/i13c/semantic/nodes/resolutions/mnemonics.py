@@ -44,6 +44,30 @@ GROUP1_VARIANTS = [
     (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg64()),
 ]
 
+MOV_VARIANTS = [
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm32()),
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm64()),
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg64()),
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr64()),
+    (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm32()),
+    (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.reg32()),
+    (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr32()),
+    (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.imm16()),
+    (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.reg16()),
+    (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.addr16()),
+    (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.reg8()),
+    (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.addr8()),
+    (MnemonicOperandSpec.addr8(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.addr8(), MnemonicOperandSpec.reg8()),
+    (MnemonicOperandSpec.addr16(), MnemonicOperandSpec.imm16()),
+    (MnemonicOperandSpec.addr16(), MnemonicOperandSpec.reg16()),
+    (MnemonicOperandSpec.addr32(), MnemonicOperandSpec.imm32()),
+    (MnemonicOperandSpec.addr32(), MnemonicOperandSpec.reg32()),
+    (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.imm32()),
+    (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg64()),
+]
+
 INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
     b"bswap": [
         (MnemonicOperandSpec.reg32(),),
@@ -61,28 +85,7 @@ INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
     b"loop": [
         (MnemonicOperandSpec.rel(),),
     ],
-    b"mov": [
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm16()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm32()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm64()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg64()),
-        (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.addr64()),
-        (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.addr64()),
-        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr64()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr64()),
-        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm16()),
-        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm32()),
-        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr64()),
-        (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.imm16()),
-        (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.imm32()),
-        (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg8()),
-        (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg16()),
-        (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg32()),
-        (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg64()),
-    ],
+    b"mov": MOV_VARIANTS,
     b"nop": [()],
     b"pop": [
         (MnemonicOperandSpec.reg64(),),

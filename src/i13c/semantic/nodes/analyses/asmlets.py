@@ -7,21 +7,21 @@ from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.analyses.asmlets import (
     Asmlet,
+    AsmletAddressSize,
     AsmletId,
     AsmletInstruction,
     AsmletOperand,
     AsmletOperandAddress,
     AsmletOperandDisplacement,
     AsmletOperandImmediate,
+    AsmletOperandIndex,
     AsmletOperandRegister,
     AsmletOperandRelocation,
     AsmletOperandTarget,
-    AsmletOperandIndex,
-    AsmletAddressSize,
 )
+from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
-from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance

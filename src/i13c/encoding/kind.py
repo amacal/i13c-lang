@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Protocol, Literal as Kind
+from typing import Literal as Kind
+from typing import Protocol
 
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.semantic.typing.analyses import llvm
@@ -86,6 +87,10 @@ class ImmediateInfo:
     @staticmethod
     def is_one(imm: llvm.Immediate) -> bool:
         return imm.value.width == 8 and imm.value.data == b"\x01"
+
+    @staticmethod
+    def get_width(imm: llvm.Immediate) -> int:
+        return imm.value.width
 
     @staticmethod
     def fits_signed(imm: llvm.Immediate, width: int) -> bool:
@@ -253,6 +258,15 @@ class OpCodeEncoding:
     rex_b: int
     opcode_reg: int
 
+    @staticmethod
+    def default() -> OpCodeEncoding:
+        return OpCodeEncoding(
+            rex_h=0x00,
+            rex_w=0b0000,
+            rex_b=0b0000,
+            opcode_reg=0b0000,
+        )
+
 
 @dataclass(kw_only=True)
 class RexEncoding:
@@ -338,15 +352,10 @@ def encode_rex(
     mem = isinstance(target, llvm.Address)
 
     if target is not None:
-        if reg and RegisterInfo.is_64bit(target):  # noqa: SIM102
-            rex.w |= 0b1000
-            rex.h |= 0x40
+        is_reg_64 = reg and RegisterInfo.is_64bit(target)
+        is_mem_64 = mem and AddressInfo.is_64bit(target)
 
-        elif mem and AddressInfo.is_64bit(target):  # noqa: SIM102
-            rex.w |= 0b1000
-            rex.h |= 0x40
-
-        elif not mem and not reg:
+        if is_reg_64 or is_mem_64 or not mem and not reg:
             rex.w |= 0b1000
             rex.h |= 0x40
 

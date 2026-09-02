@@ -8,7 +8,9 @@ from i13c.semantic.nodes.resolutions.binds import configure_bind_resolution
 from i13c.semantic.nodes.resolutions.calls import configure_call_resolution
 from i13c.semantic.nodes.resolutions.callsites import configure_callsite_resolution
 from i13c.semantic.nodes.resolutions.cflows import configure_control_flow_resolution
-from i13c.semantic.nodes.resolutions.displacements import configure_displacement_resolution
+from i13c.semantic.nodes.resolutions.displacements import (
+    configure_displacement_resolution,
+)
 from i13c.semantic.nodes.resolutions.environments import (
     configure_environment_resolution,
 )

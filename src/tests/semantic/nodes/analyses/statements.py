@@ -28,7 +28,7 @@ def can_detect_statements_pure_assign_and_call():
         if isinstance(statement.acceptance.target, AssignAcceptance):
             assert idx == 0
             assert statement.listing() == [
-                "mov rdi, 0x42",
+                "mov edi, 0x00000042",
             ]
 
         else:
@@ -60,7 +60,7 @@ def can_detect_statements_assign_with_spills():
         if isinstance(statement.acceptance.target, AssignAcceptance):
             assert idx == 0
             assert statement.listing() == [
-                "mov r11, 0x42",
+                "mov r11d, 0x00000042",
                 "mov qword [rsp + 0x00], r11",
             ]
 

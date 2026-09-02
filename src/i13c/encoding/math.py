@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 
 from i13c.encoding import kind
 from i13c.encoding.kind import AddressInfo, RegisterInfo
@@ -11,8 +11,8 @@ from i13c.semantic.typing.analyses.llvm import (
     SBB,
     SUB,
     XOR,
-    Group1Instruction,
     Address,
+    Group1Instruction,
     Immediate,
     Register,
 )
@@ -117,6 +117,37 @@ def encode_xor(instruction: XOR, bytecode: bytearray) -> None:
     return encode_group(0x30, instruction, bytecode)
 
 
+def encode_mr(
+    base: int,
+    dst: Register | Address,
+    src: Register | Address,
+) -> tuple[int, Register | Address, Register]:
+    # register to register or memory
+    if isinstance(src, Register):
+        reg = src
+        rm = dst
+
+        if isinstance(dst, Register):
+            rm_width = RegisterInfo.get_width(dst)
+        else:
+            rm_width = AddressInfo.get_width(dst)
+
+        opcode = SPEC["MR"][(rm_width, rm_width)](base)
+
+    # memory to register
+    else:
+        assert isinstance(dst, Register)
+        assert isinstance(src, Address)
+
+        rm = src
+        reg = dst
+
+        rm_width = RegisterInfo.get_width(dst)
+        opcode = SPEC["RM"][(rm_width, rm_width)](base)
+
+    return (opcode, rm, reg)
+
+
 def encode_group(
     base: int, instruction: Group1Instruction, bytecode: bytearray
 ) -> None:
@@ -134,7 +165,7 @@ def encode_group(
     reg: kind.RegisterOrConstant
     rm: kind.RegisterOrAddress | None = None
 
-    # handle immediates first
+    # handle immediates
     if isinstance(src, Immediate):
         immediate = src
         imm_width = immediate.width()
@@ -167,27 +198,8 @@ def encode_group(
             reg, rm = IMM["EXT"](base), dst
             opcode = SIZE[(rm_width, imm_width)]
 
-    elif isinstance(src, Register):
-        reg = src
-
-        if isinstance(dst, Register):
-            rm_width = RegisterInfo.get_width(dst)
-        else:
-            rm_width = AddressInfo.get_width(dst)
-
-        rm = dst
-        opcode = SPEC["MR"][(rm_width, rm_width)](base)
-
     else:
-
-        assert isinstance(dst, Register)
-        assert isinstance(src, Address)
-
-        rm = src
-        rm_width = RegisterInfo.get_width(dst)
-
-        reg = dst
-        opcode = SPEC["RM"][(rm_width, rm_width)](base)
+        opcode, rm, reg = encode_mr(base, dst, src)
 
     if rm is None:
         # satisfy type checker
@@ -201,7 +213,6 @@ def encode_group(
         kind.write_prefixes(bytecode, prefixes)
         kind.write_rex(bytecode, rex)
         kind.write_opcode(bytecode, 1, opcode)
-        kind.write_immediate(bytecode, immediate, condition=immediate is not None)
 
     else:
         # compute ModRM fields
@@ -217,4 +228,6 @@ def encode_group(
         kind.write_rex(bytecode, rex)
         kind.write_opcode(bytecode, 1, opcode)
         kind.write_modrm(bytecode, modrm_reg, modrm_rm)
-        kind.write_immediate(bytecode, immediate, condition=immediate is not None)
+
+    # encode optional immediate
+    kind.write_immediate(bytecode, immediate)

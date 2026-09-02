@@ -1,5 +1,6 @@
-from i13c.semantic.typing.analyses.llvm import BSWAP, SHL
 from typing import Literal as Kind
+
+from i13c.semantic.typing.analyses.llvm import BSWAP, SHL
 from tests.encoding import (
     ImmediateInfo,
     RegisterInfo,

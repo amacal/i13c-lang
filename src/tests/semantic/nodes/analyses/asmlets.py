@@ -442,7 +442,7 @@ def can_substitute_only_once_the_same_signatured_called_twice_via_register():
 
 def can_substitute_a_snippet_with_a_immediate_parameter():
     entities, analyses = prepare_analyses("""
-        asm bar(v@imm: u16) { mov rax, @v; }
+        asm bar(v@imm: u16) { mov ax, @v; }
         fn main() { bar(0x0001); }
     """)
 
@@ -470,9 +470,9 @@ def can_substitute_a_snippet_with_a_immediate_parameter():
     assert instr.mnemonic == b"mov"
     assert len(instr.operands) == 2
 
-    assert instr.operands[0].symbol == "reg64"
+    assert instr.operands[0].symbol == "reg16"
     assert isinstance(instr.operands[0].target, AsmletOperandRegister)
-    assert instr.operands[0].target.name == b"rax"
+    assert instr.operands[0].target.name == b"ax"
 
     assert instr.operands[1].symbol == "imm16"
     assert isinstance(instr.operands[1].target, AsmletOperandImmediate)
@@ -483,7 +483,7 @@ def can_substitute_a_snippet_with_a_immediate_parameter():
 
 def can_substitute_a_snippet_with_a_immediate_parameter_once():
     _, analyses = prepare_analyses("""
-        asm bar(v@imm: u16) { mov rax, @v; }
+        asm bar(v@imm: u16) { mov ax, @v; }
         fn main() { bar(0x0001); bar(0x0001); }
     """)
 
@@ -493,7 +493,7 @@ def can_substitute_a_snippet_with_a_immediate_parameter_once():
 
 def can_substitute_a_snippet_with_a_immediate_parameter_twice():
     entities, analyses = prepare_analyses("""
-        asm bar(v@imm: u16) { mov rax, @v; }
+        asm bar(v@imm: u16) { mov ax, @v; }
         fn main() { bar(0x0000); bar(0x0001); }
     """)
 
@@ -521,9 +521,9 @@ def can_substitute_a_snippet_with_a_immediate_parameter_twice():
         assert instr.mnemonic == b"mov"
         assert len(instr.operands) == 2
 
-        assert instr.operands[0].symbol == "reg64"
+        assert instr.operands[0].symbol == "reg16"
         assert isinstance(instr.operands[0].target, AsmletOperandRegister)
-        assert instr.operands[0].target.name == b"rax"
+        assert instr.operands[0].target.name == b"ax"
 
         assert instr.operands[1].symbol == "imm16"
         assert isinstance(instr.operands[1].target, AsmletOperandImmediate)
@@ -534,7 +534,7 @@ def can_substitute_a_snippet_with_a_immediate_parameter_twice():
 
 def can_substitute_a_snippet_with_a_direct_immediate_operand():
     _, analyses = prepare_analyses("""
-        asm bar() { mov rax, 0x0001; }
+        asm bar() { mov ax, 0x0001; }
         fn main() { bar(); }
     """)
 
@@ -551,9 +551,9 @@ def can_substitute_a_snippet_with_a_direct_immediate_operand():
     assert instr.mnemonic == b"mov"
     assert len(instr.operands) == 2
 
-    assert instr.operands[0].symbol == "reg64"
+    assert instr.operands[0].symbol == "reg16"
     assert isinstance(instr.operands[0].target, AsmletOperandRegister)
-    assert instr.operands[0].target.name == b"rax"
+    assert instr.operands[0].target.name == b"ax"
 
     assert instr.operands[1].symbol == "imm16"
     assert isinstance(instr.operands[1].target, AsmletOperandImmediate)
@@ -563,7 +563,7 @@ def can_substitute_a_snippet_with_a_direct_immediate_operand():
 
 def can_substitute_a_snippet_with_two_immediate_parameters():
     _, analyses = prepare_analyses("""
-        asm bar(x@imm: u8, y@imm: u16) { mov rax, @x; mov rax, @y; }
+        asm bar(x@imm: u8, y@imm: u16) { mov ah, @x; and ax, @y; }
         fn main() { bar(0x01, 0x0002); }
     """)
 

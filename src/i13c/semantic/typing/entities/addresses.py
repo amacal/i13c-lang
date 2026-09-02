@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
 from i13c.semantic.typing.entities.displacements import DisplacementId
+from i13c.semantic.typing.entities.indices import IndexId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
-from i13c.semantic.typing.entities.indices import IndexId
 from i13c.syntax.source import Span
 
 BaseRegister = RegisterId | ReferenceId

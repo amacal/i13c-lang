@@ -3,9 +3,9 @@ from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
+from i13c.semantic.typing.resolutions.indices import IndexAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
-from i13c.semantic.typing.resolutions.indices import IndexAcceptance
 from i13c.syntax.source import Span
 
 AddressRejectionReason = Kind[

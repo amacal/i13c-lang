@@ -28,13 +28,13 @@ from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
-from i13c.semantic.typing.resolutions.displacements import DisplacementResolution
 from i13c.semantic.typing.resolutions.assigns import AssignResolution
 from i13c.semantic.typing.resolutions.bindings import BindingResolution
 from i13c.semantic.typing.resolutions.binds import BindResolution
 from i13c.semantic.typing.resolutions.calls import CallResolution
 from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.cflows import ControlFlowResolution
+from i13c.semantic.typing.resolutions.displacements import DisplacementResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
 from i13c.semantic.typing.resolutions.expressions import ExpressionResolution
 from i13c.semantic.typing.resolutions.flags import FlagsResolution
