@@ -1,0 +1,6 @@
+- "x86-encoding"
+- "opcode-tables"
+- "instruction-selection"
+- "immediate-encoding"
+- "code-size-optimization"
+- "test-coverage"

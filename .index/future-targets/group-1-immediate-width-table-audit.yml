@@ -1,6 +1,0 @@
-title: "Group 1 Immediate-Width Table Audit"
-status: not-completed
-mentioned_by:
-  - "MOV Completeness (native x86-64)"
-evidence:
-  - ".history/2026-09/2026-09-02-mov-completeness-native-x86-64.yml session.not_completed (during this session, MOV_VARIANTS was audited row-by-row against MOV's real SDM opcodes and found already complete once restricted to exact-opcode-backed width pairs; whether GROUP1_VARIANTS — built the day before, in the Group 1 Arithmetic Instructions session, under the same convention — actually has a corresponding gap in any of its own (register-width, immediate-width) combinations was raised in dialogue but never checked)"
