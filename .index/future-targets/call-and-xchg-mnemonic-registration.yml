@@ -1,6 +1,0 @@
-title: "CALL and XCHG Mnemonic Registration"
-status: not-completed
-mentioned_by:
-  - "Group 1 Arithmetic Instructions, Explicit Memory-Operand Sizes, and REX Encodability Checking"
-evidence:
-  - ".history/2026-09/2026-09-01-group-1-arithmetic-instructions-explicit-memory-operand-sizes-and-rex-encodability-checking.yml session.not_completed (call and xchg remain unregistered in INSTRUCTIONS_TABLE, same shape of gap as sub before this session — an encoder and emitter already exist for both, but resolutions/mnemonics.py's INSTRUCTIONS_TABLE has no entry, so both are rejected by the compiler with E3024 unknown-mnemonic despite being fully encodable)"

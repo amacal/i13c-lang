@@ -1,0 +1,3 @@
+- "xchg-instruction-encoding"
+- "accumulator-short-form-optimization"
+- "resolver-encoder-invariant-checking"

@@ -1,0 +1,41 @@
+date: "2026-09-04"
+title: "XCHG Mnemonic Registration, Memory Operands, and Accumulator Short-Form Encoding"
+session:
+  files:
+    - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+    - "src/i13c/semantic/typing/analyses/llvm.py"
+    - "src/i13c/semantic/nodes/analyses/blocklets.py"
+    - "src/i13c/encoding/move.py"
+  source: —
+  status: completed
+  attempted:
+    - "Register XCHG in INSTRUCTIONS_TABLE with full memory-operand support and exhaustive test coverage, resolving the XCHG half of the CALL and XCHG Mnemonic Registration future-target"
+  explored:
+    - "Whether XCHG's 86/87 /r opcodes belong to an SDM Group-N-style shared /digit opcode-extension table like Group 1's 80/81/83 — resolved no, since ModRM.reg in 86/87 already encodes a genuine register operand, leaving no /digit slot free for another mnemonic to share"
+    - "Whether emit_xchg needs its own explicit runtime check against an addr,addr operand combination, given that emit_group1's accept_reg_addr/accept_reg_imm_addr calls never cross-check each other"
+    - "Whether to implement the 90+rd/90+rw accumulator short-form encoding as a byte-economy optimization, following the PUSH/POP 50+rd/58+rd precedent"
+  tried:
+    - "Reused encode_mr (already shared by Group1's encode_group) inside encode_xchg instead of writing a bespoke ModRM encoder"
+    - "Implemented the accumulator short-form optimization as an eager, permanent operand swap performed before checking the width condition; this proved unsafe (see bugs_found) and was reworked to compute the swap on local copies, committing it back to the real operands only once the short form is confirmed applicable"
+  corrections:
+    - "Assumed CALL and XCHG had 'the same shape of gap' per the prior session's note; corrected — XCHG was a pure INSTRUCTIONS_TABLE registration omission with a working encoder/emitter already in place, while CALL has never been user-asm-writable at all (only built internally by the compiler's own call codegen), a materially deeper gap than a missing table row"
+    - "Assumed an unannotated memory operand like [rax] would resolve to match its paired register's width; corrected — resolutions/addresses.py defaults an unannotated address to 64-bit regardless of the paired operand, so xchg [rax], ecx (addr64, reg32) fails variant-mismatch even though xchg dword [rax], ecx (addr32, reg32) is valid"
+  bugs_found:
+    - "encode_xchg's rewrite initially passed MOV's base opcode (0x88) into encode_mr(0x88, dst, src) instead of XCHG's own base opcode (0x86 byte / 0x87 wider) — caught by all 12 initial exhaustive test rows failing with a consistent +2 opcode-byte offset (e.g. expected '87 c8', got '89 c8'). Fixed by passing 0x86."
+    - "The 90+rd accumulator short-form optimization's operand swap (triggered whenever the second operand is the accumulator) mutated the real dst/src variables unconditionally, before checking whether the short form actually applies (it never does for an 8-bit accumulator, since XCHG's SDM table has no 8-bit short-form row). This let a swap meant to be provisional leak into the general 86/87 fallback path, silently producing the wrong but well-formed ModRM byte for xchg bh, al — 0xF8 instead of the correct 0xC7 — rather than a crash. Fixed by computing the swap on local copies and only committing it back once the short form is confirmed applicable."
+  completed:
+    - "Added XCHG_VARIANTS to INSTRUCTIONS_TABLE: 12 variants covering reg8/16/32/64,reg8/16/32/64 and both reg,addr / addr,reg directions for each width, with no immediate variant and no addr,addr variant"
+    - "Widened XCHG's dataclass operand type from tuple[Register, Register] to tuple[Register | Address, Register | Address]"
+    - "Changed emit_xchg to accept_reg_addr on both operands, mirroring emit_group1's pattern, relying on the resolution-layer variant table rather than the emit/encode layers as the actual gatekeeper against invalid operand-shape combinations"
+    - "Rewrote encode_xchg to reuse the shared encode_mr encoder already used by Group1's encode_group, and added the 90+rd/90+rw accumulator short-form optimization for reg,reg pairs where one operand is the accumulator and width is greater than 8 bits"
+    - "Wrote exhaustive encoding tests (src/tests/encoding/xchg.py) covering every width in both reg,reg and reg,addr/addr,reg directions, a full REX-prefix/high-byte-register table for the 8-bit case (legacy, REX-required, and extended registers, including an expected-rejection row for a high-byte-vs-REX-forcing register conflict), and a can_exhaust_xchg completeness check"
+    - "Verified end-to-end via the CLI and disassembly for three cases: xchg dword [rax], ecx (addr,reg) and its reverse-written form both produced '87 08'; xchg eax, ecx produced the single-byte '91' short form"
+    - "make test-encoding (13/13) and make test-semantic (423/423) both green"
+  not_completed:
+    - "make lint still fails, but on 4 pre-existing errors in src/tests/encoding/core.py:353 (CALL/RET/NOP/SYSCALL missing an .operands attribute) unrelated to this session's changes — confirmed via git diff --stat that core.py was untouched this session; deferred to a future session"
+    - "CALL's own registration/user-writability left unaddressed, now understood as a materially different, deeper problem than XCHG's, not mere INSTRUCTIONS_TABLE registration"
+    - "jmp reg64/addr64 (FF /2, FF /4 indirect forms), mechanical zero-coverage tests for shr/ret/syscall/loop, and upgrading bswap/shl/lea's older @samples-style tests to the newer exhaust() tier were all explicitly set aside at the start of this session in favor of xchg-only scope"
+  open_questions:
+    - "Whether emit_group1/encode_mr should gain an explicit semantic-layer diagnostic for a would-be addr,addr combination, given today's finding that its only current guard is a bare, effectively-unreachable assert deep inside encode_mr — left as-is since it is out of scope for XCHG and the resolution-layer variant table already prevents any valid input from reaching it"
+  notes:
+    - "Rendered a new SDM page this session: Vol. 2D p.6-32 (XCHG's opcode table), cached at .tmp/325462-092/6-32-xchg.png; chapter 6's printed-to-physical page offset had not been established before and was found by bisection"

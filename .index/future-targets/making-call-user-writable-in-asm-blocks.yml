@@ -1,0 +1,8 @@
+title: "Making CALL User-Writable in Asm Blocks"
+status: not-completed
+mentioned_by:
+  - "Group 1 Arithmetic Instructions, Explicit Memory-Operand Sizes, and REX Encodability Checking"
+  - "XCHG Mnemonic Registration, Memory Operands, and Accumulator Short-Form Encoding"
+evidence:
+  - ".history/2026-09/2026-09-01-group-1-arithmetic-instructions-explicit-memory-operand-sizes-and-rex-encodability-checking.yml session.not_completed (originally framed together with xchg as 'same shape of gap' — an encoder exists but no INSTRUCTIONS_TABLE entry)"
+  - ".history/2026-09/2026-09-04-xchg-mnemonic-registration-memory-operands-and-accumulator-short-form-encoding.yml session.corrections (corrected: CALL has never been user-asm-writable at all — only built internally by the compiler's own call codegen via a AsmletId | FunctionId target, not a Relocation — so this is a new operand-shape and emit_call capability, not a missing INSTRUCTIONS_TABLE row like XCHG's was)"

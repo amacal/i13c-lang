@@ -68,6 +68,21 @@ MOV_VARIANTS = [
     (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg64()),
 ]
 
+XCHG_VARIANTS = [
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg64()),
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr64()),
+    (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.reg32()),
+    (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr32()),
+    (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.reg16()),
+    (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.addr16()),
+    (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.reg8()),
+    (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.addr8()),
+    (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg64()),
+    (MnemonicOperandSpec.addr32(), MnemonicOperandSpec.reg32()),
+    (MnemonicOperandSpec.addr16(), MnemonicOperandSpec.reg16()),
+    (MnemonicOperandSpec.addr8(), MnemonicOperandSpec.reg8()),
+]
+
 INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
     b"bswap": [
         (MnemonicOperandSpec.reg32(),),
@@ -116,6 +131,7 @@ INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
         (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg8(b"cl")),
     ],
     b"syscall": [()],
+    b"xchg": XCHG_VARIANTS,
 }
 
 for mnemonic in GROUP1_MNEMONICS:

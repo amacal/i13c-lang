@@ -1,0 +1,6 @@
+title: "Zero-Operand Instructions in the Encoding Test Harness"
+status: not-completed
+mentioned_by:
+  - "XCHG Mnemonic Registration, Memory Operands, and Accumulator Short-Form Encoding"
+evidence:
+  - ".history/2026-09/2026-09-04-xchg-mnemonic-registration-memory-operands-and-accumulator-short-form-encoding.yml session.not_completed (make lint fails on 4 pre-existing errors in src/tests/encoding/core.py:353 — CALL/RET/NOP/SYSCALL lack an .operands attribute that a generic test helper assumes every instruction dataclass has; confirmed unrelated to this session's own changes via git diff --stat, explicitly deferred by the user)"

@@ -1,0 +1,1 @@
+Registered XCHG in INSTRUCTIONS_TABLE with full memory-operand support and a 90+rd accumulator short-form optimization, fixing two bugs introduced during the rewrite (a copied-over MOV opcode, and a provisional operand swap that leaked into the fallback encoding path) and verifying every width/direction combination with an exhaustive test suite.

@@ -165,7 +165,7 @@ class BSWAP:
 
 @dataclass(kw_only=True, repr=False)
 class XCHG:
-    operands: tuple[Register, Register]
+    operands: tuple[Register | Address, Register | Address]
 
     def __str__(self) -> str:
         return f"xchg {self.operands[0]}, {self.operands[1]}"

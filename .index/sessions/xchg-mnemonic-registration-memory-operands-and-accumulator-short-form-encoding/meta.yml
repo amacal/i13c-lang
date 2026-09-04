@@ -1,0 +1,9 @@
+title: "XCHG Mnemonic Registration, Memory Operands, and Accumulator Short-Form Encoding"
+kind: implementation
+files:
+  - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+  - "src/i13c/semantic/typing/analyses/llvm.py"
+  - "src/i13c/semantic/nodes/analyses/blocklets.py"
+  - "src/i13c/encoding/move.py"
+source: —
+date: "2026-09-04"

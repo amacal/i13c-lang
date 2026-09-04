@@ -206,8 +206,8 @@ def emit_xchg(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 2
 
-    dst = accept_reg(operands[0])
-    src = accept_reg(operands[1])
+    dst = accept_reg_addr(operands[0])
+    src = accept_reg_addr(operands[1])
 
     return (XCHG(operands=(dst, src)), None)
 

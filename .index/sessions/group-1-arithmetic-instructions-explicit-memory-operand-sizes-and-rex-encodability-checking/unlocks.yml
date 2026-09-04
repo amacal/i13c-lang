@@ -1,3 +1,4 @@
-- "CALL and XCHG Mnemonic Registration"
+- "Making CALL User-Writable in Asm Blocks"
 - "Deriving the Blocklet Emit Dispatch from INSTRUCTIONS_TABLE"
 - "Requiring Explicit Size for Every Memory Data Access"
+- "XCHG Mnemonic Registration, Memory Operands, and Accumulator Short-Form Encoding"
