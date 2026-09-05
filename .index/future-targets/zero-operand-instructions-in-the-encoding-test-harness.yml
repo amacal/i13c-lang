@@ -2,5 +2,7 @@ title: "Zero-Operand Instructions in the Encoding Test Harness"
 status: not-completed
 mentioned_by:
   - "XCHG Mnemonic Registration, Memory Operands, and Accumulator Short-Form Encoding"
+  - "JMP, LOOP, and CALL Instruction Family Completeness"
 evidence:
   - ".history/2026-09/2026-09-04-xchg-mnemonic-registration-memory-operands-and-accumulator-short-form-encoding.yml session.not_completed (make lint fails on 4 pre-existing errors in src/tests/encoding/core.py:353 — CALL/RET/NOP/SYSCALL lack an .operands attribute that a generic test helper assumes every instruction dataclass has; confirmed unrelated to this session's own changes via git diff --stat, explicitly deferred by the user)"
+  - ".history/2026-09/2026-09-05-jmp-loop-and-call-instruction-family-completeness.yml session.completed (renaming CALL's target field to operands, done for an unrelated reason — making CALL user-writable — incidentally fixed CALL's own share of this same pre-existing pyright complaint; make lint dropped from 4 errors to 3; RET/NOP/SYSCALL still lack .operands and remain open)"

@@ -5,7 +5,13 @@ from i13c.semantic.nodes.resolutions.mnemonics import (
     INSTRUCTIONS_TABLE,
     MnemonicVariant,
 )
+from i13c.semantic.typing.analyses.llvm import NOP
+from i13c.semantic.typing.analyses.blocklets import BlockletInstruction
 from i13c.semantic.typing.resolutions.mnemonics import MnemonicOperandSymbol
+from i13c.semantic.typing.resolutions.instructions import (
+    InstructionAcceptance,
+    InstructionRejection,
+)
 from i13c.syntax.lexing import tokenize
 from i13c.syntax.parsing import parse
 from i13c.syntax.source import open_text
@@ -162,6 +168,9 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
         case "imm64":
             return imm64
 
+        case "rel":
+            return ("@prev5", "@prev1", "@next1", "@next5")
+
         case ("addr8" | "addr16" | "addr32" | "addr64") as symbol:
             scales = (1, 2, 4, 8)
             indexes = tuple(register for register in reg64 if register != "rsp")
@@ -289,18 +298,35 @@ def exhaust(*tables: str):
 
         for instruction, _ in parse_table(table):
             semantic = compile(instruction)
+            accepted: list[InstructionAcceptance] | None = None
+            rejected: list[InstructionRejection] | None = None
 
+            # all instructions must have their resolutions available
             assert semantic.resolutions.instructions is not None
-            assert semantic.resolutions.instructions.size() == 1
 
-            _, resolved = semantic.resolutions.instructions.peek()
-            assert len(resolved.accepted) == 1
+            if semantic.resolutions.instructions.size() == 1:
+                _, resolved = semantic.resolutions.instructions.peek()
+                accepted, rejected = resolved.accepted, resolved.rejected
 
-            mnemonic = resolved.accepted[0].mnemonic
+            else:
+                for resolved in semantic.resolutions.instructions.values():
+                    if (
+                        resolved.accepted
+                        and resolved.accepted[0].mnemonic.name != b"nop"
+                    ):
+                        accepted, rejected = resolved.accepted, resolved.rejected
+                        break
+
+            assert accepted is not None
+            assert rejected is not None
+
+            assert len(accepted) == 1
+
+            mnemonic = accepted[0].mnemonic
             variants = INSTRUCTIONS_TABLE[mnemonic.name]
 
-            visited.add(resolved.accepted[0].variant)
-            variant = resolved.accepted[0].variant
+            visited.add(accepted[0].variant)
+            variant = accepted[0].variant
             combinations: list[tuple[str, ...]] = []
 
             for operand in variant:
@@ -316,50 +342,93 @@ def exhaust(*tables: str):
 
         found: set[str] = set()
         expected = {":".join(entry) for entry in cover(combinations)}
-        rejected: int = 0
+        rejections: int = 0
 
         for instruction, _ in parse_table(table):
             semantic = compile(instruction)
+            accepted: list[InstructionAcceptance] | None = None
+            rejected: list[InstructionRejection] | None = None
 
             if semantic.resolutions.instructions is None:
                 continue
 
+            # all instructions must have their resolutions available
             assert semantic.resolutions.instructions is not None
-            assert semantic.resolutions.instructions.size() == 1
 
-            _, resolved = semantic.resolutions.instructions.peek()
+            if semantic.resolutions.instructions.size() == 1:
+                _, resolved = semantic.resolutions.instructions.peek()
+                accepted, rejected = resolved.accepted, resolved.rejected
 
-            if resolved.accepted:
-                assert len(resolved.accepted) == 1
-                assert id(variant) == id(resolved.accepted[0].variant)
+            else:
+                for resolved in semantic.resolutions.instructions.values():
+                    if (
+                        resolved.accepted
+                        and resolved.accepted[0].mnemonic.name != b"nop"
+                    ):
+                        accepted, rejected = resolved.accepted, resolved.rejected
+                        break
 
-            elif resolved.rejected:
-                rejected += 1
-                assert len(resolved.rejected) == 1
-                assert id(variant) == id(resolved.rejected[0].variant)
+            assert accepted is not None
+            assert rejected is not None
 
-            if resolved.accepted:
+            if accepted:
+                assert len(accepted) == 1
+                assert id(variant) == id(accepted[0].variant)
+
+            elif rejected:
+                rejections += 1
+                assert len(rejected) == 1
+                assert id(variant) == id(rejected[0].variant)
+
+            if accepted:
                 assert semantic.analyses.blocklets is not None
                 assert semantic.analyses.blocklets.size() == 1
 
                 _, blocklet = semantic.analyses.blocklets.peek()
-                assert len(blocklet.blocks) == 1
-                assert len(blocklet.blocks[0].instructions) == 1
+                instructions: list[BlockletInstruction] = []
 
-                found.add(
-                    ":".join(
-                        [
-                            str(operand)
-                            for operand in blocklet.blocks[0].instructions[0].operands
-                        ]
-                    )
+                before: list[BlockletInstruction] = []
+                after: list[BlockletInstruction] | None = None
+
+                for block in blocklet.blocks:
+                    for instruction in block.instructions:
+                        instructions.append(instruction)
+
+                if len(instructions) > 1:
+                    for instruction in list(instructions):
+                        if isinstance(instruction, NOP):
+                            print("Removing NOP instruction:", instruction)
+                            instructions.remove(instruction)
+
+                            if after is not None:
+                                after.append(instruction)
+                            else:
+                                before.append(instruction)
+
+                        else:
+                            print("Encountered non-NOP instruction:", instruction)
+                            after = []
+
+                assert len(instructions) == 1
+
+                after = after or []
+                operands = ":".join(
+                    [str(operand) for operand in instructions[0].operands]
                 )
+
+                operands = operands.replace("#0", f"@prev{len(before)}")
+                operands = operands.replace("#1", f"@next{len(after)-1}")
+
+                found.add(operands)
+
+        print("Found operands:", found)
+        print("Expected operands:", expected)
 
         # ensure all found instructions are part of the expected set
         assert expected.intersection(found) == found
 
         # remaining instructions that were expected but were rejected
         difference = expected.difference(found)
-        assert len(difference) == rejected
+        assert len(difference) == rejections
 
     assert visited == set(variants)

@@ -7,13 +7,13 @@ from i13c.semantic.typing.analyses.llvm import (
     CALL,
     JMP,
     LEA,
-    LOOP,
     MOV,
     NOP,
     RET,
     SYSCALL,
     Group1Instruction,
     Group2Instruction,
+    LoopInstruction,
 )
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.syntax.source import Span
@@ -23,13 +23,13 @@ AsmletInstruction = (
     | CALL
     | JMP
     | LEA
-    | LOOP
     | MOV
     | NOP
     | RET
     | SYSCALL
     | Group1Instruction
     | Group2Instruction
+    | LoopInstruction
 )
 
 BlockletTarget = FunctionId | AsmletId

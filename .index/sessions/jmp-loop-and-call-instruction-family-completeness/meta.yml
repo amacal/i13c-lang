@@ -1,0 +1,14 @@
+title: "JMP, LOOP, and CALL Instruction Family Completeness"
+kind: implementation
+files:
+  - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+  - "src/i13c/semantic/typing/analyses/llvm.py"
+  - "src/i13c/semantic/nodes/analyses/blocklets.py"
+  - "src/i13c/semantic/nodes/analyses/calls.py"
+  - "src/i13c/semantic/typing/analyses/blocklets.py"
+  - "src/i13c/semantic/typing/analyses/asmlets.py"
+  - "src/i13c/semantic/typing/entities/functions.py"
+  - "src/i13c/encoding/ctrl.py"
+  - "src/i13c/encoding/__init__.py"
+source: —
+date: "2026-09-05"

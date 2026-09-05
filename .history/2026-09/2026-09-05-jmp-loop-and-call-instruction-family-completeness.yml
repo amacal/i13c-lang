@@ -1,0 +1,44 @@
+date: "2026-09-05"
+title: "JMP, LOOP, and CALL Instruction Family Completeness"
+session:
+  files:
+    - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+    - "src/i13c/semantic/typing/analyses/llvm.py"
+    - "src/i13c/semantic/nodes/analyses/blocklets.py"
+    - "src/i13c/semantic/nodes/analyses/calls.py"
+    - "src/i13c/semantic/typing/analyses/blocklets.py"
+    - "src/i13c/semantic/typing/analyses/asmlets.py"
+    - "src/i13c/semantic/typing/entities/functions.py"
+    - "src/i13c/encoding/ctrl.py"
+    - "src/i13c/encoding/__init__.py"
+  source: —
+  status: completed
+  attempted:
+    - "Register the missing loope/loopne mnemonics and give the whole JMP/LOOP instruction family real exhaust()-based test coverage, matching the exhaust()/cover()/expand() migration already done for LEA and BSWAP earlier the same day"
+  explored:
+    - "A larger alternative topic, RIP-relative label addressing for LEA (a new Relocation-based address shape usable by any addrN()-accepting mnemonic), was investigated via a dedicated plan-agent dialogue but was explicitly abandoned by the user in favor of this smaller, better-scoped topic"
+  tried:
+    - "Grouped jmp and call under one CALL_MNEMONICS list sharing one CALL_VARIANTS operand-shape table (addr64()/reg64()/rel()) before the corresponding blocklet-emit and encoder support existed"
+  corrections:
+    - "Assumed CALL's existing target: AsmletId | FunctionId field could stay separate from the new user-writable operand shapes; corrected to one widened CALL.operands: tuple[Register | Address | Relocation | AsmletId | FunctionId] union, the field renamed from target to operands for consistency with every other mnemonic dataclass"
+  bugs_found:
+    - "INSTRUCTIONS_TABLE[b'jmp'] already registered reg64()/addr64() variants before this session, but emit_jmp unconditionally asserted a Relocation-shaped operand and encode_jmp only implemented E9 cd (JMP rel32); jmp rax / jmp qword [rbx] passed resolution then crashed with a raw AssertionError. Fixed by adding the FF /4 (JMP r/m64) ModRM-based path, unified with CALL's FF /2 form in one encode_group_call(opcode, ext, ...)"
+    - "Registering call in CALL_MNEMONICS with no corresponding blocklet-dispatch entry caused call rax to crash with a raw KeyError: b'call' at blocklet emission"
+    - "Widening CALL.operands to include Register | Address | Relocation broke the pre-existing internal call mechanism: calls.py still constructs CALL(operands=(asmlet.id,)) / CALL(operands=(function.id,)) for every internal function call, but the new encode_group_call only branched on Relocation vs. (Address, Register), so every internal call (confirmed via data/hello.i13c's print()/exit() calls) crashed with an AssertionError. Fixed by adding a third branch for (FunctionId, AsmletId) targets"
+  completed:
+    - "Registered loope (E1 cb) and loopne (E0 cb), mirroring loop's (E2 cb) rel()-only shape; added LOOPE/LOOPNE dataclasses, emit_loope/emit_loopne via a shared generic emit_loop, and encode_loope/encode_loopne via a shared encode_group_loop"
+    - "Fixed JMP's reg64()/addr64() crash and unified JMP/CALL's indirect-form encoding into one encode_group_call(opcode, ext, instruction, bytecode), parameterized by the Group 5 opcode-extension digit (0x04 for JMP, 0x02 for CALL)"
+    - "Made CALL genuinely user-writable for register/memory/local-label targets (call rax / call [rbx] / call @label) while preserving the pre-existing internal cross-function call mechanism"
+    - "Extended the exhaust()/cover()/expand() test harness to support rel()-shaped operands for the first time: expand('rel') now returns four symbolic markers (@prev5/@prev1/@next1/@next5), and the rel() test tables embed real, resolvable multi-instruction NOP-padded snippets so the relocation math is proven through the actual resolver rather than by constructing dataclasses directly"
+    - "Added dedicated exhaust()/encode()-based test files for jmp, loop, loope, loopne, nop, ret, and syscall (nop/ret/syscall previously had no dedicated per-mnemonic test file at all)"
+    - "Verified live: jmp rax -> 48 ff e0, jmp qword [rbx] -> 48 ff 23, loope @nibble -> e1 fa, loopne @nibble -> e0 f8"
+    - "Recompiled and ran data/hello.i13c end to end after the CALL fix, output 0123456789abcdef, exit 0"
+    - "Full suite green: make test-core (22), make test-syntax (42), make test-semantic (423), make test-encoding (425); make lint reduced from 4 to 3 pre-existing errors (renaming CALL.target to CALL.operands incidentally fixed CALL's own missing-.operands pyright complaint)"
+  not_completed:
+    - "Whether encode_group_call's FF /2 / FF /4 r/m64 forms should suppress the REX.W byte was raised and left unresolved — the SDM's opcode table lists no REX.W requirement for FF /4 (JMP r/m64), so the REX.W byte encode_rex currently emits may be a harmless but non-byte-minimal redundancy"
+    - "CALL's own SDM opcode page (E8 cd / FF /2) was never rendered/confirmed this session; the values were inferred from the already-rendered JMP page's parallel structure and the user's own knowledge, not independently verified against a primary source"
+    - "The RIP-relative-label-addressing alternative (see explored) was not pursued"
+  open_questions:
+    - "Should the REX.W byte be suppressed for JMP/CALL's r/m64 indirect forms, given the operand size already defaults to 64 bits without it"
+  notes:
+    - "Reused two already-rendered SDM pages: .tmp/325462-092/3-504-jmp.png (JMP opcode table, confirming FF /4 covers both reg64()/addr64()) and .tmp/325462-092/3-570-loop.png (LOOP/LOOPcc opcode table, confirming E1/E0 for LOOPE/LOOPNE); no new pages rendered this session"

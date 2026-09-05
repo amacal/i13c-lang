@@ -130,10 +130,10 @@ def emit(
                 )
 
     if asmlet := asmlets.find(entry.target.callsite):
-        instructions.append(CALL(target=asmlet.id))
+        instructions.append(CALL(operands=(asmlet.id,)))
 
     elif function := functions.find(entry.target.callsite):
-        instructions.append(CALL(target=function.id))
+        instructions.append(CALL(operands=(function.id,)))
 
 
 class ListExtractor:

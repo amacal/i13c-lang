@@ -322,11 +322,19 @@ class LOOP:
 
 
 @dataclass(kw_only=True, repr=False)
-class JMP:
+class LOOPE:
     operands: tuple[Relocation]
 
     def __str__(self) -> str:
-        return f"jmp {self.operands[0]}"
+        return f"loope {self.operands[0]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class LOOPNE:
+    operands: tuple[Relocation]
+
+    def __str__(self) -> str:
+        return f"loopne {self.operands[0]}"
 
 
 @dataclass(kw_only=True, repr=False)
@@ -346,11 +354,18 @@ class POP:
 
 
 @dataclass(kw_only=True, repr=False)
-class CALL:
-    target: AsmletId | FunctionId
+class JMP:
+    operands: tuple[Register | Address | Relocation]
 
     def __str__(self) -> str:
-        return f"call {self.target.identify(1)}"
+        return f"jmp {self.operands[0]}"
+
+@dataclass(kw_only=True, repr=False)
+class CALL:
+    operands: tuple[Register | Address | Relocation | AsmletId | FunctionId]
+
+    def __str__(self) -> str:
+        return f"call {self.operands[0]}"
 
 
 @dataclass(kw_only=True, repr=False)
@@ -371,3 +386,7 @@ Group1Instruction = ADD | AND | OR | SUB | ADC | SBB | XOR | CMP
 
 Group2Operands = tuple[Register | Address, Register | Immediate]
 Group2Instruction = SHR | SHL | SAR | SAL | ROL | ROR | RCL | RCR
+
+
+LoopOperands = tuple[Relocation]
+LoopInstruction = LOOP | LOOPE | LOOPNE

@@ -29,10 +29,13 @@ from i13c.semantic.typing.analyses.llvm import (
     ADD,
     AND,
     BSWAP,
+    CALL,
     CMP,
     JMP,
     LEA,
     LOOP,
+    LOOPE,
+    LOOPNE,
     MOV,
     NOP,
     OR,
@@ -62,6 +65,8 @@ from i13c.semantic.typing.analyses.llvm import (
     Index,
     Register,
     Relocation,
+    LoopOperands,
+    LoopInstruction,
 )
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
@@ -108,7 +113,7 @@ class EmitRelocation:
     offset: int
 
 
-EmitRelocatable = LOOP | JMP
+EmitRelocatable = LoopInstruction | JMP | CALL
 EmitRelocated = tuple[BlockletInstruction, EmitRelocation | None]
 EmitSignature = Callable[[list[AsmletOperand]], EmitRelocated]
 
@@ -124,10 +129,13 @@ def emit_asmlets(
         b"add": partial(emit_group1, ADD),
         b"and": partial(emit_group1, AND),
         b"bswap": emit_bswap,
+        b"call": emit_call,
         b"cmp": partial(emit_group1, CMP),
         b"jmp": emit_jmp,
         b"lea": emit_lea,
-        b"loop": emit_loop,
+        b"loop": partial(emit_loop, LOOP),
+        b"loope": partial(emit_loop, LOOPE),
+        b"loopne": partial(emit_loop, LOOPNE),
         b"mov": emit_mov,
         b"nop": emit_nop,
         b"or": partial(emit_group1, OR),
@@ -242,13 +250,38 @@ def emit_ret(operands: list[AsmletOperand]) -> EmitRelocated:
     return RET(), None
 
 
+def emit_call(operands: list[AsmletOperand]) -> EmitRelocated:
+    # sanity checks
+    assert len(operands) == 1
+
+    # the target must be either a relocation or an address
+    target = accept_reg_addr_rel(operands[0])
+
+    if isinstance(target, tuple):
+        instruction = CALL(operands=(target[0],))
+        relocation = EmitRelocation(target=instruction, offset=target[1])
+
+    else:
+        instruction = CALL(operands=(target,))
+        relocation = None
+
+    return instruction, relocation
+
+
 def emit_jmp(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 1
-    assert isinstance(operands[0].target, AsmletOperandRelocation)
 
-    instruction = JMP(operands=(Relocation(block=0),))
-    relocation = EmitRelocation(target=instruction, offset=operands[0].target.offset)
+    # the target must be either a relocation or an address
+    target = accept_reg_addr_rel(operands[0])
+
+    if isinstance(target, tuple):
+        instruction = JMP(operands=(target[0],))
+        relocation = EmitRelocation(target=instruction, offset=target[1])
+
+    else:
+        instruction = JMP(operands=(target,))
+        relocation = None
 
     return instruction, relocation
 
@@ -267,6 +300,10 @@ class Group1Constructor[T: Group1Instruction](Protocol):
 
 class Group2Constructor[T: Group2Instruction](Protocol):
     def __call__(self, *, operands: Group2Operands) -> T: ...
+
+
+class LoopConstructor[T: LoopInstruction](Protocol):
+    def __call__(self, *, operands: LoopOperands) -> T: ...
 
 
 def emit_group1[T: Group1Instruction](
@@ -299,6 +336,22 @@ def emit_group2[T: Group2Instruction](
     return op(operands=(dst, src)), None
 
 
+def emit_loop[T: LoopInstruction](
+    op: LoopConstructor[T],
+    operands: list[AsmletOperand],
+) -> EmitRelocated:
+    # sanity checks
+    assert len(operands) == 1
+
+    # one relocation operand
+    assert isinstance(operands[0].target, AsmletOperandRelocation)
+
+    instruction = op(operands=(Relocation(block=0),))
+    relocation = EmitRelocation(target=instruction, offset=operands[0].target.offset)
+
+    return instruction, relocation
+
+
 def emit_lea(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 2
@@ -325,18 +378,6 @@ def emit_push(operands: list[AsmletOperand]) -> EmitRelocated:
     dst = accept_reg_imm_addr(operands[0])
 
     return PUSH(operands=(dst,)), None
-
-
-def emit_loop(operands: list[AsmletOperand]) -> EmitRelocated:
-    # sanity checks
-    assert len(operands) == 1
-
-    assert isinstance(operands[0].target, AsmletOperandRelocation)
-
-    instruction = LOOP(operands=(Relocation(block=0),))
-    relocation = EmitRelocation(target=instruction, offset=operands[0].target.offset)
-
-    return instruction, relocation
 
 
 def accept_reg(operand: AsmletOperand) -> Register:
@@ -392,6 +433,57 @@ def accept_reg_addr(operand: AsmletOperand) -> Register | Address:
     )
 
     index: Index | None = None
+
+    if isinstance(operand.target, AsmletOperandAddress):
+        index = (
+            Index(
+                scale=operand.target.indx.scale,
+                reg=Register(name=operand.target.indx.reg.name),
+            )
+            if operand.target.indx is not None
+            else None
+        )
+
+    if isinstance(operand.target, AsmletOperandAddress):
+        disp = (
+            Displacement(
+                width=operand.target.disp.width,
+                offset=operand.target.disp.offset,
+                direction=operand.target.disp.direction,
+            )
+            if operand.target.disp is not None
+            else None
+        )
+
+        return Address(
+            size=operand.target.size,
+            base=(
+                Register(name=operand.target.base.name)
+                if operand.target.base is not None
+                else None
+            ),
+            indx=index,
+            disp=disp,
+        )
+
+    return Register(name=operand.target.name)
+
+
+def accept_reg_addr_rel(operand: AsmletOperand) -> Register | Address | tuple[Relocation, int]:
+    # sanity checks
+    assert isinstance(
+        operand.target,
+        (
+            AsmletOperandRegister,
+            AsmletOperandAddress,
+            AsmletOperandRelocation,
+        ),
+    )
+
+    index: Index | None = None
+
+    if isinstance(operand.target, AsmletOperandRelocation):
+        return Relocation(block=0), operand.target.offset
 
     if isinstance(operand.target, AsmletOperandAddress):
         index = (

@@ -19,6 +19,9 @@ class AsmletId:
     def identify(self, length: int) -> str:
         return "#".join(("asmlet", f"{self.value:<{length}}"))
 
+    def __str__(self) -> str:
+        return self.identify(1)
+
 
 @dataclass(kw_only=True)
 class Asmlet:

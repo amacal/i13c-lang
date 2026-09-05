@@ -1,0 +1,31 @@
+date: "2026-09-05"
+title: "LEA and BSWAP Instruction Test Completeness"
+session:
+  files:
+    - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+  source: —
+  status: completed
+  attempted:
+    - "Migrate LEA's and BSWAP's encoder tests from the older @samples/encode_instruction harness (which bypasses mnemonic resolution) to the exhaust()/cover()/expand() harness, resolving the bswap/lea half of the test-tier migration backlog the XCHG session deferred"
+  explored:
+    - "Whether LEA's addr64() memory-operand registration (identical across its reg16/reg32/reg64 destination-width variants) should also accept other declared memory-operand sizes (dword/word/byte), given LEA never actually accesses memory; concluded this is a genuinely separate, broader change (loosening operand-symbol matching or the resolver's variant-acceptance rule) and deliberately deferred rather than folded into this session's scope"
+    - "Contrasted LEA's missing reg16() registration (a real gap — the encoder already produced correct bytes) against BSWAP's absent reg16 form (not a gap — the SDM defines no 16-bit BSWAP opcode at all and explicitly calls the behavior undefined, directing to XCHG instead)"
+  tried:
+    - "Temporarily reverted the LEA_VARIANTS reg16 registration to confirm exhaust()'s assert visited == set(variants) check (and the resolver's own E3023 diagnostic) would have caught the missing variant automatically, then restored the fix"
+  corrections: —
+  bugs_found:
+    - "LEA_VARIANTS in src/i13c/semantic/nodes/resolutions/mnemonics.py registered only reg32()/reg64() destination widths paired with addr64(), omitting reg16() even though the SDM defines LEA r16,m (8D /r) as a valid form and encode_lea/kind.py already produced correct 16-bit-destination bytes; fixed by adding (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.addr64()) to LEA_VARIANTS"
+    - "A pre-existing semantic-layer regression test (src/tests/semantic/nodes/resolutions/instructions/addr.py) asserted lea dx, [rbx] was rejected with variant-mismatch, pinning the above bug as expected behavior; corrected to assert it is accepted"
+  completed:
+    - "Added the missing (reg16(), addr64()) row to LEA_VARIANTS"
+    - "Migrated src/tests/encoding/addr.py (deleted) to src/tests/encoding/lea.py using exhaust(), with three tables (LEA_REG16_ADDR64, LEA_REG32_ADDR64, LEA_REG64_ADDR64) covering the full SIB/REX/displacement combinatorial sweep for each destination width through the real resolver"
+    - "Migrated src/tests/encoding/bits.py (deleted) to src/tests/encoding/bswap.py using exhaust(), covering reg32()/reg64() only; audited clean against the SDM with no bug found"
+    - "Fixed the resulting semantic-layer regression in src/tests/semantic/nodes/resolutions/instructions/addr.py"
+    - "Verified end-to-end via the CLI and disassembly: compiled and ran data/hello.i13c (uses lea rsi, [rsp - 0x2f] in its print routine), output 0123456789abcdef, exit 0"
+    - "make test-core (22), make test-syntax (42), make test-semantic (423), and make test-encoding (647) all green; make lint showed only 4 pre-existing errors in src/tests/encoding/core.py (CALL/RET/NOP/SYSCALL missing .operands), confirmed unrelated via git show HEAD"
+  not_completed:
+    - "The literal RIP-relative addressing case for LEA ([rip] / [rip + disp32], the Fixed variant), previously covered by two rows in the old src/tests/encoding/addr.py (base=rip), was not carried into the new exhaust()-based src/tests/encoding/lea.py — expand()'s addr64 case has no rip-relative generation, so this coverage was silently dropped during the migration, the same pattern the Group 2 session recorded for SHL"
+    - "Whether LEA should accept non-qword size annotations (dword/word/byte) on its memory operand, given the computed address is identical regardless, was raised and deliberately left unresolved"
+  open_questions: —
+  notes:
+    - "Reused two already-rendered SDM pages from .tmp/325462-092/: 3-547-lea.png (LEA opcode table and Table 3-58's operand-size/address-size interaction) and 3-111-bswap.png (BSWAP opcode table and its 16-bit-undefined note); no new pages rendered this session"

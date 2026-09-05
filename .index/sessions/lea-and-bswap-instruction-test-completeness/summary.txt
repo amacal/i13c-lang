@@ -1,0 +1,1 @@
+Registered LEA's missing reg16 destination variant, migrated LEA's and BSWAP's encoder tests to the exhaust() resolver-level harness, and fixed a resulting semantic regression test.

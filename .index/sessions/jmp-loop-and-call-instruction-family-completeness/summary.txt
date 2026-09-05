@@ -1,0 +1,1 @@
+Registered loope/loopne, fixed a crash bug in JMP's reg64()/addr64() variants, made CALL user-writable via a shared encode_group_call encoder, and extended the exhaust() test harness to support rel()-shaped operands for the first time.

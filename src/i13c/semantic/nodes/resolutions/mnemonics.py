@@ -13,6 +13,10 @@ from i13c.semantic.typing.resolutions.mnemonics import (
     MnemonicVariant,
 )
 
+CALL_MNEMONICS = [b"jmp", b"call"]
+LOOP_MNEMONICS = [b"loop", b"loope", b"loopne"]
+EMPTY_MNEMONICS = [b"nop", b"ret", b"syscall"]
+
 GROUP1_MNEMONICS = [b"add", b"or", b"adc", b"sbb", b"and", b"sub", b"xor", b"cmp"]
 GROUP2_MNEMONICS = [b"shl", b"shr", b"sal", b"sar", b"rcl", b"rcr", b"rol", b"ror"]
 
@@ -88,6 +92,17 @@ MOV_VARIANTS = [
     (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg64()),
 ]
 
+BSWAP_VARIANTS = [
+    (MnemonicOperandSpec.reg32(),),
+    (MnemonicOperandSpec.reg64(),),
+]
+
+LEA_VARIANTS = [
+    (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.addr64()),
+    (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr64()),
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr64()),
+]
+
 XCHG_VARIANTS = [
     (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg64()),
     (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr64()),
@@ -120,29 +135,18 @@ PUSH_VARIANTS = [
     (MnemonicOperandSpec.addr64(),),
 ]
 
+CALL_VARIANTS = [
+    (MnemonicOperandSpec.addr64(),),
+    (MnemonicOperandSpec.reg64(),),
+    (MnemonicOperandSpec.rel(),),
+]
+
 INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
-    b"bswap": [
-        (MnemonicOperandSpec.reg32(),),
-        (MnemonicOperandSpec.reg64(),),
-    ],
-    b"jmp": [
-        (MnemonicOperandSpec.addr64(),),
-        (MnemonicOperandSpec.reg64(),),
-        (MnemonicOperandSpec.rel(),),
-    ],
-    b"lea": [
-        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.addr64()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.addr64()),
-    ],
-    b"loop": [
-        (MnemonicOperandSpec.rel(),),
-    ],
+    b"bswap": BSWAP_VARIANTS,
+    b"lea": LEA_VARIANTS,
     b"mov": MOV_VARIANTS,
-    b"nop": [()],
     b"pop": POP_VARIANTS,
     b"push": PUSH_VARIANTS,
-    b"ret": [()],
-    b"syscall": [()],
     b"xchg": XCHG_VARIANTS,
 }
 
@@ -151,6 +155,15 @@ for mnemonic in GROUP1_MNEMONICS:
 
 for mnemonic in GROUP2_MNEMONICS:
     INSTRUCTIONS_TABLE[mnemonic] = GROUP2_VARIANTS
+
+for mnemonic in LOOP_MNEMONICS:
+    INSTRUCTIONS_TABLE[mnemonic] = [(MnemonicOperandSpec.rel(),)]
+
+for mnemonic in EMPTY_MNEMONICS:
+    INSTRUCTIONS_TABLE[mnemonic] = [()]
+
+for mnemonic in CALL_MNEMONICS:
+    INSTRUCTIONS_TABLE[mnemonic] = CALL_VARIANTS
 
 
 def configure_mnemonic_resolution() -> GraphGroup:

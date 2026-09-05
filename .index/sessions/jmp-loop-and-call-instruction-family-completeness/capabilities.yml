@@ -1,0 +1,5 @@
+- "resolver-encoder-invariant-checking"
+- "shared-encoder-family-dispatch"
+- "jmp-indirect-encoding"
+- "call-user-writable-syntax"
+- "relocation-operand-test-coverage"

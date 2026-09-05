@@ -1,0 +1,6 @@
+title: "LEA and BSWAP Instruction Test Completeness"
+kind: implementation
+files:
+  - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+source: —
+date: "2026-09-05"

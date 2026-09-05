@@ -1,0 +1,6 @@
+title: "REX.W Necessity for Indirect JMP/CALL Encoding"
+status: not-completed
+mentioned_by:
+  - "JMP, LOOP, and CALL Instruction Family Completeness"
+evidence:
+  - ".history/2026-09/2026-09-05-jmp-loop-and-call-instruction-family-completeness.yml session.open_questions (encode_group_call's FF /2 / FF /4 r/m64 forms emit a REX.W byte via the shared encode_rex helper's generic \"operand is a 64-bit register/memory => set REX.W\" rule; the SDM's opcode table lists no REX.W requirement for FF /4 (JMP r/m64), so this may be a harmless but non-byte-minimal redundancy — raised, not resolved)"

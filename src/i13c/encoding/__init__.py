@@ -82,6 +82,8 @@ DISPATCH_TABLE: dict[type[BlockletInstruction], Encoder] = {
     llvm.JMP: ctrl.encode_jmp,
     llvm.LEA: addr.encode_lea,
     llvm.LOOP: ctrl.encode_loop,
+    llvm.LOOPE: ctrl.encode_loope,
+    llvm.LOOPNE: ctrl.encode_loopne,
     llvm.MOV: move.encode_mov,
     llvm.NOP: ctrl.encode_nop,
     llvm.OR: math.encode_or,
