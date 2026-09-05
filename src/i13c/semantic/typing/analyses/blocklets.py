@@ -3,49 +3,33 @@ from dataclasses import dataclass
 from i13c.semantic.typing.analyses.asmlets import AsmletId
 from i13c.semantic.typing.analyses.fnlets import FnletInstruction
 from i13c.semantic.typing.analyses.llvm import (
-    ADC,
-    ADD,
-    AND,
     BSWAP,
     CALL,
-    CMP,
     JMP,
     LEA,
     LOOP,
     MOV,
     NOP,
-    OR,
     RET,
-    SBB,
-    SHL,
-    SHR,
-    SUB,
     SYSCALL,
-    XOR,
+    Group1Instruction,
+    Group2Instruction,
 )
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.syntax.source import Span
 
 AsmletInstruction = (
-    ADD
-    | ADC
-    | AND
-    | BSWAP
+    BSWAP
     | CALL
-    | CMP
     | JMP
     | LEA
     | LOOP
     | MOV
     | NOP
-    | OR
     | RET
-    | SHL
-    | SHR
-    | SBB
-    | SUB
-    | XOR
     | SYSCALL
+    | Group1Instruction
+    | Group2Instruction
 )
 
 BlockletTarget = FunctionId | AsmletId

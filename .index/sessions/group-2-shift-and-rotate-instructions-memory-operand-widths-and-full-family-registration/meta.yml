@@ -1,0 +1,16 @@
+title: "Group 2 Shift and Rotate Instructions, Memory-Operand Widths, and Full Family Registration"
+kind: implementation
+files:
+  - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+  - "src/i13c/semantic/typing/analyses/llvm.py"
+  - "src/i13c/semantic/nodes/analyses/blocklets.py"
+  - "src/i13c/semantic/typing/analyses/blocklets.py"
+  - "src/i13c/encoding/shifts.py"
+  - "src/i13c/encoding/common.py"
+  - "src/i13c/encoding/kind.py"
+  - "src/i13c/encoding/bits.py"
+  - "src/i13c/encoding/math.py"
+  - "src/i13c/encoding/move.py"
+  - "src/i13c/encoding/__init__.py"
+source: —
+date: "2026-09-05"

@@ -1,0 +1,6 @@
+- "x86-encoding"
+- "mnemonic-registration"
+- "instruction-selection"
+- "opcode-tables"
+- "addressing-modes"
+- "test-coverage"

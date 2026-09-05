@@ -1,6 +1,6 @@
 from i13c.encoding import kind
 from i13c.encoding.kind import AddressInfo, ImmediateInfo, RegisterInfo
-from i13c.encoding.math import encode_mr
+from i13c.encoding.math import encode_rm
 from i13c.semantic.typing.analyses.llvm import MOV, XCHG, Immediate, Register, Address
 
 MOV_MEM_IMM: dict[tuple[int, int], int] = {
@@ -56,7 +56,7 @@ def encode_mov(instruction: MOV, bytecode: bytearray) -> None:
             opcode = MOV_MEM_IMM[(rm_width, imm_width)]
 
     else:
-        opcode, rm, reg = encode_mr(0x88, dst, src)
+        opcode, rm, reg = encode_rm(0x88, dst, src)
 
     if immediate is not None and opcode_reg is not None:
         prefixes = kind.encode_prefixes(dst)
@@ -128,7 +128,7 @@ def encode_xchg(instruction: XCHG, bytecode: bytearray) -> None:
     # fallback to the longer form
     else:
         # derive standard ModRM encoding for the instruction
-        opcode, rm, reg = encode_mr(0x86, dst, src)
+        opcode, rm, reg = encode_rm(0x86, dst, src)
 
         # compute ModRM fields
         modrm_reg = kind.encode_modrm_reg(reg)

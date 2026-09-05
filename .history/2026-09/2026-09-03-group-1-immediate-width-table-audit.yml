@@ -12,7 +12,7 @@ session:
     - "Whether existing tests in src/tests/encoding/{add,or,adc,sbb,and,sub,xor,cmp}.py actually exercise both opcodes in each collapsed case, or only ever exercise one."
   tried:
     - "Hand-traced encode_group's is_acc/AC8/A32/ARM branch chain in encoding/math.py for (rm_width=64, imm_width=32) and (rm_width=16, imm_width=8), computing exact opcode bytes and comparing against the AND page (SDM Vol 2A p.3-60)."
-    - "Hand-traced encode_mr's isinstance(src, Register) dispatch for reg-reg and reg-memory operand shapes to confirm which of MR/RM each shape reaches."
+    - "Hand-traced encode_rm's isinstance(src, Register) dispatch for reg-reg and reg-memory operand shapes to confirm which of MR/RM each shape reaches."
   corrections:
     - "Assumed opcode 83 /4 ib was relevant to the 64-bit-destination, 32-bit-immediate case; corrected to 83 /4 ib encoding an 8-bit sign-extended immediate, not applicable there."
     - "Assumed REX.W + 25 id addresses EAX; corrected to RAX — REX.W promotes the implicit accumulator operand to 64-bit."
@@ -20,7 +20,7 @@ session:
   completed:
     - "Confirmed GROUP1_VARIANTS is complete: every one of its 26 rows correctly and completely encodes every legal SDM Group 1 opcode row, for all 8 mnemonics."
     - "Confirmed the accumulator short-form collapse in encode_group (is_acc plus the AC8/A32/ARM branch chain) correctly reproduces all four SDM accumulator opcodes without a separate table row, and correctly falls through to the general form for width combinations with no accumulator shortcut (e.g. rm_width=16, imm_width=8)."
-    - "Confirmed the MR/RM register-register collapse in encode_mr (always taking the MR branch for reg-reg via its isinstance(src, Register) dispatch) is a legitimate redundancy elimination rather than a gap: mod=11 makes the two SDM opcodes fully interchangeable for reg-reg, whereas a memory operand can only ever occupy ModRM's r/m field, making RM mandatory whenever the source is memory."
+    - "Confirmed the MR/RM register-register collapse in encode_rm (always taking the MR branch for reg-reg via its isinstance(src, Register) dispatch) is a legitimate redundancy elimination rather than a gap: mod=11 makes the two SDM opcodes fully interchangeable for reg-reg, whereas a memory operand can only ever occupy ModRM's r/m field, making RM mandatory whenever the source is memory."
     - "Confirmed src/tests/encoding/and.py (AND_REG64_IMM32, AND_REG32_IMM32, AND_REG16_IMM16, AND_REG8_IMM8) already exercises both the accumulator-form and general-form opcode for every applicable width, with exact expected bytes; confirmed the same accumulator-vs-general test pattern exists for all 7 sibling Group 1 mnemonic test files at the (reg64, imm32) row, each with its correct per-mnemonic opcode byte."
     - "Ran make test-encoding: 604 tests passed, confirming a clean baseline with no changes needed."
   not_completed: —

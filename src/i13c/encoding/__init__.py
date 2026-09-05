@@ -2,7 +2,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Protocol
 
-from i13c.encoding import addr, bits, ctrl, math, move, stack
+from i13c.encoding import addr, bits, ctrl, math, move, stack, shifts
 from i13c.encoding.core import RelocationInfo
 from i13c.semantic.typing.analyses import llvm
 from i13c.semantic.typing.analyses.blocklets import (
@@ -73,8 +73,8 @@ class Encoder(Protocol):
 
 
 DISPATCH_TABLE: dict[type[BlockletInstruction], Encoder] = {
-    llvm.ADD: math.encode_add,
     llvm.ADC: math.encode_adc,
+    llvm.ADD: math.encode_add,
     llvm.AND: math.encode_and,
     llvm.BSWAP: bits.encode_bswap,
     llvm.CALL: ctrl.encode_call,
@@ -87,11 +87,17 @@ DISPATCH_TABLE: dict[type[BlockletInstruction], Encoder] = {
     llvm.OR: math.encode_or,
     llvm.POP: stack.encode_pop,
     llvm.PUSH: stack.encode_push,
+    llvm.RCL: shifts.encode_rcl,
+    llvm.RCR: shifts.encode_rcr,
     llvm.RET: ctrl.encode_ret,
-    llvm.SHL: bits.encode_shl,
-    llvm.SHR: bits.encode_shr,
-    llvm.SUB: math.encode_sub,
+    llvm.ROL: shifts.encode_rol,
+    llvm.ROR: shifts.encode_ror,
+    llvm.SAL: shifts.encode_sal,
+    llvm.SAR: shifts.encode_sar,
     llvm.SBB: math.encode_sbb,
+    llvm.SHL: shifts.encode_shl,
+    llvm.SHR: shifts.encode_shr,
+    llvm.SUB: math.encode_sub,
     llvm.SYSCALL: ctrl.encode_syscall,
     llvm.XCHG: move.encode_xchg,
     llvm.XOR: math.encode_xor,

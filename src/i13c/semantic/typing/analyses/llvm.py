@@ -181,7 +181,7 @@ class LEA:
 
 @dataclass(kw_only=True, repr=False)
 class SHR:
-    operands: tuple[Register, Register | Immediate]
+    operands: Group2Operands
 
     def __str__(self) -> str:
         return f"shr {self.operands[0]}, {self.operands[1]}"
@@ -189,10 +189,58 @@ class SHR:
 
 @dataclass(kw_only=True, repr=False)
 class SHL:
-    operands: tuple[Register | Address | Fixed, Register | Immediate]
+    operands: Group2Operands
 
     def __str__(self) -> str:
         return f"shl {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class SAR:
+    operands: Group2Operands
+
+    def __str__(self) -> str:
+        return f"sar {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class SAL:
+    operands: Group2Operands
+
+    def __str__(self) -> str:
+        return f"sal {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class ROL:
+    operands: Group2Operands
+
+    def __str__(self) -> str:
+        return f"rol {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class ROR:
+    operands: Group2Operands
+
+    def __str__(self) -> str:
+        return f"ror {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class RCL:
+    operands: Group2Operands
+
+    def __str__(self) -> str:
+        return f"rcl {self.operands[0]}, {self.operands[1]}"
+
+
+@dataclass(kw_only=True, repr=False)
+class RCR:
+    operands: Group2Operands
+
+    def __str__(self) -> str:
+        return f"rcr {self.operands[0]}, {self.operands[1]}"
 
 
 @dataclass(kw_only=True, repr=False)
@@ -319,3 +367,7 @@ class SYSCALL:
 
 Group1Operands = tuple[Register | Address, Register | Address | Immediate]
 Group1Instruction = ADD | AND | OR | SUB | ADC | SBB | XOR | CMP
+
+
+Group2Operands = tuple[Register | Address, Register | Immediate]
+Group2Instruction = SHR | SHL | SAR | SAL | ROL | ROR | RCL | RCR

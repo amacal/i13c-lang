@@ -5,6 +5,7 @@ def can_exhaust_pop():
     exhaust(
         POP_REG16,
         POP_REG64,
+        POP_ADDR16,
         POP_ADDR64,
     )
 
@@ -142,3 +143,98 @@ POP_ADDR64 = """
 
 def can_encode_pop_addr64():
     encode(POP_ADDR64)
+
+
+POP_ADDR16 = """
+    | ------------------------------------- | -------------------------- |
+    | instruction                           | encoding                   |
+    | ------------------------------------- | -------------------------- |
+    | pop word [rax]                        | 66 8f 00                   |
+    | pop word [rcx]                        | 66 8f 01                   |
+    | pop word [rdx]                        | 66 8f 02                   |
+    | pop word [rbx]                        | 66 8f 03                   |
+    | pop word [rsp]                        | 66 8f 04 24                |
+    | pop word [rbp]                        | 66 8f 45 00                |
+    | pop word [rsi]                        | 66 8f 06                   |
+    | pop word [rdi]                        | 66 8f 07                   |
+    | pop word [r8]                         | 66 41 8f 00                |
+    | pop word [r9]                         | 66 41 8f 01                |
+    | pop word [r10]                        | 66 41 8f 02                |
+    | pop word [r11]                        | 66 41 8f 03                |
+    | pop word [r12]                        | 66 41 8f 04 24             |
+    | pop word [r13]                        | 66 41 8f 45 00             |
+    | pop word [r14]                        | 66 41 8f 06                |
+    | pop word [r15]                        | 66 41 8f 07                |
+    | pop word [rax + 1 * rcx]              | 66 8f 04 08                |
+    | pop word [rcx + 1 * rcx]              | 66 8f 04 09                |
+    | pop word [rdx + 1 * rcx]              | 66 8f 04 0a                |
+    | pop word [rbx + 1 * rcx]              | 66 8f 04 0b                |
+    | pop word [rsp + 1 * rcx]              | 66 8f 04 0c                |
+    | pop word [rbp + 1 * rcx]              | 66 8f 44 0d 00             |
+    | pop word [rsi + 1 * rcx]              | 66 8f 04 0e                |
+    | pop word [rdi + 1 * rcx]              | 66 8f 04 0f                |
+    | pop word [r8 + 1 * rcx]               | 66 41 8f 04 08             |
+    | pop word [r9 + 1 * rcx]               | 66 41 8f 04 09             |
+    | pop word [r10 + 1 * rcx]              | 66 41 8f 04 0a             |
+    | pop word [r11 + 1 * rcx]              | 66 41 8f 04 0b             |
+    | pop word [r12 + 1 * rcx]              | 66 41 8f 04 0c             |
+    | pop word [r13 + 1 * rcx]              | 66 41 8f 44 0d 00          |
+    | pop word [r14 + 1 * rcx]              | 66 41 8f 04 0e             |
+    | pop word [r15 + 1 * rcx]              | 66 41 8f 04 0f             |
+    | pop word [rax + 1 * rax]              | 66 8f 04 00                |
+    | pop word [rax + 1 * rdx]              | 66 8f 04 10                |
+    | pop word [rax + 1 * rbx]              | 66 8f 04 18                |
+    | pop word [rax + 1 * rbp]              | 66 8f 04 28                |
+    | pop word [rax + 1 * rsi]              | 66 8f 04 30                |
+    | pop word [rax + 1 * rdi]              | 66 8f 04 38                |
+    | pop word [rax + 1 * r8]               | 66 42 8f 04 00             |
+    | pop word [rax + 1 * r9]               | 66 42 8f 04 08             |
+    | pop word [rax + 1 * r10]              | 66 42 8f 04 10             |
+    | pop word [rax + 1 * r11]              | 66 42 8f 04 18             |
+    | pop word [rax + 1 * r12]              | 66 42 8f 04 20             |
+    | pop word [rax + 1 * r13]              | 66 42 8f 04 28             |
+    | pop word [rax + 1 * r14]              | 66 42 8f 04 30             |
+    | pop word [rax + 1 * r15]              | 66 42 8f 04 38             |
+    | pop word [rax + 2 * rcx]              | 66 8f 04 48                |
+    | pop word [rax + 4 * rcx]              | 66 8f 04 88                |
+    | pop word [rax + 8 * rcx]              | 66 8f 04 c8                |
+    | pop word [r8 + 1 * r9]                | 66 43 8f 04 08             |
+    | pop word [r8 + 2 * r9]                | 66 43 8f 04 48             |
+    | pop word [r8 + 4 * r9]                | 66 43 8f 04 88             |
+    | pop word [r8 + 8 * r9]                | 66 43 8f 04 c8             |
+    | pop word [1 * rcx]                    | 66 8f 04 0d 00 00 00 00    |
+    | pop word [2 * rcx]                    | 66 8f 04 4d 00 00 00 00    |
+    | pop word [4 * rcx]                    | 66 8f 04 8d 00 00 00 00    |
+    | pop word [8 * rcx]                    | 66 8f 04 cd 00 00 00 00    |
+    | pop word [1 * r9]                     | 66 42 8f 04 0d 00 00 00 00 |
+    | pop word [2 * r9]                     | 66 42 8f 04 4d 00 00 00 00 |
+    | pop word [4 * r9]                     | 66 42 8f 04 8d 00 00 00 00 |
+    | pop word [8 * r9]                     | 66 42 8f 04 cd 00 00 00 00 |
+    | pop word [r13 + 8 * r12]              | 66 43 8f 44 e5 00          |
+    | pop word [rsp + 4 * r15]              | 66 42 8f 04 bc             |
+    | pop word [rax + 1 * rcx + 0x00]       | 66 8f 44 08 00             |
+    | pop word [rax + 1 * rcx - 0x00]       | 66 8f 44 08 00             |
+    | pop word [rax + 1 * rcx + 0x01]       | 66 8f 44 08 01             |
+    | pop word [rax + 1 * rcx - 0x01]       | 66 8f 44 08 ff             |
+    | pop word [rax + 1 * rcx + 0x00000001] | 66 8f 84 08 01 00 00 00    |
+    | pop word [rax + 1 * rcx - 0x00000001] | 66 8f 84 08 ff ff ff ff    |
+    | pop word [rax + 1 * rcx + 0x7f]       | 66 8f 44 08 7f             |
+    | pop word [rax + 1 * rcx - 0x7f]       | 66 8f 44 08 81             |
+    | pop word [rax + 1 * rcx + 0x80]       | 66 8f 84 08 80 00 00 00    |
+    | pop word [rax + 1 * rcx - 0x80]       | 66 8f 44 08 80             |
+    | pop word [rax + 1 * rcx - 0x81]       | 66 8f 84 08 7f ff ff ff    |
+    | pop word [rax + 1 * rcx + 0xff]       | 66 8f 84 08 ff 00 00 00    |
+    | pop word [rax + 1 * rcx - 0xff]       | 66 8f 84 08 01 ff ff ff    |
+    | pop word [rax + 1 * rcx + 0x7fffffff] | 66 8f 84 08 ff ff ff 7f    |
+    | pop word [rax + 1 * rcx - 0x7fffffff] | 66 8f 84 08 01 00 00 80    |
+    | pop word [rax + 1 * rcx - 0x80000000] | 66 8f 84 08 00 00 00 80    |
+    | pop word [r10 + 0x7f]                 | 66 41 8f 42 7f             |
+    | pop word [r10 + 0x80]                 | 66 41 8f 82 80 00 00 00    |
+    | pop word [r10 - 0x80]                 | 66 41 8f 42 80             |
+    | pop word [r10 - 0x81]                 | 66 41 8f 82 7f ff ff ff    |
+    | ------------------------------------- | -------------------------- |
+"""
+
+
+def can_encode_pop_addr16():
+    encode(POP_ADDR16)

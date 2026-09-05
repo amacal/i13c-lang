@@ -1,6 +1,5 @@
-from collections.abc import Callable
-
 from i13c.encoding import kind
+from i13c.encoding.common import Transform, div8, add4, add5, encode_rm
 from i13c.encoding.kind import AddressInfo, RegisterInfo
 from i13c.semantic.typing.analyses.llvm import (
     ADC,
@@ -11,45 +10,14 @@ from i13c.semantic.typing.analyses.llvm import (
     SBB,
     SUB,
     XOR,
-    Address,
     Group1Instruction,
     Immediate,
     Register,
 )
 
 
-def div8(value: int) -> int:
-    return value // 8
-
-
-def add0(value: int) -> int:
-    return value + 0
-
-
-def add1(value: int) -> int:
-    return value + 1
-
-
-def add2(value: int) -> int:
-    return value + 2
-
-
-def add3(value: int) -> int:
-    return value + 3
-
-
-def add4(value: int) -> int:
-    return value + 4
-
-
-def add5(value: int) -> int:
-    return value + 5
-
-
-Transform = Callable[[int], int]
 ImmType = dict[str, Transform]
 SizeType = dict[tuple[int, int], int]
-SpecType = dict[tuple[int, int], Transform]
 
 
 IMM: ImmType = {
@@ -67,21 +35,6 @@ SIZE: SizeType = {
     (16, 8): 0x83,
     (32, 8): 0x83,
     (64, 8): 0x83,
-}
-
-SPEC: dict[str, SpecType] = {
-    "MR": {
-        (8, 8): add0,
-        (16, 16): add1,
-        (32, 32): add1,
-        (64, 64): add1,
-    },
-    "RM": {
-        (8, 8): add2,
-        (16, 16): add3,
-        (32, 32): add3,
-        (64, 64): add3,
-    },
 }
 
 
@@ -115,37 +68,6 @@ def encode_sub(instruction: SUB, bytecode: bytearray) -> None:
 
 def encode_xor(instruction: XOR, bytecode: bytearray) -> None:
     return encode_group(0x30, instruction, bytecode)
-
-
-def encode_mr(
-    base: int,
-    dst: Register | Address,
-    src: Register | Address,
-) -> tuple[int, Register | Address, Register]:
-    # register to register or memory
-    if isinstance(src, Register):
-        reg = src
-        rm = dst
-
-        if isinstance(dst, Register):
-            rm_width = RegisterInfo.get_width(dst)
-        else:
-            rm_width = AddressInfo.get_width(dst)
-
-        opcode = SPEC["MR"][(rm_width, rm_width)](base)
-
-    # memory to register
-    else:
-        assert isinstance(dst, Register)
-        assert isinstance(src, Address)
-
-        rm = src
-        reg = dst
-
-        rm_width = RegisterInfo.get_width(dst)
-        opcode = SPEC["RM"][(rm_width, rm_width)](base)
-
-    return (opcode, rm, reg)
 
 
 def encode_group(
@@ -199,7 +121,7 @@ def encode_group(
             opcode = SIZE[(rm_width, imm_width)]
 
     else:
-        opcode, rm, reg = encode_mr(base, dst, src)
+        opcode, rm, reg = encode_rm(base, dst, src)
 
     if rm is None:
         # satisfy type checker

@@ -46,10 +46,18 @@ from i13c.semantic.typing.analyses.llvm import (
     SYSCALL,
     XCHG,
     XOR,
+    ROL,
+    ROR,
+    RCL,
+    RCR,
+    SAR,
+    SAL,
     Address,
     Displacement,
     Group1Instruction,
+    Group2Instruction,
     Group1Operands,
+    Group2Operands,
     Immediate,
     Index,
     Register,
@@ -112,8 +120,8 @@ def emit_asmlets(
 ) -> Iterable[tuple[BlockletId, Blocklet]]:
 
     dispatch: dict[bytes, EmitSignature] = {
-        b"add": partial(emit_group1, ADD),
         b"adc": partial(emit_group1, ADC),
+        b"add": partial(emit_group1, ADD),
         b"and": partial(emit_group1, AND),
         b"bswap": emit_bswap,
         b"cmp": partial(emit_group1, CMP),
@@ -125,10 +133,16 @@ def emit_asmlets(
         b"or": partial(emit_group1, OR),
         b"pop": emit_pop,
         b"push": emit_push,
+        b"rcl": partial(emit_group2, RCL),
+        b"rcr": partial(emit_group2, RCR),
         b"ret": emit_ret,
+        b"rol": partial(emit_group2, ROL),
+        b"ror": partial(emit_group2, ROR),
+        b"sal": partial(emit_group2, SAL),
+        b"sar": partial(emit_group2, SAR),
         b"sbb": partial(emit_group1, SBB),
-        b"shl": emit_shl,
-        b"shr": emit_shr,
+        b"shl": partial(emit_group2, SHL),
+        b"shr": partial(emit_group2, SHR),
         b"sub": partial(emit_group1, SUB),
         b"syscall": emit_syscall,
         b"xchg": emit_xchg,
@@ -251,6 +265,10 @@ class Group1Constructor[T: Group1Instruction](Protocol):
     def __call__(self, *, operands: Group1Operands) -> T: ...
 
 
+class Group2Constructor[T: Group2Instruction](Protocol):
+    def __call__(self, *, operands: Group2Operands) -> T: ...
+
+
 def emit_group1[T: Group1Instruction](
     op: Group1Constructor[T],
     operands: list[AsmletOperand],
@@ -261,6 +279,21 @@ def emit_group1[T: Group1Instruction](
     # two operands
     dst = accept_reg_addr(operands[0])
     src = accept_reg_imm_addr(operands[1])
+
+    # no relocation
+    return op(operands=(dst, src)), None
+
+
+def emit_group2[T: Group2Instruction](
+    op: Group2Constructor[T],
+    operands: list[AsmletOperand],
+) -> EmitRelocated:
+    # sanity checks
+    assert len(operands) == 2
+
+    # two operands
+    dst = accept_reg_addr(operands[0])
+    src = accept_reg_imm(operands[1])
 
     # no relocation
     return op(operands=(dst, src)), None
@@ -292,26 +325,6 @@ def emit_push(operands: list[AsmletOperand]) -> EmitRelocated:
     dst = accept_reg_imm_addr(operands[0])
 
     return PUSH(operands=(dst,)), None
-
-
-def emit_shr(operands: list[AsmletOperand]) -> EmitRelocated:
-    # sanity checks
-    assert len(operands) == 2
-
-    dst = accept_reg(operands[0])
-    src = accept_reg_imm(operands[1])
-
-    return SHR(operands=(dst, src)), None
-
-
-def emit_shl(operands: list[AsmletOperand]) -> EmitRelocated:
-    # sanity checks
-    assert len(operands) == 2
-
-    dst = accept_reg(operands[0])
-    src = accept_reg_imm(operands[1])
-
-    return SHL(operands=(dst, src)), None
 
 
 def emit_loop(operands: list[AsmletOperand]) -> EmitRelocated:

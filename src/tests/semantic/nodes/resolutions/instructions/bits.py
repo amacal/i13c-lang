@@ -36,7 +36,7 @@ def can_handle_bswap(
     | shl ax, 0x01    | shl      | reg16, imm8    | accepted | -                 |
     | shl al, 0x01    | shl      | reg8, imm8     | accepted | -                 |
     | shl rax, cl     | shl      | reg64, reg8:cl | accepted | -                 |
-    | shl [rax], 0x01 | shl      | addr, imm8     | rejected | variant-mismatch  |
+    | shl [rax], 0x01 | shl      | addr64, imm8   | accepted | -                 |
     | shl rax         | shl      | reg64          | rejected | arity-mismatch    |
     | shl rax, al     | shl      | reg64, reg8:al | rejected | register-mismatch |
     | --------------- | -------- | -------------- | -------- | ----------------- |

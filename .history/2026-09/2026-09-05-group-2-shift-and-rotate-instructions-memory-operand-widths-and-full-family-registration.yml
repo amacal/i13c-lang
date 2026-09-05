@@ -1,0 +1,53 @@
+date: "2026-09-05"
+title: "Group 2 Shift and Rotate Instructions, Memory-Operand Widths, and Full Family Registration"
+session:
+  files:
+    - "src/i13c/semantic/nodes/resolutions/mnemonics.py"
+    - "src/i13c/semantic/typing/analyses/llvm.py"
+    - "src/i13c/semantic/nodes/analyses/blocklets.py"
+    - "src/i13c/semantic/typing/analyses/blocklets.py"
+    - "src/i13c/encoding/shifts.py"
+    - "src/i13c/encoding/common.py"
+    - "src/i13c/encoding/kind.py"
+    - "src/i13c/encoding/bits.py"
+    - "src/i13c/encoding/math.py"
+    - "src/i13c/encoding/move.py"
+    - "src/i13c/encoding/__init__.py"
+  source: —
+  status: completed
+  attempted:
+    - "Bring SHL/SHR to full test/registration completeness, then expanded scope to register and fully test the entire SDM Group 2 shift/rotate family (SAL, SHL, SAR, SHR, ROL, ROR, RCL, RCR)"
+  explored:
+    - "Whether the register-width×CL gap in the old SHL/SHR table required an encoder change or only a resolution-table change; confirmed encode_shift's opcode selection was already keyed off the destination's actual width, independent of the table"
+    - "Whether a two-mnemonic family (shl/shr) warranted the GROUP1_MNEMONICS-style loop-over-list pattern; concluded a single shared constant referenced directly by both mnemonic names was the right level of abstraction at that scale"
+    - "Whether ROL/ROR/SAL/SAR genuinely belong to the same SDM opcode group as SHL/SHR ('Group 2'), confirmed by rendering and reading the SDM's own 'RCL/RCR/ROL/ROR—Rotate' page alongside the already-cached 'SAL/SAR/SHL/SHR—Shift' page"
+    - "Whether SHL's existing Fixed (RIP-relative-literal) operand support should be preserved uniformly across the unified Group2Operands type or dropped as out of scope; decided to drop it, deferring to the existing scaled-indexing-and-rip-relative-data-references future target"
+  tried:
+    - "Attempted to locate and render Intel SDM Vol 2D Appendix A Table A-6 ('Opcode Extensions for One- and Two-Byte Opcodes') to directly confirm the SDM's own 'Group 2' naming; abandoned after discovering Volume 2C's AVX-512 instruction chapter is far larger than expected, making blind physical-page bisection impractical this session"
+  corrections:
+    - "Assumed emit_shl/emit_shr already called accept_reg_addr (per a prior audit fork's claim); corrected via direct source inspection — they called accept_reg (register-only), so an emission-layer code change, not just a resolution-table change, was required to accept a memory destination"
+    - "Stated the resulting emission-layer failure for a memory destination as 'accept_reg was rejecting addresses'; corrected to the precise behavior — a clean E3023 variant-mismatch diagnostic before the resolution table was widened, versus an unhandled AssertionError crash after the table widened but before the emission layer was fixed, a materially worse failure mode than 'rejecting'"
+    - "Stated the is_8bit memory-operand bug as making 'any address considered 64-bit'; corrected — is_8bit only selects byte vs. not-byte at the opcode level (D0/D2/C0 vs D1/D3/C1); the actual width among 16/32/64 is governed entirely by REX.W/0x66 prefixes derived independently from the operand's declared size, defaulting to 32-bit (4 bytes) without REX.W"
+  bugs_found:
+    - "encode_shift's is_8bit computation (isinstance(dst, Register) and RegisterInfo.is_8bit(dst)) was unconditionally False for any Address destination regardless of declared size, so a byte-sized memory shift (e.g. shr byte [rdi], 1) encoded opcode 0xD1 instead of 0xD0 — confirmed by a failing test (expected 'd0 28', observed 'd1 28') and by live disassembly before the fix. Fixed via a new AddressInfo.is_8bit helper, checked alongside RegisterInfo.is_8bit in the new shared encode_group (encoding/shifts.py)."
+    - "emit_shl/emit_shr still called accept_reg (register-only) immediately after the resolution table was widened to accept addr8/16/32/64 destinations, producing an unhandled AssertionError for a memory destination instead of the previous clean E3023 diagnostic. Fixed via accept_reg_addr, mirroring emit_pop's existing pattern."
+    - "A duplicate dict-literal key for b'shl'/b'shr' in the emission dispatch table (one entry pointing at the old per-mnemonic emit_shl/emit_shr, a second pointing at the new emit_group2, the second silently shadowing the first) existed transiently while emit_group2 was being introduced; resolved once the old per-mnemonic functions were fully replaced."
+    - "bits.py's original encode_shl/encode_shr/encode_shift became fully dead code once DISPATCH_TABLE was repointed at the new shifts.py encoders (encode_bswap, in the same file, remains legitimately used); removed."
+    - "All six newly-added mnemonics (rcl, rcr, rol, ror, sal, sar) were registered in INSTRUCTIONS_TABLE with working emitters before any encoder existed for them; confirmed via make test-encoding showing exactly 17/17 tests failing with KeyError for each (102 of 106 total failures at that point). Resolved once encoding/shifts.py's encode_group and its 8 per-mnemonic wrappers were written and wired into DISPATCH_TABLE."
+  completed:
+    - "Registered the full SDM Group 2 shift/rotate family (SAL, SHL, SAR, SHR, ROL, ROR, RCL, RCR) end to end: resolution table (SHIFT_MNEMONICS/SHIFT_VARIANTS covering reg8/16/32/64×imm8/cl and addr8/16/32/64×imm8/cl for every mnemonic), IR types (Group2Operands/Group2Instruction, new SAL/SAR/ROL/ROR/RCL/RCR dataclasses), emission (generic emit_group2), and encoding (generic encode_group in new encoding/shifts.py, parameterized per mnemonic's SDM /digit extension)"
+    - "Fixed the is_8bit memory-operand-width bug via a new AddressInfo.is_8bit helper in kind.py"
+    - "Wrote exhaustive encoding tests for all 8 mnemonics (src/tests/encoding/{rcl,rcr,rol,ror,sal,sar,shl,shr}.py), each covering every register width × imm8/cl and every memory-operand width × imm8/cl across the full addressing-mode matrix, plus a can_exhaust_* completeness check per mnemonic"
+    - "Extracted and renamed the shared MR/RM opcode-selection helper (encode_mr → encode_rm) out of math.py into a new neutral module, encoding/common.py, since it is used by both Group1's encode_group and XCHG's encode_xchg, not Group1-specific; propagated the rename into three past .history/ entries and one .index/ summary.txt that named the old function, as a factual-consistency correction"
+    - "Removed the two now-unsupported RIP-relative (Fixed) test rows from the pre-existing SHL memory-operand tests in src/tests/encoding/bits.py"
+    - "Verified end-to-end via the CLI and ndisasm against a compiled probe: shr byte [rsp-0x10], 1 encoded as 'D0 6C 24 F0' (correct byte-form opcode); rol rax, 1 encoded as '48 D1 C0' (REX.W + /0 extension); both matched hand-derived predictions exactly"
+    - "make lint clean (only the 4 pre-existing, already-tracked zero-operand-instructions-in-the-encoding-test-harness errors remain); make test-encoding 679/679 passed; make test-semantic 423/423 passed"
+  not_completed:
+    - "RIP-relative/Fixed-addressed operands for the Group 2 family — deliberately deferred to the existing scaled-indexing-and-rip-relative-data-references future target"
+    - "The structural fix for resolution/emission/encoding table drift (three independently-maintained tables with no formal cross-check) — a fourth recurrence of this bug shape this session (previously sub/xchg); a candidate direction (attaching encoder metadata at resolution time) was named but not implemented, remaining the existing deriving-the-blocklet-emit-dispatch-from-instructions_table future target"
+    - "Locating and rendering Intel SDM Vol 2D Appendix A Table A-6 to directly confirm the 'Group 2' naming — the name was adopted on citation confidence, not direct page confirmation, this session"
+  open_questions: —
+  notes:
+    - "Rendered two new SDM pages this session: Vol 2B p.4-533 and p.4-534 ('RCL/RCR/ROL/ROR—Rotate'), cached at .tmp/325462-092/4-533-rcl-rcr-rol-ror.png and .tmp/325462-092/4-534-rcl-rcr-rol-ror.png"
+    - "A transient pytest collection anomaly (rcl.py/rcr.py/rol.py producing no output in a whole-directory test run) traced to a save-timing race from concurrent file edits, not a real pytest defect; resolved on rerun with no code or config change"
+    - "data/hello.i13c was independently simplified by the user (merging the print_asm asmlet directly into print, removing the wrapping fn print) — confirmed this still compiles and runs correctly; unrelated to this session's own design work"

@@ -4,7 +4,7 @@ asm exit(code@imm: u32[0x00000000..0x000000ff]) noreturn clobbers rdi, rcx, r11,
     syscall;
 }
 
-asm print_asm(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
+asm print(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
     mov rcx, 0x3736353433323130;
     mov qword [rsp - 0x10], rcx;
     mov rcx, 0x6665646362613938;
@@ -30,10 +30,6 @@ asm print_asm(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
 
     syscall;
     ret;
-}
-
-fn print(value: u64) {
-  print_asm(value);
 }
 
 fn main() noreturn {

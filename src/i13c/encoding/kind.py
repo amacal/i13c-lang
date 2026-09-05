@@ -130,6 +130,10 @@ class AddressInfo:
     def is_16bit(addr: llvm.Address) -> bool:
         return addr.size == 16
 
+    @staticmethod
+    def is_8bit(addr: llvm.Address) -> bool:
+        return addr.size == 8
+
 
 class RegisterInfo:
     @staticmethod

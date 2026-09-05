@@ -14,6 +14,7 @@ from i13c.semantic.typing.resolutions.mnemonics import (
 )
 
 GROUP1_MNEMONICS = [b"add", b"or", b"adc", b"sbb", b"and", b"sub", b"xor", b"cmp"]
+GROUP2_MNEMONICS = [b"shl", b"shr", b"sal", b"sar", b"rcl", b"rcr", b"rol", b"ror"]
 
 GROUP1_VARIANTS = [
     (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
@@ -42,6 +43,25 @@ GROUP1_VARIANTS = [
     (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.imm8()),
     (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.imm32()),
     (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg64()),
+]
+
+GROUP2_VARIANTS = [
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg8(b"cl")),
+    (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.reg8(b"cl")),
+    (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.reg8(b"cl")),
+    (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.reg8(b"cl")),
+    (MnemonicOperandSpec.addr8(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.addr8(), MnemonicOperandSpec.reg8(b"cl")),
+    (MnemonicOperandSpec.addr16(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.addr16(), MnemonicOperandSpec.reg8(b"cl")),
+    (MnemonicOperandSpec.addr32(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.addr32(), MnemonicOperandSpec.reg8(b"cl")),
+    (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.imm8()),
+    (MnemonicOperandSpec.addr64(), MnemonicOperandSpec.reg8(b"cl")),
 ]
 
 MOV_VARIANTS = [
@@ -83,6 +103,23 @@ XCHG_VARIANTS = [
     (MnemonicOperandSpec.addr8(), MnemonicOperandSpec.reg8()),
 ]
 
+POP_VARIANTS = [
+    (MnemonicOperandSpec.reg64(),),
+    (MnemonicOperandSpec.reg16(),),
+    (MnemonicOperandSpec.addr16(),),
+    (MnemonicOperandSpec.addr64(),),
+]
+
+PUSH_VARIANTS = [
+    (MnemonicOperandSpec.imm8(),),
+    (MnemonicOperandSpec.imm16(),),
+    (MnemonicOperandSpec.imm32(),),
+    (MnemonicOperandSpec.reg64(),),
+    (MnemonicOperandSpec.reg16(),),
+    (MnemonicOperandSpec.addr16(),),
+    (MnemonicOperandSpec.addr64(),),
+]
+
 INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
     b"bswap": [
         (MnemonicOperandSpec.reg32(),),
@@ -102,40 +139,18 @@ INSTRUCTIONS_TABLE: dict[bytes, list[MnemonicVariant]] = {
     ],
     b"mov": MOV_VARIANTS,
     b"nop": [()],
-    b"pop": [
-        (MnemonicOperandSpec.reg64(),),
-        (MnemonicOperandSpec.reg16(),),
-        (MnemonicOperandSpec.addr64(),),
-    ],
-    b"push": [
-        (MnemonicOperandSpec.imm8(),),
-        (MnemonicOperandSpec.imm16(),),
-        (MnemonicOperandSpec.imm32(),),
-        (MnemonicOperandSpec.reg64(),),
-        (MnemonicOperandSpec.reg16(),),
-        (MnemonicOperandSpec.addr64(),),
-    ],
+    b"pop": POP_VARIANTS,
+    b"push": PUSH_VARIANTS,
     b"ret": [()],
-    b"shl": [
-        (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg8(b"cl")),
-    ],
-    b"shr": [
-        (MnemonicOperandSpec.reg8(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg16(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg32(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.imm8()),
-        (MnemonicOperandSpec.reg64(), MnemonicOperandSpec.reg8(b"cl")),
-    ],
     b"syscall": [()],
     b"xchg": XCHG_VARIANTS,
 }
 
 for mnemonic in GROUP1_MNEMONICS:
     INSTRUCTIONS_TABLE[mnemonic] = GROUP1_VARIANTS
+
+for mnemonic in GROUP2_MNEMONICS:
+    INSTRUCTIONS_TABLE[mnemonic] = GROUP2_VARIANTS
 
 
 def configure_mnemonic_resolution() -> GraphGroup:

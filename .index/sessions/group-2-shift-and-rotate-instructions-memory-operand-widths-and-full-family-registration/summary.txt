@@ -1,0 +1,1 @@
+Registered the full SDM Group 2 shift/rotate instruction family (SAL, SHL, SAR, SHR, ROL, ROR, RCL, RCR) end to end across resolution, emission, and encoding, fixed a memory-operand width bug, and verified via exhaustive tests and live disassembly.

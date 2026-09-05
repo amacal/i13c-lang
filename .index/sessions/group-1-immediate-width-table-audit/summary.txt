@@ -1,1 +1,1 @@
-Audited GROUP1_VARIANTS against the SDM's Group 1 opcode tables for all 8 mnemonics and confirmed it already correctly encodes every legal opcode via two legitimate collapse mechanisms in encode_group/encode_mr, with no bugs or test gaps found.
+Audited GROUP1_VARIANTS against the SDM's Group 1 opcode tables for all 8 mnemonics and confirmed it already correctly encodes every legal opcode via two legitimate collapse mechanisms in encode_group/encode_rm, with no bugs or test gaps found.
