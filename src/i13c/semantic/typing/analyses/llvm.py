@@ -102,7 +102,7 @@ class Address:
     size: AddressSize
     base: Register | None
     indx: Index | None
-    disp: Displacement | None
+    disp: Displacement | Relocation | None
 
     def __str__(self) -> str:
         repr: list[str] = []
@@ -124,7 +124,10 @@ class Address:
         if self.indx is not None:
             repr.append(str(self.indx))
 
-        if self.disp is not None:
+        if isinstance(self.disp, Relocation):
+            disp = str(self.disp.format("rel "))
+
+        elif self.disp is not None:
             disp = str(self.disp)
 
         value = f"{' + '.join(repr)} {disp}"
@@ -135,16 +138,11 @@ class Address:
 class Relocation:
     block: int
 
-    def __str__(self) -> str:
-        return f"#{self.block}"
-
-
-@dataclass(kw_only=True, repr=False)
-class Fixed:
-    value: bytes
+    def format(self, prefix: str = "") -> str:
+        return f"{prefix}#{self.block}"
 
     def __str__(self) -> str:
-        return f"0x{self.value.hex()}"
+        return self.format()
 
 
 @dataclass(kw_only=True, repr=False)
@@ -173,7 +171,7 @@ class XCHG:
 
 @dataclass(kw_only=True, repr=False)
 class LEA:
-    operands: tuple[Register, Address | Fixed]
+    operands: tuple[Register, Address]
 
     def __str__(self) -> str:
         return f"lea {self.operands[0]}, {self.operands[1]}"
@@ -359,6 +357,7 @@ class JMP:
 
     def __str__(self) -> str:
         return f"jmp {self.operands[0]}"
+
 
 @dataclass(kw_only=True, repr=False)
 class CALL:

@@ -234,13 +234,13 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
                 "- 0x80000000",
             )
 
-            # displacement cases through SIB.
+            # displacement cases through SIB
             cases.extend(
                 f"{size} [rax + 1 * rcx {displacement}]"
                 for displacement in displacements
             )
 
-            # boundary cases without SIB.
+            # boundary cases without SIB
             cases.extend(
                 (
                     f"{size} [r10 + 0x7f]",
@@ -250,7 +250,15 @@ def expand(symbol: MnemonicOperandSymbol) -> tuple[str, ...]:
                 )
             )
 
-            # ordered de-duplication.
+            # relative addressing cases
+            cases.extend([
+                f"{size} [rel @prev5]",
+                f"{size} [rel @prev1]",
+                f"{size} [rel @next1]",
+                f"{size} [rel @next5]",
+            ])
+
+            # ordered de-duplication
             return tuple(dict.fromkeys(cases))
 
     return ()
@@ -397,7 +405,6 @@ def exhaust(*tables: str):
                 if len(instructions) > 1:
                     for instruction in list(instructions):
                         if isinstance(instruction, NOP):
-                            print("Removing NOP instruction:", instruction)
                             instructions.remove(instruction)
 
                             if after is not None:
@@ -420,9 +427,6 @@ def exhaust(*tables: str):
                 operands = operands.replace("#1", f"@next{len(after)-1}")
 
                 found.add(operands)
-
-        print("Found operands:", found)
-        print("Expected operands:", expected)
 
         # ensure all found instructions are part of the expected set
         assert expected.intersection(found) == found

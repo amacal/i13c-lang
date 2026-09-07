@@ -11,10 +11,27 @@ def can_do_nothing_without_any_reference():
     assert entities.references.size() == 0
 
 
-def can_detect_a_reference():
+def can_detect_a_reference_in_operand():
     entities = prepare_entities(
         """
-            asm main() { mov rax, @me; }
+            asm main() { jmp @me; }
+        """
+    )
+
+    assert entities.references.size() == 1
+    _, value = entities.references.peek()
+
+    assert entities.snippets.size() == 1
+    id, _ = entities.snippets.peek()
+
+    assert value.name == b"me"
+    assert value.snippet.value == id.value
+
+
+def can_detect_a_reference_in_relocated_address():
+    entities = prepare_entities(
+        """
+            asm main() { jmp [rel @me]; }
         """
     )
 

@@ -1,13 +1,23 @@
 from i13c.encoding import kind
-from i13c.semantic.typing.analyses.llvm import POP, PUSH, Immediate, Register
+from i13c.encoding.core import RelocationInfo
+from i13c.semantic.typing.analyses.llvm import (
+    POP,
+    PUSH,
+    Immediate,
+    Register,
+    Relocation,
+)
 
 
-def encode_push(instruction: PUSH, bytecode: bytearray) -> None:
+def encode_push(instruction: PUSH, bytecode: bytearray) -> RelocationInfo | None:
     # sanity check
     assert len(instruction.operands) == 1
 
     # extract operands
     target = instruction.operands[0]
+
+    # optional relocation
+    relocation: RelocationInfo | None = None
 
     # handle immediates
     if isinstance(target, Immediate):
@@ -58,13 +68,27 @@ def encode_push(instruction: PUSH, bytecode: bytearray) -> None:
         kind.write_opcode(bytecode, 1, 0xFF)
         kind.write_modrm(bytecode, modrm_reg, modrm_rm)
 
+        # check if the r/m operand has a relocation displacement
+        if isinstance(target.disp, Relocation):
+            relocation = RelocationInfo(
+                target=target.disp.block,
+                offset=len(bytecode) - 4,
+                width=4,
+            )
 
-def encode_pop(instruction: POP, bytecode: bytearray) -> None:
+    # optional relocation
+    return relocation
+
+
+def encode_pop(instruction: POP, bytecode: bytearray) -> RelocationInfo | None:
     # sanity check
     assert len(instruction.operands) == 1
 
     # extract operands
     target = instruction.operands[0]
+
+    # optional relocation
+    relocation: RelocationInfo | None = None
 
     # handle shorter form opcode for registers
     if isinstance(target, Register):
@@ -95,3 +119,14 @@ def encode_pop(instruction: POP, bytecode: bytearray) -> None:
         kind.write_rex(bytecode, rex)
         kind.write_opcode(bytecode, 1, 0x8F)
         kind.write_modrm(bytecode, modrm_reg, modrm_rm)
+
+        # check if the r/m operand has a relocation displacement
+        if isinstance(target.disp, Relocation):
+            relocation = RelocationInfo(
+                target=target.disp.block,
+                offset=len(bytecode) - 4,
+                width=4,
+            )
+
+    # optional relocation
+    return relocation

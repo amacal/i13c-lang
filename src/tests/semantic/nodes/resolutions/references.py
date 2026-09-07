@@ -4,11 +4,9 @@ from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
 def can_accept_a_reference_handled_by_a_slot():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main(x@rax: u64) { mov rax, @x; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main(x@rax: u64) { mov rax, @x; }
+    """)
 
     assert resolutions.references is not None
     assert resolutions.references.size() == 1
@@ -27,11 +25,9 @@ def can_accept_a_reference_handled_by_a_slot():
 
 
 def can_accept_a_reference_handled_by_a_label():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main() { mov rax, rbx; .me: call @me; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main() { mov rax, rbx; .me: call @me; }
+    """)
 
     assert resolutions.references is not None
     assert resolutions.references.size() == 1
@@ -49,12 +45,50 @@ def can_accept_a_reference_handled_by_a_label():
     assert source.extract(resolution.accepted[0].ref) == b"@me"
 
 
+def can_accept_a_reference_used_in_relocated_address():
+    source, resolutions = prepare_resolutions("""
+        asm main() { .start: jmp [rel @start]; }
+    """)
+
+    assert resolutions.references is not None
+    assert resolutions.references.size() == 1
+    id, resolution = resolutions.references.peek()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 0
+
+    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].name == b"start"
+
+    assert isinstance(resolution.accepted[0].target, LabelAcceptance)
+    assert resolution.accepted[0].target.name == b"start"
+
+    assert source.extract(resolution.accepted[0].ref) == b"@start"
+
+
 def can_reject_unresolved_reference():
-    source, resolutions = prepare_resolutions(
-        """
-            asm main(x@rax: u8, y@rbx: u8) { mov rax, @z; }
-        """
-    )
+    source, resolutions = prepare_resolutions("""
+        asm main(x@rax: u8, y@rbx: u8) { mov rax, @z; }
+    """)
+
+    assert resolutions.references is not None
+    assert resolutions.references.size() == 1
+    _, resolution = resolutions.references.peek()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].name == b"z"
+    assert resolution.rejected[0].reason == "unknown-name"
+
+    assert source.extract(resolution.rejected[0].ref) == b"@z"
+
+
+def can_reject_unresolved_reference_locally():
+    source, resolutions = prepare_resolutions("""
+        asm bar() { .z: nop; }
+        asm foo(x@rax: u8, y@rbx: u8) { mov rax, @z; }
+    """)
 
     assert resolutions.references is not None
     assert resolutions.references.size() == 1
@@ -70,10 +104,8 @@ def can_reject_unresolved_reference():
 
 
 def can_detect_a_broken_range_rule_e3020():
-    _, rules = prepare_rules(
-        """
-            asm main(x@rax: u8, y@rbx: u8) { mov rax, @z; }
-        """
-    )
+    _, rules = prepare_rules("""
+        asm main(x@rax: u8, y@rbx: u8) { mov rax, @z; }
+    """)
 
     assert len(rules.get("e3020")) == 1

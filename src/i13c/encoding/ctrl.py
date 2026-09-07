@@ -14,6 +14,7 @@ from i13c.semantic.typing.analyses.llvm import (
     RET,
     SYSCALL,
     Relocation,
+    Address,
 )
 
 
@@ -78,6 +79,14 @@ def encode_group_call(
         kind.write_rex(bytecode, rex)
         kind.write_opcode(bytecode, 1, opcode)
         kind.write_modrm(bytecode, reg, rm)
+
+        # check if the r/m operand has a relocation displacement
+        if isinstance(target, Address) and isinstance(target.disp, Relocation):
+            relocation = RelocationInfo(
+                target=target.disp.block,
+                offset=len(bytecode) - 4,
+                width=4,
+            )
 
     # encode as fixed displacement
     else:

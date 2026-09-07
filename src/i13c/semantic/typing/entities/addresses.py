@@ -7,6 +7,7 @@ from i13c.semantic.typing.entities.registers import RegisterId
 from i13c.syntax.source import Span
 
 BaseRegister = RegisterId | ReferenceId
+Displacement = DisplacementId | ReferenceId
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -23,7 +24,7 @@ class Address:
     size: bytes | None
     base: BaseRegister | None
     indx: IndexId | None
-    disp: DisplacementId | None
+    disp: Displacement | None
 
     def __str__(self) -> str:
         parts: list[str] = []

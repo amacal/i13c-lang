@@ -221,163 +221,170 @@ def can_encode_rol_reg8_cl():
 
 
 ROL_ADDR64_IMM8 = """
-    | -------------------------------------------- | -------------------------- |
-    | instruction                                  | encoding                   |
-    | -------------------------------------------- | -------------------------- |
-    | rol qword [rax], 0x01                        | 48 d1 00                   |
-    | rol qword [rcx], 0x01                        | 48 d1 01                   |
-    | rol qword [rdx], 0x01                        | 48 d1 02                   |
-    | rol qword [rbx], 0x01                        | 48 d1 03                   |
-    | rol qword [rsp], 0x01                        | 48 d1 04 24                |
-    | rol qword [rbp], 0x01                        | 48 d1 45 00                |
-    | rol qword [rsi], 0x01                        | 48 d1 06                   |
-    | rol qword [rdi], 0x01                        | 48 d1 07                   |
-    | rol qword [r8], 0x01                         | 49 d1 00                   |
-    | rol qword [r9], 0x01                         | 49 d1 01                   |
-    | rol qword [r10], 0x01                        | 49 d1 02                   |
-    | rol qword [r11], 0x01                        | 49 d1 03                   |
-    | rol qword [r12], 0x01                        | 49 d1 04 24                |
-    | rol qword [r13], 0x01                        | 49 d1 45 00                |
-    | rol qword [r14], 0x01                        | 49 d1 06                   |
-    | rol qword [r15], 0x01                        | 49 d1 07                   |
-    | rol qword [rax + 1 * rcx], 0x01              | 48 d1 04 08                |
-    | rol qword [rcx + 1 * rcx], 0x01              | 48 d1 04 09                |
-    | rol qword [rdx + 1 * rcx], 0x01              | 48 d1 04 0a                |
-    | rol qword [rbx + 1 * rcx], 0x01              | 48 d1 04 0b                |
-    | rol qword [rsp + 1 * rcx], 0x01              | 48 d1 04 0c                |
-    | rol qword [rbp + 1 * rcx], 0x01              | 48 d1 44 0d 00             |
-    | rol qword [rsi + 1 * rcx], 0x01              | 48 d1 04 0e                |
-    | rol qword [rdi + 1 * rcx], 0x01              | 48 d1 04 0f                |
-    | rol qword [r8 + 1 * rcx], 0x01               | 49 d1 04 08                |
-    | rol qword [r9 + 1 * rcx], 0x01               | 49 d1 04 09                |
-    | rol qword [r10 + 1 * rcx], 0x01              | 49 d1 04 0a                |
-    | rol qword [r11 + 1 * rcx], 0x01              | 49 d1 04 0b                |
-    | rol qword [r12 + 1 * rcx], 0x01              | 49 d1 04 0c                |
-    | rol qword [r13 + 1 * rcx], 0x01              | 49 d1 44 0d 00             |
-    | rol qword [r14 + 1 * rcx], 0x01              | 49 d1 04 0e                |
-    | rol qword [r15 + 1 * rcx], 0x01              | 49 d1 04 0f                |
-    | rol qword [rax + 1 * rax], 0x01              | 48 d1 04 00                |
-    | rol qword [rax + 1 * rdx], 0x01              | 48 d1 04 10                |
-    | rol qword [rax + 1 * rbx], 0x01              | 48 d1 04 18                |
-    | rol qword [rax + 1 * rbp], 0x01              | 48 d1 04 28                |
-    | rol qword [rax + 1 * rsi], 0x01              | 48 d1 04 30                |
-    | rol qword [rax + 1 * rdi], 0x01              | 48 d1 04 38                |
-    | rol qword [rax + 1 * r8], 0x01               | 4a d1 04 00                |
-    | rol qword [rax + 1 * r9], 0x01               | 4a d1 04 08                |
-    | rol qword [rax + 1 * r10], 0x01              | 4a d1 04 10                |
-    | rol qword [rax + 1 * r11], 0x01              | 4a d1 04 18                |
-    | rol qword [rax + 1 * r12], 0x01              | 4a d1 04 20                |
-    | rol qword [rax + 1 * r13], 0x01              | 4a d1 04 28                |
-    | rol qword [rax + 1 * r14], 0x01              | 4a d1 04 30                |
-    | rol qword [rax + 1 * r15], 0x01              | 4a d1 04 38                |
-    | rol qword [rax + 2 * rcx], 0x01              | 48 d1 04 48                |
-    | rol qword [rax + 4 * rcx], 0x01              | 48 d1 04 88                |
-    | rol qword [rax + 8 * rcx], 0x01              | 48 d1 04 c8                |
-    | rol qword [r8 + 1 * r9], 0x01                | 4b d1 04 08                |
-    | rol qword [r8 + 2 * r9], 0x01                | 4b d1 04 48                |
-    | rol qword [r8 + 4 * r9], 0x01                | 4b d1 04 88                |
-    | rol qword [r8 + 8 * r9], 0x01                | 4b d1 04 c8                |
-    | rol qword [1 * rcx], 0x01                    | 48 d1 04 0d 00 00 00 00    |
-    | rol qword [2 * rcx], 0x01                    | 48 d1 04 4d 00 00 00 00    |
-    | rol qword [4 * rcx], 0x01                    | 48 d1 04 8d 00 00 00 00    |
-    | rol qword [8 * rcx], 0x01                    | 48 d1 04 cd 00 00 00 00    |
-    | rol qword [1 * r9], 0x01                     | 4a d1 04 0d 00 00 00 00    |
-    | rol qword [2 * r9], 0x01                     | 4a d1 04 4d 00 00 00 00    |
-    | rol qword [4 * r9], 0x01                     | 4a d1 04 8d 00 00 00 00    |
-    | rol qword [8 * r9], 0x01                     | 4a d1 04 cd 00 00 00 00    |
-    | rol qword [r13 + 8 * r12], 0x01              | 4b d1 44 e5 00             |
-    | rol qword [rsp + 4 * r15], 0x01              | 4a d1 04 bc                |
-    | rol qword [rax + 1 * rcx + 0x00], 0x01       | 48 d1 44 08 00             |
-    | rol qword [rax + 1 * rcx - 0x00], 0x01       | 48 d1 44 08 00             |
-    | rol qword [rax + 1 * rcx + 0x01], 0x01       | 48 d1 44 08 01             |
-    | rol qword [rax + 1 * rcx - 0x01], 0x01       | 48 d1 44 08 ff             |
-    | rol qword [rax + 1 * rcx + 0x00000001], 0x01 | 48 d1 84 08 01 00 00 00    |
-    | rol qword [rax + 1 * rcx - 0x00000001], 0x01 | 48 d1 84 08 ff ff ff ff    |
-    | rol qword [rax + 1 * rcx + 0x7f], 0x01       | 48 d1 44 08 7f             |
-    | rol qword [rax + 1 * rcx - 0x7f], 0x01       | 48 d1 44 08 81             |
-    | rol qword [rax + 1 * rcx + 0x80], 0x01       | 48 d1 84 08 80 00 00 00    |
-    | rol qword [rax + 1 * rcx - 0x80], 0x01       | 48 d1 44 08 80             |
-    | rol qword [rax + 1 * rcx - 0x81], 0x01       | 48 d1 84 08 7f ff ff ff    |
-    | rol qword [rax + 1 * rcx + 0xff], 0x01       | 48 d1 84 08 ff 00 00 00    |
-    | rol qword [rax + 1 * rcx - 0xff], 0x01       | 48 d1 84 08 01 ff ff ff    |
-    | rol qword [rax + 1 * rcx + 0x7fffffff], 0x01 | 48 d1 84 08 ff ff ff 7f    |
-    | rol qword [rax + 1 * rcx - 0x7fffffff], 0x01 | 48 d1 84 08 01 00 00 80    |
-    | rol qword [rax + 1 * rcx - 0x80000000], 0x01 | 48 d1 84 08 00 00 00 80    |
-    | rol qword [r10 + 0x7f], 0x01                 | 49 d1 42 7f                |
-    | rol qword [r10 + 0x80], 0x01                 | 49 d1 82 80 00 00 00       |
-    | rol qword [r10 - 0x80], 0x01                 | 49 d1 42 80                |
-    | rol qword [r10 - 0x81], 0x01                 | 49 d1 82 7f ff ff ff       |
-    | rol qword [rax], 0x00                        | 48 c1 00 00                |
-    | rol qword [rax], 0x7f                        | 48 c1 00 7f                |
-    | rol qword [rax], 0x80                        | 48 c1 00 80                |
-    | rol qword [rax], 0xff                        | 48 c1 00 ff                |
-    | rol qword [rcx], 0x7f                        | 48 c1 01 7f                |
-    | rol qword [rdx], 0x80                        | 48 c1 02 80                |
-    | rol qword [rbx], 0xff                        | 48 c1 03 ff                |
-    | rol qword [rsp], 0x00                        | 48 c1 04 24 00             |
-    | rol qword [rsi], 0x7f                        | 48 c1 06 7f                |
-    | rol qword [rdi], 0x80                        | 48 c1 07 80                |
-    | rol qword [r8], 0xff                         | 49 c1 00 ff                |
-    | rol qword [r9], 0x00                         | 49 c1 01 00                |
-    | rol qword [r11], 0x7f                        | 49 c1 03 7f                |
-    | rol qword [r12], 0x80                        | 49 c1 04 24 80             |
-    | rol qword [r13], 0xff                        | 49 c1 45 00 ff             |
-    | rol qword [r14], 0x00                        | 49 c1 06 00                |
-    | rol qword [rax + 1 * rcx], 0x7f              | 48 c1 04 08 7f             |
-    | rol qword [rcx + 1 * rcx], 0x80              | 48 c1 04 09 80             |
-    | rol qword [rdx + 1 * rcx], 0xff              | 48 c1 04 0a ff             |
-    | rol qword [rbx + 1 * rcx], 0x00              | 48 c1 04 0b 00             |
-    | rol qword [rbp + 1 * rcx], 0x7f              | 48 c1 44 0d 00 7f          |
-    | rol qword [rsi + 1 * rcx], 0x80              | 48 c1 04 0e 80             |
-    | rol qword [rdi + 1 * rcx], 0xff              | 48 c1 04 0f ff             |
-    | rol qword [r8 + 1 * rcx], 0x00               | 49 c1 04 08 00             |
-    | rol qword [r10 + 1 * rcx], 0x7f              | 49 c1 04 0a 7f             |
-    | rol qword [r11 + 1 * rcx], 0x80              | 49 c1 04 0b 80             |
-    | rol qword [r12 + 1 * rcx], 0xff              | 49 c1 04 0c ff             |
-    | rol qword [r13 + 1 * rcx], 0x00              | 49 c1 44 0d 00 00          |
-    | rol qword [r15 + 1 * rcx], 0x7f              | 49 c1 04 0f 7f             |
-    | rol qword [rax + 1 * rax], 0x80              | 48 c1 04 00 80             |
-    | rol qword [rax + 1 * rdx], 0xff              | 48 c1 04 10 ff             |
-    | rol qword [rax + 1 * rbx], 0x00              | 48 c1 04 18 00             |
-    | rol qword [rax + 1 * rsi], 0x7f              | 48 c1 04 30 7f             |
-    | rol qword [rax + 1 * rdi], 0x80              | 48 c1 04 38 80             |
-    | rol qword [rax + 1 * r8], 0xff               | 4a c1 04 00 ff             |
-    | rol qword [rax + 1 * r9], 0x00               | 4a c1 04 08 00             |
-    | rol qword [rax + 1 * r11], 0x7f              | 4a c1 04 18 7f             |
-    | rol qword [rax + 1 * r12], 0x80              | 4a c1 04 20 80             |
-    | rol qword [rax + 1 * r13], 0xff              | 4a c1 04 28 ff             |
-    | rol qword [rax + 1 * r14], 0x00              | 4a c1 04 30 00             |
-    | rol qword [rax + 2 * rcx], 0x7f              | 48 c1 04 48 7f             |
-    | rol qword [rax + 4 * rcx], 0x80              | 48 c1 04 88 80             |
-    | rol qword [rax + 8 * rcx], 0xff              | 48 c1 04 c8 ff             |
-    | rol qword [r8 + 1 * r9], 0x00                | 4b c1 04 08 00             |
-    | rol qword [r8 + 4 * r9], 0x7f                | 4b c1 04 88 7f             |
-    | rol qword [r8 + 8 * r9], 0x80                | 4b c1 04 c8 80             |
-    | rol qword [1 * rcx], 0xff                    | 48 c1 04 0d 00 00 00 00 ff |
-    | rol qword [2 * rcx], 0x00                    | 48 c1 04 4d 00 00 00 00 00 |
-    | rol qword [8 * rcx], 0x7f                    | 48 c1 04 cd 00 00 00 00 7f |
-    | rol qword [1 * r9], 0x80                     | 4a c1 04 0d 00 00 00 00 80 |
-    | rol qword [2 * r9], 0xff                     | 4a c1 04 4d 00 00 00 00 ff |
-    | rol qword [4 * r9], 0x00                     | 4a c1 04 8d 00 00 00 00 00 |
-    | rol qword [r13 + 8 * r12], 0x7f              | 4b c1 44 e5 00 7f          |
-    | rol qword [rsp + 4 * r15], 0x80              | 4a c1 04 bc 80             |
-    | rol qword [rax + 1 * rcx + 0x00], 0xff       | 48 c1 44 08 00 ff          |
-    | rol qword [rax + 1 * rcx - 0x00], 0x00       | 48 c1 44 08 00 00          |
-    | rol qword [rax + 1 * rcx - 0x01], 0x7f       | 48 c1 44 08 ff 7f          |
-    | rol qword [rax + 1 * rcx + 0x00000001], 0x80 | 48 c1 84 08 01 00 00 00 80 |
-    | rol qword [rax + 1 * rcx - 0x00000001], 0xff | 48 c1 84 08 ff ff ff ff ff |
-    | rol qword [rax + 1 * rcx + 0x7f], 0x00       | 48 c1 44 08 7f 00          |
-    | rol qword [rax + 1 * rcx + 0x80], 0x7f       | 48 c1 84 08 80 00 00 00 7f |
-    | rol qword [rax + 1 * rcx - 0x80], 0x80       | 48 c1 44 08 80 80          |
-    | rol qword [rax + 1 * rcx - 0x81], 0xff       | 48 c1 84 08 7f ff ff ff ff |
-    | rol qword [rax + 1 * rcx + 0xff], 0x00       | 48 c1 84 08 ff 00 00 00 00 |
-    | rol qword [rax + 1 * rcx + 0x7fffffff], 0x7f | 48 c1 84 08 ff ff ff 7f 7f |
-    | rol qword [rax + 1 * rcx - 0x7fffffff], 0x80 | 48 c1 84 08 01 00 00 80 80 |
-    | rol qword [rax + 1 * rcx - 0x80000000], 0xff | 48 c1 84 08 00 00 00 80 ff |
-    | rol qword [r10 + 0x7f], 0x00                 | 49 c1 42 7f 00             |
-    | rol qword [r10 - 0x80], 0x7f                 | 49 c1 42 80 7f             |
-    | rol qword [r10 - 0x81], 0x80                 | 49 c1 82 7f ff ff ff 80    |
-    | -------------------------------------------- | -------------------------- |
+    | ------------------------------------------------------------------ | ----------------------------------------- |
+    | instruction                                                        | encoding                                  |
+    | ------------------------------------------------------------------ | ----------------------------------------- |
+    | rol qword [rax], 0x01                                              | 48 d1 00                                  |
+    | rol qword [rcx], 0x01                                              | 48 d1 01                                  |
+    | rol qword [rdx], 0x01                                              | 48 d1 02                                  |
+    | rol qword [rbx], 0x01                                              | 48 d1 03                                  |
+    | rol qword [rsp], 0x01                                              | 48 d1 04 24                               |
+    | rol qword [rbp], 0x01                                              | 48 d1 45 00                               |
+    | rol qword [rsi], 0x01                                              | 48 d1 06                                  |
+    | rol qword [rdi], 0x01                                              | 48 d1 07                                  |
+    | rol qword [r8], 0x01                                               | 49 d1 00                                  |
+    | rol qword [r9], 0x01                                               | 49 d1 01                                  |
+    | rol qword [r10], 0x01                                              | 49 d1 02                                  |
+    | rol qword [r11], 0x01                                              | 49 d1 03                                  |
+    | rol qword [r12], 0x01                                              | 49 d1 04 24                               |
+    | rol qword [r13], 0x01                                              | 49 d1 45 00                               |
+    | rol qword [r14], 0x01                                              | 49 d1 06                                  |
+    | rol qword [r15], 0x01                                              | 49 d1 07                                  |
+    | rol qword [rax + 1 * rcx], 0x01                                    | 48 d1 04 08                               |
+    | rol qword [rcx + 1 * rcx], 0x01                                    | 48 d1 04 09                               |
+    | rol qword [rdx + 1 * rcx], 0x01                                    | 48 d1 04 0a                               |
+    | rol qword [rbx + 1 * rcx], 0x01                                    | 48 d1 04 0b                               |
+    | rol qword [rsp + 1 * rcx], 0x01                                    | 48 d1 04 0c                               |
+    | rol qword [rbp + 1 * rcx], 0x01                                    | 48 d1 44 0d 00                            |
+    | rol qword [rsi + 1 * rcx], 0x01                                    | 48 d1 04 0e                               |
+    | rol qword [rdi + 1 * rcx], 0x01                                    | 48 d1 04 0f                               |
+    | rol qword [r8 + 1 * rcx], 0x01                                     | 49 d1 04 08                               |
+    | rol qword [r9 + 1 * rcx], 0x01                                     | 49 d1 04 09                               |
+    | rol qword [r10 + 1 * rcx], 0x01                                    | 49 d1 04 0a                               |
+    | rol qword [r11 + 1 * rcx], 0x01                                    | 49 d1 04 0b                               |
+    | rol qword [r12 + 1 * rcx], 0x01                                    | 49 d1 04 0c                               |
+    | rol qword [r13 + 1 * rcx], 0x01                                    | 49 d1 44 0d 00                            |
+    | rol qword [r14 + 1 * rcx], 0x01                                    | 49 d1 04 0e                               |
+    | rol qword [r15 + 1 * rcx], 0x01                                    | 49 d1 04 0f                               |
+    | rol qword [rax + 1 * rax], 0x01                                    | 48 d1 04 00                               |
+    | rol qword [rax + 1 * rdx], 0x01                                    | 48 d1 04 10                               |
+    | rol qword [rax + 1 * rbx], 0x01                                    | 48 d1 04 18                               |
+    | rol qword [rax + 1 * rbp], 0x01                                    | 48 d1 04 28                               |
+    | rol qword [rax + 1 * rsi], 0x01                                    | 48 d1 04 30                               |
+    | rol qword [rax + 1 * rdi], 0x01                                    | 48 d1 04 38                               |
+    | rol qword [rax + 1 * r8], 0x01                                     | 4a d1 04 00                               |
+    | rol qword [rax + 1 * r9], 0x01                                     | 4a d1 04 08                               |
+    | rol qword [rax + 1 * r10], 0x01                                    | 4a d1 04 10                               |
+    | rol qword [rax + 1 * r11], 0x01                                    | 4a d1 04 18                               |
+    | rol qword [rax + 1 * r12], 0x01                                    | 4a d1 04 20                               |
+    | rol qword [rax + 1 * r13], 0x01                                    | 4a d1 04 28                               |
+    | rol qword [rax + 1 * r14], 0x01                                    | 4a d1 04 30                               |
+    | rol qword [rax + 1 * r15], 0x01                                    | 4a d1 04 38                               |
+    | rol qword [rax + 2 * rcx], 0x01                                    | 48 d1 04 48                               |
+    | rol qword [rax + 4 * rcx], 0x01                                    | 48 d1 04 88                               |
+    | rol qword [rax + 8 * rcx], 0x01                                    | 48 d1 04 c8                               |
+    | rol qword [r8 + 1 * r9], 0x01                                      | 4b d1 04 08                               |
+    | rol qword [r8 + 2 * r9], 0x01                                      | 4b d1 04 48                               |
+    | rol qword [r8 + 4 * r9], 0x01                                      | 4b d1 04 88                               |
+    | rol qword [r8 + 8 * r9], 0x01                                      | 4b d1 04 c8                               |
+    | rol qword [1 * rcx], 0x01                                          | 48 d1 04 0d 00 00 00 00                   |
+    | rol qword [2 * rcx], 0x01                                          | 48 d1 04 4d 00 00 00 00                   |
+    | rol qword [4 * rcx], 0x01                                          | 48 d1 04 8d 00 00 00 00                   |
+    | rol qword [8 * rcx], 0x01                                          | 48 d1 04 cd 00 00 00 00                   |
+    | rol qword [1 * r9], 0x01                                           | 4a d1 04 0d 00 00 00 00                   |
+    | rol qword [2 * r9], 0x01                                           | 4a d1 04 4d 00 00 00 00                   |
+    | rol qword [4 * r9], 0x01                                           | 4a d1 04 8d 00 00 00 00                   |
+    | rol qword [8 * r9], 0x01                                           | 4a d1 04 cd 00 00 00 00                   |
+    | rol qword [r13 + 8 * r12], 0x01                                    | 4b d1 44 e5 00                            |
+    | rol qword [rsp + 4 * r15], 0x01                                    | 4a d1 04 bc                               |
+    | rol qword [rax + 1 * rcx + 0x00], 0x01                             | 48 d1 44 08 00                            |
+    | rol qword [rax + 1 * rcx - 0x00], 0x01                             | 48 d1 44 08 00                            |
+    | rol qword [rax + 1 * rcx + 0x01], 0x01                             | 48 d1 44 08 01                            |
+    | rol qword [rax + 1 * rcx - 0x01], 0x01                             | 48 d1 44 08 ff                            |
+    | rol qword [rax + 1 * rcx + 0x00000001], 0x01                       | 48 d1 84 08 01 00 00 00                   |
+    | rol qword [rax + 1 * rcx - 0x00000001], 0x01                       | 48 d1 84 08 ff ff ff ff                   |
+    | rol qword [rax + 1 * rcx + 0x7f], 0x01                             | 48 d1 44 08 7f                            |
+    | rol qword [rax + 1 * rcx - 0x7f], 0x01                             | 48 d1 44 08 81                            |
+    | rol qword [rax + 1 * rcx + 0x80], 0x01                             | 48 d1 84 08 80 00 00 00                   |
+    | rol qword [rax + 1 * rcx - 0x80], 0x01                             | 48 d1 44 08 80                            |
+    | rol qword [rax + 1 * rcx - 0x81], 0x01                             | 48 d1 84 08 7f ff ff ff                   |
+    | rol qword [rax + 1 * rcx + 0xff], 0x01                             | 48 d1 84 08 ff 00 00 00                   |
+    | rol qword [rax + 1 * rcx - 0xff], 0x01                             | 48 d1 84 08 01 ff ff ff                   |
+    | rol qword [rax + 1 * rcx + 0x7fffffff], 0x01                       | 48 d1 84 08 ff ff ff 7f                   |
+    | rol qword [rax + 1 * rcx - 0x7fffffff], 0x01                       | 48 d1 84 08 01 00 00 80                   |
+    | rol qword [rax + 1 * rcx - 0x80000000], 0x01                       | 48 d1 84 08 00 00 00 80                   |
+    | rol qword [r10 + 0x7f], 0x01                                       | 49 d1 42 7f                               |
+    | rol qword [r10 + 0x80], 0x01                                       | 49 d1 82 80 00 00 00                      |
+    | rol qword [r10 - 0x80], 0x01                                       | 49 d1 42 80                               |
+    | rol qword [r10 - 0x81], 0x01                                       | 49 d1 82 7f ff ff ff                      |
+    | .prev5: nop; nop; nop; nop; nop; rol qword [rel @prev5], 0x01      | 90 90 90 90 90 48 d1 05 f4 ff ff ff       |
+    | .prev1: nop; rol qword [rel @prev1], 0x01                          | 90 48 d1 05 f8 ff ff ff                   |
+    | rol qword [rel @next1], 0x01; nop; .next1: nop                     | 48 d1 05 01 00 00 00 90 90                |
+    | rol qword [rel @next5], 0x01; nop; nop; nop; nop; nop; .next5: nop | 48 d1 05 05 00 00 00 90 90 90 90 90 90    |
+    | rol qword [rax], 0x00                                              | 48 c1 00 00                               |
+    | rol qword [rax], 0x7f                                              | 48 c1 00 7f                               |
+    | rol qword [rax], 0x80                                              | 48 c1 00 80                               |
+    | rol qword [rax], 0xff                                              | 48 c1 00 ff                               |
+    | rol qword [rcx], 0x7f                                              | 48 c1 01 7f                               |
+    | rol qword [rdx], 0x80                                              | 48 c1 02 80                               |
+    | rol qword [rbx], 0xff                                              | 48 c1 03 ff                               |
+    | rol qword [rsp], 0x00                                              | 48 c1 04 24 00                            |
+    | rol qword [rsi], 0x7f                                              | 48 c1 06 7f                               |
+    | rol qword [rdi], 0x80                                              | 48 c1 07 80                               |
+    | rol qword [r8], 0xff                                               | 49 c1 00 ff                               |
+    | rol qword [r9], 0x00                                               | 49 c1 01 00                               |
+    | rol qword [r11], 0x7f                                              | 49 c1 03 7f                               |
+    | rol qword [r12], 0x80                                              | 49 c1 04 24 80                            |
+    | rol qword [r13], 0xff                                              | 49 c1 45 00 ff                            |
+    | rol qword [r14], 0x00                                              | 49 c1 06 00                               |
+    | rol qword [rax + 1 * rcx], 0x7f                                    | 48 c1 04 08 7f                            |
+    | rol qword [rcx + 1 * rcx], 0x80                                    | 48 c1 04 09 80                            |
+    | rol qword [rdx + 1 * rcx], 0xff                                    | 48 c1 04 0a ff                            |
+    | rol qword [rbx + 1 * rcx], 0x00                                    | 48 c1 04 0b 00                            |
+    | rol qword [rbp + 1 * rcx], 0x7f                                    | 48 c1 44 0d 00 7f                         |
+    | rol qword [rsi + 1 * rcx], 0x80                                    | 48 c1 04 0e 80                            |
+    | rol qword [rdi + 1 * rcx], 0xff                                    | 48 c1 04 0f ff                            |
+    | rol qword [r8 + 1 * rcx], 0x00                                     | 49 c1 04 08 00                            |
+    | rol qword [r10 + 1 * rcx], 0x7f                                    | 49 c1 04 0a 7f                            |
+    | rol qword [r11 + 1 * rcx], 0x80                                    | 49 c1 04 0b 80                            |
+    | rol qword [r12 + 1 * rcx], 0xff                                    | 49 c1 04 0c ff                            |
+    | rol qword [r13 + 1 * rcx], 0x00                                    | 49 c1 44 0d 00 00                         |
+    | rol qword [r15 + 1 * rcx], 0x7f                                    | 49 c1 04 0f 7f                            |
+    | rol qword [rax + 1 * rax], 0x80                                    | 48 c1 04 00 80                            |
+    | rol qword [rax + 1 * rdx], 0xff                                    | 48 c1 04 10 ff                            |
+    | rol qword [rax + 1 * rbx], 0x00                                    | 48 c1 04 18 00                            |
+    | rol qword [rax + 1 * rsi], 0x7f                                    | 48 c1 04 30 7f                            |
+    | rol qword [rax + 1 * rdi], 0x80                                    | 48 c1 04 38 80                            |
+    | rol qword [rax + 1 * r8], 0xff                                     | 4a c1 04 00 ff                            |
+    | rol qword [rax + 1 * r9], 0x00                                     | 4a c1 04 08 00                            |
+    | rol qword [rax + 1 * r11], 0x7f                                    | 4a c1 04 18 7f                            |
+    | rol qword [rax + 1 * r12], 0x80                                    | 4a c1 04 20 80                            |
+    | rol qword [rax + 1 * r13], 0xff                                    | 4a c1 04 28 ff                            |
+    | rol qword [rax + 1 * r14], 0x00                                    | 4a c1 04 30 00                            |
+    | rol qword [rax + 2 * rcx], 0x7f                                    | 48 c1 04 48 7f                            |
+    | rol qword [rax + 4 * rcx], 0x80                                    | 48 c1 04 88 80                            |
+    | rol qword [rax + 8 * rcx], 0xff                                    | 48 c1 04 c8 ff                            |
+    | rol qword [r8 + 1 * r9], 0x00                                      | 4b c1 04 08 00                            |
+    | rol qword [r8 + 4 * r9], 0x7f                                      | 4b c1 04 88 7f                            |
+    | rol qword [r8 + 8 * r9], 0x80                                      | 4b c1 04 c8 80                            |
+    | rol qword [1 * rcx], 0xff                                          | 48 c1 04 0d 00 00 00 00 ff                |
+    | rol qword [2 * rcx], 0x00                                          | 48 c1 04 4d 00 00 00 00 00                |
+    | rol qword [8 * rcx], 0x7f                                          | 48 c1 04 cd 00 00 00 00 7f                |
+    | rol qword [1 * r9], 0x80                                           | 4a c1 04 0d 00 00 00 00 80                |
+    | rol qword [2 * r9], 0xff                                           | 4a c1 04 4d 00 00 00 00 ff                |
+    | rol qword [4 * r9], 0x00                                           | 4a c1 04 8d 00 00 00 00 00                |
+    | rol qword [r13 + 8 * r12], 0x7f                                    | 4b c1 44 e5 00 7f                         |
+    | rol qword [rsp + 4 * r15], 0x80                                    | 4a c1 04 bc 80                            |
+    | rol qword [rax + 1 * rcx + 0x00], 0xff                             | 48 c1 44 08 00 ff                         |
+    | rol qword [rax + 1 * rcx - 0x00], 0x00                             | 48 c1 44 08 00 00                         |
+    | rol qword [rax + 1 * rcx - 0x01], 0x7f                             | 48 c1 44 08 ff 7f                         |
+    | rol qword [rax + 1 * rcx + 0x00000001], 0x80                       | 48 c1 84 08 01 00 00 00 80                |
+    | rol qword [rax + 1 * rcx - 0x00000001], 0xff                       | 48 c1 84 08 ff ff ff ff ff                |
+    | rol qword [rax + 1 * rcx + 0x7f], 0x00                             | 48 c1 44 08 7f 00                         |
+    | rol qword [rax + 1 * rcx + 0x80], 0x7f                             | 48 c1 84 08 80 00 00 00 7f                |
+    | rol qword [rax + 1 * rcx - 0x80], 0x80                             | 48 c1 44 08 80 80                         |
+    | rol qword [rax + 1 * rcx - 0x81], 0xff                             | 48 c1 84 08 7f ff ff ff ff                |
+    | rol qword [rax + 1 * rcx + 0xff], 0x00                             | 48 c1 84 08 ff 00 00 00 00                |
+    | rol qword [rax + 1 * rcx + 0x7fffffff], 0x7f                       | 48 c1 84 08 ff ff ff 7f 7f                |
+    | rol qword [rax + 1 * rcx - 0x7fffffff], 0x80                       | 48 c1 84 08 01 00 00 80 80                |
+    | rol qword [rax + 1 * rcx - 0x80000000], 0xff                       | 48 c1 84 08 00 00 00 80 ff                |
+    | rol qword [r10 + 0x7f], 0x00                                       | 49 c1 42 7f 00                            |
+    | rol qword [r10 - 0x80], 0x7f                                       | 49 c1 42 80 7f                            |
+    | rol qword [r10 - 0x81], 0x80                                       | 49 c1 82 7f ff ff ff 80                   |
+    | .prev5: nop; nop; nop; nop; nop; rol qword [rel @prev5], 0xff      | 90 90 90 90 90 48 c1 05 f3 ff ff ff ff    |
+    | .prev1: nop; rol qword [rel @prev1], 0x00                          | 90 48 c1 05 f7 ff ff ff 00                |
+    | rol qword [rel @next5], 0x7f; nop; nop; nop; nop; nop; .next5: nop | 48 c1 05 05 00 00 00 7f 90 90 90 90 90 90 |
+    | ------------------------------------------------------------------ | ----------------------------------------- |
 """
 
 
@@ -386,93 +393,97 @@ def can_encode_rol_addr64_imm8():
 
 
 ROL_ADDR64_CL = """
-    | ------------------------------------------ | ----------------------- |
-    | instruction                                | encoding                |
-    | ------------------------------------------ | ----------------------- |
-    | rol qword [rax], cl                        | 48 d3 00                |
-    | rol qword [rcx], cl                        | 48 d3 01                |
-    | rol qword [rdx], cl                        | 48 d3 02                |
-    | rol qword [rbx], cl                        | 48 d3 03                |
-    | rol qword [rsp], cl                        | 48 d3 04 24             |
-    | rol qword [rbp], cl                        | 48 d3 45 00             |
-    | rol qword [rsi], cl                        | 48 d3 06                |
-    | rol qword [rdi], cl                        | 48 d3 07                |
-    | rol qword [r8], cl                         | 49 d3 00                |
-    | rol qword [r9], cl                         | 49 d3 01                |
-    | rol qword [r10], cl                        | 49 d3 02                |
-    | rol qword [r11], cl                        | 49 d3 03                |
-    | rol qword [r12], cl                        | 49 d3 04 24             |
-    | rol qword [r13], cl                        | 49 d3 45 00             |
-    | rol qword [r14], cl                        | 49 d3 06                |
-    | rol qword [r15], cl                        | 49 d3 07                |
-    | rol qword [rax + 1 * rcx], cl              | 48 d3 04 08             |
-    | rol qword [rcx + 1 * rcx], cl              | 48 d3 04 09             |
-    | rol qword [rdx + 1 * rcx], cl              | 48 d3 04 0a             |
-    | rol qword [rbx + 1 * rcx], cl              | 48 d3 04 0b             |
-    | rol qword [rsp + 1 * rcx], cl              | 48 d3 04 0c             |
-    | rol qword [rbp + 1 * rcx], cl              | 48 d3 44 0d 00          |
-    | rol qword [rsi + 1 * rcx], cl              | 48 d3 04 0e             |
-    | rol qword [rdi + 1 * rcx], cl              | 48 d3 04 0f             |
-    | rol qword [r8 + 1 * rcx], cl               | 49 d3 04 08             |
-    | rol qword [r9 + 1 * rcx], cl               | 49 d3 04 09             |
-    | rol qword [r10 + 1 * rcx], cl              | 49 d3 04 0a             |
-    | rol qword [r11 + 1 * rcx], cl              | 49 d3 04 0b             |
-    | rol qword [r12 + 1 * rcx], cl              | 49 d3 04 0c             |
-    | rol qword [r13 + 1 * rcx], cl              | 49 d3 44 0d 00          |
-    | rol qword [r14 + 1 * rcx], cl              | 49 d3 04 0e             |
-    | rol qword [r15 + 1 * rcx], cl              | 49 d3 04 0f             |
-    | rol qword [rax + 1 * rax], cl              | 48 d3 04 00             |
-    | rol qword [rax + 1 * rdx], cl              | 48 d3 04 10             |
-    | rol qword [rax + 1 * rbx], cl              | 48 d3 04 18             |
-    | rol qword [rax + 1 * rbp], cl              | 48 d3 04 28             |
-    | rol qword [rax + 1 * rsi], cl              | 48 d3 04 30             |
-    | rol qword [rax + 1 * rdi], cl              | 48 d3 04 38             |
-    | rol qword [rax + 1 * r8], cl               | 4a d3 04 00             |
-    | rol qword [rax + 1 * r9], cl               | 4a d3 04 08             |
-    | rol qword [rax + 1 * r10], cl              | 4a d3 04 10             |
-    | rol qword [rax + 1 * r11], cl              | 4a d3 04 18             |
-    | rol qword [rax + 1 * r12], cl              | 4a d3 04 20             |
-    | rol qword [rax + 1 * r13], cl              | 4a d3 04 28             |
-    | rol qword [rax + 1 * r14], cl              | 4a d3 04 30             |
-    | rol qword [rax + 1 * r15], cl              | 4a d3 04 38             |
-    | rol qword [rax + 2 * rcx], cl              | 48 d3 04 48             |
-    | rol qword [rax + 4 * rcx], cl              | 48 d3 04 88             |
-    | rol qword [rax + 8 * rcx], cl              | 48 d3 04 c8             |
-    | rol qword [r8 + 1 * r9], cl                | 4b d3 04 08             |
-    | rol qword [r8 + 2 * r9], cl                | 4b d3 04 48             |
-    | rol qword [r8 + 4 * r9], cl                | 4b d3 04 88             |
-    | rol qword [r8 + 8 * r9], cl                | 4b d3 04 c8             |
-    | rol qword [1 * rcx], cl                    | 48 d3 04 0d 00 00 00 00 |
-    | rol qword [2 * rcx], cl                    | 48 d3 04 4d 00 00 00 00 |
-    | rol qword [4 * rcx], cl                    | 48 d3 04 8d 00 00 00 00 |
-    | rol qword [8 * rcx], cl                    | 48 d3 04 cd 00 00 00 00 |
-    | rol qword [1 * r9], cl                     | 4a d3 04 0d 00 00 00 00 |
-    | rol qword [2 * r9], cl                     | 4a d3 04 4d 00 00 00 00 |
-    | rol qword [4 * r9], cl                     | 4a d3 04 8d 00 00 00 00 |
-    | rol qword [8 * r9], cl                     | 4a d3 04 cd 00 00 00 00 |
-    | rol qword [r13 + 8 * r12], cl              | 4b d3 44 e5 00          |
-    | rol qword [rsp + 4 * r15], cl              | 4a d3 04 bc             |
-    | rol qword [rax + 1 * rcx + 0x00], cl       | 48 d3 44 08 00          |
-    | rol qword [rax + 1 * rcx - 0x00], cl       | 48 d3 44 08 00          |
-    | rol qword [rax + 1 * rcx + 0x01], cl       | 48 d3 44 08 01          |
-    | rol qword [rax + 1 * rcx - 0x01], cl       | 48 d3 44 08 ff          |
-    | rol qword [rax + 1 * rcx + 0x00000001], cl | 48 d3 84 08 01 00 00 00 |
-    | rol qword [rax + 1 * rcx - 0x00000001], cl | 48 d3 84 08 ff ff ff ff |
-    | rol qword [rax + 1 * rcx + 0x7f], cl       | 48 d3 44 08 7f          |
-    | rol qword [rax + 1 * rcx - 0x7f], cl       | 48 d3 44 08 81          |
-    | rol qword [rax + 1 * rcx + 0x80], cl       | 48 d3 84 08 80 00 00 00 |
-    | rol qword [rax + 1 * rcx - 0x80], cl       | 48 d3 44 08 80          |
-    | rol qword [rax + 1 * rcx - 0x81], cl       | 48 d3 84 08 7f ff ff ff |
-    | rol qword [rax + 1 * rcx + 0xff], cl       | 48 d3 84 08 ff 00 00 00 |
-    | rol qword [rax + 1 * rcx - 0xff], cl       | 48 d3 84 08 01 ff ff ff |
-    | rol qword [rax + 1 * rcx + 0x7fffffff], cl | 48 d3 84 08 ff ff ff 7f |
-    | rol qword [rax + 1 * rcx - 0x7fffffff], cl | 48 d3 84 08 01 00 00 80 |
-    | rol qword [rax + 1 * rcx - 0x80000000], cl | 48 d3 84 08 00 00 00 80 |
-    | rol qword [r10 + 0x7f], cl                 | 49 d3 42 7f             |
-    | rol qword [r10 + 0x80], cl                 | 49 d3 82 80 00 00 00    |
-    | rol qword [r10 - 0x80], cl                 | 49 d3 42 80             |
-    | rol qword [r10 - 0x81], cl                 | 49 d3 82 7f ff ff ff    |
-    | ------------------------------------------ | ----------------------- |
+    | ---------------------------------------------------------------- | -------------------------------------- |
+    | instruction                                                      | encoding                               |
+    | ---------------------------------------------------------------- | -------------------------------------- |
+    | rol qword [rax], cl                                              | 48 d3 00                               |
+    | rol qword [rcx], cl                                              | 48 d3 01                               |
+    | rol qword [rdx], cl                                              | 48 d3 02                               |
+    | rol qword [rbx], cl                                              | 48 d3 03                               |
+    | rol qword [rsp], cl                                              | 48 d3 04 24                            |
+    | rol qword [rbp], cl                                              | 48 d3 45 00                            |
+    | rol qword [rsi], cl                                              | 48 d3 06                               |
+    | rol qword [rdi], cl                                              | 48 d3 07                               |
+    | rol qword [r8], cl                                               | 49 d3 00                               |
+    | rol qword [r9], cl                                               | 49 d3 01                               |
+    | rol qword [r10], cl                                              | 49 d3 02                               |
+    | rol qword [r11], cl                                              | 49 d3 03                               |
+    | rol qword [r12], cl                                              | 49 d3 04 24                            |
+    | rol qword [r13], cl                                              | 49 d3 45 00                            |
+    | rol qword [r14], cl                                              | 49 d3 06                               |
+    | rol qword [r15], cl                                              | 49 d3 07                               |
+    | rol qword [rax + 1 * rcx], cl                                    | 48 d3 04 08                            |
+    | rol qword [rcx + 1 * rcx], cl                                    | 48 d3 04 09                            |
+    | rol qword [rdx + 1 * rcx], cl                                    | 48 d3 04 0a                            |
+    | rol qword [rbx + 1 * rcx], cl                                    | 48 d3 04 0b                            |
+    | rol qword [rsp + 1 * rcx], cl                                    | 48 d3 04 0c                            |
+    | rol qword [rbp + 1 * rcx], cl                                    | 48 d3 44 0d 00                         |
+    | rol qword [rsi + 1 * rcx], cl                                    | 48 d3 04 0e                            |
+    | rol qword [rdi + 1 * rcx], cl                                    | 48 d3 04 0f                            |
+    | rol qword [r8 + 1 * rcx], cl                                     | 49 d3 04 08                            |
+    | rol qword [r9 + 1 * rcx], cl                                     | 49 d3 04 09                            |
+    | rol qword [r10 + 1 * rcx], cl                                    | 49 d3 04 0a                            |
+    | rol qword [r11 + 1 * rcx], cl                                    | 49 d3 04 0b                            |
+    | rol qword [r12 + 1 * rcx], cl                                    | 49 d3 04 0c                            |
+    | rol qword [r13 + 1 * rcx], cl                                    | 49 d3 44 0d 00                         |
+    | rol qword [r14 + 1 * rcx], cl                                    | 49 d3 04 0e                            |
+    | rol qword [r15 + 1 * rcx], cl                                    | 49 d3 04 0f                            |
+    | rol qword [rax + 1 * rax], cl                                    | 48 d3 04 00                            |
+    | rol qword [rax + 1 * rdx], cl                                    | 48 d3 04 10                            |
+    | rol qword [rax + 1 * rbx], cl                                    | 48 d3 04 18                            |
+    | rol qword [rax + 1 * rbp], cl                                    | 48 d3 04 28                            |
+    | rol qword [rax + 1 * rsi], cl                                    | 48 d3 04 30                            |
+    | rol qword [rax + 1 * rdi], cl                                    | 48 d3 04 38                            |
+    | rol qword [rax + 1 * r8], cl                                     | 4a d3 04 00                            |
+    | rol qword [rax + 1 * r9], cl                                     | 4a d3 04 08                            |
+    | rol qword [rax + 1 * r10], cl                                    | 4a d3 04 10                            |
+    | rol qword [rax + 1 * r11], cl                                    | 4a d3 04 18                            |
+    | rol qword [rax + 1 * r12], cl                                    | 4a d3 04 20                            |
+    | rol qword [rax + 1 * r13], cl                                    | 4a d3 04 28                            |
+    | rol qword [rax + 1 * r14], cl                                    | 4a d3 04 30                            |
+    | rol qword [rax + 1 * r15], cl                                    | 4a d3 04 38                            |
+    | rol qword [rax + 2 * rcx], cl                                    | 48 d3 04 48                            |
+    | rol qword [rax + 4 * rcx], cl                                    | 48 d3 04 88                            |
+    | rol qword [rax + 8 * rcx], cl                                    | 48 d3 04 c8                            |
+    | rol qword [r8 + 1 * r9], cl                                      | 4b d3 04 08                            |
+    | rol qword [r8 + 2 * r9], cl                                      | 4b d3 04 48                            |
+    | rol qword [r8 + 4 * r9], cl                                      | 4b d3 04 88                            |
+    | rol qword [r8 + 8 * r9], cl                                      | 4b d3 04 c8                            |
+    | rol qword [1 * rcx], cl                                          | 48 d3 04 0d 00 00 00 00                |
+    | rol qword [2 * rcx], cl                                          | 48 d3 04 4d 00 00 00 00                |
+    | rol qword [4 * rcx], cl                                          | 48 d3 04 8d 00 00 00 00                |
+    | rol qword [8 * rcx], cl                                          | 48 d3 04 cd 00 00 00 00                |
+    | rol qword [1 * r9], cl                                           | 4a d3 04 0d 00 00 00 00                |
+    | rol qword [2 * r9], cl                                           | 4a d3 04 4d 00 00 00 00                |
+    | rol qword [4 * r9], cl                                           | 4a d3 04 8d 00 00 00 00                |
+    | rol qword [8 * r9], cl                                           | 4a d3 04 cd 00 00 00 00                |
+    | rol qword [r13 + 8 * r12], cl                                    | 4b d3 44 e5 00                         |
+    | rol qword [rsp + 4 * r15], cl                                    | 4a d3 04 bc                            |
+    | rol qword [rax + 1 * rcx + 0x00], cl                             | 48 d3 44 08 00                         |
+    | rol qword [rax + 1 * rcx - 0x00], cl                             | 48 d3 44 08 00                         |
+    | rol qword [rax + 1 * rcx + 0x01], cl                             | 48 d3 44 08 01                         |
+    | rol qword [rax + 1 * rcx - 0x01], cl                             | 48 d3 44 08 ff                         |
+    | rol qword [rax + 1 * rcx + 0x00000001], cl                       | 48 d3 84 08 01 00 00 00                |
+    | rol qword [rax + 1 * rcx - 0x00000001], cl                       | 48 d3 84 08 ff ff ff ff                |
+    | rol qword [rax + 1 * rcx + 0x7f], cl                             | 48 d3 44 08 7f                         |
+    | rol qword [rax + 1 * rcx - 0x7f], cl                             | 48 d3 44 08 81                         |
+    | rol qword [rax + 1 * rcx + 0x80], cl                             | 48 d3 84 08 80 00 00 00                |
+    | rol qword [rax + 1 * rcx - 0x80], cl                             | 48 d3 44 08 80                         |
+    | rol qword [rax + 1 * rcx - 0x81], cl                             | 48 d3 84 08 7f ff ff ff                |
+    | rol qword [rax + 1 * rcx + 0xff], cl                             | 48 d3 84 08 ff 00 00 00                |
+    | rol qword [rax + 1 * rcx - 0xff], cl                             | 48 d3 84 08 01 ff ff ff                |
+    | rol qword [rax + 1 * rcx + 0x7fffffff], cl                       | 48 d3 84 08 ff ff ff 7f                |
+    | rol qword [rax + 1 * rcx - 0x7fffffff], cl                       | 48 d3 84 08 01 00 00 80                |
+    | rol qword [rax + 1 * rcx - 0x80000000], cl                       | 48 d3 84 08 00 00 00 80                |
+    | rol qword [r10 + 0x7f], cl                                       | 49 d3 42 7f                            |
+    | rol qword [r10 + 0x80], cl                                       | 49 d3 82 80 00 00 00                   |
+    | rol qword [r10 - 0x80], cl                                       | 49 d3 42 80                            |
+    | rol qword [r10 - 0x81], cl                                       | 49 d3 82 7f ff ff ff                   |
+    | .prev5: nop; nop; nop; nop; nop; rol qword [rel @prev5], cl      | 90 90 90 90 90 48 d3 05 f4 ff ff ff    |
+    | .prev1: nop; rol qword [rel @prev1], cl                          | 90 48 d3 05 f8 ff ff ff                |
+    | rol qword [rel @next1], cl; nop; .next1: nop                     | 48 d3 05 01 00 00 00 90 90             |
+    | rol qword [rel @next5], cl; nop; nop; nop; nop; nop; .next5: nop | 48 d3 05 05 00 00 00 90 90 90 90 90 90 |
+    | ---------------------------------------------------------------- | -------------------------------------- |
 """
 
 
@@ -481,163 +492,170 @@ def can_encode_rol_addr64_cl():
 
 
 ROL_ADDR32_IMM8 = """
-    | -------------------------------------------- | -------------------------- |
-    | instruction                                  | encoding                   |
-    | -------------------------------------------- | -------------------------- |
-    | rol dword [rax], 0x01                        | d1 00                      |
-    | rol dword [rcx], 0x01                        | d1 01                      |
-    | rol dword [rdx], 0x01                        | d1 02                      |
-    | rol dword [rbx], 0x01                        | d1 03                      |
-    | rol dword [rsp], 0x01                        | d1 04 24                   |
-    | rol dword [rbp], 0x01                        | d1 45 00                   |
-    | rol dword [rsi], 0x01                        | d1 06                      |
-    | rol dword [rdi], 0x01                        | d1 07                      |
-    | rol dword [r8], 0x01                         | 41 d1 00                   |
-    | rol dword [r9], 0x01                         | 41 d1 01                   |
-    | rol dword [r10], 0x01                        | 41 d1 02                   |
-    | rol dword [r11], 0x01                        | 41 d1 03                   |
-    | rol dword [r12], 0x01                        | 41 d1 04 24                |
-    | rol dword [r13], 0x01                        | 41 d1 45 00                |
-    | rol dword [r14], 0x01                        | 41 d1 06                   |
-    | rol dword [r15], 0x01                        | 41 d1 07                   |
-    | rol dword [rax + 1 * rcx], 0x01              | d1 04 08                   |
-    | rol dword [rcx + 1 * rcx], 0x01              | d1 04 09                   |
-    | rol dword [rdx + 1 * rcx], 0x01              | d1 04 0a                   |
-    | rol dword [rbx + 1 * rcx], 0x01              | d1 04 0b                   |
-    | rol dword [rsp + 1 * rcx], 0x01              | d1 04 0c                   |
-    | rol dword [rbp + 1 * rcx], 0x01              | d1 44 0d 00                |
-    | rol dword [rsi + 1 * rcx], 0x01              | d1 04 0e                   |
-    | rol dword [rdi + 1 * rcx], 0x01              | d1 04 0f                   |
-    | rol dword [r8 + 1 * rcx], 0x01               | 41 d1 04 08                |
-    | rol dword [r9 + 1 * rcx], 0x01               | 41 d1 04 09                |
-    | rol dword [r10 + 1 * rcx], 0x01              | 41 d1 04 0a                |
-    | rol dword [r11 + 1 * rcx], 0x01              | 41 d1 04 0b                |
-    | rol dword [r12 + 1 * rcx], 0x01              | 41 d1 04 0c                |
-    | rol dword [r13 + 1 * rcx], 0x01              | 41 d1 44 0d 00             |
-    | rol dword [r14 + 1 * rcx], 0x01              | 41 d1 04 0e                |
-    | rol dword [r15 + 1 * rcx], 0x01              | 41 d1 04 0f                |
-    | rol dword [rax + 1 * rax], 0x01              | d1 04 00                   |
-    | rol dword [rax + 1 * rdx], 0x01              | d1 04 10                   |
-    | rol dword [rax + 1 * rbx], 0x01              | d1 04 18                   |
-    | rol dword [rax + 1 * rbp], 0x01              | d1 04 28                   |
-    | rol dword [rax + 1 * rsi], 0x01              | d1 04 30                   |
-    | rol dword [rax + 1 * rdi], 0x01              | d1 04 38                   |
-    | rol dword [rax + 1 * r8], 0x01               | 42 d1 04 00                |
-    | rol dword [rax + 1 * r9], 0x01               | 42 d1 04 08                |
-    | rol dword [rax + 1 * r10], 0x01              | 42 d1 04 10                |
-    | rol dword [rax + 1 * r11], 0x01              | 42 d1 04 18                |
-    | rol dword [rax + 1 * r12], 0x01              | 42 d1 04 20                |
-    | rol dword [rax + 1 * r13], 0x01              | 42 d1 04 28                |
-    | rol dword [rax + 1 * r14], 0x01              | 42 d1 04 30                |
-    | rol dword [rax + 1 * r15], 0x01              | 42 d1 04 38                |
-    | rol dword [rax + 2 * rcx], 0x01              | d1 04 48                   |
-    | rol dword [rax + 4 * rcx], 0x01              | d1 04 88                   |
-    | rol dword [rax + 8 * rcx], 0x01              | d1 04 c8                   |
-    | rol dword [r8 + 1 * r9], 0x01                | 43 d1 04 08                |
-    | rol dword [r8 + 2 * r9], 0x01                | 43 d1 04 48                |
-    | rol dword [r8 + 4 * r9], 0x01                | 43 d1 04 88                |
-    | rol dword [r8 + 8 * r9], 0x01                | 43 d1 04 c8                |
-    | rol dword [1 * rcx], 0x01                    | d1 04 0d 00 00 00 00       |
-    | rol dword [2 * rcx], 0x01                    | d1 04 4d 00 00 00 00       |
-    | rol dword [4 * rcx], 0x01                    | d1 04 8d 00 00 00 00       |
-    | rol dword [8 * rcx], 0x01                    | d1 04 cd 00 00 00 00       |
-    | rol dword [1 * r9], 0x01                     | 42 d1 04 0d 00 00 00 00    |
-    | rol dword [2 * r9], 0x01                     | 42 d1 04 4d 00 00 00 00    |
-    | rol dword [4 * r9], 0x01                     | 42 d1 04 8d 00 00 00 00    |
-    | rol dword [8 * r9], 0x01                     | 42 d1 04 cd 00 00 00 00    |
-    | rol dword [r13 + 8 * r12], 0x01              | 43 d1 44 e5 00             |
-    | rol dword [rsp + 4 * r15], 0x01              | 42 d1 04 bc                |
-    | rol dword [rax + 1 * rcx + 0x00], 0x01       | d1 44 08 00                |
-    | rol dword [rax + 1 * rcx - 0x00], 0x01       | d1 44 08 00                |
-    | rol dword [rax + 1 * rcx + 0x01], 0x01       | d1 44 08 01                |
-    | rol dword [rax + 1 * rcx - 0x01], 0x01       | d1 44 08 ff                |
-    | rol dword [rax + 1 * rcx + 0x00000001], 0x01 | d1 84 08 01 00 00 00       |
-    | rol dword [rax + 1 * rcx - 0x00000001], 0x01 | d1 84 08 ff ff ff ff       |
-    | rol dword [rax + 1 * rcx + 0x7f], 0x01       | d1 44 08 7f                |
-    | rol dword [rax + 1 * rcx - 0x7f], 0x01       | d1 44 08 81                |
-    | rol dword [rax + 1 * rcx + 0x80], 0x01       | d1 84 08 80 00 00 00       |
-    | rol dword [rax + 1 * rcx - 0x80], 0x01       | d1 44 08 80                |
-    | rol dword [rax + 1 * rcx - 0x81], 0x01       | d1 84 08 7f ff ff ff       |
-    | rol dword [rax + 1 * rcx + 0xff], 0x01       | d1 84 08 ff 00 00 00       |
-    | rol dword [rax + 1 * rcx - 0xff], 0x01       | d1 84 08 01 ff ff ff       |
-    | rol dword [rax + 1 * rcx + 0x7fffffff], 0x01 | d1 84 08 ff ff ff 7f       |
-    | rol dword [rax + 1 * rcx - 0x7fffffff], 0x01 | d1 84 08 01 00 00 80       |
-    | rol dword [rax + 1 * rcx - 0x80000000], 0x01 | d1 84 08 00 00 00 80       |
-    | rol dword [r10 + 0x7f], 0x01                 | 41 d1 42 7f                |
-    | rol dword [r10 + 0x80], 0x01                 | 41 d1 82 80 00 00 00       |
-    | rol dword [r10 - 0x80], 0x01                 | 41 d1 42 80                |
-    | rol dword [r10 - 0x81], 0x01                 | 41 d1 82 7f ff ff ff       |
-    | rol dword [rax], 0x00                        | c1 00 00                   |
-    | rol dword [rax], 0x7f                        | c1 00 7f                   |
-    | rol dword [rax], 0x80                        | c1 00 80                   |
-    | rol dword [rax], 0xff                        | c1 00 ff                   |
-    | rol dword [rcx], 0x7f                        | c1 01 7f                   |
-    | rol dword [rdx], 0x80                        | c1 02 80                   |
-    | rol dword [rbx], 0xff                        | c1 03 ff                   |
-    | rol dword [rsp], 0x00                        | c1 04 24 00                |
-    | rol dword [rsi], 0x7f                        | c1 06 7f                   |
-    | rol dword [rdi], 0x80                        | c1 07 80                   |
-    | rol dword [r8], 0xff                         | 41 c1 00 ff                |
-    | rol dword [r9], 0x00                         | 41 c1 01 00                |
-    | rol dword [r11], 0x7f                        | 41 c1 03 7f                |
-    | rol dword [r12], 0x80                        | 41 c1 04 24 80             |
-    | rol dword [r13], 0xff                        | 41 c1 45 00 ff             |
-    | rol dword [r14], 0x00                        | 41 c1 06 00                |
-    | rol dword [rax + 1 * rcx], 0x7f              | c1 04 08 7f                |
-    | rol dword [rcx + 1 * rcx], 0x80              | c1 04 09 80                |
-    | rol dword [rdx + 1 * rcx], 0xff              | c1 04 0a ff                |
-    | rol dword [rbx + 1 * rcx], 0x00              | c1 04 0b 00                |
-    | rol dword [rbp + 1 * rcx], 0x7f              | c1 44 0d 00 7f             |
-    | rol dword [rsi + 1 * rcx], 0x80              | c1 04 0e 80                |
-    | rol dword [rdi + 1 * rcx], 0xff              | c1 04 0f ff                |
-    | rol dword [r8 + 1 * rcx], 0x00               | 41 c1 04 08 00             |
-    | rol dword [r10 + 1 * rcx], 0x7f              | 41 c1 04 0a 7f             |
-    | rol dword [r11 + 1 * rcx], 0x80              | 41 c1 04 0b 80             |
-    | rol dword [r12 + 1 * rcx], 0xff              | 41 c1 04 0c ff             |
-    | rol dword [r13 + 1 * rcx], 0x00              | 41 c1 44 0d 00 00          |
-    | rol dword [r15 + 1 * rcx], 0x7f              | 41 c1 04 0f 7f             |
-    | rol dword [rax + 1 * rax], 0x80              | c1 04 00 80                |
-    | rol dword [rax + 1 * rdx], 0xff              | c1 04 10 ff                |
-    | rol dword [rax + 1 * rbx], 0x00              | c1 04 18 00                |
-    | rol dword [rax + 1 * rsi], 0x7f              | c1 04 30 7f                |
-    | rol dword [rax + 1 * rdi], 0x80              | c1 04 38 80                |
-    | rol dword [rax + 1 * r8], 0xff               | 42 c1 04 00 ff             |
-    | rol dword [rax + 1 * r9], 0x00               | 42 c1 04 08 00             |
-    | rol dword [rax + 1 * r11], 0x7f              | 42 c1 04 18 7f             |
-    | rol dword [rax + 1 * r12], 0x80              | 42 c1 04 20 80             |
-    | rol dword [rax + 1 * r13], 0xff              | 42 c1 04 28 ff             |
-    | rol dword [rax + 1 * r14], 0x00              | 42 c1 04 30 00             |
-    | rol dword [rax + 2 * rcx], 0x7f              | c1 04 48 7f                |
-    | rol dword [rax + 4 * rcx], 0x80              | c1 04 88 80                |
-    | rol dword [rax + 8 * rcx], 0xff              | c1 04 c8 ff                |
-    | rol dword [r8 + 1 * r9], 0x00                | 43 c1 04 08 00             |
-    | rol dword [r8 + 4 * r9], 0x7f                | 43 c1 04 88 7f             |
-    | rol dword [r8 + 8 * r9], 0x80                | 43 c1 04 c8 80             |
-    | rol dword [1 * rcx], 0xff                    | c1 04 0d 00 00 00 00 ff    |
-    | rol dword [2 * rcx], 0x00                    | c1 04 4d 00 00 00 00 00    |
-    | rol dword [8 * rcx], 0x7f                    | c1 04 cd 00 00 00 00 7f    |
-    | rol dword [1 * r9], 0x80                     | 42 c1 04 0d 00 00 00 00 80 |
-    | rol dword [2 * r9], 0xff                     | 42 c1 04 4d 00 00 00 00 ff |
-    | rol dword [4 * r9], 0x00                     | 42 c1 04 8d 00 00 00 00 00 |
-    | rol dword [r13 + 8 * r12], 0x7f              | 43 c1 44 e5 00 7f          |
-    | rol dword [rsp + 4 * r15], 0x80              | 42 c1 04 bc 80             |
-    | rol dword [rax + 1 * rcx + 0x00], 0xff       | c1 44 08 00 ff             |
-    | rol dword [rax + 1 * rcx - 0x00], 0x00       | c1 44 08 00 00             |
-    | rol dword [rax + 1 * rcx - 0x01], 0x7f       | c1 44 08 ff 7f             |
-    | rol dword [rax + 1 * rcx + 0x00000001], 0x80 | c1 84 08 01 00 00 00 80    |
-    | rol dword [rax + 1 * rcx - 0x00000001], 0xff | c1 84 08 ff ff ff ff ff    |
-    | rol dword [rax + 1 * rcx + 0x7f], 0x00       | c1 44 08 7f 00             |
-    | rol dword [rax + 1 * rcx + 0x80], 0x7f       | c1 84 08 80 00 00 00 7f    |
-    | rol dword [rax + 1 * rcx - 0x80], 0x80       | c1 44 08 80 80             |
-    | rol dword [rax + 1 * rcx - 0x81], 0xff       | c1 84 08 7f ff ff ff ff    |
-    | rol dword [rax + 1 * rcx + 0xff], 0x00       | c1 84 08 ff 00 00 00 00    |
-    | rol dword [rax + 1 * rcx + 0x7fffffff], 0x7f | c1 84 08 ff ff ff 7f 7f    |
-    | rol dword [rax + 1 * rcx - 0x7fffffff], 0x80 | c1 84 08 01 00 00 80 80    |
-    | rol dword [rax + 1 * rcx - 0x80000000], 0xff | c1 84 08 00 00 00 80 ff    |
-    | rol dword [r10 + 0x7f], 0x00                 | 41 c1 42 7f 00             |
-    | rol dword [r10 - 0x80], 0x7f                 | 41 c1 42 80 7f             |
-    | rol dword [r10 - 0x81], 0x80                 | 41 c1 82 7f ff ff ff 80    |
-    | -------------------------------------------- | -------------------------- |
+    | ------------------------------------------------------------------ | -------------------------------------- |
+    | instruction                                                        | encoding                               |
+    | ------------------------------------------------------------------ | -------------------------------------- |
+    | rol dword [rax], 0x01                                              | d1 00                                  |
+    | rol dword [rcx], 0x01                                              | d1 01                                  |
+    | rol dword [rdx], 0x01                                              | d1 02                                  |
+    | rol dword [rbx], 0x01                                              | d1 03                                  |
+    | rol dword [rsp], 0x01                                              | d1 04 24                               |
+    | rol dword [rbp], 0x01                                              | d1 45 00                               |
+    | rol dword [rsi], 0x01                                              | d1 06                                  |
+    | rol dword [rdi], 0x01                                              | d1 07                                  |
+    | rol dword [r8], 0x01                                               | 41 d1 00                               |
+    | rol dword [r9], 0x01                                               | 41 d1 01                               |
+    | rol dword [r10], 0x01                                              | 41 d1 02                               |
+    | rol dword [r11], 0x01                                              | 41 d1 03                               |
+    | rol dword [r12], 0x01                                              | 41 d1 04 24                            |
+    | rol dword [r13], 0x01                                              | 41 d1 45 00                            |
+    | rol dword [r14], 0x01                                              | 41 d1 06                               |
+    | rol dword [r15], 0x01                                              | 41 d1 07                               |
+    | rol dword [rax + 1 * rcx], 0x01                                    | d1 04 08                               |
+    | rol dword [rcx + 1 * rcx], 0x01                                    | d1 04 09                               |
+    | rol dword [rdx + 1 * rcx], 0x01                                    | d1 04 0a                               |
+    | rol dword [rbx + 1 * rcx], 0x01                                    | d1 04 0b                               |
+    | rol dword [rsp + 1 * rcx], 0x01                                    | d1 04 0c                               |
+    | rol dword [rbp + 1 * rcx], 0x01                                    | d1 44 0d 00                            |
+    | rol dword [rsi + 1 * rcx], 0x01                                    | d1 04 0e                               |
+    | rol dword [rdi + 1 * rcx], 0x01                                    | d1 04 0f                               |
+    | rol dword [r8 + 1 * rcx], 0x01                                     | 41 d1 04 08                            |
+    | rol dword [r9 + 1 * rcx], 0x01                                     | 41 d1 04 09                            |
+    | rol dword [r10 + 1 * rcx], 0x01                                    | 41 d1 04 0a                            |
+    | rol dword [r11 + 1 * rcx], 0x01                                    | 41 d1 04 0b                            |
+    | rol dword [r12 + 1 * rcx], 0x01                                    | 41 d1 04 0c                            |
+    | rol dword [r13 + 1 * rcx], 0x01                                    | 41 d1 44 0d 00                         |
+    | rol dword [r14 + 1 * rcx], 0x01                                    | 41 d1 04 0e                            |
+    | rol dword [r15 + 1 * rcx], 0x01                                    | 41 d1 04 0f                            |
+    | rol dword [rax + 1 * rax], 0x01                                    | d1 04 00                               |
+    | rol dword [rax + 1 * rdx], 0x01                                    | d1 04 10                               |
+    | rol dword [rax + 1 * rbx], 0x01                                    | d1 04 18                               |
+    | rol dword [rax + 1 * rbp], 0x01                                    | d1 04 28                               |
+    | rol dword [rax + 1 * rsi], 0x01                                    | d1 04 30                               |
+    | rol dword [rax + 1 * rdi], 0x01                                    | d1 04 38                               |
+    | rol dword [rax + 1 * r8], 0x01                                     | 42 d1 04 00                            |
+    | rol dword [rax + 1 * r9], 0x01                                     | 42 d1 04 08                            |
+    | rol dword [rax + 1 * r10], 0x01                                    | 42 d1 04 10                            |
+    | rol dword [rax + 1 * r11], 0x01                                    | 42 d1 04 18                            |
+    | rol dword [rax + 1 * r12], 0x01                                    | 42 d1 04 20                            |
+    | rol dword [rax + 1 * r13], 0x01                                    | 42 d1 04 28                            |
+    | rol dword [rax + 1 * r14], 0x01                                    | 42 d1 04 30                            |
+    | rol dword [rax + 1 * r15], 0x01                                    | 42 d1 04 38                            |
+    | rol dword [rax + 2 * rcx], 0x01                                    | d1 04 48                               |
+    | rol dword [rax + 4 * rcx], 0x01                                    | d1 04 88                               |
+    | rol dword [rax + 8 * rcx], 0x01                                    | d1 04 c8                               |
+    | rol dword [r8 + 1 * r9], 0x01                                      | 43 d1 04 08                            |
+    | rol dword [r8 + 2 * r9], 0x01                                      | 43 d1 04 48                            |
+    | rol dword [r8 + 4 * r9], 0x01                                      | 43 d1 04 88                            |
+    | rol dword [r8 + 8 * r9], 0x01                                      | 43 d1 04 c8                            |
+    | rol dword [1 * rcx], 0x01                                          | d1 04 0d 00 00 00 00                   |
+    | rol dword [2 * rcx], 0x01                                          | d1 04 4d 00 00 00 00                   |
+    | rol dword [4 * rcx], 0x01                                          | d1 04 8d 00 00 00 00                   |
+    | rol dword [8 * rcx], 0x01                                          | d1 04 cd 00 00 00 00                   |
+    | rol dword [1 * r9], 0x01                                           | 42 d1 04 0d 00 00 00 00                |
+    | rol dword [2 * r9], 0x01                                           | 42 d1 04 4d 00 00 00 00                |
+    | rol dword [4 * r9], 0x01                                           | 42 d1 04 8d 00 00 00 00                |
+    | rol dword [8 * r9], 0x01                                           | 42 d1 04 cd 00 00 00 00                |
+    | rol dword [r13 + 8 * r12], 0x01                                    | 43 d1 44 e5 00                         |
+    | rol dword [rsp + 4 * r15], 0x01                                    | 42 d1 04 bc                            |
+    | rol dword [rax + 1 * rcx + 0x00], 0x01                             | d1 44 08 00                            |
+    | rol dword [rax + 1 * rcx - 0x00], 0x01                             | d1 44 08 00                            |
+    | rol dword [rax + 1 * rcx + 0x01], 0x01                             | d1 44 08 01                            |
+    | rol dword [rax + 1 * rcx - 0x01], 0x01                             | d1 44 08 ff                            |
+    | rol dword [rax + 1 * rcx + 0x00000001], 0x01                       | d1 84 08 01 00 00 00                   |
+    | rol dword [rax + 1 * rcx - 0x00000001], 0x01                       | d1 84 08 ff ff ff ff                   |
+    | rol dword [rax + 1 * rcx + 0x7f], 0x01                             | d1 44 08 7f                            |
+    | rol dword [rax + 1 * rcx - 0x7f], 0x01                             | d1 44 08 81                            |
+    | rol dword [rax + 1 * rcx + 0x80], 0x01                             | d1 84 08 80 00 00 00                   |
+    | rol dword [rax + 1 * rcx - 0x80], 0x01                             | d1 44 08 80                            |
+    | rol dword [rax + 1 * rcx - 0x81], 0x01                             | d1 84 08 7f ff ff ff                   |
+    | rol dword [rax + 1 * rcx + 0xff], 0x01                             | d1 84 08 ff 00 00 00                   |
+    | rol dword [rax + 1 * rcx - 0xff], 0x01                             | d1 84 08 01 ff ff ff                   |
+    | rol dword [rax + 1 * rcx + 0x7fffffff], 0x01                       | d1 84 08 ff ff ff 7f                   |
+    | rol dword [rax + 1 * rcx - 0x7fffffff], 0x01                       | d1 84 08 01 00 00 80                   |
+    | rol dword [rax + 1 * rcx - 0x80000000], 0x01                       | d1 84 08 00 00 00 80                   |
+    | rol dword [r10 + 0x7f], 0x01                                       | 41 d1 42 7f                            |
+    | rol dword [r10 + 0x80], 0x01                                       | 41 d1 82 80 00 00 00                   |
+    | rol dword [r10 - 0x80], 0x01                                       | 41 d1 42 80                            |
+    | rol dword [r10 - 0x81], 0x01                                       | 41 d1 82 7f ff ff ff                   |
+    | .prev5: nop; nop; nop; nop; nop; rol dword [rel @prev5], 0x01      | 90 90 90 90 90 d1 05 f5 ff ff ff       |
+    | .prev1: nop; rol dword [rel @prev1], 0x01                          | 90 d1 05 f9 ff ff ff                   |
+    | rol dword [rel @next1], 0x01; nop; .next1: nop                     | d1 05 01 00 00 00 90 90                |
+    | rol dword [rel @next5], 0x01; nop; nop; nop; nop; nop; .next5: nop | d1 05 05 00 00 00 90 90 90 90 90 90    |
+    | rol dword [rax], 0x00                                              | c1 00 00                               |
+    | rol dword [rax], 0x7f                                              | c1 00 7f                               |
+    | rol dword [rax], 0x80                                              | c1 00 80                               |
+    | rol dword [rax], 0xff                                              | c1 00 ff                               |
+    | rol dword [rcx], 0x7f                                              | c1 01 7f                               |
+    | rol dword [rdx], 0x80                                              | c1 02 80                               |
+    | rol dword [rbx], 0xff                                              | c1 03 ff                               |
+    | rol dword [rsp], 0x00                                              | c1 04 24 00                            |
+    | rol dword [rsi], 0x7f                                              | c1 06 7f                               |
+    | rol dword [rdi], 0x80                                              | c1 07 80                               |
+    | rol dword [r8], 0xff                                               | 41 c1 00 ff                            |
+    | rol dword [r9], 0x00                                               | 41 c1 01 00                            |
+    | rol dword [r11], 0x7f                                              | 41 c1 03 7f                            |
+    | rol dword [r12], 0x80                                              | 41 c1 04 24 80                         |
+    | rol dword [r13], 0xff                                              | 41 c1 45 00 ff                         |
+    | rol dword [r14], 0x00                                              | 41 c1 06 00                            |
+    | rol dword [rax + 1 * rcx], 0x7f                                    | c1 04 08 7f                            |
+    | rol dword [rcx + 1 * rcx], 0x80                                    | c1 04 09 80                            |
+    | rol dword [rdx + 1 * rcx], 0xff                                    | c1 04 0a ff                            |
+    | rol dword [rbx + 1 * rcx], 0x00                                    | c1 04 0b 00                            |
+    | rol dword [rbp + 1 * rcx], 0x7f                                    | c1 44 0d 00 7f                         |
+    | rol dword [rsi + 1 * rcx], 0x80                                    | c1 04 0e 80                            |
+    | rol dword [rdi + 1 * rcx], 0xff                                    | c1 04 0f ff                            |
+    | rol dword [r8 + 1 * rcx], 0x00                                     | 41 c1 04 08 00                         |
+    | rol dword [r10 + 1 * rcx], 0x7f                                    | 41 c1 04 0a 7f                         |
+    | rol dword [r11 + 1 * rcx], 0x80                                    | 41 c1 04 0b 80                         |
+    | rol dword [r12 + 1 * rcx], 0xff                                    | 41 c1 04 0c ff                         |
+    | rol dword [r13 + 1 * rcx], 0x00                                    | 41 c1 44 0d 00 00                      |
+    | rol dword [r15 + 1 * rcx], 0x7f                                    | 41 c1 04 0f 7f                         |
+    | rol dword [rax + 1 * rax], 0x80                                    | c1 04 00 80                            |
+    | rol dword [rax + 1 * rdx], 0xff                                    | c1 04 10 ff                            |
+    | rol dword [rax + 1 * rbx], 0x00                                    | c1 04 18 00                            |
+    | rol dword [rax + 1 * rsi], 0x7f                                    | c1 04 30 7f                            |
+    | rol dword [rax + 1 * rdi], 0x80                                    | c1 04 38 80                            |
+    | rol dword [rax + 1 * r8], 0xff                                     | 42 c1 04 00 ff                         |
+    | rol dword [rax + 1 * r9], 0x00                                     | 42 c1 04 08 00                         |
+    | rol dword [rax + 1 * r11], 0x7f                                    | 42 c1 04 18 7f                         |
+    | rol dword [rax + 1 * r12], 0x80                                    | 42 c1 04 20 80                         |
+    | rol dword [rax + 1 * r13], 0xff                                    | 42 c1 04 28 ff                         |
+    | rol dword [rax + 1 * r14], 0x00                                    | 42 c1 04 30 00                         |
+    | rol dword [rax + 2 * rcx], 0x7f                                    | c1 04 48 7f                            |
+    | rol dword [rax + 4 * rcx], 0x80                                    | c1 04 88 80                            |
+    | rol dword [rax + 8 * rcx], 0xff                                    | c1 04 c8 ff                            |
+    | rol dword [r8 + 1 * r9], 0x00                                      | 43 c1 04 08 00                         |
+    | rol dword [r8 + 4 * r9], 0x7f                                      | 43 c1 04 88 7f                         |
+    | rol dword [r8 + 8 * r9], 0x80                                      | 43 c1 04 c8 80                         |
+    | rol dword [1 * rcx], 0xff                                          | c1 04 0d 00 00 00 00 ff                |
+    | rol dword [2 * rcx], 0x00                                          | c1 04 4d 00 00 00 00 00                |
+    | rol dword [8 * rcx], 0x7f                                          | c1 04 cd 00 00 00 00 7f                |
+    | rol dword [1 * r9], 0x80                                           | 42 c1 04 0d 00 00 00 00 80             |
+    | rol dword [2 * r9], 0xff                                           | 42 c1 04 4d 00 00 00 00 ff             |
+    | rol dword [4 * r9], 0x00                                           | 42 c1 04 8d 00 00 00 00 00             |
+    | rol dword [r13 + 8 * r12], 0x7f                                    | 43 c1 44 e5 00 7f                      |
+    | rol dword [rsp + 4 * r15], 0x80                                    | 42 c1 04 bc 80                         |
+    | rol dword [rax + 1 * rcx + 0x00], 0xff                             | c1 44 08 00 ff                         |
+    | rol dword [rax + 1 * rcx - 0x00], 0x00                             | c1 44 08 00 00                         |
+    | rol dword [rax + 1 * rcx - 0x01], 0x7f                             | c1 44 08 ff 7f                         |
+    | rol dword [rax + 1 * rcx + 0x00000001], 0x80                       | c1 84 08 01 00 00 00 80                |
+    | rol dword [rax + 1 * rcx - 0x00000001], 0xff                       | c1 84 08 ff ff ff ff ff                |
+    | rol dword [rax + 1 * rcx + 0x7f], 0x00                             | c1 44 08 7f 00                         |
+    | rol dword [rax + 1 * rcx + 0x80], 0x7f                             | c1 84 08 80 00 00 00 7f                |
+    | rol dword [rax + 1 * rcx - 0x80], 0x80                             | c1 44 08 80 80                         |
+    | rol dword [rax + 1 * rcx - 0x81], 0xff                             | c1 84 08 7f ff ff ff ff                |
+    | rol dword [rax + 1 * rcx + 0xff], 0x00                             | c1 84 08 ff 00 00 00 00                |
+    | rol dword [rax + 1 * rcx + 0x7fffffff], 0x7f                       | c1 84 08 ff ff ff 7f 7f                |
+    | rol dword [rax + 1 * rcx - 0x7fffffff], 0x80                       | c1 84 08 01 00 00 80 80                |
+    | rol dword [rax + 1 * rcx - 0x80000000], 0xff                       | c1 84 08 00 00 00 80 ff                |
+    | rol dword [r10 + 0x7f], 0x00                                       | 41 c1 42 7f 00                         |
+    | rol dword [r10 - 0x80], 0x7f                                       | 41 c1 42 80 7f                         |
+    | rol dword [r10 - 0x81], 0x80                                       | 41 c1 82 7f ff ff ff 80                |
+    | .prev5: nop; nop; nop; nop; nop; rol dword [rel @prev5], 0xff      | 90 90 90 90 90 c1 05 f4 ff ff ff ff    |
+    | .prev1: nop; rol dword [rel @prev1], 0x00                          | 90 c1 05 f8 ff ff ff 00                |
+    | rol dword [rel @next5], 0x7f; nop; nop; nop; nop; nop; .next5: nop | c1 05 05 00 00 00 7f 90 90 90 90 90 90 |
+    | ------------------------------------------------------------------ | -------------------------------------- |
 """
 
 
@@ -646,93 +664,97 @@ def can_encode_rol_addr32_imm8():
 
 
 ROL_ADDR32_CL = """
-    | ------------------------------------------ | ----------------------- |
-    | instruction                                | encoding                |
-    | ------------------------------------------ | ----------------------- |
-    | rol dword [rax], cl                        | d3 00                   |
-    | rol dword [rcx], cl                        | d3 01                   |
-    | rol dword [rdx], cl                        | d3 02                   |
-    | rol dword [rbx], cl                        | d3 03                   |
-    | rol dword [rsp], cl                        | d3 04 24                |
-    | rol dword [rbp], cl                        | d3 45 00                |
-    | rol dword [rsi], cl                        | d3 06                   |
-    | rol dword [rdi], cl                        | d3 07                   |
-    | rol dword [r8], cl                         | 41 d3 00                |
-    | rol dword [r9], cl                         | 41 d3 01                |
-    | rol dword [r10], cl                        | 41 d3 02                |
-    | rol dword [r11], cl                        | 41 d3 03                |
-    | rol dword [r12], cl                        | 41 d3 04 24             |
-    | rol dword [r13], cl                        | 41 d3 45 00             |
-    | rol dword [r14], cl                        | 41 d3 06                |
-    | rol dword [r15], cl                        | 41 d3 07                |
-    | rol dword [rax + 1 * rcx], cl              | d3 04 08                |
-    | rol dword [rcx + 1 * rcx], cl              | d3 04 09                |
-    | rol dword [rdx + 1 * rcx], cl              | d3 04 0a                |
-    | rol dword [rbx + 1 * rcx], cl              | d3 04 0b                |
-    | rol dword [rsp + 1 * rcx], cl              | d3 04 0c                |
-    | rol dword [rbp + 1 * rcx], cl              | d3 44 0d 00             |
-    | rol dword [rsi + 1 * rcx], cl              | d3 04 0e                |
-    | rol dword [rdi + 1 * rcx], cl              | d3 04 0f                |
-    | rol dword [r8 + 1 * rcx], cl               | 41 d3 04 08             |
-    | rol dword [r9 + 1 * rcx], cl               | 41 d3 04 09             |
-    | rol dword [r10 + 1 * rcx], cl              | 41 d3 04 0a             |
-    | rol dword [r11 + 1 * rcx], cl              | 41 d3 04 0b             |
-    | rol dword [r12 + 1 * rcx], cl              | 41 d3 04 0c             |
-    | rol dword [r13 + 1 * rcx], cl              | 41 d3 44 0d 00          |
-    | rol dword [r14 + 1 * rcx], cl              | 41 d3 04 0e             |
-    | rol dword [r15 + 1 * rcx], cl              | 41 d3 04 0f             |
-    | rol dword [rax + 1 * rax], cl              | d3 04 00                |
-    | rol dword [rax + 1 * rdx], cl              | d3 04 10                |
-    | rol dword [rax + 1 * rbx], cl              | d3 04 18                |
-    | rol dword [rax + 1 * rbp], cl              | d3 04 28                |
-    | rol dword [rax + 1 * rsi], cl              | d3 04 30                |
-    | rol dword [rax + 1 * rdi], cl              | d3 04 38                |
-    | rol dword [rax + 1 * r8], cl               | 42 d3 04 00             |
-    | rol dword [rax + 1 * r9], cl               | 42 d3 04 08             |
-    | rol dword [rax + 1 * r10], cl              | 42 d3 04 10             |
-    | rol dword [rax + 1 * r11], cl              | 42 d3 04 18             |
-    | rol dword [rax + 1 * r12], cl              | 42 d3 04 20             |
-    | rol dword [rax + 1 * r13], cl              | 42 d3 04 28             |
-    | rol dword [rax + 1 * r14], cl              | 42 d3 04 30             |
-    | rol dword [rax + 1 * r15], cl              | 42 d3 04 38             |
-    | rol dword [rax + 2 * rcx], cl              | d3 04 48                |
-    | rol dword [rax + 4 * rcx], cl              | d3 04 88                |
-    | rol dword [rax + 8 * rcx], cl              | d3 04 c8                |
-    | rol dword [r8 + 1 * r9], cl                | 43 d3 04 08             |
-    | rol dword [r8 + 2 * r9], cl                | 43 d3 04 48             |
-    | rol dword [r8 + 4 * r9], cl                | 43 d3 04 88             |
-    | rol dword [r8 + 8 * r9], cl                | 43 d3 04 c8             |
-    | rol dword [1 * rcx], cl                    | d3 04 0d 00 00 00 00    |
-    | rol dword [2 * rcx], cl                    | d3 04 4d 00 00 00 00    |
-    | rol dword [4 * rcx], cl                    | d3 04 8d 00 00 00 00    |
-    | rol dword [8 * rcx], cl                    | d3 04 cd 00 00 00 00    |
-    | rol dword [1 * r9], cl                     | 42 d3 04 0d 00 00 00 00 |
-    | rol dword [2 * r9], cl                     | 42 d3 04 4d 00 00 00 00 |
-    | rol dword [4 * r9], cl                     | 42 d3 04 8d 00 00 00 00 |
-    | rol dword [8 * r9], cl                     | 42 d3 04 cd 00 00 00 00 |
-    | rol dword [r13 + 8 * r12], cl              | 43 d3 44 e5 00          |
-    | rol dword [rsp + 4 * r15], cl              | 42 d3 04 bc             |
-    | rol dword [rax + 1 * rcx + 0x00], cl       | d3 44 08 00             |
-    | rol dword [rax + 1 * rcx - 0x00], cl       | d3 44 08 00             |
-    | rol dword [rax + 1 * rcx + 0x01], cl       | d3 44 08 01             |
-    | rol dword [rax + 1 * rcx - 0x01], cl       | d3 44 08 ff             |
-    | rol dword [rax + 1 * rcx + 0x00000001], cl | d3 84 08 01 00 00 00    |
-    | rol dword [rax + 1 * rcx - 0x00000001], cl | d3 84 08 ff ff ff ff    |
-    | rol dword [rax + 1 * rcx + 0x7f], cl       | d3 44 08 7f             |
-    | rol dword [rax + 1 * rcx - 0x7f], cl       | d3 44 08 81             |
-    | rol dword [rax + 1 * rcx + 0x80], cl       | d3 84 08 80 00 00 00    |
-    | rol dword [rax + 1 * rcx - 0x80], cl       | d3 44 08 80             |
-    | rol dword [rax + 1 * rcx - 0x81], cl       | d3 84 08 7f ff ff ff    |
-    | rol dword [rax + 1 * rcx + 0xff], cl       | d3 84 08 ff 00 00 00    |
-    | rol dword [rax + 1 * rcx - 0xff], cl       | d3 84 08 01 ff ff ff    |
-    | rol dword [rax + 1 * rcx + 0x7fffffff], cl | d3 84 08 ff ff ff 7f    |
-    | rol dword [rax + 1 * rcx - 0x7fffffff], cl | d3 84 08 01 00 00 80    |
-    | rol dword [rax + 1 * rcx - 0x80000000], cl | d3 84 08 00 00 00 80    |
-    | rol dword [r10 + 0x7f], cl                 | 41 d3 42 7f             |
-    | rol dword [r10 + 0x80], cl                 | 41 d3 82 80 00 00 00    |
-    | rol dword [r10 - 0x80], cl                 | 41 d3 42 80             |
-    | rol dword [r10 - 0x81], cl                 | 41 d3 82 7f ff ff ff    |
-    | ------------------------------------------ | ----------------------- |
+    | ---------------------------------------------------------------- | ----------------------------------- |
+    | instruction                                                      | encoding                            |
+    | ---------------------------------------------------------------- | ----------------------------------- |
+    | rol dword [rax], cl                                              | d3 00                               |
+    | rol dword [rcx], cl                                              | d3 01                               |
+    | rol dword [rdx], cl                                              | d3 02                               |
+    | rol dword [rbx], cl                                              | d3 03                               |
+    | rol dword [rsp], cl                                              | d3 04 24                            |
+    | rol dword [rbp], cl                                              | d3 45 00                            |
+    | rol dword [rsi], cl                                              | d3 06                               |
+    | rol dword [rdi], cl                                              | d3 07                               |
+    | rol dword [r8], cl                                               | 41 d3 00                            |
+    | rol dword [r9], cl                                               | 41 d3 01                            |
+    | rol dword [r10], cl                                              | 41 d3 02                            |
+    | rol dword [r11], cl                                              | 41 d3 03                            |
+    | rol dword [r12], cl                                              | 41 d3 04 24                         |
+    | rol dword [r13], cl                                              | 41 d3 45 00                         |
+    | rol dword [r14], cl                                              | 41 d3 06                            |
+    | rol dword [r15], cl                                              | 41 d3 07                            |
+    | rol dword [rax + 1 * rcx], cl                                    | d3 04 08                            |
+    | rol dword [rcx + 1 * rcx], cl                                    | d3 04 09                            |
+    | rol dword [rdx + 1 * rcx], cl                                    | d3 04 0a                            |
+    | rol dword [rbx + 1 * rcx], cl                                    | d3 04 0b                            |
+    | rol dword [rsp + 1 * rcx], cl                                    | d3 04 0c                            |
+    | rol dword [rbp + 1 * rcx], cl                                    | d3 44 0d 00                         |
+    | rol dword [rsi + 1 * rcx], cl                                    | d3 04 0e                            |
+    | rol dword [rdi + 1 * rcx], cl                                    | d3 04 0f                            |
+    | rol dword [r8 + 1 * rcx], cl                                     | 41 d3 04 08                         |
+    | rol dword [r9 + 1 * rcx], cl                                     | 41 d3 04 09                         |
+    | rol dword [r10 + 1 * rcx], cl                                    | 41 d3 04 0a                         |
+    | rol dword [r11 + 1 * rcx], cl                                    | 41 d3 04 0b                         |
+    | rol dword [r12 + 1 * rcx], cl                                    | 41 d3 04 0c                         |
+    | rol dword [r13 + 1 * rcx], cl                                    | 41 d3 44 0d 00                      |
+    | rol dword [r14 + 1 * rcx], cl                                    | 41 d3 04 0e                         |
+    | rol dword [r15 + 1 * rcx], cl                                    | 41 d3 04 0f                         |
+    | rol dword [rax + 1 * rax], cl                                    | d3 04 00                            |
+    | rol dword [rax + 1 * rdx], cl                                    | d3 04 10                            |
+    | rol dword [rax + 1 * rbx], cl                                    | d3 04 18                            |
+    | rol dword [rax + 1 * rbp], cl                                    | d3 04 28                            |
+    | rol dword [rax + 1 * rsi], cl                                    | d3 04 30                            |
+    | rol dword [rax + 1 * rdi], cl                                    | d3 04 38                            |
+    | rol dword [rax + 1 * r8], cl                                     | 42 d3 04 00                         |
+    | rol dword [rax + 1 * r9], cl                                     | 42 d3 04 08                         |
+    | rol dword [rax + 1 * r10], cl                                    | 42 d3 04 10                         |
+    | rol dword [rax + 1 * r11], cl                                    | 42 d3 04 18                         |
+    | rol dword [rax + 1 * r12], cl                                    | 42 d3 04 20                         |
+    | rol dword [rax + 1 * r13], cl                                    | 42 d3 04 28                         |
+    | rol dword [rax + 1 * r14], cl                                    | 42 d3 04 30                         |
+    | rol dword [rax + 1 * r15], cl                                    | 42 d3 04 38                         |
+    | rol dword [rax + 2 * rcx], cl                                    | d3 04 48                            |
+    | rol dword [rax + 4 * rcx], cl                                    | d3 04 88                            |
+    | rol dword [rax + 8 * rcx], cl                                    | d3 04 c8                            |
+    | rol dword [r8 + 1 * r9], cl                                      | 43 d3 04 08                         |
+    | rol dword [r8 + 2 * r9], cl                                      | 43 d3 04 48                         |
+    | rol dword [r8 + 4 * r9], cl                                      | 43 d3 04 88                         |
+    | rol dword [r8 + 8 * r9], cl                                      | 43 d3 04 c8                         |
+    | rol dword [1 * rcx], cl                                          | d3 04 0d 00 00 00 00                |
+    | rol dword [2 * rcx], cl                                          | d3 04 4d 00 00 00 00                |
+    | rol dword [4 * rcx], cl                                          | d3 04 8d 00 00 00 00                |
+    | rol dword [8 * rcx], cl                                          | d3 04 cd 00 00 00 00                |
+    | rol dword [1 * r9], cl                                           | 42 d3 04 0d 00 00 00 00             |
+    | rol dword [2 * r9], cl                                           | 42 d3 04 4d 00 00 00 00             |
+    | rol dword [4 * r9], cl                                           | 42 d3 04 8d 00 00 00 00             |
+    | rol dword [8 * r9], cl                                           | 42 d3 04 cd 00 00 00 00             |
+    | rol dword [r13 + 8 * r12], cl                                    | 43 d3 44 e5 00                      |
+    | rol dword [rsp + 4 * r15], cl                                    | 42 d3 04 bc                         |
+    | rol dword [rax + 1 * rcx + 0x00], cl                             | d3 44 08 00                         |
+    | rol dword [rax + 1 * rcx - 0x00], cl                             | d3 44 08 00                         |
+    | rol dword [rax + 1 * rcx + 0x01], cl                             | d3 44 08 01                         |
+    | rol dword [rax + 1 * rcx - 0x01], cl                             | d3 44 08 ff                         |
+    | rol dword [rax + 1 * rcx + 0x00000001], cl                       | d3 84 08 01 00 00 00                |
+    | rol dword [rax + 1 * rcx - 0x00000001], cl                       | d3 84 08 ff ff ff ff                |
+    | rol dword [rax + 1 * rcx + 0x7f], cl                             | d3 44 08 7f                         |
+    | rol dword [rax + 1 * rcx - 0x7f], cl                             | d3 44 08 81                         |
+    | rol dword [rax + 1 * rcx + 0x80], cl                             | d3 84 08 80 00 00 00                |
+    | rol dword [rax + 1 * rcx - 0x80], cl                             | d3 44 08 80                         |
+    | rol dword [rax + 1 * rcx - 0x81], cl                             | d3 84 08 7f ff ff ff                |
+    | rol dword [rax + 1 * rcx + 0xff], cl                             | d3 84 08 ff 00 00 00                |
+    | rol dword [rax + 1 * rcx - 0xff], cl                             | d3 84 08 01 ff ff ff                |
+    | rol dword [rax + 1 * rcx + 0x7fffffff], cl                       | d3 84 08 ff ff ff 7f                |
+    | rol dword [rax + 1 * rcx - 0x7fffffff], cl                       | d3 84 08 01 00 00 80                |
+    | rol dword [rax + 1 * rcx - 0x80000000], cl                       | d3 84 08 00 00 00 80                |
+    | rol dword [r10 + 0x7f], cl                                       | 41 d3 42 7f                         |
+    | rol dword [r10 + 0x80], cl                                       | 41 d3 82 80 00 00 00                |
+    | rol dword [r10 - 0x80], cl                                       | 41 d3 42 80                         |
+    | rol dword [r10 - 0x81], cl                                       | 41 d3 82 7f ff ff ff                |
+    | .prev5: nop; nop; nop; nop; nop; rol dword [rel @prev5], cl      | 90 90 90 90 90 d3 05 f5 ff ff ff    |
+    | .prev1: nop; rol dword [rel @prev1], cl                          | 90 d3 05 f9 ff ff ff                |
+    | rol dword [rel @next1], cl; nop; .next1: nop                     | d3 05 01 00 00 00 90 90             |
+    | rol dword [rel @next5], cl; nop; nop; nop; nop; nop; .next5: nop | d3 05 05 00 00 00 90 90 90 90 90 90 |
+    | ---------------------------------------------------------------- | ----------------------------------- |
 """
 
 
@@ -741,163 +763,170 @@ def can_encode_rol_addr32_cl():
 
 
 ROL_ADDR16_IMM8 = """
-    | ------------------------------------------- | ----------------------------- |
-    | instruction                                 | encoding                      |
-    | ------------------------------------------- | ----------------------------- |
-    | rol word [rax], 0x01                        | 66 d1 00                      |
-    | rol word [rcx], 0x01                        | 66 d1 01                      |
-    | rol word [rdx], 0x01                        | 66 d1 02                      |
-    | rol word [rbx], 0x01                        | 66 d1 03                      |
-    | rol word [rsp], 0x01                        | 66 d1 04 24                   |
-    | rol word [rbp], 0x01                        | 66 d1 45 00                   |
-    | rol word [rsi], 0x01                        | 66 d1 06                      |
-    | rol word [rdi], 0x01                        | 66 d1 07                      |
-    | rol word [r8], 0x01                         | 66 41 d1 00                   |
-    | rol word [r9], 0x01                         | 66 41 d1 01                   |
-    | rol word [r10], 0x01                        | 66 41 d1 02                   |
-    | rol word [r11], 0x01                        | 66 41 d1 03                   |
-    | rol word [r12], 0x01                        | 66 41 d1 04 24                |
-    | rol word [r13], 0x01                        | 66 41 d1 45 00                |
-    | rol word [r14], 0x01                        | 66 41 d1 06                   |
-    | rol word [r15], 0x01                        | 66 41 d1 07                   |
-    | rol word [rax + 1 * rcx], 0x01              | 66 d1 04 08                   |
-    | rol word [rcx + 1 * rcx], 0x01              | 66 d1 04 09                   |
-    | rol word [rdx + 1 * rcx], 0x01              | 66 d1 04 0a                   |
-    | rol word [rbx + 1 * rcx], 0x01              | 66 d1 04 0b                   |
-    | rol word [rsp + 1 * rcx], 0x01              | 66 d1 04 0c                   |
-    | rol word [rbp + 1 * rcx], 0x01              | 66 d1 44 0d 00                |
-    | rol word [rsi + 1 * rcx], 0x01              | 66 d1 04 0e                   |
-    | rol word [rdi + 1 * rcx], 0x01              | 66 d1 04 0f                   |
-    | rol word [r8 + 1 * rcx], 0x01               | 66 41 d1 04 08                |
-    | rol word [r9 + 1 * rcx], 0x01               | 66 41 d1 04 09                |
-    | rol word [r10 + 1 * rcx], 0x01              | 66 41 d1 04 0a                |
-    | rol word [r11 + 1 * rcx], 0x01              | 66 41 d1 04 0b                |
-    | rol word [r12 + 1 * rcx], 0x01              | 66 41 d1 04 0c                |
-    | rol word [r13 + 1 * rcx], 0x01              | 66 41 d1 44 0d 00             |
-    | rol word [r14 + 1 * rcx], 0x01              | 66 41 d1 04 0e                |
-    | rol word [r15 + 1 * rcx], 0x01              | 66 41 d1 04 0f                |
-    | rol word [rax + 1 * rax], 0x01              | 66 d1 04 00                   |
-    | rol word [rax + 1 * rdx], 0x01              | 66 d1 04 10                   |
-    | rol word [rax + 1 * rbx], 0x01              | 66 d1 04 18                   |
-    | rol word [rax + 1 * rbp], 0x01              | 66 d1 04 28                   |
-    | rol word [rax + 1 * rsi], 0x01              | 66 d1 04 30                   |
-    | rol word [rax + 1 * rdi], 0x01              | 66 d1 04 38                   |
-    | rol word [rax + 1 * r8], 0x01               | 66 42 d1 04 00                |
-    | rol word [rax + 1 * r9], 0x01               | 66 42 d1 04 08                |
-    | rol word [rax + 1 * r10], 0x01              | 66 42 d1 04 10                |
-    | rol word [rax + 1 * r11], 0x01              | 66 42 d1 04 18                |
-    | rol word [rax + 1 * r12], 0x01              | 66 42 d1 04 20                |
-    | rol word [rax + 1 * r13], 0x01              | 66 42 d1 04 28                |
-    | rol word [rax + 1 * r14], 0x01              | 66 42 d1 04 30                |
-    | rol word [rax + 1 * r15], 0x01              | 66 42 d1 04 38                |
-    | rol word [rax + 2 * rcx], 0x01              | 66 d1 04 48                   |
-    | rol word [rax + 4 * rcx], 0x01              | 66 d1 04 88                   |
-    | rol word [rax + 8 * rcx], 0x01              | 66 d1 04 c8                   |
-    | rol word [r8 + 1 * r9], 0x01                | 66 43 d1 04 08                |
-    | rol word [r8 + 2 * r9], 0x01                | 66 43 d1 04 48                |
-    | rol word [r8 + 4 * r9], 0x01                | 66 43 d1 04 88                |
-    | rol word [r8 + 8 * r9], 0x01                | 66 43 d1 04 c8                |
-    | rol word [1 * rcx], 0x01                    | 66 d1 04 0d 00 00 00 00       |
-    | rol word [2 * rcx], 0x01                    | 66 d1 04 4d 00 00 00 00       |
-    | rol word [4 * rcx], 0x01                    | 66 d1 04 8d 00 00 00 00       |
-    | rol word [8 * rcx], 0x01                    | 66 d1 04 cd 00 00 00 00       |
-    | rol word [1 * r9], 0x01                     | 66 42 d1 04 0d 00 00 00 00    |
-    | rol word [2 * r9], 0x01                     | 66 42 d1 04 4d 00 00 00 00    |
-    | rol word [4 * r9], 0x01                     | 66 42 d1 04 8d 00 00 00 00    |
-    | rol word [8 * r9], 0x01                     | 66 42 d1 04 cd 00 00 00 00    |
-    | rol word [r13 + 8 * r12], 0x01              | 66 43 d1 44 e5 00             |
-    | rol word [rsp + 4 * r15], 0x01              | 66 42 d1 04 bc                |
-    | rol word [rax + 1 * rcx + 0x00], 0x01       | 66 d1 44 08 00                |
-    | rol word [rax + 1 * rcx - 0x00], 0x01       | 66 d1 44 08 00                |
-    | rol word [rax + 1 * rcx + 0x01], 0x01       | 66 d1 44 08 01                |
-    | rol word [rax + 1 * rcx - 0x01], 0x01       | 66 d1 44 08 ff                |
-    | rol word [rax + 1 * rcx + 0x00000001], 0x01 | 66 d1 84 08 01 00 00 00       |
-    | rol word [rax + 1 * rcx - 0x00000001], 0x01 | 66 d1 84 08 ff ff ff ff       |
-    | rol word [rax + 1 * rcx + 0x7f], 0x01       | 66 d1 44 08 7f                |
-    | rol word [rax + 1 * rcx - 0x7f], 0x01       | 66 d1 44 08 81                |
-    | rol word [rax + 1 * rcx + 0x80], 0x01       | 66 d1 84 08 80 00 00 00       |
-    | rol word [rax + 1 * rcx - 0x80], 0x01       | 66 d1 44 08 80                |
-    | rol word [rax + 1 * rcx - 0x81], 0x01       | 66 d1 84 08 7f ff ff ff       |
-    | rol word [rax + 1 * rcx + 0xff], 0x01       | 66 d1 84 08 ff 00 00 00       |
-    | rol word [rax + 1 * rcx - 0xff], 0x01       | 66 d1 84 08 01 ff ff ff       |
-    | rol word [rax + 1 * rcx + 0x7fffffff], 0x01 | 66 d1 84 08 ff ff ff 7f       |
-    | rol word [rax + 1 * rcx - 0x7fffffff], 0x01 | 66 d1 84 08 01 00 00 80       |
-    | rol word [rax + 1 * rcx - 0x80000000], 0x01 | 66 d1 84 08 00 00 00 80       |
-    | rol word [r10 + 0x7f], 0x01                 | 66 41 d1 42 7f                |
-    | rol word [r10 + 0x80], 0x01                 | 66 41 d1 82 80 00 00 00       |
-    | rol word [r10 - 0x80], 0x01                 | 66 41 d1 42 80                |
-    | rol word [r10 - 0x81], 0x01                 | 66 41 d1 82 7f ff ff ff       |
-    | rol word [rax], 0x00                        | 66 c1 00 00                   |
-    | rol word [rax], 0x7f                        | 66 c1 00 7f                   |
-    | rol word [rax], 0x80                        | 66 c1 00 80                   |
-    | rol word [rax], 0xff                        | 66 c1 00 ff                   |
-    | rol word [rcx], 0x7f                        | 66 c1 01 7f                   |
-    | rol word [rdx], 0x80                        | 66 c1 02 80                   |
-    | rol word [rbx], 0xff                        | 66 c1 03 ff                   |
-    | rol word [rsp], 0x00                        | 66 c1 04 24 00                |
-    | rol word [rsi], 0x7f                        | 66 c1 06 7f                   |
-    | rol word [rdi], 0x80                        | 66 c1 07 80                   |
-    | rol word [r8], 0xff                         | 66 41 c1 00 ff                |
-    | rol word [r9], 0x00                         | 66 41 c1 01 00                |
-    | rol word [r11], 0x7f                        | 66 41 c1 03 7f                |
-    | rol word [r12], 0x80                        | 66 41 c1 04 24 80             |
-    | rol word [r13], 0xff                        | 66 41 c1 45 00 ff             |
-    | rol word [r14], 0x00                        | 66 41 c1 06 00                |
-    | rol word [rax + 1 * rcx], 0x7f              | 66 c1 04 08 7f                |
-    | rol word [rcx + 1 * rcx], 0x80              | 66 c1 04 09 80                |
-    | rol word [rdx + 1 * rcx], 0xff              | 66 c1 04 0a ff                |
-    | rol word [rbx + 1 * rcx], 0x00              | 66 c1 04 0b 00                |
-    | rol word [rbp + 1 * rcx], 0x7f              | 66 c1 44 0d 00 7f             |
-    | rol word [rsi + 1 * rcx], 0x80              | 66 c1 04 0e 80                |
-    | rol word [rdi + 1 * rcx], 0xff              | 66 c1 04 0f ff                |
-    | rol word [r8 + 1 * rcx], 0x00               | 66 41 c1 04 08 00             |
-    | rol word [r10 + 1 * rcx], 0x7f              | 66 41 c1 04 0a 7f             |
-    | rol word [r11 + 1 * rcx], 0x80              | 66 41 c1 04 0b 80             |
-    | rol word [r12 + 1 * rcx], 0xff              | 66 41 c1 04 0c ff             |
-    | rol word [r13 + 1 * rcx], 0x00              | 66 41 c1 44 0d 00 00          |
-    | rol word [r15 + 1 * rcx], 0x7f              | 66 41 c1 04 0f 7f             |
-    | rol word [rax + 1 * rax], 0x80              | 66 c1 04 00 80                |
-    | rol word [rax + 1 * rdx], 0xff              | 66 c1 04 10 ff                |
-    | rol word [rax + 1 * rbx], 0x00              | 66 c1 04 18 00                |
-    | rol word [rax + 1 * rsi], 0x7f              | 66 c1 04 30 7f                |
-    | rol word [rax + 1 * rdi], 0x80              | 66 c1 04 38 80                |
-    | rol word [rax + 1 * r8], 0xff               | 66 42 c1 04 00 ff             |
-    | rol word [rax + 1 * r9], 0x00               | 66 42 c1 04 08 00             |
-    | rol word [rax + 1 * r11], 0x7f              | 66 42 c1 04 18 7f             |
-    | rol word [rax + 1 * r12], 0x80              | 66 42 c1 04 20 80             |
-    | rol word [rax + 1 * r13], 0xff              | 66 42 c1 04 28 ff             |
-    | rol word [rax + 1 * r14], 0x00              | 66 42 c1 04 30 00             |
-    | rol word [rax + 2 * rcx], 0x7f              | 66 c1 04 48 7f                |
-    | rol word [rax + 4 * rcx], 0x80              | 66 c1 04 88 80                |
-    | rol word [rax + 8 * rcx], 0xff              | 66 c1 04 c8 ff                |
-    | rol word [r8 + 1 * r9], 0x00                | 66 43 c1 04 08 00             |
-    | rol word [r8 + 4 * r9], 0x7f                | 66 43 c1 04 88 7f             |
-    | rol word [r8 + 8 * r9], 0x80                | 66 43 c1 04 c8 80             |
-    | rol word [1 * rcx], 0xff                    | 66 c1 04 0d 00 00 00 00 ff    |
-    | rol word [2 * rcx], 0x00                    | 66 c1 04 4d 00 00 00 00 00    |
-    | rol word [8 * rcx], 0x7f                    | 66 c1 04 cd 00 00 00 00 7f    |
-    | rol word [1 * r9], 0x80                     | 66 42 c1 04 0d 00 00 00 00 80 |
-    | rol word [2 * r9], 0xff                     | 66 42 c1 04 4d 00 00 00 00 ff |
-    | rol word [4 * r9], 0x00                     | 66 42 c1 04 8d 00 00 00 00 00 |
-    | rol word [r13 + 8 * r12], 0x7f              | 66 43 c1 44 e5 00 7f          |
-    | rol word [rsp + 4 * r15], 0x80              | 66 42 c1 04 bc 80             |
-    | rol word [rax + 1 * rcx + 0x00], 0xff       | 66 c1 44 08 00 ff             |
-    | rol word [rax + 1 * rcx - 0x00], 0x00       | 66 c1 44 08 00 00             |
-    | rol word [rax + 1 * rcx - 0x01], 0x7f       | 66 c1 44 08 ff 7f             |
-    | rol word [rax + 1 * rcx + 0x00000001], 0x80 | 66 c1 84 08 01 00 00 00 80    |
-    | rol word [rax + 1 * rcx - 0x00000001], 0xff | 66 c1 84 08 ff ff ff ff ff    |
-    | rol word [rax + 1 * rcx + 0x7f], 0x00       | 66 c1 44 08 7f 00             |
-    | rol word [rax + 1 * rcx + 0x80], 0x7f       | 66 c1 84 08 80 00 00 00 7f    |
-    | rol word [rax + 1 * rcx - 0x80], 0x80       | 66 c1 44 08 80 80             |
-    | rol word [rax + 1 * rcx - 0x81], 0xff       | 66 c1 84 08 7f ff ff ff ff    |
-    | rol word [rax + 1 * rcx + 0xff], 0x00       | 66 c1 84 08 ff 00 00 00 00    |
-    | rol word [rax + 1 * rcx + 0x7fffffff], 0x7f | 66 c1 84 08 ff ff ff 7f 7f    |
-    | rol word [rax + 1 * rcx - 0x7fffffff], 0x80 | 66 c1 84 08 01 00 00 80 80    |
-    | rol word [rax + 1 * rcx - 0x80000000], 0xff | 66 c1 84 08 00 00 00 80 ff    |
-    | rol word [r10 + 0x7f], 0x00                 | 66 41 c1 42 7f 00             |
-    | rol word [r10 - 0x80], 0x7f                 | 66 41 c1 42 80 7f             |
-    | rol word [r10 - 0x81], 0x80                 | 66 41 c1 82 7f ff ff ff 80    |
-    | ------------------------------------------- | ----------------------------- |
+    | ----------------------------------------------------------------- | ----------------------------------------- |
+    | instruction                                                       | encoding                                  |
+    | ----------------------------------------------------------------- | ----------------------------------------- |
+    | rol word [rax], 0x01                                              | 66 d1 00                                  |
+    | rol word [rcx], 0x01                                              | 66 d1 01                                  |
+    | rol word [rdx], 0x01                                              | 66 d1 02                                  |
+    | rol word [rbx], 0x01                                              | 66 d1 03                                  |
+    | rol word [rsp], 0x01                                              | 66 d1 04 24                               |
+    | rol word [rbp], 0x01                                              | 66 d1 45 00                               |
+    | rol word [rsi], 0x01                                              | 66 d1 06                                  |
+    | rol word [rdi], 0x01                                              | 66 d1 07                                  |
+    | rol word [r8], 0x01                                               | 66 41 d1 00                               |
+    | rol word [r9], 0x01                                               | 66 41 d1 01                               |
+    | rol word [r10], 0x01                                              | 66 41 d1 02                               |
+    | rol word [r11], 0x01                                              | 66 41 d1 03                               |
+    | rol word [r12], 0x01                                              | 66 41 d1 04 24                            |
+    | rol word [r13], 0x01                                              | 66 41 d1 45 00                            |
+    | rol word [r14], 0x01                                              | 66 41 d1 06                               |
+    | rol word [r15], 0x01                                              | 66 41 d1 07                               |
+    | rol word [rax + 1 * rcx], 0x01                                    | 66 d1 04 08                               |
+    | rol word [rcx + 1 * rcx], 0x01                                    | 66 d1 04 09                               |
+    | rol word [rdx + 1 * rcx], 0x01                                    | 66 d1 04 0a                               |
+    | rol word [rbx + 1 * rcx], 0x01                                    | 66 d1 04 0b                               |
+    | rol word [rsp + 1 * rcx], 0x01                                    | 66 d1 04 0c                               |
+    | rol word [rbp + 1 * rcx], 0x01                                    | 66 d1 44 0d 00                            |
+    | rol word [rsi + 1 * rcx], 0x01                                    | 66 d1 04 0e                               |
+    | rol word [rdi + 1 * rcx], 0x01                                    | 66 d1 04 0f                               |
+    | rol word [r8 + 1 * rcx], 0x01                                     | 66 41 d1 04 08                            |
+    | rol word [r9 + 1 * rcx], 0x01                                     | 66 41 d1 04 09                            |
+    | rol word [r10 + 1 * rcx], 0x01                                    | 66 41 d1 04 0a                            |
+    | rol word [r11 + 1 * rcx], 0x01                                    | 66 41 d1 04 0b                            |
+    | rol word [r12 + 1 * rcx], 0x01                                    | 66 41 d1 04 0c                            |
+    | rol word [r13 + 1 * rcx], 0x01                                    | 66 41 d1 44 0d 00                         |
+    | rol word [r14 + 1 * rcx], 0x01                                    | 66 41 d1 04 0e                            |
+    | rol word [r15 + 1 * rcx], 0x01                                    | 66 41 d1 04 0f                            |
+    | rol word [rax + 1 * rax], 0x01                                    | 66 d1 04 00                               |
+    | rol word [rax + 1 * rdx], 0x01                                    | 66 d1 04 10                               |
+    | rol word [rax + 1 * rbx], 0x01                                    | 66 d1 04 18                               |
+    | rol word [rax + 1 * rbp], 0x01                                    | 66 d1 04 28                               |
+    | rol word [rax + 1 * rsi], 0x01                                    | 66 d1 04 30                               |
+    | rol word [rax + 1 * rdi], 0x01                                    | 66 d1 04 38                               |
+    | rol word [rax + 1 * r8], 0x01                                     | 66 42 d1 04 00                            |
+    | rol word [rax + 1 * r9], 0x01                                     | 66 42 d1 04 08                            |
+    | rol word [rax + 1 * r10], 0x01                                    | 66 42 d1 04 10                            |
+    | rol word [rax + 1 * r11], 0x01                                    | 66 42 d1 04 18                            |
+    | rol word [rax + 1 * r12], 0x01                                    | 66 42 d1 04 20                            |
+    | rol word [rax + 1 * r13], 0x01                                    | 66 42 d1 04 28                            |
+    | rol word [rax + 1 * r14], 0x01                                    | 66 42 d1 04 30                            |
+    | rol word [rax + 1 * r15], 0x01                                    | 66 42 d1 04 38                            |
+    | rol word [rax + 2 * rcx], 0x01                                    | 66 d1 04 48                               |
+    | rol word [rax + 4 * rcx], 0x01                                    | 66 d1 04 88                               |
+    | rol word [rax + 8 * rcx], 0x01                                    | 66 d1 04 c8                               |
+    | rol word [r8 + 1 * r9], 0x01                                      | 66 43 d1 04 08                            |
+    | rol word [r8 + 2 * r9], 0x01                                      | 66 43 d1 04 48                            |
+    | rol word [r8 + 4 * r9], 0x01                                      | 66 43 d1 04 88                            |
+    | rol word [r8 + 8 * r9], 0x01                                      | 66 43 d1 04 c8                            |
+    | rol word [1 * rcx], 0x01                                          | 66 d1 04 0d 00 00 00 00                   |
+    | rol word [2 * rcx], 0x01                                          | 66 d1 04 4d 00 00 00 00                   |
+    | rol word [4 * rcx], 0x01                                          | 66 d1 04 8d 00 00 00 00                   |
+    | rol word [8 * rcx], 0x01                                          | 66 d1 04 cd 00 00 00 00                   |
+    | rol word [1 * r9], 0x01                                           | 66 42 d1 04 0d 00 00 00 00                |
+    | rol word [2 * r9], 0x01                                           | 66 42 d1 04 4d 00 00 00 00                |
+    | rol word [4 * r9], 0x01                                           | 66 42 d1 04 8d 00 00 00 00                |
+    | rol word [8 * r9], 0x01                                           | 66 42 d1 04 cd 00 00 00 00                |
+    | rol word [r13 + 8 * r12], 0x01                                    | 66 43 d1 44 e5 00                         |
+    | rol word [rsp + 4 * r15], 0x01                                    | 66 42 d1 04 bc                            |
+    | rol word [rax + 1 * rcx + 0x00], 0x01                             | 66 d1 44 08 00                            |
+    | rol word [rax + 1 * rcx - 0x00], 0x01                             | 66 d1 44 08 00                            |
+    | rol word [rax + 1 * rcx + 0x01], 0x01                             | 66 d1 44 08 01                            |
+    | rol word [rax + 1 * rcx - 0x01], 0x01                             | 66 d1 44 08 ff                            |
+    | rol word [rax + 1 * rcx + 0x00000001], 0x01                       | 66 d1 84 08 01 00 00 00                   |
+    | rol word [rax + 1 * rcx - 0x00000001], 0x01                       | 66 d1 84 08 ff ff ff ff                   |
+    | rol word [rax + 1 * rcx + 0x7f], 0x01                             | 66 d1 44 08 7f                            |
+    | rol word [rax + 1 * rcx - 0x7f], 0x01                             | 66 d1 44 08 81                            |
+    | rol word [rax + 1 * rcx + 0x80], 0x01                             | 66 d1 84 08 80 00 00 00                   |
+    | rol word [rax + 1 * rcx - 0x80], 0x01                             | 66 d1 44 08 80                            |
+    | rol word [rax + 1 * rcx - 0x81], 0x01                             | 66 d1 84 08 7f ff ff ff                   |
+    | rol word [rax + 1 * rcx + 0xff], 0x01                             | 66 d1 84 08 ff 00 00 00                   |
+    | rol word [rax + 1 * rcx - 0xff], 0x01                             | 66 d1 84 08 01 ff ff ff                   |
+    | rol word [rax + 1 * rcx + 0x7fffffff], 0x01                       | 66 d1 84 08 ff ff ff 7f                   |
+    | rol word [rax + 1 * rcx - 0x7fffffff], 0x01                       | 66 d1 84 08 01 00 00 80                   |
+    | rol word [rax + 1 * rcx - 0x80000000], 0x01                       | 66 d1 84 08 00 00 00 80                   |
+    | rol word [r10 + 0x7f], 0x01                                       | 66 41 d1 42 7f                            |
+    | rol word [r10 + 0x80], 0x01                                       | 66 41 d1 82 80 00 00 00                   |
+    | rol word [r10 - 0x80], 0x01                                       | 66 41 d1 42 80                            |
+    | rol word [r10 - 0x81], 0x01                                       | 66 41 d1 82 7f ff ff ff                   |
+    | .prev5: nop; nop; nop; nop; nop; rol word [rel @prev5], 0x01      | 90 90 90 90 90 66 d1 05 f4 ff ff ff       |
+    | .prev1: nop; rol word [rel @prev1], 0x01                          | 90 66 d1 05 f8 ff ff ff                   |
+    | rol word [rel @next1], 0x01; nop; .next1: nop                     | 66 d1 05 01 00 00 00 90 90                |
+    | rol word [rel @next5], 0x01; nop; nop; nop; nop; nop; .next5: nop | 66 d1 05 05 00 00 00 90 90 90 90 90 90    |
+    | rol word [rax], 0x00                                              | 66 c1 00 00                               |
+    | rol word [rax], 0x7f                                              | 66 c1 00 7f                               |
+    | rol word [rax], 0x80                                              | 66 c1 00 80                               |
+    | rol word [rax], 0xff                                              | 66 c1 00 ff                               |
+    | rol word [rcx], 0x7f                                              | 66 c1 01 7f                               |
+    | rol word [rdx], 0x80                                              | 66 c1 02 80                               |
+    | rol word [rbx], 0xff                                              | 66 c1 03 ff                               |
+    | rol word [rsp], 0x00                                              | 66 c1 04 24 00                            |
+    | rol word [rsi], 0x7f                                              | 66 c1 06 7f                               |
+    | rol word [rdi], 0x80                                              | 66 c1 07 80                               |
+    | rol word [r8], 0xff                                               | 66 41 c1 00 ff                            |
+    | rol word [r9], 0x00                                               | 66 41 c1 01 00                            |
+    | rol word [r11], 0x7f                                              | 66 41 c1 03 7f                            |
+    | rol word [r12], 0x80                                              | 66 41 c1 04 24 80                         |
+    | rol word [r13], 0xff                                              | 66 41 c1 45 00 ff                         |
+    | rol word [r14], 0x00                                              | 66 41 c1 06 00                            |
+    | rol word [rax + 1 * rcx], 0x7f                                    | 66 c1 04 08 7f                            |
+    | rol word [rcx + 1 * rcx], 0x80                                    | 66 c1 04 09 80                            |
+    | rol word [rdx + 1 * rcx], 0xff                                    | 66 c1 04 0a ff                            |
+    | rol word [rbx + 1 * rcx], 0x00                                    | 66 c1 04 0b 00                            |
+    | rol word [rbp + 1 * rcx], 0x7f                                    | 66 c1 44 0d 00 7f                         |
+    | rol word [rsi + 1 * rcx], 0x80                                    | 66 c1 04 0e 80                            |
+    | rol word [rdi + 1 * rcx], 0xff                                    | 66 c1 04 0f ff                            |
+    | rol word [r8 + 1 * rcx], 0x00                                     | 66 41 c1 04 08 00                         |
+    | rol word [r10 + 1 * rcx], 0x7f                                    | 66 41 c1 04 0a 7f                         |
+    | rol word [r11 + 1 * rcx], 0x80                                    | 66 41 c1 04 0b 80                         |
+    | rol word [r12 + 1 * rcx], 0xff                                    | 66 41 c1 04 0c ff                         |
+    | rol word [r13 + 1 * rcx], 0x00                                    | 66 41 c1 44 0d 00 00                      |
+    | rol word [r15 + 1 * rcx], 0x7f                                    | 66 41 c1 04 0f 7f                         |
+    | rol word [rax + 1 * rax], 0x80                                    | 66 c1 04 00 80                            |
+    | rol word [rax + 1 * rdx], 0xff                                    | 66 c1 04 10 ff                            |
+    | rol word [rax + 1 * rbx], 0x00                                    | 66 c1 04 18 00                            |
+    | rol word [rax + 1 * rsi], 0x7f                                    | 66 c1 04 30 7f                            |
+    | rol word [rax + 1 * rdi], 0x80                                    | 66 c1 04 38 80                            |
+    | rol word [rax + 1 * r8], 0xff                                     | 66 42 c1 04 00 ff                         |
+    | rol word [rax + 1 * r9], 0x00                                     | 66 42 c1 04 08 00                         |
+    | rol word [rax + 1 * r11], 0x7f                                    | 66 42 c1 04 18 7f                         |
+    | rol word [rax + 1 * r12], 0x80                                    | 66 42 c1 04 20 80                         |
+    | rol word [rax + 1 * r13], 0xff                                    | 66 42 c1 04 28 ff                         |
+    | rol word [rax + 1 * r14], 0x00                                    | 66 42 c1 04 30 00                         |
+    | rol word [rax + 2 * rcx], 0x7f                                    | 66 c1 04 48 7f                            |
+    | rol word [rax + 4 * rcx], 0x80                                    | 66 c1 04 88 80                            |
+    | rol word [rax + 8 * rcx], 0xff                                    | 66 c1 04 c8 ff                            |
+    | rol word [r8 + 1 * r9], 0x00                                      | 66 43 c1 04 08 00                         |
+    | rol word [r8 + 4 * r9], 0x7f                                      | 66 43 c1 04 88 7f                         |
+    | rol word [r8 + 8 * r9], 0x80                                      | 66 43 c1 04 c8 80                         |
+    | rol word [1 * rcx], 0xff                                          | 66 c1 04 0d 00 00 00 00 ff                |
+    | rol word [2 * rcx], 0x00                                          | 66 c1 04 4d 00 00 00 00 00                |
+    | rol word [8 * rcx], 0x7f                                          | 66 c1 04 cd 00 00 00 00 7f                |
+    | rol word [1 * r9], 0x80                                           | 66 42 c1 04 0d 00 00 00 00 80             |
+    | rol word [2 * r9], 0xff                                           | 66 42 c1 04 4d 00 00 00 00 ff             |
+    | rol word [4 * r9], 0x00                                           | 66 42 c1 04 8d 00 00 00 00 00             |
+    | rol word [r13 + 8 * r12], 0x7f                                    | 66 43 c1 44 e5 00 7f                      |
+    | rol word [rsp + 4 * r15], 0x80                                    | 66 42 c1 04 bc 80                         |
+    | rol word [rax + 1 * rcx + 0x00], 0xff                             | 66 c1 44 08 00 ff                         |
+    | rol word [rax + 1 * rcx - 0x00], 0x00                             | 66 c1 44 08 00 00                         |
+    | rol word [rax + 1 * rcx - 0x01], 0x7f                             | 66 c1 44 08 ff 7f                         |
+    | rol word [rax + 1 * rcx + 0x00000001], 0x80                       | 66 c1 84 08 01 00 00 00 80                |
+    | rol word [rax + 1 * rcx - 0x00000001], 0xff                       | 66 c1 84 08 ff ff ff ff ff                |
+    | rol word [rax + 1 * rcx + 0x7f], 0x00                             | 66 c1 44 08 7f 00                         |
+    | rol word [rax + 1 * rcx + 0x80], 0x7f                             | 66 c1 84 08 80 00 00 00 7f                |
+    | rol word [rax + 1 * rcx - 0x80], 0x80                             | 66 c1 44 08 80 80                         |
+    | rol word [rax + 1 * rcx - 0x81], 0xff                             | 66 c1 84 08 7f ff ff ff ff                |
+    | rol word [rax + 1 * rcx + 0xff], 0x00                             | 66 c1 84 08 ff 00 00 00 00                |
+    | rol word [rax + 1 * rcx + 0x7fffffff], 0x7f                       | 66 c1 84 08 ff ff ff 7f 7f                |
+    | rol word [rax + 1 * rcx - 0x7fffffff], 0x80                       | 66 c1 84 08 01 00 00 80 80                |
+    | rol word [rax + 1 * rcx - 0x80000000], 0xff                       | 66 c1 84 08 00 00 00 80 ff                |
+    | rol word [r10 + 0x7f], 0x00                                       | 66 41 c1 42 7f 00                         |
+    | rol word [r10 - 0x80], 0x7f                                       | 66 41 c1 42 80 7f                         |
+    | rol word [r10 - 0x81], 0x80                                       | 66 41 c1 82 7f ff ff ff 80                |
+    | .prev5: nop; nop; nop; nop; nop; rol word [rel @prev5], 0xff      | 90 90 90 90 90 66 c1 05 f3 ff ff ff ff    |
+    | .prev1: nop; rol word [rel @prev1], 0x00                          | 90 66 c1 05 f7 ff ff ff 00                |
+    | rol word [rel @next5], 0x7f; nop; nop; nop; nop; nop; .next5: nop | 66 c1 05 05 00 00 00 7f 90 90 90 90 90 90 |
+    | ----------------------------------------------------------------- | ----------------------------------------- |
 """
 
 
@@ -906,93 +935,97 @@ def can_encode_rol_addr16_imm8():
 
 
 ROL_ADDR16_CL = """
-    | ----------------------------------------- | -------------------------- |
-    | instruction                               | encoding                   |
-    | ----------------------------------------- | -------------------------- |
-    | rol word [rax], cl                        | 66 d3 00                   |
-    | rol word [rcx], cl                        | 66 d3 01                   |
-    | rol word [rdx], cl                        | 66 d3 02                   |
-    | rol word [rbx], cl                        | 66 d3 03                   |
-    | rol word [rsp], cl                        | 66 d3 04 24                |
-    | rol word [rbp], cl                        | 66 d3 45 00                |
-    | rol word [rsi], cl                        | 66 d3 06                   |
-    | rol word [rdi], cl                        | 66 d3 07                   |
-    | rol word [r8], cl                         | 66 41 d3 00                |
-    | rol word [r9], cl                         | 66 41 d3 01                |
-    | rol word [r10], cl                        | 66 41 d3 02                |
-    | rol word [r11], cl                        | 66 41 d3 03                |
-    | rol word [r12], cl                        | 66 41 d3 04 24             |
-    | rol word [r13], cl                        | 66 41 d3 45 00             |
-    | rol word [r14], cl                        | 66 41 d3 06                |
-    | rol word [r15], cl                        | 66 41 d3 07                |
-    | rol word [rax + 1 * rcx], cl              | 66 d3 04 08                |
-    | rol word [rcx + 1 * rcx], cl              | 66 d3 04 09                |
-    | rol word [rdx + 1 * rcx], cl              | 66 d3 04 0a                |
-    | rol word [rbx + 1 * rcx], cl              | 66 d3 04 0b                |
-    | rol word [rsp + 1 * rcx], cl              | 66 d3 04 0c                |
-    | rol word [rbp + 1 * rcx], cl              | 66 d3 44 0d 00             |
-    | rol word [rsi + 1 * rcx], cl              | 66 d3 04 0e                |
-    | rol word [rdi + 1 * rcx], cl              | 66 d3 04 0f                |
-    | rol word [r8 + 1 * rcx], cl               | 66 41 d3 04 08             |
-    | rol word [r9 + 1 * rcx], cl               | 66 41 d3 04 09             |
-    | rol word [r10 + 1 * rcx], cl              | 66 41 d3 04 0a             |
-    | rol word [r11 + 1 * rcx], cl              | 66 41 d3 04 0b             |
-    | rol word [r12 + 1 * rcx], cl              | 66 41 d3 04 0c             |
-    | rol word [r13 + 1 * rcx], cl              | 66 41 d3 44 0d 00          |
-    | rol word [r14 + 1 * rcx], cl              | 66 41 d3 04 0e             |
-    | rol word [r15 + 1 * rcx], cl              | 66 41 d3 04 0f             |
-    | rol word [rax + 1 * rax], cl              | 66 d3 04 00                |
-    | rol word [rax + 1 * rdx], cl              | 66 d3 04 10                |
-    | rol word [rax + 1 * rbx], cl              | 66 d3 04 18                |
-    | rol word [rax + 1 * rbp], cl              | 66 d3 04 28                |
-    | rol word [rax + 1 * rsi], cl              | 66 d3 04 30                |
-    | rol word [rax + 1 * rdi], cl              | 66 d3 04 38                |
-    | rol word [rax + 1 * r8], cl               | 66 42 d3 04 00             |
-    | rol word [rax + 1 * r9], cl               | 66 42 d3 04 08             |
-    | rol word [rax + 1 * r10], cl              | 66 42 d3 04 10             |
-    | rol word [rax + 1 * r11], cl              | 66 42 d3 04 18             |
-    | rol word [rax + 1 * r12], cl              | 66 42 d3 04 20             |
-    | rol word [rax + 1 * r13], cl              | 66 42 d3 04 28             |
-    | rol word [rax + 1 * r14], cl              | 66 42 d3 04 30             |
-    | rol word [rax + 1 * r15], cl              | 66 42 d3 04 38             |
-    | rol word [rax + 2 * rcx], cl              | 66 d3 04 48                |
-    | rol word [rax + 4 * rcx], cl              | 66 d3 04 88                |
-    | rol word [rax + 8 * rcx], cl              | 66 d3 04 c8                |
-    | rol word [r8 + 1 * r9], cl                | 66 43 d3 04 08             |
-    | rol word [r8 + 2 * r9], cl                | 66 43 d3 04 48             |
-    | rol word [r8 + 4 * r9], cl                | 66 43 d3 04 88             |
-    | rol word [r8 + 8 * r9], cl                | 66 43 d3 04 c8             |
-    | rol word [1 * rcx], cl                    | 66 d3 04 0d 00 00 00 00    |
-    | rol word [2 * rcx], cl                    | 66 d3 04 4d 00 00 00 00    |
-    | rol word [4 * rcx], cl                    | 66 d3 04 8d 00 00 00 00    |
-    | rol word [8 * rcx], cl                    | 66 d3 04 cd 00 00 00 00    |
-    | rol word [1 * r9], cl                     | 66 42 d3 04 0d 00 00 00 00 |
-    | rol word [2 * r9], cl                     | 66 42 d3 04 4d 00 00 00 00 |
-    | rol word [4 * r9], cl                     | 66 42 d3 04 8d 00 00 00 00 |
-    | rol word [8 * r9], cl                     | 66 42 d3 04 cd 00 00 00 00 |
-    | rol word [r13 + 8 * r12], cl              | 66 43 d3 44 e5 00          |
-    | rol word [rsp + 4 * r15], cl              | 66 42 d3 04 bc             |
-    | rol word [rax + 1 * rcx + 0x00], cl       | 66 d3 44 08 00             |
-    | rol word [rax + 1 * rcx - 0x00], cl       | 66 d3 44 08 00             |
-    | rol word [rax + 1 * rcx + 0x01], cl       | 66 d3 44 08 01             |
-    | rol word [rax + 1 * rcx - 0x01], cl       | 66 d3 44 08 ff             |
-    | rol word [rax + 1 * rcx + 0x00000001], cl | 66 d3 84 08 01 00 00 00    |
-    | rol word [rax + 1 * rcx - 0x00000001], cl | 66 d3 84 08 ff ff ff ff    |
-    | rol word [rax + 1 * rcx + 0x7f], cl       | 66 d3 44 08 7f             |
-    | rol word [rax + 1 * rcx - 0x7f], cl       | 66 d3 44 08 81             |
-    | rol word [rax + 1 * rcx + 0x80], cl       | 66 d3 84 08 80 00 00 00    |
-    | rol word [rax + 1 * rcx - 0x80], cl       | 66 d3 44 08 80             |
-    | rol word [rax + 1 * rcx - 0x81], cl       | 66 d3 84 08 7f ff ff ff    |
-    | rol word [rax + 1 * rcx + 0xff], cl       | 66 d3 84 08 ff 00 00 00    |
-    | rol word [rax + 1 * rcx - 0xff], cl       | 66 d3 84 08 01 ff ff ff    |
-    | rol word [rax + 1 * rcx + 0x7fffffff], cl | 66 d3 84 08 ff ff ff 7f    |
-    | rol word [rax + 1 * rcx - 0x7fffffff], cl | 66 d3 84 08 01 00 00 80    |
-    | rol word [rax + 1 * rcx - 0x80000000], cl | 66 d3 84 08 00 00 00 80    |
-    | rol word [r10 + 0x7f], cl                 | 66 41 d3 42 7f             |
-    | rol word [r10 + 0x80], cl                 | 66 41 d3 82 80 00 00 00    |
-    | rol word [r10 - 0x80], cl                 | 66 41 d3 42 80             |
-    | rol word [r10 - 0x81], cl                 | 66 41 d3 82 7f ff ff ff    |
-    | ----------------------------------------- | -------------------------- |
+    | --------------------------------------------------------------- | -------------------------------------- |
+    | instruction                                                     | encoding                               |
+    | --------------------------------------------------------------- | -------------------------------------- |
+    | rol word [rax], cl                                              | 66 d3 00                               |
+    | rol word [rcx], cl                                              | 66 d3 01                               |
+    | rol word [rdx], cl                                              | 66 d3 02                               |
+    | rol word [rbx], cl                                              | 66 d3 03                               |
+    | rol word [rsp], cl                                              | 66 d3 04 24                            |
+    | rol word [rbp], cl                                              | 66 d3 45 00                            |
+    | rol word [rsi], cl                                              | 66 d3 06                               |
+    | rol word [rdi], cl                                              | 66 d3 07                               |
+    | rol word [r8], cl                                               | 66 41 d3 00                            |
+    | rol word [r9], cl                                               | 66 41 d3 01                            |
+    | rol word [r10], cl                                              | 66 41 d3 02                            |
+    | rol word [r11], cl                                              | 66 41 d3 03                            |
+    | rol word [r12], cl                                              | 66 41 d3 04 24                         |
+    | rol word [r13], cl                                              | 66 41 d3 45 00                         |
+    | rol word [r14], cl                                              | 66 41 d3 06                            |
+    | rol word [r15], cl                                              | 66 41 d3 07                            |
+    | rol word [rax + 1 * rcx], cl                                    | 66 d3 04 08                            |
+    | rol word [rcx + 1 * rcx], cl                                    | 66 d3 04 09                            |
+    | rol word [rdx + 1 * rcx], cl                                    | 66 d3 04 0a                            |
+    | rol word [rbx + 1 * rcx], cl                                    | 66 d3 04 0b                            |
+    | rol word [rsp + 1 * rcx], cl                                    | 66 d3 04 0c                            |
+    | rol word [rbp + 1 * rcx], cl                                    | 66 d3 44 0d 00                         |
+    | rol word [rsi + 1 * rcx], cl                                    | 66 d3 04 0e                            |
+    | rol word [rdi + 1 * rcx], cl                                    | 66 d3 04 0f                            |
+    | rol word [r8 + 1 * rcx], cl                                     | 66 41 d3 04 08                         |
+    | rol word [r9 + 1 * rcx], cl                                     | 66 41 d3 04 09                         |
+    | rol word [r10 + 1 * rcx], cl                                    | 66 41 d3 04 0a                         |
+    | rol word [r11 + 1 * rcx], cl                                    | 66 41 d3 04 0b                         |
+    | rol word [r12 + 1 * rcx], cl                                    | 66 41 d3 04 0c                         |
+    | rol word [r13 + 1 * rcx], cl                                    | 66 41 d3 44 0d 00                      |
+    | rol word [r14 + 1 * rcx], cl                                    | 66 41 d3 04 0e                         |
+    | rol word [r15 + 1 * rcx], cl                                    | 66 41 d3 04 0f                         |
+    | rol word [rax + 1 * rax], cl                                    | 66 d3 04 00                            |
+    | rol word [rax + 1 * rdx], cl                                    | 66 d3 04 10                            |
+    | rol word [rax + 1 * rbx], cl                                    | 66 d3 04 18                            |
+    | rol word [rax + 1 * rbp], cl                                    | 66 d3 04 28                            |
+    | rol word [rax + 1 * rsi], cl                                    | 66 d3 04 30                            |
+    | rol word [rax + 1 * rdi], cl                                    | 66 d3 04 38                            |
+    | rol word [rax + 1 * r8], cl                                     | 66 42 d3 04 00                         |
+    | rol word [rax + 1 * r9], cl                                     | 66 42 d3 04 08                         |
+    | rol word [rax + 1 * r10], cl                                    | 66 42 d3 04 10                         |
+    | rol word [rax + 1 * r11], cl                                    | 66 42 d3 04 18                         |
+    | rol word [rax + 1 * r12], cl                                    | 66 42 d3 04 20                         |
+    | rol word [rax + 1 * r13], cl                                    | 66 42 d3 04 28                         |
+    | rol word [rax + 1 * r14], cl                                    | 66 42 d3 04 30                         |
+    | rol word [rax + 1 * r15], cl                                    | 66 42 d3 04 38                         |
+    | rol word [rax + 2 * rcx], cl                                    | 66 d3 04 48                            |
+    | rol word [rax + 4 * rcx], cl                                    | 66 d3 04 88                            |
+    | rol word [rax + 8 * rcx], cl                                    | 66 d3 04 c8                            |
+    | rol word [r8 + 1 * r9], cl                                      | 66 43 d3 04 08                         |
+    | rol word [r8 + 2 * r9], cl                                      | 66 43 d3 04 48                         |
+    | rol word [r8 + 4 * r9], cl                                      | 66 43 d3 04 88                         |
+    | rol word [r8 + 8 * r9], cl                                      | 66 43 d3 04 c8                         |
+    | rol word [1 * rcx], cl                                          | 66 d3 04 0d 00 00 00 00                |
+    | rol word [2 * rcx], cl                                          | 66 d3 04 4d 00 00 00 00                |
+    | rol word [4 * rcx], cl                                          | 66 d3 04 8d 00 00 00 00                |
+    | rol word [8 * rcx], cl                                          | 66 d3 04 cd 00 00 00 00                |
+    | rol word [1 * r9], cl                                           | 66 42 d3 04 0d 00 00 00 00             |
+    | rol word [2 * r9], cl                                           | 66 42 d3 04 4d 00 00 00 00             |
+    | rol word [4 * r9], cl                                           | 66 42 d3 04 8d 00 00 00 00             |
+    | rol word [8 * r9], cl                                           | 66 42 d3 04 cd 00 00 00 00             |
+    | rol word [r13 + 8 * r12], cl                                    | 66 43 d3 44 e5 00                      |
+    | rol word [rsp + 4 * r15], cl                                    | 66 42 d3 04 bc                         |
+    | rol word [rax + 1 * rcx + 0x00], cl                             | 66 d3 44 08 00                         |
+    | rol word [rax + 1 * rcx - 0x00], cl                             | 66 d3 44 08 00                         |
+    | rol word [rax + 1 * rcx + 0x01], cl                             | 66 d3 44 08 01                         |
+    | rol word [rax + 1 * rcx - 0x01], cl                             | 66 d3 44 08 ff                         |
+    | rol word [rax + 1 * rcx + 0x00000001], cl                       | 66 d3 84 08 01 00 00 00                |
+    | rol word [rax + 1 * rcx - 0x00000001], cl                       | 66 d3 84 08 ff ff ff ff                |
+    | rol word [rax + 1 * rcx + 0x7f], cl                             | 66 d3 44 08 7f                         |
+    | rol word [rax + 1 * rcx - 0x7f], cl                             | 66 d3 44 08 81                         |
+    | rol word [rax + 1 * rcx + 0x80], cl                             | 66 d3 84 08 80 00 00 00                |
+    | rol word [rax + 1 * rcx - 0x80], cl                             | 66 d3 44 08 80                         |
+    | rol word [rax + 1 * rcx - 0x81], cl                             | 66 d3 84 08 7f ff ff ff                |
+    | rol word [rax + 1 * rcx + 0xff], cl                             | 66 d3 84 08 ff 00 00 00                |
+    | rol word [rax + 1 * rcx - 0xff], cl                             | 66 d3 84 08 01 ff ff ff                |
+    | rol word [rax + 1 * rcx + 0x7fffffff], cl                       | 66 d3 84 08 ff ff ff 7f                |
+    | rol word [rax + 1 * rcx - 0x7fffffff], cl                       | 66 d3 84 08 01 00 00 80                |
+    | rol word [rax + 1 * rcx - 0x80000000], cl                       | 66 d3 84 08 00 00 00 80                |
+    | rol word [r10 + 0x7f], cl                                       | 66 41 d3 42 7f                         |
+    | rol word [r10 + 0x80], cl                                       | 66 41 d3 82 80 00 00 00                |
+    | rol word [r10 - 0x80], cl                                       | 66 41 d3 42 80                         |
+    | rol word [r10 - 0x81], cl                                       | 66 41 d3 82 7f ff ff ff                |
+    | .prev5: nop; nop; nop; nop; nop; rol word [rel @prev5], cl      | 90 90 90 90 90 66 d3 05 f4 ff ff ff    |
+    | .prev1: nop; rol word [rel @prev1], cl                          | 90 66 d3 05 f8 ff ff ff                |
+    | rol word [rel @next1], cl; nop; .next1: nop                     | 66 d3 05 01 00 00 00 90 90             |
+    | rol word [rel @next5], cl; nop; nop; nop; nop; nop; .next5: nop | 66 d3 05 05 00 00 00 90 90 90 90 90 90 |
+    | --------------------------------------------------------------- | -------------------------------------- |
 """
 
 
@@ -1001,163 +1034,170 @@ def can_encode_rol_addr16_cl():
 
 
 ROL_ADDR8_IMM8 = """
-    | ------------------------------------------- | -------------------------- |
-    | instruction                                 | encoding                   |
-    | ------------------------------------------- | -------------------------- |
-    | rol byte [rax], 0x01                        | d0 00                      |
-    | rol byte [rcx], 0x01                        | d0 01                      |
-    | rol byte [rdx], 0x01                        | d0 02                      |
-    | rol byte [rbx], 0x01                        | d0 03                      |
-    | rol byte [rsp], 0x01                        | d0 04 24                   |
-    | rol byte [rbp], 0x01                        | d0 45 00                   |
-    | rol byte [rsi], 0x01                        | d0 06                      |
-    | rol byte [rdi], 0x01                        | d0 07                      |
-    | rol byte [r8], 0x01                         | 41 d0 00                   |
-    | rol byte [r9], 0x01                         | 41 d0 01                   |
-    | rol byte [r10], 0x01                        | 41 d0 02                   |
-    | rol byte [r11], 0x01                        | 41 d0 03                   |
-    | rol byte [r12], 0x01                        | 41 d0 04 24                |
-    | rol byte [r13], 0x01                        | 41 d0 45 00                |
-    | rol byte [r14], 0x01                        | 41 d0 06                   |
-    | rol byte [r15], 0x01                        | 41 d0 07                   |
-    | rol byte [rax + 1 * rcx], 0x01              | d0 04 08                   |
-    | rol byte [rcx + 1 * rcx], 0x01              | d0 04 09                   |
-    | rol byte [rdx + 1 * rcx], 0x01              | d0 04 0a                   |
-    | rol byte [rbx + 1 * rcx], 0x01              | d0 04 0b                   |
-    | rol byte [rsp + 1 * rcx], 0x01              | d0 04 0c                   |
-    | rol byte [rbp + 1 * rcx], 0x01              | d0 44 0d 00                |
-    | rol byte [rsi + 1 * rcx], 0x01              | d0 04 0e                   |
-    | rol byte [rdi + 1 * rcx], 0x01              | d0 04 0f                   |
-    | rol byte [r8 + 1 * rcx], 0x01               | 41 d0 04 08                |
-    | rol byte [r9 + 1 * rcx], 0x01               | 41 d0 04 09                |
-    | rol byte [r10 + 1 * rcx], 0x01              | 41 d0 04 0a                |
-    | rol byte [r11 + 1 * rcx], 0x01              | 41 d0 04 0b                |
-    | rol byte [r12 + 1 * rcx], 0x01              | 41 d0 04 0c                |
-    | rol byte [r13 + 1 * rcx], 0x01              | 41 d0 44 0d 00             |
-    | rol byte [r14 + 1 * rcx], 0x01              | 41 d0 04 0e                |
-    | rol byte [r15 + 1 * rcx], 0x01              | 41 d0 04 0f                |
-    | rol byte [rax + 1 * rax], 0x01              | d0 04 00                   |
-    | rol byte [rax + 1 * rdx], 0x01              | d0 04 10                   |
-    | rol byte [rax + 1 * rbx], 0x01              | d0 04 18                   |
-    | rol byte [rax + 1 * rbp], 0x01              | d0 04 28                   |
-    | rol byte [rax + 1 * rsi], 0x01              | d0 04 30                   |
-    | rol byte [rax + 1 * rdi], 0x01              | d0 04 38                   |
-    | rol byte [rax + 1 * r8], 0x01               | 42 d0 04 00                |
-    | rol byte [rax + 1 * r9], 0x01               | 42 d0 04 08                |
-    | rol byte [rax + 1 * r10], 0x01              | 42 d0 04 10                |
-    | rol byte [rax + 1 * r11], 0x01              | 42 d0 04 18                |
-    | rol byte [rax + 1 * r12], 0x01              | 42 d0 04 20                |
-    | rol byte [rax + 1 * r13], 0x01              | 42 d0 04 28                |
-    | rol byte [rax + 1 * r14], 0x01              | 42 d0 04 30                |
-    | rol byte [rax + 1 * r15], 0x01              | 42 d0 04 38                |
-    | rol byte [rax + 2 * rcx], 0x01              | d0 04 48                   |
-    | rol byte [rax + 4 * rcx], 0x01              | d0 04 88                   |
-    | rol byte [rax + 8 * rcx], 0x01              | d0 04 c8                   |
-    | rol byte [r8 + 1 * r9], 0x01                | 43 d0 04 08                |
-    | rol byte [r8 + 2 * r9], 0x01                | 43 d0 04 48                |
-    | rol byte [r8 + 4 * r9], 0x01                | 43 d0 04 88                |
-    | rol byte [r8 + 8 * r9], 0x01                | 43 d0 04 c8                |
-    | rol byte [1 * rcx], 0x01                    | d0 04 0d 00 00 00 00       |
-    | rol byte [2 * rcx], 0x01                    | d0 04 4d 00 00 00 00       |
-    | rol byte [4 * rcx], 0x01                    | d0 04 8d 00 00 00 00       |
-    | rol byte [8 * rcx], 0x01                    | d0 04 cd 00 00 00 00       |
-    | rol byte [1 * r9], 0x01                     | 42 d0 04 0d 00 00 00 00    |
-    | rol byte [2 * r9], 0x01                     | 42 d0 04 4d 00 00 00 00    |
-    | rol byte [4 * r9], 0x01                     | 42 d0 04 8d 00 00 00 00    |
-    | rol byte [8 * r9], 0x01                     | 42 d0 04 cd 00 00 00 00    |
-    | rol byte [r13 + 8 * r12], 0x01              | 43 d0 44 e5 00             |
-    | rol byte [rsp + 4 * r15], 0x01              | 42 d0 04 bc                |
-    | rol byte [rax + 1 * rcx + 0x00], 0x01       | d0 44 08 00                |
-    | rol byte [rax + 1 * rcx - 0x00], 0x01       | d0 44 08 00                |
-    | rol byte [rax + 1 * rcx + 0x01], 0x01       | d0 44 08 01                |
-    | rol byte [rax + 1 * rcx - 0x01], 0x01       | d0 44 08 ff                |
-    | rol byte [rax + 1 * rcx + 0x00000001], 0x01 | d0 84 08 01 00 00 00       |
-    | rol byte [rax + 1 * rcx - 0x00000001], 0x01 | d0 84 08 ff ff ff ff       |
-    | rol byte [rax + 1 * rcx + 0x7f], 0x01       | d0 44 08 7f                |
-    | rol byte [rax + 1 * rcx - 0x7f], 0x01       | d0 44 08 81                |
-    | rol byte [rax + 1 * rcx + 0x80], 0x01       | d0 84 08 80 00 00 00       |
-    | rol byte [rax + 1 * rcx - 0x80], 0x01       | d0 44 08 80                |
-    | rol byte [rax + 1 * rcx - 0x81], 0x01       | d0 84 08 7f ff ff ff       |
-    | rol byte [rax + 1 * rcx + 0xff], 0x01       | d0 84 08 ff 00 00 00       |
-    | rol byte [rax + 1 * rcx - 0xff], 0x01       | d0 84 08 01 ff ff ff       |
-    | rol byte [rax + 1 * rcx + 0x7fffffff], 0x01 | d0 84 08 ff ff ff 7f       |
-    | rol byte [rax + 1 * rcx - 0x7fffffff], 0x01 | d0 84 08 01 00 00 80       |
-    | rol byte [rax + 1 * rcx - 0x80000000], 0x01 | d0 84 08 00 00 00 80       |
-    | rol byte [r10 + 0x7f], 0x01                 | 41 d0 42 7f                |
-    | rol byte [r10 + 0x80], 0x01                 | 41 d0 82 80 00 00 00       |
-    | rol byte [r10 - 0x80], 0x01                 | 41 d0 42 80                |
-    | rol byte [r10 - 0x81], 0x01                 | 41 d0 82 7f ff ff ff       |
-    | rol byte [rax], 0x00                        | c0 00 00                   |
-    | rol byte [rax], 0x7f                        | c0 00 7f                   |
-    | rol byte [rax], 0x80                        | c0 00 80                   |
-    | rol byte [rax], 0xff                        | c0 00 ff                   |
-    | rol byte [rcx], 0x7f                        | c0 01 7f                   |
-    | rol byte [rdx], 0x80                        | c0 02 80                   |
-    | rol byte [rbx], 0xff                        | c0 03 ff                   |
-    | rol byte [rsp], 0x00                        | c0 04 24 00                |
-    | rol byte [rsi], 0x7f                        | c0 06 7f                   |
-    | rol byte [rdi], 0x80                        | c0 07 80                   |
-    | rol byte [r8], 0xff                         | 41 c0 00 ff                |
-    | rol byte [r9], 0x00                         | 41 c0 01 00                |
-    | rol byte [r11], 0x7f                        | 41 c0 03 7f                |
-    | rol byte [r12], 0x80                        | 41 c0 04 24 80             |
-    | rol byte [r13], 0xff                        | 41 c0 45 00 ff             |
-    | rol byte [r14], 0x00                        | 41 c0 06 00                |
-    | rol byte [rax + 1 * rcx], 0x7f              | c0 04 08 7f                |
-    | rol byte [rcx + 1 * rcx], 0x80              | c0 04 09 80                |
-    | rol byte [rdx + 1 * rcx], 0xff              | c0 04 0a ff                |
-    | rol byte [rbx + 1 * rcx], 0x00              | c0 04 0b 00                |
-    | rol byte [rbp + 1 * rcx], 0x7f              | c0 44 0d 00 7f             |
-    | rol byte [rsi + 1 * rcx], 0x80              | c0 04 0e 80                |
-    | rol byte [rdi + 1 * rcx], 0xff              | c0 04 0f ff                |
-    | rol byte [r8 + 1 * rcx], 0x00               | 41 c0 04 08 00             |
-    | rol byte [r10 + 1 * rcx], 0x7f              | 41 c0 04 0a 7f             |
-    | rol byte [r11 + 1 * rcx], 0x80              | 41 c0 04 0b 80             |
-    | rol byte [r12 + 1 * rcx], 0xff              | 41 c0 04 0c ff             |
-    | rol byte [r13 + 1 * rcx], 0x00              | 41 c0 44 0d 00 00          |
-    | rol byte [r15 + 1 * rcx], 0x7f              | 41 c0 04 0f 7f             |
-    | rol byte [rax + 1 * rax], 0x80              | c0 04 00 80                |
-    | rol byte [rax + 1 * rdx], 0xff              | c0 04 10 ff                |
-    | rol byte [rax + 1 * rbx], 0x00              | c0 04 18 00                |
-    | rol byte [rax + 1 * rsi], 0x7f              | c0 04 30 7f                |
-    | rol byte [rax + 1 * rdi], 0x80              | c0 04 38 80                |
-    | rol byte [rax + 1 * r8], 0xff               | 42 c0 04 00 ff             |
-    | rol byte [rax + 1 * r9], 0x00               | 42 c0 04 08 00             |
-    | rol byte [rax + 1 * r11], 0x7f              | 42 c0 04 18 7f             |
-    | rol byte [rax + 1 * r12], 0x80              | 42 c0 04 20 80             |
-    | rol byte [rax + 1 * r13], 0xff              | 42 c0 04 28 ff             |
-    | rol byte [rax + 1 * r14], 0x00              | 42 c0 04 30 00             |
-    | rol byte [rax + 2 * rcx], 0x7f              | c0 04 48 7f                |
-    | rol byte [rax + 4 * rcx], 0x80              | c0 04 88 80                |
-    | rol byte [rax + 8 * rcx], 0xff              | c0 04 c8 ff                |
-    | rol byte [r8 + 1 * r9], 0x00                | 43 c0 04 08 00             |
-    | rol byte [r8 + 4 * r9], 0x7f                | 43 c0 04 88 7f             |
-    | rol byte [r8 + 8 * r9], 0x80                | 43 c0 04 c8 80             |
-    | rol byte [1 * rcx], 0xff                    | c0 04 0d 00 00 00 00 ff    |
-    | rol byte [2 * rcx], 0x00                    | c0 04 4d 00 00 00 00 00    |
-    | rol byte [8 * rcx], 0x7f                    | c0 04 cd 00 00 00 00 7f    |
-    | rol byte [1 * r9], 0x80                     | 42 c0 04 0d 00 00 00 00 80 |
-    | rol byte [2 * r9], 0xff                     | 42 c0 04 4d 00 00 00 00 ff |
-    | rol byte [4 * r9], 0x00                     | 42 c0 04 8d 00 00 00 00 00 |
-    | rol byte [r13 + 8 * r12], 0x7f              | 43 c0 44 e5 00 7f          |
-    | rol byte [rsp + 4 * r15], 0x80              | 42 c0 04 bc 80             |
-    | rol byte [rax + 1 * rcx + 0x00], 0xff       | c0 44 08 00 ff             |
-    | rol byte [rax + 1 * rcx - 0x00], 0x00       | c0 44 08 00 00             |
-    | rol byte [rax + 1 * rcx - 0x01], 0x7f       | c0 44 08 ff 7f             |
-    | rol byte [rax + 1 * rcx + 0x00000001], 0x80 | c0 84 08 01 00 00 00 80    |
-    | rol byte [rax + 1 * rcx - 0x00000001], 0xff | c0 84 08 ff ff ff ff ff    |
-    | rol byte [rax + 1 * rcx + 0x7f], 0x00       | c0 44 08 7f 00             |
-    | rol byte [rax + 1 * rcx + 0x80], 0x7f       | c0 84 08 80 00 00 00 7f    |
-    | rol byte [rax + 1 * rcx - 0x80], 0x80       | c0 44 08 80 80             |
-    | rol byte [rax + 1 * rcx - 0x81], 0xff       | c0 84 08 7f ff ff ff ff    |
-    | rol byte [rax + 1 * rcx + 0xff], 0x00       | c0 84 08 ff 00 00 00 00    |
-    | rol byte [rax + 1 * rcx + 0x7fffffff], 0x7f | c0 84 08 ff ff ff 7f 7f    |
-    | rol byte [rax + 1 * rcx - 0x7fffffff], 0x80 | c0 84 08 01 00 00 80 80    |
-    | rol byte [rax + 1 * rcx - 0x80000000], 0xff | c0 84 08 00 00 00 80 ff    |
-    | rol byte [r10 + 0x7f], 0x00                 | 41 c0 42 7f 00             |
-    | rol byte [r10 - 0x80], 0x7f                 | 41 c0 42 80 7f             |
-    | rol byte [r10 - 0x81], 0x80                 | 41 c0 82 7f ff ff ff 80    |
-    | ------------------------------------------- | -------------------------- |
+    | ----------------------------------------------------------------- | -------------------------------------- |
+    | instruction                                                       | encoding                               |
+    | ----------------------------------------------------------------- | -------------------------------------- |
+    | rol byte [rax], 0x01                                              | d0 00                                  |
+    | rol byte [rcx], 0x01                                              | d0 01                                  |
+    | rol byte [rdx], 0x01                                              | d0 02                                  |
+    | rol byte [rbx], 0x01                                              | d0 03                                  |
+    | rol byte [rsp], 0x01                                              | d0 04 24                               |
+    | rol byte [rbp], 0x01                                              | d0 45 00                               |
+    | rol byte [rsi], 0x01                                              | d0 06                                  |
+    | rol byte [rdi], 0x01                                              | d0 07                                  |
+    | rol byte [r8], 0x01                                               | 41 d0 00                               |
+    | rol byte [r9], 0x01                                               | 41 d0 01                               |
+    | rol byte [r10], 0x01                                              | 41 d0 02                               |
+    | rol byte [r11], 0x01                                              | 41 d0 03                               |
+    | rol byte [r12], 0x01                                              | 41 d0 04 24                            |
+    | rol byte [r13], 0x01                                              | 41 d0 45 00                            |
+    | rol byte [r14], 0x01                                              | 41 d0 06                               |
+    | rol byte [r15], 0x01                                              | 41 d0 07                               |
+    | rol byte [rax + 1 * rcx], 0x01                                    | d0 04 08                               |
+    | rol byte [rcx + 1 * rcx], 0x01                                    | d0 04 09                               |
+    | rol byte [rdx + 1 * rcx], 0x01                                    | d0 04 0a                               |
+    | rol byte [rbx + 1 * rcx], 0x01                                    | d0 04 0b                               |
+    | rol byte [rsp + 1 * rcx], 0x01                                    | d0 04 0c                               |
+    | rol byte [rbp + 1 * rcx], 0x01                                    | d0 44 0d 00                            |
+    | rol byte [rsi + 1 * rcx], 0x01                                    | d0 04 0e                               |
+    | rol byte [rdi + 1 * rcx], 0x01                                    | d0 04 0f                               |
+    | rol byte [r8 + 1 * rcx], 0x01                                     | 41 d0 04 08                            |
+    | rol byte [r9 + 1 * rcx], 0x01                                     | 41 d0 04 09                            |
+    | rol byte [r10 + 1 * rcx], 0x01                                    | 41 d0 04 0a                            |
+    | rol byte [r11 + 1 * rcx], 0x01                                    | 41 d0 04 0b                            |
+    | rol byte [r12 + 1 * rcx], 0x01                                    | 41 d0 04 0c                            |
+    | rol byte [r13 + 1 * rcx], 0x01                                    | 41 d0 44 0d 00                         |
+    | rol byte [r14 + 1 * rcx], 0x01                                    | 41 d0 04 0e                            |
+    | rol byte [r15 + 1 * rcx], 0x01                                    | 41 d0 04 0f                            |
+    | rol byte [rax + 1 * rax], 0x01                                    | d0 04 00                               |
+    | rol byte [rax + 1 * rdx], 0x01                                    | d0 04 10                               |
+    | rol byte [rax + 1 * rbx], 0x01                                    | d0 04 18                               |
+    | rol byte [rax + 1 * rbp], 0x01                                    | d0 04 28                               |
+    | rol byte [rax + 1 * rsi], 0x01                                    | d0 04 30                               |
+    | rol byte [rax + 1 * rdi], 0x01                                    | d0 04 38                               |
+    | rol byte [rax + 1 * r8], 0x01                                     | 42 d0 04 00                            |
+    | rol byte [rax + 1 * r9], 0x01                                     | 42 d0 04 08                            |
+    | rol byte [rax + 1 * r10], 0x01                                    | 42 d0 04 10                            |
+    | rol byte [rax + 1 * r11], 0x01                                    | 42 d0 04 18                            |
+    | rol byte [rax + 1 * r12], 0x01                                    | 42 d0 04 20                            |
+    | rol byte [rax + 1 * r13], 0x01                                    | 42 d0 04 28                            |
+    | rol byte [rax + 1 * r14], 0x01                                    | 42 d0 04 30                            |
+    | rol byte [rax + 1 * r15], 0x01                                    | 42 d0 04 38                            |
+    | rol byte [rax + 2 * rcx], 0x01                                    | d0 04 48                               |
+    | rol byte [rax + 4 * rcx], 0x01                                    | d0 04 88                               |
+    | rol byte [rax + 8 * rcx], 0x01                                    | d0 04 c8                               |
+    | rol byte [r8 + 1 * r9], 0x01                                      | 43 d0 04 08                            |
+    | rol byte [r8 + 2 * r9], 0x01                                      | 43 d0 04 48                            |
+    | rol byte [r8 + 4 * r9], 0x01                                      | 43 d0 04 88                            |
+    | rol byte [r8 + 8 * r9], 0x01                                      | 43 d0 04 c8                            |
+    | rol byte [1 * rcx], 0x01                                          | d0 04 0d 00 00 00 00                   |
+    | rol byte [2 * rcx], 0x01                                          | d0 04 4d 00 00 00 00                   |
+    | rol byte [4 * rcx], 0x01                                          | d0 04 8d 00 00 00 00                   |
+    | rol byte [8 * rcx], 0x01                                          | d0 04 cd 00 00 00 00                   |
+    | rol byte [1 * r9], 0x01                                           | 42 d0 04 0d 00 00 00 00                |
+    | rol byte [2 * r9], 0x01                                           | 42 d0 04 4d 00 00 00 00                |
+    | rol byte [4 * r9], 0x01                                           | 42 d0 04 8d 00 00 00 00                |
+    | rol byte [8 * r9], 0x01                                           | 42 d0 04 cd 00 00 00 00                |
+    | rol byte [r13 + 8 * r12], 0x01                                    | 43 d0 44 e5 00                         |
+    | rol byte [rsp + 4 * r15], 0x01                                    | 42 d0 04 bc                            |
+    | rol byte [rax + 1 * rcx + 0x00], 0x01                             | d0 44 08 00                            |
+    | rol byte [rax + 1 * rcx - 0x00], 0x01                             | d0 44 08 00                            |
+    | rol byte [rax + 1 * rcx + 0x01], 0x01                             | d0 44 08 01                            |
+    | rol byte [rax + 1 * rcx - 0x01], 0x01                             | d0 44 08 ff                            |
+    | rol byte [rax + 1 * rcx + 0x00000001], 0x01                       | d0 84 08 01 00 00 00                   |
+    | rol byte [rax + 1 * rcx - 0x00000001], 0x01                       | d0 84 08 ff ff ff ff                   |
+    | rol byte [rax + 1 * rcx + 0x7f], 0x01                             | d0 44 08 7f                            |
+    | rol byte [rax + 1 * rcx - 0x7f], 0x01                             | d0 44 08 81                            |
+    | rol byte [rax + 1 * rcx + 0x80], 0x01                             | d0 84 08 80 00 00 00                   |
+    | rol byte [rax + 1 * rcx - 0x80], 0x01                             | d0 44 08 80                            |
+    | rol byte [rax + 1 * rcx - 0x81], 0x01                             | d0 84 08 7f ff ff ff                   |
+    | rol byte [rax + 1 * rcx + 0xff], 0x01                             | d0 84 08 ff 00 00 00                   |
+    | rol byte [rax + 1 * rcx - 0xff], 0x01                             | d0 84 08 01 ff ff ff                   |
+    | rol byte [rax + 1 * rcx + 0x7fffffff], 0x01                       | d0 84 08 ff ff ff 7f                   |
+    | rol byte [rax + 1 * rcx - 0x7fffffff], 0x01                       | d0 84 08 01 00 00 80                   |
+    | rol byte [rax + 1 * rcx - 0x80000000], 0x01                       | d0 84 08 00 00 00 80                   |
+    | rol byte [r10 + 0x7f], 0x01                                       | 41 d0 42 7f                            |
+    | rol byte [r10 + 0x80], 0x01                                       | 41 d0 82 80 00 00 00                   |
+    | rol byte [r10 - 0x80], 0x01                                       | 41 d0 42 80                            |
+    | rol byte [r10 - 0x81], 0x01                                       | 41 d0 82 7f ff ff ff                   |
+    | .prev5: nop; nop; nop; nop; nop; rol byte [rel @prev5], 0x01      | 90 90 90 90 90 d0 05 f5 ff ff ff       |
+    | .prev1: nop; rol byte [rel @prev1], 0x01                          | 90 d0 05 f9 ff ff ff                   |
+    | rol byte [rel @next1], 0x01; nop; .next1: nop                     | d0 05 01 00 00 00 90 90                |
+    | rol byte [rel @next5], 0x01; nop; nop; nop; nop; nop; .next5: nop | d0 05 05 00 00 00 90 90 90 90 90 90    |
+    | rol byte [rax], 0x00                                              | c0 00 00                               |
+    | rol byte [rax], 0x7f                                              | c0 00 7f                               |
+    | rol byte [rax], 0x80                                              | c0 00 80                               |
+    | rol byte [rax], 0xff                                              | c0 00 ff                               |
+    | rol byte [rcx], 0x7f                                              | c0 01 7f                               |
+    | rol byte [rdx], 0x80                                              | c0 02 80                               |
+    | rol byte [rbx], 0xff                                              | c0 03 ff                               |
+    | rol byte [rsp], 0x00                                              | c0 04 24 00                            |
+    | rol byte [rsi], 0x7f                                              | c0 06 7f                               |
+    | rol byte [rdi], 0x80                                              | c0 07 80                               |
+    | rol byte [r8], 0xff                                               | 41 c0 00 ff                            |
+    | rol byte [r9], 0x00                                               | 41 c0 01 00                            |
+    | rol byte [r11], 0x7f                                              | 41 c0 03 7f                            |
+    | rol byte [r12], 0x80                                              | 41 c0 04 24 80                         |
+    | rol byte [r13], 0xff                                              | 41 c0 45 00 ff                         |
+    | rol byte [r14], 0x00                                              | 41 c0 06 00                            |
+    | rol byte [rax + 1 * rcx], 0x7f                                    | c0 04 08 7f                            |
+    | rol byte [rcx + 1 * rcx], 0x80                                    | c0 04 09 80                            |
+    | rol byte [rdx + 1 * rcx], 0xff                                    | c0 04 0a ff                            |
+    | rol byte [rbx + 1 * rcx], 0x00                                    | c0 04 0b 00                            |
+    | rol byte [rbp + 1 * rcx], 0x7f                                    | c0 44 0d 00 7f                         |
+    | rol byte [rsi + 1 * rcx], 0x80                                    | c0 04 0e 80                            |
+    | rol byte [rdi + 1 * rcx], 0xff                                    | c0 04 0f ff                            |
+    | rol byte [r8 + 1 * rcx], 0x00                                     | 41 c0 04 08 00                         |
+    | rol byte [r10 + 1 * rcx], 0x7f                                    | 41 c0 04 0a 7f                         |
+    | rol byte [r11 + 1 * rcx], 0x80                                    | 41 c0 04 0b 80                         |
+    | rol byte [r12 + 1 * rcx], 0xff                                    | 41 c0 04 0c ff                         |
+    | rol byte [r13 + 1 * rcx], 0x00                                    | 41 c0 44 0d 00 00                      |
+    | rol byte [r15 + 1 * rcx], 0x7f                                    | 41 c0 04 0f 7f                         |
+    | rol byte [rax + 1 * rax], 0x80                                    | c0 04 00 80                            |
+    | rol byte [rax + 1 * rdx], 0xff                                    | c0 04 10 ff                            |
+    | rol byte [rax + 1 * rbx], 0x00                                    | c0 04 18 00                            |
+    | rol byte [rax + 1 * rsi], 0x7f                                    | c0 04 30 7f                            |
+    | rol byte [rax + 1 * rdi], 0x80                                    | c0 04 38 80                            |
+    | rol byte [rax + 1 * r8], 0xff                                     | 42 c0 04 00 ff                         |
+    | rol byte [rax + 1 * r9], 0x00                                     | 42 c0 04 08 00                         |
+    | rol byte [rax + 1 * r11], 0x7f                                    | 42 c0 04 18 7f                         |
+    | rol byte [rax + 1 * r12], 0x80                                    | 42 c0 04 20 80                         |
+    | rol byte [rax + 1 * r13], 0xff                                    | 42 c0 04 28 ff                         |
+    | rol byte [rax + 1 * r14], 0x00                                    | 42 c0 04 30 00                         |
+    | rol byte [rax + 2 * rcx], 0x7f                                    | c0 04 48 7f                            |
+    | rol byte [rax + 4 * rcx], 0x80                                    | c0 04 88 80                            |
+    | rol byte [rax + 8 * rcx], 0xff                                    | c0 04 c8 ff                            |
+    | rol byte [r8 + 1 * r9], 0x00                                      | 43 c0 04 08 00                         |
+    | rol byte [r8 + 4 * r9], 0x7f                                      | 43 c0 04 88 7f                         |
+    | rol byte [r8 + 8 * r9], 0x80                                      | 43 c0 04 c8 80                         |
+    | rol byte [1 * rcx], 0xff                                          | c0 04 0d 00 00 00 00 ff                |
+    | rol byte [2 * rcx], 0x00                                          | c0 04 4d 00 00 00 00 00                |
+    | rol byte [8 * rcx], 0x7f                                          | c0 04 cd 00 00 00 00 7f                |
+    | rol byte [1 * r9], 0x80                                           | 42 c0 04 0d 00 00 00 00 80             |
+    | rol byte [2 * r9], 0xff                                           | 42 c0 04 4d 00 00 00 00 ff             |
+    | rol byte [4 * r9], 0x00                                           | 42 c0 04 8d 00 00 00 00 00             |
+    | rol byte [r13 + 8 * r12], 0x7f                                    | 43 c0 44 e5 00 7f                      |
+    | rol byte [rsp + 4 * r15], 0x80                                    | 42 c0 04 bc 80                         |
+    | rol byte [rax + 1 * rcx + 0x00], 0xff                             | c0 44 08 00 ff                         |
+    | rol byte [rax + 1 * rcx - 0x00], 0x00                             | c0 44 08 00 00                         |
+    | rol byte [rax + 1 * rcx - 0x01], 0x7f                             | c0 44 08 ff 7f                         |
+    | rol byte [rax + 1 * rcx + 0x00000001], 0x80                       | c0 84 08 01 00 00 00 80                |
+    | rol byte [rax + 1 * rcx - 0x00000001], 0xff                       | c0 84 08 ff ff ff ff ff                |
+    | rol byte [rax + 1 * rcx + 0x7f], 0x00                             | c0 44 08 7f 00                         |
+    | rol byte [rax + 1 * rcx + 0x80], 0x7f                             | c0 84 08 80 00 00 00 7f                |
+    | rol byte [rax + 1 * rcx - 0x80], 0x80                             | c0 44 08 80 80                         |
+    | rol byte [rax + 1 * rcx - 0x81], 0xff                             | c0 84 08 7f ff ff ff ff                |
+    | rol byte [rax + 1 * rcx + 0xff], 0x00                             | c0 84 08 ff 00 00 00 00                |
+    | rol byte [rax + 1 * rcx + 0x7fffffff], 0x7f                       | c0 84 08 ff ff ff 7f 7f                |
+    | rol byte [rax + 1 * rcx - 0x7fffffff], 0x80                       | c0 84 08 01 00 00 80 80                |
+    | rol byte [rax + 1 * rcx - 0x80000000], 0xff                       | c0 84 08 00 00 00 80 ff                |
+    | rol byte [r10 + 0x7f], 0x00                                       | 41 c0 42 7f 00                         |
+    | rol byte [r10 - 0x80], 0x7f                                       | 41 c0 42 80 7f                         |
+    | rol byte [r10 - 0x81], 0x80                                       | 41 c0 82 7f ff ff ff 80                |
+    | .prev5: nop; nop; nop; nop; nop; rol byte [rel @prev5], 0xff      | 90 90 90 90 90 c0 05 f4 ff ff ff ff    |
+    | .prev1: nop; rol byte [rel @prev1], 0x00                          | 90 c0 05 f8 ff ff ff 00                |
+    | rol byte [rel @next5], 0x7f; nop; nop; nop; nop; nop; .next5: nop | c0 05 05 00 00 00 7f 90 90 90 90 90 90 |
+    | ----------------------------------------------------------------- | -------------------------------------- |
 """
 
 
@@ -1166,93 +1206,97 @@ def can_encode_rol_addr8_imm8():
 
 
 ROL_ADDR8_CL = """
-    | ----------------------------------------- | ----------------------- |
-    | instruction                               | encoding                |
-    | ----------------------------------------- | ----------------------- |
-    | rol byte [rax], cl                        | d2 00                   |
-    | rol byte [rcx], cl                        | d2 01                   |
-    | rol byte [rdx], cl                        | d2 02                   |
-    | rol byte [rbx], cl                        | d2 03                   |
-    | rol byte [rsp], cl                        | d2 04 24                |
-    | rol byte [rbp], cl                        | d2 45 00                |
-    | rol byte [rsi], cl                        | d2 06                   |
-    | rol byte [rdi], cl                        | d2 07                   |
-    | rol byte [r8], cl                         | 41 d2 00                |
-    | rol byte [r9], cl                         | 41 d2 01                |
-    | rol byte [r10], cl                        | 41 d2 02                |
-    | rol byte [r11], cl                        | 41 d2 03                |
-    | rol byte [r12], cl                        | 41 d2 04 24             |
-    | rol byte [r13], cl                        | 41 d2 45 00             |
-    | rol byte [r14], cl                        | 41 d2 06                |
-    | rol byte [r15], cl                        | 41 d2 07                |
-    | rol byte [rax + 1 * rcx], cl              | d2 04 08                |
-    | rol byte [rcx + 1 * rcx], cl              | d2 04 09                |
-    | rol byte [rdx + 1 * rcx], cl              | d2 04 0a                |
-    | rol byte [rbx + 1 * rcx], cl              | d2 04 0b                |
-    | rol byte [rsp + 1 * rcx], cl              | d2 04 0c                |
-    | rol byte [rbp + 1 * rcx], cl              | d2 44 0d 00             |
-    | rol byte [rsi + 1 * rcx], cl              | d2 04 0e                |
-    | rol byte [rdi + 1 * rcx], cl              | d2 04 0f                |
-    | rol byte [r8 + 1 * rcx], cl               | 41 d2 04 08             |
-    | rol byte [r9 + 1 * rcx], cl               | 41 d2 04 09             |
-    | rol byte [r10 + 1 * rcx], cl              | 41 d2 04 0a             |
-    | rol byte [r11 + 1 * rcx], cl              | 41 d2 04 0b             |
-    | rol byte [r12 + 1 * rcx], cl              | 41 d2 04 0c             |
-    | rol byte [r13 + 1 * rcx], cl              | 41 d2 44 0d 00          |
-    | rol byte [r14 + 1 * rcx], cl              | 41 d2 04 0e             |
-    | rol byte [r15 + 1 * rcx], cl              | 41 d2 04 0f             |
-    | rol byte [rax + 1 * rax], cl              | d2 04 00                |
-    | rol byte [rax + 1 * rdx], cl              | d2 04 10                |
-    | rol byte [rax + 1 * rbx], cl              | d2 04 18                |
-    | rol byte [rax + 1 * rbp], cl              | d2 04 28                |
-    | rol byte [rax + 1 * rsi], cl              | d2 04 30                |
-    | rol byte [rax + 1 * rdi], cl              | d2 04 38                |
-    | rol byte [rax + 1 * r8], cl               | 42 d2 04 00             |
-    | rol byte [rax + 1 * r9], cl               | 42 d2 04 08             |
-    | rol byte [rax + 1 * r10], cl              | 42 d2 04 10             |
-    | rol byte [rax + 1 * r11], cl              | 42 d2 04 18             |
-    | rol byte [rax + 1 * r12], cl              | 42 d2 04 20             |
-    | rol byte [rax + 1 * r13], cl              | 42 d2 04 28             |
-    | rol byte [rax + 1 * r14], cl              | 42 d2 04 30             |
-    | rol byte [rax + 1 * r15], cl              | 42 d2 04 38             |
-    | rol byte [rax + 2 * rcx], cl              | d2 04 48                |
-    | rol byte [rax + 4 * rcx], cl              | d2 04 88                |
-    | rol byte [rax + 8 * rcx], cl              | d2 04 c8                |
-    | rol byte [r8 + 1 * r9], cl                | 43 d2 04 08             |
-    | rol byte [r8 + 2 * r9], cl                | 43 d2 04 48             |
-    | rol byte [r8 + 4 * r9], cl                | 43 d2 04 88             |
-    | rol byte [r8 + 8 * r9], cl                | 43 d2 04 c8             |
-    | rol byte [1 * rcx], cl                    | d2 04 0d 00 00 00 00    |
-    | rol byte [2 * rcx], cl                    | d2 04 4d 00 00 00 00    |
-    | rol byte [4 * rcx], cl                    | d2 04 8d 00 00 00 00    |
-    | rol byte [8 * rcx], cl                    | d2 04 cd 00 00 00 00    |
-    | rol byte [1 * r9], cl                     | 42 d2 04 0d 00 00 00 00 |
-    | rol byte [2 * r9], cl                     | 42 d2 04 4d 00 00 00 00 |
-    | rol byte [4 * r9], cl                     | 42 d2 04 8d 00 00 00 00 |
-    | rol byte [8 * r9], cl                     | 42 d2 04 cd 00 00 00 00 |
-    | rol byte [r13 + 8 * r12], cl              | 43 d2 44 e5 00          |
-    | rol byte [rsp + 4 * r15], cl              | 42 d2 04 bc             |
-    | rol byte [rax + 1 * rcx + 0x00], cl       | d2 44 08 00             |
-    | rol byte [rax + 1 * rcx - 0x00], cl       | d2 44 08 00             |
-    | rol byte [rax + 1 * rcx + 0x01], cl       | d2 44 08 01             |
-    | rol byte [rax + 1 * rcx - 0x01], cl       | d2 44 08 ff             |
-    | rol byte [rax + 1 * rcx + 0x00000001], cl | d2 84 08 01 00 00 00    |
-    | rol byte [rax + 1 * rcx - 0x00000001], cl | d2 84 08 ff ff ff ff    |
-    | rol byte [rax + 1 * rcx + 0x7f], cl       | d2 44 08 7f             |
-    | rol byte [rax + 1 * rcx - 0x7f], cl       | d2 44 08 81             |
-    | rol byte [rax + 1 * rcx + 0x80], cl       | d2 84 08 80 00 00 00    |
-    | rol byte [rax + 1 * rcx - 0x80], cl       | d2 44 08 80             |
-    | rol byte [rax + 1 * rcx - 0x81], cl       | d2 84 08 7f ff ff ff    |
-    | rol byte [rax + 1 * rcx + 0xff], cl       | d2 84 08 ff 00 00 00    |
-    | rol byte [rax + 1 * rcx - 0xff], cl       | d2 84 08 01 ff ff ff    |
-    | rol byte [rax + 1 * rcx + 0x7fffffff], cl | d2 84 08 ff ff ff 7f    |
-    | rol byte [rax + 1 * rcx - 0x7fffffff], cl | d2 84 08 01 00 00 80    |
-    | rol byte [rax + 1 * rcx - 0x80000000], cl | d2 84 08 00 00 00 80    |
-    | rol byte [r10 + 0x7f], cl                 | 41 d2 42 7f             |
-    | rol byte [r10 + 0x80], cl                 | 41 d2 82 80 00 00 00    |
-    | rol byte [r10 - 0x80], cl                 | 41 d2 42 80             |
-    | rol byte [r10 - 0x81], cl                 | 41 d2 82 7f ff ff ff    |
-    | ----------------------------------------- | ----------------------- |
+    | --------------------------------------------------------------- | ----------------------------------- |
+    | instruction                                                     | encoding                            |
+    | --------------------------------------------------------------- | ----------------------------------- |
+    | rol byte [rax], cl                                              | d2 00                               |
+    | rol byte [rcx], cl                                              | d2 01                               |
+    | rol byte [rdx], cl                                              | d2 02                               |
+    | rol byte [rbx], cl                                              | d2 03                               |
+    | rol byte [rsp], cl                                              | d2 04 24                            |
+    | rol byte [rbp], cl                                              | d2 45 00                            |
+    | rol byte [rsi], cl                                              | d2 06                               |
+    | rol byte [rdi], cl                                              | d2 07                               |
+    | rol byte [r8], cl                                               | 41 d2 00                            |
+    | rol byte [r9], cl                                               | 41 d2 01                            |
+    | rol byte [r10], cl                                              | 41 d2 02                            |
+    | rol byte [r11], cl                                              | 41 d2 03                            |
+    | rol byte [r12], cl                                              | 41 d2 04 24                         |
+    | rol byte [r13], cl                                              | 41 d2 45 00                         |
+    | rol byte [r14], cl                                              | 41 d2 06                            |
+    | rol byte [r15], cl                                              | 41 d2 07                            |
+    | rol byte [rax + 1 * rcx], cl                                    | d2 04 08                            |
+    | rol byte [rcx + 1 * rcx], cl                                    | d2 04 09                            |
+    | rol byte [rdx + 1 * rcx], cl                                    | d2 04 0a                            |
+    | rol byte [rbx + 1 * rcx], cl                                    | d2 04 0b                            |
+    | rol byte [rsp + 1 * rcx], cl                                    | d2 04 0c                            |
+    | rol byte [rbp + 1 * rcx], cl                                    | d2 44 0d 00                         |
+    | rol byte [rsi + 1 * rcx], cl                                    | d2 04 0e                            |
+    | rol byte [rdi + 1 * rcx], cl                                    | d2 04 0f                            |
+    | rol byte [r8 + 1 * rcx], cl                                     | 41 d2 04 08                         |
+    | rol byte [r9 + 1 * rcx], cl                                     | 41 d2 04 09                         |
+    | rol byte [r10 + 1 * rcx], cl                                    | 41 d2 04 0a                         |
+    | rol byte [r11 + 1 * rcx], cl                                    | 41 d2 04 0b                         |
+    | rol byte [r12 + 1 * rcx], cl                                    | 41 d2 04 0c                         |
+    | rol byte [r13 + 1 * rcx], cl                                    | 41 d2 44 0d 00                      |
+    | rol byte [r14 + 1 * rcx], cl                                    | 41 d2 04 0e                         |
+    | rol byte [r15 + 1 * rcx], cl                                    | 41 d2 04 0f                         |
+    | rol byte [rax + 1 * rax], cl                                    | d2 04 00                            |
+    | rol byte [rax + 1 * rdx], cl                                    | d2 04 10                            |
+    | rol byte [rax + 1 * rbx], cl                                    | d2 04 18                            |
+    | rol byte [rax + 1 * rbp], cl                                    | d2 04 28                            |
+    | rol byte [rax + 1 * rsi], cl                                    | d2 04 30                            |
+    | rol byte [rax + 1 * rdi], cl                                    | d2 04 38                            |
+    | rol byte [rax + 1 * r8], cl                                     | 42 d2 04 00                         |
+    | rol byte [rax + 1 * r9], cl                                     | 42 d2 04 08                         |
+    | rol byte [rax + 1 * r10], cl                                    | 42 d2 04 10                         |
+    | rol byte [rax + 1 * r11], cl                                    | 42 d2 04 18                         |
+    | rol byte [rax + 1 * r12], cl                                    | 42 d2 04 20                         |
+    | rol byte [rax + 1 * r13], cl                                    | 42 d2 04 28                         |
+    | rol byte [rax + 1 * r14], cl                                    | 42 d2 04 30                         |
+    | rol byte [rax + 1 * r15], cl                                    | 42 d2 04 38                         |
+    | rol byte [rax + 2 * rcx], cl                                    | d2 04 48                            |
+    | rol byte [rax + 4 * rcx], cl                                    | d2 04 88                            |
+    | rol byte [rax + 8 * rcx], cl                                    | d2 04 c8                            |
+    | rol byte [r8 + 1 * r9], cl                                      | 43 d2 04 08                         |
+    | rol byte [r8 + 2 * r9], cl                                      | 43 d2 04 48                         |
+    | rol byte [r8 + 4 * r9], cl                                      | 43 d2 04 88                         |
+    | rol byte [r8 + 8 * r9], cl                                      | 43 d2 04 c8                         |
+    | rol byte [1 * rcx], cl                                          | d2 04 0d 00 00 00 00                |
+    | rol byte [2 * rcx], cl                                          | d2 04 4d 00 00 00 00                |
+    | rol byte [4 * rcx], cl                                          | d2 04 8d 00 00 00 00                |
+    | rol byte [8 * rcx], cl                                          | d2 04 cd 00 00 00 00                |
+    | rol byte [1 * r9], cl                                           | 42 d2 04 0d 00 00 00 00             |
+    | rol byte [2 * r9], cl                                           | 42 d2 04 4d 00 00 00 00             |
+    | rol byte [4 * r9], cl                                           | 42 d2 04 8d 00 00 00 00             |
+    | rol byte [8 * r9], cl                                           | 42 d2 04 cd 00 00 00 00             |
+    | rol byte [r13 + 8 * r12], cl                                    | 43 d2 44 e5 00                      |
+    | rol byte [rsp + 4 * r15], cl                                    | 42 d2 04 bc                         |
+    | rol byte [rax + 1 * rcx + 0x00], cl                             | d2 44 08 00                         |
+    | rol byte [rax + 1 * rcx - 0x00], cl                             | d2 44 08 00                         |
+    | rol byte [rax + 1 * rcx + 0x01], cl                             | d2 44 08 01                         |
+    | rol byte [rax + 1 * rcx - 0x01], cl                             | d2 44 08 ff                         |
+    | rol byte [rax + 1 * rcx + 0x00000001], cl                       | d2 84 08 01 00 00 00                |
+    | rol byte [rax + 1 * rcx - 0x00000001], cl                       | d2 84 08 ff ff ff ff                |
+    | rol byte [rax + 1 * rcx + 0x7f], cl                             | d2 44 08 7f                         |
+    | rol byte [rax + 1 * rcx - 0x7f], cl                             | d2 44 08 81                         |
+    | rol byte [rax + 1 * rcx + 0x80], cl                             | d2 84 08 80 00 00 00                |
+    | rol byte [rax + 1 * rcx - 0x80], cl                             | d2 44 08 80                         |
+    | rol byte [rax + 1 * rcx - 0x81], cl                             | d2 84 08 7f ff ff ff                |
+    | rol byte [rax + 1 * rcx + 0xff], cl                             | d2 84 08 ff 00 00 00                |
+    | rol byte [rax + 1 * rcx - 0xff], cl                             | d2 84 08 01 ff ff ff                |
+    | rol byte [rax + 1 * rcx + 0x7fffffff], cl                       | d2 84 08 ff ff ff 7f                |
+    | rol byte [rax + 1 * rcx - 0x7fffffff], cl                       | d2 84 08 01 00 00 80                |
+    | rol byte [rax + 1 * rcx - 0x80000000], cl                       | d2 84 08 00 00 00 80                |
+    | rol byte [r10 + 0x7f], cl                                       | 41 d2 42 7f                         |
+    | rol byte [r10 + 0x80], cl                                       | 41 d2 82 80 00 00 00                |
+    | rol byte [r10 - 0x80], cl                                       | 41 d2 42 80                         |
+    | rol byte [r10 - 0x81], cl                                       | 41 d2 82 7f ff ff ff                |
+    | .prev5: nop; nop; nop; nop; nop; rol byte [rel @prev5], cl      | 90 90 90 90 90 d2 05 f5 ff ff ff    |
+    | .prev1: nop; rol byte [rel @prev1], cl                          | 90 d2 05 f9 ff ff ff                |
+    | rol byte [rel @next1], cl; nop; .next1: nop                     | d2 05 01 00 00 00 90 90             |
+    | rol byte [rel @next5], cl; nop; nop; nop; nop; nop; .next5: nop | d2 05 05 00 00 00 90 90 90 90 90 90 |
+    | --------------------------------------------------------------- | ----------------------------------- |
 """
 
 

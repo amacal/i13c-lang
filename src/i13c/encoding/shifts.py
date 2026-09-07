@@ -1,4 +1,5 @@
 from i13c.encoding import kind
+from i13c.encoding.core import RelocationInfo
 from i13c.encoding.kind import AddressInfo, RegisterInfo, ImmediateInfo
 from i13c.semantic.typing.analyses.llvm import (
     RCL,
@@ -13,43 +14,47 @@ from i13c.semantic.typing.analyses.llvm import (
     Immediate,
     Register,
     Address,
+    Relocation,
 )
 
-def encode_rcl(instruction: RCL, bytecode: bytearray) -> None:
+
+def encode_rcl(instruction: RCL, bytecode: bytearray) -> RelocationInfo | None:
     return encode_group(0x02, instruction, bytecode)
 
 
-def encode_rcr(instruction: RCR, bytecode: bytearray) -> None:
+def encode_rcr(instruction: RCR, bytecode: bytearray) -> RelocationInfo | None:
     return encode_group(0x03, instruction, bytecode)
 
 
-def encode_rol(instruction: ROL, bytecode: bytearray) -> None:
+def encode_rol(instruction: ROL, bytecode: bytearray) -> RelocationInfo | None:
     return encode_group(0x00, instruction, bytecode)
 
 
-def encode_ror(instruction: ROR, bytecode: bytearray) -> None:
+def encode_ror(instruction: ROR, bytecode: bytearray) -> RelocationInfo | None:
     return encode_group(0x01, instruction, bytecode)
 
 
-def encode_sal(instruction: SAL, bytecode: bytearray) -> None:
+def encode_sal(instruction: SAL, bytecode: bytearray) -> RelocationInfo | None:
     return encode_group(0x04, instruction, bytecode)
 
 
-def encode_sar(instruction: SAR, bytecode: bytearray) -> None:
+def encode_sar(instruction: SAR, bytecode: bytearray) -> RelocationInfo | None:
     return encode_group(0x07, instruction, bytecode)
 
 
-def encode_shl(instruction: SHL, bytecode: bytearray) -> None:
+def encode_shl(instruction: SHL, bytecode: bytearray) -> RelocationInfo | None:
     return encode_group(0x04, instruction, bytecode)
 
 
-def encode_shr(instruction: SHR, bytecode: bytearray) -> None:
+def encode_shr(instruction: SHR, bytecode: bytearray) -> RelocationInfo | None:
     return encode_group(0x05, instruction, bytecode)
 
 
 def encode_group(
-    ext: int, instruction: Group2Instruction, bytecode: bytearray
-) -> None:
+    ext: int,
+    instruction: Group2Instruction,
+    bytecode: bytearray,
+) -> RelocationInfo | None:
     # sanity check
     assert len(instruction.operands) == 2
 
@@ -57,7 +62,8 @@ def encode_group(
     dst = instruction.operands[0]
     src = instruction.operands[1]
 
-    # assume no immediate value for now
+    # assume no immediate, nor relocation for now
+    relocation: RelocationInfo | None = None
     immediate: Immediate | None = None
     is_8bit: bool = False
 
@@ -91,4 +97,17 @@ def encode_group(
     kind.write_rex(bytecode, rex)
     kind.write_opcode(bytecode, 1, opcode)
     kind.write_modrm(bytecode, modrm_reg, modrm_rm)
+
+    # if the dst operand is not an address with a relocation displacement
+    if isinstance(dst, Address) and isinstance(dst.disp, Relocation):
+        relocation = RelocationInfo(
+            target=dst.disp.block,
+            offset=len(bytecode) - 4,
+            width=4,
+        )
+
+    # encode optional immediate
     kind.write_immediate(bytecode, immediate, condition=immediate is not None)
+
+    # relocate if needed
+    return relocation

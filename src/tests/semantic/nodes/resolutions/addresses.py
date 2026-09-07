@@ -1,6 +1,9 @@
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
+from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
+from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
+from i13c.semantic.typing.resolutions.instructions import InstructionId
 
 
 def can_accept_an_offsetless_address():
@@ -54,7 +57,6 @@ def can_accept_an_indexed_address():
     assert source.extract(resolution.accepted[0].ref) == b"[rax + rbx]"
 
 
-
 def can_accept_a_forward_address():
     source, resolutions = prepare_resolutions("""
         asm main() { jmp [rax + 0x0300]; }
@@ -72,8 +74,9 @@ def can_accept_a_forward_address():
     assert resolution.accepted[0].base.name == b"rax"
 
     assert resolution.accepted[0].disp is not None
-    assert resolution.accepted[0].disp.direction == "forward"
+    assert isinstance(resolution.accepted[0].disp, DisplacementAcceptance)
 
+    assert resolution.accepted[0].disp.direction == "forward"
     assert resolution.accepted[0].disp.width == 32
     assert str(resolution.accepted[0].disp) == "+ 0x0300"
 
@@ -105,8 +108,9 @@ def can_accept_a_backward_address():
     assert resolution.accepted[0].base.width == 64
 
     assert resolution.accepted[0].disp is not None
-    assert resolution.accepted[0].disp.direction == "backward"
+    assert isinstance(resolution.accepted[0].disp, DisplacementAcceptance)
 
+    assert resolution.accepted[0].disp.direction == "backward"
     assert resolution.accepted[0].disp.width == 32
     assert str(resolution.accepted[0].disp) == "- 0x0300"
 
@@ -136,6 +140,28 @@ def can_accept_register_bound_param_as_the_base():
     assert resolution.accepted[0].base.type.name == b"u64"
 
     assert source.extract(resolution.accepted[0].ref) == b"[@v]"
+
+
+def can_accept_reference_relative_address():
+    source, resolutions = prepare_resolutions("""
+        asm main() { .start: jmp [rel @start]; }
+    """)
+
+    assert resolutions.addresses is not None
+    assert resolutions.addresses.size() == 1
+    id, resolution = resolutions.addresses.peek()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 0
+
+    assert resolution.accepted[0].id == id
+    assert resolution.accepted[0].base is None
+
+    assert isinstance(resolution.accepted[0].disp, LabelAcceptance)
+    assert resolution.accepted[0].disp.name == b"start"
+
+    assert isinstance(resolution.accepted[0].disp.target, InstructionId)
+    assert source.extract(resolution.accepted[0].ref) == b"[rel @start]"
 
 
 def can_reject_immediate_bound_param_as_the_base():
@@ -200,6 +226,22 @@ def can_reject_non_64bit_register():
 
     assert resolution.rejected[0].reason == "invalid-register"
     assert source.extract(resolution.rejected[0].ref) == b"[eax]"
+
+
+def can_reject_relocated_address_from_parameter():
+    source, resolutions = prepare_resolutions("""
+        asm main(v@imm: u64) { jmp [rel @v]; }
+    """)
+
+    assert resolutions.addresses is not None
+    assert resolutions.addresses.size() == 1
+    _, resolution = resolutions.addresses.peek()
+
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "invalid-relocation"
+    assert source.extract(resolution.rejected[0].ref) == b"[rel @v]"
 
 
 def can_detect_a_broken_range_rule_e3022():

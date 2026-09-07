@@ -1,7 +1,15 @@
 from i13c.encoding import kind
+from i13c.encoding.core import RelocationInfo
 from i13c.encoding.kind import AddressInfo, ImmediateInfo, RegisterInfo
 from i13c.encoding.math import encode_rm
-from i13c.semantic.typing.analyses.llvm import MOV, XCHG, Immediate, Register, Address
+from i13c.semantic.typing.analyses.llvm import (
+    MOV,
+    XCHG,
+    Immediate,
+    Register,
+    Address,
+    Relocation,
+)
 
 MOV_MEM_IMM: dict[tuple[int, int], int] = {
     (8, 8): 0xC6,
@@ -18,7 +26,7 @@ MOV_REG_IMM: dict[tuple[int, int], int] = {
 }
 
 
-def encode_mov(instruction: MOV, bytecode: bytearray) -> None:
+def encode_mov(instruction: MOV, bytecode: bytearray) -> RelocationInfo | None:
     # sanity check
     assert len(instruction.operands) == 2
 
@@ -27,6 +35,7 @@ def encode_mov(instruction: MOV, bytecode: bytearray) -> None:
     src = instruction.operands[1]
 
     # assume optional encoding components
+    relocation: RelocationInfo | None = None
     immediate: Immediate | None = None
     opcode: int | None = None
     opcode_reg: kind.OpCodeEncoding | None = None
@@ -81,11 +90,22 @@ def encode_mov(instruction: MOV, bytecode: bytearray) -> None:
         kind.write_opcode(bytecode, 1, opcode)
         kind.write_modrm(bytecode, modrm_reg, modrm_rm)
 
+        # check if the r/m operand has a relocation displacement
+        if isinstance(rm, Address) and isinstance(rm.disp, Relocation):
+            relocation = RelocationInfo(
+                target=rm.disp.block,
+                offset=len(bytecode) - 4,
+                width=4,
+            )
+
     # encode optional immediate
     kind.write_immediate(bytecode, immediate)
 
+    # optional relocation
+    return relocation
 
-def encode_xchg(instruction: XCHG, bytecode: bytearray) -> None:
+
+def encode_xchg(instruction: XCHG, bytecode: bytearray) -> RelocationInfo | None:
     # sanity check
     assert len(instruction.operands) == 2
 
@@ -94,6 +114,7 @@ def encode_xchg(instruction: XCHG, bytecode: bytearray) -> None:
     src = instruction.operands[1]
 
     # assume optional encoding components
+    relocation: RelocationInfo | None = None
     opcode: int | None = None
     opcode_reg: kind.OpCodeEncoding | None = None
     reg: kind.RegisterOrConstant | None = None
@@ -143,3 +164,14 @@ def encode_xchg(instruction: XCHG, bytecode: bytearray) -> None:
         kind.write_rex(bytecode, rex)
         kind.write_opcode(bytecode, 1, opcode)
         kind.write_modrm(bytecode, modrm_reg, modrm_rm)
+
+        # check if the r/m operand has a relocation displacement
+        if isinstance(rm, Address) and isinstance(rm.disp, Relocation):
+            relocation = RelocationInfo(
+                target=rm.disp.block,
+                offset=len(bytecode) - 4,
+                width=4,
+            )
+
+    # optional relocation
+    return relocation

@@ -5,7 +5,7 @@ from typing import Protocol
 from i13c.encoding.core import UnreachableEncodingError
 from i13c.semantic.typing.analyses import llvm
 
-RegisterOrAddress = llvm.Register | llvm.Address | llvm.Relocation | llvm.Fixed
+RegisterOrAddress = llvm.Register | llvm.Address
 RegisterOrConstant = llvm.Register | int
 
 
@@ -54,20 +54,12 @@ class DisplacementInfo:
         return value.to_bytes(width // 8, byteorder="big", signed=True)
 
     @staticmethod
-    def normalize(disp: llvm.Displacement | llvm.Fixed | None, width: int) -> bytes:
-        data: bytes
-        direction: llvm.DisplacementDirection
-
+    def normalize(disp: llvm.Displacement | None, width: int) -> bytes:
         if disp is None:
             return bytes(width // 8)
 
-        if isinstance(disp, llvm.Fixed):
-            data = disp.value
-            direction = "forward"
-
-        else:
-            data = disp.offset
-            direction = disp.direction
+        data = disp.offset
+        direction = disp.direction
 
         assert width in (8, 16, 32)
         assert 8 * len(data) <= width
@@ -432,17 +424,11 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
         encoding.modrm_rm = RegisterInfo.low_3bits(rm)
         encoding.rex_b = 0b0001 if RegisterInfo.high_bit(rm) else 0b0000
 
-    elif isinstance(rm, llvm.Relocation):
+    elif isinstance(rm.disp, llvm.Relocation):
         encoding.modrm_mod = 0b00
         encoding.modrm_rm = 0b101
         encoding.disp_width = 4
-        encoding.disp_value = DisplacementInfo.fixed(rm.block, 32)
-
-    elif isinstance(rm, llvm.Fixed):
-        encoding.modrm_mod = 0b00
-        encoding.modrm_rm = 0b101
-        encoding.disp_width = 4
-        encoding.disp_value = DisplacementInfo.normalize(rm, 32)
+        encoding.disp_value = DisplacementInfo.fixed(rm.disp.block, 32)
 
     else:
         is_rsp_r12 = RegisterInfo.low_3bits(rm.base) == 0b100 if rm.base else False

@@ -86,7 +86,7 @@ class Address:
     size: bytes | None
     base: Register | Reference | None
     indx: Index | None
-    disp: Displacement | None
+    disp: Displacement | Reference | None
 
     def accept(self, visitor: Visitor, path: Path) -> None:
         visitor.on_address(self, path)

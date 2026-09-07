@@ -24,6 +24,7 @@ from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
+from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
@@ -192,7 +193,7 @@ def address_converter(
     size: AsmletAddressSize = src.size
     base: AsmletOperandRegister | None = None
     indx: AsmletOperandIndex | None = None
-    disp: AsmletOperandDisplacement | None = None
+    disp: AsmletOperandDisplacement | AsmletOperandRelocation | None = None
 
     # the base of an address can only be a register
     if isinstance(src.base, RegisterAcceptance):
@@ -221,13 +222,17 @@ def address_converter(
                 reg=AsmletOperandRegister(name=value),
             )
 
-    # displacement is optional
-    if src.disp is not None:
+    # hexadecimal displacement is optional
+    if src.disp is not None and isinstance(src.disp, DisplacementAcceptance):
         disp = AsmletOperandDisplacement(
             width=src.disp.width,
             offset=src.disp.offset,
             direction=src.disp.direction,
         )
+
+    # label-based relocation is also optional
+    if src.disp is not None and isinstance(src.disp, LabelAcceptance):
+        disp = AsmletOperandRelocation(offset=src.disp.index - ctx.index)
 
     return AsmletOperandAddress(
         size=size,

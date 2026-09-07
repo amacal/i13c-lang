@@ -14,6 +14,7 @@ from i13c.semantic.typing.analyses.asmlets import (
     AsmletOperandImmediate,
     AsmletOperandRegister,
     AsmletOperandRelocation,
+    AsmletOperandDisplacement,
 )
 from i13c.semantic.typing.analyses.blocklets import (
     Blocklet,
@@ -109,13 +110,23 @@ def build_blocklets(
 
 @dataclass(kw_only=True, repr=False)
 class EmitRelocation:
-    target: EmitRelocatable
+    target: BlockletInstruction
+    placeholder: Relocation
     offset: int
 
 
-EmitRelocatable = LoopInstruction | JMP | CALL
-EmitRelocated = tuple[BlockletInstruction, EmitRelocation | None]
+EmitRelocated = tuple[BlockletInstruction, list[EmitRelocation]]
 EmitSignature = Callable[[list[AsmletOperand]], EmitRelocated]
+Relocatable = tuple[Relocation, int]
+
+
+def into_relocations(
+    relocations: list[Relocatable], target: BlockletInstruction
+) -> list[EmitRelocation]:
+    return [
+        EmitRelocation(target=target, placeholder=entry[0], offset=entry[1])
+        for entry in relocations
+    ]
 
 
 def emit_asmlets(
@@ -169,6 +180,10 @@ def emit_asmlets(
                 if isinstance(operand.target, AsmletOperandRelocation):
                     fixes[idx + operand.target.offset] = 0
 
+                if isinstance(operand.target, AsmletOperandAddress):
+                    if isinstance(operand.target.disp, AsmletOperandRelocation):
+                        fixes[idx + operand.target.disp.offset] = 0
+
         # emit all instructions, and collect relocations
         for idx, instr in enumerate(entry.instructions):
             instruction, relocation = dispatch[instr.mnemonic](instr.operands)
@@ -179,8 +194,8 @@ def emit_asmlets(
                 fixes[idx] = len(blocks)
                 instructions = []
 
-            if relocation is not None:
-                relocations.append((idx, relocation))
+            for rel in relocation or []:
+                relocations.append((idx, rel))
 
             instructions.append(instruction)
 
@@ -190,9 +205,7 @@ def emit_asmlets(
 
         # apply relocations to the instructions
         for idx, relocation in relocations:
-            relocation.target.operands = (
-                Relocation(block=fixes[idx + relocation.offset]),
-            )
+            relocation.placeholder.block = fixes[idx + relocation.offset]
 
         blocklet = Blocklet(
             ref=entry.ref,
@@ -209,29 +222,71 @@ def emit_mov(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 2
 
+    # two operands
     dst = accept_reg_addr(operands[0])
     src = accept_reg_imm_addr(operands[1])
 
-    return MOV(operands=(dst, src)), None
+    # prepare a list to collect relocations
+    relocations: list[Relocatable] = []
+
+    # unwrap destination if it contains a relocation
+    if isinstance(dst, tuple):
+        assert isinstance(dst[0].disp, Relocation)
+        relocations.append((dst[0].disp, dst[1]))
+        dst = dst[0]
+
+    # unwrap source if it contains a relocation
+    if isinstance(src, tuple):
+        assert isinstance(src[0].disp, Relocation)
+        relocations.append((src[0].disp, src[1]))
+        src = src[0]
+
+    # create the instruction
+    instruction = MOV(operands=(dst, src))
+
+    # convert relocations to EmitRelocation instances
+    return (instruction, into_relocations(relocations, instruction))
 
 
 def emit_bswap(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 1
 
+    # one operand
     dst = accept_reg(operands[0])
 
-    return BSWAP(operands=(dst,)), None
+    # create the instruction
+    return BSWAP(operands=(dst,)), []
 
 
 def emit_xchg(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 2
 
+    # extract operands
     dst = accept_reg_addr(operands[0])
     src = accept_reg_addr(operands[1])
 
-    return (XCHG(operands=(dst, src)), None)
+    # prepare relocations list
+    relocations: list[Relocatable] = []
+
+    # unwrap destination if relocated
+    if isinstance(dst, tuple):
+        assert isinstance(dst[0].disp, Relocation)
+        relocations.append((dst[0].disp, dst[1]))
+        dst = dst[0]
+
+    # unwrap source if relocated
+    if isinstance(src, tuple):
+        assert isinstance(src[0].disp, Relocation)
+        relocations.append((src[0].disp, src[1]))
+        src = src[0]
+
+    # create the instruction
+    instruction = XCHG(operands=(dst, src))
+
+    # convert relocations to EmitRelocation instances
+    return (instruction, into_relocations(relocations, instruction))
 
 
 def emit_nop(operands: list[AsmletOperand]) -> EmitRelocated:
@@ -239,7 +294,7 @@ def emit_nop(operands: list[AsmletOperand]) -> EmitRelocated:
     assert len(operands) == 0
 
     # just emit a NOP instruction
-    return NOP(), None
+    return NOP(), []
 
 
 def emit_ret(operands: list[AsmletOperand]) -> EmitRelocated:
@@ -247,7 +302,7 @@ def emit_ret(operands: list[AsmletOperand]) -> EmitRelocated:
     assert len(operands) == 0
 
     # just emit a RET instruction
-    return RET(), None
+    return RET(), []
 
 
 def emit_call(operands: list[AsmletOperand]) -> EmitRelocated:
@@ -257,15 +312,24 @@ def emit_call(operands: list[AsmletOperand]) -> EmitRelocated:
     # the target must be either a relocation or an address
     target = accept_reg_addr_rel(operands[0])
 
+    # prepare relocations list
+    relocations: list[Relocatable] = []
+
+    # unwrap target if relocated
     if isinstance(target, tuple):
-        instruction = CALL(operands=(target[0],))
-        relocation = EmitRelocation(target=instruction, offset=target[1])
+        if isinstance(target[0], Relocation):
+            relocations.append((target[0], target[1]))
+            target = target[0]
+        else:
+            assert isinstance(target[0].disp, Relocation)
+            relocations.append((target[0].disp, target[1]))
+            target = target[0]
 
-    else:
-        instruction = CALL(operands=(target,))
-        relocation = None
+    # create the CALL instruction
+    instruction = CALL(operands=(target,))
 
-    return instruction, relocation
+    # convert relocations to EmitRelocation instances
+    return instruction, into_relocations(relocations, instruction)
 
 
 def emit_jmp(operands: list[AsmletOperand]) -> EmitRelocated:
@@ -275,15 +339,24 @@ def emit_jmp(operands: list[AsmletOperand]) -> EmitRelocated:
     # the target must be either a relocation or an address
     target = accept_reg_addr_rel(operands[0])
 
+    # prepare relocations list
+    relocations: list[Relocatable] = []
+
+    # unwrap target if relocated
     if isinstance(target, tuple):
-        instruction = JMP(operands=(target[0],))
-        relocation = EmitRelocation(target=instruction, offset=target[1])
+        if isinstance(target[0], Relocation):
+            relocations.append((target[0], target[1]))
+            target = target[0]
+        else:
+            assert isinstance(target[0].disp, Relocation)
+            relocations.append((target[0].disp, target[1]))
+            target = target[0]
 
-    else:
-        instruction = JMP(operands=(target,))
-        relocation = None
+    # create the JMP instruction
+    instruction = JMP(operands=(target,))
 
-    return instruction, relocation
+    # convert relocations to EmitRelocation instances
+    return instruction, into_relocations(relocations, instruction)
 
 
 def emit_syscall(operands: list[AsmletOperand]) -> EmitRelocated:
@@ -291,7 +364,7 @@ def emit_syscall(operands: list[AsmletOperand]) -> EmitRelocated:
     assert len(operands) == 0
 
     # just emit a SYSCALL instruction
-    return SYSCALL(), None
+    return SYSCALL(), []
 
 
 class Group1Constructor[T: Group1Instruction](Protocol):
@@ -317,8 +390,26 @@ def emit_group1[T: Group1Instruction](
     dst = accept_reg_addr(operands[0])
     src = accept_reg_imm_addr(operands[1])
 
-    # no relocation
-    return op(operands=(dst, src)), None
+    # prepare relocations list
+    relocations: list[Relocatable] = []
+
+    # unwrap destination if relocated
+    if isinstance(dst, tuple):
+        assert isinstance(dst[0].disp, Relocation)
+        relocations.append((dst[0].disp, dst[1]))
+        dst = dst[0]
+
+    # unwrap source if relocated
+    if isinstance(src, tuple):
+        assert isinstance(src[0].disp, Relocation)
+        relocations.append((src[0].disp, src[1]))
+        src = src[0]
+
+    # create the instruction
+    instruction = op(operands=(dst, src))
+
+    # convert relocations to EmitRelocation instances
+    return instruction, into_relocations(relocations, instruction)
 
 
 def emit_group2[T: Group2Instruction](
@@ -332,8 +423,20 @@ def emit_group2[T: Group2Instruction](
     dst = accept_reg_addr(operands[0])
     src = accept_reg_imm(operands[1])
 
-    # no relocation
-    return op(operands=(dst, src)), None
+    # prepare relocations list
+    relocations: list[Relocatable] = []
+
+    # unwrap destination if relocated
+    if isinstance(dst, tuple):
+        assert isinstance(dst[0].disp, Relocation)
+        relocations.append((dst[0].disp, dst[1]))
+        dst = dst[0]
+
+    # create the instruction
+    instruction = op(operands=(dst, src))
+
+    # convert relocations to EmitRelocation instances
+    return instruction, into_relocations(relocations, instruction)
 
 
 def emit_loop[T: LoopInstruction](
@@ -346,38 +449,130 @@ def emit_loop[T: LoopInstruction](
     # one relocation operand
     assert isinstance(operands[0].target, AsmletOperandRelocation)
 
-    instruction = op(operands=(Relocation(block=0),))
-    relocation = EmitRelocation(target=instruction, offset=operands[0].target.offset)
+    # one operand
+    target = operands[0].target
 
-    return instruction, relocation
+    placeholder = Relocation(block=0)
+    instruction = op(operands=(placeholder,))
+
+    relocation = EmitRelocation(
+        target=instruction,
+        placeholder=placeholder,
+        offset=target.offset,
+    )
+
+    return instruction, [relocation]
 
 
 def emit_lea(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 2
 
+    # two operands
     dst = accept_reg(operands[0])
     src = accept_addr(operands[1])
 
-    return LEA(operands=(dst, src)), None
+    # prepare relocations list
+    relocations: list[Relocatable] = []
+
+    # unwrap source if relocated
+    if isinstance(src, tuple):
+        assert isinstance(src[0].disp, Relocation)
+        relocations.append((src[0].disp, src[1]))
+        src = src[0]
+
+    # create the instruction
+    instruction = LEA(operands=(dst, src))
+
+    # convert relocations to EmitRelocation instances
+    return instruction, into_relocations(relocations, instruction)
 
 
 def emit_pop(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 1
 
+    # one operand
     dst = accept_reg_addr(operands[0])
 
-    return POP(operands=(dst,)), None
+    # prepare relocations list
+    relocations: list[Relocatable] = []
+
+    # unwrap destination if relocated
+    if isinstance(dst, tuple):
+        assert isinstance(dst[0].disp, Relocation)
+        relocations.append((dst[0].disp, dst[1]))
+        dst = dst[0]
+
+    # create the instruction
+    instruction = POP(operands=(dst,))
+
+    # convert relocations to EmitRelocation instances
+    return instruction, into_relocations(relocations, instruction)
 
 
 def emit_push(operands: list[AsmletOperand]) -> EmitRelocated:
     # sanity checks
     assert len(operands) == 1
 
+    # one operand
     dst = accept_reg_imm_addr(operands[0])
 
-    return PUSH(operands=(dst,)), None
+    # prepare relocations list
+    relocations: list[Relocatable] = []
+
+    # unwrap destination if relocated
+    if isinstance(dst, tuple):
+        assert isinstance(dst[0].disp, Relocation)
+        relocations.append((dst[0].disp, dst[1]))
+        dst = dst[0]
+
+    # create the instruction
+    instruction = PUSH(operands=(dst,))
+
+    # convert relocations to EmitRelocation instances
+    return instruction, into_relocations(relocations, instruction)
+
+
+def convert_addr(operand: AsmletOperandAddress) -> Address | tuple[Address, int]:
+    index = (
+        Index(
+            scale=operand.indx.scale,
+            reg=Register(name=operand.indx.reg.name),
+        )
+        if operand.indx is not None
+        else None
+    )
+
+    # default values
+    disp: Displacement | Relocation | None = None
+    relocation: int | None = None
+
+    # decide if the displacement is a regular displacement
+    if isinstance(operand.disp, AsmletOperandDisplacement):
+        disp = Displacement(
+            width=operand.disp.width,
+            offset=operand.disp.offset,
+            direction=operand.disp.direction,
+        )
+
+    # decide if the displacement has to be relocated
+    if isinstance(operand.disp, AsmletOperandRelocation):
+        disp, relocation = Relocation(block=0), operand.disp.offset
+
+    address = Address(
+        size=operand.size,
+        base=(Register(name=operand.base.name) if operand.base is not None else None),
+        indx=index,
+        disp=disp,
+    )
+
+    # decide if to return just address or address with relocation
+    if relocation is not None:
+        return address, relocation
+
+    else:
+        return address
 
 
 def accept_reg(operand: AsmletOperand) -> Register:
@@ -387,42 +582,15 @@ def accept_reg(operand: AsmletOperand) -> Register:
     return Register(name=operand.target.name)
 
 
-def accept_addr(operand: AsmletOperand) -> Address:
+def accept_addr(operand: AsmletOperand) -> Address | tuple[Address, int]:
     # sanity checks
     assert isinstance(operand.target, AsmletOperandAddress)
 
-    index = (
-        Index(
-            scale=operand.target.indx.scale,
-            reg=Register(name=operand.target.indx.reg.name),
-        )
-        if operand.target.indx is not None
-        else None
-    )
-
-    disp = (
-        Displacement(
-            width=operand.target.disp.width,
-            offset=operand.target.disp.offset,
-            direction=operand.target.disp.direction,
-        )
-        if operand.target.disp is not None
-        else None
-    )
-
-    return Address(
-        size=operand.target.size,
-        base=(
-            Register(name=operand.target.base.name)
-            if operand.target.base is not None
-            else None
-        ),
-        indx=index,
-        disp=disp,
-    )
+    # follow address path
+    return convert_addr(operand.target)
 
 
-def accept_reg_addr(operand: AsmletOperand) -> Register | Address:
+def accept_reg_addr(operand: AsmletOperand) -> Register | Address | tuple[Address, int]:
     # sanity checks
     assert isinstance(
         operand.target,
@@ -432,44 +600,15 @@ def accept_reg_addr(operand: AsmletOperand) -> Register | Address:
         ),
     )
 
-    index: Index | None = None
+    if isinstance(operand.target, AsmletOperandRegister):
+        return Register(name=operand.target.name)
 
-    if isinstance(operand.target, AsmletOperandAddress):
-        index = (
-            Index(
-                scale=operand.target.indx.scale,
-                reg=Register(name=operand.target.indx.reg.name),
-            )
-            if operand.target.indx is not None
-            else None
-        )
-
-    if isinstance(operand.target, AsmletOperandAddress):
-        disp = (
-            Displacement(
-                width=operand.target.disp.width,
-                offset=operand.target.disp.offset,
-                direction=operand.target.disp.direction,
-            )
-            if operand.target.disp is not None
-            else None
-        )
-
-        return Address(
-            size=operand.target.size,
-            base=(
-                Register(name=operand.target.base.name)
-                if operand.target.base is not None
-                else None
-            ),
-            indx=index,
-            disp=disp,
-        )
-
-    return Register(name=operand.target.name)
+    return convert_addr(operand.target)
 
 
-def accept_reg_addr_rel(operand: AsmletOperand) -> Register | Address | tuple[Relocation, int]:
+def accept_reg_addr_rel(
+    operand: AsmletOperand,
+) -> Register | Address | tuple[Relocation, int] | tuple[Address, int]:
     # sanity checks
     assert isinstance(
         operand.target,
@@ -480,44 +619,14 @@ def accept_reg_addr_rel(operand: AsmletOperand) -> Register | Address | tuple[Re
         ),
     )
 
-    index: Index | None = None
+    if isinstance(operand.target, AsmletOperandAddress):
+        return convert_addr(operand.target)
 
-    if isinstance(operand.target, AsmletOperandRelocation):
+    elif isinstance(operand.target, AsmletOperandRelocation):
         return Relocation(block=0), operand.target.offset
 
-    if isinstance(operand.target, AsmletOperandAddress):
-        index = (
-            Index(
-                scale=operand.target.indx.scale,
-                reg=Register(name=operand.target.indx.reg.name),
-            )
-            if operand.target.indx is not None
-            else None
-        )
-
-    if isinstance(operand.target, AsmletOperandAddress):
-        disp = (
-            Displacement(
-                width=operand.target.disp.width,
-                offset=operand.target.disp.offset,
-                direction=operand.target.disp.direction,
-            )
-            if operand.target.disp is not None
-            else None
-        )
-
-        return Address(
-            size=operand.target.size,
-            base=(
-                Register(name=operand.target.base.name)
-                if operand.target.base is not None
-                else None
-            ),
-            indx=index,
-            disp=disp,
-        )
-
-    return Register(name=operand.target.name)
+    else:
+        return Register(name=operand.target.name)
 
 
 def accept_reg_imm(operand: AsmletOperand) -> Register | Immediate:
@@ -536,7 +645,9 @@ def accept_reg_imm(operand: AsmletOperand) -> Register | Immediate:
     return Register(name=operand.target.name)
 
 
-def accept_reg_imm_addr(operand: AsmletOperand) -> Register | Immediate | Address:
+def accept_reg_imm_addr(
+    operand: AsmletOperand,
+) -> Register | Immediate | Address | tuple[Address, int]:
     # sanity checks
     assert isinstance(
         operand.target,
@@ -547,44 +658,14 @@ def accept_reg_imm_addr(operand: AsmletOperand) -> Register | Immediate | Addres
         ),
     )
 
-    index: Index | None = None
-
     if isinstance(operand.target, AsmletOperandAddress):
-        index = (
-            Index(
-                scale=operand.target.indx.scale,
-                reg=Register(name=operand.target.indx.reg.name),
-            )
-            if operand.target.indx is not None
-            else None
-        )
+        return convert_addr(operand.target)
 
-    if isinstance(operand.target, AsmletOperandImmediate):
+    elif isinstance(operand.target, AsmletOperandImmediate):
         return Immediate(value=operand.target.value)
 
-    if isinstance(operand.target, AsmletOperandAddress):
-        disp = (
-            Displacement(
-                width=operand.target.disp.width,
-                offset=operand.target.disp.offset,
-                direction=operand.target.disp.direction,
-            )
-            if operand.target.disp is not None
-            else None
-        )
-
-        return Address(
-            size=operand.target.size,
-            base=(
-                Register(name=operand.target.base.name)
-                if operand.target.base is not None
-                else None
-            ),
-            indx=index,
-            disp=disp,
-        )
-
-    return Register(name=operand.target.name)
+    else:
+        return Register(name=operand.target.name)
 
 
 def emit_fnlets(

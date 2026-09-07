@@ -1,0 +1,1 @@
+Implemented [rel @label] RIP-relative-to-label addressing by widening Address.disp to a Displacement/Reference union across the whole pipeline, making the capability available to every address-accepting mnemonic rather than only LEA, verified end to end via disassembly.

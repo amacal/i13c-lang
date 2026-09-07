@@ -1,0 +1,6 @@
+- "x86-encoding"
+- "relocations"
+- "addressing-modes"
+- "parsing"
+- "resolution"
+- "instruction-selection"

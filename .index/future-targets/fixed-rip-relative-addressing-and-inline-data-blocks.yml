@@ -1,0 +1,12 @@
+title: "Fixed RIP-Relative Addressing and Inline Data Blocks"
+status: not-completed
+mentioned_by:
+  - "Consuming Register Allocation in the Encoding Backend"
+  - "Group 2 Shift and Rotate Instructions, Memory-Operand Widths, and Full Family Registration"
+  - "LEA and BSWAP Instruction Test Completeness"
+  - "RIP-Relative Label Addressing"
+evidence:
+  - ".history/2026-08/2026-08-27-consuming-register-allocation-in-the-encoding-backend.yml session.not_completed (the Fixed literal-value RIP-relative addressing variant existed in the type system and encoder but was never exercised by a real instruction; the .quad-style inline-data-in-.text pattern, guarded by unconditional control flow, was designed conceptually but not implemented)"
+  - ".history/2026-09/2026-09-05-group-2-shift-and-rotate-instructions-memory-operand-widths-and-full-family-registration.yml session.explored/not_completed (SHL's pre-existing Fixed/RIP-relative destination support was deliberately dropped rather than carried into the newly-unified Group2Operands type shared by all 8 shift/rotate mnemonics)"
+  - ".history/2026-09/2026-09-05-lea-and-bswap-instruction-test-completeness.yml session.not_completed (LEA's own literal RIP-relative addressing rows, previously covered via the Fixed variant with base=rip, were not carried into the new exhaust()-based src/tests/encoding/lea.py)"
+  - ".history/2026-09/2026-09-07-rip-relative-label-addressing.yml session.not_completed (the Fixed type itself was deleted this session, since it had zero parser surface and zero test coverage since being introduced, so this remaining half must be rebuilt from scratch rather than re-wired; the .quad-style inline-data pattern remains untouched)"

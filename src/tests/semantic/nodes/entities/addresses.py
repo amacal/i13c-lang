@@ -94,3 +94,23 @@ def can_detect_a_backward_address():
 
     assert value.disp == id
     assert value.indx is None
+
+
+def can_detect_a_relative_address():
+    entities = prepare_entities(
+        """
+            asm main() { jmp [rel @abc]; }
+        """
+    )
+
+    assert entities.addresses.size() == 1
+    _, value = entities.addresses.peek()
+
+    assert entities.registers.size() == 0
+    assert entities.displacements.size() == 0
+
+    assert entities.references.size() == 1
+    id, _ = entities.references.peek()
+
+    assert value.disp == id
+    assert value.indx is None

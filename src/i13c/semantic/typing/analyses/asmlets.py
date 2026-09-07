@@ -108,7 +108,7 @@ class AsmletOperandAddress:
     size: AsmletAddressSize
     base: AsmletOperandRegister | None
     indx: AsmletOperandIndex | None
-    disp: AsmletOperandDisplacement | None
+    disp: AsmletOperandDisplacement | AsmletOperandRelocation | None
 
 
 AsmletOperandTarget = (

@@ -6,16 +6,19 @@ from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptanc
 from i13c.semantic.typing.resolutions.indices import IndexAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
+from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.syntax.source import Span
 
 AddressRejectionReason = Kind[
     "invalid-register",
     "invalid-index",
     "invalid-size",
+    "invalid-relocation",
 ]
 
 AddressSize = Kind[8, 16, 32, 64]
 AddressBase = RegisterAcceptance | ParameterAcceptance
+Displacement = DisplacementAcceptance | LabelAcceptance
 
 
 @dataclass(kw_only=True)
@@ -34,7 +37,7 @@ class AddressAcceptance:
     size: AddressSize
     base: AddressBase | None
     indx: IndexAcceptance | None
-    disp: DisplacementAcceptance | None
+    disp: Displacement | None
 
     def __str__(self) -> str:
         output = ""

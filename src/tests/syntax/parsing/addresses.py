@@ -116,3 +116,21 @@ def can_parse_address_with_address_operand_with_negative_disp():
 
     assert operand1.target.disp.offset.digits.hex() == "04"
     assert operand1.target.disp.kind == "backward"
+
+
+def can_parse_address_with_relative_address():
+    instructions = parse_instructions("""
+        asm main() { mov [rel @abc]; }
+    """)
+
+    assert instructions[0].mnemonic.name == b"mov"
+    assert len(instructions[0].operands) == 1
+
+    operand1 = instructions[0].operands[0]
+    assert isinstance(operand1.target, tree.snippet.Address)
+
+    assert operand1.target.base is None
+    assert operand1.target.indx is None
+
+    assert isinstance(operand1.target.disp, tree.snippet.Reference)
+    assert operand1.target.disp.name == b"abc"

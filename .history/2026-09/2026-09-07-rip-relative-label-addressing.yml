@@ -1,0 +1,55 @@
+date: "2026-09-07"
+title: "RIP-Relative Label Addressing"
+session:
+  files:
+    - "src/i13c/encoding/addr.py"
+    - "src/i13c/encoding/ctrl.py"
+    - "src/i13c/encoding/kind.py"
+    - "src/i13c/encoding/math.py"
+    - "src/i13c/encoding/move.py"
+    - "src/i13c/encoding/shifts.py"
+    - "src/i13c/encoding/stack.py"
+    - "src/i13c/semantic/nodes/analyses/asmlets.py"
+    - "src/i13c/semantic/nodes/analyses/blocklets.py"
+    - "src/i13c/semantic/nodes/entities/addresses.py"
+    - "src/i13c/semantic/nodes/resolutions/addresses.py"
+    - "src/i13c/semantic/typing/analyses/asmlets.py"
+    - "src/i13c/semantic/typing/analyses/llvm.py"
+    - "src/i13c/semantic/typing/entities/addresses.py"
+    - "src/i13c/semantic/typing/resolutions/addresses.py"
+    - "src/i13c/syntax/parsing/snippets.py"
+    - "src/i13c/syntax/tree/snippet.py"
+  source: —
+  status: completed
+  attempted:
+    - "Added support for lea rax, [rel @label]-style RIP-relative addressing to a label, replacing the previous ambiguous [@label] syntax that misresolved the reference as a parameter-bound base register."
+  explored:
+    - "Compared three candidate designs for representing [rel @label]: a wholly new AST-level entity, collapsing it to the same bare-Reference operand shape JMP/CALL/LOOP already use, and widening Address.disp to a DisplacementId | ReferenceId union with base/indx left None; chose the union design."
+    - "Investigated whether rel should be registered as a new lexer keyword (SET_KEYWORDS) or recognized as a content-checked plain IDENT following the existing byte/word/dword/qword size-prefix precedent; chose the plain-IDENT approach, to avoid permanently reserving the word."
+    - "Traced build_operand_resolution to determine whether LEA_VARIANTS needed a new rel()-shaped MnemonicOperandSpec mirroring CALL_VARIANTS's; confirmed [rel @label] still resolves as an address-kind operand rather than a reference-kind one, so no new variant was needed."
+    - "Checked the existing AddressRejectionReason naming convention (invalid-register/invalid-index/invalid-size) against a new invalid-relocation reason for a rel reference that does not name a label."
+    - "Discussed why rel/base/index mutual exclusivity belongs in the grammar while the reference-must-be-a-label check belongs in semantic resolution, tracing what the parser does and does not have access to at parse time."
+  tried: —
+  corrections:
+    - "Assumed mid-session that address_converter's own return type would need to widen to AsmletOperandAddress | AsmletOperandRelocation; the implementation instead widened AsmletOperandAddress.disp itself to AsmletOperandDisplacement | AsmletOperandRelocation, keeping the outer return type unchanged for consistency with every other pipeline layer's union-in-disp approach."
+    - "Assumed invalid-displacement would be the more convention-consistent AddressRejectionReason name; confirmed invalid-relocation is equally consistent, since the existing invalid-register reason is itself named after what the reference was supposed to resolve to (a register), not the field name it occupies (base)."
+    - "This session's own preceding plan-agent research assumed LEA_VARIANTS would need a new rel()-shaped MnemonicOperandSpec; confirmed instead that the existing addr64() variant already covers [rel @label], since the operand stays address-shaped rather than collapsing to a bare reference."
+  bugs_found: —
+  completed:
+    - "Implemented [rel @label] RIP-relative-to-label addressing by widening Address.disp to a Displacement/Reference union across every pipeline layer: AST (syntax/tree/snippet.py), entities (semantic/typing/entities/addresses.py, semantic/nodes/entities/addresses.py), resolution (semantic/typing/resolutions/addresses.py, semantic/nodes/resolutions/addresses.py), asmlet conversion (semantic/typing/analyses/asmlets.py, semantic/nodes/analyses/asmlets.py), the typed IR (semantic/typing/analyses/llvm.py), and the encoders (encoding/addr.py, encoding/kind.py)."
+    - "Because the capability lives on Address.disp rather than being LEA-specific, it became available generically to every address-accepting mnemonic; added the matching relocation-check-and-return logic to encoding/move.py (MOV, XCHG), encoding/math.py, encoding/shifts.py, and encoding/stack.py."
+    - "Enforced rel's mutual exclusivity with a base or index register at the grammar level via a new parse_address_rel production split out of parse_address in syntax/parsing/snippets.py, rather than as a later semantic rejection."
+    - "Added a new invalid-relocation AddressRejectionReason, raised when a rel reference resolves to something other than a label."
+    - "Generalized semantic/nodes/analyses/blocklets.py's relocation-emission mechanism from one whole-operand relocation per instruction (EmitRelocation | None) to a list of relocations per instruction, each possibly nested inside an operand's Address.disp (EmitRelocated = tuple[BlockletInstruction, list[EmitRelocation]]), via a mutable Relocation placeholder that is mutated in place once its target block index is known, rather than by reassigning an instruction's whole operands tuple."
+    - "Extracted a shared convert_addr helper in blocklets.py, removing Index/Displacement/Address construction logic that had been duplicated across accept_addr, accept_reg_addr, accept_reg_addr_rel, and accept_reg_imm_addr."
+    - "Deleted the unused Fixed type (semantic/typing/analyses/llvm.py) and its dead-code branch in encoding/kind.py's DisplacementInfo.normalize, since it had zero parser surface and zero test coverage since being introduced."
+    - "Verified the full pipeline end to end: compiled a lea rsi, [rel @nibble] snippet and confirmed via make asm/ndisasm that the emitted bytes (ModRM mod=00/rm=101, disp32 = -39) resolve to the .nibble label's actual address, matching the SDM's RIP-relative ModRM special case."
+    - "Ran the full test suite (920 passed) and pyright (same 3 pre-existing, unrelated errors as the baseline, confirmed via git stash comparison) with no regressions."
+  not_completed:
+    - "The Fixed/literal RIP-relative addressing form ([rip + 0x10], no label) remains unimplemented; its type was deleted this session rather than left wired, so it will need to be rebuilt from scratch rather than re-wired."
+    - "The .quad-style inline-data-in-.text pattern, intended to be referenced via RIP-relative addressing, remains undesigned in code."
+    - "encoding/kind.py's encode_modrm_rm still contains a dead isinstance(rm, llvm.Relocation) branch (for a bare top-level Relocation, distinct from one nested in Address.disp) that remains unreachable; left in place, not removed."
+  open_questions: —
+  notes:
+    - "rel is a plain Tokens.IDENT checked by extracted byte content (b\"rel\"), not a SET_KEYWORDS entry, matching how byte/word/dword/qword are recognized."
+    - "This session's scope grew from LEA specifically to every address-accepting mnemonic as a direct consequence of the chosen design: RIP-relative addressing is modeled as a property of the Address type itself, not of any one mnemonic."

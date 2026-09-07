@@ -270,24 +270,65 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
 
 def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Address:
-    displacement: tree.snippet.Displacement | None = None
     size: LexingToken | None = None
 
-    # remember size if provided
+    # address size if provided
     if token.code == Tokens.IDENT:
         size = token
         token = state.expect(Tokens.SQUARE_OPEN)
 
+    end = state.expect(
+        Tokens.IDENT,  # for any register or rip/rel
+        Tokens.AT,  # for any reference
+        Tokens.DIGIT,  # for any scaler
+    )
+
+    if end.code == Tokens.IDENT:
+        match state.extract(end):
+            case b"rel":
+                return parse_address_rel(state, size, token, end)
+
+            case _:
+                pass
+
+    return parse_address_base(state, size, token, end)
+
+
+def parse_address_rel(
+    state: ParsingState,
+    size: LexingToken | None,
+    start: LexingToken,
+    end: LexingToken,
+) -> tree.snippet.Address:
+    # expect the '@' symbol indicating a reference
+    token = state.expect(Tokens.AT)
+
+    # parse the reference following the '@' symbol
+    reference = parse_reference(state, token)
+
+    # expect the closing square bracket of the address
+    end = state.expect(Tokens.SQUARE_CLOSE)
+
+    return tree.snippet.Address(
+        ref=state.between(start, end),
+        size=size and state.extract(size),
+        base=None,
+        indx=None,
+        disp=reference,
+    )
+
+
+def parse_address_base(
+    state: ParsingState,
+    size: LexingToken | None,
+    start: LexingToken,
+    end: LexingToken,
+) -> tree.snippet.Address:
     # optionally, a base, an offset or an index can be provided
     base: tree.snippet.Register | tree.snippet.Reference | None = None
     indx: tree.snippet.Index | None = None
     operator: LexingToken | None = None
-
-    end = state.expect(
-        Tokens.IDENT,  # for any register
-        Tokens.AT,  # for any reference
-        Tokens.DIGIT,  # for any scaler
-    )
+    displacement: tree.snippet.Displacement | None = None
 
     while end.code != Tokens.SQUARE_CLOSE:
         # if there's a base (register or reference)
@@ -320,7 +361,7 @@ def parse_address(state: ParsingState, token: LexingToken) -> tree.snippet.Addre
         assert False
 
     return tree.snippet.Address(
-        ref=state.between(token, end),
+        ref=state.between(start, end),
         size=size and state.extract(size),
         base=base,
         indx=indx,
@@ -389,7 +430,10 @@ def parse_index(
 
     return token, indx
 
-def parse_displacement(state: ParsingState, token: LexingToken, operator: LexingToken) -> tuple[LexingToken, tree.snippet.Displacement]:
+
+def parse_displacement(
+    state: ParsingState, token: LexingToken, operator: LexingToken
+) -> tuple[LexingToken, tree.snippet.Displacement]:
     # determine the sign of the displacement
     kind = "forward" if operator.code == Tokens.PLUS else "backward"
 

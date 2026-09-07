@@ -14,12 +14,14 @@ from i13c.semantic.typing.resolutions.addresses import (
     AddressRejection,
     AddressResolution,
     AddressSize,
+    Displacement,
 )
 from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
 from i13c.semantic.typing.resolutions.indices import IndexAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
+from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.syntax.source import Span
 
 
@@ -86,8 +88,9 @@ def build_address_resolution(
         )
 
         # assume all values are unavailable
-        disp, base, indx = None, None, None
+        base, indx = None, None
         size: AddressSize = 64
+        disp: Displacement | None = None
 
         # resolve size
         if entry.size is not None:
@@ -121,9 +124,26 @@ def build_address_resolution(
                     )
                 )
 
-        # resolve displacement, if present
-        if entry.disp is not None:
+        # resolve hexadecimal displacement, if present
+        if entry.disp is not None and isinstance(entry.disp, DisplacementId):
             disp = displacements.get(entry.disp)
+
+        # resolve reference displacement, if present
+        if entry.disp is not None and isinstance(entry.disp, ReferenceId):
+            reference = references.get(entry.disp)
+
+            if isinstance(reference.target, LabelAcceptance):
+                disp = reference.target
+
+            # if the reference is not a label, it's an invalid relocation
+            else:
+                resolution.rejected.append(
+                    AddressRejection(
+                        ref=entry.ref,
+                        id=aid,
+                        reason="invalid-relocation",
+                    )
+                )
 
         if len(resolution.rejected) == 0:
             resolution.accepted.append(

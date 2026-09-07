@@ -33,7 +33,7 @@ def build_addresses(
         # optionally available index or offset information
         base_id: BaseRegister | None = None
         indx_id: IndexId | None = None
-        disp_id: DisplacementId | None = None
+        disp_id: DisplacementId | ReferenceId | None = None
 
         # reverse mapping to base register ID
         if isinstance(entry.base, tree.snippet.Register):
@@ -50,9 +50,13 @@ def build_addresses(
             indx_id = IndexId(value=indx_nid.value)
 
         # reverse mapping to immediate ID
-        if entry.disp is not None:
+        if entry.disp is not None and isinstance(entry.disp, tree.snippet.Displacement):
             offset_nid = graph.snippet.displacements.get_by_node(entry.disp)
             disp_id = DisplacementId(value=offset_nid.value)
+
+        if entry.disp is not None and isinstance(entry.disp, tree.snippet.Reference):
+            reference_nid = graph.snippet.references.get_by_node(entry.disp)
+            disp_id = ReferenceId(value=reference_nid.value)
 
         addresses[address_id] = Address(
             ref=entry.ref,
