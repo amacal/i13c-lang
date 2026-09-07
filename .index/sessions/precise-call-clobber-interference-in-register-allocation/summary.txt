@@ -1,0 +1,1 @@
+Fixed allocations.py's interference-clique construction to distinguish values that merely die as a call's own argument from values live-out past the call, so only true survivors are forced to avoid that call's clobbered registers, eliminating a class of needless register/spill-slot forcing.

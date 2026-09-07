@@ -46,11 +46,11 @@ def can_detect_statements_assign_with_spills():
                 rdi, rsi, rdx, rcx, r8, r9, r10, r11,
                 r12, r13, r14, r15, rbx, rax, rbp { }
 
-        fn main() { val x: u8 = 0x42; foo(x); }
+        fn main() { val x: u8 = 0x42; foo(x); val y: u8 = x; }
     """)
 
     assert analyses.statements is not None
-    assert analyses.statements.size() == 2
+    assert analyses.statements.size() == 3
 
     assert analyses.asmlets is not None
     assert analyses.asmlets.size() == 1
@@ -58,11 +58,16 @@ def can_detect_statements_assign_with_spills():
 
     for idx, statement in enumerate(analyses.statements.values()):
         if isinstance(statement.acceptance.target, AssignAcceptance):
-            assert idx == 0
-            assert statement.listing() == [
-                "mov r11d, 0x00000042",
-                "mov qword [rsp + 0x00], r11",
-            ]
+            if idx == 0:
+                assert statement.listing() == [
+                    "mov r11d, 0x00000042",
+                    "mov qword [rsp + 0x00], r11",
+                ]
+
+            if idx == 2:
+                assert statement.listing() == [
+                    "mov r11, qword [rsp + 0x00]"
+                ]
 
         else:
             assert idx == 1

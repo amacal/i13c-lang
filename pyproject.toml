@@ -27,3 +27,6 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.ruff.lint]
+ignore = ["SIM102", "SIM114", "SIM118"]

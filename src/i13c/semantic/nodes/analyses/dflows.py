@@ -99,7 +99,7 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
         for arg in stmt.target.target.arguments:
             if isinstance(arg, ParameterAcceptance):
                 for nix, node in enumerate(dflow.values):
-                    if isinstance(node, ParameterAcceptance):  # noqa: SIM102
+                    if isinstance(node, ParameterAcceptance):
                         if node.id == arg.id:
                             dflow.forward[nix].append(idx)
                             dflow.backward[idx].append(nix)
@@ -107,7 +107,7 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
 
             elif isinstance(arg, ValueAcceptance):
                 for nix, node in enumerate(dflow.values):
-                    if isinstance(node, ValueAcceptance):  # noqa: SIM102
+                    if isinstance(node, ValueAcceptance):
                         if node.id == arg.id:
                             dflow.forward[nix].append(idx)
                             dflow.backward[idx].append(nix)
@@ -123,7 +123,7 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
 
         if isinstance(stmt.target.expression, ExpressionAcceptance):
             for nix, node in enumerate(dflow.values):
-                if isinstance(node, (ParameterAcceptance, ValueAcceptance)): # noqa: SIM102
+                if isinstance(node, (ParameterAcceptance, ValueAcceptance)):
                     if node.id == stmt.target.expression.target.id:
                         dflow.forward[nix].append(idx)
                         dflow.backward[idx].append(nix)

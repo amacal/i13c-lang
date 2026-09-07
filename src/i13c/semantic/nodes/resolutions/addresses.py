@@ -18,10 +18,10 @@ from i13c.semantic.typing.resolutions.addresses import (
 )
 from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
 from i13c.semantic.typing.resolutions.indices import IndexAcceptance
+from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.references import ReferenceAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
-from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.syntax.source import Span
 
 

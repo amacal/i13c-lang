@@ -1,0 +1,6 @@
+title: "Precise Call-Clobber Interference in Register Allocation"
+kind: implementation
+files:
+  - "src/i13c/semantic/nodes/analyses/allocations.py"
+source: —
+date: "2026-09-07"

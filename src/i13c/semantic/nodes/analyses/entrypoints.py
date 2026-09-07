@@ -31,9 +31,9 @@ def build_entrypoints(
     entrypoints: dict[SignatureId, Entrypoint] = {}
 
     for nid, signature in signatures.items():
-        if signature.name == b"main":  # noqa: SIM102
-            if len(signature.parameters) == 0:  # noqa: SIM102
-                if flag := flags.find(nid):  # noqa: SIM102
+        if signature.name == b"main":
+            if len(signature.parameters) == 0:
+                if flag := flags.find(nid):
                     if flag.noreturn:
                         entrypoints[signature.id] = Entrypoint(target=signature)
 

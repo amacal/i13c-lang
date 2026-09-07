@@ -43,14 +43,16 @@ def build_allocations(
             graph[idx] = set()
 
         for idx in range(len(live.nodes)):
-            clobbers = live.clobbers[idx]
+            vals1 = live.clobbers[idx].union(live.live_out[idx])
+            vals2 = live.live_in[idx].union(live.live_out[idx])
 
-            values = live.live_in[idx].union(live.live_out[idx]).union(clobbers)
-            pairs = [(a, b) for a in values for b in values if a != b]
+            pairs1 = {(a, b) for a in vals1 for b in vals1 if a != b}
+            pairs2 = {(a, b) for a in vals2 for b in vals2 if a != b}
 
-            targets.update(values)
+            targets.update(vals1)
+            targets.update(vals2)
 
-            for a, b in pairs:
+            for a, b in pairs1.union(pairs2):
                 graph[a].add(b)
                 graph[b].add(a)
 
@@ -137,7 +139,7 @@ def build_allocations(
         spills.clear()
 
         for idx, value in enumerate(live.values):
-            if isinstance(value, CallingClobber):  # noqa: SIM102
+            if isinstance(value, CallingClobber):
                 if idx in graph:
                     del colors[idx]
 

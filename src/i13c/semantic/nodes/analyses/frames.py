@@ -65,7 +65,7 @@ def build_frames(
         for calling in allocation.values:
             if isinstance(calling, Calling):
                 for clobber in calling.clobbers:
-                    if not is_already_saved(saved, clobber.name):  # noqa: SIM102
+                    if not is_already_saved(saved, clobber.name):
                         if clobber.name in callee_saved:
                             saved.append(
                                 StackFrameSave(

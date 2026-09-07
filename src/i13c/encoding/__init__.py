@@ -2,7 +2,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Protocol
 
-from i13c.encoding import addr, bits, ctrl, math, move, stack, shifts
+from i13c.encoding import addr, bits, ctrl, math, move, shifts, stack
 from i13c.encoding.core import RelocationInfo
 from i13c.semantic.typing.analyses import llvm
 from i13c.semantic.typing.analyses.blocklets import (

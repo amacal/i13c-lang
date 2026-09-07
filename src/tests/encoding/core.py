@@ -5,13 +5,13 @@ from i13c.semantic.nodes.resolutions.mnemonics import (
     INSTRUCTIONS_TABLE,
     MnemonicVariant,
 )
-from i13c.semantic.typing.analyses.llvm import NOP
 from i13c.semantic.typing.analyses.blocklets import BlockletInstruction
-from i13c.semantic.typing.resolutions.mnemonics import MnemonicOperandSymbol
+from i13c.semantic.typing.analyses.llvm import NOP
 from i13c.semantic.typing.resolutions.instructions import (
     InstructionAcceptance,
     InstructionRejection,
 )
+from i13c.semantic.typing.resolutions.mnemonics import MnemonicOperandSymbol
 from i13c.syntax.lexing import tokenize
 from i13c.syntax.parsing import parse
 from i13c.syntax.source import open_text
@@ -399,8 +399,7 @@ def exhaust(*tables: str):
                 after: list[BlockletInstruction] | None = None
 
                 for block in blocklet.blocks:
-                    for instruction in block.instructions:
-                        instructions.append(instruction)
+                    instructions.extend(block.instructions)
 
                 if len(instructions) > 1:
                     for instruction in list(instructions):

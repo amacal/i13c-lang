@@ -1,9 +1,9 @@
-from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
-from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
-from i13c.semantic.typing.resolutions.labels import LabelAcceptance
-from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 from i13c.semantic.typing.resolutions.displacements import DisplacementAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionId
+from i13c.semantic.typing.resolutions.labels import LabelAcceptance
+from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
+from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
 def can_accept_an_offsetless_address():

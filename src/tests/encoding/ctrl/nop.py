@@ -1,14 +1,13 @@
 from tests.encoding.core import encode
 
-
-SYSCALL = """
+NOP = """
     | ----------- | -------- |
     | instruction | encoding |
     | ----------- | -------- |
-    | syscall     | 0f 05    |
+    | nop         | 90       |
     | ----------- | -------- |
 """
 
 
-def can_encode_syscall():
-    encode(SYSCALL)
+def can_encode_nop():
+    encode(NOP)

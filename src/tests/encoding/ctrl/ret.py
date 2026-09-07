@@ -1,6 +1,5 @@
 from tests.encoding.core import encode
 
-
 RET = """
     | ----------- | -------- |
     | instruction | encoding |

@@ -142,7 +142,7 @@ def build_callsite_resolution(
                         rejected = "unknown-target"
                         break
 
-                    if parameter.bind == "literal": # noqa: SIM102
+                    if parameter.bind == "literal":
                         if not isinstance(argument, LiteralId):
                             rejected = "not-literal"
                             break

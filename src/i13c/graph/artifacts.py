@@ -33,8 +33,8 @@ class GraphArtifacts:
     #     return self.data["llvm/graph"]
 
     def list_view(self, name: str) -> AbstractListExtractor[Any, Any] | None:
-        if view := self.views.get(name): # noqa: SIM102
-            if list := view.list: # noqa: SIM102
+        if view := self.views.get(name):
+            if list := view.list:
                 if data := self.data.get(name):
                     return list(data)
 

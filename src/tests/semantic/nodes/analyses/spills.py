@@ -104,14 +104,14 @@ def can_detect_one_spill_on_value_of_literal_put_in_slot():
                 rdi, rsi, rdx, rcx, r8, r9, r10, r11,
                 r12, r13, r14, r15, rbx, rax, rbp { }
 
-        fn main() { val abc: u8 = 0x01; foo(abc); }
+        fn main() { val abc: u8 = 0x01; foo(abc); val x: u8 = abc; }
     """)
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
     _, spills = analyses.spills.peek()
 
-    assert len(spills.spills) == 4
+    assert len(spills.spills) == 5
     assert len(spills.spills[spills.entry]) == 0
     assert len(spills.spills[spills.exit]) == 0
 
@@ -130,14 +130,14 @@ def can_detect_one_spill_on_value_of_variable_put_in_slot():
                 rdi, rsi, rdx, rcx, r8, r9, r10, r11,
                 r12, r13, r14, r15, rbx, rax, rbp { }
 
-        fn main(x: u8) { val abc: u8 = x; foo(abc); }
+        fn main(x: u8) { val abc: u8 = x; foo(abc); val x: u8 = abc; }
     """)
 
     assert analyses.spills is not None
     assert analyses.spills.size() == 1
     _, spills = analyses.spills.peek()
 
-    assert len(spills.spills) == 4
+    assert len(spills.spills) == 5
     assert len(spills.spills[spills.entry]) == 0
     assert len(spills.spills[spills.exit]) == 0
 

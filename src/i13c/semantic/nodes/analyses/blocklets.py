@@ -4,17 +4,17 @@ from functools import partial
 from typing import Protocol
 
 from i13c.core.generator import Generator
-from i13c.core.graph import GraphNode, GraphViews
+from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.asmlets import (
     Asmlet,
     AsmletId,
     AsmletOperand,
     AsmletOperandAddress,
+    AsmletOperandDisplacement,
     AsmletOperandImmediate,
     AsmletOperandRegister,
     AsmletOperandRelocation,
-    AsmletOperandDisplacement,
 )
 from i13c.semantic.typing.analyses.blocklets import (
     Blocklet,
@@ -42,7 +42,13 @@ from i13c.semantic.typing.analyses.llvm import (
     OR,
     POP,
     PUSH,
+    RCL,
+    RCR,
     RET,
+    ROL,
+    ROR,
+    SAL,
+    SAR,
     SBB,
     SHL,
     SHR,
@@ -50,32 +56,34 @@ from i13c.semantic.typing.analyses.llvm import (
     SYSCALL,
     XCHG,
     XOR,
-    ROL,
-    ROR,
-    RCL,
-    RCR,
-    SAR,
-    SAL,
     Address,
     Displacement,
     Group1Instruction,
-    Group2Instruction,
     Group1Operands,
+    Group2Instruction,
     Group2Operands,
     Immediate,
     Index,
+    LoopInstruction,
+    LoopOperands,
     Register,
     Relocation,
-    LoopOperands,
-    LoopInstruction,
 )
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.syntax.source import Span
 
 
-def configure_blocklets() -> GraphNode:
-    return GraphNode(
+def configure_blocklets() -> GraphGroup:
+    configure = GraphNode(
+        builder=build_configuration,
+        constraint=None,
+        produces=("configuration/blocklets",),
+        requires=frozenset({}),
+        views=GraphViews(list=ConfigurationExtractor),
+    )
+
+    resolve = GraphNode(
         builder=build_blocklets,
         constraint=None,
         produces=("analyses/blocklets",),
@@ -85,21 +93,102 @@ def configure_blocklets() -> GraphNode:
                 ("entrypoints", "analyses/entrypoints"),
                 ("asmlets", "analyses/asmlets"),
                 ("fnlets", "analyses/fnlets"),
+                ("configuration", "configuration/blocklets"),
             }
         ),
         views=GraphViews(list=ListExtractor),
     )
 
+    return GraphGroup(nodes=[configure, resolve])
+
+
+GROUP1: list[tuple[bytes, type[Group1Instruction]]] = [
+    (b"adc", ADC),
+    (b"add", ADD),
+    (b"and", AND),
+    (b"cmp", CMP),
+    (b"or", OR),
+    (b"sbb", SBB),
+    (b"sub", SUB),
+    (b"xor", XOR),
+]
+
+GROUP2: list[tuple[bytes, type[Group2Instruction]]] = [
+    (b"rol", ROL),
+    (b"ror", ROR),
+    (b"sal", SAL),
+    (b"sar", SAR),
+    (b"shl", SHL),
+    (b"shr", SHR),
+    (b"rcl", RCL),
+    (b"rcr", RCR),
+]
+
+LOOPS: list[tuple[bytes, type[LoopInstruction]]] = [
+    (b"loop", LOOP),
+    (b"loope", LOOPE),
+    (b"loopne", LOOPNE),
+]
+
+
+def build_configuration() -> OneToOne[bytes, BlockletEmit]:
+    data: dict[bytes, BlockletEmit] = {}
+
+    dispatch: dict[bytes, EmitSignature] = {
+        b"bswap": emit_bswap,
+        b"call": emit_call,
+        b"jmp": emit_jmp,
+        b"lea": emit_lea,
+        b"mov": emit_mov,
+        b"nop": emit_nop,
+        b"pop": emit_pop,
+        b"push": emit_push,
+        b"ret": emit_ret,
+        b"syscall": emit_syscall,
+        b"xchg": emit_xchg,
+    }
+
+    # group 1 registration
+    for mnemonic, clazz in GROUP1:
+        data[mnemonic] = BlockletEmit(
+            mnemonic=mnemonic,
+            signature=partial(emit_group1, clazz),
+        )
+
+    # group 2 registration
+    for mnemonic, clazz in GROUP2:
+        data[mnemonic] = BlockletEmit(
+            mnemonic=mnemonic,
+            signature=partial(emit_group2, clazz),
+        )
+
+    # loop registration
+    for mnemonic, clazz in LOOPS:
+        data[mnemonic] = BlockletEmit(
+            mnemonic=mnemonic,
+            signature=partial(emit_loop, clazz),
+        )
+
+    # free instruction registration
+    for mnemonic, signature in dispatch.items():
+        data[mnemonic] = BlockletEmit(
+            mnemonic=mnemonic,
+            signature=signature,
+        )
+
+    return OneToOne[bytes, BlockletEmit].instance(data)
+
 
 def build_blocklets(
     generator: Generator,
+    configuration: OneToOne[bytes, BlockletEmit],
     entrypoints: OneToOne[SignatureId, Entrypoint],
     asmlets: OneToOne[AsmletId, Asmlet],
     fnlets: OneToOne[FunctionId, Fnlet],
 ) -> OneToOne[BlockletId, Blocklet]:
     blocklets: dict[BlockletId, Blocklet] = {}
 
-    for bid, blocklet in emit_asmlets(generator, asmlets, entrypoints):
+    for bid, blocklet in emit_asmlets(generator, asmlets, entrypoints, configuration):
         blocklets[bid] = blocklet
 
     for bid, blocklet in emit_fnlets(generator, fnlets, entrypoints):
@@ -120,6 +209,12 @@ EmitSignature = Callable[[list[AsmletOperand]], EmitRelocated]
 Relocatable = tuple[Relocation, int]
 
 
+@dataclass(kw_only=True, repr=False)
+class BlockletEmit:
+    mnemonic: bytes
+    signature: EmitSignature
+
+
 def into_relocations(
     relocations: list[Relocatable], target: BlockletInstruction
 ) -> list[EmitRelocation]:
@@ -133,40 +228,8 @@ def emit_asmlets(
     generator: Generator,
     asmlets: OneToOne[AsmletId, Asmlet],
     entrypoints: OneToOne[SignatureId, Entrypoint],
+    configuration: OneToOne[bytes, BlockletEmit],
 ) -> Iterable[tuple[BlockletId, Blocklet]]:
-
-    dispatch: dict[bytes, EmitSignature] = {
-        b"adc": partial(emit_group1, ADC),
-        b"add": partial(emit_group1, ADD),
-        b"and": partial(emit_group1, AND),
-        b"bswap": emit_bswap,
-        b"call": emit_call,
-        b"cmp": partial(emit_group1, CMP),
-        b"jmp": emit_jmp,
-        b"lea": emit_lea,
-        b"loop": partial(emit_loop, LOOP),
-        b"loope": partial(emit_loop, LOOPE),
-        b"loopne": partial(emit_loop, LOOPNE),
-        b"mov": emit_mov,
-        b"nop": emit_nop,
-        b"or": partial(emit_group1, OR),
-        b"pop": emit_pop,
-        b"push": emit_push,
-        b"rcl": partial(emit_group2, RCL),
-        b"rcr": partial(emit_group2, RCR),
-        b"ret": emit_ret,
-        b"rol": partial(emit_group2, ROL),
-        b"ror": partial(emit_group2, ROR),
-        b"sal": partial(emit_group2, SAL),
-        b"sar": partial(emit_group2, SAR),
-        b"sbb": partial(emit_group1, SBB),
-        b"shl": partial(emit_group2, SHL),
-        b"shr": partial(emit_group2, SHR),
-        b"sub": partial(emit_group1, SUB),
-        b"syscall": emit_syscall,
-        b"xchg": emit_xchg,
-        b"xor": partial(emit_group1, XOR),
-    }
 
     for eid, entry in asmlets.items():
         blocks: list[BlockletBlock] = []
@@ -186,7 +249,8 @@ def emit_asmlets(
 
         # emit all instructions, and collect relocations
         for idx, instr in enumerate(entry.instructions):
-            instruction, relocation = dispatch[instr.mnemonic](instr.operands)
+            emit = configuration.get(instr.mnemonic)
+            instruction, relocation = emit.signature(instr.operands)
 
             # start a new block if this instruction is a split point
             if idx in fixes and instructions:
@@ -294,7 +358,7 @@ def emit_nop(operands: list[AsmletOperand]) -> EmitRelocated:
     assert len(operands) == 0
 
     # just emit a NOP instruction
-    return NOP(), []
+    return NOP(operands=()), []
 
 
 def emit_ret(operands: list[AsmletOperand]) -> EmitRelocated:
@@ -302,7 +366,7 @@ def emit_ret(operands: list[AsmletOperand]) -> EmitRelocated:
     assert len(operands) == 0
 
     # just emit a RET instruction
-    return RET(), []
+    return RET(operands=()), []
 
 
 def emit_call(operands: list[AsmletOperand]) -> EmitRelocated:
@@ -364,7 +428,7 @@ def emit_syscall(operands: list[AsmletOperand]) -> EmitRelocated:
     assert len(operands) == 0
 
     # just emit a SYSCALL instruction
-    return SYSCALL(), []
+    return SYSCALL(operands=()), []
 
 
 class Group1Constructor[T: Group1Instruction](Protocol):
@@ -728,4 +792,23 @@ class ListExtractor:
             "target": key[2].identify(1),
             "idx": str(entry[0]),
             "instrs": str(len(entry[1].instructions)),
+        }
+
+
+class ConfigurationExtractor:
+    def __init__(self, data: OneToOne[bytes, BlockletEmit]):
+        self.data = data
+
+    def extract(self) -> Iterable[tuple[bytes, BlockletEmit]]:
+        yield from self.data.items()
+
+    @staticmethod
+    def headers() -> dict[str, str]:
+        return {"mnemonic": "Mnemonic", "emit": "Emitter"}
+
+    @staticmethod
+    def rows(key: bytes, entry: BlockletEmit) -> dict[str, str]:
+        return {
+            "mnemonic": key.decode("utf-8"),
+            "emit": str(entry),
         }

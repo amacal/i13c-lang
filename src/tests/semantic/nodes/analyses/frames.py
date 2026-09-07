@@ -46,11 +46,11 @@ def can_detect_frames_with_a_parameter_move():
 
     assert len(frames.moved) == 1
     assert len(frames.spill) == 0
-    assert len(frames.saved) == 6
+    assert len(frames.saved) == 5
     assert frames.slots == 0
 
     assert frames.moved[0].src == b"rdi"
-    assert frames.moved[0].dst == b"rbp"
+    assert frames.moved[0].dst == b"rdi"
 
 
 def can_detect_frames_with_a_parameter_spill():
@@ -59,7 +59,7 @@ def can_detect_frames_with_a_parameter_spill():
           clobbers rdi, rsi, rdx, rcx, r8, r9, r10, r11, r12, r13, r14, r15, rbx, rax, rbp
         { }
 
-        fn main(v: u16) { foo(v); }
+        fn main(v: u16) { foo(v); val x: u16 = v; }
     """)
 
     assert analyses.frames is not None
@@ -81,20 +81,20 @@ def can_detect_frames_with_a_parameter_spill_and_value():
           clobbers rdi, rsi, rdx, rcx, r8, r9, r10, r11, r12, r13, r14, r15, rbx, rax, rbp
         { }
 
-        fn main(v: u16) { val x: u16 = 0x01; foo(v, x); }
+        fn main(v: u16) { val x: u16 = 0x01; foo(v, x); val z: u16 = x; }
     """)
 
     assert analyses.frames is not None
     assert analyses.frames.size() == 1
     _, frames = analyses.frames.peek()
 
-    assert len(frames.moved) == 0
-    assert len(frames.spill) == 1
+    assert len(frames.moved) == 1
+    assert len(frames.spill) == 0
     assert len(frames.saved) == 6
-    assert frames.slots == 2
+    assert frames.slots == 1
 
-    assert frames.spill[0].name == b"rdi"
-    assert frames.spill[0].slot == 1
+    assert frames.moved[0].src == b"rdi"
+    assert frames.moved[0].dst == b"rdi"
 
 
 def can_detect_frames_with_a_call_to_regular_function():
@@ -110,8 +110,8 @@ def can_detect_frames_with_a_call_to_regular_function():
         if frames.moved:
             assert len(frames.moved) == 1
             assert len(frames.spill) == 0
-            assert len(frames.saved) == 1
+            assert len(frames.saved) == 0
             assert frames.slots == 0
 
             assert frames.moved[0].src == b"rdi"
-            assert frames.moved[0].dst == b"rbx"
+            assert frames.moved[0].dst == b"rdi"

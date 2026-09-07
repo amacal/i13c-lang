@@ -123,7 +123,7 @@ def emit_epilogue(instructions: list[FnletInstruction], frame: StackFrame):
     for entry in reversed(frame.saved):
         instructions.append(POP(operands=(Register(name=entry.name),)))
 
-    instructions.append(RET())
+    instructions.append(RET(operands=()))
 
 
 def emit_body(

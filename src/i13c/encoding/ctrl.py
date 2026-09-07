@@ -1,8 +1,6 @@
 from i13c.encoding import kind
 from i13c.encoding.core import RelocationInfo
 from i13c.encoding.kind import DisplacementInfo
-
-from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.analyses.asmlets import AsmletId
 from i13c.semantic.typing.analyses.llvm import (
     CALL,
@@ -13,9 +11,10 @@ from i13c.semantic.typing.analyses.llvm import (
     NOP,
     RET,
     SYSCALL,
-    Relocation,
     Address,
+    Relocation,
 )
+from i13c.semantic.typing.entities.functions import FunctionId
 
 
 def encode_syscall(instruction: SYSCALL, bytecode: bytearray) -> None:

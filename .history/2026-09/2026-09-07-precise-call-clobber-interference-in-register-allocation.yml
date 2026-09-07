@@ -1,0 +1,40 @@
+date: "2026-09-07"
+title: "Precise Call-Clobber Interference in Register Allocation"
+session:
+  files:
+    - "src/i13c/semantic/nodes/analyses/allocations.py"
+  source: —
+  status: completed
+  attempted:
+    - "Started from a 5-candidate select-agent survey (Jcc registration, LLVM backend rewrite stepping-stone, deriving blocklet dispatch from INSTRUCTIONS_TABLE, live-range splitting, zero-operand-instruction lint fix); picked none directly, instead named 'range coloring' (clarified as live-range splitting), motivated by wanting a function call's own reshuffled colors to become the base coloring going forward"
+    - "A plan-agent fork confirmed the full prerequisite chain (Liveness Analysis, Register Allocation (semantic layer), Calling Convention in Register Allocation, Argument-Placement Lowering, Spill-Slot Assignment via Graph Coloring, Mid-Body Spill-Store Lowering, Function-Entry Prologue and Epilogue Lowering) already complete, and flagged allocations.py's single blanket interference-clique construction as directly relevant"
+    - "Reframed mid-dialogue to the session's actual adopted goal: smart allocation with as low a number of moves as possible, rather than true live-range splitting"
+  explored:
+    - "Traced two symptoms to one root cause in allocations.py's interference-clique construction, using real anchor programs run through prepare_analyses/i13c model: (a) a value dying as a call's own argument was needlessly forced to avoid that same call's clobbers, demonstrated via a two-call example forcing a value into r8 instead of the legal, cheaper rcx; (b) two call arguments both dying at an all-registers-clobbered call were needlessly force-spilled with zero real conflict"
+    - "Compared a linear-scan-style greedy forward pass (reassign a value's color only when a call is about to threaten it) against the existing global graph-coloring pass; concluded the greedy version still needs identical interference-checking machinery, just relocated, so not pursued as a redesign"
+    - "Considered copy-coalescing (val x: u8 = abc; forcing x and abc into different colors purely from sharing live_in/live_out membership); confirmed empirically as a real, safe-to-coalesce case in some situations, but explicitly ruled out of scope by policy — distinct source-level bindings always get distinct colors, for simplicity"
+    - "Considered whether any concrete case in this session's branch-free language subset genuinely requires a value to hold more than one persistent color across its life (true live-range splitting); no such case was found — every case built was fully resolved by a single, more-precisely-chosen color"
+    - "Named but did not implement biased/conservative coalescing (preferring a color matching a known future call-binding register, to eliminate a shuffle move)"
+  tried:
+    - "Replaced the single values = live_in ∪ live_out ∪ clobbers clique with two separate pair-generating passes: pairs1 from clobbers ∪ live_out (only survivors need to avoid a call's clobbers) and pairs2 from live_in ∪ live_out (the general value-vs-value interference, confirmed still necessary via a constructed counterexample: two different call arguments at one node, one dying there and one surviving, which must stay distinct or a later read would silently return the wrong value)"
+    - "Updated seven consuming test files (allocations.py, calls.py, fnlets.py, frames.py, shuffles.py, spills.py, statements.py) by adding a genuine surviving use (typically val <new>: <ty> = <existing>; right after a call) wherever a test's original 'forced spill' premise had been invalidated by the fix, restoring each test's original intent rather than only editing expected values"
+  corrections:
+    - "Assumed 'abc dies here and x is born here' was the precise safe-to-coalesce condition for a copy; a constructed counterexample (abc surviving past x's definition too) showed this sufficient but not necessary — moot since copy-coalescing was ruled out of scope, not pursued further"
+    - "Initially reasoned x could be coalesced with parameter abc to save a register-to-register copy; caught that abc's own register (rdi) was itself in the relevant call's clobber list, so no coalescing choice would have avoided the required move anyway"
+  bugs_found:
+    - "allocations.py line ~48 (pre-fix): live.clobbers[idx].union(live.live_out[idx]).union(live.live_in[idx]) cliqued every value together per CFG node, forcing any value merely consumed as a call's own argument (dying there, absent from live_out) to also avoid that call's clobbered registers, when only values actually live-out of the call need to. Fixed by splitting into two separate pair-generation passes (pairs1 from clobbers ∪ live_out, pairs2 from live_in ∪ live_out) unioned together"
+    - "Observed consequences before the fix, all reproduced and verified against emitted instructions: a value forced into r8 instead of the legal rcx; two call arguments dying at an all-clobbering call force-spilled with no real conflict; a value dying at a call needlessly spilled to the stack (extra mov r11d, imm + mov qword [rsp+N], r11 instead of one direct mov reg, imm) plus an unneeded stack-frame slot (extra sub rsp,N/add rsp,N, and in one case an extra callee-saved save/restore pair)"
+  completed:
+    - "Implemented and verified the two-pass interference-graph fix in allocations.py, independently re-derived against prepare_analyses/liveness/allocations output, not just re-running pytest"
+    - "Updated and independently re-verified all seven affected test files (allocations.py, calls.py, fnlets.py, frames.py, shuffles.py, spills.py, statements.py), including tracing why frames.saved includes rbp only when some call's own clobbers clause mentions rbp (independent of whether the allocator's coloring actually uses rbp for a value), and why fnlets.py's instruction count dropped from 19 to 16 (1 fewer for an assign statement collapsing from scratch+store to one direct mov, 2 fewer for the no-longer-needed stack-slot sub/add rsp pair)"
+    - "Confirmed make lint clean (0 errors/warnings, one benign ruff auto-fix) and all 495 core/syntax/semantic tests plus all 425 encoding tests passing after the change"
+  not_completed:
+    - "True live-range splitting (a value legitimately holding more than one persistent color across its life, joined by an inserted copy) explicitly set aside — no case demonstrating genuine necessity was found this session; remains a named future target, now specifically informed by today's finding that most of its presumed benefit is captured by precise single-color interference instead"
+    - "Copy-coalescing ruled out of scope as a deliberate simplicity policy, not deferred as future work"
+    - "Biased/conservative coalescing toward a known future call-binding register was named and discussed conceptually but not implemented"
+  open_questions:
+    - "Whether a genuine case requiring true multi-color live-range splitting exists anywhere reachable by the current (branch-free) language subset remains open — none found, none proven impossible"
+  notes:
+    - "Test-file edits followed a consistent pattern: wherever a test's 'forced spill' premise depended on the old bug, a real surviving statement was added right after the call rather than only changing expected values"
+    - "frames.saved's exact semantics (driven by which registers appear in any call's own clobbers clause within the function, not by which registers the allocator's coloring actually uses) was newly understood as a side-finding this session, though it is pre-existing behavior from Function-Entry Prologue and Epilogue Lowering, not something changed today"
+    - "The repo's working tree also carries unrelated same-day pending changes (a NOP/RET/SYSCALL operands-field fix, a ruff lint-config change, a test-directory reorg into ctrl/math/move/shifts/stack subpackages, an in-progress mnemonics.py graph-node promotion) — none of those belong to this session; this entry's files field is scoped only to src/i13c/semantic/nodes/analyses/allocations.py"

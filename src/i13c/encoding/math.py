@@ -1,6 +1,6 @@
 from i13c.encoding import kind
+from i13c.encoding.common import Transform, add4, add5, div8, encode_rm
 from i13c.encoding.core import RelocationInfo
-from i13c.encoding.common import Transform, div8, add4, add5, encode_rm
 from i13c.encoding.kind import AddressInfo, RegisterInfo
 from i13c.semantic.typing.analyses.llvm import (
     ADC,
@@ -11,10 +11,10 @@ from i13c.semantic.typing.analyses.llvm import (
     SBB,
     SUB,
     XOR,
+    Address,
     Group1Instruction,
     Immediate,
     Register,
-    Address,
     Relocation,
 )
 

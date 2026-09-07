@@ -125,10 +125,12 @@ def build_instruction_resolution(
                     reason = "variant-mismatch"
 
                 if spec.names and not reason:
-                    if (
-                        not isinstance(accepted.target, RegisterAcceptance)
-                        or accepted.target.name not in spec.names
-                    ):
+                    # spec.names is non-empty, so we need to check register
+                    if not isinstance(accepted.target, RegisterAcceptance):
+                        reason = "register-mismatch"
+
+                    # and it must be one of the allowed names
+                    elif accepted.target.name not in spec.names:
                         reason = "register-mismatch"
 
                 if reason is not None:

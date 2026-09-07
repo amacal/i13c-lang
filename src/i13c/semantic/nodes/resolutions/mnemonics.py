@@ -167,11 +167,24 @@ for mnemonic in CALL_MNEMONICS:
 
 
 def configure_mnemonic_resolution() -> GraphGroup:
+    configure = GraphNode(
+        builder=build_mnemonic_configuration,
+        constraint=None,
+        produces=("configuration/mnemonics",),
+        requires=frozenset({}),
+        views=GraphViews(list=ListConfigurationExtractor),
+    )
+
     resolve = GraphNode(
         builder=build_mnemonic_resolution,
         constraint=None,
         produces=("resolutions/mnemonics",),
-        requires=frozenset({("mnemonics", "entities/mnemonics")}),
+        requires=frozenset(
+            {
+                ("mnemonics", "entities/mnemonics"),
+                ("configuration", "configuration/mnemonics"),
+            }
+        ),
         views=GraphViews(list=ListAllExtractor),
     )
 
@@ -208,11 +221,21 @@ def configure_mnemonic_resolution() -> GraphGroup:
         views=GraphViews(list=ListRejectedExtractor),
     )
 
-    return GraphGroup(nodes=[resolve, validate, extract, reject])
+    return GraphGroup(nodes=[configure, resolve, validate, extract, reject])
+
+
+def build_mnemonic_configuration() -> OneToMany[bytes, MnemonicVariant]:
+    configuration: dict[bytes, list[MnemonicVariant]] = {}
+
+    for mnemonic, variants in INSTRUCTIONS_TABLE.items():
+        configuration[mnemonic] = variants
+
+    return OneToMany[bytes, MnemonicVariant].instance(configuration)
 
 
 def build_mnemonic_resolution(
     mnemonics: OneToOne[MnemonicId, Mnemonic],
+    configuration: OneToMany[bytes, MnemonicVariant],
 ) -> OneToOne[MnemonicId, MnemonicResolution]:
     resolutions: dict[MnemonicId, MnemonicResolution] = {}
 
@@ -224,7 +247,7 @@ def build_mnemonic_resolution(
             rejected=[],
         )
 
-        if entry.name not in INSTRUCTIONS_TABLE:
+        if entry.name not in configuration.keys():
             resolution.rejected.append(
                 MnemonicRejection(
                     ref=entry.ref,
@@ -240,7 +263,7 @@ def build_mnemonic_resolution(
                     ref=entry.ref,
                     id=mid,
                     name=entry.name,
-                    variants=INSTRUCTIONS_TABLE[entry.name],
+                    variants=configuration.find(entry.name),
                 )
             )
 
@@ -383,4 +406,28 @@ class ListAcceptedExtractor:
             "id": key.identify(1),
             "name": entry.name.decode(),
             "variants": str(len(entry.variants)),
+        }
+
+
+class ListConfigurationExtractor:
+    def __init__(self, data: OneToMany[bytes, MnemonicVariant]):
+        self.data = data
+
+    def extract(self) -> Iterable[tuple[bytes, MnemonicVariant]]:
+        for key, entries in self.data.items():
+            for entry in entries:
+                yield key, entry
+
+    @staticmethod
+    def headers() -> dict[str, str]:
+        return {
+            "mnemonic": "Mnemonic",
+            "variant": "Variant",
+        }
+
+    @staticmethod
+    def rows(key: bytes, entry: MnemonicVariant) -> dict[str, str]:
+        return {
+            "mnemonic": key.decode(),
+            "variant": str(entry),
         }

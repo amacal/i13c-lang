@@ -318,6 +318,8 @@ def can_detect_allocations_with_forced_spill_two_blocks():
             val c: u8 = 0x14;
             val d: u8 = 0x15;
             foo(a,c,d);
+            val f: u8 = c;
+            val g: u8 = d;
         }
     """)
 
@@ -325,8 +327,8 @@ def can_detect_allocations_with_forced_spill_two_blocks():
     assert analyses.allocations.size() == 1
     _, allocations = analyses.allocations.peek()
 
-    assert len(allocations.values) == 36
-    assert allocations.colors == {1: 10, 19: 10}
+    assert len(allocations.values) == 38
+    assert allocations.colors == {1: 0, 19: 10}
     assert allocations.spills == {0: 1, 17: 0}
 
     assert isinstance(allocations.values[0], ParameterAcceptance)
@@ -342,6 +344,7 @@ def can_detect_allocations_with_forced_spill_all_clobbered():
 
         fn main(a: u8, b: u8) {
             foo(a,b, 0x13);
+            val e: u8 = a;
         }
     """)
 
@@ -349,9 +352,9 @@ def can_detect_allocations_with_forced_spill_all_clobbered():
     assert analyses.allocations.size() == 1
     _, allocations = analyses.allocations.peek()
 
-    assert len(allocations.values) == 18
-    assert len(allocations.colors) == 0
-    assert allocations.spills == {0: 1, 1: 0}
+    assert len(allocations.values) == 19
+    assert len(allocations.colors) == 1
+    assert allocations.spills == {0: 0}
 
     assert isinstance(allocations.values[0], ParameterAcceptance)
     assert isinstance(allocations.values[1], ParameterAcceptance)

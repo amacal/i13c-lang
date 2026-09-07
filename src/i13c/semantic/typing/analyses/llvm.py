@@ -307,6 +307,8 @@ class CMP:
 
 @dataclass(kw_only=True, repr=False)
 class NOP:
+    operands: tuple[()]
+
     def __str__(self) -> str:
         return "nop"
 
@@ -369,12 +371,16 @@ class CALL:
 
 @dataclass(kw_only=True, repr=False)
 class RET:
+    operands: tuple[()]
+
     def __str__(self) -> str:
         return "ret"
 
 
 @dataclass(kw_only=True, repr=False)
 class SYSCALL:
+    operands: tuple[()]
+
     def __str__(self) -> str:
         return "syscall"
 

@@ -1,7 +1,6 @@
 from i13c.semantic.typing.analyses.shuffles import (
     ShuffleExchange,
     ShuffleImmediate,
-    ShuffleLoad,
     ShuffleMove,
 )
 from tests.semantic.nodes.analyses import prepare_analyses
@@ -202,6 +201,6 @@ def can_detect_shuffles_with_asm_callsite_with_spilled_param():
     assert len(shuffles.callsites) == 1
     assert len(shuffles.callsites[0].moves) == 1
 
-    assert isinstance(shuffles.callsites[0].moves[0], ShuffleLoad)
-    assert shuffles.callsites[0].moves[0].src == 0
+    assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
+    assert shuffles.callsites[0].moves[0].src == b"rdi"
     assert shuffles.callsites[0].moves[0].dst == b"rax"

@@ -1,6 +1,6 @@
 from i13c.encoding import kind
 from i13c.encoding.core import RelocationInfo
-from i13c.encoding.kind import AddressInfo, RegisterInfo, ImmediateInfo
+from i13c.encoding.kind import AddressInfo, ImmediateInfo, RegisterInfo
 from i13c.semantic.typing.analyses.llvm import (
     RCL,
     RCR,
@@ -10,10 +10,10 @@ from i13c.semantic.typing.analyses.llvm import (
     SAR,
     SHL,
     SHR,
+    Address,
     Group2Instruction,
     Immediate,
     Register,
-    Address,
     Relocation,
 )
 

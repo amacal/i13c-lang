@@ -61,7 +61,7 @@ def build_spills(
                     worklist.append(successor)
 
             for value in dflow.defs[idx]:
-                if value in allocation.spills:  # noqa: SIM102
+                if value in allocation.spills:
                     if isinstance(dflow.values[value], ValueAcceptance):
                         assert value in dflow.backward
                         assert len(dflow.backward[value]) <= 1

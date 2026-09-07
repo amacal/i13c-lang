@@ -5,9 +5,9 @@ from i13c.encoding.math import encode_rm
 from i13c.semantic.typing.analyses.llvm import (
     MOV,
     XCHG,
+    Address,
     Immediate,
     Register,
-    Address,
     Relocation,
 )
 

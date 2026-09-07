@@ -73,7 +73,7 @@ def parse_slot(state: ParsingState) -> tree.snippet.Slot:
     bind = state.expect(Tokens.IDENT, Tokens.KEYWORD)
 
     # if it's a keyword, it has to be "imm"
-    if bind.code == Tokens.KEYWORD:  # noqa: SIM102
+    if bind.code == Tokens.KEYWORD:
         if state.extract(bind) != b"imm":
             raise UnexpectedKeyword(bind, [b"imm"], state.extract(bind))
 
@@ -253,7 +253,7 @@ def parse_operand(state: ParsingState) -> tree.snippet.Operand:
 
     # address operands starts fixed non-registerkeywords
     # so it can really resemble a register operand
-    if isinstance(operand, tree.snippet.Register):  # noqa: SIM102
+    if isinstance(operand, tree.snippet.Register):
         if operand.name in (b"byte", b"word", b"dword", b"qword"):
             operand = parse_address(state, token)
 

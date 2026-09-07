@@ -44,4 +44,4 @@ def can_detect_fnlets_assign_with_spills():
     _, fnlet = analyses.fnlets.peek()
 
     assert len(fnlet.blocks) == 1
-    assert len(fnlet.blocks[0].instructions) == 19
+    assert len(fnlet.blocks[0].instructions) == 16
