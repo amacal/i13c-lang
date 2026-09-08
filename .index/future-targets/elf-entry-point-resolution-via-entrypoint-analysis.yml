@@ -1,0 +1,7 @@
+title: "ELF Entry Point Resolution via Entrypoint Analysis"
+status: not-completed
+mentioned_by:
+  - "Consuming Register Allocation in the Encoding Backend"
+evidence:
+  - ".history/2026-08/2026-08-27-consuming-register-allocation-in-the-encoding-backend.yml session.not_completed (ELF entry point is not computed from the real Entrypoint analysis; the current fix only works because of blocklet iteration order, not by design)"
+  - ".history/2026-08/2026-08-27-consuming-register-allocation-in-the-encoding-backend.yml session.bugs_found (cli/__init__.py's elf_command computed entry_point as ELF_BASE_ADDR + file_off_code with no awareness of which blocklet is the program's actual entrypoint; the user's fix reordered blocklet iteration so the real entrypoint function ends up first, which resolves it for this single-entrypoint program but does not consult the existing analyses/entrypoints Entrypoint analysis and is not a general fix)"

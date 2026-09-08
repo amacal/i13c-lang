@@ -57,11 +57,11 @@ itself.
    conversation reuses these directly for the Socratic walkthrough instead of
    re-rendering the same pages.
 
-6. **Implementation topics:** identify which pipeline stage(s) the work will touch
-   (`syntax/`, `semantic/`, `encoding/`, `llvm/`, `graph/`, `core/`) and name the
-   standard compiler-construction term for the technique involved, if one exists (a
-   terminology citation only, never an actual function/variable identifier — Claude
-   never proposes names for the user's own code).
+6. **Implementation topics:** identify which pipeline stage(s) the work will touch —
+   `ls src/i13c/` for the actual current top-level directories rather than assuming a
+   fixed list — and name the standard compiler-construction term for the technique
+   involved, if one exists (a terminology citation only, never an actual
+   function/variable identifier — Claude never proposes names for the user's own code).
 
 7. **Report back** a structured plan: (a) prerequisites to cite-and-confirm briefly,
    each with source file(s) and the specific fact/pattern to reuse; (b) any

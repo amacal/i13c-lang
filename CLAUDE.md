@@ -36,9 +36,10 @@ tried and weren't enough):
 - A small, self-contained example that demonstrates a *pattern* — a shape of recursion, a
   visitor structure, a bit-twiddling idiom — never the feature you are actually building.
 - Deliberately generic: different identifiers, a toy domain, or an existing analogous
-  spot in this codebase cited by file and line (e.g. "see how `configure_callsites` in
-  `src/i13c/llvm/nodes/callsites.py` threads its `OneToMany` mapping — the same shape
-  applies here") rather than retyped and adapted to the task at hand.
+  spot in this codebase cited by file and line (e.g. "see how `configure_callsites`
+  threads its `OneToMany` mapping — the same shape applies here"; find the actual
+  file/line fresh with `grep -rn` rather than trusting a path written down earlier,
+  since files move) rather than retyped and adapted to the task at hand.
 - Never assembled into something that would compile or drop in as the actual answer if
   pasted verbatim into the file you're working on.
 - Still followed by a question — a snippet is a nudge, not a hand-off. Confirm you can
@@ -106,8 +107,10 @@ table or IR construct, resolving ambiguity between sections.
   Every opcode, ModRM byte, and addressing form comes from here.
 - **System V AMD64 ABI (psABI)** — calling convention, stack alignment, relocation types
   used by `encoding/elf.py`.
-- **LLVM Language Reference** — the `llvm/` backend, which builds LLVM IR text and does
-  its own register allocation from scratch (no `llvmlite`, no bindings).
+- **LLVM Language Reference** — for any LLVM-targeting backend: building LLVM IR text
+  and doing register allocation from scratch (no `llvmlite`, no bindings). Whether such
+  a backend currently exists, and in what shape, is a fact about the code, not this
+  file — check `src/i13c/` rather than assuming from here.
 - General compiler-construction texts (e.g. *Engineering a Compiler*, *Crafting
   Interpreters*) for algorithm background — cited by name, never substituted for reading
   the primary spec when a spec section actually answers the question.
@@ -153,12 +156,14 @@ document name and section/page number.
 
 ## Cross-backend comparison
 
-`encoding/` (hand-written x86-64 machine code + ELF) and `llvm/` (hand-written LLVM IR +
-its own register allocation) are a deliberate pair. The same source construct — a call,
-a loop, a spilled value — looks very different depending on which backend consumes it.
-Comparing the two forces precision: you must articulate what is fundamental to the
-construct and what is incidental to the target backend. Use this comparison actively,
-not just occasionally.
+The native x86-64 + ELF backend (`encoding/`) is the baseline. Whenever a second backend
+for the same construct exists — e.g. a hand-written LLVM IR backend with its own
+register allocation — treat the two as a deliberate pair, not unrelated tracks: check
+`src/i13c/` for what currently exists rather than assuming from here. The same source
+construct — a call, a loop, a spilled value — looks very different depending on which
+backend consumes it. Comparing the two forces precision: you must articulate what is
+fundamental to the construct and what is incidental to the target backend. Use this
+comparison actively whenever a second backend exists, not just occasionally.
 
 When a construct recurs across backends, disambiguate the exact Session Title with the
 backend in parentheses — e.g. "Register Spilling (native x86-64)" and "Register Spilling
@@ -190,7 +195,7 @@ recorded as a `related_to` link between them in `.index/`, not lost inside one t
 - A session is a coherent unit of design work — one feature, one resolution pass, one
   encoding capability, one optimization — not one file. Because a real compiler feature
   usually touches several pipeline stages at once (e.g. a new statement kind touches
-  `syntax/`, `semantic/`, and `encoding/` or `llvm/`), a session's `.index`/`.history`
+  `syntax/`, `semantic/`, and a code-generation backend), a session's `.index`/`.history`
   `files` field is a list of the primary source files you wrote or changed, not a single
   companion path.
 - There are no companion `.md` notes files in this repo (unlike the sibling `-with-llm`
@@ -227,9 +232,9 @@ recorded as a `related_to` link between them in `.index/`, not lost inside one t
 - For each proposal, briefly state why it is interesting given what has already been
   done.
 - Be deliberate about topic selection. Consider the full pipeline — lexing/parsing,
-  name/type resolution, control-flow and liveness analysis, native encoding, the LLVM
-  backend, linking/ELF, optimization passes — and explicitly consider cross-backend
-  angles. Do not default to the nearest extension.
+  name/type resolution, control-flow and liveness analysis, native encoding,
+  linking/ELF, optimization passes, and any alternative backend that currently exists —
+  and explicitly consider cross-backend angles. Do not default to the nearest extension.
 
 ## Memory
 
@@ -495,14 +500,17 @@ not session-scoped, so nothing there gets cleaned up as part of closing.
 
 ## Scope
 
-- A compiler for the i13c language: lexing/parsing (`syntax/`), name/type resolution and
-  control-flow/liveness analysis (`semantic/`), a native x86-64 + ELF backend
-  (`encoding/`), an alternative LLVM-IR backend with its own register allocation
-  (`llvm/`), and shared infrastructure (`core/`, `graph/`, `cli/`).
+- A compiler for the i13c language, organized as a pipeline: lexing/parsing (`syntax/`),
+  name/type resolution and control-flow/liveness analysis (`semantic/`), a native x86-64
+  + ELF backend (`encoding/`), shared infrastructure (`core/`, `graph/`, `cli/`), and
+  room for an additional backend (e.g. an LLVM IR backend with its own register
+  allocation) for cross-backend comparison. Whether that additional backend currently
+  exists, and in what shape, is a fact about the code — check `src/i13c/` rather than
+  this file, which does not track implementation state.
 - Topics: lexing, parsing, name/type resolution, control-flow graphs, liveness/def-use
   analysis, calling conventions, x86-64 instruction encoding, ELF generation and
-  relocations, LLVM IR construction, register allocation, and eventually optimization
-  passes.
+  relocations, an alternative backend's IR construction and register allocation when one
+  exists, and eventually optimization passes.
 - Not in scope: language features or backends not already implied by the existing
   pipeline stages, without an explicit decision to add one.
 
@@ -513,7 +521,7 @@ not session-scoped, so nothing there gets cleaned up as part of closing.
   opcode, ModRM byte, and addressing form comes from the Intel SDM.
 - No external ELF-writing library — sections, headers, and relocations are hand-built
   from the ELF/psABI spec.
-- No `llvmlite` or any LLVM binding, even for the `llvm/` backend — IR text
+- No `llvmlite` or any LLVM binding, for any LLVM-targeting backend — IR text
   construction, instruction selection, and register allocation are built from scratch
   from the LLVM Language Reference.
 - `click` is the sole permitted runtime dependency, confined to `cli/`. No other module
