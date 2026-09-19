@@ -245,6 +245,13 @@ recorded as a `related_to` link between them in `.index/`, not lost inside one t
   repo, e.g. `~/.claude/projects/.../memory/`) for anything load-bearing; the container
   can be rebuilt and that state isn't guaranteed to survive. Anything that must persist
   belongs in this file, `.history/`, or `.index/`.
+- `.history/` and `.index/` are gitignored, not committed — they persist because the
+  workspace folder itself is a persistent bind-mount surviving container rebuilds, not
+  because git tracks them. This is deliberate: their content is local session
+  bookkeeping, not something that belongs in shared `main`-branch history alongside
+  actual code changes. If the workspace ever stops being a persistent bind-mount, this
+  decision needs revisiting, since the "must persist" guarantee above would no longer
+  hold for them.
 
 ## Session history (`.history/`)
 

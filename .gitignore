@@ -8,4 +8,6 @@ src/**/__pycache__/
 **/*.out
 dump
 .tmp
+.history
+.index
 docs/*.pdf
