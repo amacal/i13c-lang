@@ -1,7 +1,0 @@
-title: "Spill-Slot Assignment via Graph Coloring"
-kind: implementation
-files:
-  - "src/i13c/semantic/nodes/analyses/allocations.py"
-  - "src/i13c/semantic/typing/analyses/allocations.py"
-source: —
-date: "2026-08-15"

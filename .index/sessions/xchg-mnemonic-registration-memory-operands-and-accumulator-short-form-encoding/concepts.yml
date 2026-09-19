@@ -1,6 +1,0 @@
-- "x86-encoding"
-- "mnemonic-registration"
-- "instruction-selection"
-- "opcode-tables"
-- "code-size-optimization"
-- "test-coverage"

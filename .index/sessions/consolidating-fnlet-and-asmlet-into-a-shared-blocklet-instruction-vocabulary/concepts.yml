@@ -1,6 +1,0 @@
-- "instruction-selection"
-- "code-generation"
-- "basic-blocks"
-- "relocations"
-- "x86-encoding"
-- "spilling"
