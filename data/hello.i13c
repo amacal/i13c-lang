@@ -33,6 +33,11 @@ asm print(value@rax: u64) clobbers rax, rcx, r11, rdi, rsi, rdx {
 }
 
 fn main() noreturn {
-  print(0x0123456789abcdef);
+  val x: u64 = 0x0123456789abcdef;
+  val y: u64 = 0xfedcba9876543210;
+
+  print(y);
+  print(x);
+
   exit(0x00000000);
 }

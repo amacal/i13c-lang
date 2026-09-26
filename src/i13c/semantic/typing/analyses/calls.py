@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.analyses.llvm import CALL, MOV, XCHG
+from i13c.semantic.typing.analyses.llvm import CALL
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.syntax.source import Span
 
-CallInstruction = CALL | MOV | XCHG
+CallInstruction = CALL
 
 
 @dataclass(kw_only=True, repr=False)

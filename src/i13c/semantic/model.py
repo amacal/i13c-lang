@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.mapping import OneToMany, OneToOne
+from i13c.llvm.nodes import LlvmNodes
 from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.analyses.core import AnalysisNodes
 from i13c.semantic.typing.entities import EntityNodes
@@ -33,6 +34,7 @@ class IndexEdges:
 class SemanticGraph:
     analyses: AnalysisNodes
     entities: EntityNodes
+    llvm: LlvmNodes
     indices: IndexEdges
     resolutions: ResolutionNodes
 

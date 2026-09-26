@@ -1,0 +1,98 @@
+#!/bin/bash
+# ai-typos [base-branch] :: Fix free-text typos introduced in this branch
+set -e
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: ai-typos [base-branch]"
+    echo ""
+    echo "Looks at the files touched by this branch (vs base-branch, default:"
+    echo "main) for English spelling/grammar mistakes in free text - comments,"
+    echo "docstrings, log/error messages, docs - and fixes the safe ones in"
+    echo "place. Never touches identifiers (variable/function/column/table"
+    echo "names, keys, paths, URLs). Prints a report of anything left for you"
+    echo "to handle manually."
+    exit 0
+fi
+
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "Not a git repository." >&2
+    exit 1
+fi
+
+BASE_BRANCH="${1:-main}"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$CURRENT_BRANCH" = "$BASE_BRANCH" ]; then
+    echo "Already on $BASE_BRANCH, nothing to check." >&2
+    exit 1
+fi
+
+if ! MERGE_BASE=$(git merge-base "$BASE_BRANCH" HEAD 2>/dev/null); then
+    echo "Could not find a merge base with '$BASE_BRANCH'." >&2
+    exit 1
+fi
+
+FILES=$(git diff --name-only "$MERGE_BASE"..HEAD --diff-filter=d)
+
+if [ -z "$FILES" ]; then
+    echo "No changed files between $BASE_BRANCH and $CURRENT_BRANCH." >&2
+    exit 1
+fi
+
+DIFF=$(git diff "$MERGE_BASE"..HEAD)
+
+PROMPT=$(cat <<EOF
+This branch (${CURRENT_BRANCH}, vs ${BASE_BRANCH}) touched the files listed
+below. Read each one in full (not just the diff hunks) and find genuine
+English spelling/grammar mistakes in FREE TEXT only: comments, docstrings,
+log/error/user-facing messages, and prose in markdown/docs. Look at the whole
+file, not only the added/changed lines, since a typo can sit right next to
+new code.
+
+Do not be picky - many sentences can be phrased several valid ways; only flag
+actual misspellings or grammar errors, never stylistic rewrites or personal
+preference.
+
+Never change identifiers: variable, function, class, method, column, table,
+dataset, DAG/task ids, dict/config keys, file paths, URLs, import names, or
+any other token code or infrastructure references elsewhere - changing these
+can silently break things. If a typo happens to sit inside one of those,
+do NOT edit it - report it instead so a human can fix it (and anywhere else
+it's referenced) deliberately.
+
+For every safe free-text typo, fix it directly in the file with an edit.
+For anything risky, ambiguous, or inside an identifier, leave it alone and
+add it to the report instead.
+
+Never mention "AI", "Claude", "LLM", "assistant", or any model/vendor name in
+anything you fix or report.
+
+Changed files:
+${FILES}
+
+Diff (for context on what's new vs pre-existing):
+${DIFF}
+EOF
+)
+
+SCHEMA='{"type":"object","properties":{"fixed":{"type":"array","items":{"type":"string"},"description":"One line per free-text typo actually fixed, formatted as file:line: original -> corrected"},"needs_attention":{"type":"array","items":{"type":"string"},"description":"One line per possible typo left for the human to handle (e.g. inside an identifier, or too ambiguous), formatted as file:line: what and why"}},"required":["fixed","needs_attention"]}'
+
+RESULT=$(echo "$PROMPT" | claude -p --dangerously-skip-permissions --tools Read Grep Glob Edit --permission-mode acceptEdits --no-session-persistence --output-format json --json-schema "$SCHEMA")
+
+FIXED_COUNT=$(echo "$RESULT" | jq -r '.structured_output.fixed | length')
+ATTENTION_COUNT=$(echo "$RESULT" | jq -r '.structured_output.needs_attention | length')
+
+if [ "$FIXED_COUNT" -gt 0 ]; then
+    echo "Fixed:"
+    echo "$RESULT" | jq -r '.structured_output.fixed[] | "  - " + .'
+fi
+
+if [ "$ATTENTION_COUNT" -gt 0 ]; then
+    [ "$FIXED_COUNT" -gt 0 ] && echo
+    echo "Needs your attention:"
+    echo "$RESULT" | jq -r '.structured_output.needs_attention[] | "  - " + .'
+fi
+
+if [ "$FIXED_COUNT" -eq 0 ] && [ "$ATTENTION_COUNT" -eq 0 ]; then
+    echo "No typos found."
+fi

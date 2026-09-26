@@ -6,19 +6,15 @@ from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.analyses.calls import CallInstruction, CallLlvm
 from i13c.semantic.typing.analyses.llvm import (
     CALL,
-    MOV,
-    XCHG,
-    Address,
-    Displacement,
-    ImmediateInfo,
+    CallArguments,
+    CallClobbers,
+    CallOperands,
+    Immediate,
     Register,
-    RegisterInfo,
 )
 from i13c.semantic.typing.analyses.shuffles import (
     ShuffleCallSite,
-    ShuffleExchange,
     ShuffleImmediate,
-    ShuffleLoad,
     ShuffleMove,
 )
 from i13c.semantic.typing.entities.calls import CallId
@@ -73,67 +69,33 @@ def emit(
     functions: OneToOne[CallSiteId, Function],
     entry: CallAcceptance,
 ):
+    # blank dict for call arguments
+    args: CallArguments = {}
+    clobbers: CallClobbers | None = None
+    operands: CallOperands | None = None
+
     # before any call we need to pass the arguments
     if shuffle := shuffles.find(entry.target.callsite):
-
-        # first direct register moves
         for move in shuffle.moves:
             if isinstance(move, ShuffleMove):
-                instructions.append(
-                    MOV(
-                        operands=(
-                            Register(name=move.dst),
-                            Register(name=move.src),
-                        )
-                    )
-                )
+                args[move.dst] = Register(name=move.src)
 
-        # then register exchanges
-        for move in shuffle.moves:
-            if isinstance(move, ShuffleExchange):
-                instructions.append(
-                    XCHG(
-                        operands=(
-                            Register(name=move.dst),
-                            Register(name=move.src),
-                        )
-                    )
-                )
+            elif isinstance(move, ShuffleImmediate):
+                args[move.dst] = Immediate(value=move.src)
 
-        # then register loads from memory
-        for move in shuffle.moves:
-            if isinstance(move, ShuffleLoad):
-                instructions.append(
-                    MOV(
-                        operands=(
-                            Register(name=move.dst),
-                            Address(
-                                size=64,
-                                base=Register(name=b"rsp"),
-                                indx=None,
-                                disp=Displacement.positive(8 * move.src),
-                            ),
-                        )
-                    )
-                )
-
-        # finally direct immediate moves
-        for move in shuffle.moves:
-            if isinstance(move, ShuffleImmediate):
-                instructions.append(
-                    MOV(
-                        operands=(
-                            RegisterInfo.derive32(move.dst, move.src.width),
-                            ImmediateInfo.extend32(move.src, move.src.width),
-                        )
-                    )
-                )
-
+    # handle asmlet callsite
     if asmlet := asmlets.find(entry.target.callsite):
-        instructions.append(CALL(operands=(asmlet.id,)))
+        operands = (asmlet.id,)
+        clobbers = [reg.name for reg in asmlet.clobbers]
 
+    # handle function callsite
     elif function := functions.find(entry.target.callsite):
-        instructions.append(CALL(operands=(function.id,)))
+        operands = (function.id,)
+        clobbers = [reg.name for reg in entry.target.clobbers]
+
+    # emit the call instruction if we have both operands and clobbers
+    if clobbers is not None and operands is not None:
+        instructions.append(CALL(operands=operands, args=args, clobbers=clobbers))
 
 
 class ListExtractor:
@@ -142,21 +104,25 @@ class ListExtractor:
 
     def extract(
         self,
-    ) -> Iterable[tuple[CallId, CallLlvm]]:
-        yield from self.data.items()
+    ) -> Iterable[tuple[CallId, tuple[CallLlvm, CALL]]]:
+        for key, entry in self.data.items():
+            for instruction in entry.instructions:
+                yield key, (entry, instruction)
 
     @staticmethod
     def headers() -> dict[str, str]:
         return {
             "ref": "Ref",
             "id": "ID",
-            "instrs": "Instructions",
+            "target": "Target",
+            "args": "Arguments",
         }
 
     @staticmethod
-    def rows(key: CallId, entry: CallLlvm) -> dict[str, str]:
+    def rows(key: CallId, entry: tuple[CallLlvm, CALL]) -> dict[str, str]:
         return {
-            "ref": str(entry.ref),
+            "ref": str(entry[0].ref),
             "id": key.identify(1),
-            "instrs": str(len(entry.instructions)),
+            "target": str(entry[1].operands[0]),
+            "args": str({k.decode(): str(v) for k, v in entry[1].args.items()}),
         }

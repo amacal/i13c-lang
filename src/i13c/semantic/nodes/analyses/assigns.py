@@ -2,17 +2,9 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.analyses.allocations import Allocation
+from i13c.semantic.nodes.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.assigns import AssignInstruction, AssignLlvm
-from i13c.semantic.typing.analyses.llvm import (
-    MOV,
-    Address,
-    Displacement,
-    Immediate,
-    ImmediateInfo,
-    Register,
-    RegisterInfo,
-)
+from i13c.semantic.typing.analyses.llvm import MOV, Immediate, Register
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
@@ -27,7 +19,7 @@ def configure_assigns() -> GraphNode:
         requires=frozenset(
             {
                 ("assigns", "resolutions/assigns/accepted"),
-                ("allocations", "analyses/allocations"),
+                ("dflows", "analyses/dflows"),
             }
         ),
         views=GraphViews(list=ListExtractor),
@@ -35,16 +27,16 @@ def configure_assigns() -> GraphNode:
 
 
 def build_assigns(
+    dflows: OneToOne[FunctionId, DataFlows],
     assigns: OneToOne[AssignId, AssignAcceptance],
-    allocations: OneToOne[FunctionId, Allocation],
 ) -> OneToOne[AssignId, AssignLlvm]:
     llvm: dict[AssignId, AssignLlvm] = {}
 
     for eid, entry in assigns.items():
         instructions: list[AssignInstruction] = []
-        allocation = allocations.get(entry.fn)
+        dflow = dflows.get(entry.fn)
 
-        emit(instructions, allocation, entry)
+        emit(instructions, dflow, entry)
 
         llvm[eid] = AssignLlvm(
             ref=entry.ref,
@@ -57,44 +49,19 @@ def build_assigns(
 
 def emit(
     instructions: list[AssignInstruction],
-    allocation: Allocation,
+    dflow: DataFlows,
     entry: AssignAcceptance,
 ):
-    # fmt: off
-    system_v: dict[int, bytes] = {
-        0: b"rdi", 1: b"rsi", 2: b"rdx", 3: b"rcx", 4: b"r8", 5: b"r9", 6: b"r10", 7: b"r11",
-        8: b"rax", 9: b"rbx", 10: b"rbp", 11: b"r12", 12: b"r13", 13: b"r14", 14: b"r15",
-    }
-    # fmt: on
-
     # lookup for destination
-    idx = allocation.values.index(entry.destination)
-
-    if idx in allocation.colors:
-        dst = Register(name=system_v[allocation.colors[idx]])
-    else:
-        dst = Register(name=system_v[allocation.scratch])
+    idx = dflow.values.index(entry.destination)
+    dst = Register(name=dflow.vregs[idx])
 
     # lookup for source
     if isinstance(entry.expression, LiteralAcceptance):
         src = Immediate(value=entry.expression.target)
     else:
-        idx = allocation.values.index(entry.expression.target)
-
-        if idx in allocation.colors:
-            src = Register(name=system_v[allocation.colors[idx]])
-        else:
-            src = Address(
-                size=64,
-                base=Register(name=b"rsp"),
-                indx=None,
-                disp=Displacement.positive(8 * allocation.spills[idx]),
-            )
-
-    # match operand sizes
-    if isinstance(src, Immediate):
-        dst = RegisterInfo.derive32(dst.name, src.value.width)
-        src = ImmediateInfo.extend32(src.value, src.value.width)
+        idx = dflow.values.index(entry.expression.target)
+        src = Register(name=dflow.vregs[idx])
 
     # emit single instruction
     instructions.append(MOV(operands=(dst, src)))

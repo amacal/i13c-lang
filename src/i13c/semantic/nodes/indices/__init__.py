@@ -21,7 +21,6 @@ from i13c.semantic.nodes.indices.signatures import (
     configure_signatures_by_names,
     configure_signatures_by_nid,
 )
-from i13c.semantic.nodes.indices.spills import configure_spills_by_statements
 from i13c.semantic.nodes.indices.values import configure_values_by_statements
 
 
@@ -42,7 +41,6 @@ def configure_indices() -> GraphGroup:
             configure_signatures_by_names(),
             configure_signatures_by_nid(),
             configure_shuffles_by_callsites(),
-            configure_spills_by_statements(),
             configure_values_by_statements(),
         ]
     )

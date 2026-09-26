@@ -28,13 +28,12 @@ def can_detect_statements_pure_assign_and_call():
         if isinstance(statement.acceptance.target, AssignAcceptance):
             assert idx == 0
             assert statement.listing() == [
-                "mov edi, 0x00000042",
+                "mov v0, 0x42",
             ]
 
         else:
             assert idx == 1
             assert statement.listing() == [
-                "mov rax, rdi",
                 f"call {asmlet.identify(1)}",
             ]
 
@@ -60,18 +59,16 @@ def can_detect_statements_assign_with_spills():
         if isinstance(statement.acceptance.target, AssignAcceptance):
             if idx == 0:
                 assert statement.listing() == [
-                    "mov r11d, 0x00000042",
-                    "mov qword [rsp + 0x00], r11",
+                    "mov v0, 0x42",
                 ]
 
             if idx == 2:
                 assert statement.listing() == [
-                    "mov r11, qword [rsp + 0x00]"
+                    "mov v18, v0"
                 ]
 
         else:
             assert idx == 1
             assert statement.listing() == [
-                "mov rax, qword [rsp + 0x00]",
                 f"call {asmlet.identify(1)}",
             ]

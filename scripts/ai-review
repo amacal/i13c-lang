@@ -1,0 +1,108 @@
+#!/bin/bash
+# ai-review [base-branch] :: Review this branch's commits for real bugs
+set -e
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: ai-review [base-branch]"
+    echo ""
+    echo "Reviews every commit from this branch against base-branch (default:"
+    echo "main), reading beyond the diff for context. Flags real bugs and"
+    echo "mistakes only - never style or 'could be done differently'. Prints"
+    echo "a short, friendly verdict plus any findings to stdout."
+    exit 0
+fi
+
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "Not a git repository." >&2
+    exit 1
+fi
+
+BASE_BRANCH="${1:-main}"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$CURRENT_BRANCH" = "$BASE_BRANCH" ]; then
+    echo "Already on $BASE_BRANCH, nothing to review." >&2
+    exit 1
+fi
+
+if ! MERGE_BASE=$(git merge-base "$BASE_BRANCH" HEAD 2>/dev/null); then
+    echo "Could not find a merge base with '$BASE_BRANCH'." >&2
+    exit 1
+fi
+
+DIFF=$(git diff "$MERGE_BASE"..HEAD)
+
+if [ -z "$DIFF" ]; then
+    echo "No changes between $BASE_BRANCH and $CURRENT_BRANCH." >&2
+    exit 1
+fi
+
+COMMITS=$(git log --reverse --format='- %s%n%b' "$MERGE_BASE"..HEAD)
+FILES=$(git diff --name-only "$MERGE_BASE"..HEAD)
+RECENT_HISTORY=$(git log --oneline -30 "$BASE_BRANCH")
+
+PROMPT=$(cat <<EOF
+Review this branch (${CURRENT_BRANCH}, vs ${BASE_BRANCH}) for real bugs and
+mistakes only - not style, not "this could be done differently" (everything
+can be done differently; that's not useful feedback here). Read beyond the
+diff hunks: open the affected files in full, and anything else in the repo
+that helps you judge whether the change is actually correct (callers, similar
+existing code, config it depends on).
+
+Extra context, use it if it helps:
+- Recent history on ${BASE_BRANCH} below shows how this codebase is usually
+  built - flag a deviation as a mistake only if it clearly breaks an
+  established, load-bearing pattern (e.g. skips a step every similar
+  DAG/function does), never just because it's "different."
+- If a .blog/ directory exists in this repo, it holds session retrospectives -
+  skim it (Glob + Read) for past mistakes on similar work, and check whether
+  this branch repeats one of them.
+
+Only report genuine correctness problems: logic errors, edge cases that will
+actually break, wrong assumptions, missing error handling that matters, or a
+clear mistake (not a preference) versus how the rest of the repo does the
+same thing. Do not report style, naming, formatting, "could be cleaner," or
+hypothetical future-proofing - skip all of that entirely even if you notice
+it.
+
+Be honest but kind: assume good intent, no sarcasm, no lecturing, no hedging
+disclaimers. If you find nothing real, say so in one short, warm sentence -
+don't pad the review to look thorough. If you do find things, keep it tight:
+no filler, no restating the diff, no "great job overall but" preamble - just
+the verdict and the findings themselves.
+
+The verdict is one short, friendly sentence giving the overall read. Each
+finding is a single crisp sentence or two: what's wrong, where, and why it
+actually matters - a concrete failure scenario beats abstract concern. This
+will be read by someone tired at the end of a long session, so make every
+line earn its place.
+
+Never mention "AI", "Claude", "LLM", "assistant", or any model/vendor name.
+
+Commits (oldest to newest):
+${COMMITS}
+
+Changed files:
+${FILES}
+
+Recent history on ${BASE_BRANCH} for context on conventions:
+${RECENT_HISTORY}
+
+Diff:
+${DIFF}
+EOF
+)
+
+SCHEMA='{"type":"object","properties":{"verdict":{"type":"string","description":"One short, warm, non-cheesy sentence giving the overall read - e.g. nothing found, or a heads-up that N real things need a look."},"findings":{"type":"array","items":{"type":"object","properties":{"location":{"type":"string","description":"file:line or file, best effort"},"issue":{"type":"string","description":"One or two crisp sentences: what is wrong, and why it actually matters - a concrete failure scenario, not a style opinion."}},"required":["location","issue"]},"description":"Only genuine bugs/mistakes. Empty if none found - never pad this with style or preference points."}},"required":["verdict","findings"]}'
+
+RESULT=$(echo "$PROMPT" | claude -p --dangerously-skip-permissions --tools Read Grep Glob --permission-prompts none --no-session-persistence --output-format json --json-schema "$SCHEMA")
+
+VERDICT=$(echo "$RESULT" | jq -r .structured_output.verdict)
+FINDINGS_COUNT=$(echo "$RESULT" | jq -r '.structured_output.findings | length')
+
+echo "$VERDICT"
+
+if [ "$FINDINGS_COUNT" -gt 0 ]; then
+    echo
+    echo "$RESULT" | jq -r '.structured_output.findings[] | "- " + .location + " — " + .issue'
+fi

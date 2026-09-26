@@ -1,5 +1,4 @@
 from i13c.semantic.typing.analyses.shuffles import (
-    ShuffleExchange,
     ShuffleImmediate,
     ShuffleMove,
 )
@@ -46,7 +45,7 @@ def can_detect_shuffles_with_asm_callsite_using_parameter():
     assert len(shuffles.callsites[0].moves) == 1
 
     assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
-    assert shuffles.callsites[0].moves[0].src == b"rdi"
+    assert shuffles.callsites[0].moves[0].src == b"v0"
     assert shuffles.callsites[0].moves[0].dst == b"rax"
 
 
@@ -64,7 +63,7 @@ def can_detect_shuffles_with_asm_callsite_using_value():
     assert len(shuffles.callsites[0].moves) == 1
 
     assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
-    assert shuffles.callsites[0].moves[0].src == b"rdi"
+    assert shuffles.callsites[0].moves[0].src == b"v0"
     assert shuffles.callsites[0].moves[0].dst == b"rax"
 
 
@@ -78,8 +77,18 @@ def can_detect_shuffles_with_asm_callsite_with_correct_params():
     assert analyses.shuffles.size() == 1
     _, shuffles = analyses.shuffles.peek()
 
+    # a move is recorded per argument regardless of where it will end up
+    # being colored -- that reconciliation happens later, in rewrite_call
     assert len(shuffles.callsites) == 1
-    assert len(shuffles.callsites[0].moves) == 0
+    assert len(shuffles.callsites[0].moves) == 2
+
+    assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
+    assert shuffles.callsites[0].moves[0].src == b"v0"
+    assert shuffles.callsites[0].moves[0].dst == b"rsi"
+
+    assert isinstance(shuffles.callsites[0].moves[1], ShuffleMove)
+    assert shuffles.callsites[0].moves[1].src == b"v1"
+    assert shuffles.callsites[0].moves[1].dst == b"rdi"
 
 
 def can_detect_shuffles_with_asm_callsite_with_inverted_params():
@@ -93,11 +102,15 @@ def can_detect_shuffles_with_asm_callsite_with_inverted_params():
     _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
-    assert len(shuffles.callsites[0].moves) == 1
+    assert len(shuffles.callsites[0].moves) == 2
 
-    assert isinstance(shuffles.callsites[0].moves[0], ShuffleExchange)
-    assert shuffles.callsites[0].moves[0].src == b"rdi"
+    assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
+    assert shuffles.callsites[0].moves[0].src == b"v1"
     assert shuffles.callsites[0].moves[0].dst == b"rsi"
+
+    assert isinstance(shuffles.callsites[0].moves[1], ShuffleMove)
+    assert shuffles.callsites[0].moves[1].src == b"v0"
+    assert shuffles.callsites[0].moves[1].dst == b"rdi"
 
 
 def can_detect_shuffles_with_asm_callsite_with_shifted_params():
@@ -114,11 +127,11 @@ def can_detect_shuffles_with_asm_callsite_with_shifted_params():
     assert len(shuffles.callsites[0].moves) == 2
 
     assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
-    assert shuffles.callsites[0].moves[0].src == b"rsi"
+    assert shuffles.callsites[0].moves[0].src == b"v1"
     assert shuffles.callsites[0].moves[0].dst == b"rax"
 
     assert isinstance(shuffles.callsites[0].moves[1], ShuffleMove)
-    assert shuffles.callsites[0].moves[1].src == b"rdi"
+    assert shuffles.callsites[0].moves[1].src == b"v2"
     assert shuffles.callsites[0].moves[1].dst == b"rbx"
 
 
@@ -133,15 +146,19 @@ def can_detect_shuffles_with_asm_callsite_with_three_params():
     _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
-    assert len(shuffles.callsites[0].moves) == 2
+    assert len(shuffles.callsites[0].moves) == 3
 
-    assert isinstance(shuffles.callsites[0].moves[0], ShuffleExchange)
-    assert shuffles.callsites[0].moves[0].src == b"rdx"
+    assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
+    assert shuffles.callsites[0].moves[0].src == b"v0"
     assert shuffles.callsites[0].moves[0].dst == b"rdi"
 
-    assert isinstance(shuffles.callsites[0].moves[1], ShuffleExchange)
-    assert shuffles.callsites[0].moves[1].src == b"rdx"
+    assert isinstance(shuffles.callsites[0].moves[1], ShuffleMove)
+    assert shuffles.callsites[0].moves[1].src == b"v2"
     assert shuffles.callsites[0].moves[1].dst == b"rsi"
+
+    assert isinstance(shuffles.callsites[0].moves[2], ShuffleMove)
+    assert shuffles.callsites[0].moves[2].src == b"v1"
+    assert shuffles.callsites[0].moves[2].dst == b"rdx"
 
 
 def can_detect_shuffles_with_asm_callsite_with_same_params():
@@ -155,15 +172,19 @@ def can_detect_shuffles_with_asm_callsite_with_same_params():
     _, shuffles = analyses.shuffles.peek()
 
     assert len(shuffles.callsites) == 1
-    assert len(shuffles.callsites[0].moves) == 2
+    assert len(shuffles.callsites[0].moves) == 3
 
     assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
-    assert shuffles.callsites[0].moves[0].src == b"rdi"
-    assert shuffles.callsites[0].moves[0].dst == b"rsi"
+    assert shuffles.callsites[0].moves[0].src == b"v0"
+    assert shuffles.callsites[0].moves[0].dst == b"rdi"
 
     assert isinstance(shuffles.callsites[0].moves[1], ShuffleMove)
-    assert shuffles.callsites[0].moves[1].src == b"rdi"
-    assert shuffles.callsites[0].moves[1].dst == b"rdx"
+    assert shuffles.callsites[0].moves[1].src == b"v0"
+    assert shuffles.callsites[0].moves[1].dst == b"rsi"
+
+    assert isinstance(shuffles.callsites[0].moves[2], ShuffleMove)
+    assert shuffles.callsites[0].moves[2].src == b"v0"
+    assert shuffles.callsites[0].moves[2].dst == b"rdx"
 
 
 def can_detect_shuffles_with_asm_callsite_with_literal():
@@ -202,5 +223,5 @@ def can_detect_shuffles_with_asm_callsite_with_spilled_param():
     assert len(shuffles.callsites[0].moves) == 1
 
     assert isinstance(shuffles.callsites[0].moves[0], ShuffleMove)
-    assert shuffles.callsites[0].moves[0].src == b"rdi"
+    assert shuffles.callsites[0].moves[0].src == b"v0"
     assert shuffles.callsites[0].moves[0].dst == b"rax"

@@ -1,0 +1,8 @@
+asm foo(x@rsi: u8, y@rdi: u8) clobbers rsi {
+    and rsi, rdi;
+    ret;
+}
+
+fn main(abc: u8, cde: u8) {
+    foo(abc, cde);
+}

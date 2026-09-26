@@ -4,7 +4,7 @@ from i13c.core.generator import Generator
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.encoding import encode
-from i13c.semantic.typing.analyses.blocklets import Blocklet, BlockletId
+from i13c.llvm.typing.blocklets import Blocklet, BlockletId
 from i13c.semantic.typing.analyses.sections import Section, SectiontId
 
 

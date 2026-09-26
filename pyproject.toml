@@ -29,4 +29,4 @@ dev = [
 pythonpath = ["src"]
 
 [tool.ruff.lint]
-ignore = ["SIM102", "SIM114", "SIM118"]
+ignore = ["SIM102", "SIM114", "SIM118", "B006", "B008"]

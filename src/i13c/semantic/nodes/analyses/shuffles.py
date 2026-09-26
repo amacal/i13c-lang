@@ -3,8 +3,8 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Hex
-from i13c.semantic.typing.analyses.allocations import Allocation, AllocationValue
 from i13c.semantic.typing.analyses.callings import Calling, CallingArgument
+from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.shuffles import (
     Shuffle,
     ShuffleCallSite,
@@ -27,7 +27,7 @@ def configure_shuffles() -> GraphNode:
         produces=("analyses/shuffles",),
         requires=frozenset(
             {
-                ("allocations", "analyses/allocations"),
+                ("dflows", "analyses/dflows"),
             }
         ),
         views=GraphViews(list=ListExtractor),
@@ -35,36 +35,21 @@ def configure_shuffles() -> GraphNode:
 
 
 def build_shuffles(
-    allocations: OneToOne[FunctionId, Allocation],
+    dflows: OneToOne[FunctionId, DataFlows],
 ) -> OneToOne[FunctionId, Shuffle]:
     shuffles: dict[FunctionId, Shuffle] = {}
 
-    # fmt: off
-    system_v: dict[int, bytes] = {
-        0: b"rdi", 1: b"rsi", 2: b"rdx", 3: b"rcx", 4: b"r8", 5: b"r9", 6: b"r10", 7: b"r11",
-        8: b"rax", 9: b"rbx", 10: b"rbp", 11: b"r12", 12: b"r13", 13: b"r14", 14: b"r15",
-    }
-    # fmt: on
-
-    for fid, allocation in allocations.items():
+    for fid, dflow in dflows.items():
         callsites: list[ShuffleCallSite] = []
 
-        for calling in allocation.values:
+        for calling in dflow.values:
             if isinstance(calling, Calling):
-                colors = {
-                    idx: system_v[color] for idx, color in allocation.colors.items()
-                }
-
                 arguments = {
                     bind.name: arg
                     for arg, bind in zip(calling.arguments, calling.bindings)
                 }
 
-                moves = build_moves(
-                    build_mapping(
-                        allocation.values, colors, allocation.spills, arguments
-                    )
-                )
+                moves = build_moves(build_mapping(dflow, arguments))
 
                 callsites.append(
                     ShuffleCallSite(
@@ -75,21 +60,19 @@ def build_shuffles(
                 )
 
         shuffles[fid] = Shuffle(
-            ref=allocation.ref,
-            target=allocation.target,
+            ref=dflow.ref,
+            target=dflow.target,
             callsites=callsites,
         )
 
     return OneToOne[FunctionId, Shuffle].instance(shuffles)
 
 
-ShuffleMapping = list[tuple[bytes | Hex | int, bytes]]
+ShuffleMapping = list[tuple[bytes | Hex, bytes]]
 
 
 def build_mapping(
-    values: list[AllocationValue],
-    colors: dict[int, bytes],
-    spills: dict[int, int],
+    dflow: DataFlows,
     arguments: dict[bytes, CallingArgument],
 ) -> ShuffleMapping:
     # mapping of src register to dst register
@@ -101,15 +84,10 @@ def build_mapping(
             mapping.append((argument.target, dst))
 
         if isinstance(argument, (ParameterAcceptance, ValueAcceptance)):
-            idx = values.index(argument)
+            idx = dflow.values.index(argument)
+            vreg = dflow.vregs[idx]
 
-            # param/value may be colored
-            if idx in colors:
-                mapping.append((colors[idx], dst))
-
-            # or spilled to memory
-            else:
-                mapping.append((spills[idx], dst))
+            mapping.append((vreg, dst))
 
     return mapping
 

@@ -4,12 +4,12 @@ from typing import Protocol
 
 from i13c.encoding import addr, bits, ctrl, math, move, shifts, stack
 from i13c.encoding.core import RelocationInfo
-from i13c.semantic.typing.analyses import llvm
-from i13c.semantic.typing.analyses.blocklets import (
+from i13c.llvm.typing.blocklets import (
     Blocklet,
     BlockletInstruction,
     BlockletTarget,
 )
+from i13c.semantic.typing.analyses import llvm
 
 RelocationEntry = tuple[int, int, int]
 

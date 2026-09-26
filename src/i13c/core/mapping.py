@@ -27,6 +27,9 @@ class OneToOne[SemanticId, SemanticNode]:
     def peek(self) -> tuple[SemanticId, SemanticNode]:
         return next(iter(self.data.items()))
 
+    def __getitem__(self, key: SemanticId) -> SemanticNode:
+        return self.data[key]
+
     def get(self, key: SemanticId) -> SemanticNode:
         return self.data[key]
 

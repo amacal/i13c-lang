@@ -1,11 +1,11 @@
 from i13c.core.result import Err, Ok
 from i13c.graph.nodes import run as run_graph
+from i13c.llvm.typing.blocklets import BlockletInstruction
 from i13c.semantic.graph import SemanticGraph
 from i13c.semantic.nodes.resolutions.mnemonics import (
     INSTRUCTIONS_TABLE,
     MnemonicVariant,
 )
-from i13c.semantic.typing.analyses.blocklets import BlockletInstruction
 from i13c.semantic.typing.analyses.llvm import NOP
 from i13c.semantic.typing.resolutions.instructions import (
     InstructionAcceptance,
@@ -412,7 +412,6 @@ def exhaust(*tables: str):
                                 before.append(instruction)
 
                         else:
-                            print("Encountered non-NOP instruction:", instruction)
                             after = []
 
                 assert len(instructions) == 1

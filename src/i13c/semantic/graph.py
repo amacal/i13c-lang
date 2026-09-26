@@ -2,6 +2,7 @@ from typing import Any
 
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, Prefix
+from i13c.llvm.nodes import configure_llvm, parse_llvm
 from i13c.semantic.model import IndexEdges, SemanticGraph, SemanticRules
 from i13c.semantic.nodes import configure_nodes
 from i13c.semantic.nodes.analyses.core import parse_analyses
@@ -27,6 +28,14 @@ def configure_semantic_graph() -> GraphGroup:
             configure_nodes(),
             configure_self(),
             configure_e3xxx(),
+            configure_llvm_graph(),
+        ]
+    )
+
+def configure_llvm_graph() -> GraphGroup:
+    return GraphGroup(
+        nodes=[
+            configure_llvm(),
         ]
     )
 
@@ -40,6 +49,7 @@ def configure_self() -> GraphNode:
             {
                 ("syntax", "syntax/graph"),
                 ("rules", "rules/semantic"),
+                ("llvm", Prefix(value="llvm/")),
                 ("analyses", Prefix(value="analyses/")),
                 ("entities", Prefix(value="entities/")),
                 ("indices", Prefix(value="indices/")),
@@ -54,11 +64,13 @@ def build(
     indices: dict[str, Any],
     resolutions: dict[str, Any],
     analyses: dict[str, Any],
+    llvm: dict[str, Any],
     **kwargs: dict[str, Any],
 ) -> SemanticGraph:
     return SemanticGraph(
         entities=parse_entities(entities),
         analyses=parse_analyses(analyses),
+        llvm=parse_llvm(llvm),
         indices=IndexEdges(
             binds_by_parameters=indices.get("indices/binds/parameters"),
             environments_by_snippets=indices.get("indices/environments/snippets"),

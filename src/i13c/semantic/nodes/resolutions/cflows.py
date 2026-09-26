@@ -11,14 +11,16 @@ from i13c.semantic.typing.analyses.cflows import (
     FlowMember,
     FlowNode,
 )
+from i13c.semantic.typing.entities.calls import CallId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.entities.statements import Statement, StatementId
 from i13c.semantic.typing.resolutions.cflows import (
     ControlFlowAcceptance,
     ControlFlowEntry,
     ControlFlowEnvironment,
     ControlFlowResolution,
+    ControlFlowSegments,
 )
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
@@ -35,6 +37,7 @@ def configure_control_flow_resolution() -> GraphGroup:
                 ("functions", "entities/functions"),
                 ("values", "indices/values/statements"),
                 ("signatures", "resolutions/signatures/accepted"),
+                ("statements", "entities/statements"),
             }
         ),
         views=GraphViews(list=ListAllExtractor),
@@ -73,6 +76,7 @@ def build_control_flow_resolution(
     functions: OneToOne[FunctionId, Function],
     values: OneToMany[StatementId, ValueAcceptance],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
+    statements: OneToOne[StatementId, Statement],
 ) -> OneToOne[FunctionId, ControlFlowResolution]:
     resolutions: dict[FunctionId, ControlFlowResolution] = {}
 
@@ -95,12 +99,12 @@ def build_control_flow_resolution(
         assert isinstance(fexit, FlowExit)
 
         next: ControlFlowEntry = {}
-        environments: ControlFlowEnvironment = {
-            fentry: {},
-        }
-
         for param in signature.parameters:
             next[param.name] = param
+
+        environments: ControlFlowEnvironment = {
+            fentry: next.copy(),
+        }
 
         for node in entry.nodes[1:-1]:
             assert isinstance(node, FlowNode)
@@ -114,6 +118,20 @@ def build_control_flow_resolution(
 
         environments[fexit] = next.copy()
 
+        segmentid: int = 0
+        segments: ControlFlowSegments = [segmentid]
+
+        for node in entry.nodes[1:-1]:
+            assert isinstance(node, FlowNode)
+
+            statement = statements.get(node.target)
+            is_a_call = isinstance(statement.target, CallId)
+
+            if is_a_call:
+                segmentid += 1
+
+            segments.append(segmentid)
+
         resolution.accepted.append(
             ControlFlowAcceptance(
                 ref=entry.ref,
@@ -123,6 +141,7 @@ def build_control_flow_resolution(
                 entry=fentry,
                 exit=fexit,
                 environments=environments,
+                segments=segments,
             )
         )
 
@@ -216,6 +235,7 @@ class ListAcceptedExtractor:
             "fn": "Function",
             "sig": "Signature",
             "envs": "Environments",
+            "segs": "Segments",
         }
 
     @staticmethod
@@ -225,4 +245,5 @@ class ListAcceptedExtractor:
             "fn": key.identify(1),
             "sig": entry.signature.identify(1),
             "envs": str(len(entry.environments)),
+            "segs": str(len(entry.segments)),
         }

@@ -175,7 +175,7 @@ def evaluate(
 
     def expand(req: str | Prefix) -> Any | None:
         if isinstance(req, Prefix):
-            return {key: artifacts[key] for key in req.find(artifacts.keys())} or None
+            return {key: artifacts[key] for key in req.find(artifacts.keys())}
         else:
             return artifacts.get(req, None)
 

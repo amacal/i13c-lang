@@ -45,7 +45,10 @@ def can_accept_an_empty_function_with_parameters():
     assert len(resolution.accepted[0].environments) == 2
 
     entry = resolution.accepted[0].entry
-    assert len(resolution.accepted[0].environments[entry]) == 0
+    assert len(resolution.accepted[0].environments[entry]) == 2
+
+    assert b"x" in resolution.accepted[0].environments[entry]
+    assert b"y" in resolution.accepted[0].environments[entry]
 
     exit = resolution.accepted[0].exit
     assert len(resolution.accepted[0].environments[exit]) == 2
@@ -107,7 +110,10 @@ def can_accept_a_function_with_parameters_and_values():
     assert len(resolution.accepted[0].environments) == 4
 
     entry = resolution.accepted[0].entry
-    assert len(resolution.accepted[0].environments[entry]) == 0
+    assert len(resolution.accepted[0].environments[entry]) == 2
+
+    assert b"x" in resolution.accepted[0].environments[entry]
+    assert b"y" in resolution.accepted[0].environments[entry]
 
     exit = resolution.accepted[0].exit
     assert len(resolution.accepted[0].environments[exit]) == 4

@@ -12,6 +12,8 @@ FlowValue = (
     ParameterAcceptance | ValueAcceptance | LiteralAcceptance | Calling | CallingClobber
 )
 
+VReg = bytes
+
 
 @dataclass(kw_only=True)
 class DataFlows:
@@ -20,6 +22,7 @@ class DataFlows:
 
     nodes: list[FlowMember]
     values: list[FlowValue]
+    vregs: list[VReg]
 
     # DFG Node -> DFG Nodes
     forward: dict[int, list[int]]

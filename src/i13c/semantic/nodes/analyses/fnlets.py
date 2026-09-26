@@ -2,25 +2,16 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.core import Hex
-from i13c.semantic.typing.analyses.cflows import ControlFlows, FlowNode
+from i13c.semantic.typing.analyses.cflows import FlowNode
+from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.fnlets import Fnlet, FnletBlock, FnletInstruction
-from i13c.semantic.typing.analyses.frames import StackFrame
-from i13c.semantic.typing.analyses.llvm import (
-    ADD,
-    MOV,
-    POP,
-    PUSH,
-    RET,
-    SUB,
-    Address,
-    Displacement,
-    Immediate,
-    Register,
-)
+from i13c.semantic.typing.analyses.llvm import EPILOG, PROLOG, Register
 from i13c.semantic.typing.analyses.statements import StatementLlvm
 from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
+from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
 from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
 from i13c.syntax.source import Span
 
@@ -32,8 +23,9 @@ def configure_fnlets() -> GraphNode:
         produces=("analyses/fnlets",),
         requires=frozenset(
             {
-                ("cflows", "analyses/cflows"),
-                ("frames", "analyses/frames"),
+                ("cflows", "resolutions/cflows/accepted"),
+                ("dflows", "analyses/dflows"),
+                ("bindings", "resolutions/bindings/accepted"),
                 ("statements", "analyses/statements"),
                 ("functions", "resolutions/functions/accepted"),
             }
@@ -43,109 +35,110 @@ def configure_fnlets() -> GraphNode:
 
 
 def build_fnlets(
-    cflows: OneToOne[FunctionId, ControlFlows],
-    frames: OneToOne[FunctionId, StackFrame],
+    cflows: OneToOne[FunctionId, ControlFlowAcceptance],
+    dflows: OneToOne[FunctionId, DataFlows],
     functions: OneToOne[FunctionId, FunctionAcceptance],
     statements: OneToOne[StatementId, StatementLlvm],
+    bindings: OneToOne[SignatureId, BindingAcceptance],
 ) -> OneToOne[FunctionId, Fnlet]:
     fnlets: dict[FunctionId, Fnlet] = {}
 
     for fid, cflow in cflows.items():
-        instructions: list[FnletInstruction] = []
-        frame = frames.get(fid)
-        cflow = cflows.get(fid)
+        instructions: dict[int, list[FnletInstruction]] = {}
+        cflow, dflow = cflows.get(fid), dflows.get(fid)
 
-        emit_prologue(instructions, frame)
+        emit_prolog(instructions, bindings, cflow, dflow)
         emit_body(instructions, statements, cflow)
-        emit_epilogue(instructions, frame)
+        emit_epilog(instructions, cflow)
+
+        blocks = [
+            FnletBlock(instructions=instrs)
+            for _, instrs in sorted(instructions.items())
+        ]
 
         fnlets[fid] = Fnlet(
             ref=cflow.ref,
             target=fid,
             signature=functions.get(fid).signature,
-            blocks=[FnletBlock(instructions=instructions)],
+            blocks=blocks,
         )
 
     return OneToOne[FunctionId, Fnlet].instance(fnlets)
 
 
-def emit_prologue(instructions: list[FnletInstruction], frame: StackFrame):
-    for entry in frame.saved:
-        instructions.append(PUSH(operands=(Register(name=entry.name),)))
+def emit_prolog(
+    instructions: dict[int, list[FnletInstruction]],
+    bindings: OneToOne[SignatureId, BindingAcceptance],
+    cflow: ControlFlowAcceptance,
+    dflow: DataFlows,
+):
+    binding = bindings.get(cflow.signature)
+    environment = cflow.environments[cflow.entry]
 
-    if frame.slots > 0:
-        instructions.append(
-            SUB(
-                operands=(
-                    Register(name=b"rsp"),
-                    Immediate(value=Hex.smallest(8 * frame.slots)),
-                )
-            )
+    binds = {
+        dflow.vregs[dflow.values.index(environment[entry.src])]: Register(
+            name=entry.dst
         )
+        for entry in binding.mapping
+    }
 
-    for entry in frame.spill:
-        instructions.append(
-            MOV(
-                operands=(
-                    Address(
-                        size=64,
-                        base=Register(name=b"rsp"),
-                        indx=None,
-                        disp=Displacement.positive(8 * entry.slot),
-                    ),
-                    Register(name=entry.name),
-                ),
-            )
+    instructions[0] = [
+        PROLOG(
+            operands=(),
+            binds=binds,
+            preserves=[
+                Register(name=reg)
+                for reg in (b"rbx", b"rbp", b"r12", b"r13", b"r14", b"r15")
+            ],
         )
-
-    for entry in frame.moved:
-        instructions.append(
-            MOV(
-                operands=(
-                    Register(name=entry.dst),
-                    Register(name=entry.src),
-                )
-            )
-        )
-
-
-def emit_epilogue(instructions: list[FnletInstruction], frame: StackFrame):
-    if frame.slots > 0:
-        instructions.append(
-            ADD(
-                operands=(
-                    Register(name=b"rsp"),
-                    Immediate(value=Hex.smallest(8 * frame.slots)),
-                )
-            )
-        )
-
-    for entry in reversed(frame.saved):
-        instructions.append(POP(operands=(Register(name=entry.name),)))
-
-    instructions.append(RET(operands=()))
+    ]
 
 
 def emit_body(
-    instructions: list[FnletInstruction],
+    instructions: dict[int, list[FnletInstruction]],
     statements: OneToOne[StatementId, StatementLlvm],
-    cflow: ControlFlows,
+    cflow: ControlFlowAcceptance,
 ):
-    worklist: list[int] = [cflow.entry]
+    worklist: list[int] = [cflow.source.entry]
 
     while worklist:
         idx = worklist.pop()
-        node = cflow.nodes[idx]
+        node = cflow.source.nodes[idx]
 
         # schedule direct successors
-        worklist.extend(cflow.forward.get(idx, []))
+        worklist.extend(cflow.source.forward.get(idx, []))
 
         if not isinstance(node, FlowNode):
             continue
 
         # copy already emitted instructions
         entry = statements.get(node.target)
-        instructions.extend(entry.instructions)
+        segment = cflow.segments[idx] + 1
+
+        if segment not in instructions:
+            instructions[segment] = []
+
+        instructions[segment].extend(entry.instructions)
+
+
+def emit_epilog(
+    instructions: dict[int, list[FnletInstruction]],
+    cflow: ControlFlowAcceptance,
+):
+    segment = len(cflow.segments)
+
+    if segment not in instructions:
+        instructions[segment] = []
+
+    instructions[segment].append(
+        EPILOG(
+            operands=(),
+            preserves=[
+                Register(name=reg)
+                for reg in (b"rbx", b"rbp", b"r12", b"r13", b"r14", b"r15")
+            ],
+        )
+    )
 
 
 class ListExtractor:
@@ -164,7 +157,7 @@ class ListExtractor:
         return {
             "ref": "Ref",
             "function": "Function",
-            "idx": "Block Index",
+            "idx": "Index",
             "instrs": "Instructions",
         }
 

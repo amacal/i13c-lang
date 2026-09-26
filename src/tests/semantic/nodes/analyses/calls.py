@@ -44,7 +44,6 @@ def can_detect_calls_with_asm_callsite_using_parameter():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "mov rax, rdi",
         f"call {asmlet.identify(1)}",
     ]
 
@@ -64,7 +63,6 @@ def can_detect_calls_with_asm_callsite_using_value():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "mov rax, rdi",
         f"call {asmlet.identify(1)}",
     ]
 
@@ -103,7 +101,6 @@ def can_detect_calls_with_asm_callsite_with_inverted_params():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "xchg rsi, rdi",
         f"call {asmlet.identify(1)}",
     ]
 
@@ -123,8 +120,6 @@ def can_detect_calls_with_asm_callsite_with_shifted_params():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "mov rax, rsi",
-        "mov rbx, rdi",
         f"call {asmlet.identify(1)}",
     ]
 
@@ -144,8 +139,6 @@ def can_detect_calls_with_asm_callsite_with_three_params():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "xchg rdi, rdx",
-        "xchg rsi, rdx",
         f"call {asmlet.identify(1)}",
     ]
 
@@ -165,8 +158,6 @@ def can_detect_calls_with_asm_callsite_with_same_params():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "mov rsi, rdi",
-        "mov rdx, rdi",
         f"call {asmlet.identify(1)}",
     ]
 
@@ -186,7 +177,6 @@ def can_detect_calls_with_asm_callsite_with_literal():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "mov edi, 0x00000005",
         f"call {asmlet.identify(1)}",
     ]
 
@@ -210,6 +200,5 @@ def can_detect_calls_with_asm_callsite_with_spilled_param():
     asmlet, _ = analyses.asmlets.peek()
 
     assert call.listing() == [
-        "mov rax, qword [rsp + 0x00]",
         f"call {asmlet.identify(1)}",
     ]

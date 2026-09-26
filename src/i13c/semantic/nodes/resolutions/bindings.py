@@ -8,6 +8,7 @@ from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.resolutions.bindings import (
     BindingAcceptance,
+    BindingEntry,
     BindingRejection,
     BindingResolution,
 )
@@ -61,6 +62,7 @@ def build_binding_resolution(
     binds: OneToOne[ParameterId, BindAcceptance],
 ) -> OneToOne[SignatureId, BindingResolution]:
     resolutions: dict[SignatureId, BindingResolution] = {}
+    sysv: list[bytes] = [b"rdi", b"rsi", b"rdx", b"rcx", b"r8", b"r9"]
 
     for sid, entry in signatures.items():
         resolution = BindingResolution(
@@ -71,10 +73,10 @@ def build_binding_resolution(
         )
 
         names: set[bytes] = set()
-        found: list[BindAcceptance] = []
+        found: list[BindingEntry] = []
 
         # only snippets may have binds
-        for parameter in entry.parameters:
+        for parameter, reg in zip(entry.parameters, sysv):
             if bind := binds.find(parameter.id):
                 if bind.mode == "register" and bind.dst in names:
                     resolution.rejected.append(
@@ -87,14 +89,30 @@ def build_binding_resolution(
 
                 else:
                     names.add(bind.dst)
-                    found.append(bind)
+                    found.append(
+                        BindingEntry(
+                            src=bind.src,
+                            dst=bind.dst,
+                            mode=bind.mode,
+                        )
+                    )
+
+            # otherwise it goes via the default System V registers
+            else:
+                found.append(
+                    BindingEntry(
+                        src=parameter.name,
+                        dst=reg,
+                        mode="register",
+                    )
+                )
 
         if len(resolution.rejected) == 0:
             resolution.accepted.append(
                 BindingAcceptance(
                     ref=entry.ref,
                     owner=sid,
-                    binds=found,
+                    mapping=found,
                 )
             )
 
@@ -191,5 +209,5 @@ class ListAcceptedExtractor:
         return {
             "ref": str(entry.ref),
             "sig": key.identify(1),
-            "binds": str(len(entry.binds)),
+            "binds": ", ".join([bind.dst.decode() for bind in entry.mapping]),
         }

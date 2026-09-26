@@ -10,8 +10,15 @@ from i13c.semantic.typing.entities.functions import FunctionId
 class Immediate:
     value: Hex
 
+    @staticmethod
+    def derive(value: bytes) -> Immediate:
+        return Immediate(value=Hex.derive(value))
+
     def width(self) -> Kind[8, 16, 32, 64]:
         return self.value.width
+
+    def resize(self, width: Kind[8, 16, 32, 64]) -> Immediate:
+        return Immediate(value=self.value.extend(width))
 
     def __str__(self) -> str:
         return str(self.value)
@@ -21,13 +28,16 @@ class Immediate:
 class Register:
     name: bytes
 
+    def resize(self, width: Kind[8, 16, 32, 64]) -> Register:
+        return RegisterInfo.resize(name=self.name, width=width)
+
     def __str__(self) -> str:
         return self.name.decode("utf-8")
 
 
 class RegisterInfo:
     @staticmethod
-    def derive32(name: bytes, width: Kind[8, 16, 32, 64]) -> Register:
+    def resize(name: bytes, width: Kind[8, 16, 32, 64]) -> Register:
         # fmt: off
         registers = {
             64: [b"rax", b"rbx", b"rcx", b"rdx", b"rsi", b"rdi", b"rsp", b"rbp", b"r8", b"r9", b"r10", b"r11", b"r12", b"r13", b"r14", b"r15"],
@@ -37,22 +47,10 @@ class RegisterInfo:
         }
         # fmt: on
 
-        # coerce derived width to at least 32 bits
-        width = max(width, 32)
+        # ensure the register is a valid 64-bit register before resizing
+        assert name in registers[64]
 
         return Register(name=registers[width][registers[64].index(name)])
-
-
-class ImmediateInfo:
-    @staticmethod
-    def extend32(value: Hex, width: Kind[8, 16, 32, 64]) -> Immediate:
-        # coerce derived width to at least 32 bits
-        width = max(width, 32)
-
-        if value.width < 32:
-            value = value.extend(32)
-
-        return Immediate(value=value)
 
 
 @dataclass(kw_only=True, repr=False)
@@ -103,6 +101,14 @@ class Address:
     base: Register | None
     indx: Index | None
     disp: Displacement | Relocation | None
+
+    def resize(self, width: AddressSize) -> Address:
+        return Address(
+            size=width,
+            base=self.base,
+            indx=self.indx,
+            disp=self.disp,
+        )
 
     def __str__(self) -> str:
         repr: list[str] = []
@@ -361,9 +367,15 @@ class JMP:
         return f"jmp {self.operands[0]}"
 
 
+CallOperands = tuple[Register | Address | Relocation | AsmletId | FunctionId]
+CallArguments = dict[bytes, Register | Immediate]
+CallClobbers = list[bytes]
+
 @dataclass(kw_only=True, repr=False)
 class CALL:
-    operands: tuple[Register | Address | Relocation | AsmletId | FunctionId]
+    operands: CallOperands
+    args: CallArguments
+    clobbers: CallClobbers
 
     def __str__(self) -> str:
         return f"call {self.operands[0]}"
@@ -383,6 +395,25 @@ class SYSCALL:
 
     def __str__(self) -> str:
         return "syscall"
+
+
+@dataclass(kw_only=True, repr=False)
+class PROLOG:
+    operands: tuple[()]
+    binds: dict[bytes, Register]
+    preserves: list[Register]
+
+    def __str__(self) -> str:
+        return "prologue"
+
+
+@dataclass(kw_only=True, repr=False)
+class EPILOG:
+    operands: tuple[()]
+    preserves: list[Register]
+
+    def __str__(self) -> str:
+        return "epilogue"
 
 
 Group1Operands = tuple[Register | Address, Register | Address | Immediate]

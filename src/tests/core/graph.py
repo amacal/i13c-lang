@@ -287,7 +287,7 @@ def can_reject_missing_prefix_dependency():
     assert error.value.prefix.value == "entities/"
 
 
-def can_not_consume_prefix_if_no_prefix_artifacts_were_produced():
+def can_consume_a_prefix_that_matched_no_artifacts_as_empty():
     def build(entities: dict[str, int]) -> int:
         return len(entities)
 
@@ -311,9 +311,8 @@ def can_not_consume_prefix_if_no_prefix_artifacts_were_produced():
 
     views, artifacts = evaluate([producer, consumer], initial={})
 
-    # producer didn't produce any artifacts, so consumer should be skipped
     assert views == {}
-    assert artifacts == {}
+    assert artifacts == {"result": 0}
 
 
 def can_reject_missing_artifact_dependency():

@@ -56,10 +56,10 @@ def can_accept_a_snippet_with_parameters():
 
     assert resolution.accepted[0].signature.id == id
     assert resolution.accepted[0].binding.owner == id
-    assert len(resolution.accepted[0].binding.binds) == 1
+    assert len(resolution.accepted[0].binding.mapping) == 1
 
-    assert resolution.accepted[0].binding.binds[0].src == b"x"
-    assert resolution.accepted[0].binding.binds[0].dst == b"rbx"
+    assert resolution.accepted[0].binding.mapping[0].src == b"x"
+    assert resolution.accepted[0].binding.mapping[0].dst == b"rbx"
 
     assert resolutions.instructions is not None
     id, _ = resolutions.instructions.peek()

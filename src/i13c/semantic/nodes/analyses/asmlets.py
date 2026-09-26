@@ -62,10 +62,10 @@ def build_asmlets(
 
     for sid, snippet in snippets.items():
         removed: list[bytes] = []
-        positions: list[bool] = [False] * len(snippet.binding.binds)
+        positions: list[bool] = [False] * len(snippet.binding.mapping)
         index: dict[frozenset[tuple[bytes, Hex]], list[CallSiteAcceptance]] = {}
 
-        for idx, bind in enumerate(snippet.binding.binds):
+        for idx, bind in enumerate(snippet.binding.mapping):
             if bind.is_immediate():
                 removed.append(bind.src)
             else:
@@ -84,7 +84,7 @@ def build_asmlets(
 
             else:
                 for idx, (bind, argument) in enumerate(
-                    zip(snippet.binding.binds, callsite.arguments)
+                    zip(snippet.binding.mapping, callsite.arguments)
                 ):
                     if not positions[idx]:
                         assert isinstance(argument, LiteralAcceptance)
@@ -99,7 +99,7 @@ def build_asmlets(
                 continue
 
             # copy all binds except those that are immediate
-            binds = [bind for bind in snippet.binding.binds if bind.src not in removed]
+            binds = [bind for bind in snippet.binding.mapping if bind.src not in removed]
 
             # copy all parameters except those that are immediate
             parameters = [

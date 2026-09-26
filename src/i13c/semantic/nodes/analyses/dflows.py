@@ -50,6 +50,7 @@ def build_data_flows(
             defs={},
             uses={},
             clobbers={},
+            vregs=[],
         )
 
         for idx, node in enumerate(entry.nodes):
@@ -62,6 +63,9 @@ def build_data_flows(
             else:
                 dflow.defs[idx] = []
                 dflow.uses[idx] = []
+
+        for idx in range(len(dflow.values)):
+            dflow.vregs.append(f"v{idx}".encode())
 
         dflows[fid] = dflow
 
@@ -151,6 +155,7 @@ class ListExtractor:
             "ref": "Ref",
             "fn": "Function",
             "values": "values",
+            "vregs": "Registers",
             "forward": "Forward",
             "backward": "Backward",
         }
@@ -160,6 +165,7 @@ class ListExtractor:
         return {
             "ref": str(entry.ref),
             "fn": key.identify(1),
+            "vregs": str(len(entry.vregs)),
             "values": str(len(entry.values)),
             "forward": str(len(entry.forward)),
             "backward": str(len(entry.backward)),

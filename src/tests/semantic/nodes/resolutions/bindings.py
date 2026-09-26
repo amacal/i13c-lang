@@ -19,7 +19,7 @@ def can_accept_a_binding_without_parameters():
     id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].owner == id
-    assert len(resolution.accepted[0].binds) == 0
+    assert len(resolution.accepted[0].mapping) == 0
 
     assert source.extract(resolution.accepted[0].ref) == b"main()"
 
@@ -42,10 +42,10 @@ def can_accept_a_binding_to_immediate():
     id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].owner == id
-    assert len(resolution.accepted[0].binds) == 1
+    assert len(resolution.accepted[0].mapping) == 1
 
-    assert resolution.accepted[0].binds[0].src == b"x"
-    assert resolution.accepted[0].binds[0].dst == b"imm"
+    assert resolution.accepted[0].mapping[0].src == b"x"
+    assert resolution.accepted[0].mapping[0].dst == b"imm"
 
     assert source.extract(resolution.accepted[0].ref) == b"main(x@imm: u32)"
 
@@ -68,13 +68,13 @@ def can_accept_a_double_binding_to_immediates():
     id, _ = resolutions.signatures.peek()
 
     assert resolution.accepted[0].owner == id
-    assert len(resolution.accepted[0].binds) == 2
+    assert len(resolution.accepted[0].mapping) == 2
 
-    assert resolution.accepted[0].binds[0].src == b"x"
-    assert resolution.accepted[0].binds[0].dst == b"imm"
+    assert resolution.accepted[0].mapping[0].src == b"x"
+    assert resolution.accepted[0].mapping[0].dst == b"imm"
 
-    assert resolution.accepted[0].binds[1].src == b"y"
-    assert resolution.accepted[0].binds[1].dst == b"imm"
+    assert resolution.accepted[0].mapping[1].src == b"y"
+    assert resolution.accepted[0].mapping[1].dst == b"imm"
 
     assert source.extract(resolution.accepted[0].ref) == b"main(x@imm: u32, y@imm: u32)"
 

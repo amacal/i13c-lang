@@ -2,7 +2,7 @@
 install:
 	@sudo apt update
 	@sudo apt install -y nasm
-	@pipx install poetry==2.4.1 --force
+	@pipx install poetry==2.5.1 --force
 
 .PHONY: deps
 deps:
@@ -18,8 +18,12 @@ lint:
 	@poetry run ruff check src/i13c src/tests --fix
 
 .PHONY: test
-test: test-core test-syntax test-semantic test-encoding
+test: test-core test-inline test-syntax test-semantic test-encoding
 	@echo "All tests passed!"
+
+.PHONY: test-inline
+test-inline:
+	@poetry run pytest -vvo python_files='*.py' -o python_functions="can_*" src/i13c/
 
 .PHONY: test-core
 test-core:
@@ -41,17 +45,23 @@ test-encoding:
 asm:
 	@ndisasm -b 64 -k0,120 a.out
 
-.PHONY: dump
-dump:
-	@find ./src -type f -name '*.py' -print0 \
-	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump
 
-.PHONY: dump-llvm
-dump-llvm:
-	@find ./src/i13c/llvm -type f -name '*.py' -print0 \
-	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump
+.PHONY: ai-commit
+ai-commit:
+	@bash scripts/ai-commit
 
-.PHONY: dump-semantic
-dump-semantic:
-	@find ./src/i13c/semantic -type f -name '*.py' -print0 \
-	| xargs -0 -I{} sh -c 'echo "{}"; cat "{}"; echo' > dump
+.PHONY: ai-amend
+ai-amend:
+	@bash scripts/ai-amend
+
+.PHONY: ai-help
+ai-help:
+	@bash scripts/ai-help
+
+.PHONY: ai-typos
+ai-typos:
+	@bash scripts/ai-typos $(BASE)
+
+.PHONY: ai-review
+ai-review:
+	@bash scripts/ai-review $(BASE)

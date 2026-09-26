@@ -29,9 +29,6 @@ class GraphArtifacts:
     def rule_by_name(self, name: str) -> list[Diagnostic]:
         return self.rules().get(name)
 
-    # def llvm_graph(self) -> LowLevelGraph:
-    #     return self.data["llvm/graph"]
-
     def list_view(self, name: str) -> AbstractListExtractor[Any, Any] | None:
         if view := self.views.get(name):
             if list := view.list:

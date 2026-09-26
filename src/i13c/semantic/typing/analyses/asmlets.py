@@ -4,7 +4,7 @@ from typing import Literal as Kind
 from i13c.semantic.core import Hex
 from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.snippets import SnippetId
-from i13c.semantic.typing.resolutions.binds import BindAcceptance
+from i13c.semantic.typing.resolutions.bindings import BindingEntry
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.operands import OperandSymbol, RegisterAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
@@ -34,7 +34,7 @@ class Asmlet:
     signature: SignatureAcceptance
     keys: dict[bytes, Hex]
 
-    bindings: list[BindAcceptance]
+    bindings: list[BindingEntry]
     parameters: list[ParameterAcceptance]
 
     noreturn: bool

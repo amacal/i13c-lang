@@ -19,7 +19,7 @@ ControlFlowTarget = ParameterAcceptance | ValueAcceptance
 ControlFlowRejectionReason = Kind["unknown",]
 ControlFlowEntry = dict[bytes, ControlFlowTarget]
 ControlFlowEnvironment = dict[ControlFlowMember, ControlFlowEntry]
-
+ControlFlowSegments = list[int]
 
 @dataclass(kw_only=True)
 class ControlFlowRejection:
@@ -38,7 +38,9 @@ class ControlFlowAcceptance:
 
     entry: FlowEntry
     exit: FlowExit
+
     environments: ControlFlowEnvironment
+    segments: ControlFlowSegments
 
 
 @dataclass(kw_only=True)
