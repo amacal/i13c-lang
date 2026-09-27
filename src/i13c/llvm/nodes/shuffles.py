@@ -100,7 +100,7 @@ def address(offset: int) -> llvm.Address:
         disp=llvm.Displacement(
             width=width,
             direction="forward",
-            offset=offset.to_bytes(width // 8, "little"),
+            offset=offset.to_bytes(width // 8, "big"),
         ),
     )
 
@@ -339,7 +339,8 @@ def can_address_uses_an_8_bit_displacement_below_128():
 
 
 def can_address_uses_a_32_bit_displacement_from_128():
-    assert str(address(128)) == "qword [rsp + 0x80000000]"
+    # displacement bytes are big-endian, as DisplacementInfo.normalize reads them
+    assert str(address(128)) == "qword [rsp + 0x00000080]"
 
 
 def can_transfer_without_vregs():

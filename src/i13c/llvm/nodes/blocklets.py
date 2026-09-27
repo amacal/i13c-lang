@@ -962,7 +962,7 @@ def address(offset: int) -> Address:
         disp=Displacement(
             width=width,
             direction="forward",
-            offset=offset.to_bytes(width // 8, "little"),
+            offset=offset.to_bytes(width // 8, "big"),
         ),
     )
 
@@ -1113,22 +1113,6 @@ class ConfigurationExtractor:
         }
 
 
-def spill_address(slot: int) -> Address:
-    offset = 8 * slot
-    width = 8 if offset < 128 else 32
-
-    return Address(
-        size=64,
-        base=Register(name=b"rsp"),
-        indx=None,
-        disp=Displacement(
-            width=width,
-            direction="forward",
-            offset=offset.to_bytes(width // 8, "little"),
-        ),
-    )
-
-
 def can_rewrite_mov_leave_a_move_between_two_untracked_physical_registers_unchanged():
     registers = [b"v0", b"v1"]
     palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
@@ -1250,7 +1234,7 @@ def can_rewrite_mov_pass_a_genuine_memory_to_memory_move_through_the_scratch_reg
     # neither operand is a Register at all here, so this exercises the
     # mem-to-mem branch directly, independent of any vreg recoloring
     segment = AllocationSegment(colors={}, spills={})
-    instruction = MOV(operands=(spill_address(0), spill_address(1)))
+    instruction = MOV(operands=(address(0), address(8)))
 
     result = rewrite_mov(instruction, scratch, registers, palette, segment)
 
@@ -1266,7 +1250,7 @@ def can_rewrite_mov_resize_a_memory_destination_when_storing_a_narrow_immediate(
     scratch = Register(name=b"r11")
     segment = AllocationSegment(colors={}, spills={})
     immediate = Immediate.derive(bytes([0x01]))
-    instruction = MOV(operands=(spill_address(0), immediate))
+    instruction = MOV(operands=(address(0), immediate))
 
     result = rewrite_mov(instruction, scratch, registers, palette, segment)
 
@@ -1305,6 +1289,19 @@ def can_rewrite_mov_load_a_spilled_source_into_a_colored_destination():
     result = rewrite_mov(instruction, scratch, registers, palette, segment)
 
     assert [str(m) for m in result] == ["mov rdi, qword [rsp + 0x18]"]
+
+
+def can_rewrite_mov_load_a_spilled_source_through_a_32_bit_displacement():
+    registers = [b"v0", b"v1"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+    segment = AllocationSegment(colors={0: 0}, spills={1: 16})
+    instruction = MOV(operands=(Register(name=b"v0"), Register(name=b"v1")))
+
+    # slot 16 sits at offset 128, one past what an 8-bit displacement can reach
+    result = rewrite_mov(instruction, scratch, registers, palette, segment)
+
+    assert [str(m) for m in result] == ["mov rdi, qword [rsp + 0x00000080]"]
 
 
 def can_rewrite_mov_shuffle_a_spill_to_spill_move_through_the_scratch_register():
