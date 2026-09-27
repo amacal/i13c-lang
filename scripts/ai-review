@@ -6,9 +6,11 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: ai-review [base-branch]"
     echo ""
     echo "Reviews every commit from this branch against base-branch (default:"
-    echo "main), reading beyond the diff for context. Flags real bugs and"
-    echo "mistakes only - never style or 'could be done differently'. Prints"
-    echo "a short, friendly verdict plus any findings to stdout."
+    echo "main), reading beyond the diff for context. On base-branch itself,"
+    echo "reviews local commits not yet on origin/base-branch instead. Flags"
+    echo "real bugs and mistakes only - never style or 'could be done"
+    echo "differently'. Prints a short, friendly verdict plus any findings"
+    echo "to stdout."
     exit 0
 fi
 
@@ -20,29 +22,33 @@ fi
 BASE_BRANCH="${1:-main}"
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
+# On the base branch itself, there's no separate branch to diff against - review
+# local commits not yet on origin instead (e.g. reviewing your own work on main
+# before pushing).
 if [ "$CURRENT_BRANCH" = "$BASE_BRANCH" ]; then
-    echo "Already on $BASE_BRANCH, nothing to review." >&2
-    exit 1
+    COMPARE_REF="origin/$BASE_BRANCH"
+else
+    COMPARE_REF="$BASE_BRANCH"
 fi
 
-if ! MERGE_BASE=$(git merge-base "$BASE_BRANCH" HEAD 2>/dev/null); then
-    echo "Could not find a merge base with '$BASE_BRANCH'." >&2
+if ! MERGE_BASE=$(git merge-base "$COMPARE_REF" HEAD 2>/dev/null); then
+    echo "Could not find a merge base with '$COMPARE_REF'." >&2
     exit 1
 fi
 
 DIFF=$(git diff "$MERGE_BASE"..HEAD)
 
 if [ -z "$DIFF" ]; then
-    echo "No changes between $BASE_BRANCH and $CURRENT_BRANCH." >&2
+    echo "No changes between $COMPARE_REF and $CURRENT_BRANCH." >&2
     exit 1
 fi
 
 COMMITS=$(git log --reverse --format='- %s%n%b' "$MERGE_BASE"..HEAD)
 FILES=$(git diff --name-only "$MERGE_BASE"..HEAD)
-RECENT_HISTORY=$(git log --oneline -30 "$BASE_BRANCH")
+RECENT_HISTORY=$(git log --oneline -30 "$COMPARE_REF")
 
 PROMPT=$(cat <<EOF
-Review this branch (${CURRENT_BRANCH}, vs ${BASE_BRANCH}) for real bugs and
+Review this branch (${CURRENT_BRANCH}, vs ${COMPARE_REF}) for real bugs and
 mistakes only - not style, not "this could be done differently" (everything
 can be done differently; that's not useful feedback here). Read beyond the
 diff hunks: open the affected files in full, and anything else in the repo
@@ -50,7 +56,7 @@ that helps you judge whether the change is actually correct (callers, similar
 existing code, config it depends on).
 
 Extra context, use it if it helps:
-- Recent history on ${BASE_BRANCH} below shows how this codebase is usually
+- Recent history on ${COMPARE_REF} below shows how this codebase is usually
   built - flag a deviation as a mistake only if it clearly breaks an
   established, load-bearing pattern (e.g. skips a step every similar
   DAG/function does), never just because it's "different."
@@ -85,7 +91,7 @@ ${COMMITS}
 Changed files:
 ${FILES}
 
-Recent history on ${BASE_BRANCH} for context on conventions:
+Recent history on ${COMPARE_REF} for context on conventions:
 ${RECENT_HISTORY}
 
 Diff:

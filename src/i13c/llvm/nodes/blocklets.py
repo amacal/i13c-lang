@@ -824,6 +824,9 @@ def emit_fnlets(
             # construct the blocklet block with the accumulated instructions
             blocks.append(BlockletBlock(instructions=instructions))
 
+            if after := shuffle.segments[idx]:
+                instructions.extend(after.after)
+
         blocklet = Blocklet(
             ref=fnlet.ref,
             target=fid,
