@@ -1,0 +1,33 @@
+#!/bin/bash
+# ai-help :: List available ai-* commands
+set -e
+
+cd "$(dirname "$0")"
+
+USAGES=()
+DESCS=()
+
+for f in ai-*; do
+    [ "$f" = "ai-help" ] && continue
+    LINE=$(sed -n '2p' "$f")
+    USAGES+=("${LINE#\# }")
+    USAGES[-1]="${USAGES[-1]%% :: *}"
+    DESCS+=("${LINE#*:: }")
+done
+
+WIDTH=0
+for u in "${USAGES[@]}"; do
+    [ "${#u}" -gt "$WIDTH" ] && WIDTH="${#u}"
+done
+
+PREFIX_LEN=$((2 + WIDTH + 3))
+DESC_WIDTH=$((80 - PREFIX_LEN))
+
+echo "Available commands:"
+for i in "${!USAGES[@]}"; do
+    DESC="${DESCS[$i]}"
+    if [ "${#DESC}" -gt "$DESC_WIDTH" ]; then
+        DESC="${DESC:0:$((DESC_WIDTH - 1))}…"
+    fi
+    printf "  %-${WIDTH}s   %s\n" "${USAGES[$i]}" "$DESC"
+done

@@ -1,0 +1,84 @@
+#!/bin/bash
+# ai-amend :: Amend the previous commit with a fresh message
+set -e
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: ai-amend"
+    echo ""
+    echo "Amends the previous commit (folding in anything currently staged),"
+    echo "regenerating its message from the resulting diff - read alongside"
+    echo "the surrounding code for context."
+    exit 0
+fi
+
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "Not a git repository." >&2
+    exit 1
+fi
+
+if ! git rev-parse --verify -q HEAD > /dev/null; then
+    echo "No commits yet, nothing to amend." >&2
+    exit 1
+fi
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git fetch origin "$CURRENT_BRANCH" -q 2>/dev/null || true
+
+if git rev-parse -q --verify "origin/$CURRENT_BRANCH" > /dev/null; then
+    if git merge-base --is-ancestor HEAD "origin/$CURRENT_BRANCH" 2>/dev/null; then
+        echo "Refusing to amend: HEAD is already pushed to origin/$CURRENT_BRANCH." >&2
+        exit 1
+    fi
+fi
+
+if ! PARENT=$(git rev-parse -q --verify HEAD^); then
+    PARENT=$(git hash-object -t tree /dev/null)
+fi
+
+PREVIOUS_MESSAGE=$(git log -1 --format='%B' HEAD)
+DIFF=$(git diff "$PARENT" --cached)
+
+if [ -z "$DIFF" ]; then
+    echo "Nothing to amend: previous commit and staged changes are both empty." >&2
+    exit 1
+fi
+
+FILES=$(git diff "$PARENT" --cached --name-only)
+
+PROMPT=$(cat <<EOF
+Write a git commit message for the amended commit below: the previous commit's
+changes plus anything newly staged on top of it.
+Before writing anything, read the surrounding code in the affected files (not
+just the diff hunks) so you understand the real intent - the diff alone is
+often misleading out of context.
+
+Be concise, not verbose: a short imperative subject line (<=72 chars), and
+only add a body (a couple of short bullet points) if the subject alone can't
+carry the "why". No preamble, no markdown code fences, no restating the diff
+line by line. Never mention "AI", "Claude", "LLM", "assistant", or any model/
+vendor name, even when the change itself touches code that calls one -
+describe what the code mechanically does instead (e.g. "generates X via a CLI
+call"). Output just the commit message text, ready to pass straight to
+'git commit -m'.
+
+Previous commit message (for continuity, may be superseded):
+${PREVIOUS_MESSAGE}
+
+Changed files:
+${FILES}
+
+Combined diff (previous commit + staged changes):
+${DIFF}
+EOF
+)
+
+SCHEMA='{"type":"object","properties":{"message":{"type":"string","description":"The git commit message text only - no preamble, no meta-commentary about the writing process."}},"required":["message"]}'
+
+MESSAGE=$(echo "$PROMPT" | claude -p --dangerously-skip-permissions --tools Read Grep Glob --permission-prompts none --no-session-persistence --output-format json --json-schema "$SCHEMA" | jq -r .structured_output.message)
+
+if [ -z "$MESSAGE" ]; then
+    echo "Failed to generate a commit message." >&2
+    exit 1
+fi
+
+git commit --amend -m "$MESSAGE"

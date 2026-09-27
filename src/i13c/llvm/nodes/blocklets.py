@@ -1015,7 +1015,7 @@ def rewrite_mov(
         if src.name not in palette:
             src, changed = None, True
 
-    # both operands must be resized
+    # both register and immediate operands must be resized
     if isinstance(src, Immediate) and dst is not None:
         if src.width() < 64:
             dst = dst.resize(32)
@@ -1047,13 +1047,29 @@ def rewrite_mov(
             ]
 
         # there is no imm64-to-mem move, use the scratch register to avoid it
-        elif dst_is_address:
+        elif isinstance(results[0].operands[0], Address):
             if isinstance(results[0].operands[1], Immediate):
                 if results[0].operands[1].width() == 64:
                     results = [
                         MOV(operands=(scratch, results[0].operands[1])),
                         MOV(operands=(results[0].operands[0], scratch)),
                     ]
+
+                elif results[0].operands[1].width() == 32:
+                    if results[0].operands[1].bit(31):
+                        results = [
+                            MOV(operands=(scratch.resize(32), results[0].operands[1])),
+                            MOV(operands=(results[0].operands[0].resize(64), scratch)),
+                        ]
+                    else:
+                        results = [
+                            MOV(
+                                operands=(
+                                    results[0].operands[0].resize(64),
+                                    results[0].operands[1],
+                                )
+                            ),
+                        ]
 
     return results
 
@@ -1244,7 +1260,7 @@ def can_rewrite_mov_pass_a_genuine_memory_to_memory_move_through_the_scratch_reg
     ]
 
 
-def can_rewrite_mov_resize_a_memory_destination_when_storing_a_narrow_immediate():
+def can_rewrite_mov_keep_a_memory_destination_full_width_when_storing_a_narrow_immediate():
     registers = [b"v0", b"v1"]
     palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
     scratch = Register(name=b"r11")
@@ -1254,7 +1270,7 @@ def can_rewrite_mov_resize_a_memory_destination_when_storing_a_narrow_immediate(
 
     result = rewrite_mov(instruction, scratch, registers, palette, segment)
 
-    assert [str(m) for m in result] == ["mov dword [rsp + 0x00], 0x00000001"]
+    assert [str(m) for m in result] == ["mov qword [rsp + 0x00], 0x00000001"]
 
 
 def can_rewrite_mov_store_an_immediate_into_a_spilled_destination():
@@ -1274,6 +1290,37 @@ def can_rewrite_mov_store_an_immediate_into_a_spilled_destination():
 
     assert [str(m) for m in result] == [
         "mov r11, 0x0123456789abcdef",
+        "mov qword [rsp + 0x00], r11",
+    ]
+
+
+def can_rewrite_mov_store_a_narrow_immediate_into_the_full_width_of_a_spilled_slot():
+    registers = [b"v0", b"v1"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+    segment = AllocationSegment(colors={}, spills={0: 0})
+    immediate = Immediate.derive(bytes([0x01]))
+    instruction = MOV(operands=(Register(name=b"v0"), immediate))
+
+    # the slot is always reloaded as a qword, so its upper half must be written
+    result = rewrite_mov(instruction, scratch, registers, palette, segment)
+
+    assert [str(m) for m in result] == ["mov qword [rsp + 0x00], 0x00000001"]
+
+
+def can_rewrite_mov_zero_extend_a_top_bit_immediate_into_a_spilled_slot():
+    registers = [b"v0", b"v1"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+    segment = AllocationSegment(colors={}, spills={0: 0})
+    immediate = Immediate.derive(bytes([0x80, 0x00, 0x00, 0x00]))
+    instruction = MOV(operands=(Register(name=b"v0"), immediate))
+
+    # a qword store would sign-extend imm32, a 32-bit register write zero-extends
+    result = rewrite_mov(instruction, scratch, registers, palette, segment)
+
+    assert [str(m) for m in result] == [
+        "mov r11d, 0x80000000",
         "mov qword [rsp + 0x00], r11",
     ]
 

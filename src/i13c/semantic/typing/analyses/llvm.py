@@ -20,6 +20,11 @@ class Immediate:
     def resize(self, width: Kind[8, 16, 32, 64]) -> Immediate:
         return Immediate(value=self.value.extend(width))
 
+    def bit(self, index: int) -> bool:
+        return (
+            (self.value.data[(self.value.width - index - 1) // 8] >> (index % 8)) & 1
+        ) == 1
+
     def __str__(self) -> str:
         return str(self.value)
 
@@ -370,6 +375,7 @@ class JMP:
 CallOperands = tuple[Register | Address | Relocation | AsmletId | FunctionId]
 CallArguments = dict[bytes, Register | Immediate]
 CallClobbers = list[bytes]
+
 
 @dataclass(kw_only=True, repr=False)
 class CALL:
