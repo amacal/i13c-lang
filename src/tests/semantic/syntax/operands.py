@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_a_register_operand() -> None:
+def can_visit_a_register_operand():
     visitor = parse_syntax_graph(
         """
             asm main() { call rax; }
@@ -11,7 +11,7 @@ def can_visit_a_register_operand() -> None:
     assert len(list(visitor.graph.snippet.operands.items())) == 1
 
 
-def can_visit_an_immediate_operand() -> None:
+def can_visit_an_immediate_operand():
     visitor = parse_syntax_graph(
         """
             asm main() { call 0x1234; }
@@ -21,7 +21,7 @@ def can_visit_an_immediate_operand() -> None:
     assert len(list(visitor.graph.snippet.operands.items())) == 1
 
 
-def can_visit_a_reference_operand() -> None:
+def can_visit_a_reference_operand():
     visitor = parse_syntax_graph(
         """
             asm main(x@rax: u16) { call @x; }
@@ -31,7 +31,7 @@ def can_visit_a_reference_operand() -> None:
     assert len(list(visitor.graph.snippet.operands.items())) == 1
 
 
-def can_visit_a_base_operand() -> None:
+def can_visit_a_base_operand():
     visitor = parse_syntax_graph(
         """
             asm main() { jmp [rax + 0x1234]; }
@@ -41,7 +41,7 @@ def can_visit_a_base_operand() -> None:
     assert len(list(visitor.graph.snippet.operands.items())) == 1
 
 
-def can_visit_a_rip_operand() -> None:
+def can_visit_a_rip_operand():
     visitor = parse_syntax_graph(
         """
             asm main() { jmp [rip + 0x1234]; }

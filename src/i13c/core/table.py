@@ -13,7 +13,7 @@ class Table:
             for line in self.entries
         ]
 
-    def equals(self, other: str) -> None:
+    def equals(self, other: str):
         assert "\n".join(self.reformat()) == "\n".join(
             line.strip() for line in other.strip().splitlines()
         )

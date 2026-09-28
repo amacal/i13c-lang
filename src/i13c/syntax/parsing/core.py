@@ -6,34 +6,34 @@ from i13c.syntax.source import SourceCode, Span
 
 
 class UnexpectedTokenCode(Exception):
-    def __init__(self, token: LexingToken, expected: list[int], found: int) -> None:
+    def __init__(self, token: LexingToken, expected: list[int], found: int):
         self.token = token
         self.expected = expected
         self.found = found
 
 
 class UnexpectedEndOfTokens(Exception):
-    def __init__(self, offset: int) -> None:
+    def __init__(self, offset: int):
         self.offset = offset
 
 
 class UnexpectedKeyword(Exception):
     def __init__(
         self, token: LexingToken, expected: list[bytes] | set[bytes], found: bytes
-    ) -> None:
+    ):
         self.token = token
         self.expected = expected
         self.found = found
 
 
 class FlagAlreadySpecified(Exception):
-    def __init__(self, token: LexingToken, flag: bytes) -> None:
+    def __init__(self, token: LexingToken, flag: bytes):
         self.token = token
         self.flag = flag
 
 
 class InvalidHexLiteral(Exception):
-    def __init__(self, token: LexingToken) -> None:
+    def __init__(self, token: LexingToken):
         self.token = token
 
 
@@ -87,7 +87,7 @@ class ParsingState:
         # return the consumed token
         return self.tokens[self.position - 1]
 
-    def advance(self) -> None:
+    def advance(self):
         self.position += 1
 
     def extract(self, token: LexingToken) -> bytes:

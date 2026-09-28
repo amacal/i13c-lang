@@ -1,21 +1,25 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_registers_in_an_operand() -> None:
-    visitor = parse_syntax_graph(
-        """
-            asm main() { mov rax, 0x1234; }
-        """
-    )
+def can_visit_registers_in_an_operand():
+    visitor = parse_syntax_graph("""
+        asm main() { mov rax, 0x1234; }
+    """)
 
     assert len(list(visitor.graph.snippet.registers.items())) == 1
 
 
-def can_visit_registers_in_an_base_of_an_address() -> None:
-    visitor = parse_syntax_graph(
-        """
-            asm main() { jmp [rbx + 0x1234]; }
-        """
-    )
+def can_visit_registers_in_an_base_of_an_address():
+    visitor = parse_syntax_graph("""
+        asm main() { jmp [rbx + 0x1234]; }
+    """)
 
     assert len(list(visitor.graph.snippet.registers.items())) == 1
+
+
+def can_visit_registers_in_an_index_of_an_address():
+    visitor = parse_syntax_graph("""
+        asm main() { jmp [rax + 2 * rbx]; }
+    """)
+
+    assert len(list(visitor.graph.snippet.registers.items())) == 2

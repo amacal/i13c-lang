@@ -5,6 +5,8 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.binds import Bind, BindId
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.results import ResultId
+from i13c.syntax import tree
 
 
 def configure_binds() -> GraphNode:
@@ -24,18 +26,26 @@ def build_binds(
 
     for nid, entry in graph.snippet.binds.items():
         # find the parent slot
-        slot = graph.snippet.binds.get_ctx(nid)
-        ctx = graph.snippet.slots.get_by_node(slot)
-        param_id = ParameterId(value=ctx.value)
+        node = graph.snippet.binds.get_ctx(nid)
+
+        if isinstance(node, tree.snippet.Slot):
+            id = graph.snippet.slots.get_by_node(node)
+            ctx = ParameterId(value=id.value)
+            src, dst = node.name, entry.name
+
+        else:
+            id = graph.snippet.results.get_by_node(node)
+            ctx = ResultId(value=id.value)
+            src, dst = b"_ret", entry.name
 
         # derive bind ID from globally unique node ID
         bind_id = BindId(value=nid.value)
 
         binds[bind_id] = Bind(
             ref=entry.ref,
-            ctx=param_id,
-            src=slot.name,
-            dst=entry.name,
+            ctx=ctx,
+            src=src,
+            dst=dst,
         )
 
     return OneToOne[BindId, Bind].instance(binds)

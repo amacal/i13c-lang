@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_assign_statement() -> None:
+def can_visit_assign_statement():
     visitor = parse_syntax_graph(
         """
             fn main() { val x: u8 = 0x12; }

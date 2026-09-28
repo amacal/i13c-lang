@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_a_base_address() -> None:
+def can_visit_a_base_address():
     visitor = parse_syntax_graph("""
             asm main() { jmp qword [rax + 0x1234]; }
         """)
@@ -9,7 +9,7 @@ def can_visit_a_base_address() -> None:
     assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
-def can_visit_an_indexed_address() -> None:
+def can_visit_an_indexed_address():
     visitor = parse_syntax_graph("""
             asm main() { jmp qword [rax + rbx + 0x1234]; }
         """)
@@ -17,7 +17,7 @@ def can_visit_an_indexed_address() -> None:
     assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
-def can_visit_a_rip_address() -> None:
+def can_visit_a_rip_address():
     visitor = parse_syntax_graph("""
             asm main() { jmp qword [rip + 0x1234]; }
         """)
@@ -25,7 +25,7 @@ def can_visit_a_rip_address() -> None:
     assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
-def can_visit_a_scaled_index_address() -> None:
+def can_visit_a_scaled_index_address():
     visitor = parse_syntax_graph("""
             asm main() { jmp qword [rax + 2 * rbx + 0x1234]; }
         """)
@@ -33,7 +33,7 @@ def can_visit_a_scaled_index_address() -> None:
     assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
-def can_visit_a_qword_address() -> None:
+def can_visit_a_qword_address():
     visitor = parse_syntax_graph("""
             asm main() { push qword [rax]; }
         """)
@@ -41,7 +41,7 @@ def can_visit_a_qword_address() -> None:
     assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
-def can_visit_a_dword_address() -> None:
+def can_visit_a_dword_address():
     visitor = parse_syntax_graph("""
             asm main() { push dword [rax]; }
         """)
@@ -49,7 +49,7 @@ def can_visit_a_dword_address() -> None:
     assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
-def can_visit_a_word_address() -> None:
+def can_visit_a_word_address():
     visitor = parse_syntax_graph("""
             asm main() { push word [rax]; }
         """)
@@ -57,7 +57,7 @@ def can_visit_a_word_address() -> None:
     assert len(list(visitor.graph.snippet.addresses.items())) == 1
 
 
-def can_visit_a_byte_address() -> None:
+def can_visit_a_byte_address():
     visitor = parse_syntax_graph("""
             asm main() { push byte [rax]; }
         """)

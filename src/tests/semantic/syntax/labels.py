@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_a_label() -> None:
+def can_visit_a_label():
     visitor = parse_syntax_graph(
         """
             asm main() { mov rax, @x; .label: nop; }

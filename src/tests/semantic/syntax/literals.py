@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_a_literal() -> None:
+def can_visit_a_literal():
     visitor = parse_syntax_graph(
         """
             fn main() { val x: u16 = 0x1234; }

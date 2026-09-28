@@ -30,6 +30,7 @@ CLASS_CURLY_OPEN = b"{"
 CLASS_CURLY_CLOSE = b"}"
 CLASS_SQUARE_OPEN = b"["
 CLASS_SQUARE_CLOSE = b"]"
+CLASS_GREATER = b">"
 CLASS_LETTER = b"abcdefghijklmnopqrstuvwxyz"
 CLASS_ALPHANUM = b"abcdefghijklmnopqrstuvwxyz0123456789"
 CLASS_HEX = b"0123456789abcdef"
@@ -56,6 +57,7 @@ class Tokens:
     MINUS = 19
     DOT = 20
     STAR = 21
+    RIGHT_ARROW = 22
     EOF = 255
 
 
@@ -66,7 +68,7 @@ SEPARATORS = (
     CLASS_CURLY_OPEN + CLASS_CURLY_CLOSE +
     CLASS_SQUARE_OPEN + CLASS_SQUARE_CLOSE +
     CLASS_AT + CLASS_COLON + CLASS_DOT + CLASS_EQUALS +
-    CLASS_PLUS + CLASS_MINUS + CLASS_STAR
+    CLASS_PLUS + CLASS_MINUS + CLASS_STAR + CLASS_GREATER
 )
 
 SET_KEYWORDS = {
@@ -95,25 +97,26 @@ TOKEN_NAMES: dict[int, str] = {
     Tokens.MINUS: "minus",
     Tokens.SQUARE_OPEN: "square-open",
     Tokens.SQUARE_CLOSE: "square-close",
+    Tokens.RIGHT_ARROW: "right-arrow",
     Tokens.EOF: "end-of-file",
 }
 # fmt: on
 
 
 class TooLargeHex(Exception):
-    def __init__(self, offset: int, length: int) -> None:
+    def __init__(self, offset: int, length: int):
         self.offset = offset
         self.length = length
 
 
 class UnexpectedValue(Exception):
-    def __init__(self, offset: int, expected: bytes) -> None:
+    def __init__(self, offset: int, expected: bytes):
         self.offset = offset
         self.expected = expected
 
 
 class UnexpectedEndOfFile(Exception):
-    def __init__(self, offset: int) -> None:
+    def __init__(self, offset: int):
         self.offset = offset
 
 
@@ -134,10 +137,10 @@ class Lexer:
     def extract(self, token: Token) -> bytes:
         return self.code.extract(token)
 
-    def advance(self, n: int) -> None:
+    def advance(self, n: int):
         self.offset += n
 
-    def expect(self, n: bytes) -> None:
+    def expect(self, n: bytes):
         if self.is_eof():
             raise UnexpectedEndOfFile(self.offset)
 
@@ -226,12 +229,20 @@ class Token:
         return Token(code=Tokens.AT, offset=offset, length=1)
 
     @staticmethod
+    def minus_token(offset: int) -> Token:
+        return Token(code=Tokens.MINUS, offset=offset, length=1)
+
+    @staticmethod
     def colon_token(offset: int) -> Token:
         return Token(code=Tokens.COLON, offset=offset, length=1)
 
     @staticmethod
     def equals_token(offset: int) -> Token:
         return Token(code=Tokens.EQUALS, offset=offset, length=1)
+
+    @staticmethod
+    def right_arrow_token(offset: int) -> Token:
+        return Token(code=Tokens.RIGHT_ARROW, offset=offset, length=2)
 
 
 def tokenize(code: SourceCode) -> result.Result[list[Token], list[Diagnostic]]:
@@ -279,14 +290,14 @@ def tokenize(code: SourceCode) -> result.Result[list[Token], list[Diagnostic]]:
             elif lexer.is_in(CLASS_PLUS):
                 emit_plus(lexer, tokens)
 
-            elif lexer.is_in(CLASS_MINUS):
-                emit_minus(lexer, tokens)
-
             elif lexer.is_in(CLASS_DIGIT):
                 emit_digit(lexer, tokens)
 
             elif lexer.is_in(CLASS_STAR):
                 emit_star(lexer, tokens)
+
+            elif lexer.is_in(CLASS_MINUS):
+                read_minus(lexer, tokens)
 
             elif lexer.is_in(CLASS_DOT):
                 read_dot(lexer, tokens)
@@ -321,12 +332,29 @@ def tokenize(code: SourceCode) -> result.Result[list[Token], list[Diagnostic]]:
     return result.Ok(tokens)
 
 
-def skip_whitespace(lexer: Lexer) -> None:
+def skip_whitespace(lexer: Lexer):
     while not lexer.is_eof() and lexer.is_in(CLASS_WHITESPACE):
         lexer.advance(1)
 
 
-def read_dot(lexer: Lexer, tokens: list[Token]) -> None:
+def read_minus(lexer: Lexer, tokens: list[Token]):
+    start_offset = lexer.offset
+    lexer.advance(1)  # consume the '-'
+
+    # perhaps it's a single minus token
+    if not lexer.is_in(CLASS_GREATER):
+        token = Token.minus_token(offset=start_offset)
+
+    # handle arrow token with '->'
+    else:
+        lexer.advance(1)  # consume the second '>'
+        token = Token.right_arrow_token(offset=start_offset)
+
+    # success
+    tokens.append(token)
+
+
+def read_dot(lexer: Lexer, tokens: list[Token]):
     start_offset = lexer.offset
     lexer.advance(1)  # consume the '.'
 
@@ -343,7 +371,7 @@ def read_dot(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(token)
 
 
-def read_hex(lexer: Lexer, tokens: list[Token]) -> None:
+def read_hex(lexer: Lexer, tokens: list[Token]):
     start_offset = lexer.offset
     lexer.advance(1)  # consume the '0'
 
@@ -375,7 +403,7 @@ def read_hex(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(Token.hex_token(offset=start_offset, length=length))
 
 
-def read_ident(lexer: Lexer, tokens: list[Token]) -> None:
+def read_ident(lexer: Lexer, tokens: list[Token]):
     start_offset = lexer.offset
     lexer.advance(1)  # consume first letter
 
@@ -397,77 +425,72 @@ def read_ident(lexer: Lexer, tokens: list[Token]) -> None:
     tokens.append(token)
 
 
-def emit_semicolon(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_semicolon(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.semicolon_token(offset=lexer.offset))
     lexer.advance(1)  # consume semicolon
 
 
-def emit_comma(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_comma(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.comma_token(offset=lexer.offset))
     lexer.advance(1)  # consume comma
 
 
-def emit_round_open(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_round_open(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.round_open_token(offset=lexer.offset))
     lexer.advance(1)  # consume '('
 
 
-def emit_round_close(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_round_close(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.round_close_token(offset=lexer.offset))
     lexer.advance(1)  # consume ')'
 
 
-def emit_curly_open(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_curly_open(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.curly_open_token(offset=lexer.offset))
     lexer.advance(1)  # consume '{'
 
 
-def emit_curly_close(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_curly_close(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.curly_close_token(offset=lexer.offset))
     lexer.advance(1)  # consume '}'
 
 
-def emit_square_open(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_square_open(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.square_open_token(offset=lexer.offset))
     lexer.advance(1)  # consume '['
 
 
-def emit_square_close(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_square_close(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.square_close_token(offset=lexer.offset))
     lexer.advance(1)  # consume ']'
 
 
-def emit_colon(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_colon(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.colon_token(offset=lexer.offset))
     lexer.advance(1)  # consume ':'
 
 
-def emit_at(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_at(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.at_token(offset=lexer.offset))
     lexer.advance(1)  # consume '@'
 
 
-def emit_equals(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_equals(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.equals_token(offset=lexer.offset))
     lexer.advance(1)  # consume '='
 
 
-def emit_plus(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_plus(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token(code=Tokens.PLUS, offset=lexer.offset, length=1))
     lexer.advance(1)  # consume '+'
 
 
-def emit_minus(lexer: Lexer, tokens: list[Token]) -> None:
-    tokens.append(Token(code=Tokens.MINUS, offset=lexer.offset, length=1))
-    lexer.advance(1)  # consume '-'
-
-
-def emit_digit(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_digit(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.digit_token(offset=lexer.offset))
     lexer.advance(1)  # consume digit
 
 
-def emit_star(lexer: Lexer, tokens: list[Token]) -> None:
+def emit_star(lexer: Lexer, tokens: list[Token]):
     tokens.append(Token.star_token(offset=lexer.offset))
     lexer.advance(1)  # consume '*'
 

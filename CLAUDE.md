@@ -203,7 +203,8 @@ recorded as a `related_to` link between them in `.index/`, not lost inside one t
   commit message or a code comment at the point the WHY is non-obvious — never into
   `.history/`/`.index/`, which stay structural and factual only.
 - Claude never edits or writes any file inside `src/`, `scripts/`, or `data/` — see
-  "What Claude must never do." You name and organize your own files.
+  "What Claude must never do" (and its one narrow failing-test exception). You name and
+  organize your own files.
 
 ## Session selection
 
@@ -550,6 +551,10 @@ not session-scoped, so nothing there gets cleaned up as part of closing.
   - Exception: `.tmp/{page}.png` spec-page images (see "Spec study sessions"), written
     via Bash (`pdftoppm`/`pdftocairo`), never via Edit/Write. Gitignored, deleted only at
     the Session closing ritual.
+  - Exception: on your explicit request, one new failing `can_*` test that exposes an
+    already-observed defect or missing behaviour, added to the existing module under
+    test in that module's style. Never production code, never an edit to an existing
+    test, never the change that makes it pass — turning it green stays yours.
 
 ## Enforcement role
 

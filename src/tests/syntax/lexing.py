@@ -272,6 +272,27 @@ def can_tokenize_keywords():
     assert code.extract(tokens.value[6]) == b""
 
 
+def can_tokenizer_right_arrow():
+    text = "abc->cde"
+    code = open_text(text)
+
+    tokens = tokenize(code)
+    assert tokens is not None
+
+    assert isinstance(tokens, result.Ok)
+    assert len(tokens.value) == 4
+
+    assert tokens.value[0] == Token(code=Tokens.IDENT, offset=0, length=3)
+    assert tokens.value[1] == Token(code=Tokens.RIGHT_ARROW, offset=3, length=2)
+    assert tokens.value[2] == Token(code=Tokens.IDENT, offset=5, length=3)
+    assert tokens.value[3] == Token(code=Tokens.EOF, offset=8, length=0)
+
+    assert code.extract(tokens.value[0]) == b"abc"
+    assert code.extract(tokens.value[1]) == b"->"
+    assert code.extract(tokens.value[2]) == b"cde"
+    assert code.extract(tokens.value[3]) == b""
+
+
 def can_omit_whitespaces():
     text = "  0xff  test  "
     code = open_text(text)

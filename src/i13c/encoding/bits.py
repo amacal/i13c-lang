@@ -2,7 +2,7 @@ from i13c.encoding import kind
 from i13c.semantic.typing.analyses.llvm import BSWAP
 
 
-def encode_bswap(instruction: BSWAP, bytecode: bytearray) -> None:
+def encode_bswap(instruction: BSWAP, bytecode: bytearray):
     # sanity check
     assert len(instruction.operands) == 1
 

@@ -71,7 +71,7 @@ def build_liveness(
 
 
 class ListExtractor:
-    def __init__(self, data: OneToOne[FunctionId, Liveness]) -> None:
+    def __init__(self, data: OneToOne[FunctionId, Liveness]):
         self.data = data
 
     def extract(self) -> Iterable[tuple[FunctionId, Liveness]]:

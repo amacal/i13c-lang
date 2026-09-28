@@ -48,7 +48,7 @@ def build_shuffles(
 
 
 class ListExtractor:
-    def __init__(self, data: OneToOne[FunctionId, Shuffle]) -> None:
+    def __init__(self, data: OneToOne[FunctionId, Shuffle]):
         self.data = data
 
     def extract(

@@ -178,7 +178,7 @@ def build_allocations(
 
 
 class ListExtractor:
-    def __init__(self, data: OneToOne[FunctionId, Allocation]) -> None:
+    def __init__(self, data: OneToOne[FunctionId, Allocation]):
         self.data = data
 
     def extract(self) -> Iterable[tuple[FunctionId, Allocation]]:

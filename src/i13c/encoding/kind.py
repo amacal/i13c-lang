@@ -486,12 +486,12 @@ def encode_modrm_rm(rm: RegisterOrAddress) -> ModRMEncoding:
     return encoding
 
 
-def write_prefixes(bytecode: bytearray, prefixes: PrefixEncoding) -> None:
+def write_prefixes(bytecode: bytearray, prefixes: PrefixEncoding):
     if prefixes.operand_override:
         bytecode.append(prefixes.operand_override)
 
 
-def write_rex(bytecode: bytearray, rex: RexEncoding) -> None:
+def write_rex(bytecode: bytearray, rex: RexEncoding):
     if rex.is_required():
         bytecode.append(rex.get_bits())
 
@@ -500,7 +500,7 @@ def write_modrm(
     bytecode: bytearray,
     modrm_reg: ModRegEncoding,
     modrm_rm: ModRMEncoding,
-) -> None:
+):
 
     # ModRM is always required
     bytecode.append(
@@ -524,7 +524,7 @@ def write_opcode(
     opcode_value: int,
     /,
     opcode_reg: OpCodeEncoding | None = None,
-) -> None:
+):
 
     # append opcode register bits to opcode value if present
     if opcode_reg is not None:
@@ -539,6 +539,6 @@ def write_immediate(
     imm: llvm.Immediate | None,
     /,
     condition: bool = True,
-) -> None:
+):
     if condition and imm is not None:
         bytecode.extend(reversed(imm.value.data))

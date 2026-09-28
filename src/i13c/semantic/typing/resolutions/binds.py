@@ -3,6 +3,7 @@ from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.results import ResultId
 from i13c.syntax.source import Span
 
 BindRejectionReason = Kind[
@@ -23,7 +24,7 @@ class BindRejection:
 class BindAcceptance:
     ref: Span
     id: BindId
-    ctx: ParameterId
+    ctx: ParameterId | ResultId
 
     src: bytes
     dst: bytes

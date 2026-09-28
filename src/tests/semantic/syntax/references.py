@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_references_in_operand() -> None:
+def can_visit_references_in_operand():
     visitor = parse_syntax_graph("""
         asm main() { jmp @start; }
     """)
@@ -9,7 +9,7 @@ def can_visit_references_in_operand() -> None:
     assert len(list(visitor.graph.snippet.references.items())) == 1
 
 
-def can_visit_reference_in_relocated_address() -> None:
+def can_visit_reference_in_relocated_address():
     visitor = parse_syntax_graph("""
         asm main() { jmp [rel @start]; }
     """)

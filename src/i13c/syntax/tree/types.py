@@ -7,8 +7,8 @@ from i13c.syntax.tree.literals import Hex
 
 
 class Visitor(Protocol):
-    def on_type(self, type: Type, path: Path) -> None: ...
-    def on_range(self, range: Range, path: Path) -> None: ...
+    def on_type(self, type: Type, path: Path): ...
+    def on_range(self, range: Range, path: Path): ...
 
 
 @dataclass(kw_only=True, eq=False)
@@ -17,7 +17,7 @@ class Type:
     name: bytes
     range: Range | None
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_type(self, path)
 
         with path.push(self) as node:
@@ -31,5 +31,5 @@ class Range:
     lower: Hex
     upper: Hex
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_range(self, path)

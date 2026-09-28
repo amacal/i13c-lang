@@ -1,8 +1,15 @@
-asm foo(x@rsi: u8, y@rdi: u8) clobbers rsi {
-    and rsi, rdi;
+asm exit(code@imm: u32[0x00000000..0x000000ff]) noreturn clobbers rdi, rcx, r11, rax {
+    mov edi, @code;
+    mov eax, 0x0000003c;
+    syscall;
+}
+
+asm use(value@rax: u64) clobbers rax {
     ret;
 }
 
-fn main(abc: u8, cde: u8) {
-    foo(abc, cde);
+fn main(a: u64) noreturn {
+  val b: u64 = a;
+  use(b);
+  exit(0x00000000);
 }

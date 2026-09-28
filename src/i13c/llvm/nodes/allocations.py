@@ -50,7 +50,7 @@ def build_allocations(
 
 
 class ListExtractor:
-    def __init__(self, data: OneToOne[FunctionId, Allocation]) -> None:
+    def __init__(self, data: OneToOne[FunctionId, Allocation]):
         self.data = data
 
     def extract(
@@ -197,19 +197,21 @@ def into_graph(
         live_in = segment.live_in[iid]
         live_out = segment.live_out[iid]
 
-        vals1 = clobbers.union(live_out)
-        vals2 = live_out.union(live_in)
+        vals1 = clobbers.union(live_out.intersection(live_in))
+        vals2 = live_out
+        vals3 = live_in
 
         pairs1 = {(a, b) for a in vals1 for b in vals1 if a < b}
         pairs2 = {(a, b) for a in vals2 for b in vals2 if a < b}
+        pairs3 = {(a, b) for a in vals3 for b in vals3 if a < b}
 
-        for idx in sorted(vals1.union(vals2)):
+        for idx in sorted(vals1.union(vals2).union(vals3)):
             graph.add(mapping[idx])
 
         # seeding initial registers maybe added
         # but we skip adding them to the edges
         for reg, color in seeds.colors:
-            if reg in vals1 or reg in vals2:
+            if reg in vals1 or reg in vals2 or reg in vals3:
                 reg = graph.map(mapping[reg])
                 colors[reg] = color
 
@@ -219,6 +221,10 @@ def into_graph(
 
         # regular interference
         for left, right in pairs2:
+            graph.insert((mapping[left], mapping[right]))
+
+        # regular interference
+        for left, right in pairs3:
             graph.insert((mapping[left], mapping[right]))
 
     # remap spills according to the graph
@@ -368,7 +374,7 @@ def solve(
 
 
 class InterferenceGraph:
-    def __init__(self) -> None:
+    def __init__(self):
         self._nodes: set[int] = set()
         self._edges: dict[int, set[int]] = {}
         self._mapping: list[InterferenceNode] = []
@@ -2104,6 +2110,54 @@ def can_handle_graphs_from_fnlet_when_a_survivor_outlives_a_full_register_clobbe
 
     assert allocation.segments[3].colors == {}
     assert allocation.segments[3].spills == {}
+
+
+def can_handle_graphs_from_fnlet_when_a_moved_vreg_reuses_its_dying_source():
+    entry = FnletBlockMock(
+        instructions=[
+            llvm.PROLOG(
+                operands=(),
+                binds={b"v0": llvm.Register(name=b"rdi")},
+                preserves=[],
+            ),
+        ]
+    )
+
+    # v0 dies at the move, v1 goes back into rsi
+    body = FnletBlockMock(
+        instructions=[
+            llvm.MOV(operands=(llvm.Register(name=b"v1"), llvm.Register(name=b"v0"))),
+            llvm.CALL(
+                operands=(FunctionId(value=11),),
+                clobbers=[],
+                args={b"rdi": llvm.Register(name=b"v1")},
+            ),
+        ]
+    )
+
+    exit = FnletBlockMock(
+        instructions=[
+            llvm.EPILOG(operands=(), preserves=[]),
+        ]
+    )
+
+    # prepare fnlet and liveness
+    fnlet = FnletMock(blocks=[entry, body, exit])
+    liveness = prepare_liveness(fnlet)
+    palette = create_systemv_palette()
+
+    assert liveness.registers == [b"rdi", b"v0", b"v1"]
+    assert liveness.seeds == [(0, 1)]
+
+    # allocate registers
+    allocation = allocate(liveness, palette)
+    assert len(allocation.segments) == 3
+
+    # v1 takes the lowest free color: rdi, same as v0
+    assert allocation.segments[1].colors == {
+        1: palette.find_by_name(b"rdi"),
+        2: palette.find_by_name(b"rdi"),
+    }
 
 
 def can_allocate_collect_no_clobbers_when_no_call_exists():

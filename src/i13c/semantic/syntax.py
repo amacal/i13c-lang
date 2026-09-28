@@ -26,7 +26,7 @@ class Bidirectional[AstNode, AstCtx]:
     def empty() -> Bidirectional[AstNode, AstCtx]:
         return Bidirectional(node_to_id={}, id_to_node={}, id_to_ctx={})
 
-    def append(self, id: NodeId, node: AstNode, /, ctx: AstCtx | None = None) -> None:
+    def append(self, id: NodeId, node: AstNode, /, ctx: AstCtx | None = None):
         self.node_to_id[node] = id
         self.id_to_node[id] = node
 
@@ -47,20 +47,20 @@ class Bidirectional[AstNode, AstCtx]:
 
 
 class NodesVisitor:
-    def __init__(self, generator: Generator) -> None:
+    def __init__(self, generator: Generator):
         self.generator = generator
         self.graph = SyntaxGraph.empty()
 
     def next(self) -> NodeId:
         return NodeId(value=self.generator.next())
 
-    def on_program(self, program: tree.Program, path: Path) -> None:
+    def on_program(self, program: tree.Program, path: Path):
         pass
 
-    def on_snippet(self, snippet: tree.snippet.Snippet, path: Path) -> None:
+    def on_snippet(self, snippet: tree.snippet.Snippet, path: Path):
         self.graph.snippet.snippets.append(self.next(), snippet)
 
-    def on_flags(self, flags: tree.Flags, path: Path) -> None:
+    def on_flags(self, flags: tree.Flags, path: Path):
         if isinstance(flags, tree.snippet.Flags):
             self.graph.snippet.flags.append(
                 self.next(),
@@ -74,7 +74,7 @@ class NodesVisitor:
                 ctx=path.find(tree.function.Function),
             )
 
-    def on_signature(self, signature: tree.Signature, path: Path) -> None:
+    def on_signature(self, signature: tree.Signature, path: Path):
         if isinstance(signature, tree.snippet.Signature):
             self.graph.snippet.signatures.append(
                 self.next(),
@@ -88,53 +88,60 @@ class NodesVisitor:
                 ctx=path.find(tree.function.Function),
             )
 
-    def on_slot(self, slot: tree.snippet.Slot, path: Path) -> None:
+    def on_slot(self, slot: tree.snippet.Slot, path: Path):
         self.graph.snippet.slots.append(self.next(), slot)
 
-    def on_bind(self, bind: tree.snippet.Bind, path: Path) -> None:
+    def on_bind(self, bind: tree.snippet.Bind, path: Path):
         self.graph.snippet.binds.append(
             self.next(),
             bind,
-            ctx=path.find(tree.snippet.Slot),
+            ctx=path.find2(tree.snippet.Slot, tree.snippet.Result),
         )
 
-    def on_label(self, label: tree.snippet.Label, path: Path) -> None:
+    def on_result(self, result: tree.snippet.Result, path: Path):
+        self.graph.snippet.results.append(
+            self.next(),
+            result,
+            ctx=path.find(tree.snippet.Snippet),
+        )
+
+    def on_label(self, label: tree.snippet.Label, path: Path):
         self.graph.snippet.labels.append(
             self.next(),
             label,
             ctx=path.find(tree.snippet.Snippet),
         )
 
-    def on_instruction(self, instruction: tree.snippet.Instruction, path: Path) -> None:
+    def on_instruction(self, instruction: tree.snippet.Instruction, path: Path):
         self.graph.snippet.instructions.append(
             self.next(),
             instruction,
             ctx=path.find(tree.snippet.Snippet),
         )
 
-    def on_mnemonic(self, mnemonic: tree.snippet.Mnemonic, path: Path) -> None:
+    def on_mnemonic(self, mnemonic: tree.snippet.Mnemonic, path: Path):
         self.graph.snippet.mnemonics.append(self.next(), mnemonic)
 
-    def on_operand(self, operand: tree.snippet.Operand, path: Path) -> None:
+    def on_operand(self, operand: tree.snippet.Operand, path: Path):
         self.graph.snippet.operands.append(self.next(), operand)
 
-    def on_immediate(self, immediate: tree.snippet.Immediate, path: Path) -> None:
+    def on_immediate(self, immediate: tree.snippet.Immediate, path: Path):
         self.graph.snippet.immediates.append(self.next(), immediate)
 
-    def on_register(self, register: tree.snippet.Register, path: Path) -> None:
+    def on_register(self, register: tree.snippet.Register, path: Path):
         self.graph.snippet.registers.append(self.next(), register)
 
-    def on_reference(self, reference: tree.snippet.Reference, path: Path) -> None:
+    def on_reference(self, reference: tree.snippet.Reference, path: Path):
         self.graph.snippet.references.append(
             self.next(),
             reference,
             ctx=path.find(tree.snippet.Snippet),
         )
 
-    def on_address(self, address: tree.snippet.Address, path: Path) -> None:
+    def on_address(self, address: tree.snippet.Address, path: Path):
         self.graph.snippet.addresses.append(self.next(), address)
 
-    def on_index(self, index: tree.snippet.Index, path: Path) -> None:
+    def on_index(self, index: tree.snippet.Index, path: Path):
         self.graph.snippet.indices.append(
             self.next(),
             index,
@@ -143,68 +150,68 @@ class NodesVisitor:
 
     def on_displacement(
         self, displacement: tree.snippet.Displacement, path: Path
-    ) -> None:
+    ):
         self.graph.snippet.displacements.append(
             self.next(),
             displacement,
             ctx=path.find(tree.snippet.Address),
         )
 
-    def on_function(self, function: tree.function.Function, path: Path) -> None:
+    def on_function(self, function: tree.function.Function, path: Path):
         self.graph.function.functions.append(self.next(), function)
 
-    def on_parameter(self, parameter: tree.function.Parameter, path: Path) -> None:
+    def on_parameter(self, parameter: tree.function.Parameter, path: Path):
         self.graph.function.parameters.append(self.next(), parameter)
 
-    def on_statement(self, statement: tree.function.Statement, path: Path) -> None:
+    def on_statement(self, statement: tree.function.Statement, path: Path):
         self.graph.function.statements.append(
             self.next(),
             statement,
             ctx=path.find(tree.function.Function),
         )
 
-    def on_call(self, call: tree.function.CallStatement, path: Path) -> None:
+    def on_call(self, call: tree.function.CallStatement, path: Path):
         self.graph.function.calls.append(
             self.next(),
             call,
             ctx=path.find(tree.function.Statement),
         )
 
-    def on_callsite(self, callsite: tree.function.CallSite, path: Path) -> None:
+    def on_callsite(self, callsite: tree.function.CallSite, path: Path):
         self.graph.function.callsites.append(
             self.next(),
             callsite,
             ctx=path.find(tree.function.Statement),
         )
 
-    def on_assign(self, assign: tree.function.AssignStatement, path: Path) -> None:
+    def on_assign(self, assign: tree.function.AssignStatement, path: Path):
         self.graph.function.assigns.append(
             self.next(),
             assign,
             ctx=path.find(tree.function.Statement),
         )
 
-    def on_value(self, value: tree.function.Value, path: Path) -> None:
+    def on_value(self, value: tree.function.Value, path: Path):
         self.graph.function.values.append(
             self.next(),
             value,
             ctx=path.find(tree.function.Statement),
         )
 
-    def on_literal(self, literal: tree.function.Literal, path: Path) -> None:
+    def on_literal(self, literal: tree.function.Literal, path: Path):
         self.graph.function.literals.append(self.next(), literal)
 
-    def on_expression(self, expression: tree.function.Expression, path: Path) -> None:
+    def on_expression(self, expression: tree.function.Expression, path: Path):
         self.graph.function.expressions.append(
             self.next(),
             expression,
             ctx=path.find(tree.function.Statement),
         )
 
-    def on_type(self, type: tree.types.Type, path: Path) -> None:
+    def on_type(self, type: tree.types.Type, path: Path):
         self.graph.types.append(self.next(), type)
 
-    def on_range(self, range: tree.types.Range, path: Path) -> None:
+    def on_range(self, range: tree.types.Range, path: Path):
         self.graph.ranges.append(self.next(), range)
 
 
@@ -214,7 +221,8 @@ class Snippet:
     flags: Bidirectional[tree.snippet.Flags, tree.snippet.Snippet]
     signatures: Bidirectional[tree.snippet.Signature, tree.snippet.Snippet]
     slots: Bidirectional[tree.snippet.Slot, None]
-    binds: Bidirectional[tree.snippet.Bind, tree.snippet.Slot]
+    binds: Bidirectional[tree.snippet.Bind, tree.snippet.Slot | tree.snippet.Result]
+    results: Bidirectional[tree.snippet.Result, tree.snippet.Snippet]
     labels: Bidirectional[tree.snippet.Label, tree.snippet.Snippet]
     instructions: Bidirectional[tree.snippet.Instruction, tree.snippet.Snippet]
     mnemonics: Bidirectional[tree.snippet.Mnemonic, None]
@@ -260,7 +268,10 @@ class SyntaxGraph:
                     tree.snippet.Signature, tree.snippet.Snippet
                 ].empty(),
                 slots=Bidirectional[tree.snippet.Slot, None].empty(),
-                binds=Bidirectional[tree.snippet.Bind, tree.snippet.Slot].empty(),
+                binds=Bidirectional[tree.snippet.Bind, tree.snippet.Slot | tree.snippet.Result].empty(),
+                results=Bidirectional[
+                    tree.snippet.Result, tree.snippet.Snippet
+                ].empty(),
                 labels=Bidirectional[tree.snippet.Label, tree.snippet.Snippet].empty(),
                 instructions=Bidirectional[
                     tree.snippet.Instruction, tree.snippet.Snippet

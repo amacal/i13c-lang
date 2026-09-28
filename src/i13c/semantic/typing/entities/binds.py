@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.results import ResultId
 from i13c.syntax.source import Span
 
 
@@ -15,7 +16,7 @@ class BindId:
 @dataclass(kw_only=True)
 class Bind:
     ref: Span
-    ctx: ParameterId
+    ctx: ParameterId | ResultId
 
     src: bytes
     dst: bytes

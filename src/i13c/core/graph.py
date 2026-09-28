@@ -8,25 +8,25 @@ from i13c.core.extractors import AbstractListExtractor
 
 
 class CyclicDependencyError(Exception):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__("graph contains cyclic dependencies")
 
 
 class MissingPrefixProducerError(Exception):
-    def __init__(self, prefix: Prefix) -> None:
+    def __init__(self, prefix: Prefix):
         self.prefix = prefix
         super().__init__(f"no producer found for prefix {prefix.value}")
 
 
 class MissingArtifactProducerError(Exception):
-    def __init__(self, node: GraphNode, artifact: str) -> None:
+    def __init__(self, node: GraphNode, artifact: str):
         self.node = node
         self.artifact = artifact
         super().__init__(f"no producer found for artifact {artifact}")
 
 
 class DuplicateArtifactError(Exception):
-    def __init__(self, artifact: str, producers: list[GraphNode]) -> None:
+    def __init__(self, artifact: str, producers: list[GraphNode]):
         self.artifact = artifact
         self.producers = producers
 
@@ -36,7 +36,7 @@ class DuplicateArtifactError(Exception):
 
 
 class InvalidDatasetArityError(Exception):
-    def __init__(self, node: GraphNode, expected: int, actual: int) -> None:
+    def __init__(self, node: GraphNode, expected: int, actual: int):
         self.node = node
         self.expected = expected
         self.actual = actual

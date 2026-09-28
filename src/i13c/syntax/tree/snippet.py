@@ -8,25 +8,26 @@ from i13c.syntax.tree.core import Path
 
 
 class Visitor(Protocol):
-    def on_snippet(self, snippet: Snippet, path: Path) -> None: ...
-    def on_flags(self, flags: Flags, path: Path) -> None: ...
-    def on_signature(self, signature: Signature, path: Path) -> None: ...
-    def on_slot(self, slot: Slot, path: Path) -> None: ...
-    def on_bind(self, bind: Bind, path: Path) -> None: ...
-    def on_label(self, label: Label, path: Path) -> None: ...
-    def on_instruction(self, instruction: Instruction, path: Path) -> None: ...
-    def on_mnemonic(self, mnemonic: Mnemonic, path: Path) -> None: ...
-    def on_operand(self, operand: Operand, path: Path) -> None: ...
-    def on_immediate(self, immediate: Immediate, path: Path) -> None: ...
-    def on_register(self, register: Register, path: Path) -> None: ...
-    def on_reference(self, reference: Reference, path: Path) -> None: ...
-    def on_address(self, address: Address, path: Path) -> None: ...
-    def on_index(self, index: Index, path: Path) -> None: ...
-    def on_displacement(self, displacement: Displacement, path: Path) -> None: ...
+    def on_snippet(self, snippet: Snippet, path: Path): ...
+    def on_flags(self, flags: Flags, path: Path): ...
+    def on_signature(self, signature: Signature, path: Path): ...
+    def on_slot(self, slot: Slot, path: Path): ...
+    def on_bind(self, bind: Bind, path: Path): ...
+    def on_result(self, result: Result, path: Path): ...
+    def on_label(self, label: Label, path: Path): ...
+    def on_instruction(self, instruction: Instruction, path: Path): ...
+    def on_mnemonic(self, mnemonic: Mnemonic, path: Path): ...
+    def on_operand(self, operand: Operand, path: Path): ...
+    def on_immediate(self, immediate: Immediate, path: Path): ...
+    def on_register(self, register: Register, path: Path): ...
+    def on_reference(self, reference: Reference, path: Path): ...
+    def on_address(self, address: Address, path: Path): ...
+    def on_index(self, index: Index, path: Path): ...
+    def on_displacement(self, displacement: Displacement, path: Path): ...
 
     # types related
-    def on_type(self, type: types.Type, path: Path) -> None: ...
-    def on_range(self, range: types.Range, path: Path) -> None: ...
+    def on_type(self, type: types.Type, path: Path): ...
+    def on_range(self, range: types.Range, path: Path): ...
 
 
 @dataclass(kw_only=True, eq=False)
@@ -34,7 +35,7 @@ class Register:
     ref: Span
     name: bytes
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_register(self, path)
 
 
@@ -43,7 +44,7 @@ class Immediate:
     ref: Span
     data: literals.Hex
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_immediate(self, path)
 
 
@@ -52,7 +53,7 @@ class Reference:
     ref: Span
     name: bytes
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_reference(self, path)
 
 
@@ -63,7 +64,7 @@ class Index:
     scale: int
     target: Register | Reference
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_index(self, path)
 
         with path.push(self) as node:
@@ -76,7 +77,7 @@ class Displacement:
     kind: Kind["forward", "backward"]
     offset: literals.Hex
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_displacement(self, path)
 
 
@@ -88,7 +89,7 @@ class Address:
     indx: Index | None
     disp: Displacement | Reference | None
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_address(self, path)
 
         with path.push(self) as node:
@@ -107,7 +108,7 @@ class Label:
     ref: Span
     name: bytes
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_label(self, path)
 
 
@@ -119,7 +120,7 @@ class Operand:
     ref: Span
     target: OperandTarget
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_operand(self, path)
 
         with path.push(self) as node:
@@ -131,8 +132,22 @@ class Bind:
     ref: Span
     name: bytes
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_bind(self, path)
+
+
+@dataclass(kw_only=True, eq=False)
+class Result:
+    ref: Span
+    type: types.Type
+    bind: Bind
+
+    def accept(self, visitor: Visitor, path: Path):
+        visitor.on_result(self, path)
+
+        with path.push(self) as node:
+            self.bind.accept(visitor, node)
+            self.type.accept(visitor, node)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -142,7 +157,7 @@ class Slot:
     type: types.Type
     bind: Bind
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_slot(self, path)
 
         with path.push(self) as node:
@@ -155,7 +170,7 @@ class Mnemonic:
     ref: Span
     name: bytes
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_mnemonic(self, path)
 
 
@@ -165,7 +180,7 @@ class Instruction:
     mnemonic: Mnemonic
     operands: list[Operand]
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_instruction(self, path)
 
         with path.push(self) as node:
@@ -183,13 +198,17 @@ class Signature:
     ref: Span
     name: bytes
     slots: list[Slot]
+    result: Result | None
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_signature(self, path)
 
         with path.push(self) as node:
             for entry in self.slots:
                 entry.accept(visitor, node)
+
+            if self.result is not None:
+                self.result.accept(visitor, node)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -198,7 +217,7 @@ class Flags:
     noreturn: bool | None
     clobbers: list[Register] | None
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_flags(self, path)
 
         with path.push(self) as node:
@@ -213,7 +232,7 @@ class Snippet:
     flags: Flags | None
     body: list[InstructionOrLabel]
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_snippet(self, path)
 
         with path.push(self) as node:

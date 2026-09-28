@@ -20,7 +20,7 @@ def i13c():
 
 @i13c.command("lex")
 @click.argument("path", type=click.Path(exists=True))
-def lex_command(path: str) -> None:
+def lex_command(path: str):
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
@@ -37,7 +37,7 @@ def lex_command(path: str) -> None:
 
 @i13c.command("ast")
 @click.argument("path", type=click.Path(exists=True))
-def ast_command(path: str) -> None:
+def ast_command(path: str):
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
@@ -51,7 +51,7 @@ def ast_command(path: str) -> None:
 @i13c.command("model")
 @click.argument("path", type=click.Path(exists=True))
 @click.argument("view-name", type=str, required=True)
-def model_command(path: str, view_name: str) -> None:
+def model_command(path: str, view_name: str):
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 
@@ -70,7 +70,7 @@ def model_command(path: str, view_name: str) -> None:
 
 @i13c.command("elf")
 @click.argument("path", type=click.Path(exists=True))
-def elf_command(path: str) -> None:
+def elf_command(path: str):
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
 

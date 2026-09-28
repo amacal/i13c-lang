@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_a_callsite_node_in_a_function() -> None:
+def can_visit_a_callsite_node_in_a_function():
     visitor = parse_syntax_graph(
         """
             fn main() { foo(0x42); }

@@ -17,12 +17,12 @@ from i13c.semantic.typing.analyses.llvm import (
 from i13c.semantic.typing.entities.functions import FunctionId
 
 
-def encode_syscall(instruction: SYSCALL, bytecode: bytearray) -> None:
+def encode_syscall(instruction: SYSCALL, bytecode: bytearray):
     # encode instruction
     kind.write_opcode(bytecode, 2, 0x0F05)
 
 
-def encode_ret(instruction: RET, bytecode: bytearray) -> None:
+def encode_ret(instruction: RET, bytecode: bytearray):
     # encode instruction
     kind.write_opcode(bytecode, 1, 0xC3)
 
@@ -138,6 +138,6 @@ def encode_group_loop(
     )
 
 
-def encode_nop(instruction: NOP, bytecode: bytearray) -> None:
+def encode_nop(instruction: NOP, bytecode: bytearray):
     # encode instruction
     kind.write_opcode(bytecode, 1, 0x90)

@@ -25,6 +25,7 @@ def build_binds_by_parameters(
     index: dict[ParameterId, BindAcceptance] = {}
 
     for entry in binds.values():
-        index[entry.ctx] = entry
+        if isinstance(entry.ctx, ParameterId):
+            index[entry.ctx] = entry
 
     return OneToOne[ParameterId, BindAcceptance].instance(index)

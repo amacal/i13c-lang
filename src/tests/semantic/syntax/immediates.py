@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_immediates_in_an_operand() -> None:
+def can_visit_immediates_in_an_operand():
     visitor = parse_syntax_graph(
         """
             asm main() { mov rax, 0x1234; }

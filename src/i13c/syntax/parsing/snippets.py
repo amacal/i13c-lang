@@ -14,6 +14,7 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
     body: list[tree.snippet.InstructionOrLabel] = []
     slots: list[tree.snippet.Slot] = []
     flags: tree.snippet.Flags | None = None
+    result: tree.snippet.Result | None = None
 
     # snippet name is an identifier
     name = state.expect(Tokens.IDENT)
@@ -27,6 +28,10 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
 
     # expect closed round bracket
     end = state.expect(Tokens.ROUND_CLOSE)
+
+    # optional result type
+    if state.is_in(Tokens.RIGHT_ARROW):
+        result = parse_result(state)
 
     # optional flags
     if not state.is_in(Tokens.CURLY_OPEN):
@@ -48,9 +53,37 @@ def parse_snippet(state: ParsingState) -> tree.snippet.Snippet:
             ref=state.between(name, end),
             name=state.extract(name),
             slots=slots,
+            result=result,
         ),
         flags=flags,
         body=body,
+    )
+
+def parse_result(state: ParsingState) -> tree.snippet.Result:
+    state.expect(Tokens.RIGHT_ARROW)
+    type = state.expect(Tokens.IDENT)
+
+    # optional range for the result type
+    if state.is_in(Tokens.SQUARE_OPEN):
+        range, end = parse_range(state)
+    else:
+        range, end = None, type
+
+    # expect '@' followed by a bind
+    state.expect(Tokens.AT)
+    bind = state.expect(Tokens.IDENT)
+
+    return tree.snippet.Result(
+        ref=state.between(type, bind),
+        type=tree.types.Type(
+            ref=state.between(type, end),
+            name=state.extract(type),
+            range=range,
+        ),
+        bind=tree.snippet.Bind(
+            ref=state.between(bind, bind),
+            name=state.extract(bind),
+        ),
     )
 
 

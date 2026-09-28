@@ -7,21 +7,21 @@ from i13c.syntax.tree.core import Path
 
 
 class Visitor(Protocol):
-    def on_function(self, function: Function, path: Path) -> None: ...
-    def on_flags(self, flags: Flags, path: Path) -> None: ...
-    def on_signature(self, signature: Signature, path: Path) -> None: ...
-    def on_statement(self, statement: Statement, path: Path) -> None: ...
-    def on_call(self, call: CallStatement, path: Path) -> None: ...
-    def on_callsite(self, callsite: CallSite, path: Path) -> None: ...
-    def on_assign(self, assign: AssignStatement, path: Path) -> None: ...
-    def on_value(self, value: Value, path: Path) -> None: ...
-    def on_literal(self, literal: Literal, path: Path) -> None: ...
-    def on_expression(self, expression: Expression, path: Path) -> None: ...
-    def on_parameter(self, parameter: Parameter, path: Path) -> None: ...
+    def on_function(self, function: Function, path: Path): ...
+    def on_flags(self, flags: Flags, path: Path): ...
+    def on_signature(self, signature: Signature, path: Path): ...
+    def on_statement(self, statement: Statement, path: Path): ...
+    def on_call(self, call: CallStatement, path: Path): ...
+    def on_callsite(self, callsite: CallSite, path: Path): ...
+    def on_assign(self, assign: AssignStatement, path: Path): ...
+    def on_value(self, value: Value, path: Path): ...
+    def on_literal(self, literal: Literal, path: Path): ...
+    def on_expression(self, expression: Expression, path: Path): ...
+    def on_parameter(self, parameter: Parameter, path: Path): ...
 
     # types related
-    def on_type(self, type: types.Type, path: Path) -> None: ...
-    def on_range(self, range: types.Range, path: Path) -> None: ...
+    def on_type(self, type: types.Type, path: Path): ...
+    def on_range(self, range: types.Range, path: Path): ...
 
 
 @dataclass(kw_only=True, eq=False)
@@ -29,7 +29,7 @@ class Literal:
     ref: Span
     value: literals.Hex
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_literal(self, path)
 
 
@@ -38,7 +38,7 @@ class Expression:
     ref: Span
     name: bytes
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_expression(self, path)
 
 
@@ -51,7 +51,7 @@ class Parameter:
     name: bytes
     type: types.Type
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_parameter(self, path)
 
         with path.push(self) as node:
@@ -64,7 +64,7 @@ class CallSite:
     name: bytes
     arguments: list[Argument]
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_callsite(self, path)
 
         with path.push(self) as node:
@@ -81,7 +81,7 @@ class CallStatement:
     ref: Span
     target: CallSite
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_call(self, path)
 
         with path.push(self) as node:
@@ -97,7 +97,7 @@ class Value:
     name: bytes
     type: types.Type
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_value(self, path)
 
         with path.push(self) as node:
@@ -110,7 +110,7 @@ class AssignStatement:
     destination: Value
     expression: ValueExpression
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_assign(self, path)
 
         with path.push(self) as node:
@@ -127,7 +127,7 @@ class Signature:
     name: bytes
     params: list[Parameter]
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_signature(self, path)
 
         with path.push(self) as node:
@@ -143,7 +143,7 @@ class Statement:
     ref: Span
     target: StatementTarget
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_statement(self, path)
 
         with path.push(self) as node:
@@ -155,7 +155,7 @@ class Flags:
     ref: Span
     noreturn: bool | None
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_flags(self, path)
 
 
@@ -166,7 +166,7 @@ class Function:
     flags: Flags | None
     statements: list[Statement]
 
-    def accept(self, visitor: Visitor, path: Path) -> None:
+    def accept(self, visitor: Visitor, path: Path):
         visitor.on_function(self, path)
 
         with path.push(self) as node:

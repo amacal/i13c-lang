@@ -38,7 +38,7 @@ def emit(code: bytes) -> bytes:
     return bytes(content)
 
 
-def emit_ehdr(content: bytearray, entry_point: int) -> None:
+def emit_ehdr(content: bytearray, entry_point: int):
 
     # fmt: off
     eident = bytes(
@@ -64,7 +64,7 @@ def emit_ehdr(content: bytearray, entry_point: int) -> None:
     # fmt: on
 
 
-def emit_phdr(content: bytearray, file_size: int) -> None:
+def emit_phdr(content: bytearray, file_size: int):
     # fmt: off
     content.extend(as_bytes(PT_LOAD, 4))             # p_type
     content.extend(as_bytes(PF_R | PF_X, 4))         # p_flags

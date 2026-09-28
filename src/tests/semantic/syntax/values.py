@@ -1,7 +1,7 @@
 from tests.semantic.syntax import parse_syntax_graph
 
 
-def can_visit_value_declaration_with_initialization() -> None:
+def can_visit_value_declaration_with_initialization():
     visitor = parse_syntax_graph(
         """
             fn main() { val x: u8 = 0x12; }

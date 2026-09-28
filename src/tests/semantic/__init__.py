@@ -7,7 +7,7 @@ from i13c.syntax.tree import Program
 
 
 class FixtureException(Exception):
-    def __init__(self, diagnostics: list[Diagnostic]) -> None:
+    def __init__(self, diagnostics: list[Diagnostic]):
         self.diagnostics = diagnostics
         super().__init__(diagnostics[0])
 
