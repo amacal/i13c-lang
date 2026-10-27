@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.14
+FROM mcr.microsoft.com/vscode/devcontainers/python:dev-3.15-trixie
 
 RUN rm -f /etc/apt/sources.list.d/yarn.list
 RUN apt update && apt install --yes wget bash-completion make poppler-utils
