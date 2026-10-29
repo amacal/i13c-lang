@@ -88,7 +88,8 @@ class CallStatement:
             self.target.accept(visitor, node)
 
 
-ValueExpression = Literal | Expression
+# an expression that can be directly assigned to a value
+ValueExpression = Literal | Expression | CallSite
 
 
 @dataclass(kw_only=True, eq=False)
@@ -106,6 +107,10 @@ class Value:
 
 @dataclass(kw_only=True, eq=False)
 class AssignStatement:
+    # assignment represents an expression assigning to a value
+    # where the destination must be a pure value declaration
+    # and the expression must be a literal, expression or callsite
+
     ref: Span
     destination: Value
     expression: ValueExpression

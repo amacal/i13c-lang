@@ -4,6 +4,7 @@ from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.results import ResultId
 from i13c.semantic.typing.entities.signatures import Signature, SignatureId
 from i13c.syntax import tree
 
@@ -36,11 +37,19 @@ def build_signatures(
             nid = graph.snippet.slots.get_by_node(slot)
             return ParameterId(value=nid.value)
 
+        # result is optional and must be mapped
+        if entry.result is not None:
+            result_nid = graph.snippet.results.get_by_node(entry.result)
+            result_id = ResultId(value=result_nid.value)
+        else:
+            result_id = None
+
         signatures[signature_id] = Signature(
             ref=entry.ref,
             nid=snippet_nid,
             name=entry.name,
             parameters=[map_slot(slot) for slot in entry.slots],
+            output=result_id,
         )
 
     for nid, entry in graph.function.signatures.items():
@@ -61,6 +70,7 @@ def build_signatures(
             nid=function_nid,
             name=entry.name,
             parameters=[map_param(param) for param in entry.params],
+            output=None,
         )
 
     return OneToOne[SignatureId, Signature].instance(signatures)

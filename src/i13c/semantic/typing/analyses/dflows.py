@@ -1,15 +1,20 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.analyses.callings import Calling, CallingClobber
+from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.analyses.cflows import FlowMember
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.results import ResultAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span
 
 FlowValue = (
-    ParameterAcceptance | ValueAcceptance | LiteralAcceptance | Calling | CallingClobber
+    ParameterAcceptance
+    | ValueAcceptance
+    | LiteralAcceptance
+    | Calling
+    | ResultAcceptance
 )
 
 VReg = bytes

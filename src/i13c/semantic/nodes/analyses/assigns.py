@@ -8,6 +8,7 @@ from i13c.semantic.typing.analyses.llvm import MOV, Immediate, Register
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
+from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 
 
@@ -56,11 +57,19 @@ def emit(
     idx = dflow.values.index(entry.destination)
     dst = Register(name=dflow.vregs[idx])
 
-    # lookup for source
+    # lookup for source, literal emits immediate
     if isinstance(entry.expression, LiteralAcceptance):
         src = Immediate(value=entry.expression.target)
-    else:
+
+    # expression emits vreg where its value is stored
+    elif isinstance(entry.expression, ExpressionAcceptance):
         idx = dflow.values.index(entry.expression.target)
+        src = Register(name=dflow.vregs[idx])
+
+    # callsite emits vreg where its value is returned
+    else:
+        assert entry.expression.result is not None
+        idx = dflow.values.index(entry.expression.result)
         src = Register(name=dflow.vregs[idx])
 
     # emit single instruction

@@ -4,12 +4,14 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance, AssignResolution
+from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
@@ -26,6 +28,7 @@ def configure_assign_resolution() -> GraphGroup:
                 ("values", "resolutions/values/accepted"),
                 ("literals", "resolutions/literals/accepted"),
                 ("expressions", "resolutions/expressions/accepted"),
+                ("callsites", "resolutions/callsites/accepted"),
             }
         ),
     )
@@ -62,6 +65,7 @@ def build_assign_resolution(
     values: OneToOne[ValueId, ValueAcceptance],
     literals: OneToOne[LiteralId, LiteralAcceptance],
     expressions: OneToOne[ExpressionId, ExpressionAcceptance],
+    callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ) -> OneToOne[AssignId, AssignResolution]:
     resolutions: dict[AssignId, AssignResolution] = {}
 
@@ -74,8 +78,13 @@ def build_assign_resolution(
         if isinstance(entry.expression, LiteralId):
             expression = literals.get(entry.expression)
 
-        else:
+        elif isinstance(entry.expression, ExpressionId):
             expression = expressions.get(entry.expression)
+
+        # callsite propagates its signature, because it contains
+        # where the retuned value is stored, callsite is not needed
+        else:
+            expression = callsites.get(entry.expression).signature
 
         resolution.accepted.append(
             AssignAcceptance(

@@ -3,12 +3,13 @@ from dataclasses import dataclass
 from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.syntax.source import Span
 
-AssignExpression = LiteralId | ExpressionId
+AssignExpression = LiteralId | ExpressionId | CallSiteId
 
 
 @dataclass(kw_only=True, frozen=True)

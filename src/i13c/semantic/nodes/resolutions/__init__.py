@@ -30,6 +30,7 @@ from i13c.semantic.nodes.resolutions.parameters import configure_parameter_resol
 from i13c.semantic.nodes.resolutions.ranges import configure_range_resolution
 from i13c.semantic.nodes.resolutions.references import configure_reference_resolution
 from i13c.semantic.nodes.resolutions.registers import configure_register_resolution
+from i13c.semantic.nodes.resolutions.results import configure_result_resolution
 from i13c.semantic.nodes.resolutions.signatures import configure_signature_resolution
 from i13c.semantic.nodes.resolutions.snippets import configure_snippet_resolution
 from i13c.semantic.nodes.resolutions.statements import configure_statement_resolution
@@ -64,6 +65,7 @@ def configure_resolutions() -> GraphGroup:
             configure_range_resolution(),
             configure_reference_resolution(),
             configure_register_resolution(),
+            configure_result_resolution(),
             configure_signature_resolution(),
             configure_snippet_resolution(),
             configure_statement_resolution(),
@@ -97,6 +99,7 @@ def parse_resolutions(resolutions: dict[str, Any]) -> ResolutionNodes:
         ranges=resolutions.get("resolutions/ranges"),
         references=resolutions.get("resolutions/references"),
         registers=resolutions.get("resolutions/registers"),
+        results=resolutions.get("resolutions/results"),
         signatures=resolutions.get("resolutions/signatures"),
         statements=resolutions.get("resolutions/statements"),
         parameters=resolutions.get("resolutions/parameters"),

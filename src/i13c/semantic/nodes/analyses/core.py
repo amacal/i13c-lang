@@ -2,7 +2,6 @@ from typing import Any
 
 from i13c.core.graph import GraphGroup
 from i13c.llvm.nodes.blocklets import configure_blocklets
-from i13c.semantic.nodes.analyses.allocations import configure_allocations
 from i13c.semantic.nodes.analyses.asmlets import configure_asmlets
 from i13c.semantic.nodes.analyses.assigns import configure_assigns
 from i13c.semantic.nodes.analyses.callings import configure_callings
@@ -13,7 +12,6 @@ from i13c.semantic.nodes.analyses.cpaths import configure_control_paths
 from i13c.semantic.nodes.analyses.dflows import configure_data_flows
 from i13c.semantic.nodes.analyses.entrypoints import configure_entrypoints
 from i13c.semantic.nodes.analyses.fnlets import configure_fnlets
-from i13c.semantic.nodes.analyses.liveness import configure_liveness
 from i13c.semantic.nodes.analyses.noreturns import configure_noreturns
 from i13c.semantic.nodes.analyses.sections import configure_sections
 from i13c.semantic.nodes.analyses.shuffles import configure_shuffles
@@ -24,7 +22,6 @@ from i13c.semantic.typing.analyses.core import AnalysisNodes
 def configure_analyses() -> GraphGroup:
     return GraphGroup(
         nodes=[
-            configure_allocations(),
             configure_asmlets(),
             configure_assigns(),
             configure_blocklets(),
@@ -36,7 +33,6 @@ def configure_analyses() -> GraphGroup:
             configure_data_flows(),
             configure_entrypoints(),
             configure_fnlets(),
-            configure_liveness(),
             configure_noreturns(),
             configure_sections(),
             configure_shuffles(),
@@ -47,7 +43,6 @@ def configure_analyses() -> GraphGroup:
 
 def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
     return AnalysisNodes(
-        allocations=analyses.get("analyses/allocations"),
         asmlets=analyses.get("analyses/asmlets"),
         assigns=analyses.get("analyses/assigns"),
         blocklets=analyses.get("analyses/blocklets"),
@@ -59,7 +54,6 @@ def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
         dflows=analyses.get("analyses/dflows"),
         entrypoints=analyses.get("analyses/entrypoints"),
         fnlets=analyses.get("analyses/fnlets"),
-        liveness=analyses.get("analyses/liveness"),
         noreturns=analyses.get("analyses/noreturns"),
         sections=analyses.get("analyses/sections"),
         shuffles=analyses.get("analyses/shuffles"),

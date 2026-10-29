@@ -4,6 +4,7 @@ from typing import Literal as Kind
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.results import ResultAcceptance
 from i13c.syntax.source import Span
 
 SignatureRejectionReason = Kind[
@@ -27,6 +28,7 @@ class SignatureAcceptance:
 
     name: bytes
     parameters: list[ParameterAcceptance]
+    result: ResultAcceptance | None
 
 
 @dataclass(kw_only=True)

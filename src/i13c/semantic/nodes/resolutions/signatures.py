@@ -5,8 +5,10 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.results import ResultId
 from i13c.semantic.typing.entities.signatures import Signature, SignatureId
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.results import ResultAcceptance
 from i13c.semantic.typing.resolutions.signatures import (
     SignatureAcceptance,
     SignatureRejection,
@@ -23,6 +25,7 @@ def configure_signature_resolution() -> GraphGroup:
             {
                 ("signatures", "entities/signatures"),
                 ("parameters", "resolutions/parameters/accepted"),
+                ("results", "resolutions/results/accepted"),
             }
         ),
         views=GraphViews(list=ListAllExtractor),
@@ -59,6 +62,7 @@ def configure_signature_resolution() -> GraphGroup:
 def build_signature_resolution(
     signatures: OneToOne[SignatureId, Signature],
     parameters: OneToOne[ParameterId, ParameterAcceptance],
+    results: OneToOne[ResultId, ResultAcceptance],
 ) -> OneToOne[SignatureId, SignatureResolution]:
     resolutions: dict[SignatureId, SignatureResolution] = {}
 
@@ -100,6 +104,11 @@ def build_signature_resolution(
             # the parameter survived the checks
             accepted.append(parameter)
 
+        if entry.output is not None:
+            result = results.get(entry.output)
+        else:
+            result = None
+
         if len(resolution.rejected) == 0:
             resolution.accepted.append(
                 SignatureAcceptance(
@@ -108,6 +117,7 @@ def build_signature_resolution(
                     nid=entry.nid,
                     name=entry.name,
                     parameters=accepted,
+                    result=result,
                 )
             )
 

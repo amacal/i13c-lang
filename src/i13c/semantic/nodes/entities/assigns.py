@@ -3,6 +3,7 @@ from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.values import ValueId
@@ -45,9 +46,13 @@ def build_assigns(
             target = LiteralId(value=nid.value)
 
         # derive expression ID from the statement
-        else:
+        elif isinstance(statement.expression, tree.function.Expression):
             nid = graph.function.expressions.get_by_node(statement.expression)
             target = ExpressionId(value=nid.value)
+
+        else:
+            nid = graph.function.callsites.get_by_node(statement.expression)
+            target = CallSiteId(value=nid.value)
 
         assigns[assign_id] = Assign(
             ref=statement.ref,

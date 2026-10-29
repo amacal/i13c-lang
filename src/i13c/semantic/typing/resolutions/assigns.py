@@ -6,11 +6,12 @@ from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
+from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span
 
 AssignRejectionReason = Kind["unknown"]
-AssignExpression = LiteralAcceptance | ExpressionAcceptance
+AssignExpression = LiteralAcceptance | ExpressionAcceptance | SignatureAcceptance
 
 
 @dataclass(kw_only=True)

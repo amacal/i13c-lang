@@ -64,7 +64,7 @@ def can_detect_statements_assign_with_spills():
 
             if idx == 2:
                 assert statement.listing() == [
-                    "mov v18, v0"
+                    "mov v3, v0"
                 ]
 
         else:

@@ -22,6 +22,7 @@ from i13c.semantic.typing.entities.parameters import ParameterId
 from i13c.semantic.typing.entities.ranges import RangeId
 from i13c.semantic.typing.entities.references import ReferenceId
 from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.results import ResultId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.statements import StatementId
@@ -50,6 +51,7 @@ from i13c.semantic.typing.resolutions.parameters import ParameterResolution
 from i13c.semantic.typing.resolutions.ranges import RangeResolution
 from i13c.semantic.typing.resolutions.references import ReferenceResolution
 from i13c.semantic.typing.resolutions.registers import RegisterResolution
+from i13c.semantic.typing.resolutions.results import ResultResolution
 from i13c.semantic.typing.resolutions.signatures import SignatureResolution
 from i13c.semantic.typing.resolutions.snippets import SnippetResolution
 from i13c.semantic.typing.resolutions.statements import StatementResolution
@@ -81,6 +83,7 @@ class ResolutionNodes:
     ranges: OneToOne[RangeId, RangeResolution] | None
     references: OneToOne[ReferenceId, ReferenceResolution] | None
     registers: OneToOne[RegisterId, RegisterResolution] | None
+    results: OneToOne[ResultId, ResultResolution] | None
     signatures: OneToOne[SignatureId, SignatureResolution] | None
     statements: OneToOne[StatementId, StatementResolution] | None
     parameters: OneToOne[ParameterId, ParameterResolution] | None

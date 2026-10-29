@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.blocklets import Blocklet, BlockletId
-from i13c.semantic.typing.analyses.allocations import Allocation
 from i13c.semantic.typing.analyses.asmlets import Asmlet, AsmletId
 from i13c.semantic.typing.analyses.assigns import AssignLlvm
 from i13c.semantic.typing.analyses.callings import Calling
@@ -13,7 +12,6 @@ from i13c.semantic.typing.analyses.cpaths import ControlPaths
 from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.analyses.fnlets import Fnlet
-from i13c.semantic.typing.analyses.liveness import Liveness
 from i13c.semantic.typing.analyses.noreturns import NoReturn
 from i13c.semantic.typing.analyses.sections import Section, SectiontId
 from i13c.semantic.typing.analyses.shuffles import Shuffle
@@ -28,7 +26,6 @@ from i13c.semantic.typing.entities.statements import StatementId
 
 @dataclass(repr=False)
 class AnalysisNodes:
-    allocations: OneToOne[FunctionId, Allocation] | None
     asmlets: OneToOne[AsmletId, Asmlet] | None
     assigns: OneToOne[AssignId, AssignLlvm] | None
     blocklets: OneToOne[BlockletId, Blocklet] | None
@@ -40,7 +37,6 @@ class AnalysisNodes:
     dflows: OneToOne[FunctionId, DataFlows] | None
     entrypoints: OneToOne[SignatureId, Entrypoint] | None
     fnlets: OneToOne[FunctionId, Fnlet] | None
-    liveness: OneToOne[FunctionId, Liveness] | None
     noreturns: OneToOne[SignatureId, NoReturn] | None
     sections: OneToOne[SectiontId, Section] | None
     shuffles: OneToOne[FunctionId, Shuffle] | None
