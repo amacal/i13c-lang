@@ -10,7 +10,11 @@ from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.entities.values import ValueId
-from i13c.semantic.typing.resolutions.assigns import AssignAcceptance, AssignResolution
+from i13c.semantic.typing.resolutions.assigns import (
+    AssignAcceptance,
+    AssignRejection,
+    AssignResolution,
+)
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
@@ -75,27 +79,58 @@ def build_assign_resolution(
             rejected=[],
         )
 
+        # extract destination, because we need to check its compatibility
+        destination = values.get(entry.destination)
+
+        # nothing is rejected by default
+        rejected = None
+
+        # literals are directly retrieved
+        # matched by their value against the destination type
         if isinstance(entry.expression, LiteralId):
             expression = literals.get(entry.expression)
+            target = expression
 
+        # expressions are also directly retrieved
+        # matched by their target type against the destination type
         elif isinstance(entry.expression, ExpressionId):
             expression = expressions.get(entry.expression)
+            target = expression.target.type
 
         # callsite propagates its signature, because it contains
         # where the retuned value is stored, callsite is not needed
         else:
             expression = callsites.get(entry.expression).signature
+            target = expression.result.type if expression.result else None
 
-        resolution.accepted.append(
-            AssignAcceptance(
-                ref=entry.ref,
-                id=aid,
-                fn=entry.get_function(FunctionId.from_context),
-                stmt=entry.get_statement(StatementId.from_context),
-                destination=values.get(entry.destination),
-                expression=expression,
+        if target is None:
+            rejected = "type-mismatch"
+
+        elif not destination.type.accepts(target):
+            rejected = "type-mismatch"
+
+        # if we know some rejection reason
+        # we need just to record the rejection
+        if rejected is not None:
+            resolution.rejected.append(
+                AssignRejection(
+                    ref=entry.ref,
+                    id=aid,
+                    reason=rejected,
+                )
             )
-        )
+
+        else:
+            resolution.accepted.append(
+                AssignAcceptance(
+                    ref=entry.ref,
+                    id=aid,
+                    fn=entry.get_function(FunctionId.from_context),
+                    stmt=entry.get_statement(StatementId.from_context),
+                    destination=destination,
+                    expression=expression,
+                )
+            )
 
         resolutions[aid] = resolution
 
@@ -130,14 +165,17 @@ def validate_assign_resolution_e3007(
     for id, resolution in resolutions.items():
         if len(resolution.accepted) != 1:
             for _ in resolution.rejected:
-                diagnostics.append(report_assign_resolution_e3007(assigns.get(id)))
+                diagnostics.append(report_assign_resolution_e3007(assigns.get(id), _))
 
     return diagnostics
 
 
-def report_assign_resolution_e3007(entry: Assign) -> Diagnostic:
+def report_assign_resolution_e3007(
+    entry: Assign,
+    rejection: AssignRejection,
+) -> Diagnostic:
     return Diagnostic(
         ref=entry.ref,
         code="E3007",
-        message=f"Invalid assign {entry}, reason: unknown.",
+        message=f"Invalid assign {entry}, reason: {rejection.reason}.",
     )

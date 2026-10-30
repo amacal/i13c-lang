@@ -12,6 +12,7 @@ from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.statements import StatementAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
@@ -94,12 +95,6 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
         dflow.backward[idx] = []
         dflow.clobbers[nid] = []
 
-        # for off, clobber in enumerate(stmt.target.target.clobbers):
-        #     dflow.forward[idx + off + 1] = []
-        #     dflow.backward[idx + off + 1] = []
-        #     dflow.clobbers[nid].append(idx + off + 1)
-        #     dflow.values.append(clobber)
-
         for arg in stmt.target.target.arguments:
             if isinstance(arg, ParameterAcceptance):
                 for nix, node in enumerate(dflow.values):
@@ -140,6 +135,15 @@ def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
             dflow.forward[off] = [idx]
             dflow.backward[off] = []
             dflow.backward[idx].append(off)
+
+        # an assignment accepting signature result
+        if isinstance(stmt.target.expression, SignatureAcceptance):
+            if stmt.target.expression.result is not None:
+                off = len(dflow.values)
+                dflow.values.append(stmt.target.expression.result)
+                dflow.forward[off] = [idx]
+                dflow.backward[off] = []
+                dflow.backward[idx].append(off)
 
 
 class ListExtractor:

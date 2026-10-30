@@ -10,7 +10,7 @@ from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span
 
-AssignRejectionReason = Kind["unknown"]
+AssignRejectionReason = Kind["type-mismatch"]
 AssignExpression = LiteralAcceptance | ExpressionAcceptance | SignatureAcceptance
 
 
@@ -28,6 +28,8 @@ class AssignAcceptance:
 
 @dataclass(kw_only=True)
 class AssignRejection:
+    ref: Span
+    id: AssignId
     reason: AssignRejectionReason
 
 

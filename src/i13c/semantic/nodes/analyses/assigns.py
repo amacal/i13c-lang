@@ -53,6 +53,9 @@ def emit(
     dflow: DataFlows,
     entry: AssignAcceptance,
 ):
+    # to emit assignment instruction, we need to determine
+    # the source and destination operands for the assignment
+
     # lookup for destination
     idx = dflow.values.index(entry.destination)
     dst = Register(name=dflow.vregs[idx])

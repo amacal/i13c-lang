@@ -42,9 +42,6 @@ class Expression:
         visitor.on_expression(self, path)
 
 
-Argument = Literal | Expression
-
-
 @dataclass(kw_only=True, eq=False)
 class Parameter:
     ref: Span
@@ -74,6 +71,9 @@ class CallSite:
 
                 if isinstance(argument, Expression):
                     visitor.on_expression(argument, node)
+
+
+Argument = Literal | Expression | CallSite
 
 
 @dataclass(kw_only=True, eq=False)

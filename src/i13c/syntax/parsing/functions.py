@@ -1,4 +1,3 @@
-
 from i13c.syntax import tree
 from i13c.syntax.lexing import Token as LexingToken
 from i13c.syntax.lexing import Tokens
@@ -130,7 +129,7 @@ def parse_statement(state: ParsingState) -> tree.function.Statement:
     target: tree.function.StatementTarget | None = None
 
     if token.code == Tokens.IDENT:
-        target = parse_callsite(state, token)
+        target = parse_callsite_statement(state, token)
 
     elif state.extract(token) == b"val":
         target = parse_value(state)
@@ -144,9 +143,23 @@ def parse_statement(state: ParsingState) -> tree.function.Statement:
     )
 
 
-def parse_callsite(
+def parse_callsite_statement(
     state: ParsingState, ident: LexingToken
 ) -> tree.function.CallStatement:
+    # parse the callsite
+    target, end = parse_callsite(state, ident)
+
+    # expect a semicolon
+    state.expect(Tokens.SEMICOLON)
+
+    # and wrap it in a statement
+    return tree.function.CallStatement(
+        ref=state.between(ident, end),
+        target=target,
+    )
+
+
+def parse_callsite(state: ParsingState, ident: LexingToken) -> tuple[tree.function.CallSite, LexingToken]:
     arguments: list[tree.function.Argument] = []
 
     # expect opening round bracket
@@ -159,17 +172,13 @@ def parse_callsite(
     # expect closed round bracket
     end = state.expect(Tokens.ROUND_CLOSE)
 
-    # expect a semicolon
-    state.expect(Tokens.SEMICOLON)
-
-    return tree.function.CallStatement(
+    callsite = tree.function.CallSite(
         ref=state.between(ident, end),
-        target=tree.function.CallSite(
-            ref=state.between(ident, end),
-            name=state.extract(ident),
-            arguments=arguments,
-        ),
+        name=state.extract(ident),
+        arguments=arguments,
     )
+
+    return callsite, end
 
 
 def parse_value(state: ParsingState) -> tree.function.AssignStatement:
@@ -233,7 +242,11 @@ def parse_argument(state: ParsingState) -> tuple[tree.function.Argument, LexingT
             value=extract_hex(state, token),
         )
 
-    # an identifier can be only an expression
+    # an identifier can be a callsite
+    elif state.is_in(Tokens.ROUND_OPEN):
+        expression, token = parse_callsite(state, token)
+
+    # or just a variable reference
     else:
         expression = tree.function.Expression(
             ref=state.span(token),

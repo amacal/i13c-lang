@@ -16,7 +16,7 @@ class NodeId:
     value: int
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class Bidirectional[AstNode, AstCtx]:
     node_to_id: dict[AstNode, NodeId]
     id_to_node: dict[NodeId, AstNode]
@@ -235,7 +235,7 @@ class Snippet:
     displacements: Bidirectional[tree.snippet.Displacement, tree.snippet.Address]
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class Function:
     functions: Bidirectional[tree.function.Function, None]
     flags: Bidirectional[tree.function.Flags, tree.function.Function]
@@ -250,7 +250,7 @@ class Function:
     parameters: Bidirectional[tree.function.Parameter, None]
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class SyntaxGraph:
     snippet: Snippet
     function: Function

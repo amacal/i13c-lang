@@ -46,10 +46,13 @@ def build_callsites(
                 lid = graph.function.literals.get_by_node(argument)
                 arguments.append(LiteralId(value=lid.value))
 
-            else:
+            elif isinstance(argument, tree.function.Expression):
                 # derive expression ID from globally unique node ID
                 eid = graph.function.expressions.get_by_node(argument)
                 arguments.append(ExpressionId(value=eid.value))
+
+            else:
+                assert False, f"Unsupported argument type: {type(argument)}"
 
         callsites[callsite_id] = CallSite(
             ref=callsite.ref,

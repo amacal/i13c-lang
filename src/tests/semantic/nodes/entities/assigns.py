@@ -51,3 +51,25 @@ def can_detect_an_assignment_using_an_expression():
     id, _ = entities.expressions.peek()
 
     assert assign.expression == id
+
+
+def can_detect_an_assignment_using_a_callsite():
+    entities = prepare_entities(
+        """
+            asm foo() -> u8@rax { }
+            fn main() { val x: u8 = foo(); }
+        """
+    )
+
+    assert entities.assigns.size() == 1
+    _, assign = entities.assigns.peek()
+
+    assert entities.values.size() == 1
+    id, _ = entities.values.peek()
+
+    assert assign.destination == id
+
+    assert entities.callsites.size() == 1
+    id, _ = entities.callsites.peek()
+
+    assert assign.expression == id
