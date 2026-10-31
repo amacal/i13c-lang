@@ -244,6 +244,15 @@ class CALL:
             idx = dflow[0].add_register(clobber)
             dflow[1].add_clobber(instr[0], idx)
 
+        # all outputs must be connected
+        for src, dst in instr[1].outs.items():
+            src = dflow[0].add_register(src)
+            dst = dflow[0].add_register(dst.name)
+
+            dflow[1].add_def(instr[0], dst)
+            dflow[1].add_edge(src, dst)
+            dflow[0].add_seed(src, dst)
+
 
 @dataclass(kw_only=True, repr=False)
 class FnletBlockMock:
@@ -416,6 +425,7 @@ def can_solve_fnlet_with_single_call():
                 operands=(FunctionId(value=11),),
                 clobbers=[],
                 args={},
+                outs={},
             ),
         ]
     )
@@ -472,6 +482,7 @@ def can_solve_fnlet_with_single_call_with_clobbers():
                 operands=(FunctionId(value=11),),
                 clobbers=[b"r11", b"r8"],
                 args={},
+                outs={},
             ),
         ]
     )
@@ -532,6 +543,7 @@ def can_solve_fnlet_with_single_call_with_arguments():
                     b"rdi": llvm.Register(name=b"v0"),
                     b"rsi": llvm.Immediate.derive(bytes([0x00, 0x00, 0x00, 0x00])),
                 },
+                outs={},
             ),
         ]
     )
@@ -604,6 +616,7 @@ def can_solve_fnlet_with_multiple_mov_followed_by_call():
                     b"rdi": llvm.Register(name=b"v0"),
                     b"rsi": llvm.Register(name=b"v1"),
                 },
+                outs={},
             ),
         ]
     )

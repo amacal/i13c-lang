@@ -104,10 +104,10 @@ def build_signature_resolution(
             # the parameter survived the checks
             accepted.append(parameter)
 
-        if entry.output is not None:
-            result = results.get(entry.output)
-        else:
+        if entry.output is None:
             result = None
+        else:
+            result = results.get(entry.output)
 
         if len(resolution.rejected) == 0:
             resolution.accepted.append(

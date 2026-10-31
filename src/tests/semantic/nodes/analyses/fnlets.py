@@ -28,11 +28,10 @@ def can_detect_fnlets_pure_assign_and_call():
     _, fnlet = analyses.fnlets.peek()
 
     # a block boundary falls at PROLOG, the assign, the call, and EPILOG
-    assert len(fnlet.blocks) == 4
+    assert len(fnlet.blocks) == 3
     assert len(fnlet.blocks[0].instructions) == 1
-    assert len(fnlet.blocks[1].instructions) == 1
+    assert len(fnlet.blocks[1].instructions) == 2
     assert len(fnlet.blocks[2].instructions) == 1
-    assert len(fnlet.blocks[3].instructions) == 1
 
 
 def can_detect_fnlets_assign_with_spills():
@@ -50,8 +49,7 @@ def can_detect_fnlets_assign_with_spills():
     _, fnlet = analyses.fnlets.peek()
 
     # spilling is resolved later during register allocation, not here
-    assert len(fnlet.blocks) == 4
+    assert len(fnlet.blocks) == 3
     assert len(fnlet.blocks[0].instructions) == 1
-    assert len(fnlet.blocks[1].instructions) == 1
+    assert len(fnlet.blocks[1].instructions) == 2
     assert len(fnlet.blocks[2].instructions) == 1
-    assert len(fnlet.blocks[3].instructions) == 1

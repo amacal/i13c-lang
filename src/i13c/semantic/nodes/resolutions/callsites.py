@@ -12,6 +12,7 @@ from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
     CallSiteArgument,
+    CallSiteOutput,
     CallSiteRejection,
     CallSiteRejectionReason,
     CallSiteResolution,
@@ -160,6 +161,14 @@ def build_callsite_resolution(
                     arguments.append(target)
 
                 if rejected is None:
+                    output = None
+
+                    # output must be wrapped into dedicated object
+                    # it helps us distinguish output per callsite
+
+                    if signature.result is not None:
+                        output = CallSiteOutput(target=signature.result)
+
                     resolution.accepted.append(
                         CallSiteAcceptance(
                             ref=entry.ref,
@@ -168,6 +177,7 @@ def build_callsite_resolution(
                             stmt=stmt_id,
                             signature=signature,
                             arguments=arguments,
+                            output=output,
                         )
                     )
 

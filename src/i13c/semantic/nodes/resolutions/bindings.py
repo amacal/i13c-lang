@@ -5,6 +5,7 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.parameters import ParameterId
+from i13c.semantic.typing.entities.results import ResultId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.resolutions.bindings import (
     BindingAcceptance,
@@ -24,7 +25,9 @@ def configure_binding_resolution() -> GraphGroup:
         requires=frozenset(
             {
                 ("signatures", "resolutions/signatures/accepted"),
-                ("binds", "indices/binds/parameters"),
+                ("binds_params", "indices/binds/parameters"),
+                ("binds_results", "indices/binds/results"),
+
             }
         ),
         views=GraphViews(list=ListAllExtractor),
@@ -59,7 +62,8 @@ def configure_binding_resolution() -> GraphGroup:
 
 def build_binding_resolution(
     signatures: OneToOne[SignatureId, SignatureAcceptance],
-    binds: OneToOne[ParameterId, BindAcceptance],
+    binds_params: OneToOne[ParameterId, BindAcceptance],
+    binds_results: OneToOne[ResultId, BindAcceptance],
 ) -> OneToOne[SignatureId, BindingResolution]:
     resolutions: dict[SignatureId, BindingResolution] = {}
     sysv: list[bytes] = [b"rdi", b"rsi", b"rdx", b"rcx", b"r8", b"r9"]
@@ -74,10 +78,11 @@ def build_binding_resolution(
 
         names: set[bytes] = set()
         found: list[BindingEntry] = []
+        outputs: list[BindingEntry] = []
 
         # only snippets may have binds
         for parameter, reg in zip(entry.parameters, sysv):
-            if bind := binds.find(parameter.id):
+            if bind := binds_params.find(parameter.id):
                 if bind.mode == "register" and bind.dst in names:
                     resolution.rejected.append(
                         BindingRejection(
@@ -107,12 +112,23 @@ def build_binding_resolution(
                     )
                 )
 
+        if entry.result is not None:
+            if bind := binds_results.find(entry.result.id):
+                outputs.append(
+                    BindingEntry(
+                        src=bind.src,
+                        dst=bind.dst,
+                        mode=bind.mode,
+                    )
+                )
+
         if len(resolution.rejected) == 0:
             resolution.accepted.append(
                 BindingAcceptance(
                     ref=entry.ref,
                     owner=sid,
                     mapping=found,
+                    outputs=outputs,
                 )
             )
 

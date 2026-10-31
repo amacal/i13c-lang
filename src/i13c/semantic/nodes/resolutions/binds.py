@@ -16,7 +16,11 @@ def configure_bind_resolution() -> GraphGroup:
         builder=build_bind_resolution,
         constraint=None,
         produces=("resolutions/binds",),
-        requires=frozenset({("binds", "entities/binds")}),
+        requires=frozenset(
+            {
+                ("binds", "entities/binds"),
+            }
+        ),
     )
 
     validate = GraphNode(
@@ -69,6 +73,14 @@ def build_bind_resolution(
                 BindRejection(
                     ref=entry.ref,
                     reason="unknown-register",
+                )
+            )
+
+        elif entry.dst in (b"r11", b"rsp"):
+            resolution.rejected.append(
+                BindRejection(
+                    ref=entry.ref,
+                    reason="incorrect-register",
                 )
             )
 

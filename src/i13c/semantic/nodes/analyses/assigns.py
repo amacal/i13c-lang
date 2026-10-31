@@ -64,15 +64,17 @@ def emit(
     if isinstance(entry.expression, LiteralAcceptance):
         src = Immediate(value=entry.expression.target)
 
-    # expression emits vreg where its value is stored
+    # expression emits dest <- vreg of the expression's value
+    # the value of the expression is already stored in a vreg
     elif isinstance(entry.expression, ExpressionAcceptance):
         idx = dflow.values.index(entry.expression.target)
         src = Register(name=dflow.vregs[idx])
 
-    # callsite emits vreg where its value is returned
+    # callsite emits dest <- vreg of the callsite's output
+    # the callsite must be called first to have its output
     else:
-        assert entry.expression.result is not None
-        idx = dflow.values.index(entry.expression.result)
+        assert entry.expression.output is not None
+        idx = dflow.values.index(entry.expression.output)
         src = Register(name=dflow.vregs[idx])
 
     # emit single instruction

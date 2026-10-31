@@ -6,6 +6,7 @@ from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
+from i13c.semantic.typing.resolutions.results import ResultAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span
@@ -21,6 +22,16 @@ CallSiteRejectionReason = Kind[
 
 CallSiteArgument = LiteralAcceptance | ParameterAcceptance | ValueAcceptance
 
+# the output of a callsite cannot be comparable
+# it has to be comparable by the reference (ref)
+
+@dataclass(kw_only=True, eq=False)
+class CallSiteOutput:
+    target: ResultAcceptance
+
+    def __str__(self) -> str:
+        return str(self.target)
+
 
 @dataclass(kw_only=True)
 class CallSiteRejection:
@@ -30,7 +41,7 @@ class CallSiteRejection:
     reason: CallSiteRejectionReason
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class CallSiteAcceptance:
     ref: Span
     id: CallSiteId
@@ -40,6 +51,7 @@ class CallSiteAcceptance:
 
     signature: SignatureAcceptance
     arguments: list[CallSiteArgument]
+    output: CallSiteOutput | None
 
 
 @dataclass(kw_only=True)

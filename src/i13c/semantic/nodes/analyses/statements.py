@@ -6,10 +6,11 @@ from i13c.semantic.typing.analyses.assigns import AssignLlvm
 from i13c.semantic.typing.analyses.calls import CallLlvm
 from i13c.semantic.typing.analyses.statements import StatementInstruction, StatementLlvm
 from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.calls import CallId
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
+from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.statements import StatementAcceptance
 
 
@@ -30,7 +31,7 @@ def configure_statements() -> GraphNode:
 
 
 def build_statements(
-    calls: OneToOne[CallId, CallLlvm],
+    calls: OneToOne[CallSiteId, CallLlvm],
     assigns: OneToOne[AssignId, AssignLlvm],
     statements: OneToOne[StatementId, StatementAcceptance],
 ) -> OneToOne[StatementId, StatementLlvm]:
@@ -39,10 +40,19 @@ def build_statements(
     for eid, entry in statements.items():
         instructions: list[StatementInstruction] = []
 
+        # the call alone doesn't need any ordering
+
         if isinstance(entry.target, CallAcceptance):
-            instructions.extend(calls.get(entry.target.id).instructions)
+            instructions.extend(calls.get(entry.target.target.callsite).instructions)
+
+        # the order of extending assignments matters
+        # calls should be extended before assigns to
+        # ensure that the call's result is ready to assign
 
         if isinstance(entry.target, AssignAcceptance):
+            if isinstance(entry.target.expression, CallSiteAcceptance):
+                instructions.extend(calls.get(entry.target.expression.id).instructions)
+
             instructions.extend(assigns.get(entry.target.id).instructions)
 
         llvm[eid] = StatementLlvm(

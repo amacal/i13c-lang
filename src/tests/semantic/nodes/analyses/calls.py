@@ -181,6 +181,27 @@ def can_detect_calls_with_asm_callsite_with_literal():
     ]
 
 
+def can_detect_calls_when_used_in_assignment():
+    _, analyses = prepare_analyses("""
+        asm foo(x@rdi: u8) -> u16@rax clobbers rax { }
+        fn main(x: u8) { val v: u16 = foo(x); }
+    """)
+
+    assert analyses.calls is not None
+    assert analyses.calls.size() == 1
+    _, call = analyses.calls.peek()
+
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    asmlet, _ = analyses.asmlets.peek()
+
+    assert call.listing() == [
+        f"call {asmlet.identify(1)}",
+    ]
+
+    assert call.instructions[0].args
+
+
 def can_detect_calls_with_asm_callsite_with_spilled_param():
     _, analyses = prepare_analyses("""
         asm foo(x@rax: u8)
@@ -202,3 +223,37 @@ def can_detect_calls_with_asm_callsite_with_spilled_param():
     assert call.listing() == [
         f"call {asmlet.identify(1)}",
     ]
+
+
+def can_detect_calls_collecting_output_from_declared_register():
+    _, analyses = prepare_analyses("""
+        asm foo() -> u64@rdx clobbers rdx { }
+        fn main() { val v: u64 = foo(); }
+    """)
+
+    assert analyses.calls is not None
+    assert analyses.calls.size() == 1
+    _, call = analyses.calls.peek()
+
+    assert len(call.instructions) == 1
+    instr = call.instructions[0]
+
+    # the output is collected from rdx as declared, not from the default rax
+    assert {dst: src.name for dst, src in instr.outs.items()} == {b"rdx": b"v1"}
+
+
+def can_detect_calls_not_duplicating_a_declared_result_clobber():
+    _, analyses = prepare_analyses("""
+        asm foo() -> u64@rax clobbers rax { }
+        fn main() { val v: u64 = foo(); }
+    """)
+
+    assert analyses.calls is not None
+    assert analyses.calls.size() == 1
+    _, call = analyses.calls.peek()
+
+    assert len(call.instructions) == 1
+    instr = call.instructions[0]
+
+    # the result register must be declared as a clobber, and it's listed once
+    assert instr.clobbers == [b"rax"]

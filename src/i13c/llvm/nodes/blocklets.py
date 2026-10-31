@@ -408,7 +408,7 @@ def emit_call(operands: list[AsmletOperand]) -> EmitRelocated:
             target = target[0]
 
     # create the CALL instruction
-    instruction = CALL(operands=(target,), args={}, clobbers=[])
+    instruction = CALL(operands=(target,), clobbers=[], args={}, outs={})
 
     # convert relocations to EmitRelocation instances
     return instruction, into_relocations(relocations, instruction)
@@ -914,20 +914,33 @@ def rewrite_call(
         else:
             return InRegister(name=palette[segment.colors[idx]])
 
-    src: Coloring = {
+    # fmt: off
+    before_src: Coloring = {
         dst: into_location(src.name)
         for dst, src in instruction.args.items()
         if isinstance(src, Register)
     }
 
-    dst: Coloring = {
+    before_dst: Coloring = {
         dst: InRegister(name=dst)
         for dst, src in instruction.args.items()
         if isinstance(src, Register)
     }
 
+    after_src: Coloring = {
+        dst: InRegister(name=dst)
+        for dst in instruction.outs
+    }
+
+    after_dst: Coloring = {
+        dst: into_location(src.name)
+        for dst, src in instruction.outs.items()
+    }
+    # fmt: on
+
     # perform the transfer using the scratch register
-    instructions = transfer(InRegister(name=scratch.name), src, dst)
+    before = transfer(InRegister(name=scratch.name), before_src, before_dst)
+    after = transfer(InRegister(name=scratch.name), after_src, after_dst)
 
     # handle immediate operands separately
     for op1, op2 in instruction.args.items():
@@ -940,15 +953,16 @@ def rewrite_call(
                 if op2.width() < 32:
                     op2 = op2.resize(32)
 
-            instructions.append(MOV(operands=(op1, op2)))
+            before.append(MOV(operands=(op1, op2)))
 
     call = CALL(
         operands=instruction.operands,
-        args={},
         clobbers=[],
+        args={},
+        outs={},
     )
 
-    return instructions + [call]
+    return before + [call] + after
 
 
 def address(offset: int) -> Address:
@@ -1420,6 +1434,7 @@ def can_rewrite_call_move_a_colored_argument_into_its_required_register():
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rdi": Register(name=b"v0")},
+        outs={},
         clobbers=[],
     )
 
@@ -1436,6 +1451,7 @@ def can_rewrite_call_skip_the_move_when_the_argument_is_already_in_place():
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rdi": Register(name=b"v0")},
+        outs={},
         clobbers=[],
     )
 
@@ -1455,6 +1471,7 @@ def can_rewrite_call_exchange_two_arguments_that_need_to_swap_registers():
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rdi": Register(name=b"v0"), b"rsi": Register(name=b"v1")},
+        outs={},
         clobbers=[],
     )
 
@@ -1470,6 +1487,7 @@ def can_rewrite_call_load_an_immediate_argument_directly():
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rdi": immediate},
+        outs={},
         clobbers=[],
     )
 
@@ -1488,6 +1506,7 @@ def can_rewrite_call_widen_a_byte_sized_immediate_argument_to_fit_its_register()
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rdi": immediate},
+        outs={},
         clobbers=[],
     )
 
@@ -1505,6 +1524,7 @@ def can_rewrite_call_widen_a_word_sized_immediate_argument_to_fit_its_register()
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rdi": immediate},
+        outs={},
         clobbers=[],
     )
 
@@ -1527,6 +1547,7 @@ def can_rewrite_call_combine_a_colored_register_argument_with_an_immediate_argum
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rdi": Register(name=b"v0"), b"rsi": immediate},
+        outs={},
         clobbers=[],
     )
 
@@ -1541,7 +1562,7 @@ def can_rewrite_call_combine_a_colored_register_argument_with_an_immediate_argum
 
 def can_rewrite_call_emit_a_bare_call_when_there_are_no_arguments():
     segment = AllocationSegment(colors={}, spills={})
-    instruction = CALL(operands=(FunctionId(value=1),), args={}, clobbers=[])
+    instruction = CALL(operands=(FunctionId(value=1),), args={}, outs={}, clobbers=[])
 
     result = rewrite_call(
         instruction, transfer, Register(name=b"r11"), [], [b"rdi"], segment
@@ -1555,6 +1576,7 @@ def can_rewrite_call_strip_the_original_args_and_clobbers_from_the_rewritten_cal
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={},
+        outs={},
         clobbers=[b"rax", b"rcx"],
     )
 
@@ -1581,6 +1603,7 @@ def can_rewrite_call_load_a_spilled_argument_from_its_assigned_slot_not_its_inde
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rax": Register(name=b"v0")},
+        outs={},
         clobbers=[],
     )
 
@@ -1603,6 +1626,7 @@ def can_rewrite_call_load_two_spilled_arguments_whose_indices_and_slots_never_ma
     instruction = CALL(
         operands=(FunctionId(value=1),),
         args={b"rax": Register(name=b"v0"), b"rdi": Register(name=b"v1")},
+        outs={},
         clobbers=[],
     )
 
@@ -1613,6 +1637,125 @@ def can_rewrite_call_load_two_spilled_arguments_whose_indices_and_slots_never_ma
         "mov rdi, qword [rsp + 0x00]",
         "call function#1",
     ]
+
+
+def can_rewrite_call_move_an_output_into_its_colored_register():
+    registers = [b"v0"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+    segment = AllocationSegment(colors={0: 1}, spills={})
+    instruction = CALL(
+        operands=(FunctionId(value=1),),
+        args={},
+        outs={b"rax": Register(name=b"v0")},
+        clobbers=[],
+    )
+
+    # the callee leaves its result in rax, but v0 was colored to rsi
+    result = rewrite_call(instruction, transfer, scratch, registers, palette, segment)
+
+    assert [str(i) for i in result] == ["call function#1", "mov rsi, rax"]
+
+
+def can_rewrite_call_skip_the_move_when_the_output_is_already_in_place():
+    registers = [b"v0"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+    segment = AllocationSegment(colors={0: 4}, spills={})
+    instruction = CALL(
+        operands=(FunctionId(value=1),),
+        args={},
+        outs={b"rax": Register(name=b"v0")},
+        clobbers=[],
+    )
+
+    # v0 is already colored to rax, exactly where the callee leaves it
+    result = rewrite_call(instruction, transfer, scratch, registers, palette, segment)
+
+    assert [str(i) for i in result] == ["call function#1"]
+
+
+def can_rewrite_call_store_a_spilled_output_into_its_assigned_slot():
+    registers = [b"v0"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+
+    # v0 is spilled to slot 5, so the result must be stored right after the call
+    segment = AllocationSegment(colors={}, spills={0: 5})
+    instruction = CALL(
+        operands=(FunctionId(value=1),),
+        args={},
+        outs={b"rax": Register(name=b"v0")},
+        clobbers=[],
+    )
+
+    result = rewrite_call(instruction, transfer, scratch, registers, palette, segment)
+
+    assert [str(i) for i in result] == [
+        "call function#1",
+        "mov qword [rsp + 0x28], rax",
+    ]
+
+
+def can_rewrite_call_move_arguments_before_and_outputs_after_the_call():
+    registers = [b"v0", b"v1"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+    segment = AllocationSegment(colors={0: 2, 1: 1}, spills={})
+    instruction = CALL(
+        operands=(FunctionId(value=1),),
+        args={b"rdi": Register(name=b"v0")},
+        outs={b"rax": Register(name=b"v1")},
+        clobbers=[],
+    )
+
+    # v0 is passed in from rdx, v1 is collected from rax into rsi
+    result = rewrite_call(instruction, transfer, scratch, registers, palette, segment)
+
+    assert [str(i) for i in result] == [
+        "mov rdi, rdx",
+        "call function#1",
+        "mov rsi, rax",
+    ]
+
+
+def can_rewrite_call_exchange_two_outputs_that_need_to_swap_registers():
+    registers = [b"v0", b"v1"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+
+    # v0 comes in rax but wants rdx, v1 comes in rdx but wants rax: a cycle
+    segment = AllocationSegment(colors={0: 2, 1: 4}, spills={})
+    instruction = CALL(
+        operands=(FunctionId(value=1),),
+        args={},
+        outs={b"rax": Register(name=b"v0"), b"rdx": Register(name=b"v1")},
+        clobbers=[],
+    )
+
+    result = rewrite_call(instruction, transfer, scratch, registers, palette, segment)
+
+    assert [str(i) for i in result] == ["call function#1", "xchg rdx, rax"]
+
+
+def can_rewrite_call_strip_the_original_outs_from_the_rewritten_call():
+    registers = [b"v0"]
+    palette = [b"rdi", b"rsi", b"rdx", b"rcx", b"rax"]
+    scratch = Register(name=b"r11")
+    segment = AllocationSegment(colors={0: 1}, spills={})
+    instruction = CALL(
+        operands=(FunctionId(value=1),),
+        args={},
+        outs={b"rax": Register(name=b"v0")},
+        clobbers=[],
+    )
+
+    result = rewrite_call(instruction, transfer, scratch, registers, palette, segment)
+
+    # the outputs are already reconciled by the moves after the call
+    call = result[0]
+    assert isinstance(call, CALL)
+    assert call.outs == {}
 
 
 def can_emit_prologue_save_a_callee_saved_register_the_function_actually_uses():

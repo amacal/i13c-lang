@@ -5,6 +5,7 @@ from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
     CallSiteArgument,
+    CallSiteOutput,
 )
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
@@ -28,6 +29,15 @@ class CallingUnbound:
     name: bytes
 
 
+@dataclass(kw_only=True, eq=False, repr=False)
+class CallingOutput:
+    name: bytes
+    target: CallSiteOutput
+
+    def __str__(self) -> str:
+        return f"{self.name.decode()}:{self.target.target.type}"
+
+
 @dataclass(kw_only=True, repr=False)
 class Calling:
     ref: Span
@@ -41,3 +51,4 @@ class Calling:
     bindings: list[CallingBinding]
     clobbers: list[CallingClobber]
     unbounds: list[CallingUnbound]
+    outputs: list[CallingOutput]

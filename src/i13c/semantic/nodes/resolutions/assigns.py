@@ -97,11 +97,17 @@ def build_assign_resolution(
             expression = expressions.get(entry.expression)
             target = expression.target.type
 
-        # callsite propagates its signature, because it contains
-        # where the retuned value is stored, callsite is not needed
+        # callsite propagates its call, because it contains
+        # where the returned value is stored, callsite is not needed
         else:
-            expression = callsites.get(entry.expression).signature
-            target = expression.result.type if expression.result else None
+            expression = callsites.get(entry.expression)
+
+            # result may be null when the callsite does not produce a value
+            target = (
+                expression.signature.result.type
+                if expression.signature.result
+                else None
+            )
 
         if target is None:
             rejected = "type-mismatch"

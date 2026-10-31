@@ -8,6 +8,7 @@ from i13c.syntax.source import Span
 
 BindRejectionReason = Kind[
     "unknown-register",
+    "incorrect-register",
     "incorrect-width",
 ]
 

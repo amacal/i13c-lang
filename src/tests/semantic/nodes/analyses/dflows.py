@@ -1,5 +1,6 @@
 from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.resolutions.assigns import ValueAcceptance
+from i13c.semantic.typing.resolutions.callsites import CallSiteOutput
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from tests.semantic.nodes.analyses import prepare_analyses
@@ -418,4 +419,219 @@ def can_detect_dflow_with_an_assignment_using_value():
     assert dflows.uses[1] == []
 
     assert dflows.defs[2] == [2]
+    assert dflows.uses[2] == [0]
+
+
+def can_detect_dflow_with_an_assignment_using_callsite():
+    _, analyses = prepare_analyses("""
+        asm foo() -> u8@rax clobbers rax { }
+        fn bar() { val x: u8 = foo(); }
+    """)
+
+    assert analyses.dflows is not None
+    assert analyses.dflows.size() == 1
+    _, dflows = analyses.dflows.peek()
+
+    assert len(dflows.values) == 3
+    assert len(dflows.forward) == 3
+    assert len(dflows.backward) == 3
+
+    assert isinstance(dflows.values[0], ValueAcceptance)
+    assert dflows.values[0].name == b"x"
+    assert dflows.values[0].type.name == b"u8"
+
+    assert isinstance(dflows.values[1], CallSiteOutput)
+    assert dflows.values[1].target.type.name == b"u8"
+
+    assert isinstance(dflows.values[2], Calling)
+    assert dflows.values[2].signature.name == b"foo"
+
+    assert dflows.forward[0] == []
+    assert dflows.backward[0] == [1]
+
+    assert dflows.forward[1] == [0]
+    assert dflows.backward[1] == []
+
+    assert dflows.forward[2] == []
+    assert dflows.backward[2] == []
+
+    assert len(dflows.nodes) == 3
+    assert len(dflows.defs) == 3
+    assert len(dflows.uses) == 3
+
+    assert dflows.defs[0] == []
+    assert dflows.defs[2] == []
+
+    assert dflows.uses[0] == []
+    assert dflows.uses[2] == []
+
+    assert dflows.defs[1] == [0]
+    assert dflows.uses[1] == []
+
+
+def can_detect_dflow_with_an_assignment_using_callsite_with_parameter():
+    _, analyses = prepare_analyses("""
+        asm foo(a@rbx: u8) -> u8@rax clobbers rax { }
+        fn bar(a: u8) { val x: u8 = foo(a); }
+    """)
+
+    assert analyses.dflows is not None
+    assert analyses.dflows.size() == 1
+    _, dflows = analyses.dflows.peek()
+
+    assert len(dflows.values) == 4
+    assert len(dflows.forward) == 4
+    assert len(dflows.backward) == 4
+
+    assert isinstance(dflows.values[0], ParameterAcceptance)
+    assert dflows.values[0].name == b"a"
+
+    assert isinstance(dflows.values[1], ValueAcceptance)
+    assert dflows.values[1].name == b"x"
+
+    assert isinstance(dflows.values[2], CallSiteOutput)
+
+    assert isinstance(dflows.values[3], Calling)
+    assert dflows.values[3].signature.name == b"foo"
+
+    # parameter flows into the calling, not into the assigned value
+    assert dflows.forward[0] == [3]
+    assert dflows.backward[0] == []
+
+    assert dflows.forward[1] == []
+    assert dflows.backward[1] == [2]
+
+    assert dflows.forward[2] == [1]
+    assert dflows.backward[2] == []
+
+    assert dflows.forward[3] == []
+    assert dflows.backward[3] == [0]
+
+    assert len(dflows.nodes) == 3
+    assert len(dflows.defs) == 3
+    assert len(dflows.uses) == 3
+
+    assert dflows.defs[0] == [0]
+    assert dflows.defs[2] == []
+
+    assert dflows.uses[0] == []
+    assert dflows.uses[2] == []
+
+    # the assignment defines the value and uses the call argument
+    assert dflows.defs[1] == [1]
+    assert dflows.uses[1] == [0]
+
+
+def can_detect_dflow_with_an_assignment_using_callsite_with_value():
+    _, analyses = prepare_analyses("""
+        asm foo(a@rbx: u8) -> u8@rax clobbers rax { }
+        fn bar() { val a: u8 = 0x42; val x: u8 = foo(a); }
+    """)
+
+    assert analyses.dflows is not None
+    assert analyses.dflows.size() == 1
+    _, dflows = analyses.dflows.peek()
+
+    assert len(dflows.values) == 5
+    assert len(dflows.forward) == 5
+    assert len(dflows.backward) == 5
+
+    assert isinstance(dflows.values[0], ValueAcceptance)
+    assert dflows.values[0].name == b"a"
+
+    assert isinstance(dflows.values[1], LiteralAcceptance)
+    assert str(dflows.values[1].target) == "0x42"
+
+    assert isinstance(dflows.values[2], ValueAcceptance)
+    assert dflows.values[2].name == b"x"
+
+    assert isinstance(dflows.values[3], CallSiteOutput)
+
+    assert isinstance(dflows.values[4], Calling)
+    assert dflows.values[4].signature.name == b"foo"
+
+    assert dflows.forward[0] == [4]
+    assert dflows.backward[0] == [1]
+
+    assert dflows.forward[1] == [0]
+    assert dflows.backward[1] == []
+
+    assert dflows.forward[2] == []
+    assert dflows.backward[2] == [3]
+
+    assert dflows.forward[3] == [2]
+    assert dflows.backward[3] == []
+
+    assert dflows.forward[4] == []
+    assert dflows.backward[4] == [0]
+
+    assert len(dflows.nodes) == 4
+    assert len(dflows.defs) == 4
+    assert len(dflows.uses) == 4
+
+    assert dflows.defs[0] == []
+    assert dflows.defs[3] == []
+
+    assert dflows.uses[0] == []
+    assert dflows.uses[3] == []
+
+    assert dflows.defs[1] == [0]
+    assert dflows.uses[1] == []
+
+    assert dflows.defs[2] == [2]
+    assert dflows.uses[2] == [0]
+
+
+def can_detect_dflow_with_a_chain_of_callsite_to_value_to_callsite():
+    _, analyses = prepare_analyses("""
+        asm foo() -> u8@rax clobbers rax { }
+        asm baz(a@rbx: u8) { }
+        fn bar() { val x: u8 = foo(); baz(x); }
+    """)
+
+    assert analyses.dflows is not None
+    assert analyses.dflows.size() == 1
+    _, dflows = analyses.dflows.peek()
+
+    assert len(dflows.values) == 4
+    assert len(dflows.forward) == 4
+    assert len(dflows.backward) == 4
+
+    assert isinstance(dflows.values[0], ValueAcceptance)
+    assert dflows.values[0].name == b"x"
+
+    assert isinstance(dflows.values[1], CallSiteOutput)
+
+    assert isinstance(dflows.values[2], Calling)
+    assert dflows.values[2].signature.name == b"foo"
+
+    assert isinstance(dflows.values[3], Calling)
+    assert dflows.values[3].signature.name == b"baz"
+
+    assert dflows.forward[0] == [3]
+    assert dflows.backward[0] == [1]
+
+    assert dflows.forward[1] == [0]
+    assert dflows.backward[1] == []
+
+    assert dflows.forward[2] == []
+    assert dflows.backward[2] == []
+
+    assert dflows.forward[3] == []
+    assert dflows.backward[3] == [0]
+
+    assert len(dflows.nodes) == 4
+    assert len(dflows.defs) == 4
+    assert len(dflows.uses) == 4
+
+    assert dflows.defs[0] == []
+    assert dflows.defs[3] == []
+
+    assert dflows.uses[0] == []
+    assert dflows.uses[3] == []
+
+    assert dflows.defs[1] == [0]
+    assert dflows.uses[1] == []
+
+    assert dflows.defs[2] == []
     assert dflows.uses[2] == [0]

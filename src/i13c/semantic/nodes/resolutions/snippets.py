@@ -103,6 +103,23 @@ def build_snippet_resolution(
                     )
                 )
 
+        # if the signature has outputs, each of them must be
+        # register as clobber, otherwise it is an unregistered-clobber
+
+        if signature.result is not None:
+            # index is used to quicker check membership
+            index = {clobber.name for clobber in clobbers}
+
+            for bind in binding.outputs:
+                if bind.dst not in index:
+                    resolution.rejected.append(
+                        SnippetRejection(
+                            ref=entry.ref,
+                            id=sid,
+                            reason="unregistered-clobber",
+                        )
+                    )
+
         if found := noreturns.get(entry.signature):
             noreturn = found.outcome
 

@@ -3,7 +3,10 @@ from i13c.semantic.nodes.indices.asmlets import (
     configure_asmlets_by_callsites,
     configure_asmlets_by_signatures,
 )
-from i13c.semantic.nodes.indices.binds import configure_binds_by_parameters
+from i13c.semantic.nodes.indices.binds import (
+    configure_binds_by_parameters,
+    configure_binds_by_results,
+)
 from i13c.semantic.nodes.indices.callsites import (
     configure_callsites_by_signatures,
     configure_callsites_by_statements,
@@ -30,6 +33,7 @@ def configure_indices() -> GraphGroup:
             configure_asmlets_by_callsites(),
             configure_asmlets_by_signatures(),
             configure_binds_by_parameters(),
+            configure_binds_by_results(),
             configure_callsites_by_signatures(),
             configure_callsites_by_statements(),
             configure_flags_by_nid(),

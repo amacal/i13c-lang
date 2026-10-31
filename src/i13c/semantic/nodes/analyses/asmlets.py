@@ -99,7 +99,9 @@ def build_asmlets(
                 continue
 
             # copy all binds except those that are immediate
-            binds = [bind for bind in snippet.binding.mapping if bind.src not in removed]
+            binds = [
+                bind for bind in snippet.binding.mapping if bind.src not in removed
+            ]
 
             # copy all parameters except those that are immediate
             parameters = [
@@ -107,6 +109,13 @@ def build_asmlets(
                 for param in snippet.signature.parameters
                 if param.name not in removed
             ]
+
+            if snippet.signature.result is None:
+                outputs = []
+
+            else:
+                outputs = snippet.binding.outputs
+                assert len(outputs) == 1
 
             # mapping of parameter name to bind source for all register parameters
             mapping: dict[bytes, bytes | Hex] = {bind.src: bind.dst for bind in binds}
@@ -135,6 +144,7 @@ def build_asmlets(
                 bindings=binds,
                 clobbers=snippet.clobbers,
                 parameters=parameters,
+                outputs=outputs,
                 instructions=instructions,
             )
 

@@ -1,7 +1,7 @@
+from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
-from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
@@ -84,12 +84,12 @@ def can_accept_valid_assign_from_callsite():
     assert resolution.accepted[0].destination.name == b"x"
     assert resolution.accepted[0].destination.type.width == 16
 
-    assert isinstance(resolution.accepted[0].expression, SignatureAcceptance)
-    assert resolution.accepted[0].expression.name == b"foo"
+    assert isinstance(resolution.accepted[0].expression, CallSiteAcceptance)
+    assert resolution.accepted[0].expression.signature.name == b"foo"
 
-    assert resolution.accepted[0].expression.result is not None
-    assert resolution.accepted[0].expression.result.type.name == b"u16"
-    assert resolution.accepted[0].expression.result.type.width == 16
+    assert resolution.accepted[0].expression.signature.result is not None
+    assert resolution.accepted[0].expression.signature.result.type.name == b"u16"
+    assert resolution.accepted[0].expression.signature.result.type.width == 16
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u16 = foo()"
 
@@ -110,8 +110,8 @@ def can_accept_valid_assign_from_callsite_with_arguments():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert isinstance(resolution.accepted[0].expression, SignatureAcceptance)
-    assert resolution.accepted[0].expression.name == b"foo"
+    assert isinstance(resolution.accepted[0].expression, CallSiteAcceptance)
+    assert resolution.accepted[0].expression.signature.name == b"foo"
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u16 = foo(0x12)"
 
@@ -132,7 +132,7 @@ def can_accept_valid_assign_from_callsite_with_narrower_range():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert isinstance(resolution.accepted[0].expression, SignatureAcceptance)
+    assert isinstance(resolution.accepted[0].expression, CallSiteAcceptance)
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u8[0x00..0x03] = foo()"
 

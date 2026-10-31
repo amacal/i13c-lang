@@ -582,3 +582,34 @@ def can_substitute_a_snippet_with_two_immediate_parameters():
 
     assert asmlet.keys[b"y"].width == 16
     assert asmlet.keys[b"y"].data.hex() == "0002"
+
+
+def can_substitute_a_snippet_with_a_result_in_rax():
+    _, analyses = prepare_analyses("""
+        asm bar() -> u64@rax clobbers rax { mov rax, rbx; }
+        fn main() { val x: u64 = bar(); }
+    """)
+
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peek()
+
+    assert len(asmlet.outputs) == 1
+    assert asmlet.outputs[0].dst == b"rax"
+    assert asmlet.outputs[0].mode == "register"
+
+
+def can_substitute_a_snippet_with_a_result_in_declared_register():
+    _, analyses = prepare_analyses("""
+        asm bar() -> u64@rdx clobbers rdx { mov rdx, rbx; }
+        fn main() { val x: u64 = bar(); }
+    """)
+
+    assert analyses.asmlets is not None
+    assert analyses.asmlets.size() == 1
+    _, asmlet = analyses.asmlets.peek()
+
+    # the result is returned in rdx as declared, not in the default rax
+    assert len(asmlet.outputs) == 1
+    assert asmlet.outputs[0].dst == b"rdx"
+    assert asmlet.outputs[0].mode == "register"

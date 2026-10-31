@@ -2,17 +2,19 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
+from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.analyses.cflows import ControlFlows, FlowNode
 from i13c.semantic.typing.analyses.dflows import DataFlows
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
+from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
-from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.statements import StatementAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
@@ -25,6 +27,7 @@ def configure_data_flows() -> GraphNode:
         requires=frozenset(
             {
                 ("cflows", "analyses/cflows"),
+                ("callings", "analyses/callings"),
                 ("functions", "resolutions/functions/accepted"),
                 ("statements", "resolutions/statements/accepted"),
             }
@@ -35,6 +38,7 @@ def configure_data_flows() -> GraphNode:
 
 def build_data_flows(
     cflows: OneToOne[FunctionId, ControlFlows],
+    callings: OneToOne[CallSiteId, Calling],
     functions: OneToOne[FunctionId, FunctionAcceptance],
     statements: OneToOne[StatementId, StatementAcceptance],
 ) -> OneToOne[FunctionId, DataFlows]:
@@ -59,7 +63,7 @@ def build_data_flows(
                 handle_entry(dflow, idx, functions.get(fid))
 
             elif isinstance(node, FlowNode):
-                handle_node(dflow, idx, statements.get(node.target))
+                handle_node(dflow, idx, statements.get(node.target), callings)
 
             else:
                 dflow.defs[idx] = []
@@ -85,65 +89,96 @@ def handle_entry(dflow: DataFlows, nid: int, target: FunctionAcceptance):
         dflow.backward[idx] = []
 
 
-def handle_node(dflow: DataFlows, nid: int, stmt: StatementAcceptance):
-    if isinstance(stmt.target, CallAcceptance):
-        idx = len(dflow.values)
-        dflow.values.append(stmt.target.target)
-        dflow.defs[nid] = []
-        dflow.uses[nid] = []
-        dflow.forward[idx] = []
-        dflow.backward[idx] = []
-        dflow.clobbers[nid] = []
+def handle_calling(dflow: DataFlows, nid: int, calling: Calling):
 
-        for arg in stmt.target.target.arguments:
-            if isinstance(arg, ParameterAcceptance):
-                for nix, node in enumerate(dflow.values):
-                    if isinstance(node, ParameterAcceptance):
-                        if node.id == arg.id:
-                            dflow.forward[nix].append(idx)
-                            dflow.backward[idx].append(nix)
-                            dflow.uses[nid].append(nix)
+    # calling is injected without any dependency
+    # buts is arguments are added as usages
 
-            elif isinstance(arg, ValueAcceptance):
-                for nix, node in enumerate(dflow.values):
-                    if isinstance(node, ValueAcceptance):
-                        if node.id == arg.id:
-                            dflow.forward[nix].append(idx)
-                            dflow.backward[idx].append(nix)
-                            dflow.uses[nid].append(nix)
+    idx = len(dflow.values)
+    dflow.values.append(calling)
+    dflow.forward[idx] = []
+    dflow.backward[idx] = []
 
-    if isinstance(stmt.target, AssignAcceptance):
-        idx = len(dflow.values)
-        dflow.values.append(stmt.target.destination)
-        dflow.defs[nid] = [idx]
-        dflow.uses[nid] = []
-        dflow.forward[idx] = []
-        dflow.backward[idx] = []
-
-        if isinstance(stmt.target.expression, ExpressionAcceptance):
+    for arg in calling.arguments:
+        if isinstance(arg, ParameterAcceptance):
             for nix, node in enumerate(dflow.values):
-                if isinstance(node, (ParameterAcceptance, ValueAcceptance)):
-                    if node.id == stmt.target.expression.target.id:
+                if isinstance(node, ParameterAcceptance):
+                    if node.id == arg.id:
                         dflow.forward[nix].append(idx)
                         dflow.backward[idx].append(nix)
                         dflow.uses[nid].append(nix)
 
-        # an assignment with literal makes short-lived inline edge
-        if isinstance(stmt.target.expression, LiteralAcceptance):
-            off = len(dflow.values)
-            dflow.values.append(stmt.target.expression)
-            dflow.forward[off] = [idx]
-            dflow.backward[off] = []
-            dflow.backward[idx].append(off)
+        elif isinstance(arg, ValueAcceptance):
+            for nix, node in enumerate(dflow.values):
+                if isinstance(node, ValueAcceptance):
+                    if node.id == arg.id:
+                        dflow.forward[nix].append(idx)
+                        dflow.backward[idx].append(nix)
+                        dflow.uses[nid].append(nix)
 
-        # an assignment accepting signature result
-        if isinstance(stmt.target.expression, SignatureAcceptance):
-            if stmt.target.expression.result is not None:
-                off = len(dflow.values)
-                dflow.values.append(stmt.target.expression.result)
-                dflow.forward[off] = [idx]
-                dflow.backward[off] = []
-                dflow.backward[idx].append(off)
+
+def handle_assign(
+    dflow: DataFlows,
+    nid: int,
+    assign: AssignAcceptance,
+    callings: OneToOne[CallSiteId, Calling],
+):
+
+    idx = len(dflow.values)
+    dflow.defs[nid].append(idx)
+
+    dflow.values.append(assign.destination)
+    dflow.forward[idx] = []
+    dflow.backward[idx] = []
+
+    if isinstance(assign.expression, ExpressionAcceptance):
+        for nix, node in enumerate(dflow.values):
+            if isinstance(node, (ParameterAcceptance, ValueAcceptance)):
+                if node.id == assign.expression.target.id:
+                    dflow.forward[nix].append(idx)
+                    dflow.backward[idx].append(nix)
+                    dflow.uses[nid].append(nix)
+
+    # an assignment with literal makes short-lived inline edge
+    if isinstance(assign.expression, LiteralAcceptance):
+        off = len(dflow.values)
+        dflow.values.append(assign.expression)
+        dflow.forward[off] = [idx]
+        dflow.backward[off] = []
+        dflow.backward[idx].append(off)
+
+    # an assignment accepting signature result
+    if isinstance(assign.expression, CallSiteAcceptance):
+        assert assign.expression.output is not None
+
+        off = len(dflow.values)
+        dflow.values.append(assign.expression.output)
+        dflow.forward[off] = [idx]
+        dflow.backward[off] = []
+        dflow.backward[idx].append(off)
+
+        calling = callings.get(assign.expression.id)
+        handle_calling(dflow, nid, calling)
+
+
+def handle_node(
+    dflow: DataFlows,
+    nid: int,
+    stmt: StatementAcceptance,
+    callings: OneToOne[CallSiteId, Calling],
+):
+
+    # handles the stmts into dflow knowing nid as ctrl flow idx
+
+    dflow.defs[nid] = []
+    dflow.uses[nid] = []
+    dflow.clobbers[nid] = []
+
+    if isinstance(stmt.target, CallAcceptance):
+        handle_calling(dflow, nid, stmt.target.target)
+
+    if isinstance(stmt.target, AssignAcceptance):
+        handle_assign(dflow, nid, stmt.target, callings)
 
 
 class ListExtractor:

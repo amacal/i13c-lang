@@ -36,6 +36,7 @@ class Asmlet:
 
     bindings: list[BindingEntry]
     parameters: list[ParameterAcceptance]
+    outputs: list[BindingEntry]
 
     noreturn: bool
     clobbers: list[RegisterAcceptance]

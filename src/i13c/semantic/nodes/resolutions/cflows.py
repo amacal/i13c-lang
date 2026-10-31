@@ -11,10 +11,16 @@ from i13c.semantic.typing.analyses.cflows import (
     FlowMember,
     FlowNode,
 )
+from i13c.semantic.typing.entities.assigns import Assign, AssignId
 from i13c.semantic.typing.entities.calls import CallId
+from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.statements import Statement, StatementId
+from i13c.semantic.typing.entities.statements import (
+    Statement,
+    StatementId,
+    StatementTarget,
+)
 from i13c.semantic.typing.resolutions.cflows import (
     ControlFlowAcceptance,
     ControlFlowEntry,
@@ -36,6 +42,7 @@ def configure_control_flow_resolution() -> GraphGroup:
                 ("cflows", "analyses/cflows"),
                 ("functions", "entities/functions"),
                 ("values", "indices/values/statements"),
+                ("assigns", "entities/assigns"),
                 ("signatures", "resolutions/signatures/accepted"),
                 ("statements", "entities/statements"),
             }
@@ -77,6 +84,7 @@ def build_control_flow_resolution(
     values: OneToMany[StatementId, ValueAcceptance],
     signatures: OneToOne[SignatureId, SignatureAcceptance],
     statements: OneToOne[StatementId, Statement],
+    assigns: OneToOne[AssignId, Assign],
 ) -> OneToOne[FunctionId, ControlFlowResolution]:
     resolutions: dict[FunctionId, ControlFlowResolution] = {}
 
@@ -125,12 +133,12 @@ def build_control_flow_resolution(
             assert isinstance(node, FlowNode)
 
             statement = statements.get(node.target)
-            is_a_call = isinstance(statement.target, CallId)
+            is_a_call = is_call(assigns, statement.target)
+
+            segments.append(segmentid)
 
             if is_a_call:
                 segmentid += 1
-
-            segments.append(segmentid)
 
         resolution.accepted.append(
             ControlFlowAcceptance(
@@ -148,6 +156,19 @@ def build_control_flow_resolution(
         resolutions[fid] = resolution
 
     return OneToOne[FunctionId, ControlFlowResolution].instance(resolutions)
+
+
+def is_call(
+    assigns: OneToOne[AssignId, Assign],
+    statement: StatementTarget,
+) -> bool:
+    if isinstance(statement, CallId):
+        return True
+
+    if assign := assigns.get(statement):
+        return isinstance(assign.expression, CallSiteId)
+
+    return False
 
 
 def check_control_flow_resolution_accepted(

@@ -4,14 +4,14 @@ from typing import Literal as Kind
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
-from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span
 
 AssignRejectionReason = Kind["type-mismatch"]
-AssignExpression = LiteralAcceptance | ExpressionAcceptance | SignatureAcceptance
+AssignExpression = LiteralAcceptance | ExpressionAcceptance | CallSiteAcceptance
 
 
 @dataclass(kw_only=True)

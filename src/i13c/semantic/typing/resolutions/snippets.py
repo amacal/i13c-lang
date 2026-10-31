@@ -10,6 +10,7 @@ from i13c.syntax.source import Span
 
 SnippetRejectionReason = Kind[
     "unallowed-clobber",
+    "unregistered-clobber",
 ]
 
 @dataclass(kw_only=True)

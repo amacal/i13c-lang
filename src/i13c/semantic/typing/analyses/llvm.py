@@ -375,13 +375,15 @@ class JMP:
 CallOperands = tuple[Register | Address | Relocation | AsmletId | FunctionId]
 CallArguments = dict[bytes, Register | Immediate]
 CallClobbers = list[bytes]
+CallOutputs = dict[bytes, Register]
 
 
 @dataclass(kw_only=True, repr=False)
 class CALL:
     operands: CallOperands
-    args: CallArguments
     clobbers: CallClobbers
+    args: CallArguments
+    outs: CallOutputs
 
     def __str__(self) -> str:
         return f"call {self.operands[0]}"

@@ -377,6 +377,7 @@ def can_visit_fnlet_with_a_parameterless_call():
                 operands=(FunctionId(value=11),),
                 clobbers=[],
                 args={},
+                outs={},
             ),
         ]
     )
@@ -443,6 +444,7 @@ def can_visit_fnlet_with_a_call_and_params():
                     b"rsi": llvm.Register(name=b"v0"),
                     b"rdx": llvm.Immediate.derive(bytes([0x00, 0x00, 0x00, 0x00])),
                 },
+                outs={},
             ),
         ]
     )
@@ -515,6 +517,7 @@ def can_visit_fnlet_with_multiline_instructions():
                     b"rdi": llvm.Register(name=b"v0"),
                     b"rsi": llvm.Register(name=b"v1"),
                 },
+                outs={},
             ),
         ]
     )
@@ -534,6 +537,7 @@ def can_visit_fnlet_with_multiline_instructions():
                     b"rdi": llvm.Register(name=b"v2"),
                     b"rsi": llvm.Register(name=b"v0"),
                 },
+                outs={},
             ),
         ]
     )

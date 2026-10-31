@@ -199,3 +199,66 @@ def can_detect_a_broken_range_rule_e3015():
     )
 
     assert len(rules.get("e3015")) == 1
+
+
+def can_accept_a_snippet_with_result_registered_as_clobber():
+    _, resolutions = prepare_resolutions(
+        """
+            asm main() -> u64@rax clobbers rax { mov rax, rbx; }
+        """
+    )
+
+    assert resolutions.snippets is not None
+    assert resolutions.snippets.size() == 1
+    _, resolution = resolutions.snippets.peek()
+
+    assert len(resolution.accepted) == 1
+    assert len(resolution.rejected) == 0
+
+
+def can_reject_a_snippet_with_result_not_registered_as_clobber():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main() -> u64@rax { mov rax, rbx; }
+        """
+    )
+
+    assert resolutions.snippets is not None
+    assert resolutions.snippets.size() == 1
+    _, resolution = resolutions.snippets.peek()
+
+    # the snippet writes its result into rax, so rax must be a clobber
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "unregistered-clobber"
+    assert source.extract(resolution.rejected[0].ref) == b"main()"
+
+
+def can_reject_a_snippet_with_result_registered_as_another_clobber():
+    source, resolutions = prepare_resolutions(
+        """
+            asm main() -> u64@rax clobbers rdx { mov rax, rbx; }
+        """
+    )
+
+    assert resolutions.snippets is not None
+    assert resolutions.snippets.size() == 1
+    _, resolution = resolutions.snippets.peek()
+
+    # rdx is clobbered, but the result register rax is not
+    assert len(resolution.accepted) == 0
+    assert len(resolution.rejected) == 1
+
+    assert resolution.rejected[0].reason == "unregistered-clobber"
+    assert source.extract(resolution.rejected[0].ref) == b"main()"
+
+
+def can_detect_an_unregistered_result_clobber_rule_e3015():
+    _, rules = prepare_rules(
+        """
+            asm main() -> u64@rax { mov rax, rbx; }
+        """
+    )
+
+    assert len(rules.get("e3015")) == 1

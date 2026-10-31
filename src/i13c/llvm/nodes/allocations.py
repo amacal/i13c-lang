@@ -213,7 +213,8 @@ def into_graph(
         for reg, color in seeds.colors:
             if reg in vals1 or reg in vals2 or reg in vals3:
                 reg = graph.map(mapping[reg])
-                colors[reg] = color
+                if reg not in colors:
+                    colors[reg] = color
 
         # regular interference
         for left, right in pairs1:
@@ -272,7 +273,7 @@ def allocate(liveness: Liveness, palette: Palette) -> Allocation:
             if isinstance(node, VirtualRegister):
                 gspills[nametoid[node.name]] = color
 
-        seeds.colors = [(idx, color) for idx, color in gcolors.items()]
+        seeds.colors = [(idx, color) for idx, color in gcolors.items()] + colors
         seeds.spills = [(idx, color) for idx, color in gspills.items()]
 
         for regs in segment.clobbers:
@@ -514,8 +515,7 @@ class InterferenceSolver:
 
         # try to reserve color candidates
         for idx, color in colors.items():
-            if color not in self._colors.values():
-                self._precolors[idx] = color
+            self._precolors[idx] = color
 
     def pass_zero(self, /, palette: int = 15):
         specs: dict[str, type | None] = {
@@ -1110,6 +1110,52 @@ def can_solve_interference_graph_avoid_two_distinct_physical_registers():
     }
 
 
+def can_solve_interference_graph_honor_a_hint_to_a_clobbered_color_without_interference():
+    graph = InterferenceGraph()
+
+    rax = PhysicalRegister(name=b"rax")
+    v0 = VirtualRegister(name=b"v0")
+    v1 = VirtualRegister(name=b"v1")
+
+    graph.add(rax)
+    graph.add(v0)
+    graph.add(v1)
+
+    graph.insert((rax, v1))
+
+    palette = Palette([b"rdi", b"rsi", b"rax"])
+    precolors = Precolored(colors={1: palette.find_by_name(b"rax")}, spills={})
+    colors, spills, clobbers = solve(graph, palette, precolors=precolors)
+
+    # rax is clobbered here, but only v1 interferes with it; v0 is hinted
+    # to rax and is free to take it, instead of falling back to rdi
+    assert colors == {1: palette.find_by_name(b"rax"), 2: 0}
+    assert spills == {}
+    assert clobbers == {0: palette.find_by_name(b"rax")}
+
+
+def can_solve_interference_graph_drop_a_hint_to_a_clobbered_color_with_interference():
+    graph = InterferenceGraph()
+
+    rax = PhysicalRegister(name=b"rax")
+    v0 = VirtualRegister(name=b"v0")
+
+    graph.add(rax)
+    graph.add(v0)
+
+    graph.insert((rax, v0))
+
+    palette = Palette([b"rdi", b"rsi", b"rax"])
+    precolors = Precolored(colors={1: palette.find_by_name(b"rax")}, spills={})
+    colors, spills, clobbers = solve(graph, palette, precolors=precolors)
+
+    # v0 interferes with the clobbered rax (it lives across the clobber),
+    # so its hint to rax must be dropped and it takes another color
+    assert colors == {1: 0}
+    assert spills == {}
+    assert clobbers == {0: palette.find_by_name(b"rax")}
+
+
 def can_allocate_keep_a_spilled_vregs_slot_stable_across_segments():
     registers = [b"v0", b"v1", b"v2"]
     palette = Palette([b"rax"])
@@ -1141,6 +1187,69 @@ def can_allocate_keep_a_spilled_vregs_slot_stable_across_segments():
     # v2 was already spilled to slot 0; it must keep that same slot here,
     # not be bumped just because v1 also needs a slot in this segment
     assert allocation.segments[1].spills == {1: 1, 2: 0}
+
+
+def can_allocate_apply_a_seed_to_a_vreg_first_seen_in_a_later_segment():
+    registers = [b"rax", b"v0"]
+    palette = Palette([b"rdi", b"rsi", b"rax"])
+
+    # segment0 never touches v0
+    segment0 = LivenessSegment(
+        live_in=[set()],
+        live_out=[set()],
+        clobbers=[[]],
+    )
+
+    # segment1 defines v0 in its first instruction and uses it in the next
+    segment1 = LivenessSegment(
+        live_in=[set(), {1}],
+        live_out=[{1}, set()],
+        clobbers=[[], []],
+    )
+
+    # v0 is seeded from rax, like an output of a call in segment1
+    liveness = Liveness(
+        registers=registers,
+        segments=[segment0, segment1],
+        seeds=[(0, 1)],
+    )
+
+    allocation = allocate(liveness, palette)
+
+    # the seed must still apply in segment1, not only in the first segment
+    assert allocation.segments[0].colors == {}
+    assert allocation.segments[1].colors == {1: palette.find_by_name(b"rax")}
+
+
+def can_allocate_apply_a_seed_to_a_vreg_defined_where_its_register_is_clobbered():
+    registers = [b"rax", b"v0"]
+    palette = Palette([b"rdi", b"rsi", b"rax"])
+
+    segment0 = LivenessSegment(
+        live_in=[set()],
+        live_out=[set()],
+        clobbers=[[]],
+    )
+
+    # the first instruction clobbers rax and defines v0, exactly like a call
+    # returning its result in rax
+    segment1 = LivenessSegment(
+        live_in=[set(), {1}],
+        live_out=[{1}, set()],
+        clobbers=[[0], []],
+    )
+
+    liveness = Liveness(
+        registers=registers,
+        segments=[segment0, segment1],
+        seeds=[(0, 1)],
+    )
+
+    allocation = allocate(liveness, palette)
+
+    # v0 is not live across the clobber, so the clobber must not block its seed
+    assert allocation.segments[0].colors == {}
+    assert allocation.segments[1].colors == {1: palette.find_by_name(b"rax")}
 
 
 def prepare_liveness(fnlet: FnletMock):
@@ -1324,6 +1433,7 @@ def can_handle_graphs_from_fnlet_with_call_and_params():
                     b"rsi": llvm.Register(name=b"v0"),
                     b"rdx": llvm.Immediate.derive(bytes([0x00, 0x00, 0x00, 0x00])),
                 },
+                outs={},
             ),
         ]
     )
@@ -1435,6 +1545,54 @@ def can_handle_graphs_from_fnlet_with_call_and_params():
     assert allocation.segments[2].spills == {}
 
 
+def can_handle_graphs_from_fnlet_with_call_output():
+    entry = FnletBlockMock(
+        instructions=[
+            llvm.PROLOG(operands=(), binds={}, preserves=[]),
+        ]
+    )
+
+    body = FnletBlockMock(
+        instructions=[
+            llvm.CALL(
+                operands=(FunctionId(value=11),),
+                clobbers=[b"rax", b"rcx", b"r11"],
+                args={},
+                outs={b"rax": llvm.Register(name=b"v0")},
+            ),
+            llvm.MOV(
+                operands=(llvm.Register(name=b"v1"), llvm.Register(name=b"v0")),
+            ),
+        ]
+    )
+
+    exit = FnletBlockMock(
+        instructions=[
+            llvm.EPILOG(operands=(), preserves=[]),
+        ]
+    )
+
+    # prepare fnlet and liveness
+    fnlet = FnletMock(blocks=[entry, body, exit])
+    liveness = prepare_liveness(fnlet)
+    palette = create_systemv_palette()
+
+    # allocate registers
+    allocation = allocate(liveness, palette)
+    assert len(allocation.segments) == 3
+
+    # v0 is bound from rax by the call output
+    assert allocation.registers[0] == b"rax"
+    assert allocation.registers[3] == b"v0"
+    assert allocation.seeds == [(0, 3)]
+
+    # the call clobbers rax, but v0 is defined by that very call, so it
+    # lands in rax and no move after the call is needed
+    assert allocation.segments[0].colors == {}
+    assert allocation.segments[1].colors == {3: palette.find_by_name(b"rax")}
+    assert allocation.segments[2].colors == {}
+
+
 def can_handle_graphs_from_fnlet_with_multiline_instructions():
     entry = FnletBlockMock(
         instructions=[
@@ -1463,6 +1621,7 @@ def can_handle_graphs_from_fnlet_with_multiline_instructions():
                     b"rdi": llvm.Register(name=b"v0"),
                     b"rsi": llvm.Register(name=b"v1"),
                 },
+                outs={},
             ),
         ]
     )
@@ -1482,6 +1641,7 @@ def can_handle_graphs_from_fnlet_with_multiline_instructions():
                     b"rdi": llvm.Register(name=b"v2"),
                     b"rsi": llvm.Register(name=b"v0"),
                 },
+                outs={},
             ),
         ]
     )
@@ -1614,6 +1774,7 @@ def can_handle_graphs_from_fnlet_with_multiline_clobbers():
                     b"rdi": llvm.Register(name=b"v0"),
                     b"rsi": llvm.Register(name=b"v1"),
                 },
+                outs={},
             ),
         ]
     )
@@ -1633,6 +1794,7 @@ def can_handle_graphs_from_fnlet_with_multiline_clobbers():
                     b"rdi": llvm.Register(name=b"v1"),
                     b"rsi": llvm.Register(name=b"v2"),
                 },
+                outs={},
             ),
         ]
     )
@@ -1770,6 +1932,7 @@ def can_handle_graphs_from_fnlet_with_a_hinted_survivor_colliding_with_a_clobber
                     b"rdi": llvm.Register(name=b"v0"),
                     b"rsi": llvm.Register(name=b"v1"),
                 },
+                outs={},
             ),
         ]
     )
@@ -1791,6 +1954,7 @@ def can_handle_graphs_from_fnlet_with_a_hinted_survivor_colliding_with_a_clobber
                     b"rdi": llvm.Register(name=b"v0"),
                     b"rsi": llvm.Register(name=b"v2"),
                 },
+                outs={},
             ),
         ]
     )
@@ -1838,6 +2002,7 @@ def can_handle_graphs_from_fnlet_with_a_hinted_survivor_colliding_with_a_clobber
     graph2, hints2 = into_graph(
         palette, liveness.registers, liveness.segments[2], Seeds.empty()
     )
+
     graph3, hints3 = into_graph(
         palette, liveness.registers, liveness.segments[3], Seeds.empty()
     )
@@ -1986,6 +2151,7 @@ def can_handle_graphs_from_fnlet_when_a_survivor_outlives_a_full_register_clobbe
                     b"r15",
                 ],
                 args={},
+                outs={},
             ),
         ]
     )
@@ -1996,6 +2162,7 @@ def can_handle_graphs_from_fnlet_when_a_survivor_outlives_a_full_register_clobbe
                 operands=(FunctionId(value=11),),
                 clobbers=[],
                 args={b"rdi": llvm.Register(name=b"v0")},
+                outs={},
             ),
         ]
     )
@@ -2131,6 +2298,7 @@ def can_handle_graphs_from_fnlet_when_a_moved_vreg_reuses_its_dying_source():
                 operands=(FunctionId(value=11),),
                 clobbers=[],
                 args={b"rdi": llvm.Register(name=b"v1")},
+                outs={},
             ),
         ]
     )
@@ -2179,15 +2347,18 @@ def can_allocate_collect_clobbers_from_a_single_call():
     entry = FnletBlockMock(
         instructions=[llvm.PROLOG(operands=(), binds={}, preserves=[])]
     )
+
     body = FnletBlockMock(
         instructions=[
             llvm.CALL(
                 operands=(FunctionId(value=11),),
-                args={},
                 clobbers=[b"rax", b"rcx"],
+                args={},
+                outs={},
             ),
         ]
     )
+
     exit = FnletBlockMock(instructions=[llvm.EPILOG(operands=(), preserves=[])])
 
     fnlet = FnletMock(blocks=[entry, body, exit])
@@ -2208,11 +2379,13 @@ def can_allocate_collect_the_union_of_clobbers_across_multiple_calls():
             llvm.CALL(
                 operands=(FunctionId(value=11),),
                 args={},
+                outs={},
                 clobbers=[b"rax", b"rbx"],
             ),
             llvm.CALL(
                 operands=(FunctionId(value=12),),
                 args={},
+                outs={},
                 clobbers=[b"rbx", b"rcx"],
             ),
         ]
@@ -2238,6 +2411,7 @@ def can_allocate_collect_a_clobber_outside_the_palette():
             llvm.CALL(
                 operands=(FunctionId(value=11),),
                 args={},
+                outs={},
                 clobbers=[b"r11"],
             ),
         ]

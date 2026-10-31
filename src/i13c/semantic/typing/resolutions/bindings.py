@@ -29,7 +29,9 @@ class BindingEntry:
 class BindingAcceptance:
     ref: Span
     owner: SignatureId
+
     mapping: list[BindingEntry]
+    outputs: list[BindingEntry]
 
 
 @dataclass(kw_only=True)

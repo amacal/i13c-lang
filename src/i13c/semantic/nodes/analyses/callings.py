@@ -7,6 +7,7 @@ from i13c.semantic.typing.analyses.callings import (
     Calling,
     CallingBinding,
     CallingClobber,
+    CallingOutput,
     CallingUnbound,
     CallSiteArgument,
 )
@@ -41,10 +42,13 @@ def build_callings(
     # fmt: on
 
     # copy by default all available callsites
+    # according to System V AMD64 ABI
+
     for cid, entry in callsites.items():
         bindings: list[CallingBinding] = []
         clobbers: list[CallingClobber] = []
         unbounds: list[CallingUnbound] = []
+        outputs: list[CallingOutput] = []
 
         for idx, reg in enumerate(caller_saved):
             if idx < len(entry.signature.parameters):
@@ -56,6 +60,9 @@ def build_callings(
         for reg in callee_saved:
             unbounds.append(CallingUnbound(name=reg))
 
+        if entry.output is not None:
+            outputs.append(CallingOutput(name=b"rax", target=entry.output))
+
         callings[cid] = Calling(
             callsite=cid,
             ref=entry.ref,
@@ -66,6 +73,7 @@ def build_callings(
             bindings=bindings,
             clobbers=clobbers,
             unbounds=unbounds,
+            outputs=outputs,
         )
 
     # override callings with available asmlet callsites
@@ -84,18 +92,25 @@ def build_callings(
 
             clobbers_tmp: list[bytes] = [clobber.name for clobber in entry.clobbers]
             bindings_tmp: list[bytes] = [binding.dst for binding in entry.bindings]
+            outputs_tmp: list[bytes] = [output.dst for output in entry.outputs]
 
-            target.clobbers = [
-                CallingClobber(name=clobber) for clobber in clobbers_tmp
-            ]
+            target.clobbers = [CallingClobber(name=clobber) for clobber in clobbers_tmp]
+            target.bindings = [CallingBinding(name=binding) for binding in bindings_tmp]
 
-            target.bindings = [
-                CallingBinding(name=binding) for binding in bindings_tmp
+            # rewrite outputs with the same targets, but
+            # outputs rebound to actual registers
+
+            target.outputs = [
+                CallingOutput(name=out, target=entry.target)
+                for out, entry in zip(outputs_tmp, target.outputs)
             ]
 
             target.unbounds = [
-                CallingUnbound(name=reg) for reg in [*callee_saved, *caller_saved]
-                if reg not in bindings_tmp and reg not in clobbers_tmp
+                CallingUnbound(name=reg)
+                for reg in [*callee_saved, *caller_saved]
+                if reg not in bindings_tmp
+                and reg not in clobbers_tmp
+                and reg not in outputs_tmp
             ]
 
     return OneToOne[CallSiteId, Calling].instance(callings)
@@ -123,6 +138,7 @@ class ListExtractor:
             "callsite": "CallSite",
             "target": "Target",
             "arguments": "Arguments",
+            "outputs": "Outputs",
         }
 
     @staticmethod
@@ -132,4 +148,5 @@ class ListExtractor:
             "callsite": key.identify(1),
             "target": entry.target.id.identify(1),
             "arguments": ", ".join(str(arg) for arg in entry.arguments),
+            "outputs": ", ".join(str(out) for out in entry.outputs),
         }
