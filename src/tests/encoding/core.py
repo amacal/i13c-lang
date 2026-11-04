@@ -389,10 +389,10 @@ def exhaust(*tables: str):
                 assert id(variant) == id(rejected[0].variant)
 
             if accepted:
-                assert semantic.analyses.blocklets is not None
-                assert semantic.analyses.blocklets.size() == 1
+                assert semantic.llvm.blocklets is not None
+                assert semantic.llvm.blocklets.size() == 1
 
-                _, blocklet = semantic.analyses.blocklets.peek()
+                _, blocklet = semantic.llvm.blocklets.peek()
                 instructions: list[BlockletInstruction] = []
 
                 before: list[BlockletInstruction] = []

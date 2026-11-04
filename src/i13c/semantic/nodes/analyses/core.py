@@ -1,7 +1,6 @@
 from typing import Any
 
 from i13c.core.graph import GraphGroup
-from i13c.llvm.nodes.blocklets import configure_blocklets
 from i13c.semantic.nodes.analyses.asmlets import configure_asmlets
 from i13c.semantic.nodes.analyses.assigns import configure_assigns
 from i13c.semantic.nodes.analyses.callings import configure_callings
@@ -24,7 +23,6 @@ def configure_analyses() -> GraphGroup:
         nodes=[
             configure_asmlets(),
             configure_assigns(),
-            configure_blocklets(),
             configure_call_graphs(),
             configure_callings(),
             configure_calls(),
@@ -45,7 +43,6 @@ def parse_analyses(analyses: dict[str, Any]) -> AnalysisNodes:
     return AnalysisNodes(
         asmlets=analyses.get("analyses/asmlets"),
         assigns=analyses.get("analyses/assigns"),
-        blocklets=analyses.get("analyses/blocklets"),
         callings=analyses.get("analyses/callings"),
         calls=analyses.get("analyses/calls"),
         cflows=analyses["analyses/cflows"],

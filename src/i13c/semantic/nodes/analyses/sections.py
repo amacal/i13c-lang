@@ -16,7 +16,7 @@ def configure_sections() -> GraphNode:
         requires=frozenset(
             {
                 ("generator", "core/generator"),
-                ("blocklets", "analyses/blocklets"),
+                ("blocklets", "llvm/blocklets"),
             }
         ),
         views=GraphViews(list=ListExtractor),

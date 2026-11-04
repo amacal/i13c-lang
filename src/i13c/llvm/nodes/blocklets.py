@@ -98,7 +98,7 @@ def configure_blocklets() -> GraphGroup:
     resolve = GraphNode(
         builder=build_blocklets,
         constraint=None,
-        produces=("analyses/blocklets",),
+        produces=("llvm/blocklets",),
         requires=frozenset(
             {
                 ("generator", "core/generator"),

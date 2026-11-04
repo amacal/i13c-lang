@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from i13c.core.mapping import OneToOne
-from i13c.llvm.typing.blocklets import Blocklet, BlockletId
 from i13c.semantic.typing.analyses.asmlets import Asmlet, AsmletId
 from i13c.semantic.typing.analyses.assigns import AssignLlvm
 from i13c.semantic.typing.analyses.callings import Calling
@@ -28,7 +27,6 @@ from i13c.semantic.typing.entities.statements import StatementId
 class AnalysisNodes:
     asmlets: OneToOne[AsmletId, Asmlet] | None
     assigns: OneToOne[AssignId, AssignLlvm] | None
-    blocklets: OneToOne[BlockletId, Blocklet] | None
     callings: OneToOne[CallSiteId, Calling] | None
     calls: OneToOne[CallId, CallLlvm] | None
     cflows: OneToOne[FunctionId, ControlFlows] | None
