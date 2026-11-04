@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.llvm.nodes import LlvmNodes
-from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.analyses.core import AnalysisNodes
 from i13c.semantic.typing.entities import EntityNodes
 from i13c.semantic.typing.entities.functions import FunctionId
@@ -27,7 +26,6 @@ class IndexEdges:
     signatures_by_names: OneToMany[bytes, SignatureAcceptance] | None
     values_by_statements: OneToMany[StatementId, ValueAcceptance] | None
     callsites_by_signatures: OneToMany[SignatureId, CallSiteAcceptance] | None
-    asmlets_by_signatures: OneToMany[SignatureId, Asmlet] | None
 
 
 @dataclass(kw_only=True, repr=False)

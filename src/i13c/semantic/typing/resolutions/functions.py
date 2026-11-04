@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.analyses.cflows import ControlFlows
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
@@ -23,7 +22,6 @@ class FunctionAcceptance:
 
     noreturn: bool
     signature: SignatureAcceptance
-    cflow: ControlFlows
 
 
 @dataclass(kw_only=True)

@@ -1,8 +1,5 @@
 from i13c.core.graph import GraphGroup
-from i13c.semantic.nodes.indices.asmlets import (
-    configure_asmlets_by_callsites,
-    configure_asmlets_by_signatures,
-)
+from i13c.semantic.nodes.indices.asmlets import configure_asmlets_by_callsites
 from i13c.semantic.nodes.indices.binds import (
     configure_binds_by_parameters,
     configure_binds_by_results,
@@ -11,7 +8,6 @@ from i13c.semantic.nodes.indices.callsites import (
     configure_callsites_by_signatures,
     configure_callsites_by_statements,
 )
-from i13c.semantic.nodes.indices.cflows import configure_control_flows_by_signatures
 from i13c.semantic.nodes.indices.cpaths import configure_control_paths_by_signatures
 from i13c.semantic.nodes.indices.environments import configure_environments_by_snippets
 from i13c.semantic.nodes.indices.flags import configure_flags_by_nid
@@ -31,7 +27,6 @@ def configure_indices() -> GraphGroup:
     return GraphGroup(
         nodes=[
             configure_asmlets_by_callsites(),
-            configure_asmlets_by_signatures(),
             configure_binds_by_parameters(),
             configure_binds_by_results(),
             configure_callsites_by_signatures(),
@@ -39,7 +34,6 @@ def configure_indices() -> GraphGroup:
             configure_flags_by_nid(),
             configure_functions_by_signatures(),
             configure_functions_by_callsites(),
-            configure_control_flows_by_signatures(),
             configure_control_paths_by_signatures(),
             configure_environments_by_snippets(),
             configure_signatures_by_names(),

@@ -77,7 +77,6 @@ def build(
             signatures_by_names=indices.get("indices/signatures/names"),
             values_by_statements=indices.get("indices/values/statements"),
             callsites_by_signatures=indices.get("indices/callsites/signatures"),
-            asmlets_by_signatures=indices.get("indices/asmlets/signatures"),
         ),
         resolutions=parse_resolutions(resolutions),
     )
