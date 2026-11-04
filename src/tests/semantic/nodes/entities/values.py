@@ -28,7 +28,7 @@ def can_detect_a_value_declaration_with_literal_initialization():
     assert value.type == id
 
 
-def can_detect_a_value_declaration_with_expression_initialization():
+def can_detect_a_value_declaration_with_usage_initialization():
     entities = prepare_entities(
         """
             fn main() { val x: u8 = abc; }

@@ -7,18 +7,18 @@ from i13c.syntax.source import Span
 
 
 @dataclass(kw_only=True, frozen=True)
-class ExpressionId:
+class UsageId:
     value: int
 
     def identify(self, length: int) -> str:
-        return "#".join(("expression", f"{self.value:<{length}}"))
+        return "#".join(("usage", f"{self.value:<{length}}"))
 
 
-ExpressionContext = TypeVar("ExpressionContext")
+UsageContext = TypeVar("UsageContext")
 
 
 @dataclass(kw_only=True)
-class Expression:
+class Usage:
     ref: Span
     name: bytes
 
@@ -26,11 +26,11 @@ class Expression:
     statement: NodeId
 
     def get_function(
-        self, factory: Callable[[NodeId], ExpressionContext]
-    ) -> ExpressionContext:
+        self, factory: Callable[[NodeId], UsageContext]
+    ) -> UsageContext:
         return factory(self.function)
 
     def get_statement(
-        self, factory: Callable[[NodeId], ExpressionContext]
-    ) -> ExpressionContext:
+        self, factory: Callable[[NodeId], UsageContext]
+    ) -> UsageContext:
         return factory(self.statement)

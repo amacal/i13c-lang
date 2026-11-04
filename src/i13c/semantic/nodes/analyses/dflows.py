@@ -11,11 +11,11 @@ from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
-from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.functions import FunctionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.statements import StatementAcceptance
+from i13c.semantic.typing.resolutions.usages import UsageAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
@@ -131,7 +131,7 @@ def handle_assign(
     dflow.forward[idx] = []
     dflow.backward[idx] = []
 
-    if isinstance(assign.expression, ExpressionAcceptance):
+    if isinstance(assign.expression, UsageAcceptance):
         for nix, node in enumerate(dflow.values):
             if isinstance(node, (ParameterAcceptance, ValueAcceptance)):
                 if node.id == assign.expression.target.id:

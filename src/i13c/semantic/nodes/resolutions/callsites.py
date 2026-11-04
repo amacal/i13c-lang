@@ -5,10 +5,10 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
-from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.entities.usages import Usage, UsageId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
     CallSiteArgument,
@@ -33,7 +33,7 @@ def configure_callsite_resolution() -> GraphGroup:
             {
                 ("callsites", "entities/callsites"),
                 ("functions", "entities/functions"),
-                ("expressions", "entities/expressions"),
+                ("usages", "entities/usages"),
                 ("cflows", "resolutions/cflows/accepted"),
                 ("literals", "resolutions/literals/accepted"),
                 ("signatures", "indices/signatures/names"),
@@ -81,7 +81,7 @@ def configure_callsite_resolution() -> GraphGroup:
 def build_callsite_resolution(
     callsites: OneToOne[CallSiteId, CallSite],
     functions: OneToOne[FunctionId, Function],
-    expressions: OneToOne[ExpressionId, Expression],
+    usages: OneToOne[UsageId, Usage],
     cflows: OneToOne[FunctionId, ControlFlowAcceptance],
     literals: OneToOne[LiteralId, LiteralAcceptance],
     signatures: OneToMany[bytes, SignatureAcceptance],
@@ -135,7 +135,7 @@ def build_callsite_resolution(
                     if isinstance(argument, LiteralId):
                         target = literals.get(argument)
                     else:
-                        expr = expressions.get(argument)
+                        expr = usages.get(argument)
                         target = environment.get(expr.name)
 
                     # if a symbol is not in the environment

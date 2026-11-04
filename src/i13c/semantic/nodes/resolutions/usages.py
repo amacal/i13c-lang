@@ -5,24 +5,24 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.cflows import FunctionId
-from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.entities.usages import Usage, UsageId
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
-from i13c.semantic.typing.resolutions.expressions import (
-    ExpressionAcceptance,
-    ExpressionRejection,
-    ExpressionResolution,
+from i13c.semantic.typing.resolutions.usages import (
+    UsageAcceptance,
+    UsageRejection,
+    UsageResolution,
 )
 
 
-def configure_expression_resolution() -> GraphGroup:
+def configure_usage_resolution() -> GraphGroup:
     resolve = GraphNode(
-        builder=build_expression_resolution,
+        builder=build_usage_resolution,
         constraint=None,
-        produces=("resolutions/expressions",),
+        produces=("resolutions/usages",),
         requires=frozenset(
             {
-                ("expressions", "entities/expressions"),
+                ("usages", "entities/usages"),
                 ("cflows", "resolutions/cflows/accepted"),
             }
         ),
@@ -30,25 +30,25 @@ def configure_expression_resolution() -> GraphGroup:
     )
 
     validate = GraphNode(
-        builder=validate_expression_resolution_e3010,
+        builder=validate_usage_resolution_e3010,
         constraint=None,
         produces=("rules/e3010",),
         requires=frozenset(
             {
-                ("expressions", "entities/expressions"),
-                ("resolutions", "resolutions/expressions"),
+                ("usages", "entities/usages"),
+                ("resolutions", "resolutions/usages"),
             }
         ),
     )
 
     extract = GraphNode(
-        builder=build_expression_resolution_accepted,
-        constraint=check_expression_resolution_accepted,
-        produces=("resolutions/expressions/accepted",),
+        builder=build_usage_resolution_accepted,
+        constraint=check_usage_resolution_accepted,
+        produces=("resolutions/usages/accepted",),
         requires=frozenset(
             {
                 ("rule_e3010", "rules/e3010"),
-                ("resolutions", "resolutions/expressions"),
+                ("resolutions", "resolutions/usages"),
             }
         ),
         views=GraphViews(list=ListAcceptedExtractor),
@@ -57,14 +57,14 @@ def configure_expression_resolution() -> GraphGroup:
     return GraphGroup(nodes=[resolve, validate, extract])
 
 
-def build_expression_resolution(
-    expressions: OneToOne[ExpressionId, Expression],
+def build_usage_resolution(
+    usages: OneToOne[UsageId, Usage],
     cflows: OneToOne[FunctionId, ControlFlowAcceptance],
-) -> OneToOne[ExpressionId, ExpressionResolution]:
-    resolutions: dict[ExpressionId, ExpressionResolution] = {}
+) -> OneToOne[UsageId, UsageResolution]:
+    resolutions: dict[UsageId, UsageResolution] = {}
 
-    for eid, entry in expressions.items():
-        resolution = ExpressionResolution(
+    for eid, entry in usages.items():
+        resolution = UsageResolution(
             ref=entry.ref,
             id=eid,
             accepted=[],
@@ -81,7 +81,7 @@ def build_expression_resolution(
 
         if entry.name not in environment:
             resolution.rejected.append(
-                ExpressionRejection(
+                UsageRejection(
                     ref=entry.ref,
                     id=eid,
                     name=entry.name,
@@ -91,7 +91,7 @@ def build_expression_resolution(
 
         if not resolution.rejected:
             resolution.accepted.append(
-                ExpressionAcceptance(
+                UsageAcceptance(
                     ref=entry.ref,
                     id=eid,
                     name=entry.name,
@@ -102,31 +102,31 @@ def build_expression_resolution(
 
         resolutions[eid] = resolution
 
-    return OneToOne[ExpressionId, ExpressionResolution].instance(resolutions)
+    return OneToOne[UsageId, UsageResolution].instance(resolutions)
 
 
-def check_expression_resolution_accepted(
+def check_usage_resolution_accepted(
     rule_e3010: list[Diagnostic],
     **kwargs: dict[str, Any],
 ) -> bool:
     return len(rule_e3010) == 0
 
 
-def build_expression_resolution_accepted(
-    resolutions: OneToOne[ExpressionId, ExpressionResolution],
+def build_usage_resolution_accepted(
+    resolutions: OneToOne[UsageId, UsageResolution],
     **kwargs: dict[str, Any],
-) -> OneToOne[ExpressionId, ExpressionAcceptance]:
-    accepted: dict[ExpressionId, ExpressionAcceptance] = {}
+) -> OneToOne[UsageId, UsageAcceptance]:
+    accepted: dict[UsageId, UsageAcceptance] = {}
 
     for id, resolution in resolutions.items():
         accepted[id] = resolution.accepted[0]
 
-    return OneToOne[ExpressionId, ExpressionAcceptance].instance(accepted)
+    return OneToOne[UsageId, UsageAcceptance].instance(accepted)
 
 
-def validate_expression_resolution_e3010(
-    expressions: OneToOne[ExpressionId, Expression],
-    resolutions: OneToOne[ExpressionId, ExpressionResolution],
+def validate_usage_resolution_e3010(
+    usages: OneToOne[UsageId, Usage],
+    resolutions: OneToOne[UsageId, UsageResolution],
 ) -> list[Diagnostic]:
     diagnostics: list[Diagnostic] = []
 
@@ -134,25 +134,25 @@ def validate_expression_resolution_e3010(
         if len(resolution.accepted) != 1:
             for _ in resolution.rejected:
                 diagnostics.append(
-                    report_expression_resolution_e3010(expressions.get(id))
+                    report_usage_resolution_e3010(usages.get(id))
                 )
 
     return diagnostics
 
 
-def report_expression_resolution_e3010(entry: Expression) -> Diagnostic:
+def report_usage_resolution_e3010(entry: Usage) -> Diagnostic:
     return Diagnostic(
         ref=entry.ref,
         code="E3010",
-        message=f"Invalid expression {entry}, reason: unknown.",
+        message=f"Invalid usage {entry}, reason: unknown.",
     )
 
 
 class ListAllExtractor:
-    def __init__(self, data: OneToOne[ExpressionId, ExpressionResolution]):
+    def __init__(self, data: OneToOne[UsageId, UsageResolution]):
         self.data = data
 
-    def extract(self) -> Iterable[tuple[ExpressionId, ExpressionResolution]]:
+    def extract(self) -> Iterable[tuple[UsageId, UsageResolution]]:
         yield from self.data.items()
 
     @staticmethod
@@ -165,7 +165,7 @@ class ListAllExtractor:
         }
 
     @staticmethod
-    def rows(key: ExpressionId, entry: ExpressionResolution) -> dict[str, str]:
+    def rows(key: UsageId, entry: UsageResolution) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),
@@ -175,10 +175,10 @@ class ListAllExtractor:
 
 
 class ListAcceptedExtractor:
-    def __init__(self, data: OneToOne[ExpressionId, ExpressionAcceptance]):
+    def __init__(self, data: OneToOne[UsageId, UsageAcceptance]):
         self.data = data
 
-    def extract(self) -> Iterable[tuple[ExpressionId, ExpressionAcceptance]]:
+    def extract(self) -> Iterable[tuple[UsageId, UsageAcceptance]]:
         yield from self.data.items()
 
     @staticmethod
@@ -191,7 +191,7 @@ class ListAcceptedExtractor:
         }
 
     @staticmethod
-    def rows(key: ExpressionId, entry: ExpressionAcceptance) -> dict[str, str]:
+    def rows(key: UsageId, entry: UsageAcceptance) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

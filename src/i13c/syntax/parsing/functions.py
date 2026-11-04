@@ -248,7 +248,7 @@ def parse_argument(state: ParsingState) -> tuple[tree.function.Argument, LexingT
 
     # or just a variable reference
     else:
-        expression = tree.function.Expression(
+        expression = tree.function.Usage(
             ref=state.span(token),
             name=state.extract(token),
         )

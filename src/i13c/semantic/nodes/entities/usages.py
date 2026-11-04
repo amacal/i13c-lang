@@ -3,53 +3,53 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.entities.usages import Usage, UsageId
 
 
-def configure_expressions() -> GraphNode:
+def configure_usages() -> GraphNode:
     return GraphNode(
-        builder=build_expressions,
+        builder=build_usages,
         constraint=None,
-        produces=("entities/expressions",),
+        produces=("entities/usages",),
         requires=frozenset({("graph", "syntax/graph")}),
         views=GraphViews(list=ListExtractor),
     )
 
 
-def build_expressions(
+def build_usages(
     graph: SyntaxGraph,
-) -> OneToOne[ExpressionId, Expression]:
-    expressions: dict[ExpressionId, Expression] = {}
+) -> OneToOne[UsageId, Usage]:
+    usages: dict[UsageId, Usage] = {}
 
-    for nid, expression in graph.function.expressions.items():
-        # derive expression ID from globally unique node ID
-        expression_id = ExpressionId(value=nid.value)
+    for nid, usage in graph.function.usages.items():
+        # derive usage ID from globally unique node ID
+        usage_id = UsageId(value=nid.value)
 
-        # find the owning statement of this expression
-        stmt = graph.function.expressions.get_ctx(nid)
+        # find the owning statement of this usage
+        stmt = graph.function.usages.get_ctx(nid)
         stmt_nid = graph.function.statements.get_by_node(stmt)
 
-        # find the owning function of this expression
+        # find the owning function of this usage
         fn = graph.function.statements.get_ctx(stmt_nid)
         fn_nid = graph.function.functions.get_by_node(fn)
 
-        expressions[expression_id] = Expression(
-            ref=expression.ref,
-            name=expression.name,
+        usages[usage_id] = Usage(
+            ref=usage.ref,
+            name=usage.name,
             statement=stmt_nid,
             function=fn_nid,
         )
 
-    return OneToOne[ExpressionId, Expression].instance(expressions)
+    return OneToOne[UsageId, Usage].instance(usages)
 
 
 class ListExtractor:
-    def __init__(self, data: OneToOne[ExpressionId, Expression]):
+    def __init__(self, data: OneToOne[UsageId, Usage]):
         self.data = data
 
-    def extract(self) -> Iterable[tuple[ExpressionId, Expression]]:
+    def extract(self) -> Iterable[tuple[UsageId, Usage]]:
         yield from self.data.items()
 
     @staticmethod
@@ -63,7 +63,7 @@ class ListExtractor:
         }
 
     @staticmethod
-    def rows(key: ExpressionId, entry: Expression) -> dict[str, str]:
+    def rows(key: UsageId, entry: Usage) -> dict[str, str]:
         return {
             "ref": str(entry.ref),
             "id": key.identify(1),

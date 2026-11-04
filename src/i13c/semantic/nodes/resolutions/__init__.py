@@ -14,7 +14,6 @@ from i13c.semantic.nodes.resolutions.displacements import (
 from i13c.semantic.nodes.resolutions.environments import (
     configure_environment_resolution,
 )
-from i13c.semantic.nodes.resolutions.expressions import configure_expression_resolution
 from i13c.semantic.nodes.resolutions.flags import configure_flags_resolution
 from i13c.semantic.nodes.resolutions.functions import configure_function_resolution
 from i13c.semantic.nodes.resolutions.immediates import configure_immediate_resolution
@@ -35,6 +34,7 @@ from i13c.semantic.nodes.resolutions.signatures import configure_signature_resol
 from i13c.semantic.nodes.resolutions.snippets import configure_snippet_resolution
 from i13c.semantic.nodes.resolutions.statements import configure_statement_resolution
 from i13c.semantic.nodes.resolutions.types import configure_type_resolution
+from i13c.semantic.nodes.resolutions.usages import configure_usage_resolution
 from i13c.semantic.nodes.resolutions.values import configure_value_resolution
 from i13c.semantic.typing.resolutions.core import ResolutionNodes
 
@@ -51,7 +51,7 @@ def configure_resolutions() -> GraphGroup:
             configure_control_flow_resolution(),
             configure_displacement_resolution(),
             configure_environment_resolution(),
-            configure_expression_resolution(),
+            configure_usage_resolution(),
             configure_flags_resolution(),
             configure_function_resolution(),
             configure_immediate_resolution(),
@@ -86,7 +86,7 @@ def parse_resolutions(resolutions: dict[str, Any]) -> ResolutionNodes:
         cflows=resolutions.get("resolutions/cflows"),
         displacements=resolutions.get("resolutions/displacements"),
         environments=resolutions.get("resolutions/environments"),
-        expressions=resolutions.get("resolutions/expressions"),
+        usages=resolutions.get("resolutions/usages"),
         flags=resolutions.get("resolutions/flags"),
         functions=resolutions.get("resolutions/functions"),
         immediates=resolutions.get("resolutions/immediates"),

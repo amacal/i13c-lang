@@ -8,7 +8,6 @@ from i13c.semantic.nodes.entities.calls import configure_calls
 from i13c.semantic.nodes.entities.callsites import configure_callsites
 from i13c.semantic.nodes.entities.displacements import configure_displacements
 from i13c.semantic.nodes.entities.environments import configure_environments
-from i13c.semantic.nodes.entities.expressions import configure_expressions
 from i13c.semantic.nodes.entities.flags import configure_flags
 from i13c.semantic.nodes.entities.functions import configure_functions
 from i13c.semantic.nodes.entities.immediates import configure_immediates
@@ -27,6 +26,7 @@ from i13c.semantic.nodes.entities.signatures import configure_signatures
 from i13c.semantic.nodes.entities.snippets import configure_snippets
 from i13c.semantic.nodes.entities.statements import configure_statements
 from i13c.semantic.nodes.entities.types import configure_types
+from i13c.semantic.nodes.entities.usages import configure_usages
 from i13c.semantic.nodes.entities.values import configure_values
 from i13c.semantic.typing.entities import EntityNodes
 
@@ -41,7 +41,7 @@ def configure_entities() -> GraphGroup:
             configure_callsites(),
             configure_displacements(),
             configure_environments(),
-            configure_expressions(),
+            configure_usages(),
             configure_flags(),
             configure_functions(),
             configure_immediates(),
@@ -74,7 +74,7 @@ def parse_entities(entities: dict[str, Any]) -> EntityNodes:
         callsites=entities["entities/callsites"],
         displacements=entities["entities/displacements"],
         environments=entities["entities/environments"],
-        expressions=entities["entities/expressions"],
+        usages=entities["entities/usages"],
         flags=entities["entities/flags"],
         functions=entities["entities/functions"],
         immediates=entities["entities/immediates"],

@@ -8,7 +8,6 @@ from i13c.semantic.typing.entities.calls import CallId
 from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.displacements import DisplacementId
 from i13c.semantic.typing.entities.environments import EnvironmentId
-from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.immediates import ImmediateId
@@ -27,6 +26,7 @@ from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.snippets import SnippetId
 from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.entities.types import TypeId
+from i13c.semantic.typing.entities.usages import UsageId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
 from i13c.semantic.typing.resolutions.assigns import AssignResolution
@@ -37,7 +37,6 @@ from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.cflows import ControlFlowResolution
 from i13c.semantic.typing.resolutions.displacements import DisplacementResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
-from i13c.semantic.typing.resolutions.expressions import ExpressionResolution
 from i13c.semantic.typing.resolutions.flags import FlagsResolution
 from i13c.semantic.typing.resolutions.functions import FunctionResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
@@ -56,6 +55,7 @@ from i13c.semantic.typing.resolutions.signatures import SignatureResolution
 from i13c.semantic.typing.resolutions.snippets import SnippetResolution
 from i13c.semantic.typing.resolutions.statements import StatementResolution
 from i13c.semantic.typing.resolutions.types import TypeResolution
+from i13c.semantic.typing.resolutions.usages import UsageResolution
 from i13c.semantic.typing.resolutions.values import ValueResolution
 
 
@@ -70,7 +70,7 @@ class ResolutionNodes:
     cflows: OneToOne[FunctionId, ControlFlowResolution] | None
     displacements: OneToOne[DisplacementId, DisplacementResolution] | None
     environments: OneToOne[EnvironmentId, EnvironmentResolution] | None
-    expressions: OneToOne[ExpressionId, ExpressionResolution] | None
+    usages: OneToOne[UsageId, UsageResolution] | None
     flags: OneToOne[FlagsId, FlagsResolution] | None
     functions: OneToOne[FunctionId, FunctionResolution] | None
     immediates: OneToOne[ImmediateId, ImmediateResolution] | None

@@ -32,7 +32,7 @@ def can_detect_an_assignment_using_the_literal():
     assert assign.expression == id
 
 
-def can_detect_an_assignment_using_an_expression():
+def can_detect_an_assignment_using_a_usage():
     entities = prepare_entities(
         """
             fn main() { val x: u8 = abc; }
@@ -47,8 +47,8 @@ def can_detect_an_assignment_using_an_expression():
 
     assert assign.destination == id
 
-    assert entities.expressions.size() == 1
-    id, _ = entities.expressions.peek()
+    assert entities.usages.size() == 1
+    id, _ = entities.usages.peek()
 
     assert assign.expression == id
 

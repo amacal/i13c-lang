@@ -5,10 +5,10 @@ from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
 from i13c.semantic.typing.entities.callsites import CallSiteId
-from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.entities.usages import UsageId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.semantic.typing.resolutions.assigns import (
     AssignAcceptance,
@@ -16,8 +16,8 @@ from i13c.semantic.typing.resolutions.assigns import (
     AssignResolution,
 )
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
-from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
+from i13c.semantic.typing.resolutions.usages import UsageAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
@@ -31,7 +31,7 @@ def configure_assign_resolution() -> GraphGroup:
                 ("assigns", "entities/assigns"),
                 ("values", "resolutions/values/accepted"),
                 ("literals", "resolutions/literals/accepted"),
-                ("expressions", "resolutions/expressions/accepted"),
+                ("usages", "resolutions/usages/accepted"),
                 ("callsites", "resolutions/callsites/accepted"),
             }
         ),
@@ -68,7 +68,7 @@ def build_assign_resolution(
     assigns: OneToOne[AssignId, Assign],
     values: OneToOne[ValueId, ValueAcceptance],
     literals: OneToOne[LiteralId, LiteralAcceptance],
-    expressions: OneToOne[ExpressionId, ExpressionAcceptance],
+    usages: OneToOne[UsageId, UsageAcceptance],
     callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ) -> OneToOne[AssignId, AssignResolution]:
     resolutions: dict[AssignId, AssignResolution] = {}
@@ -91,10 +91,10 @@ def build_assign_resolution(
             expression = literals.get(entry.expression)
             target = expression
 
-        # expressions are also directly retrieved
+        # usages are also directly retrieved
         # matched by their target type against the destination type
-        elif isinstance(entry.expression, ExpressionId):
-            expression = expressions.get(entry.expression)
+        elif isinstance(entry.expression, UsageId):
+            expression = usages.get(entry.expression)
             target = expression.target.type
 
         # callsite propagates its call, because it contains

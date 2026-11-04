@@ -8,7 +8,6 @@ from i13c.semantic.typing.entities.calls import Call, CallId
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
 from i13c.semantic.typing.entities.displacements import Displacement, DisplacementId
 from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
-from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
 from i13c.semantic.typing.entities.flags import Flags, FlagsId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
@@ -27,6 +26,7 @@ from i13c.semantic.typing.entities.signatures import Signature, SignatureId
 from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
 from i13c.semantic.typing.entities.statements import Statement, StatementId
 from i13c.semantic.typing.entities.types import Type, TypeId
+from i13c.semantic.typing.entities.usages import Usage, UsageId
 from i13c.semantic.typing.entities.values import Value, ValueId
 
 
@@ -39,7 +39,7 @@ class EntityNodes:
     callsites: OneToOne[CallSiteId, CallSite]
     displacements: OneToOne[DisplacementId, Displacement]
     environments: OneToOne[EnvironmentId, Environment]
-    expressions: OneToOne[ExpressionId, Expression]
+    usages: OneToOne[UsageId, Usage]
     flags: OneToOne[FlagsId, Flags]
     functions: OneToOne[FunctionId, Function]
     immediates: OneToOne[ImmediateId, Immediate]

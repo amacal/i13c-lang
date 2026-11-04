@@ -3,11 +3,11 @@ from dataclasses import dataclass
 from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.literals import LiteralId
+from i13c.semantic.typing.entities.usages import UsageId
 from i13c.syntax.source import Span
 
-CallSiteTarget = LiteralId | ExpressionId
+CallSiteTarget = LiteralId | UsageId
 
 
 @dataclass(kw_only=True, frozen=True)

@@ -201,10 +201,10 @@ class NodesVisitor:
     def on_literal(self, literal: tree.function.Literal, path: Path):
         self.graph.function.literals.append(self.next(), literal)
 
-    def on_expression(self, expression: tree.function.Expression, path: Path):
-        self.graph.function.expressions.append(
+    def on_usage(self, usage: tree.function.Usage, path: Path):
+        self.graph.function.usages.append(
             self.next(),
-            expression,
+            usage,
             ctx=path.find(tree.function.Statement),
         )
 
@@ -246,7 +246,7 @@ class Function:
     assigns: Bidirectional[tree.function.AssignStatement, tree.function.Statement]
     values: Bidirectional[tree.function.Value, tree.function.Statement]
     literals: Bidirectional[tree.function.Literal, None]
-    expressions: Bidirectional[tree.function.Expression, tree.function.Statement]
+    usages: Bidirectional[tree.function.Usage, tree.function.Statement]
     parameters: Bidirectional[tree.function.Parameter, None]
 
 
@@ -313,8 +313,8 @@ class SyntaxGraph:
                     tree.function.Value, tree.function.Statement
                 ].empty(),
                 literals=Bidirectional[tree.function.Literal, None].empty(),
-                expressions=Bidirectional[
-                    tree.function.Expression, tree.function.Statement
+                usages=Bidirectional[
+                    tree.function.Usage, tree.function.Statement
                 ].empty(),
                 parameters=Bidirectional[tree.function.Parameter, None].empty(),
             ),

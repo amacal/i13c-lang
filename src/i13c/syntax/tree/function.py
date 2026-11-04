@@ -16,7 +16,7 @@ class Visitor(Protocol):
     def on_assign(self, assign: AssignStatement, path: Path): ...
     def on_value(self, value: Value, path: Path): ...
     def on_literal(self, literal: Literal, path: Path): ...
-    def on_expression(self, expression: Expression, path: Path): ...
+    def on_usage(self, usage: Usage, path: Path): ...
     def on_parameter(self, parameter: Parameter, path: Path): ...
 
     # types related
@@ -34,12 +34,12 @@ class Literal:
 
 
 @dataclass(kw_only=True, eq=False)
-class Expression:
+class Usage:
     ref: Span
     name: bytes
 
     def accept(self, visitor: Visitor, path: Path):
-        visitor.on_expression(self, path)
+        visitor.on_usage(self, path)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -69,11 +69,11 @@ class CallSite:
                 if isinstance(argument, Literal):
                     visitor.on_literal(argument, node)
 
-                if isinstance(argument, Expression):
-                    visitor.on_expression(argument, node)
+                if isinstance(argument, Usage):
+                    visitor.on_usage(argument, node)
 
 
-Argument = Literal | Expression | CallSite
+Argument = Literal | Usage | CallSite
 
 
 @dataclass(kw_only=True, eq=False)
@@ -89,7 +89,7 @@ class CallStatement:
 
 
 # an expression that can be directly assigned to a value
-ValueExpression = Literal | Expression | CallSite
+ValueExpression = Literal | Usage | CallSite
 
 
 @dataclass(kw_only=True, eq=False)
@@ -109,7 +109,7 @@ class Value:
 class AssignStatement:
     # assignment represents an expression assigning to a value
     # where the destination must be a pure value declaration
-    # and the expression must be a literal, expression or callsite
+    # and the expression must be a literal, usage or callsite
 
     ref: Span
     destination: Value

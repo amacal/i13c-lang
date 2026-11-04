@@ -8,8 +8,8 @@ from i13c.semantic.typing.analyses.llvm import MOV, Immediate, Register
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
-from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
+from i13c.semantic.typing.resolutions.usages import UsageAcceptance
 
 
 def configure_assigns() -> GraphNode:
@@ -64,9 +64,9 @@ def emit(
     if isinstance(entry.expression, LiteralAcceptance):
         src = Immediate(value=entry.expression.target)
 
-    # expression emits dest <- vreg of the expression's value
-    # the value of the expression is already stored in a vreg
-    elif isinstance(entry.expression, ExpressionAcceptance):
+    # usage emits dest <- vreg of the usage's value
+    # the value of the usage is already stored in a vreg
+    elif isinstance(entry.expression, UsageAcceptance):
         idx = dflow.values.index(entry.expression.target)
         src = Register(name=dflow.vregs[idx])
 

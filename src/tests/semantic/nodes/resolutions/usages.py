@@ -3,16 +3,16 @@ from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from tests.semantic.nodes.resolutions import prepare_resolutions, prepare_rules
 
 
-def can_accept_valid_expression_from_value():
+def can_accept_valid_usage_from_value():
     source, resolutions = prepare_resolutions(
         """
             fn main() { val x: u16 = 0x1234; val y: u16 = x; }
         """
     )
 
-    assert resolutions.expressions is not None
-    assert resolutions.expressions.size() == 1
-    id, resolution = resolutions.expressions.peek()
+    assert resolutions.usages is not None
+    assert resolutions.usages.size() == 1
+    id, resolution = resolutions.usages.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -26,16 +26,16 @@ def can_accept_valid_expression_from_value():
     assert source.extract(resolution.accepted[0].ref) == b"x"
 
 
-def can_accept_valid_expression_from_parameter():
+def can_accept_valid_usage_from_parameter():
     source, resolutions = prepare_resolutions(
         """
             fn main(x: u16) { val y: u16 = x; }
         """
     )
 
-    assert resolutions.expressions is not None
-    assert resolutions.expressions.size() == 1
-    id, resolution = resolutions.expressions.peek()
+    assert resolutions.usages is not None
+    assert resolutions.usages.size() == 1
+    id, resolution = resolutions.usages.peek()
 
     assert len(resolution.accepted) == 1
     assert len(resolution.rejected) == 0
@@ -49,16 +49,16 @@ def can_accept_valid_expression_from_parameter():
     assert source.extract(resolution.accepted[0].ref) == b"x"
 
 
-def can_rejected_unresolved_expression():
+def can_rejected_unresolved_usage():
     source, resolutions = prepare_resolutions(
         """
             fn main() { val y: u16 = x; }
         """
     )
 
-    assert resolutions.expressions is not None
-    assert resolutions.expressions.size() == 1
-    id, resolution = resolutions.expressions.peek()
+    assert resolutions.usages is not None
+    assert resolutions.usages.size() == 1
+    id, resolution = resolutions.usages.peek()
 
     assert len(resolution.accepted) == 0
     assert len(resolution.rejected) == 1
@@ -70,7 +70,7 @@ def can_rejected_unresolved_expression():
     assert source.extract(resolution.rejected[0].ref) == b"x"
 
 
-def can_detect_an_unresolved_expression():
+def can_detect_an_unresolved_usage():
     _, rules = prepare_rules(
         """
             fn main() { val y: u16 = x; }

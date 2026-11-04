@@ -4,10 +4,10 @@ from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId, CallSiteTarget
-from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.entities.usages import UsageId
 from i13c.syntax import tree
 
 
@@ -46,10 +46,10 @@ def build_callsites(
                 lid = graph.function.literals.get_by_node(argument)
                 arguments.append(LiteralId(value=lid.value))
 
-            elif isinstance(argument, tree.function.Expression):
-                # derive expression ID from globally unique node ID
-                eid = graph.function.expressions.get_by_node(argument)
-                arguments.append(ExpressionId(value=eid.value))
+            elif isinstance(argument, tree.function.Usage):
+                # derive usage ID from globally unique node ID
+                eid = graph.function.usages.get_by_node(argument)
+                arguments.append(UsageId(value=eid.value))
 
             else:
                 assert False, f"Unsupported argument type: {type(argument)}"

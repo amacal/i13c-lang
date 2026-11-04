@@ -164,7 +164,7 @@ def can_accept_a_call_with_parameter_ranged():
     assert source.extract(resolution.accepted[0].ref) == b"foo(y)"
 
 
-def can_accept_a_call_with_expression():
+def can_accept_a_call_with_usage():
     source, resolutions = prepare_resolutions(
         """
             fn foo(x: u8) { }
@@ -391,7 +391,7 @@ def can_reject_a_call_with_unmatched_parameter_type_upper_bound():
     assert source.extract(resolution.rejected[0].ref) == b"foo(y)"
 
 
-def can_reject_a_call_with_unmatched_expression_type():
+def can_reject_a_call_with_unmatched_usage_type():
     source, resolutions = prepare_resolutions(
         """
             fn foo(x: u8) { }
@@ -410,7 +410,7 @@ def can_reject_a_call_with_unmatched_expression_type():
     assert source.extract(resolution.rejected[0].ref) == b"foo(y)"
 
 
-def can_reject_a_call_with_unmatched_expression_type_lower_bound():
+def can_reject_a_call_with_unmatched_usage_type_lower_bound():
     source, resolutions = prepare_resolutions(
         """
             fn foo(x: u8[0x01..0x02]) { }
@@ -429,7 +429,7 @@ def can_reject_a_call_with_unmatched_expression_type_lower_bound():
     assert source.extract(resolution.rejected[0].ref) == b"foo(y)"
 
 
-def can_reject_a_call_with_unmatched_expression_type_upper_bound():
+def can_reject_a_call_with_unmatched_usage_type_upper_bound():
     source, resolutions = prepare_resolutions(
         """
             fn foo(x: u8[0x01..0x02]) { }

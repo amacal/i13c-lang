@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.expressions import ExpressionId
+from i13c.semantic.typing.entities.usages import UsageId
 from i13c.semantic.typing.resolutions.cflows import ControlFlowEntry, ControlFlowTarget
 from i13c.syntax.source import Span
 
-ExpressionRejectionReason = Kind["unresolved"]
+UsageRejectionReason = Kind["unresolved"]
 
 
 @dataclass(kw_only=True)
-class ExpressionAcceptance:
+class UsageAcceptance:
     ref: Span
-    id: ExpressionId
+    id: UsageId
 
     name: bytes
     target: ControlFlowTarget
@@ -19,18 +19,18 @@ class ExpressionAcceptance:
 
 
 @dataclass(kw_only=True)
-class ExpressionRejection:
+class UsageRejection:
     ref: Span
-    id: ExpressionId
+    id: UsageId
 
     name: bytes
-    reason: ExpressionRejectionReason
+    reason: UsageRejectionReason
 
 
 @dataclass(kw_only=True)
-class ExpressionResolution:
+class UsageResolution:
     ref: Span
-    id: ExpressionId
+    id: UsageId
 
-    accepted: list[ExpressionAcceptance]
-    rejected: list[ExpressionRejection]
+    accepted: list[UsageAcceptance]
+    rejected: list[UsageRejection]
