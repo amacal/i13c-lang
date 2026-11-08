@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.syntax.source import Span
 
 

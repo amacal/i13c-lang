@@ -25,7 +25,6 @@ from i13c.llvm.typing.shuffles import (
 )
 from i13c.semantic.typing.analyses.asmlets import (
     Asmlet,
-    AsmletId,
     AsmletOperand,
     AsmletOperandAddress,
     AsmletOperandDisplacement,
@@ -81,8 +80,9 @@ from i13c.semantic.typing.analyses.llvm import (
     Register,
     Relocation,
 )
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.identifiers.asmlets import AsmletId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
 from i13c.syntax.source import Span
 
 

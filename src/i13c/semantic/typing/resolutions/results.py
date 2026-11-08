@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.entities.results import ResultId
+from i13c.semantic.typing.identifiers.results import ResultId
 from i13c.semantic.typing.resolutions.types import TypeAcceptance
 from i13c.syntax.source import Span
 

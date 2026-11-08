@@ -5,9 +5,9 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.nodes.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.assigns import AssignInstruction, AssignLlvm
 from i13c.semantic.typing.analyses.llvm import MOV, Immediate, Register
-from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.assigns import AssignId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance

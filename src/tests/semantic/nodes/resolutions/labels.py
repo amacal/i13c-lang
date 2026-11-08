@@ -1,4 +1,4 @@
-from i13c.semantic.typing.entities.instructions import InstructionId
+from i13c.semantic.typing.identifiers.instructions import InstructionId
 from tests.semantic.nodes.resolutions import prepare_resolutions
 
 

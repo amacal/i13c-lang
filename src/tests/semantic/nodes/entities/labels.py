@@ -1,5 +1,5 @@
-from i13c.semantic.typing.entities.instructions import InstructionId
 from i13c.semantic.typing.entities.labels import EndOfSnippet
+from i13c.semantic.typing.identifiers.instructions import InstructionId
 from tests.semantic.nodes.entities import prepare_entities
 
 

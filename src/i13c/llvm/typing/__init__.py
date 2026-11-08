@@ -7,7 +7,7 @@ from i13c.llvm.typing.cflows import ControlFlow
 from i13c.llvm.typing.dflows import DataFlow
 from i13c.llvm.typing.liveness import Liveness
 from i13c.llvm.typing.shuffles import Shuffle
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 
 
 @dataclass(repr=False)

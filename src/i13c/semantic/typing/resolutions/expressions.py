@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.expressions import ExpressionId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.types import TypeAcceptance
 from i13c.semantic.typing.resolutions.usages import UsageAcceptance

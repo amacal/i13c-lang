@@ -2,8 +2,9 @@
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.types import TypeId
-from i13c.semantic.typing.entities.values import Value, ValueId
+from i13c.semantic.typing.entities.values import Value
+from i13c.semantic.typing.identifiers.types import TypeId
+from i13c.semantic.typing.identifiers.values import ValueId
 
 
 def configure_values() -> GraphNode:

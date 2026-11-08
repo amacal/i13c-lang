@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
+from i13c.semantic.typing.entities.mnemonics import Mnemonic
+from i13c.semantic.typing.identifiers.mnemonics import MnemonicId
 from i13c.syntax.source import Span
 
 MnemonicRejectionReason = Kind["unknown-mnemonic",]

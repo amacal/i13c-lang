@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance

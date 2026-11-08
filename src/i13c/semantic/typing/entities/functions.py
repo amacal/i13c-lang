@@ -1,25 +1,10 @@
 from dataclasses import dataclass
 
-from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.flags import FlagsId
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.flags import FlagsId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.syntax.source import Span
-
-
-@dataclass(kw_only=True, frozen=True)
-class FunctionId:
-    value: int
-
-    @staticmethod
-    def from_context(nid: NodeId) -> FunctionId:
-        return FunctionId(value=nid.value)
-
-    def identify(self, length: int) -> str:
-        return "#".join(("function", f"{self.value:<{length}}"))
-
-    def __str__(self) -> str:
-        return self.identify(1)
 
 
 @dataclass(kw_only=True)

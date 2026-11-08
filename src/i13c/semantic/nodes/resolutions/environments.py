@@ -4,9 +4,10 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
-from i13c.semantic.typing.entities.labels import LabelId
-from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.entities.environments import Environment
+from i13c.semantic.typing.identifiers.environments import EnvironmentId
+from i13c.semantic.typing.identifiers.labels import LabelId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
 from i13c.semantic.typing.resolutions.environments import (
     EnvironmentAcceptance,
     EnvironmentRejection,

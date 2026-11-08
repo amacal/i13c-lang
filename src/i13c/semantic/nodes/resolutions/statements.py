@@ -4,9 +4,10 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.calls import CallId
-from i13c.semantic.typing.entities.statements import Statement, StatementId
+from i13c.semantic.typing.entities.statements import Statement
+from i13c.semantic.typing.identifiers.assigns import AssignId
+from i13c.semantic.typing.identifiers.calls import CallId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.semantic.typing.resolutions.statements import (

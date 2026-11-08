@@ -2,25 +2,15 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 
 from i13c.semantic.core import Hex
-from i13c.semantic.typing.entities.instructions import InstructionId
-from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.identifiers.asmlets import AsmletId
+from i13c.semantic.typing.identifiers.instructions import InstructionId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 from i13c.semantic.typing.resolutions.bindings import BindingEntry
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.operands import OperandSymbol, RegisterAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
-
-
-@dataclass(kw_only=True, frozen=True)
-class AsmletId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("asmlet", f"{self.value:<{length}}"))
-
-    def __str__(self) -> str:
-        return self.identify(1)
 
 
 @dataclass(kw_only=True)

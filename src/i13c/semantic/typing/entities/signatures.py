@@ -1,17 +1,9 @@
 from dataclasses import dataclass
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.parameters import ParameterId
-from i13c.semantic.typing.entities.results import ResultId
+from i13c.semantic.typing.identifiers.parameters import ParameterId
+from i13c.semantic.typing.identifiers.results import ResultId
 from i13c.syntax.source import Span
-
-
-@dataclass(kw_only=True, frozen=True)
-class SignatureId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("signature", f"{self.value:<{length}}"))
 
 
 @dataclass(kw_only=True)

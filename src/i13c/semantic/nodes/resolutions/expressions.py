@@ -2,10 +2,11 @@ from typing import Any
 
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
-from i13c.semantic.typing.entities.literals import LiteralId
-from i13c.semantic.typing.entities.usages import UsageId
+from i13c.semantic.typing.entities.expressions import Expression
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.expressions import ExpressionId
+from i13c.semantic.typing.identifiers.literals import LiteralId
+from i13c.semantic.typing.identifiers.usages import UsageId
 from i13c.semantic.typing.resolutions.expressions import (
     ExpressionAcceptance,
     ExpressionNode,

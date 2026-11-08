@@ -3,10 +3,11 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
-from i13c.semantic.typing.entities.labels import LabelId
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.environments import Environment
+from i13c.semantic.typing.identifiers.environments import EnvironmentId
+from i13c.semantic.typing.identifiers.labels import LabelId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 
 
 def configure_environments() -> GraphNode:

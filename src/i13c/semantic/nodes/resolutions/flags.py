@@ -4,8 +4,9 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.flags import Flags, FlagsId
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.flags import Flags
+from i13c.semantic.typing.identifiers.flags import FlagsId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.semantic.typing.resolutions.flags import (
     FlagsAcceptance,
     FlagsRejection,

@@ -3,7 +3,8 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.binds import Bind, BindId
+from i13c.semantic.typing.entities.binds import Bind
+from i13c.semantic.typing.identifiers.binds import BindId
 from i13c.semantic.typing.resolutions.binds import (
     BindAcceptance,
     BindRejection,

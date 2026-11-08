@@ -1,16 +1,8 @@
 from dataclasses import dataclass
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.syntax.source import Span
-
-
-@dataclass(kw_only=True, frozen=True)
-class FlagsId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("flags", f"{self.value:<{length}}"))
 
 
 @dataclass(kw_only=True)

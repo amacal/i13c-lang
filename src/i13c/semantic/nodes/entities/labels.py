@@ -3,14 +3,11 @@ from collections.abc import Iterable
 from i13c.core.graph import AbstractListExtractor, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.instructions import InstructionId
-from i13c.semantic.typing.entities.labels import (
-    EndOfSnippet,
-    Label,
-    LabelId,
-    LabelTarget,
-)
-from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
+from i13c.semantic.typing.entities.labels import EndOfSnippet, Label, LabelTarget
+from i13c.semantic.typing.entities.snippets import Snippet
+from i13c.semantic.typing.identifiers.instructions import InstructionId
+from i13c.semantic.typing.identifiers.labels import LabelId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 
 
 def configure_labels() -> GraphNode:

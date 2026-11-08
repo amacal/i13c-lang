@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.usages import UsageId
+from i13c.semantic.typing.identifiers.usages import UsageId
 from i13c.semantic.typing.resolutions.cflows import ControlFlowEntry, ControlFlowTarget
 from i13c.syntax.source import Span
 

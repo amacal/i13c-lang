@@ -4,12 +4,13 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.addresses import AddressId
-from i13c.semantic.typing.entities.immediates import ImmediateId
-from i13c.semantic.typing.entities.operands import Operand, OperandId
-from i13c.semantic.typing.entities.parameters import ParameterId
-from i13c.semantic.typing.entities.references import ReferenceId
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.operands import Operand
+from i13c.semantic.typing.identifiers.addresses import AddressId
+from i13c.semantic.typing.identifiers.immediates import ImmediateId
+from i13c.semantic.typing.identifiers.operands import OperandId
+from i13c.semantic.typing.identifiers.parameters import ParameterId
+from i13c.semantic.typing.identifiers.references import ReferenceId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance

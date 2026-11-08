@@ -4,11 +4,12 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.addresses import Address, AddressId
-from i13c.semantic.typing.entities.displacements import DisplacementId
-from i13c.semantic.typing.entities.indices import IndexId
-from i13c.semantic.typing.entities.references import ReferenceId
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.addresses import Address
+from i13c.semantic.typing.identifiers.addresses import AddressId
+from i13c.semantic.typing.identifiers.displacements import DisplacementId
+from i13c.semantic.typing.identifiers.indices import IndexId
+from i13c.semantic.typing.identifiers.references import ReferenceId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.semantic.typing.resolutions.addresses import (
     AddressAcceptance,
     AddressRejection,

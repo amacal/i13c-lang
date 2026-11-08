@@ -11,7 +11,7 @@ from i13c.llvm.typing.allocations import Allocation, AllocationSegment
 from i13c.llvm.typing.liveness import Liveness, LivenessSegment
 from i13c.semantic.typing.analyses import llvm
 from i13c.semantic.typing.analyses.fnlets import FnletInstruction
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 
 
 def configure_allocations() -> GraphNode:

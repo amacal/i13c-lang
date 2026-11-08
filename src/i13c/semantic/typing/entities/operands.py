@@ -1,22 +1,14 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.addresses import AddressId
-from i13c.semantic.typing.entities.immediates import ImmediateId
-from i13c.semantic.typing.entities.references import ReferenceId
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.identifiers.addresses import AddressId
+from i13c.semantic.typing.identifiers.immediates import ImmediateId
+from i13c.semantic.typing.identifiers.references import ReferenceId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.syntax.source import Span
 
 OperandKind = Kind["register", "immediate", "reference", "address"]
 OperandTarget = RegisterId | ImmediateId | ReferenceId | AddressId
-
-
-@dataclass(kw_only=True, frozen=True)
-class OperandId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("operand", f"{self.value:<{length}}"))
 
 
 @dataclass(kw_only=True)

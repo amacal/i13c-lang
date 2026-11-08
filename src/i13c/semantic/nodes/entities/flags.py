@@ -3,8 +3,9 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.flags import Flags, FlagsId
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.flags import Flags
+from i13c.semantic.typing.identifiers.flags import FlagsId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.syntax import tree
 
 

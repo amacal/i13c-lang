@@ -3,8 +3,9 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
-from i13c.semantic.typing.entities.types import TypeId
+from i13c.semantic.typing.entities.parameters import Parameter
+from i13c.semantic.typing.identifiers.parameters import ParameterId
+from i13c.semantic.typing.identifiers.types import TypeId
 
 
 def configure_parameters() -> GraphNode:

@@ -7,7 +7,7 @@ from i13c.core.mapping import OneToOne
 from i13c.llvm.typing.dflows import DataFlow, DataFlowSegment
 from i13c.semantic.typing.analyses import llvm
 from i13c.semantic.typing.analyses.fnlets import Fnlet, FnletInstruction
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 
 
 def configure_data_flows() -> GraphNode:

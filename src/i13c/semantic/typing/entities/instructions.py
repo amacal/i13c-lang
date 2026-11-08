@@ -3,17 +3,9 @@ from dataclasses import dataclass
 from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.mnemonics import MnemonicId
-from i13c.semantic.typing.entities.operands import OperandId
+from i13c.semantic.typing.identifiers.mnemonics import MnemonicId
+from i13c.semantic.typing.identifiers.operands import OperandId
 from i13c.syntax.source import Span
-
-
-@dataclass(kw_only=True, frozen=True)
-class InstructionId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("instruction", f"{self.value:<{length}}"))
 
 
 class SnippetContextBound(Protocol):

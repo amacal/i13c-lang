@@ -4,8 +4,9 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.references import Reference, ReferenceId
-from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.references import Reference
+from i13c.semantic.typing.identifiers.references import ReferenceId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance

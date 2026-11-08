@@ -5,10 +5,11 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.noreturns import NoReturn
-from i13c.semantic.typing.entities.flags import FlagsId
-from i13c.semantic.typing.entities.instructions import InstructionId
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
+from i13c.semantic.typing.entities.snippets import Snippet
+from i13c.semantic.typing.identifiers.flags import FlagsId
+from i13c.semantic.typing.identifiers.instructions import InstructionId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
 from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.instructions import InstructionAcceptance

@@ -1,35 +1,62 @@
 from dataclasses import dataclass
 
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.addresses import Address, AddressId
-from i13c.semantic.typing.entities.assigns import Assign, AssignId
-from i13c.semantic.typing.entities.binds import Bind, BindId
-from i13c.semantic.typing.entities.calls import Call, CallId
+from i13c.semantic.typing.entities.addresses import Address
+from i13c.semantic.typing.entities.assigns import Assign
+from i13c.semantic.typing.entities.binds import Bind
+from i13c.semantic.typing.entities.calls import Call
 from i13c.semantic.typing.entities.callsites import CallSite
-from i13c.semantic.typing.entities.displacements import Displacement, DisplacementId
-from i13c.semantic.typing.entities.environments import Environment, EnvironmentId
-from i13c.semantic.typing.entities.expressions import Expression, ExpressionId
-from i13c.semantic.typing.entities.flags import Flags, FlagsId
-from i13c.semantic.typing.entities.functions import Function, FunctionId
-from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
-from i13c.semantic.typing.entities.indices import Index, IndexId
-from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
-from i13c.semantic.typing.entities.labels import Label, LabelId
-from i13c.semantic.typing.entities.literals import Literal, LiteralId
-from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
-from i13c.semantic.typing.entities.operands import Operand, OperandId
-from i13c.semantic.typing.entities.parameters import Parameter, ParameterId
-from i13c.semantic.typing.entities.ranges import Range, RangeId
-from i13c.semantic.typing.entities.references import Reference, ReferenceId
-from i13c.semantic.typing.entities.registers import Register, RegisterId
-from i13c.semantic.typing.entities.results import Result, ResultId
-from i13c.semantic.typing.entities.signatures import Signature, SignatureId
-from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
-from i13c.semantic.typing.entities.statements import Statement, StatementId
-from i13c.semantic.typing.entities.types import Type, TypeId
-from i13c.semantic.typing.entities.usages import Usage, UsageId
-from i13c.semantic.typing.entities.values import Value, ValueId
+from i13c.semantic.typing.entities.displacements import Displacement
+from i13c.semantic.typing.entities.environments import Environment
+from i13c.semantic.typing.entities.expressions import Expression
+from i13c.semantic.typing.entities.flags import Flags
+from i13c.semantic.typing.entities.functions import Function
+from i13c.semantic.typing.entities.immediates import Immediate
+from i13c.semantic.typing.entities.indices import Index
+from i13c.semantic.typing.entities.instructions import Instruction
+from i13c.semantic.typing.entities.labels import Label
+from i13c.semantic.typing.entities.literals import Literal
+from i13c.semantic.typing.entities.mnemonics import Mnemonic
+from i13c.semantic.typing.entities.operands import Operand
+from i13c.semantic.typing.entities.parameters import Parameter
+from i13c.semantic.typing.entities.ranges import Range
+from i13c.semantic.typing.entities.references import Reference
+from i13c.semantic.typing.entities.registers import Register
+from i13c.semantic.typing.entities.results import Result
+from i13c.semantic.typing.entities.signatures import Signature
+from i13c.semantic.typing.entities.snippets import Snippet
+from i13c.semantic.typing.entities.statements import Statement
+from i13c.semantic.typing.entities.types import Type
+from i13c.semantic.typing.entities.usages import Usage
+from i13c.semantic.typing.entities.values import Value
+from i13c.semantic.typing.identifiers.addresses import AddressId
+from i13c.semantic.typing.identifiers.assigns import AssignId
+from i13c.semantic.typing.identifiers.binds import BindId
+from i13c.semantic.typing.identifiers.calls import CallId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.displacements import DisplacementId
+from i13c.semantic.typing.identifiers.environments import EnvironmentId
+from i13c.semantic.typing.identifiers.expressions import ExpressionId
+from i13c.semantic.typing.identifiers.flags import FlagsId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.immediates import ImmediateId
+from i13c.semantic.typing.identifiers.indices import IndexId
+from i13c.semantic.typing.identifiers.instructions import InstructionId
+from i13c.semantic.typing.identifiers.labels import LabelId
+from i13c.semantic.typing.identifiers.literals import LiteralId
+from i13c.semantic.typing.identifiers.mnemonics import MnemonicId
+from i13c.semantic.typing.identifiers.operands import OperandId
+from i13c.semantic.typing.identifiers.parameters import ParameterId
+from i13c.semantic.typing.identifiers.ranges import RangeId
+from i13c.semantic.typing.identifiers.references import ReferenceId
+from i13c.semantic.typing.identifiers.registers import RegisterId
+from i13c.semantic.typing.identifiers.results import ResultId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
+from i13c.semantic.typing.identifiers.statements import StatementId
+from i13c.semantic.typing.identifiers.types import TypeId
+from i13c.semantic.typing.identifiers.usages import UsageId
+from i13c.semantic.typing.identifiers.values import ValueId
 
 
 @dataclass

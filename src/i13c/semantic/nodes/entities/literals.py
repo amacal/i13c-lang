@@ -3,7 +3,8 @@ from collections.abc import Iterable
 from i13c.core.graph import AbstractListExtractor, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.literals import Hex, Literal, LiteralId
+from i13c.semantic.typing.entities.literals import Hex, Literal
+from i13c.semantic.typing.identifiers.literals import LiteralId
 
 
 def configure_literals() -> GraphNode:

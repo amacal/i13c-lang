@@ -3,7 +3,8 @@ from collections.abc import Iterable
 from i13c.core.graph import AbstractListExtractor, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.displacements import Displacement, DisplacementId
+from i13c.semantic.typing.entities.displacements import Displacement
+from i13c.semantic.typing.identifiers.displacements import DisplacementId
 
 
 def configure_displacements() -> GraphNode:

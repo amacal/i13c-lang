@@ -11,8 +11,8 @@ from i13c.semantic.typing.analyses.cflows import (
     FlowMember,
     FlowNode,
 )
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.statements import StatementId
 
 
 def configure_control_flows() -> GraphNode:

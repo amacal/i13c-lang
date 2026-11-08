@@ -2,7 +2,7 @@
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.flags import FlagsId
+from i13c.semantic.typing.identifiers.flags import FlagsId
 from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from i13c.semantic.typing.analyses import llvm
 from i13c.semantic.typing.analyses.statements import StatementInstruction
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 from i13c.syntax.source import Span
 

@@ -4,9 +4,10 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.parameters import ParameterId
-from i13c.semantic.typing.entities.results import ResultId
-from i13c.semantic.typing.entities.signatures import Signature, SignatureId
+from i13c.semantic.typing.entities.signatures import Signature
+from i13c.semantic.typing.identifiers.parameters import ParameterId
+from i13c.semantic.typing.identifiers.results import ResultId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.results import ResultAcceptance
 from i13c.semantic.typing.resolutions.signatures import (

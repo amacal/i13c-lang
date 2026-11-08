@@ -1,21 +1,13 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.entities.displacements import DisplacementId
-from i13c.semantic.typing.entities.indices import IndexId
-from i13c.semantic.typing.entities.references import ReferenceId
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.identifiers.displacements import DisplacementId
+from i13c.semantic.typing.identifiers.indices import IndexId
+from i13c.semantic.typing.identifiers.references import ReferenceId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.syntax.source import Span
 
 BaseRegister = RegisterId | ReferenceId
 Displacement = DisplacementId | ReferenceId
-
-
-@dataclass(kw_only=True, frozen=True)
-class AddressId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("address", f"{self.value:<{length}}"))
 
 
 @dataclass(kw_only=True)

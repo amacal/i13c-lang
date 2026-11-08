@@ -4,7 +4,7 @@ from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import NodeId
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
-from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
 from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 

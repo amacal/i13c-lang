@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.indices import IndexId
+from i13c.semantic.typing.identifiers.indices import IndexId
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.registers import RegisterAcceptance
 from i13c.syntax.source import Span

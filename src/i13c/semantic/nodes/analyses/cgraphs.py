@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.analyses.cgraphs import CallGraph
-from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
 

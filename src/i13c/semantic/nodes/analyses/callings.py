@@ -2,7 +2,7 @@ from collections.abc import Iterable
 
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.analyses.asmlets import Asmlet, AsmletId
+from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.analyses.callings import (
     Calling,
     CallingBinding,
@@ -11,6 +11,7 @@ from i13c.semantic.typing.analyses.callings import (
     CallingUnbound,
     CallSiteArgument,
 )
+from i13c.semantic.typing.identifiers.asmlets import AsmletId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 

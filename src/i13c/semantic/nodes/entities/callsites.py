@@ -4,10 +4,10 @@ from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.callsites import CallSite
-from i13c.semantic.typing.entities.expressions import ExpressionId
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.expressions import ExpressionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.statements import StatementId
 
 
 def configure_callsites() -> GraphNode:

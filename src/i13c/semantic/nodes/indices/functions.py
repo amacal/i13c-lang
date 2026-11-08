@@ -1,8 +1,9 @@
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.functions import Function, FunctionId
-from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.entities.functions import Function
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 
 

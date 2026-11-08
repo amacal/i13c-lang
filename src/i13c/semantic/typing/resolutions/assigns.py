@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.assigns import AssignId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 from i13c.syntax.source import Span

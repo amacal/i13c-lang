@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 
 from i13c.semantic.core import Hex
-from i13c.semantic.typing.entities.ranges import RangeId
+from i13c.semantic.typing.identifiers.ranges import RangeId
 from i13c.syntax.source import Span
 
 RangeRejectionReason = Kind[

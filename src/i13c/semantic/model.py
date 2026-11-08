@@ -6,11 +6,11 @@ from i13c.core.mapping import OneToMany, OneToOne
 from i13c.llvm.nodes import LlvmNodes
 from i13c.semantic.typing.analyses.core import AnalysisNodes
 from i13c.semantic.typing.entities import EntityNodes
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.parameters import ParameterId
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.snippets import SnippetId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.parameters import ParameterId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.binds import BindAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.core import ResolutionNodes

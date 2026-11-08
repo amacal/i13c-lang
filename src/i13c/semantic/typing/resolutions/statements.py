@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.syntax.source import Span

@@ -1,8 +1,8 @@
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.shuffles import Shuffle, ShuffleCallSite
-from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 
 
 def configure_shuffles_by_callsites() -> GraphNode:

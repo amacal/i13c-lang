@@ -3,10 +3,11 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
-from i13c.semantic.typing.entities.mnemonics import MnemonicId
-from i13c.semantic.typing.entities.operands import OperandId
-from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.instructions import Instruction
+from i13c.semantic.typing.identifiers.instructions import InstructionId
+from i13c.semantic.typing.identifiers.mnemonics import MnemonicId
+from i13c.semantic.typing.identifiers.operands import OperandId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 
 
 def configure_instructions() -> GraphNode:

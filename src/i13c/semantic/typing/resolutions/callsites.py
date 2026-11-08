@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.callsites import CallSite
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.results import ResultAcceptance

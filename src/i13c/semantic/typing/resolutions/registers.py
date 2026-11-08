@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.syntax.source import Span
 
 RegisterRejectionReason = Kind[

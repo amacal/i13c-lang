@@ -3,7 +3,8 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.registers import Register, RegisterId
+from i13c.semantic.typing.entities.registers import Register
+from i13c.semantic.typing.identifiers.registers import RegisterId
 
 
 def configure_registers() -> GraphNode:

@@ -3,17 +3,9 @@ from dataclasses import dataclass
 from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.expressions import ExpressionId
-from i13c.semantic.typing.entities.values import ValueId
+from i13c.semantic.typing.identifiers.expressions import ExpressionId
+from i13c.semantic.typing.identifiers.values import ValueId
 from i13c.syntax.source import Span
-
-
-@dataclass(kw_only=True, frozen=True)
-class AssignId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("assign", f"{self.value:<{length}}"))
 
 
 class AssignContextBound(Protocol):

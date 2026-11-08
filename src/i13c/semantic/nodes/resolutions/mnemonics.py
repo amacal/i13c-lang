@@ -4,7 +4,8 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
+from i13c.semantic.typing.entities.mnemonics import Mnemonic
+from i13c.semantic.typing.identifiers.mnemonics import MnemonicId
 from i13c.semantic.typing.resolutions.mnemonics import (
     MnemonicAcceptance,
     MnemonicOperandSpec,

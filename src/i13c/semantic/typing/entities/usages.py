@@ -5,15 +5,6 @@ from typing import TypeVar
 from i13c.semantic.syntax import NodeId
 from i13c.syntax.source import Span
 
-
-@dataclass(kw_only=True, frozen=True)
-class UsageId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("usage", f"{self.value:<{length}}"))
-
-
 UsageContext = TypeVar("UsageContext")
 
 

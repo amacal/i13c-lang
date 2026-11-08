@@ -1,8 +1,8 @@
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.typing.entities.statements import StatementId
-from i13c.semantic.typing.entities.values import ValueId
+from i13c.semantic.typing.identifiers.statements import StatementId
+from i13c.semantic.typing.identifiers.values import ValueId
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 

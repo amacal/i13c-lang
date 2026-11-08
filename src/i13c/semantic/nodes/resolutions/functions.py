@@ -5,8 +5,9 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.noreturns import NoReturn
-from i13c.semantic.typing.entities.functions import Function, FunctionId
-from i13c.semantic.typing.entities.signatures import SignatureId
+from i13c.semantic.typing.entities.functions import Function
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
 from i13c.semantic.typing.resolutions.functions import (
     FunctionAcceptance,
     FunctionRejection,

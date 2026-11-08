@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.analyses.cflows import FlowMember
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 from i13c.semantic.typing.resolutions.callsites import CallSiteOutput
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance

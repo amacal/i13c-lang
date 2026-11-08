@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.expressions import ExpressionId
+from i13c.semantic.typing.identifiers.expressions import ExpressionId
 from i13c.syntax.source import Span
 
 

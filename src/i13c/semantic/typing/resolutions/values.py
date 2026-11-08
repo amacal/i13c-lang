@@ -4,7 +4,7 @@ from typing import Literal as Kind
 from typing import TypeVar
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.values import ValueId
+from i13c.semantic.typing.identifiers.values import ValueId
 from i13c.semantic.typing.resolutions.types import TypeAcceptance
 from i13c.syntax.source import Span
 

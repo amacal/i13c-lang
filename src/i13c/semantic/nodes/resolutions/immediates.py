@@ -4,7 +4,8 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
+from i13c.semantic.typing.entities.immediates import Immediate
+from i13c.semantic.typing.identifiers.immediates import ImmediateId
 from i13c.semantic.typing.resolutions.immediates import (
     ImmediateAcceptance,
     ImmediateResolution,

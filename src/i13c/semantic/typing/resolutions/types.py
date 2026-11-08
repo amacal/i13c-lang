@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 
 from i13c.semantic.core import Hex
-from i13c.semantic.typing.entities.types import TypeId
+from i13c.semantic.typing.identifiers.types import TypeId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.ranges import RangeAcceptance
 from i13c.syntax.source import Span

@@ -3,15 +3,12 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.flags import FlagsId
-from i13c.semantic.typing.entities.instructions import InstructionId
-from i13c.semantic.typing.entities.labels import LabelId
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.snippets import (
-    InstructionOrLabel,
-    Snippet,
-    SnippetId,
-)
+from i13c.semantic.typing.entities.snippets import InstructionOrLabel, Snippet
+from i13c.semantic.typing.identifiers.flags import FlagsId
+from i13c.semantic.typing.identifiers.instructions import InstructionId
+from i13c.semantic.typing.identifiers.labels import LabelId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 from i13c.syntax import tree
 
 

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.entities.labels import LabelId, LabelTarget
+from i13c.semantic.typing.entities.labels import LabelTarget
+from i13c.semantic.typing.identifiers.labels import LabelId
 from i13c.syntax.source import Span
 
 

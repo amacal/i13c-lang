@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from i13c.semantic.typing.analyses.asmlets import AsmletId
 from i13c.semantic.typing.analyses.fnlets import FnletInstruction
 from i13c.semantic.typing.analyses.llvm import (
     BSWAP,
@@ -15,7 +14,8 @@ from i13c.semantic.typing.analyses.llvm import (
     Group2Instruction,
     LoopInstruction,
 )
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.asmlets import AsmletId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 from i13c.syntax.source import Span
 
 AsmletInstruction = (

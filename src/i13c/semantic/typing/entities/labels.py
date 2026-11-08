@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import TypeVar
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.instructions import InstructionId
+from i13c.semantic.typing.identifiers.instructions import InstructionId
 from i13c.syntax.source import Span
 
 
@@ -14,14 +14,6 @@ class EndOfSnippet:
 
 
 LabelTarget = InstructionId | EndOfSnippet
-
-
-@dataclass(kw_only=True, frozen=True)
-class LabelId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("label", f"{self.value:<{length}}"))
 
 
 SnippetIdLike = TypeVar("SnippetIdLike")

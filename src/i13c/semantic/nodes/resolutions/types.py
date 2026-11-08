@@ -4,8 +4,9 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.ranges import RangeId
-from i13c.semantic.typing.entities.types import Type, TypeId
+from i13c.semantic.typing.entities.types import Type
+from i13c.semantic.typing.identifiers.ranges import RangeId
+from i13c.semantic.typing.identifiers.types import TypeId
 from i13c.semantic.typing.resolutions.ranges import RangeAcceptance
 from i13c.semantic.typing.resolutions.types import (
     TypeAcceptance,

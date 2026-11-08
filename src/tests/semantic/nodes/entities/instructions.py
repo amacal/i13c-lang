@@ -1,5 +1,6 @@
 from i13c.graph.nodes import run as run_graph
-from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
+from i13c.semantic.typing.entities.instructions import Instruction
+from i13c.semantic.typing.identifiers.instructions import InstructionId
 from tests.semantic import prepare_program
 
 

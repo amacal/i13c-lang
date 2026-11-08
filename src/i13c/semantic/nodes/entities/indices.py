@@ -3,9 +3,10 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.indices import Index, IndexId
-from i13c.semantic.typing.entities.references import ReferenceId
-from i13c.semantic.typing.entities.registers import RegisterId
+from i13c.semantic.typing.entities.indices import Index
+from i13c.semantic.typing.identifiers.indices import IndexId
+from i13c.semantic.typing.identifiers.references import ReferenceId
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.syntax import tree
 
 

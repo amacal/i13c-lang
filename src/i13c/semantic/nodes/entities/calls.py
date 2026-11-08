@@ -3,7 +3,8 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.calls import Call, CallId
+from i13c.semantic.typing.entities.calls import Call
+from i13c.semantic.typing.identifiers.calls import CallId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
 
 

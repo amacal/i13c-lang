@@ -3,8 +3,9 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.references import Reference, ReferenceId
-from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.entities.references import Reference
+from i13c.semantic.typing.identifiers.references import ReferenceId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 
 
 def configure_references() -> GraphNode:

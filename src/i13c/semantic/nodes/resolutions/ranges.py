@@ -4,7 +4,8 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Hex
-from i13c.semantic.typing.entities.ranges import Range, RangeId
+from i13c.semantic.typing.entities.ranges import Range
+from i13c.semantic.typing.identifiers.ranges import RangeId
 from i13c.semantic.typing.resolutions.ranges import (
     RangeAcceptance,
     RangeRejection,

@@ -2,9 +2,10 @@
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.assigns import Assign, AssignId
-from i13c.semantic.typing.entities.expressions import ExpressionId
-from i13c.semantic.typing.entities.values import ValueId
+from i13c.semantic.typing.entities.assigns import Assign
+from i13c.semantic.typing.identifiers.assigns import AssignId
+from i13c.semantic.typing.identifiers.expressions import ExpressionId
+from i13c.semantic.typing.identifiers.values import ValueId
 
 
 def configure_assigns() -> GraphNode:

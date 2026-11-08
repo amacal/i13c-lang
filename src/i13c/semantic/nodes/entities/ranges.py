@@ -4,7 +4,8 @@ from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Hex
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.ranges import Range, RangeId
+from i13c.semantic.typing.entities.ranges import Range
+from i13c.semantic.typing.identifiers.ranges import RangeId
 
 
 def configure_ranges() -> GraphNode:

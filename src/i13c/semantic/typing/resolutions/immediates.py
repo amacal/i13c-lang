@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from i13c.semantic.core import Hex
-from i13c.semantic.typing.entities.immediates import ImmediateId
+from i13c.semantic.typing.identifiers.immediates import ImmediateId
 from i13c.syntax.source import Span
 
 

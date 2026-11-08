@@ -7,9 +7,9 @@ from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.fnlets import Fnlet, FnletBlock, FnletInstruction
 from i13c.semantic.typing.analyses.llvm import EPILOG, PROLOG, Register
 from i13c.semantic.typing.analyses.statements import StatementLlvm
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.bindings import BindingAcceptance
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
 from i13c.semantic.typing.resolutions.functions import FunctionAcceptance

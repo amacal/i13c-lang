@@ -11,7 +11,7 @@ from i13c.llvm.typing.dflows import DataFlow
 from i13c.llvm.typing.liveness import Liveness, LivenessSegment
 from i13c.semantic.typing.analyses import llvm
 from i13c.semantic.typing.analyses.fnlets import Fnlet, FnletInstruction
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 
 
 def configure_liveness() -> GraphNode:

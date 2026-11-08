@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.operands import OperandId
+from i13c.semantic.typing.identifiers.operands import OperandId
 from i13c.semantic.typing.resolutions.addresses import AddressAcceptance
 from i13c.semantic.typing.resolutions.immediates import ImmediateAcceptance
 from i13c.semantic.typing.resolutions.labels import LabelAcceptance

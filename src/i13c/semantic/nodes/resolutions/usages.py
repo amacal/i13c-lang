@@ -5,8 +5,9 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.cflows import FunctionId
-from i13c.semantic.typing.entities.statements import StatementId
-from i13c.semantic.typing.entities.usages import Usage, UsageId
+from i13c.semantic.typing.entities.usages import Usage
+from i13c.semantic.typing.identifiers.statements import StatementId
+from i13c.semantic.typing.identifiers.usages import UsageId
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
 from i13c.semantic.typing.resolutions.usages import (
     UsageAcceptance,

@@ -3,9 +3,9 @@ from typing import Literal as Kind
 
 from i13c.semantic.typing.entities.displacements import (
     DisplacementDirection,
-    DisplacementId,
     DisplacementOffset,
 )
+from i13c.semantic.typing.identifiers.displacements import DisplacementId
 from i13c.syntax.source import Span
 
 DisplacementWidth = Kind[0, 8, 32]

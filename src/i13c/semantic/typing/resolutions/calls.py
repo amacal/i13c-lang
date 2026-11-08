@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from typing import Literal as Kind
 
 from i13c.semantic.typing.analyses.callings import Calling
-from i13c.semantic.typing.entities.calls import CallId
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.calls import CallId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.syntax.source import Span
 
 CallRejectionReason = Kind["unknown"]

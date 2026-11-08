@@ -4,7 +4,8 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.displacements import Displacement, DisplacementId
+from i13c.semantic.typing.entities.displacements import Displacement
+from i13c.semantic.typing.identifiers.displacements import DisplacementId
 from i13c.semantic.typing.resolutions.displacements import (
     DisplacementAcceptance,
     DisplacementRejection,

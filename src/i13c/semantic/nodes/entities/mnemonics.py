@@ -3,7 +3,8 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.mnemonics import Mnemonic, MnemonicId
+from i13c.semantic.typing.entities.mnemonics import Mnemonic
+from i13c.semantic.typing.identifiers.mnemonics import MnemonicId
 
 
 def configure_mnemonics() -> GraphNode:

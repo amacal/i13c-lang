@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.instructions import Instruction, InstructionId
+from i13c.semantic.typing.entities.instructions import Instruction
+from i13c.semantic.typing.identifiers.instructions import InstructionId
 from i13c.semantic.typing.resolutions.mnemonics import (
     MnemonicAcceptance,
     MnemonicVariant,

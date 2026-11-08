@@ -4,7 +4,8 @@ from i13c.core.graph import AbstractListExtractor, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.core import Hex
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.immediates import Immediate, ImmediateId
+from i13c.semantic.typing.entities.immediates import Immediate
+from i13c.semantic.typing.identifiers.immediates import ImmediateId
 
 
 def configure_immediates() -> GraphNode:

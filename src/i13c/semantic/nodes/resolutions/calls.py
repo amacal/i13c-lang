@@ -5,10 +5,11 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.callings import Calling
-from i13c.semantic.typing.entities.calls import Call, CallId
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.entities.calls import Call
+from i13c.semantic.typing.identifiers.calls import CallId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.calls import CallAcceptance, CallResolution
 
 

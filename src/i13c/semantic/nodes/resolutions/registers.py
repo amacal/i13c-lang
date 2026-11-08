@@ -4,7 +4,8 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.registers import Register, RegisterId
+from i13c.semantic.typing.entities.registers import Register
+from i13c.semantic.typing.identifiers.registers import RegisterId
 from i13c.semantic.typing.resolutions.registers import (
     RegisterAcceptance,
     RegisterKind,

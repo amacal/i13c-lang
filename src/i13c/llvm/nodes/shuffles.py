@@ -16,7 +16,7 @@ from i13c.llvm.typing.shuffles import (
     ShuffleSegment,
 )
 from i13c.semantic.typing.analyses import llvm
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 
 
 def configure_shuffles() -> GraphNode:

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.analyses.asmlets import Asmlet, AsmletId
+from i13c.semantic.typing.analyses.asmlets import Asmlet
 from i13c.semantic.typing.analyses.assigns import AssignLlvm
 from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.analyses.calls import CallLlvm
@@ -12,15 +12,17 @@ from i13c.semantic.typing.analyses.dflows import DataFlows
 from i13c.semantic.typing.analyses.entrypoints import Entrypoint
 from i13c.semantic.typing.analyses.fnlets import Fnlet
 from i13c.semantic.typing.analyses.noreturns import NoReturn
-from i13c.semantic.typing.analyses.sections import Section, SectiontId
+from i13c.semantic.typing.analyses.sections import Section
 from i13c.semantic.typing.analyses.shuffles import Shuffle
 from i13c.semantic.typing.analyses.statements import StatementLlvm
-from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.calls import CallId
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.asmlets import AsmletId
+from i13c.semantic.typing.identifiers.assigns import AssignId
+from i13c.semantic.typing.identifiers.calls import CallId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.sections import SectiontId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.statements import StatementId
 
 
 @dataclass(repr=False)

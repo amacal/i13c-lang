@@ -6,10 +6,11 @@ from i13c.core.mapping import OneToMany, OneToOne
 from i13c.semantic.typing.analyses.cflows import FlowEntry, FlowExit, FlowMember
 from i13c.semantic.typing.analyses.cpaths import ControlPaths
 from i13c.semantic.typing.analyses.noreturns import NoReturn
-from i13c.semantic.typing.entities.flags import FlagsId
-from i13c.semantic.typing.entities.signatures import SignatureId
-from i13c.semantic.typing.entities.snippets import Snippet, SnippetId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.entities.snippets import Snippet
+from i13c.semantic.typing.identifiers.flags import FlagsId
+from i13c.semantic.typing.identifiers.signatures import SignatureId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.flags import FlagsAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance

@@ -3,9 +3,10 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.statements import StatementId
-from i13c.semantic.typing.entities.usages import Usage, UsageId
+from i13c.semantic.typing.entities.usages import Usage
+from i13c.semantic.typing.identifiers.functions import FunctionId
+from i13c.semantic.typing.identifiers.statements import StatementId
+from i13c.semantic.typing.identifiers.usages import UsageId
 
 
 def configure_usages() -> GraphNode:

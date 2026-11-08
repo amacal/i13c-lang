@@ -14,7 +14,7 @@ from i13c.semantic.typing.analyses.shuffles import (
     ShuffleMove,
     ShuffleMoves,
 )
-from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.functions import FunctionId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance

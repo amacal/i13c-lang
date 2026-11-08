@@ -1,8 +1,8 @@
 
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
-from i13c.semantic.typing.entities.environments import EnvironmentId
-from i13c.semantic.typing.entities.snippets import SnippetId
+from i13c.semantic.typing.identifiers.environments import EnvironmentId
+from i13c.semantic.typing.identifiers.snippets import SnippetId
 from i13c.semantic.typing.resolutions.environments import EnvironmentAcceptance
 
 

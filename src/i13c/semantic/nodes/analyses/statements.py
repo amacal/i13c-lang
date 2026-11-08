@@ -5,9 +5,9 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.assigns import AssignLlvm
 from i13c.semantic.typing.analyses.calls import CallLlvm
 from i13c.semantic.typing.analyses.statements import StatementInstruction, StatementLlvm
-from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.assigns import AssignId
 from i13c.semantic.typing.identifiers.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.statements import StatementId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.semantic.typing.resolutions.statements import StatementAcceptance
