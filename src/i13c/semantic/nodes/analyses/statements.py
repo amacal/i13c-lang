@@ -6,11 +6,10 @@ from i13c.semantic.typing.analyses.assigns import AssignLlvm
 from i13c.semantic.typing.analyses.calls import CallLlvm
 from i13c.semantic.typing.analyses.statements import StatementInstruction, StatementLlvm
 from i13c.semantic.typing.entities.assigns import AssignId
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
-from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.statements import StatementAcceptance
 
 
@@ -50,8 +49,12 @@ def build_statements(
         # ensure that the call's result is ready to assign
 
         if isinstance(entry.target, AssignAcceptance):
-            if isinstance(entry.target.expression, CallSiteAcceptance):
-                instructions.extend(calls.get(entry.target.expression.id).instructions)
+
+            # expect exactly one node in the expression
+            node = entry.target.expression.get_node()
+
+            if isinstance(node, CallSiteId):
+                instructions.extend(calls.get(node).instructions)
 
             instructions.extend(assigns.get(entry.target.id).instructions)
 

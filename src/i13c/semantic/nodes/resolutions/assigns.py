@@ -4,20 +4,18 @@ from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
-from i13c.semantic.typing.entities.usages import UsageId
 from i13c.semantic.typing.entities.values import ValueId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.assigns import (
     AssignAcceptance,
     AssignRejection,
     AssignResolution,
 )
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
-from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
-from i13c.semantic.typing.resolutions.usages import UsageAcceptance
+from i13c.semantic.typing.resolutions.expressions import ExpressionAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
@@ -30,9 +28,8 @@ def configure_assign_resolution() -> GraphGroup:
             {
                 ("assigns", "entities/assigns"),
                 ("values", "resolutions/values/accepted"),
-                ("literals", "resolutions/literals/accepted"),
-                ("usages", "resolutions/usages/accepted"),
                 ("callsites", "resolutions/callsites/accepted"),
+                ("expressions", "resolutions/expressions/accepted"),
             }
         ),
     )
@@ -67,9 +64,8 @@ def configure_assign_resolution() -> GraphGroup:
 def build_assign_resolution(
     assigns: OneToOne[AssignId, Assign],
     values: OneToOne[ValueId, ValueAcceptance],
-    literals: OneToOne[LiteralId, LiteralAcceptance],
-    usages: OneToOne[UsageId, UsageAcceptance],
     callsites: OneToOne[CallSiteId, CallSiteAcceptance],
+    expressions: OneToOne[ExpressionId, ExpressionAcceptance],
 ) -> OneToOne[AssignId, AssignResolution]:
     resolutions: dict[AssignId, AssignResolution] = {}
 
@@ -82,37 +78,25 @@ def build_assign_resolution(
         # extract destination, because we need to check its compatibility
         destination = values.get(entry.destination)
 
+        # extract expression, because we need to check its type
+        expression = expressions.get(entry.expression)
+
         # nothing is rejected by default
         rejected = None
 
-        # literals are directly retrieved
-        # matched by their value against the destination type
-        if isinstance(entry.expression, LiteralId):
-            expression = literals.get(entry.expression)
-            target = expression
+        # evaluate type compatibility between destination and expression
+        target = expression.get_type()
 
-        # usages are also directly retrieved
-        # matched by their target type against the destination type
-        elif isinstance(entry.expression, UsageId):
-            expression = usages.get(entry.expression)
-            target = expression.target.type
+        # if the target is a callsite, we need to resolve its output type
+        if isinstance(target, CallSiteId):
+            output = callsites.get(target).output
+            target = output.target.type if output else None
 
-        # callsite propagates its call, because it contains
-        # where the returned value is stored, callsite is not needed
-        else:
-            expression = callsites.get(entry.expression)
+        # after resolving callsite output, target should no longer be a CallSiteId
+        assert not isinstance(target, CallSiteId)
 
-            # result may be null when the callsite does not produce a value
-            target = (
-                expression.signature.result.type
-                if expression.signature.result
-                else None
-            )
-
-        if target is None:
-            rejected = "type-mismatch"
-
-        elif not destination.type.accepts(target):
+        # check if the destination type accepts the target type
+        if not target or not destination.type.accepts(target):
             rejected = "type-mismatch"
 
         # if we know some rejection reason

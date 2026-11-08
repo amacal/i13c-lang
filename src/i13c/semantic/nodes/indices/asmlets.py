@@ -2,7 +2,7 @@
 from i13c.core.graph import GraphNode
 from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.asmlets import Asmlet, AsmletId
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 
 
 def configure_asmlets_by_callsites() -> GraphNode:

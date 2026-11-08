@@ -17,10 +17,10 @@ from i13c.semantic.typing.analyses.shuffles import Shuffle
 from i13c.semantic.typing.analyses.statements import StatementLlvm
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.calls import CallId
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 
 
 @dataclass(repr=False)

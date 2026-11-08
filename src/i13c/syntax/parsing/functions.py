@@ -159,8 +159,10 @@ def parse_callsite_statement(
     )
 
 
-def parse_callsite(state: ParsingState, ident: LexingToken) -> tuple[tree.function.CallSite, LexingToken]:
-    arguments: list[tree.function.Argument] = []
+def parse_callsite(
+    state: ParsingState, ident: LexingToken
+) -> tuple[tree.function.CallSite, LexingToken]:
+    arguments: list[tree.function.Expression] = []
 
     # expect opening round bracket
     state.expect(Tokens.ROUND_OPEN)
@@ -217,12 +219,12 @@ def parse_value(state: ParsingState) -> tree.function.AssignStatement:
 
 def parse_value_expression(
     state: ParsingState,
-) -> tuple[tree.function.ValueExpression, LexingToken]:
+) -> tuple[tree.function.Expression, LexingToken]:
     return parse_argument(state)
 
 
-def parse_arguments(state: ParsingState) -> list[tree.function.Argument]:
-    arguments: list[tree.function.Argument] = []
+def parse_arguments(state: ParsingState) -> list[tree.function.Expression]:
+    arguments: list[tree.function.Expression] = []
     arguments.append(parse_argument(state)[0])
 
     # a comma suggests next argument
@@ -232,25 +234,32 @@ def parse_arguments(state: ParsingState) -> list[tree.function.Argument]:
     return arguments
 
 
-def parse_argument(state: ParsingState) -> tuple[tree.function.Argument, LexingToken]:
-    token = state.expect(Tokens.HEX, Tokens.IDENT)
+def parse_argument(state: ParsingState) -> tuple[tree.function.Expression, LexingToken]:
+    # record the start of the argument for span calculation
+    start = token = state.expect(Tokens.HEX, Tokens.IDENT)
 
     # a hex can be only an integer literal
-    if token.code == Tokens.HEX:
+    if start.code == Tokens.HEX:
         expression = tree.function.Literal(
-            ref=state.span(token),
-            value=extract_hex(state, token),
+            ref=state.span(start),
+            value=extract_hex(state, start),
         )
 
     # an identifier can be a callsite
     elif state.is_in(Tokens.ROUND_OPEN):
-        expression, token = parse_callsite(state, token)
+        expression, token = parse_callsite(state, start)
 
     # or just a variable reference
     else:
         expression = tree.function.Usage(
-            ref=state.span(token),
-            name=state.extract(token),
+            ref=state.span(start),
+            name=state.extract(start),
         )
+
+    # wrap argument in an expression node
+    expression = tree.function.Expression(
+        ref=state.between(start, token),
+        target=tree.function.ExpressionNode(target=expression),
+    )
 
     return expression, token

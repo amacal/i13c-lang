@@ -11,6 +11,7 @@ class Visitor(Protocol):
     def on_flags(self, flags: Flags, path: Path): ...
     def on_signature(self, signature: Signature, path: Path): ...
     def on_statement(self, statement: Statement, path: Path): ...
+    def on_expression(self, expression: Expression, path: Path): ...
     def on_call(self, call: CallStatement, path: Path): ...
     def on_callsite(self, callsite: CallSite, path: Path): ...
     def on_assign(self, assign: AssignStatement, path: Path): ...
@@ -59,21 +60,14 @@ class Parameter:
 class CallSite:
     ref: Span
     name: bytes
-    arguments: list[Argument]
+    arguments: list[Expression]
 
     def accept(self, visitor: Visitor, path: Path):
         visitor.on_callsite(self, path)
 
         with path.push(self) as node:
             for argument in self.arguments:
-                if isinstance(argument, Literal):
-                    visitor.on_literal(argument, node)
-
-                if isinstance(argument, Usage):
-                    visitor.on_usage(argument, node)
-
-
-Argument = Literal | Usage | CallSite
+                argument.accept(visitor, node)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -88,8 +82,28 @@ class CallStatement:
             self.target.accept(visitor, node)
 
 
-# an expression that can be directly assigned to a value
-ValueExpression = Literal | Usage | CallSite
+@dataclass(kw_only=True, eq=False)
+class Expression:
+    ref: Span
+    target: ExpressionNode
+
+    def accept(self, visitor: Visitor, path: Path):
+        visitor.on_expression(self, path)
+
+        with path.push(self) as node:
+            self.target.accept(visitor, node)
+
+
+@dataclass(kw_only=True, eq=False)
+class ExpressionNode:
+    target: ExpressionTarget
+
+    def accept(self, visitor: Visitor, path: Path):
+        self.target.accept(visitor, path)
+
+
+# an expression tree node
+ExpressionTarget = Literal | Usage | CallSite | ExpressionNode
 
 
 @dataclass(kw_only=True, eq=False)
@@ -113,7 +127,7 @@ class AssignStatement:
 
     ref: Span
     destination: Value
-    expression: ValueExpression
+    expression: Expression
 
     def accept(self, visitor: Visitor, path: Path):
         visitor.on_assign(self, path)

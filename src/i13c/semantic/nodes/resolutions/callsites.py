@@ -4,11 +4,11 @@ from typing import Any
 from i13c.core.diagnostics import Diagnostic
 from i13c.core.graph import GraphGroup, GraphNode, GraphViews
 from i13c.core.mapping import OneToMany, OneToOne
-from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
+from i13c.semantic.typing.entities.callsites import CallSite
+from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
-from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
-from i13c.semantic.typing.entities.usages import Usage, UsageId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
     CallSiteArgument,
@@ -18,9 +18,13 @@ from i13c.semantic.typing.resolutions.callsites import (
     CallSiteResolution,
 )
 from i13c.semantic.typing.resolutions.cflows import ControlFlowAcceptance
+from i13c.semantic.typing.resolutions.expressions import (
+    ExpressionAcceptance,
+)
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.signatures import SignatureAcceptance
+from i13c.semantic.typing.resolutions.usages import UsageAcceptance
 from i13c.semantic.typing.resolutions.values import ValueAcceptance
 
 
@@ -33,10 +37,9 @@ def configure_callsite_resolution() -> GraphGroup:
             {
                 ("callsites", "entities/callsites"),
                 ("functions", "entities/functions"),
-                ("usages", "entities/usages"),
                 ("cflows", "resolutions/cflows/accepted"),
-                ("literals", "resolutions/literals/accepted"),
                 ("signatures", "indices/signatures/names"),
+                ("expressions", "resolutions/expressions/accepted"),
             }
         ),
         views=GraphViews(list=ListAllExtractor),
@@ -81,10 +84,9 @@ def configure_callsite_resolution() -> GraphGroup:
 def build_callsite_resolution(
     callsites: OneToOne[CallSiteId, CallSite],
     functions: OneToOne[FunctionId, Function],
-    usages: OneToOne[UsageId, Usage],
     cflows: OneToOne[FunctionId, ControlFlowAcceptance],
-    literals: OneToOne[LiteralId, LiteralAcceptance],
     signatures: OneToMany[bytes, SignatureAcceptance],
+    expressions: OneToOne[ExpressionId, ExpressionAcceptance],
 ) -> OneToOne[CallSiteId, CallSiteResolution]:
     resolutions: dict[CallSiteId, CallSiteResolution] = {}
 
@@ -130,13 +132,29 @@ def build_callsite_resolution(
                     continue
 
                 for parameter, argument in zip(signature.parameters, entry.arguments):
-                    target: LiteralAcceptance | ParameterAcceptance | ValueAcceptance | None
+                    target: (
+                        None
+                        | CallSiteId
+                        | CallSiteAcceptance
+                        | LiteralAcceptance
+                        | UsageAcceptance
+                        | ParameterAcceptance
+                        | ValueAcceptance
+                    )
 
-                    if isinstance(argument, LiteralId):
-                        target = literals.get(argument)
-                    else:
-                        expr = usages.get(argument)
-                        target = environment.get(expr.name)
+                    # extract expression and first node
+                    expression = expressions.get(argument)
+                    target = expression.get_node()
+
+                    # take referenced value which may produce None
+                    if isinstance(target, UsageAcceptance):
+                        target = environment.get(target.name)
+
+                    # callsite was probably resolved
+                    if isinstance(target, CallSiteId):
+                        if callsite := resolutions.get(target):
+                            if callsite.accepted:
+                                target = callsite.accepted[0]
 
                     # if a symbol is not in the environment
                     if target is None:
@@ -144,7 +162,7 @@ def build_callsite_resolution(
                         break
 
                     if parameter.bind == "literal":
-                        if not isinstance(argument, LiteralId):
+                        if not isinstance(target, LiteralAcceptance):
                             rejected = "not-literal"
                             break
 
@@ -153,10 +171,23 @@ def build_callsite_resolution(
                             rejected = "type-mismatch"
                             break
 
-                    # parameter and value have a type field
-                    elif not parameter.type.accepts(target.type):
-                        rejected = "type-mismatch"
-                        break
+                    elif isinstance(target, CallSiteAcceptance):
+                        if not target.output:
+                            rejected = "type-mismatch"
+                            break
+
+                        elif not parameter.type.accepts(target.output.target.type):
+                            rejected = "type-mismatch"
+                            break
+
+                    else:
+                        # CallSite ID must have been resolved at this point
+                        assert not isinstance(target, CallSiteId)
+
+                        # parameter and value have a type field
+                        if not parameter.type.accepts(target.type):
+                            rejected = "type-mismatch"
+                            break
 
                     arguments.append(target)
 

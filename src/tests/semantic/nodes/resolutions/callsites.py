@@ -468,22 +468,15 @@ def can_reject_a_call_with_unmatched_3rd_argument():
 
 
 def can_reject_a_call_with_unresolved_symbol():
-    source, resolutions = prepare_resolutions(
+    _, resolutions = prepare_resolutions(
         """
             fn foo(x: u8) { }
             fn main() { foo(bar); }
         """
     )
 
-    assert resolutions.callsites is not None
-    assert resolutions.callsites.size() == 1
-    _, resolution = resolutions.callsites.peek()
-
-    assert len(resolution.accepted) == 0
-    assert len(resolution.rejected) == 1
-
-    assert resolution.rejected[0].reason == "unknown-target"
-    assert source.extract(resolution.rejected[0].ref) == b"foo(bar)"
+    # the callsite resolution is not even called
+    assert resolutions.callsites is None
 
 
 def can_accept_matching_overload_after_arity_mismatch():

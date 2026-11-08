@@ -5,9 +5,9 @@ from i13c.core.mapping import OneToOne
 from i13c.semantic.typing.analyses.callings import Calling
 from i13c.semantic.typing.analyses.cflows import ControlFlows, FlowNode
 from i13c.semantic.typing.analyses.dflows import DataFlows
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
@@ -30,6 +30,7 @@ def configure_data_flows() -> GraphNode:
                 ("callings", "analyses/callings"),
                 ("functions", "resolutions/functions/accepted"),
                 ("statements", "resolutions/statements/accepted"),
+                ("callsites", "resolutions/callsites/accepted"),
             }
         ),
         views=GraphViews(list=ListExtractor),
@@ -41,6 +42,7 @@ def build_data_flows(
     callings: OneToOne[CallSiteId, Calling],
     functions: OneToOne[FunctionId, FunctionAcceptance],
     statements: OneToOne[StatementId, StatementAcceptance],
+    callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ) -> OneToOne[FunctionId, DataFlows]:
     dflows: dict[FunctionId, DataFlows] = {}
 
@@ -63,7 +65,9 @@ def build_data_flows(
                 handle_entry(dflow, idx, functions.get(fid))
 
             elif isinstance(node, FlowNode):
-                handle_node(dflow, idx, statements.get(node.target), callings)
+                handle_node(
+                    dflow, idx, statements.get(node.target), callings, callsites
+            )
 
             else:
                 dflow.defs[idx] = []
@@ -122,6 +126,7 @@ def handle_assign(
     nid: int,
     assign: AssignAcceptance,
     callings: OneToOne[CallSiteId, Calling],
+    callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ):
 
     idx = len(dflow.values)
@@ -131,33 +136,37 @@ def handle_assign(
     dflow.forward[idx] = []
     dflow.backward[idx] = []
 
-    if isinstance(assign.expression, UsageAcceptance):
+    # expect exactly one node in the expression
+    expression = assign.expression.get_node()
+
+    if isinstance(expression, UsageAcceptance):
         for nix, node in enumerate(dflow.values):
             if isinstance(node, (ParameterAcceptance, ValueAcceptance)):
-                if node.id == assign.expression.target.id:
+                if node.id == expression.target.id:
                     dflow.forward[nix].append(idx)
                     dflow.backward[idx].append(nix)
                     dflow.uses[nid].append(nix)
 
     # an assignment with literal makes short-lived inline edge
-    if isinstance(assign.expression, LiteralAcceptance):
+    if isinstance(expression, LiteralAcceptance):
         off = len(dflow.values)
-        dflow.values.append(assign.expression)
+        dflow.values.append(expression)
         dflow.forward[off] = [idx]
         dflow.backward[off] = []
         dflow.backward[idx].append(off)
 
     # an assignment accepting signature result
-    if isinstance(assign.expression, CallSiteAcceptance):
-        assert assign.expression.output is not None
+    if isinstance(expression, CallSiteId):
+        callsite = callsites.get(expression)
+        assert callsite.output is not None
 
         off = len(dflow.values)
-        dflow.values.append(assign.expression.output)
+        dflow.values.append(callsite.output)
         dflow.forward[off] = [idx]
         dflow.backward[off] = []
         dflow.backward[idx].append(off)
 
-        calling = callings.get(assign.expression.id)
+        calling = callings.get(expression)
         handle_calling(dflow, nid, calling)
 
 
@@ -166,6 +175,7 @@ def handle_node(
     nid: int,
     stmt: StatementAcceptance,
     callings: OneToOne[CallSiteId, Calling],
+    callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ):
 
     # handles the stmts into dflow knowing nid as ctrl flow idx
@@ -178,7 +188,7 @@ def handle_node(
         handle_calling(dflow, nid, stmt.target.target)
 
     if isinstance(stmt.target, AssignAcceptance):
-        handle_assign(dflow, nid, stmt.target, callings)
+        handle_assign(dflow, nid, stmt.target, callings, callsites)
 
 
 class ListExtractor:

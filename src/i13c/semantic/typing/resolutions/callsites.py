@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import Literal as Kind
 
-from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId
+from i13c.semantic.typing.entities.callsites import CallSite
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.statements import StatementId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.results import ResultAcceptance
@@ -20,10 +21,9 @@ CallSiteRejectionReason = Kind[
     "not-literal",
 ]
 
-CallSiteArgument = LiteralAcceptance | ParameterAcceptance | ValueAcceptance
-
 # the output of a callsite cannot be comparable
 # it has to be comparable by the reference (ref)
+
 
 @dataclass(kw_only=True, eq=False)
 class CallSiteOutput:
@@ -52,6 +52,11 @@ class CallSiteAcceptance:
     signature: SignatureAcceptance
     arguments: list[CallSiteArgument]
     output: CallSiteOutput | None
+
+
+CallSiteArgument = (
+    LiteralAcceptance | ParameterAcceptance | ValueAcceptance | CallSiteAcceptance
+)
 
 
 @dataclass(kw_only=True)

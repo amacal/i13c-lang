@@ -24,8 +24,8 @@ def can_detect_a_callsite_with_literal():
     assert callsites.callee == b"foo"
     assert len(callsites.arguments) == 1
 
-    assert entities.literals.size() == 1
-    id, _ = entities.literals.peek()
+    assert entities.expressions.size() == 1
+    id, _ = entities.expressions.peek()
 
     assert callsites.arguments[0] == id
 
@@ -33,7 +33,7 @@ def can_detect_a_callsite_with_literal():
 def can_detect_a_callsite_with_usage():
     entities = prepare_entities(
         """
-            fn main() { val x: u8 = 0x42; foo(x); }
+            fn main(x: u8) { foo(x); }
         """
     )
 
@@ -43,7 +43,7 @@ def can_detect_a_callsite_with_usage():
     assert callsites.callee == b"foo"
     assert len(callsites.arguments) == 1
 
-    assert entities.usages.size() == 1
-    id, _ = entities.usages.peek()
+    assert entities.expressions.size() == 1
+    id, _ = entities.expressions.peek()
 
     assert callsites.arguments[0] == id

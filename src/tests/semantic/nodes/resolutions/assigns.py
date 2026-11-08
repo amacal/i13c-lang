@@ -1,4 +1,4 @@
-from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.parameters import ParameterAcceptance
 from i13c.semantic.typing.resolutions.usages import UsageAcceptance
@@ -25,9 +25,10 @@ def can_accept_valid_assign_from_literal():
     assert resolution.accepted[0].destination.type.width == 16
     assert resolution.accepted[0].destination.type.range is None
 
-    assert isinstance(resolution.accepted[0].expression, LiteralAcceptance)
-    assert resolution.accepted[0].expression.target.data.hex() == "1234"
-    assert resolution.accepted[0].expression.target.width == 16
+    node = resolution.accepted[0].expression.get_node()
+    assert isinstance(node, LiteralAcceptance)
+    assert node.target.data.hex() == "1234"
+    assert node.target.width == 16
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u16 = 0x1234"
 
@@ -52,11 +53,12 @@ def can_accept_valid_assign_from_parameter():
     assert resolution.accepted[0].destination.type.width == 16
     assert resolution.accepted[0].destination.type.range is None
 
-    assert isinstance(resolution.accepted[0].expression, UsageAcceptance)
-    assert resolution.accepted[0].expression.name == b"v"
+    node = resolution.accepted[0].expression.get_node()
+    assert isinstance(node, UsageAcceptance)
+    assert node.name == b"v"
 
-    assert b"v" in resolution.accepted[0].expression.environment
-    entry = resolution.accepted[0].expression.environment[b"v"]
+    assert b"v" in node.environment
+    entry = node.environment[b"v"]
 
     assert isinstance(entry, ParameterAcceptance)
     assert entry.type.name == b"u16"
@@ -84,12 +86,16 @@ def can_accept_valid_assign_from_callsite():
     assert resolution.accepted[0].destination.name == b"x"
     assert resolution.accepted[0].destination.type.width == 16
 
-    assert isinstance(resolution.accepted[0].expression, CallSiteAcceptance)
-    assert resolution.accepted[0].expression.signature.name == b"foo"
+    node = resolution.accepted[0].expression.get_node()
+    assert isinstance(node, CallSiteId)
 
-    assert resolution.accepted[0].expression.signature.result is not None
-    assert resolution.accepted[0].expression.signature.result.type.name == b"u16"
-    assert resolution.accepted[0].expression.signature.result.type.width == 16
+    assert resolutions.callsites is not None
+    callsite = resolutions.callsites.get(node)
+    assert callsite.accepted[0].signature.name == b"foo"
+
+    assert callsite.accepted[0].signature.result is not None
+    assert callsite.accepted[0].signature.result.type.name == b"u16"
+    assert callsite.accepted[0].signature.result.type.width == 16
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u16 = foo()"
 
@@ -110,8 +116,13 @@ def can_accept_valid_assign_from_callsite_with_arguments():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert isinstance(resolution.accepted[0].expression, CallSiteAcceptance)
-    assert resolution.accepted[0].expression.signature.name == b"foo"
+
+    node = resolution.accepted[0].expression.get_node()
+    assert isinstance(node, CallSiteId)
+
+    assert resolutions.callsites is not None
+    callsite = resolutions.callsites.get(node)
+    assert callsite.accepted[0].signature.name == b"foo"
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u16 = foo(0x12)"
 
@@ -132,7 +143,9 @@ def can_accept_valid_assign_from_callsite_with_narrower_range():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert isinstance(resolution.accepted[0].expression, CallSiteAcceptance)
+
+    node = resolution.accepted[0].expression.get_node()
+    assert isinstance(node, CallSiteId)
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u8[0x00..0x03] = foo()"
 
@@ -152,7 +165,9 @@ def can_accept_valid_assign_from_literal_in_range():
     assert len(resolution.rejected) == 0
 
     assert resolution.accepted[0].id == id
-    assert isinstance(resolution.accepted[0].expression, LiteralAcceptance)
+
+    node = resolution.accepted[0].expression.get_node()
+    assert isinstance(node, LiteralAcceptance)
 
     assert source.extract(resolution.accepted[0].ref) == b"x: u8[0x01..0x02] = 0x02"
 

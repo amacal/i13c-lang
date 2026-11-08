@@ -4,7 +4,7 @@ from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
 from i13c.semantic.typing.entities.calls import Call, CallId
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 
 
 def configure_calls() -> GraphNode:

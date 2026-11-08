@@ -3,13 +3,9 @@ from dataclasses import dataclass
 from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.callsites import CallSiteId
-from i13c.semantic.typing.entities.literals import LiteralId
-from i13c.semantic.typing.entities.usages import UsageId
+from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.values import ValueId
 from i13c.syntax.source import Span
-
-AssignExpression = LiteralId | UsageId | CallSiteId
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -34,7 +30,7 @@ class Assign:
     stmt: NodeId
 
     destination: ValueId
-    expression: AssignExpression
+    expression: ExpressionId
 
     def get_function(
         self, factory: Callable[[NodeId], AssignContext]

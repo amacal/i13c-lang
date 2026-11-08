@@ -7,7 +7,9 @@ from i13c.semantic.typing.analyses.assigns import AssignInstruction, AssignLlvm
 from i13c.semantic.typing.analyses.llvm import MOV, Immediate, Register
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.functions import FunctionId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
+from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 from i13c.semantic.typing.resolutions.literals import LiteralAcceptance
 from i13c.semantic.typing.resolutions.usages import UsageAcceptance
 
@@ -20,6 +22,7 @@ def configure_assigns() -> GraphNode:
         requires=frozenset(
             {
                 ("assigns", "resolutions/assigns/accepted"),
+                ("callsites", "resolutions/callsites/accepted"),
                 ("dflows", "analyses/dflows"),
             }
         ),
@@ -30,6 +33,7 @@ def configure_assigns() -> GraphNode:
 def build_assigns(
     dflows: OneToOne[FunctionId, DataFlows],
     assigns: OneToOne[AssignId, AssignAcceptance],
+    callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ) -> OneToOne[AssignId, AssignLlvm]:
     llvm: dict[AssignId, AssignLlvm] = {}
 
@@ -37,7 +41,7 @@ def build_assigns(
         instructions: list[AssignInstruction] = []
         dflow = dflows.get(entry.fn)
 
-        emit(instructions, dflow, entry)
+        emit(instructions, dflow, entry, callsites)
 
         llvm[eid] = AssignLlvm(
             ref=entry.ref,
@@ -52,6 +56,7 @@ def emit(
     instructions: list[AssignInstruction],
     dflow: DataFlows,
     entry: AssignAcceptance,
+    callsites: OneToOne[CallSiteId, CallSiteAcceptance],
 ):
     # to emit assignment instruction, we need to determine
     # the source and destination operands for the assignment
@@ -60,21 +65,26 @@ def emit(
     idx = dflow.values.index(entry.destination)
     dst = Register(name=dflow.vregs[idx])
 
+    # expect exactly one node in the expression
+    node = entry.expression.get_node()
+
     # lookup for source, literal emits immediate
-    if isinstance(entry.expression, LiteralAcceptance):
-        src = Immediate(value=entry.expression.target)
+    if isinstance(node, LiteralAcceptance):
+        src = Immediate(value=node.target)
 
     # usage emits dest <- vreg of the usage's value
     # the value of the usage is already stored in a vreg
-    elif isinstance(entry.expression, UsageAcceptance):
-        idx = dflow.values.index(entry.expression.target)
+    elif isinstance(node, UsageAcceptance):
+        idx = dflow.values.index(node.target)
         src = Register(name=dflow.vregs[idx])
 
     # callsite emits dest <- vreg of the callsite's output
     # the callsite must be called first to have its output
     else:
-        assert entry.expression.output is not None
-        idx = dflow.values.index(entry.expression.output)
+        callsite = callsites.get(node)
+        assert callsite.output is not None
+
+        idx = dflow.values.index(callsite.output)
         src = Register(name=dflow.vregs[idx])
 
     # emit single instruction

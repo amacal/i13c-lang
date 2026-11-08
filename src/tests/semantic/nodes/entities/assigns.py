@@ -26,8 +26,8 @@ def can_detect_an_assignment_using_the_literal():
 
     assert assign.destination == id
 
-    assert entities.literals.size() == 1
-    id, _ = entities.literals.peek()
+    assert entities.expressions.size() == 1
+    id, _ = entities.expressions.peek()
 
     assert assign.expression == id
 
@@ -47,8 +47,8 @@ def can_detect_an_assignment_using_a_usage():
 
     assert assign.destination == id
 
-    assert entities.usages.size() == 1
-    id, _ = entities.usages.peek()
+    assert entities.expressions.size() == 1
+    id, _ = entities.expressions.peek()
 
     assert assign.expression == id
 
@@ -69,7 +69,7 @@ def can_detect_an_assignment_using_a_callsite():
 
     assert assign.destination == id
 
-    assert entities.callsites.size() == 1
-    id, _ = entities.callsites.peek()
+    assert entities.expressions.size() == 1
+    id, _ = entities.expressions.peek()
 
     assert assign.expression == id

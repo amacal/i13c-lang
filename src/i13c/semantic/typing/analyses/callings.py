@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from i13c.semantic.typing.analyses.asmlets import Asmlet
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.callsites import (
     CallSiteAcceptance,
     CallSiteArgument,

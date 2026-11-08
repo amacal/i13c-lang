@@ -13,7 +13,6 @@ from i13c.semantic.typing.analyses.cflows import (
 )
 from i13c.semantic.typing.entities.assigns import Assign, AssignId
 from i13c.semantic.typing.entities.calls import CallId
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
 from i13c.semantic.typing.entities.signatures import SignatureId
 from i13c.semantic.typing.entities.statements import (
@@ -21,6 +20,7 @@ from i13c.semantic.typing.entities.statements import (
     StatementId,
     StatementTarget,
 )
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.cflows import (
     ControlFlowAcceptance,
     ControlFlowEntry,

@@ -14,6 +14,7 @@ from i13c.semantic.nodes.resolutions.displacements import (
 from i13c.semantic.nodes.resolutions.environments import (
     configure_environment_resolution,
 )
+from i13c.semantic.nodes.resolutions.expressions import configure_expression_resolution
 from i13c.semantic.nodes.resolutions.flags import configure_flags_resolution
 from i13c.semantic.nodes.resolutions.functions import configure_function_resolution
 from i13c.semantic.nodes.resolutions.immediates import configure_immediate_resolution
@@ -57,6 +58,7 @@ def configure_resolutions() -> GraphGroup:
             configure_immediate_resolution(),
             configure_index_resolution(),
             configure_instruction_resolution(),
+            configure_expression_resolution(),
             configure_label_resolution(),
             configure_literal_resolution(),
             configure_mnemonic_resolution(),
@@ -102,6 +104,7 @@ def parse_resolutions(resolutions: dict[str, Any]) -> ResolutionNodes:
         results=resolutions.get("resolutions/results"),
         signatures=resolutions.get("resolutions/signatures"),
         statements=resolutions.get("resolutions/statements"),
+        expressions=resolutions.get("resolutions/expressions"),
         parameters=resolutions.get("resolutions/parameters"),
         snippets=resolutions.get("resolutions/snippets"),
         types=resolutions.get("resolutions/types"),

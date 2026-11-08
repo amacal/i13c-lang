@@ -11,7 +11,7 @@ from i13c.semantic.typing.analyses.callings import (
     CallingUnbound,
     CallSiteArgument,
 )
-from i13c.semantic.typing.entities.callsites import CallSiteId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 
 

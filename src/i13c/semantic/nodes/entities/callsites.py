@@ -3,12 +3,11 @@ from collections.abc import Iterable
 from i13c.core.graph import GraphNode, GraphViews
 from i13c.core.mapping import OneToOne
 from i13c.semantic.syntax import SyntaxGraph
-from i13c.semantic.typing.entities.callsites import CallSite, CallSiteId, CallSiteTarget
+from i13c.semantic.typing.entities.callsites import CallSite
+from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.functions import FunctionId
-from i13c.semantic.typing.entities.literals import LiteralId
 from i13c.semantic.typing.entities.statements import StatementId
-from i13c.semantic.typing.entities.usages import UsageId
-from i13c.syntax import tree
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 
 
 def configure_callsites() -> GraphNode:
@@ -30,7 +29,7 @@ def build_callsites(
 
         # derive callsite ID from globally unique node ID
         callsite_id = CallSiteId(value=nid.value)
-        arguments: list[CallSiteTarget] = []
+        arguments: list[ExpressionId] = []
 
         # derive function ID from globally unique node ID
         stmt = graph.function.callsites.get_ctx(nid)
@@ -41,18 +40,9 @@ def build_callsites(
         fn_nid = graph.function.functions.get_by_node(fn)
 
         for argument in callsite.arguments:
-            if isinstance(argument, tree.function.Literal):
-                # derive literal ID from globally unique node ID
-                lid = graph.function.literals.get_by_node(argument)
-                arguments.append(LiteralId(value=lid.value))
-
-            elif isinstance(argument, tree.function.Usage):
-                # derive usage ID from globally unique node ID
-                eid = graph.function.usages.get_by_node(argument)
-                arguments.append(UsageId(value=eid.value))
-
-            else:
-                assert False, f"Unsupported argument type: {type(argument)}"
+            # derive expression ID from globally unique node ID
+            lid = graph.function.expressions.get_by_node(argument)
+            arguments.append(ExpressionId(value=lid.value))
 
         callsites[callsite_id] = CallSite(
             ref=callsite.ref,

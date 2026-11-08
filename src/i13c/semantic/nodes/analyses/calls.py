@@ -22,11 +22,10 @@ from i13c.semantic.typing.analyses.shuffles import (
 )
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.calls import CallId
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.functions import Function, FunctionId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.assigns import AssignAcceptance
 from i13c.semantic.typing.resolutions.calls import CallAcceptance
-from i13c.semantic.typing.resolutions.callsites import CallSiteAcceptance
 
 
 def configure_calls() -> GraphNode:
@@ -78,8 +77,11 @@ def build_calls(
         # generate call instructions for the current call entry
         # only when an assignment involves a callsite
 
-        if isinstance(entry.expression, CallSiteAcceptance):
-            calling = callings.get(entry.expression.id)
+        # expect exactly one node in the expression
+        node = entry.expression.get_node()
+
+        if isinstance(node, CallSiteId):
+            calling = callings.get(node)
 
             # emit a call for a given calling, with passed
             # data flow which contains info about call outputs

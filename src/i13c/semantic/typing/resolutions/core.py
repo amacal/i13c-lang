@@ -5,9 +5,9 @@ from i13c.semantic.typing.entities.addresses import AddressId
 from i13c.semantic.typing.entities.assigns import AssignId
 from i13c.semantic.typing.entities.binds import BindId
 from i13c.semantic.typing.entities.calls import CallId
-from i13c.semantic.typing.entities.callsites import CallSiteId
 from i13c.semantic.typing.entities.displacements import DisplacementId
 from i13c.semantic.typing.entities.environments import EnvironmentId
+from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.semantic.typing.entities.flags import FlagsId
 from i13c.semantic.typing.entities.functions import FunctionId
 from i13c.semantic.typing.entities.immediates import ImmediateId
@@ -28,6 +28,7 @@ from i13c.semantic.typing.entities.statements import StatementId
 from i13c.semantic.typing.entities.types import TypeId
 from i13c.semantic.typing.entities.usages import UsageId
 from i13c.semantic.typing.entities.values import ValueId
+from i13c.semantic.typing.identifiers.callsites import CallSiteId
 from i13c.semantic.typing.resolutions.addresses import AddressResolution
 from i13c.semantic.typing.resolutions.assigns import AssignResolution
 from i13c.semantic.typing.resolutions.bindings import BindingResolution
@@ -37,6 +38,7 @@ from i13c.semantic.typing.resolutions.callsites import CallSiteResolution
 from i13c.semantic.typing.resolutions.cflows import ControlFlowResolution
 from i13c.semantic.typing.resolutions.displacements import DisplacementResolution
 from i13c.semantic.typing.resolutions.environments import EnvironmentResolution
+from i13c.semantic.typing.resolutions.expressions import ExpressionResolution
 from i13c.semantic.typing.resolutions.flags import FlagsResolution
 from i13c.semantic.typing.resolutions.functions import FunctionResolution
 from i13c.semantic.typing.resolutions.immediates import ImmediateResolution
@@ -86,6 +88,7 @@ class ResolutionNodes:
     results: OneToOne[ResultId, ResultResolution] | None
     signatures: OneToOne[SignatureId, SignatureResolution] | None
     statements: OneToOne[StatementId, StatementResolution] | None
+    expressions: OneToOne[ExpressionId, ExpressionResolution] | None
     parameters: OneToOne[ParameterId, ParameterResolution] | None
     snippets: OneToOne[SnippetId, SnippetResolution] | None
     types: OneToOne[TypeId, TypeResolution] | None

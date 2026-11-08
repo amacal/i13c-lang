@@ -3,19 +3,8 @@ from dataclasses import dataclass
 from typing import Protocol, TypeVar
 
 from i13c.semantic.syntax import NodeId
-from i13c.semantic.typing.entities.literals import LiteralId
-from i13c.semantic.typing.entities.usages import UsageId
+from i13c.semantic.typing.entities.expressions import ExpressionId
 from i13c.syntax.source import Span
-
-CallSiteTarget = LiteralId | UsageId
-
-
-@dataclass(kw_only=True, frozen=True)
-class CallSiteId:
-    value: int
-
-    def identify(self, length: int) -> str:
-        return "#".join(("callsite", f"{self.value:<{length}}"))
 
 
 class CallSiteContextBound(Protocol):
@@ -33,7 +22,7 @@ class CallSite:
     statement: NodeId
 
     callee: bytes
-    arguments: list[CallSiteTarget]
+    arguments: list[ExpressionId]
 
     def get_function(
         self, factory: Callable[[NodeId], CallSiteContext]

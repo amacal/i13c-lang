@@ -170,6 +170,13 @@ class NodesVisitor:
             ctx=path.find(tree.function.Function),
         )
 
+    def on_expression(self, expression: tree.function.Expression, path: Path):
+        self.graph.function.expressions.append(
+            self.next(),
+            expression,
+            ctx=path.find(tree.function.Statement),
+        )
+
     def on_call(self, call: tree.function.CallStatement, path: Path):
         self.graph.function.calls.append(
             self.next(),
@@ -241,6 +248,7 @@ class Function:
     flags: Bidirectional[tree.function.Flags, tree.function.Function]
     signatures: Bidirectional[tree.function.Signature, tree.function.Function]
     statements: Bidirectional[tree.function.Statement, tree.function.Function]
+    expressions: Bidirectional[tree.function.Expression, tree.function.Statement]
     calls: Bidirectional[tree.function.CallStatement, tree.function.Statement]
     callsites: Bidirectional[tree.function.CallSite, tree.function.Statement]
     assigns: Bidirectional[tree.function.AssignStatement, tree.function.Statement]
@@ -299,6 +307,9 @@ class SyntaxGraph:
                 ].empty(),
                 statements=Bidirectional[
                     tree.function.Statement, tree.function.Function
+                ].empty(),
+                expressions=Bidirectional[
+                    tree.function.Expression, tree.function.Statement
                 ].empty(),
                 calls=Bidirectional[
                     tree.function.CallStatement, tree.function.Statement
